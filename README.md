@@ -10,93 +10,80 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-The data product portal enables companies to build data products in a self-service way enabling analytics capabilities
-for all departments/domains throughout an organisation. It introduces simple but powerful concepts that are easy to
-understand and extensible to many types of data platform implementations. The data product portal can be considered as a
-process tool that helps people working with data while also providing governance and insights how data is being used
-throughout the organisation. The data product portal allows to build data products at scale by all departments/domains
-in a self service manner while keeping control of how your data is being used.
+## Introduction
 
-The data product portal is agnostic to storage technologies (ie. AWS S3, Azure storage containers,… ) and data platforms
-(AWS compute, Snowflake, Databricks,…) and abstracts away these technological challenges in a standardised way. The data
-product portal offers a unified user experience that helps both people working on data products as people from the
-business that need to keep oversight and control over how their data is being used in an organisation.
+The Data Product Portal enables companies to build data products in a self-service manner, enabling the creation of data
+products across all departments and domains within an organization. It introduces simple but powerful concepts that 
+are easy to understand and extensible to various types of data platform implementations. The portal is a process tool 
+that helps data professionals while providing governance and insights into how data is being used throughout the 
+organization.
 
-For companies that are struggling with enabling self service data product teams in their organisation to build data
-products at scale, the data product portal provides a simple and understandable process that guides organisations
-through all of the steps that come with building data products, it provides self-service and secure access to all of
-the tools, data platforms, data sources and sharing concepts to all people building new data products. It keeps control
-and oversight of all the data and data product development with the business stakeholders that are working with their
-data. Unlike data catalogs like Collibra that focus mostly on describing your data, the data product portal guides you
-through all the stages of the data product development cycle where all departments or domains can work on data products
-in a governed and self service manner.
+Unlike traditional data catalogs that primarily focus on describing data, the Data Product Portal guides you through 
+the entire data product development lifecycle. This includes self-service and secure access to tools, data platforms, 
+data sources, and sharing concepts, ensuring control and oversight for business stakeholders. 
+
+Our goal is to bridge the gap between data governance, data platforms and data catalogs and provide a 360 view of all 
+ongoing data initiatives that is easy to understand by everybody.
 
 ## Who is it for?
 
-The Data Product Portal is aimed towards data teams in business who want to build their own use cases in a self-service
-way, embracing data product thinking. The Data Product Portal automates away many of the steps you’re going to to get
-onboarded on the data platform and start building data platforms.
+The Data Product Portal is designed for data teams within businesses that aim to build their own use cases in a 
+self-service way, embracing data product thinking. It automates many of the onboarding steps required to start building 
+data platforms.
 
-The Data Product Portal needs support from your data platform team to be installed and integrated to their tooling. The
-Data Product Portal is technology-agnostic. That means it can integrate with almost any cloud, with almost any tool and
-with almost any dataset you might use. But you need to build those integrations once. We offer a few standard
-integrations at launch, and we expect to extend this over time.
+While the portal is technology-agnostic and can integrate with various clouds, tools, and datasets, it requires initial 
+support from your data platform team for installation and integration. We offer several standard integrations at launch 
+and plan to extend these over time.
 
-If you only have one data team or only a few use cases, the added overhead of setting up and managing the Data Product
-Portal is probably too high. And it’s easier to manually configure each team and data product.
+If your organization has only one data team or a limited number of use cases, the data product portal might not be 
+something for you. With the data product portal we aim to help organisations that want to scale building data products 
+by offering self-service capabilities. 
 
 ## Concepts
-The data product portal guides product teams through all of the steps of the data product life cycle while taking into
-account all governance aspects that are required from modern organisations. It does so by working around a couple of
-simple concepts that provide data product teams in a self service way the capability to: Create new data products,
-define who can work on them, request access to data sources, register new data sources for sharing, integrate with your
-data platform seamlessly and do so while encouraging all best practices both from governance and engineering point of
-view. With these concepts, the data product portal provides insights about what data products are out there, who is
-using your data, for what reason and how your data flows through the organisation. At the same time it also provides
-all practical tools and integrations for your data citizens to immediately start building data products in a safe and
-governed environment using all the best practices.
 
-The concepts we are introducing are:
+The Data Product Portal guides product teams through the data product life cycle, considering all governance aspects 
+required by modern organizations. It introduces several key concepts:
 
-- **Data product or project**: Data products are scoped data initiatives with a clear goal that different departments in
-an organisation can work on to deliver business value. They are usually led by a data product owner that takes the
-operational ownership of building, delivering and maintaining that data product and its data outputs for their
-department or domain. Data product owners decide on the team that can work on that data product and requests access to
-data sets that have been made available for sharing throughout the organisation. Data products typically follow the
-data product lifecycle and the data product portal aims to guide the data product through the typical stages of the
-data product lifecycle: From idea to experimentation to business validation to productisation to maintenance following
-a governed, standardised and compliant process tailored to the needs of your organisation. All access, tooling and
-interactions are configured and separated at the data product level, this means that people working on data products
-can do so in a safe manner that does not have an impact on other data products. The automatic setup and configuration of
-the data platforms of choice should be able to provide these guarantees.
-- **Users**: Users are people that can work on a data product in a specific role. Users automatically get access to all
-tooling and data sources based on the role they have for that data product. Depending on their permissions, they can
-perform different actions like, interacting with development and/or production data, releasing data pipelines into
-production, interact with schedulers, merge pull requests to master,… Users can work on multiple data products, but
-never at the same time. Users always need to make a conscious choice of deciding of what data product they are working
-for, as all permissions are set at the data product level and not at the user level. This has as an additional benefit
-that you can guarantee that your data will always be used in the right context and that processing permissions and user
-permissions are always aligned.
-- **Datasets**: Datasets are a grouping of one or more data objects and are the level at which read data access is
-granted to a data product. Datasets are owned by a data steward or other often business related person that can take
-responsibility of approving access to specific data products. As data products have a specific scope and owner, it
-becomes quite easy for dataset owners to assess whether access to their data is warranted. As access is granted to the
-data product and not the user, the guarantee can be given that your data will only be usable for scope of the data
-product that you approved access for. Only users that are allowed to work on a data product can interact with the tools,
-services and data sources that are allowed for that data product.
-- **Data objects**: Data objects are considered as the output of a data product. Data objects can be considered as files
-on a storage location, tables in a database, topics on streaming queues,… Data objects are associated with a data
-product that will (once approved) have full read and write permissions to those data objects in scope of the data
-product. Data objects are never shared directly unless they are part of a dataset. This allows data product teams to
-already work safely on their data objects or outputs, knowing that this will never be shared with anyone in the
-organisation yet. You can register a data object to become a part of a dataset to make it shareable with the rest of the
-organisation. During that registration process, the dataset owner can impose  guarantees to the data product team to
-make sure that: Specific SLA’s are met, Data contracts/schemas are defined and guaranteed, data governance rules are
-followed and the data catalog has been fed with the right information. This registration of data objects to a dataset
-can be very flexible and adapted to the needs of the organisation.
+### Data Products
 
-With these simple principles we can solve a lot of questions that companies are facing for people working with data
-as well as for people that keep oversight and are concerned with governance aspects.
+A data product is a scoped data initiative with a clear goal, led by a data product owner. The owner manages the team, 
+requests access to datasets, and follows a governed, standardized, and compliant process tailored to the organization’s 
+needs. All access, tooling, and interactions are configured at the data product level, ensuring safe and isolated 
+development.
+
+### Users
+
+Users are individuals who work on a data product in specific roles, gaining access to tools and data sources based on 
+their roles. They perform various actions such as interacting with data, releasing pipelines, and merging pull requests. 
+Users can work on multiple data products but must choose which one they are working on at any given time, ensuring data 
+is used in the right context.
+
+### Datasets
+
+Datasets group one or more data objects and are the level at which read data access is granted to a data product. 
+Dataset owners, typically business-related individuals, approve access to specific data products. Access is granted to 
+data products rather than users, guaranteeing that data is used only for the approved scope.
+
+### Data Objects
+
+Data objects are outputs of a data product, such as files, tables, or topics. They are associated with a data product 
+that has full read and write permissions. Data objects are never directly shared unless they are part of a dataset, 
+allowing safe development until they are ready for organizational sharing.
+
+## Benefits
+
+Adopting the Data Product Portal offers several benefits:
+- **Guided Setup:** Step-by-step assistance involving the right stakeholders for creating data products, requesting 
+access, adding users and registering new data for sharing with other data products.
+- **Tech Translation:** Converts high-level concepts into specific configurations settings for platforms like AWS, 
+Azure, Databricks, Snowflake, and others, making sure that each data product is correctly separated and not impacting 
+each other.
+- **User-Friendly Interface:** Makes it easy for business users and people working with data to understand and navigate 
+the data landscape.
+- **Self-service:** Enables departments and teams to start new data initiatives easily without having to depend on a 
+central team. 
+- **Comprehensive Overview:** Combines data catalogs, data platforms and data governance aspects into a single 360 
+overview of all ongoing data initiatives.
 
 # Getting Started
 
