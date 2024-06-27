@@ -1,0 +1,18 @@
+@import '@/styles/variables';
+
+.layout-content {
+    overflow: initial;
+    height: 100%;
+}
+
+.layout-wrapper {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    min-width: $app-min-width;
+}
+
+.children-wrapper {
+    height: 100%;
+    overflow-x: auto;
+}

@@ -1,0 +1,29 @@
+@import '@/styles/variables';
+@import '@/styles/colors';
+
+.current {
+    font-weight: 600;
+    text-decoration: none;
+    cursor: default;
+    color: $breadcrumb-last-item-color;
+
+    &:hover {
+        color: #000;
+    }
+}
+
+.breadcrumb-wrapper {
+    gap: $column-gap-sm;
+    max-width: 100%;
+}
+
+.link-container {
+    color: $breadcrumb-link-color;
+    align-items: center;
+    justify-content: center;
+    gap: $column-gap-sm;
+}
+
+.link {
+    display: flex !important;
+}

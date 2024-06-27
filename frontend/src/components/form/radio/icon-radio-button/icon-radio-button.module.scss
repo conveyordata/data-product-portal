@@ -1,0 +1,32 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+@import '@/styles/colors';
+
+$button-width: 100px;
+$icon-size: 65px;
+
+.radio-button-container {
+    align-items: center;
+    gap: $column-gap-badge;
+}
+
+.radio-button {
+    height: 100%;
+    min-height: $button-width;
+    width: $button-width;
+    padding: $standard-div-padding;
+    border-radius: $border-radius-lg;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-wrapper {
+    height: 100%;
+    min-height: $icon-size;
+    min-width: $icon-size;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}

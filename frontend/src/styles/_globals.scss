@@ -1,0 +1,75 @@
+@import 'mixins';
+@import 'fonts';
+@import 'variables';
+
+* {
+    @include border-box-sizing();
+    margin: 0;
+}
+
+#root {
+    height: 100dvh;
+    width: 100%;
+    overflow-x: auto;
+}
+
+body {
+    height: 100%;
+    min-height: 100dvh;
+
+    font-family: $font-family;
+
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+    text-align: start;
+    height: 100%;
+    width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-bottom: 0;
+}
+
+.form-button {
+    min-width: $button-width;
+}
+
+.large-button {
+    min-width: $button-large-width;
+    width: 100%;
+}
+
+.no-select {
+    @include no-select();
+}
+
+.full-width {
+    width: 100%;
+}
+
+.full-height {
+    height: 100%;
+}
+
+// Necessary for ant-tab-panes to take up full height
+.ant-tabs-content-holder {
+    height: 100%;
+
+    .ant-tabs-content.ant-tabs-content-top {
+        height: 100%;
+
+        .ant-tabs-tabpane {
+            height: 100%;
+            overflow-y: auto;
+        }
+    }
+}

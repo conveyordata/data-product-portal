@@ -1,0 +1,32 @@
+{{- if .Values.cloudwatch_enabled }}
+apiVersion: v1
+data:
+  cwagentconfig.json: |
+    {
+      "agent": {
+        "debug": true,
+        "omit_hostname": true
+      },
+      "logs": {
+        "logs_collected": {
+            "files": {
+                "collect_list": [{
+                    "file_path": "/var/logs/local",
+                    "log_group_name": "data-product-portal/cwagent"
+                }
+                ]
+            }
+        }
+      },
+      "metrics": {
+        "metrics_collected": {
+          "statsd": {
+            "service_address":":8125"
+          }
+        }
+      }
+    }
+kind: ConfigMap
+metadata:
+  name: cwagentstatsdconfig
+{{- end }}

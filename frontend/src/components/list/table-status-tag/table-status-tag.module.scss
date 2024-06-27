@@ -1,0 +1,7 @@
+@import '@/styles/variables';
+
+.tag {
+    border-radius: $border-radius-status-tag;
+    padding: $status-tag-padding;
+    min-width: $status-tag-min-width;
+}

@@ -1,0 +1,26 @@
+@import '@/styles/mixins';
+@import '@/styles/colors';
+
+$max-dynamic-title-width: 260px;
+
+.breadcrumb {
+    @include no-select();
+    font-weight: 400;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+        color: #000;
+    }
+}
+
+.title {
+    max-width: $max-dynamic-title-width !important;
+    color: inherit;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

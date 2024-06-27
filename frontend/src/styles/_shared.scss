@@ -1,0 +1,143 @@
+@import '@/styles/colors';
+@import '@/styles/variables';
+
+.default-icon {
+    width: $icon-size-default;
+    height: $icon-size-default;
+    color: $primary-color;
+
+    &.primary {
+        color: $primary-color;
+    }
+
+    &.success {
+        color: $success-color;
+    }
+
+    &.warning {
+        color: $warning-color;
+    }
+
+    &.danger {
+        color: $error-color;
+    }
+
+    &.info {
+        color: $info-color;
+    }
+
+    &.light {
+        color: $primary-color-border;
+    }
+
+    &.dark {
+        color: $color-text;
+    }
+
+    &.x-small {
+        width: $icon-size-extra-small;
+        height: $icon-size-extra-small;
+    }
+
+    &.small {
+        width: $icon-size-small;
+        height: $icon-size-small;
+    }
+
+    &.regular {
+        width: $icon-size-regular;
+        height: $icon-size-regular;
+    }
+
+    &.large {
+        width: $icon-size-large;
+        height: $icon-size-large;
+    }
+
+    &.x-large {
+        width: $icon-size-extra-large;
+        height: $icon-size-extra-large;
+    }
+
+    &.inverted:not(.square-border) {
+        color: $color-white;
+        background: $primary-color;
+
+        svg {
+            fill: $color-white;
+        }
+    }
+
+    &.icon-border {
+        padding: $spacing-s;
+        border: 2px solid $primary-color;
+        border-radius: 50%;
+
+        &.primary {
+            border-color: $primary-color;
+        }
+
+        &.success {
+            border-color: $success-color;
+        }
+
+        &.warning {
+            border-color: $warning-color;
+        }
+
+        &.danger {
+            border-color: $error-color;
+        }
+
+        &.info {
+            border-color: $info-color;
+        }
+
+        &.light {
+            border-color: $primary-color-border;
+        }
+
+        &.dark {
+            border-color: $color-text;
+        }
+    }
+
+    &.inverted {
+        color: $color-white;
+
+        svg {
+            fill: $color-white;
+
+            rect {
+                fill: $primary-color;
+            }
+
+            path {
+                fill: $color-white;
+            }
+        }
+    }
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.search-container {
+    width: 100%;
+    justify-content: space-between;
+    gap: $column-gap-m;
+
+    form {
+        flex: 1;
+    }
+}
+
+.table-row {
+    height: $table-row-height-default;
+}
+
+.no-cursor-pointer {
+    cursor: default !important;
+}

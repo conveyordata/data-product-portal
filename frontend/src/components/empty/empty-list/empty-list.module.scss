@@ -1,0 +1,9 @@
+$min-height: 280px;
+
+.empty-container {
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    min-height: $min-height;
+}

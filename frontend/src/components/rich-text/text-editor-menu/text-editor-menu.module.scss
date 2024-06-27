@@ -1,0 +1,25 @@
+@import '@/styles/variables';
+@import '@/styles/colors';
+
+$text-type-dropdown-width: 120px;
+
+.menuBar {
+    width: 100%;
+    margin-bottom: $spacing-m;
+
+    .actions-container {
+        justify-content: flex-start;
+        align-items: center;
+    }
+}
+
+.menuButton {
+    &.active {
+        background-color: $primary-color;
+        color: $blue-1;
+    }
+}
+
+.text-type-dropdown {
+    width: $text-type-dropdown-width;
+}

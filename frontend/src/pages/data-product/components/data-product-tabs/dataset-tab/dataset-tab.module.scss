@@ -1,0 +1,12 @@
+@import '@/styles/globals';
+@import '@/styles/variables';
+@import '@/styles/shared';
+
+.container {
+    @extend .container;
+    gap: $column-gap-regular;
+}
+
+.list {
+    width: 100%;
+}

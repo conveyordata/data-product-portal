@@ -1,0 +1,28 @@
+@import '@/styles/variables';
+@import '@/styles/colors';
+
+.layout-content {
+    position: relative;
+    overflow: initial;
+    height: 100%;
+}
+
+.layout-wrapper {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    min-width: $app-min-width;
+}
+
+.children-wrapper {
+    height: 100%;
+    overflow-x: auto;
+    padding: $container-padding-large;
+    background: $background-color-container;
+    border-radius: $border-radius-lg;
+
+    &.layout-content-home {
+        padding: unset;
+        border-radius: unset;
+    }
+}

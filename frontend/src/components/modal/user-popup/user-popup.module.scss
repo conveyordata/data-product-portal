@@ -1,0 +1,14 @@
+@import '@/styles/variables';
+
+.search-field-wrapper {
+    margin-bottom: 0 !important;
+}
+
+.user-list {
+    max-height: $modal-content-max-height;
+    overflow: auto;
+}
+
+.user-name {
+    font-weight: $font-weight-normal;
+}

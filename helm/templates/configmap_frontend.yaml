@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+    config.js: |
+        const config = (() => {
+            return {
+                API_BASE_URL: "{{ .Values.host }}",
+                OIDC_DISABLED: {{ .Values.oidc.disabled }},
+                OIDC_CLIENT_ID: "{{ .Values.oidc.client_id }}",
+                OIDC_CLIENT_SECRET: "{{ .Values.oidc.client_secret }}",
+                OIDC_AUTHORITY: "{{ .Values.oidc.authority }}",
+                OIDC_REDIRECT_URI: "{{ .Values.oidc.redirect_uri }}",
+                OIDC_POST_LOGOUT_REDIRECT_URI: "{{ .Values.oidc.redirect_uri }}logout/"
+            }
+        })();
+kind: ConfigMap
+metadata:
+  name: frontend

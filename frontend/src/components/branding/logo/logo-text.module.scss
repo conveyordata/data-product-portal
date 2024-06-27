@@ -1,0 +1,14 @@
+@import '@/styles/variables';
+@import '@/styles/colors';
+@import '@/styles/mixins';
+
+.logo-text {
+    @include no-select();
+    cursor: pointer;
+    color: $blue-1 !important;
+    font-weight: $font-weight-bolder;
+
+    &.dark {
+        color: $primary-color !important;
+    }
+}

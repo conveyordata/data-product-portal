@@ -1,0 +1,11 @@
+@import '@/styles/globals';
+@import '@/styles/shared';
+
+.team-list-container {
+    @extend .no-select;
+    width: 100%;
+
+    .team-list-table {
+        width: 100%;
+    }
+}

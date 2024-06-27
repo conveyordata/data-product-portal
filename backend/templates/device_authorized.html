@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Device Auth Confirmation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+      * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+          font-family: 'Inter', sans-serif;
+          font-size: 14px;
+      }
+
+      body {
+          background-color: #f5f5f5;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          padding: 1rem;
+      }
+
+      h1,
+      h2 {
+          font-weight: 600;
+          color: #333333;
+      }
+
+      .container {
+          max-width: 400px;
+          text-align: center;
+
+      }
+
+      .title {
+          font-size: 1.5rem;
+          margin-bottom: 1.5rem;
+      }
+
+      .content {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          background: #ffffff;
+          border: 1px solid #e0e0e0;
+          border-radius: .75rem;
+          box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+          padding: 2rem;
+      }
+
+      .content-title {
+          font-size: 1.25rem;
+          margin-bottom: 1.5rem;
+      }
+
+      .message {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          font-size: 1rem;
+          font-weight: 500;
+          color: #666666;
+
+          & > p:first-child {
+              color: #389E0D;
+          }
+      }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1 class="title">Data Product Portal</h1>
+  <div class="content">
+    <h2 class="content-title">Device Activation</h2>
+    <div class="message">
+      <p>Your device has been successfully authorized.</p>
+      <p>You can now safely close this window.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

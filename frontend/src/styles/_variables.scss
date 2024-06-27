@@ -1,0 +1,105 @@
+//==================================//
+//========== SPACING ============//
+//==================================//
+$spacing-xs: 0.25rem;
+$spacing-s: 0.5rem;
+$spacing-m: 0.75rem;
+$spacing-regular: 1rem;
+$spacing-ml: 1.25rem;
+$spacing-l: 1.5rem;
+$spacing-xl: 2rem;
+$spacing-xlm: 2.5rem;
+$spacing-xxl: 3rem;
+
+$standard-div-padding: $spacing-regular;
+
+$container-padding: $spacing-xl $spacing-xl;
+$container-padding-large: $spacing-xlm $spacing-xxl;
+
+$column-gap-xxs: 0.125rem;
+$column-gap-xs: 0.25rem;
+$column-gap-sm: 0.5rem;
+$column-gap-regular: 1rem;
+$column-gap-m: 1.25rem;
+$column-gap-l: 2rem;
+$column-gap-xl: 2.5rem;
+
+$column-gap-badge: 0.625rem;
+
+$avatar-list-gap: 0.625rem;
+
+$status-tag-padding: 0.125rem 0.5rem;
+
+//==================================//
+//========== SIZES ============//
+//==================================//
+$app-min-width: 1200px;
+$button-width: 160px;
+$button-large-width: 220px;
+$icon-size-table-cell: 1.25rem;
+$icon-size-extra-small: 1rem;
+$icon-size-small: 1.5rem;
+$icon-size-regular: 2rem;
+$icon-size-default: 2.5rem;
+$icon-size-ml: 2.75rem;
+$icon-size-large: 3rem;
+$icon-size-extra-large: 4rem;
+
+$circle-icon-button-size: 40px;
+$nav-avatar-size: 2.5rem;
+$user-avatar-size: 32px;
+$loading-spinner-size: 32px;
+
+$navbar-height: 72px;
+
+$modal-padding: $spacing-l;
+$modal-gap-header: $column-gap-regular;
+$modal-content-max-height: 60vh;
+$modal-content-min-height: 520px;
+$modal-max-width: 40rem;
+
+$min-sidebar-width: 290px;
+
+$status-tag-min-width: 120px;
+
+$table-row-height-default: 60px;
+
+$popover-max-width: 320px;
+
+$text-editor-min-height: 400px;
+//==================================//
+//========== FONTS  ================//
+//==================================//
+$font-family: 'Neue Haas Grotesk Display Pro', sans-serif;
+$font-family-mono: 'SF Mono', monospace;
+
+$font-size-text: 1rem;
+$font-size-sm: 0.8rem;
+
+//==================================//
+//========= FONT WEIGHTS ===========//
+//==================================//
+$font-weight-normal: 400;
+$font-weight-bold: 600;
+$font-weight-bolder: 700;
+
+//==================================//
+//========= FONT SIZES ===========//
+//==================================//
+$font-header-1: 38px;
+$font-header-2: 30px;
+$font-header-3: 24px;
+$font-header-4: 20px;
+$font-header-5: 16px;
+$font-header-6: 14px;
+
+//==================================//
+//========= BORDERS ===========//
+//==================================//
+$border-radius: var(--ant-border-radius);
+$border-radius-xs: var(--ant-border-radius-xs);
+$border-radius-sm: var(--ant-border-radius-sm);
+$border-radius-lg: var(--ant-border-radius-lg);
+$border-radius-outer: var(--ant-border-radius-outer);
+
+$border-radius-status-tag: 1.5rem;

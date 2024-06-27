@@ -1,0 +1,12 @@
+@import '@/styles/variables';
+@import '@/styles/globals';
+
+.form-container {
+    @extend .container;
+    gap: $spacing-l;
+}
+
+.radio-button-container {
+    display: flex;
+    gap: $spacing-m;
+}

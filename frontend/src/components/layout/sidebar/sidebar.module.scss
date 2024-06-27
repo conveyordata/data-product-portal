@@ -1,0 +1,26 @@
+@import '@/styles/variables';
+@import '@/styles/colors';
+@import '@/styles/mixins';
+
+.sidebar-wrapper {
+    overflow: auto;
+    height: 100%;
+    position: relative;
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    .sidebar-content {
+        gap: $column-gap-m;
+    }
+}
+
+.logoWrapper {
+    height: $navbar-height;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $column-gap-sm;
+
+    width: 100%;
+}

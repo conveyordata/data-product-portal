@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 14 14" fill="none">
+    <g clip-path="url(#clip0_441_4403)">
+        <rect
+                x="7"
+                y="2.2272"
+                width="6.75"
+                height="6.75"
+                transform="rotate(45 7 2.2272)"
+                fill="transparent"
+                stroke="currentColor"
+                stroke-opacity="1"
+                stroke-width="1.5"
+        />
+    </g>
+    <defs>
+        <clipPath id="clip0_441_4403">
+            <rect width="14" height="14" fill="none"/>
+        </clipPath>
+    </defs>
+</svg>

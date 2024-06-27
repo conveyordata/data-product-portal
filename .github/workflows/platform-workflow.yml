@@ -1,0 +1,138 @@
+name: Docker Image CI
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  prep-version:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get Previous tag
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Set new version env
+        env:
+           TAG: ${{ steps.previoustag.outputs.tag }}
+        run: |
+          echo "TAG=${TAG#v}" >> $GITHUB_ENV
+          echo "APP_VERSION=$(cat VERSION)" >> $GITHUB_ENV
+      - name: Check Version Update
+        id: versionupdate
+        if: ${{ env.TAG != env.APP_VERSION }}
+        uses: actions/github-script@v3
+        with:
+          script: |
+              core.setFailed('VERSION is not the latest tag, did you do a version bump?')
+    outputs:
+      version: ${{ env.APP_VERSION }}
+  helm:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    needs: [ "prep-version" ]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.BUILDACCOUNTID }}:role/portal_github_actions
+          aws-region: us-east-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: ${{ secrets.PUBLICAWSACCOUNTID }}
+          registry-type: public
+          mask-password: "true"
+      - name: Publish Helm package
+        uses: WyriHaximus/github-action-helm3@v3
+        env:
+          VERSION: ${{ needs.prep-version.outputs.version }}
+        with:
+          exec: |
+            helm repo add bitnami https://charts.bitnami.com/bitnami
+            helm package --dependency-update helm
+            helm push data-product-portal-$VERSION.tgz oci://public.ecr.aws/conveyordata
+  backend:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    needs: ["prep-version"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.BUILDACCOUNTID }}:role/portal_github_actions
+          aws-region: us-east-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: ${{ secrets.PUBLICAWSACCOUNTID }}
+          registry-type: public
+          mask-password: "true"
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-publish
+        shell: bash
+        env:
+          ECR_REGISTRY: public.ecr.aws/conveyordata
+          ECR_REPOSITORY: data-product-portal/backend
+          IMAGE_TAG: ${{ needs.prep-version.outputs.version }}
+        run: |
+          docker build ./backend -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
+          echo "image_tag=$IMAGE_TAG"
+          echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+  frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    needs: ["prep-version"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.BUILDACCOUNTID }}:role/portal_github_actions
+          aws-region: us-east-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: ${{ secrets.PUBLICAWSACCOUNTID }}
+          registry-type: public
+          mask-password: "true"
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-publish
+        shell: bash
+        env:
+          ECR_REGISTRY: public.ecr.aws/conveyordata
+          ECR_REPOSITORY: data-product-portal/frontend
+          IMAGE_TAG: ${{ needs.prep-version.outputs.version }}
+        run: |
+          docker build ./frontend -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
+          echo "image_tag=$IMAGE_TAG"
+          echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"

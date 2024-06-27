@@ -1,0 +1,15 @@
+@import '@/styles/globals';
+
+.container {
+    width: 100%;
+    gap: $column-gap-regular;
+    min-width: $button-large-width;
+}
+
+.section-wrapper {
+    gap: $column-gap-regular;
+}
+
+.user-avatar-list {
+    gap: $avatar-list-gap;
+}

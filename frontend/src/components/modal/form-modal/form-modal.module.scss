@@ -1,0 +1,26 @@
+@import '@/styles/variables';
+
+.container {
+    width: 100%;
+    max-width: $modal-max-width;
+
+    .form-modal-content {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        min-height: $modal-content-min-height;
+        padding: $modal-padding;
+    }
+
+    .form-modal-header {
+        margin-bottom: $modal-gap-header;
+    }
+
+    .form-modal-body {
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        gap: $column-gap-regular;
+        flex: 1;
+    }
+}

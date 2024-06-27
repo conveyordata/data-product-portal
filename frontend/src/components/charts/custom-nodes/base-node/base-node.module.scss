@@ -1,0 +1,28 @@
+@import '@/styles/variables';
+
+$node-width: 120px;
+$node-height: 180px;
+
+.node-container {
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    width: $node-width;
+    justify-content: center;
+}
+
+.node-wrapper {
+    color: red;
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.node-label {
+    text-align: center;
+    width: 100%;
+    max-width: $node-width;
+    font-size: $font-size-sm;
+    margin-bottom: 0 !important;
+}

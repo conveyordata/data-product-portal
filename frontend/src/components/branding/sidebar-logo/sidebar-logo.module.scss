@@ -1,0 +1,25 @@
+@import '@/styles/variables';
+@import '@/styles/colors';
+@import '@/styles/mixins';
+
+.logo-text {
+    @include no-select();
+    cursor: pointer;
+    color: $blue-1;
+    font-weight: $font-weight-bold;
+    line-height: unset;
+
+    &.dark {
+        color: $primary-color;
+    }
+}
+
+.logo {
+    width: 80%;
+}
+
+.logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: $column-gap-sm;
+}

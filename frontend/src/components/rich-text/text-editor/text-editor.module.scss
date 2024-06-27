@@ -1,0 +1,55 @@
+@import '@/styles/variables';
+@import '@/styles/colors';
+
+.editorContainer {
+    height: 100%;
+    min-height: $text-editor-min-height;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.editorContent {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.submitButton {
+    position: absolute;
+    bottom: $spacing-regular;
+    right: $spacing-regular;
+    border-radius: 50%;
+}
+
+.editor {
+    height: 100%;
+    border: 1px solid transparent;
+    border-radius: $border-radius;
+    padding: $spacing-s $spacing-m;
+    overflow-y: auto;
+
+    &:focus {
+        outline: none;
+        border: 1px solid $primary-color;
+    }
+
+    pre {
+        margin-top: $spacing-xs;
+        background: $base-text-color;
+        border-radius: $border-radius;
+        color: $base-text-bg-base;
+        padding: $spacing-s $spacing-m;
+        font-family: $font-family-mono;
+
+        code {
+            background: none;
+            color: inherit;
+            font-size: $font-size-sm;
+            padding: 0;
+        }
+    }
+}
+
+.content {
+    height: 100%;
+}

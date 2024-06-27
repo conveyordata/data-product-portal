@@ -1,0 +1,54 @@
+repos:
+# Common git hooks
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+    # Git style
+    - id: check-added-large-files
+      exclude: ^frontend/src/assets/fonts/
+    - id: check-merge-conflict
+    - id: no-commit-to-branch
+
+    # Common errors
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+    - id: check-yaml
+      exclude: ^helm/templates
+    - id: check-merge-conflict
+    - id: check-executables-have-shebangs
+
+    # Cross-platform
+    - id: check-case-conflict
+    - id: mixed-line-ending
+      args: [--fix=lf]
+    - id: check-symlinks
+
+    # Security
+    - id: detect-aws-credentials
+      args: ['--allow-missing-credentials']
+    - id: detect-private-key
+
+# Python
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.9.0
+  hooks:
+    - id: mypy
+      additional_dependencies:
+      - types-PyYAML
+      - types-requests
+      - types-pytz
+- repo: https://github.com/pycqa/flake8
+  rev: 7.0.0
+  hooks:
+    - id: flake8
+      additional_dependencies: [flake8-black]
+- repo: https://github.com/psf/black
+  rev: 24.3.0
+  hooks:
+    - id: black
+- repo: local
+  hooks:
+    - id: add-helm-version
+      name: add-helm-version
+      entry: ./add_helm_version.sh
+      language: script
