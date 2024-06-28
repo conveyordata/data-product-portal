@@ -17,10 +17,10 @@ from app.data_product_types.model import DataProductType as DataProductTypeModel
 from app.data_products.model import DataProduct as DataProductModel
 from app.database.database import get_db_session
 from app.datasets.enums import DatasetAccessType
+from app.datasets.model import Dataset as DatasetModel
 from app.environments.schema import Environment as EnvironmentModel
 from app.main import app
 from app.users.model import User as UserModel
-from app.datasets.model import Dataset as DatasetModel
 
 # Set up a test client using the FastAPI app
 test_client = TestClient(app)
@@ -167,6 +167,27 @@ def default_data_product(
 
 
 @pytest.fixture()
+def default_data_product_payload(
+    default_data_product,
+    default_user,
+):
+    return {
+        "name": default_data_product.name,
+        "description": default_data_product.description,
+        "external_id": str(default_data_product.external_id),
+        "tags": default_data_product.tags,
+        "type_id": str(default_data_product.type_id),
+        "memberships": [
+            {
+                "user_id": str(default_user.id),
+                "role": DataProductUserRole.OWNER.value,
+            }
+        ],
+        "business_area_id": str(default_data_product.business_area_id),
+    }
+
+
+@pytest.fixture()
 def default_dataset(
     session,
     default_business_area,
@@ -182,6 +203,23 @@ def default_dataset(
         business_area_id=default_business_area.id,
     )
     return dataset
+
+
+@pytest.fixture()
+def default_dataset_payload(
+    default_dataset,
+):
+    return {
+        "name": default_dataset.name,
+        "description": default_dataset.description,
+        "external_id": default_dataset.external_id,
+        "tags": [],
+        "owners": [
+            str(default_dataset.owners[0].id),
+        ],
+        "access_type": DatasetAccessType.RESTRICTED,
+        "business_area_id": str(default_dataset.business_area_id),
+    }
 
 
 @pytest.fixture()

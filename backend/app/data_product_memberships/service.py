@@ -95,8 +95,9 @@ class DataProductMembershipService:
         data_product_membership.approved_by_id = authenticated_user.id
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
         db.commit()
+        db.refresh(data_product_membership)
 
-        return data_product_membership
+        return {"id": data_product_membership.id}
 
     def deny_membership_request(
         self,
@@ -128,8 +129,9 @@ class DataProductMembershipService:
         data_product_membership.denied_by_id = authenticated_user.id
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
         db.commit()
+        db.refresh(data_product_membership)
 
-        return data_product_membership
+        return {"id": data_product_membership.id}
 
     def remove_membership(self, id: UUID, db: Session, authenticated_user: User):
         data_product_membership = (
@@ -177,8 +179,8 @@ class DataProductMembershipService:
         )
         data_product.memberships.append(data_product_membership)
         db.commit()
-
-        return data_product_membership
+        db.refresh(data_product_membership)
+        return {"id": data_product_membership.id}
 
     def update_data_product_membership_role(
         self,
@@ -201,3 +203,6 @@ class DataProductMembershipService:
         data_product_membership = db.get(DataProductMembership, id)
         data_product_membership.role = membership_role
         db.commit()
+        db.refresh(data_product_membership)
+
+        return {"id": data_product_membership.id}

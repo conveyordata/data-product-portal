@@ -293,6 +293,8 @@ class DataProductService:
         )
         data_product.dataset_links.append(dataset_link)
         db.commit()
+        db.refresh(data_product)
+        return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(
         self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
