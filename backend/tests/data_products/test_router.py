@@ -23,6 +23,19 @@ class TestDataProductsRouter:
         assert data_product.status_code == 200
         assert len(data_product.json()) == 1
 
+    def test_get_data_product_by_id(self, client, default_data_product_payload):
+        created_data_product = self.create_default_data_product(
+            client, default_data_product_payload
+        )
+        assert created_data_product.status_code == 200
+        assert "id" in created_data_product.json()
+
+        data_product = self.get_data_product_by_id(
+            client, created_data_product.json()["id"]
+        )
+        assert data_product.status_code == 200
+        assert "id" in data_product.json()
+
     def test_update_data_product(
         self, client, session, default_data_product, default_data_product_payload
     ):
