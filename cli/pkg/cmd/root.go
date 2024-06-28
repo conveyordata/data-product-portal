@@ -5,20 +5,21 @@ package cmd
 
 import (
 	"os"
-	"portal/libs/core"
-	"portal/pkg/cmd/auth"
 
 	"github.com/spf13/cobra"
+
+	"portal/libs/core"
+	"portal/pkg/cmd/auth"
 )
 
 const version = "1.0"
 
-// rootCmd represents the base command when called without any subcommands
+// rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
-	Use:     "portal",
-	Version: version,
+	Use:              "portal",
+	Version:          version,
 	PersistentPreRun: core.EnsureValidConfig,
-	Short:   "A brief description of your application",
+	Short:            "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
 

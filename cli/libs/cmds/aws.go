@@ -6,10 +6,11 @@ import (
 	"errors"
 	"io"
 	"os"
+	"time"
+
 	"portal/libs/cliapi"
 	"portal/libs/core"
 	"portal/pkg/api"
-	"time"
 )
 
 type AWSCredentials struct {
@@ -52,7 +53,7 @@ func OpenAPIAws(ctx context.Context, data_product string, environment string) (*
 }
 
 func GetAWSRole(ctx context.Context, data_product string, environment string) (*AWSCredentials, error) {
-	catched_cred, err := ReadAWSToken(data_product+environment)
+	catched_cred, err := ReadAWSToken(data_product + environment)
 	switch {
 	case errors.Is(err, core.ErrTokenDoesNotExist):
 		// Generate new credentials

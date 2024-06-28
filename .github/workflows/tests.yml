@@ -69,3 +69,23 @@ jobs:
       - name: Run the automated tests
         working-directory: ./backend
         run: poetry run pytest -v
+
+  lint-golang:
+    name: Run Go linters
+    if: ${{ github.actor != 'dependabot[bot]' || contains(github.head_ref, 'dependabot/go_modules')}}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: cli/go.mod
+          cache: false
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          args: --timeout 15m0s
+          working-directory: cli
+
