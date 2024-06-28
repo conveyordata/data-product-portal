@@ -25,6 +25,8 @@ data sources, and sharing concepts, ensuring control and oversight for business 
 Our goal is to bridge the gap between data governance, data platforms and data catalogs and provide a 360 view of all 
 ongoing data initiatives that is easy to understand by everybody.
 
+To read more about it, please checkout our [announcement blogpost](https://hubs.li/Q02DGGpR0)
+
 ## Who is it for?
 
 The Data Product Portal is designed for data teams within businesses that aim to build their own use cases in a 
