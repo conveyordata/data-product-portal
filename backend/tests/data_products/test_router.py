@@ -4,6 +4,8 @@ ENDPOINT = "/api/data_products"
 
 
 class TestDataProductsRouter:
+    invalid_data_product_id = "00000000-0000-0000-0000-000000000000"
+
     def test_create_data_product(self, client, default_data_product_payload):
         created_data_product = self.create_default_data_product(
             client, default_data_product_payload
@@ -78,12 +80,21 @@ class TestDataProductsRouter:
         )
         assert deleted_data_product.status_code == 200
 
+    def test_get_data_product_by_id_with_invalid_id(self, client):
+        data_product = self.get_data_product_by_id(client, self.invalid_data_product_id)
+        assert data_product.status_code == 404
+
     def test_update_data_product_with_invalid_data_product_id(
         self, client, default_data_product
     ):
-        invalid_data_product_id = "00000000-0000-0000-0000-000000000000"
         data_product = self.update_default_data_product(
-            client, default_data_product, invalid_data_product_id
+            client, default_data_product, self.invalid_data_product_id
+        )
+        assert data_product.status_code == 404
+
+    def test_remove_data_product_with_invalid_data_product_id(self, client):
+        data_product = self.delete_default_data_product(
+            client, self.invalid_data_product_id
         )
         assert data_product.status_code == 404
 
