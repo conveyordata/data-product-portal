@@ -10,7 +10,7 @@ python = "^3.11"
 fastapi = "0.110.1"
 uvicorn = "^0.29.0"
 requests = "^2.31.0"
-gunicorn = "^21.2.0"
+gunicorn = "^22.0.0"
 pydantic = { version = "^2.6.4", extras = ['email'] }
 python-dotenv = "^1.0.1"
 sqlalchemy = "^2.0.29"
