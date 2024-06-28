@@ -6,6 +6,8 @@ DATASETS_ENDPOINT = "/api/datasets"
 
 
 class TestDataProductsDatasetsRouter:
+    invalid_id = "00000000-0000-0000-0000-000000000000"
+
     def test_request_data_product_link(
         self, client, session, default_data_product_payload, default_dataset_payload
     ):
@@ -89,6 +91,23 @@ class TestDataProductsDatasetsRouter:
         link_id = link.json()["id"]
         removed_link = self.remove_data_product_dataset_link(client, link_id)
         assert removed_link.status_code == 200
+
+    def test_request_dataset_link_with_invalid_dataset_id(
+        self, client, session, default_data_product_payload, default_dataset_payload
+    ):
+        data_product = self.create_default_data_product(
+            client, default_data_product_payload
+        )
+        assert data_product.status_code == 200
+        data_product_id = data_product.json()["id"]
+
+        dataset = self.create_default_dataset(client, default_dataset_payload)
+        assert dataset.status_code == 200
+
+        link = self.request_default_data_product_dataset_link(
+            client, data_product_id, self.invalid_id
+        )
+        assert link.status_code == 404
 
     @staticmethod
     def default_update_dataset_payload(default_dataset, session):

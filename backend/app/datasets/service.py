@@ -14,13 +14,19 @@ from app.users.schema import User
 
 class DatasetService:
     def get_dataset(self, id: UUID, db: Session) -> DatasetGet:
-        return db.get(
+        dataset = db.get(
             DatasetModel,
             id,
             options=[
                 joinedload(DatasetModel.data_product_links),
             ],
         )
+
+        if not dataset:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
+            )
+        return dataset
 
     def get_datasets(self, db: Session) -> list[DatasetsGet]:
         return db.query(DatasetModel).order_by(asc(DatasetModel.name)).all()

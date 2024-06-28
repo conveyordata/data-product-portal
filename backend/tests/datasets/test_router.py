@@ -2,6 +2,8 @@ ENDPOINT = "/api/datasets"
 
 
 class TestDatasetsRouter:
+    invalid_dataset_id = "00000000-0000-0000-0000-000000000000"
+
     def test_create_dataset(self, client, session, default_dataset_payload):
         created_dataset = self.create_default_dataset(client, default_dataset_payload)
         assert created_dataset.status_code == 200
@@ -70,6 +72,32 @@ class TestDatasetsRouter:
         deleted_dataset = self.delete_default_dataset(client, dataset_data["id"])
         assert deleted_dataset.status_code == 200
 
+    def test_add_user_to_dataset(
+        self,
+        client,
+        session,
+        default_dataset_payload,
+        default_user,
+        default_secondary_user,
+    ):
+        created_dataset = self.create_default_dataset(client, default_dataset_payload)
+        assert created_dataset.status_code == 200
+        assert "id" in created_dataset.json()
+
+        session.add(default_secondary_user)
+
+        dataset_id = created_dataset.json()["id"]
+        user_id = default_secondary_user.id
+
+        add_user_to_dataset_response = self.add_user_to_dataset(
+            client, user_id, dataset_id
+        )
+        assert add_user_to_dataset_response.status_code == 200
+
+        dataset = self.get_dataset_by_id(client, dataset_id)
+        assert dataset.status_code == 200
+        assert len(dataset.json()["owners"]) == 2
+
     def test_remove_user_from_dataset(
         self, client, session, default_dataset_payload, default_user
     ):
@@ -84,21 +112,71 @@ class TestDatasetsRouter:
 
         owner_id = dataset.json()["owners"][0]["id"]
 
-        deleted_dataset = self.delete_dataset_user(client, owner_id, dataset_id)
-        assert deleted_dataset.status_code == 200
+        delete_dataset_user_response = self.delete_dataset_user(
+            client, owner_id, dataset_id
+        )
+        assert delete_dataset_user_response.status_code == 200
 
         dataset = self.get_dataset_by_id(client, dataset_id)
         assert dataset.status_code == 200
         assert len(dataset.json()["owners"]) == 0
 
+    def test_get_dataset_by_id_with_invalid_dataset_id(self, client, session):
+        dataset = self.get_dataset_by_id(client, self.invalid_dataset_id)
+        assert dataset.status_code == 404
+
     def test_update_dataset_with_invalid_dataset_id(
         self, client, session, default_dataset_payload
     ):
-        invalid_dataset_id = "00000000-0000-0000-0000-000000000000"
         dataset = self.update_default_dataset(
-            client, default_dataset_payload, invalid_dataset_id
+            client, default_dataset_payload, self.invalid_dataset_id
         )
         assert dataset.status_code == 404
+
+    def test_remove_dataset_with_invalid_dataset_id(self, client, session):
+        dataset = self.delete_default_dataset(client, self.invalid_dataset_id)
+        assert dataset.status_code == 404
+
+    def test_remove_user_from_dataset_with_invalid_dataset_id(
+        self, client, session, default_user
+    ):
+        dataset = self.delete_dataset_user(
+            client, default_user.id, self.invalid_dataset_id
+        )
+        assert dataset.status_code == 404
+
+    def test_remove_user_from_dataset_with_invalid_user_id(
+        self, client, session, default_dataset_payload
+    ):
+        created_dataset = self.create_default_dataset(client, default_dataset_payload)
+        assert created_dataset.status_code == 200
+        assert "id" in created_dataset.json()
+        dataset_id = created_dataset.json()["id"]
+
+        dataset = self.get_dataset_by_id(client, dataset_id)
+        assert dataset.status_code == 200
+        assert len(dataset.json()["owners"]) == 1
+
+        delete_dataset_user_response = self.delete_dataset_user(
+            client, self.invalid_dataset_id, dataset_id
+        )
+        assert delete_dataset_user_response.status_code == 404
+
+    def test_add_already_existing_dataset_owner_to_dataset(
+        self, client, session, default_dataset_payload, default_user
+    ):
+        created_dataset = self.create_default_dataset(client, default_dataset_payload)
+        assert created_dataset.status_code == 200
+        assert "id" in created_dataset.json()
+        dataset_id = created_dataset.json()["id"]
+
+        dataset = self.get_dataset_by_id(client, dataset_id)
+        assert dataset.status_code == 200
+        assert len(dataset.json()["owners"]) == 1
+
+        owner_id = dataset.json()["owners"][0]["id"]
+        added_dataset = self.add_user_to_dataset(client, owner_id, dataset_id)
+        assert added_dataset.status_code == 400
 
     @staticmethod
     def default_dataset_about_payload():
@@ -133,4 +211,9 @@ class TestDatasetsRouter:
     @staticmethod
     def delete_dataset_user(client, user_id, dataset_id):
         response = client.delete(f"{ENDPOINT}/{dataset_id}/user/{user_id}")
+        return response
+
+    @staticmethod
+    def add_user_to_dataset(client, user_id, dataset_id):
+        response = client.post(f"{ENDPOINT}/{dataset_id}/user/{user_id}")
         return response
