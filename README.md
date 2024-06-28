@@ -120,6 +120,7 @@ as well as for people that keep oversight and are concerned with governance aspe
   ```sh
   docker compose up --build
   ```
+- Now visit http://localhost:8080 to check it out!
 
 ### Sample Data
 While running in sandbox mode, the Portal will be automatically seeded with sample data (incl. users, data products, datasets, ...). The source of this data can be found in the [sample_data.sql](./backend/sample_data.sql) file.
