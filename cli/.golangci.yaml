@@ -1,0 +1,74 @@
+# This file contains all available configuration options
+# with their default values.
+
+# options for analysis running
+run:
+
+
+issues:
+  # Which dirs to exclude: issues from them won't be reported.
+  # Can use regexp here: `generated.*`, regexp is applied on full path,
+  # including the path prefix if one is set.
+  # Default dirs are skipped independently of this option's value (see exclude-dirs-use-default).
+  # "/" will be replaced by current OS file path separator to properly work on Windows.
+  # Default: []
+  exclude-dirs:
+
+  # Enables exclude of directories:
+  # - vendor$, third_party$, testdata$, examples$, Godeps$, builtin$
+  # Default: true
+  exclude-dirs-use-default: true
+
+  exclude-rules:
+    # Exclude selected linters for test files
+    - path: _test.go
+      linters:
+        - bodyclose
+
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    - errcheck
+    - exhaustive
+    - gci
+    - gocritic
+    - godot
+    - gosimple
+    - govet
+    - ineffassign
+    - makezero
+    - misspell
+    - predeclared
+    - promlinter
+    - revive
+    - staticcheck
+    - tparallel
+    - typecheck
+    - unconvert
+    - unused
+    - wastedassign
+    - whitespace
+
+linters-settings:
+  goimports:
+    local-prefixes: portal
+  exhaustive:
+    default-signifies-exhaustive: false
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(portal)
+  gocritic:
+    disabled-checks:
+      - commentFormatting
+  revive:
+    rules:
+      - name: defer
+        severity: warning
+        disabled: false
+        arguments:
+          - [ "call-chain", "loop" ]
+

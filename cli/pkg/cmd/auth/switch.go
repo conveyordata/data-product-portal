@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"portal/libs/core"
-
 	"github.com/spf13/cobra"
+
+	"portal/libs/core"
 )
 
 // switchCmd represents the switch command.

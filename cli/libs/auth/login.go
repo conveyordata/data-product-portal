@@ -6,14 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
+
+	"github.com/pkg/browser"
+
 	"portal/libs/cliapi"
 	"portal/libs/core"
 	"portal/libs/token"
-	"time"
-
 	"portal/pkg/api"
-
-	"github.com/pkg/browser"
 )
 
 func requestJWT(ctx context.Context, config core.Config, device string) (*token.Token, error) {

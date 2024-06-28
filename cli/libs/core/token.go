@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+
 	utils "portal/libs/httpclient"
 	"portal/libs/logger"
 	"portal/libs/token"
 	"portal/libs/token/cognitotoken"
-	"strings"
 )
 
 var (
@@ -97,8 +98,8 @@ func awsTokenBaseLocation() string {
 }
 
 func AwsTokenFileLocation(activeProfile string) string {
-	activeProfile = strings.Replace(activeProfile, ":", "-", -1)
-	activeProfile = strings.Replace(activeProfile, "/", "-", -1)
+	activeProfile = strings.ReplaceAll(activeProfile, ":", "-")
+	activeProfile = strings.ReplaceAll(activeProfile, "/", "-")
 	return filepath.Join(awsTokenBaseLocation(), activeProfile)
 }
 

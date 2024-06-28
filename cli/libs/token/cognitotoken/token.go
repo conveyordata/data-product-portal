@@ -34,6 +34,7 @@ func FetchToken(ctx context.Context, client httpclient.HTTPClient, request Token
 	if err != nil {
 		return nil, fmt.Errorf("failed fetching cognito token: %w", err)
 	}
+	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
@@ -61,6 +62,7 @@ func FetchToken(ctx context.Context, client httpclient.HTTPClient, request Token
 	if err != nil {
 		return nil, fmt.Errorf("failed fetching cognito token: %w", err)
 	}
+	defer res.Body.Close()
 	tokenBody, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err

@@ -2,10 +2,11 @@ package cliapi
 
 import (
 	"context"
-	"portal/libs/core"
-	"portal/pkg/api"
 
 	"github.com/deepmap/oapi-codegen/pkg/securityprovider"
+
+	"portal/libs/core"
+	"portal/pkg/api"
 )
 
 func AuthenticatedContext(ctx context.Context) (api.ClientInterface, error) {

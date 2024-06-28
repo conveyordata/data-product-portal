@@ -4,13 +4,15 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"portal/libs/logger"
 	"sync"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"portal/libs/logger"
 )
+
 const (
 	activeProfileKey string = "activeProfile"
 )
@@ -20,11 +22,11 @@ var (
 )
 
 type Config struct {
-	Api      string `mapstructure:"api"`
-	Secret   string `mapstructure:"secret"`    // Secret is used for m2m flow
-	ClientID string `mapstructure:"client_id"` // The ClientID is used for the user login flow
-	DevMode  bool   `mapstructure:"dev_mode"`
-	AuthUrl  string `mapstructure:"auth_url"`
+	Api        string `mapstructure:"api"`
+	Secret     string `mapstructure:"secret"`    // Secret is used for m2m flow
+	ClientID   string `mapstructure:"client_id"` // The ClientID is used for the user login flow
+	DevMode    bool   `mapstructure:"dev_mode"`
+	AuthUrl    string `mapstructure:"auth_url"`
 	HomeFolder string `mapstructure:"home_folder"`
 }
 
@@ -35,6 +37,7 @@ func GetActiveProfile() string {
 	}
 	return viper.GetString(activeProfileKey)
 }
+
 // func GetActiveProfile() string {
 // 	return "portal-profile" // Profiles is currently not yet a thing
 // }
@@ -52,7 +55,6 @@ func DefaultConfig() Config {
 		DevMode: false,
 	}
 }
-
 
 func InitConfig() {
 	// Avoid concurrent initialization during tests
@@ -94,7 +96,6 @@ func writeViper() {
 		}
 	}
 }
-
 
 func cliLocation() string {
 	home, err := homedir.Dir()
@@ -176,7 +177,7 @@ func GetCurrentConfig() Config {
 func configToViper(config Config, activeProfile string) {
 	viper.Set(activeProfile, map[string]string{
 		"api":       config.Api,
-		"auth_url":      config.AuthUrl,
+		"auth_url":  config.AuthUrl,
 		"secret":    config.Secret,
 		"client_id": config.ClientID,
 	})

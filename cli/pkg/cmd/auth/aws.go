@@ -7,8 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	//"fmt"
-
 	"portal/libs/cmds"
 )
 
@@ -44,7 +42,7 @@ func validateInputAWS(awsProject string) error {
 }
 
 var (
-	awsProject string
+	awsProject     string
 	awsEnvironment string
 )
 
