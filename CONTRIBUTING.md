@@ -27,7 +27,7 @@ Pull Requests are a way to suggest changes in our repository. These pull request
 
 #### Create a new issue
 
-If you've found a bug in the application or want to request a new feature, search open issues to see if someone else has reported the same thing. If it's something new, [report the bug](https://github.com/conveyordata/data-product-portal/issues/new?labels=bug&template=bug-report---.md) or [request the feature](https://github.com/conveyordata/data-product-portal/issues/new?labels=enhancement&template=feature-request---.md).
+If you've found a bug in the application or want to request an improvement / new feature, search open issues to see if someone else has reported the same thing. If it's something new, [report the bug](https://github.com/conveyordata/data-product-portal/issues/new?labels=bug&template=bug-report---.md), [request the improvement](https://github.com/conveyordata/data-product-portal/issues/new?labels=enhancement&template=improvement-request---.md) or [request the feature](https://github.com/conveyordata/data-product-portal/issues/new?labels=enhancement&template=feature-request---.md).
 
 #### Solve an issue
 
