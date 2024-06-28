@@ -4,7 +4,8 @@ services:
     env_file:
       - .env.docker
     depends_on:
-      - postgresql
+      postgresql:
+        condition: service_healthy
     command: >
       bash -c "python -m app.db_tool init --force sample_data.sql
       && uvicorn app.main:app --host 0.0.0.0 --port 5050"
@@ -23,6 +24,11 @@ services:
       - ${POSTGRES_PORT}:5432
     env_file:
       - .env.docker
+    healthcheck:
+      test: /usr/bin/pg_isready
+      interval: 5s
+      timeout: 10s
+      retries: 120
   nginx:
     build: ./nginx
     ports:
