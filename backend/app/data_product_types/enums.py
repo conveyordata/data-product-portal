@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class DataProductIconKey(Enum):
+class DataProductIconKey(str, Enum):
     REPORTING = "reporting"
     PROCESSING = "processing"
     EXPLORATION = "exploration"
