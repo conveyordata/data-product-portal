@@ -81,9 +81,9 @@ else:
     ) -> User:
         oidc_user = OIDCIdentity(
             sub="sub",
-            name="test",
-            family_name="test",
-            email="test@test.be",
+            name="John",
+            family_name="Doe",
+            email="john.doe@dataminded.com",
             username="sub",
         )
         token = JWTToken(sub="sub", token="token_value")
