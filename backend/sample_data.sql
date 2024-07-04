@@ -45,8 +45,8 @@ begin
     TRUNCATE TABLE public.tags CASCADE;
 
     -- ENVIRONMENTS
-    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'dev', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'prd', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'custom_arn_development_project{{}}', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'custom_arn_production_project{{}}', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- BUSINESS AREAS
     INSERT INTO public.business_areas (id, "name", description, created_on, updated_on, deleted_at) VALUES ('672debaf-31f9-4233-820b-ad2165af044e', 'HR', 'Human Resources', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO hr_id;
