@@ -13,6 +13,7 @@ class NotebookBuilderConveyor:
         self.conveyor_api = "https://app.conveyordata.com/api/v2"
 
         self.oidc = OIDCConfiguration(
+            oidc_disabled=False,
             authority="https://auth.dataminded.cloud/oauth2",
             client_id=self.api_key,
             client_secret=self.api_secret,

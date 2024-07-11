@@ -16,14 +16,14 @@ class OIDCProvider(Enum):
 class OIDCConfiguration:
     def __init__(
         self,
-        oidc_disabled: bool = False,
+        oidc_disabled: bool = True,
         provider: OIDCProvider = OIDCProvider.COGNITO,
         client_id: Optional[str] = None,
         client_secret: Optional[str] = None,
         authority: Optional[str] = None,
         redirect_uri: Optional[str] = None,
     ):
-        if not get_boolean_variable("OIDC_DISABLED", True):
+        if not oidc_disabled or not get_boolean_variable("OIDC_DISABLED", True):
             self.client_id = client_id if client_id else os.getenv("OIDC_CLIENT_ID")
             self.client_secret = (
                 client_secret if client_secret else os.getenv("OIDC_CLIENT_SECRET")
