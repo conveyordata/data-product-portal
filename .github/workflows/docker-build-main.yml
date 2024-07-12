@@ -19,6 +19,8 @@ jobs:
       - name: Get commit hash
         id: vars
         run: echo "version=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+    outputs:
+        version: ${{ steps.vars.outputs.version }}
   backend:
     runs-on: ubuntu-latest
     permissions:
