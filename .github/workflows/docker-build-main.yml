@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - 'feature/build-docker-on-main'
 
 jobs:
   prep-version:
