@@ -19,7 +19,7 @@ jobs:
       - name: Get Commit hash
         id: previoustag
         run: |
-           echo "GIT_HASH=$(git rev-parse --short "$GITHUB_SHA") >> $GITHUB_ENV
+           echo "GIT_HASH=$(git rev-parse --short '$GITHUB_SHA')" >> $GITHUB_ENV
     outputs:
       version: ${{ env.GIT_HASH }}
   backend:
