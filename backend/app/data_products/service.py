@@ -9,6 +9,7 @@ import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
+from botocore.exceptions import ClientError
 
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
@@ -328,10 +329,16 @@ class DataProductService:
         self, role_arn: str, authenticated_user: User
     ) -> AWSCredentials:
         email = authenticated_user.email
-        response = get_client("sts").assume_role(
-            RoleArn=role_arn,
-            RoleSessionName=email,
-        )
+        try:
+            response = get_client("sts").assume_role(
+                RoleArn=role_arn,
+                RoleSessionName=email,
+            )
+        except ClientError:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="Please contact us on how to integrate with AWS",
+            )
 
         return AWSCredentials(**response.get("Credentials"))
 

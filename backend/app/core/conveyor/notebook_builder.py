@@ -21,8 +21,14 @@ class NotebookBuilderConveyor:
         self.token = ""
 
     def authenticate(self) -> str:
-        session = requests.Session()
-        session.auth = (self.oidc.client_id, self.oidc.client_secret)
+        try:
+            session = requests.Session()
+            session.auth = (self.oidc.client_id, self.oidc.client_secret)
+        except AttributeError:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="Please contact us on how to integrate with Conveyor",
+            )
         result = session.post(
             "https://auth.dataminded.cloud/oauth2/token",
             data={
