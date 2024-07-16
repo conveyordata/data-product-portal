@@ -64,7 +64,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./backend
-        run: poetry install
+        run: poetry install --with test
 
       - name: Run the automated tests
         working-directory: ./backend
@@ -88,4 +88,3 @@ jobs:
         with:
           args: --timeout 15m0s
           working-directory: cli
-
