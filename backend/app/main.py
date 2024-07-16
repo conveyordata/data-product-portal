@@ -1,16 +1,17 @@
-from app.core.config.env_var_parser import get_boolean_variable
-from app.core.logging.logger import setup_logger
-from fastapi import FastAPI, Response, Request
-from fastapi.exceptions import RequestValidationError
-import os
-from starlette.exceptions import HTTPException
-from app.core.errors.error_handling import ErrorHandler
-from app.shared.router import router
 import time
+
+from fastapi import FastAPI, Request, Response
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.exceptions import HTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
+from app.core.errors.error_handling import ErrorHandler
+from app.core.logging.logger import setup_logger
+from app.settings import settings
+from app.shared.router import router
 
 with open("./VERSION", "r") as f:
     API_VERSION = f.read()
@@ -19,7 +20,7 @@ TITLE = "Data product portal"
 
 oidc_kwargs = (
     {}
-    if get_boolean_variable("OIDC_DISABLED", True)
+    if settings.OIDC_DISABLED
     else {
         "swagger_ui_init_oauth": {
             "clientId": oidc.client_id,
@@ -45,11 +46,10 @@ app.include_router(router, prefix="/api")
 app.include_router(auth, prefix="/api")
 
 logger = setup_logger()
-origins = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.CORS_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

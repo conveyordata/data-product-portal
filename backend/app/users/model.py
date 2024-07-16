@@ -4,13 +4,11 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.data_product_memberships.model import DataProductMembership
 from app.data_products.model import DataProduct
-from app.database.database import Base
-from app.database.database import ensure_exists
+from app.database.database import Base, ensure_exists
 from app.datasets.model import datasets_owner_table
 from app.shared.model import BaseORM
 from app.users.schema import User as UserSchema

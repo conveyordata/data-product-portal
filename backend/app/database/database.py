@@ -2,12 +2,10 @@ from typing import Any
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import create_engine, Column
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker, Query
+from sqlalchemy import Column, create_engine
+from sqlalchemy.orm import Query, Session, declarative_base, sessionmaker
 
-from app.core.config.db_config import DBConfig
+from app.settings import settings
 from app.shared.model import BaseORM
 from app.shared.schema import ORMModel
 
@@ -23,11 +21,10 @@ def ensure_exists(id: UUID, db: Session, type: type[BaseORM]) -> ORMModel:
 
 
 def get_url():
-    db_config = DBConfig()
     return (
-        f"postgresql://{db_config.user}:"
-        f"{db_config.password}@{db_config.server}:"
-        f"{db_config.port}/{db_config.name}"
+        f"postgresql://{settings.POSTGRES_USER}:"
+        f"{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}:"
+        f"{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
     )
 
 

@@ -52,3 +52,8 @@ repos:
       name: add-helm-version
       entry: ./add_helm_version.sh
       language: script
+- repo: https://github.com/pycqa/isort
+  rev: 5.12.0
+  hooks:
+    - id: isort
+      name: isort (python)
