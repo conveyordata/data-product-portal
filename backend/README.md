@@ -18,18 +18,18 @@
 ### Configuration (.env file)
 
 Both for local execution and local development, you need to specify some configuration arguments.
-All configuration values for this project are read from a `.env` file in the root folder.
+All configuration values for this project are read from a `.env` file in the `backend (current)` folder.
 Please look at [example.env](../example.env) to see which values are mandatory and which can be omitted.
 Then copy and paste the content of `example.env` to `.env` you created and replace values where necessary.
 
 #### Minimal `.env` file
 A minimal example of a `.env` file can be found below. This is enough to get things started.
 ```
-POSTGRESQL_PASSWORD=vy/*&4%osdivdadkr238ry7t2123
-POSTGRESQL_PORT=5432
-POSTGRESQL_USER=postgres
-POSTGRESQL_DATABASE=data-product-portal
-POSTGRESQL_SERVER=localhost
+POSTGRES_PASSWORD=vy/*&4%osdivdadkr238ry7t2123
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_DB=data-product-portal
+POSTGRES_SERVER=localhost
 
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5050,http://localhost:8080
 AWS_DEFAULT_REGION=eu-west-1
@@ -65,7 +65,7 @@ In order to just run the backend locally, you can choose between the 2 options b
   ```
 - Run the Docker container by executing the command below.
   ```sh
-  docker run --name data-product-portal-backend-container --env-file ../.env -p 3000:8080  data-product-portal-backend
+  docker run --name data-product-portal-backend-container --env-file .env -p 3000:8080  data-product-portal-backend
   ```
 
 ## Local Development
@@ -97,7 +97,7 @@ In order to run the project in development mode, after initializing the database
 
 ## Data
 A small CLI tool is delivered to enable database setup / migrations.
-The CLI tool fetches database configuration from the `.env` file in the root of the project. Make sure your database connection variables are set
+The CLI tool fetches database configuration from the `.env` file in the current folder. Make sure your database connection variables are set
 up correctly.
 Execute `python -m app.db_tool --help` from the `backend` folder to receive the help text from this tool.
 

@@ -4,15 +4,13 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.business_areas.model import BusinessArea as BusinessAreaModel
-from app.core.config.db_config import DBConfig
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
-    DataProductUserRole,
 )
+from app.data_product_memberships.model import DataProductUserRole
 from app.data_product_types.model import DataProductType as DataProductTypeModel
 from app.data_products.model import DataProduct as DataProductModel
 from app.database.database import get_db_session
@@ -20,6 +18,7 @@ from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.environments.schema import Environment as EnvironmentModel
 from app.main import app
+from app.settings import settings
 from app.users.model import User as UserModel
 
 # Set up a test client using the FastAPI app
@@ -27,11 +26,10 @@ test_client = TestClient(app)
 
 
 def get_test_url():
-    db_config = DBConfig()
     return (
-        f"postgresql://{db_config.user}:"
-        f"{db_config.password}@{db_config.server}:"
-        f"{db_config.port}/{db_config.name}"
+        f"postgresql://{settings.POSTGRES_USER}:"
+        f"{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}:"
+        f"{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
     )
 
 

@@ -6,29 +6,27 @@ from uuid import UUID
 
 import httpx
 import pytz
+from botocore.exceptions import ClientError
 from fastapi import HTTPException, status
 from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
-from botocore.exceptions import ClientError
 
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.data_product_memberships.enums import (
-    DataProductUserRole,
     DataProductMembershipStatus,
+    DataProductUserRole,
 )
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_memberships.schema import DataProductMembershipCreate
-from app.data_products.model import (
-    DataProduct as DataProductModel,
-    ensure_data_product_exists,
-)
+from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.model import ensure_data_product_exists
 from app.data_products.schema import (
     DataProduct,
+    DataProductAboutUpdate,
     DataProductCreate,
     DataProductUpdate,
-    DataProductAboutUpdate,
 )
 from app.data_products.schema_get import DataProductGet, DataProductsGet
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
@@ -246,7 +244,8 @@ class DataProductService:
         current_data_product.about = data_product.about
         db.commit()
 
-    def ensure_owner(self, authenticated_user: User, data_product: DataProduct):
+    @staticmethod
+    def ensure_owner(authenticated_user: User, data_product: DataProduct):
         data_product_membership = next(
             (
                 membership

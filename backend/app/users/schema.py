@@ -1,6 +1,8 @@
-from pydantic import EmailStr
-from app.shared.schema import ORMModel
 from uuid import UUID
+
+from pydantic import EmailStr
+
+from app.shared.schema import ORMModel
 
 
 class UserCreate(ORMModel):

@@ -1,16 +1,13 @@
-from logging.config import fileConfig
 import sys
+from logging.config import fileConfig
 from os.path import abspath, dirname
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 sys.path.insert(
     0, dirname(dirname(dirname(dirname(abspath(__file__)))))
 )  # Insert <.>/ # allows import from app.
-from app.core.helpers.local import add_additional_env_vars  # noqa: E402
-
-add_additional_env_vars()
 
 from app.database.database import get_url  # noqa: E402
 
