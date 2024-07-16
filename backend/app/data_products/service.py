@@ -246,6 +246,9 @@ class DataProductService:
 
     @staticmethod
     def ensure_owner(authenticated_user: User, data_product: DataProduct):
+        if authenticated_user.is_admin:
+            return
+
         data_product_membership = next(
             (
                 membership

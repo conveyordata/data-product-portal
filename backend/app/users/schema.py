@@ -14,3 +14,4 @@ class UserCreate(ORMModel):
 
 class User(UserCreate):
     id: UUID
+    is_admin: bool

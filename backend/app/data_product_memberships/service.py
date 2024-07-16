@@ -6,8 +6,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.data_product_memberships.enums import (
-    DataProductUserRole,
     DataProductMembershipStatus,
+    DataProductUserRole,
 )
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_memberships.schema import DataProductMembershipCreate
@@ -21,6 +21,9 @@ class DataProductMembershipService:
 
     @staticmethod
     def ensure_data_product_owner(authenticated_user: User, data_product: DataProduct):
+        if authenticated_user.is_admin:
+            return
+
         data_product_membership = next(
             (
                 membership
