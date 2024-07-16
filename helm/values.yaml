@@ -136,7 +136,6 @@ volumes:
       name: sampledata
       optional: true
 
-
 volumeMounts:
   - name: varlog
     mountPath: /var/logs
