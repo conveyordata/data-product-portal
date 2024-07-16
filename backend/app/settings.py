@@ -1,7 +1,6 @@
 from functools import lru_cache
 from typing import Optional
 
-from pydantic import HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,11 +14,7 @@ class Settings(BaseSettings):
     POSTGRES_SERVER: str
 
     # Other
-    CORS_ALLOWED_ORIGINS: list[HttpUrl] = [
-        "http://localhost:3000",
-        "http://localhost:5050",
-        "http://localhost:8080",
-    ]
+    CORS_ALLOWED_ORIGINS: str = ""
     AWS_DEFAULT_REGION: str = "eu-west-1"
 
     # OIDC Configuration
