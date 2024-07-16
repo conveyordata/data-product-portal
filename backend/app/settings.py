@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Optional
 
 from pydantic import HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -25,8 +26,8 @@ class Settings(BaseSettings):
     OIDC_DISABLED: bool = True
 
     # Conveyor
-    CONVEYOR_API_KEY: str
-    CONVEYOR_SECRET: str
+    CONVEYOR_API_KEY: Optional[str] = None
+    CONVEYOR_SECRET: Optional[str] = None
     LOGGING_DIRECTORY: str = "./tmp/logs"
 
 
