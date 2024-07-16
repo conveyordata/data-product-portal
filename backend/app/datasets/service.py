@@ -4,8 +4,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
 
-from app.datasets.model import Dataset as DatasetModel, ensure_dataset_exists
-from app.datasets.schema import DatasetCreateUpdate, DatasetAboutUpdate, Dataset
+from app.datasets.model import Dataset as DatasetModel
+from app.datasets.model import ensure_dataset_exists
+from app.datasets.schema import Dataset, DatasetAboutUpdate, DatasetCreateUpdate
 from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.tags.model import Tag as TagModel
 from app.users.model import ensure_user_exists
@@ -52,8 +53,9 @@ class DatasetService:
             dataset.owners.append(user)
         return dataset
 
-    def ensure_owner(self, authenticated_user: User, dataset: Dataset):
-        if authenticated_user not in dataset.owners:
+    @staticmethod
+    def ensure_owner(authenticated_user: User, dataset: Dataset):
+        if authenticated_user not in dataset.owners and not authenticated_user.is_admin:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User is not an owner of the dataset",

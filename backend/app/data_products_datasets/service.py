@@ -24,7 +24,10 @@ class DataProductDatasetService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Dataset data product link {id} not found",
             )
-        if authenticated_user not in current_link.dataset.owners:
+        if (
+            authenticated_user not in current_link.dataset.owners
+            and not authenticated_user.is_admin
+        ):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only dataset owners can execute this action",
@@ -46,7 +49,10 @@ class DataProductDatasetService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Dataset data product link {id} not found",
             )
-        if authenticated_user not in current_link.dataset.owners:
+        if (
+            authenticated_user not in current_link.dataset.owners
+            and not authenticated_user.is_admin
+        ):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only dataset owners can execute this action",
@@ -65,7 +71,7 @@ class DataProductDatasetService:
             )
         dataset = current_link.dataset
         ensure_dataset_exists(dataset.id, db)
-        if authenticated_user not in dataset.owners:
+        if authenticated_user not in dataset.owners and not authenticated_user.is_admin:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only dataset owners can execute this action",

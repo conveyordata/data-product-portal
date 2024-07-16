@@ -10,6 +10,7 @@ class UserCreate(ORMModel):
     external_id: str
     first_name: str
     last_name: str
+    is_admin: bool
 
 
 class User(UserCreate):
