@@ -1,0 +1,31 @@
+clean_test:
+  data_ids:
+    - clean_test
+    - raw_test
+  owner: kristof.martens@dataminded.com
+
+master_test:
+  data_ids:
+    - master_test
+  owner: kristof.martens@dataminded.com
+
+all_data:
+  data_ids:
+    - raw_test
+    - clean_test
+    - master_test
+  owner: kristof.martens@dataminded.com
+
+clean_gemeente_verslagen:
+  data_ids:
+    - raw_gemeente_verslagen
+    - clean_gemeente_verslagen
+
+clean_themas:
+  data_ids:
+    - raw_themas
+    - clean_themas
+
+master_gemeente_verslagen:
+  data_ids:
+    - master_gemeente_verslagen
