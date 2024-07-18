@@ -9,14 +9,13 @@ from app.settings import settings
 
 class RefreshInfrastructureLambda:
     def __init__(self):
-        self.enabled = bool(settings.INFRASTRUCTURE_LAMBDA_ARN)
         self.lambda_arn = settings.INFRASTRUCTURE_LAMBDA_ARN
         self.logger = getLogger()
-        if self.enabled:
+        if self.lambda_arn:
             self.client = get_client("lambda")
 
     def trigger(self) -> dict[str, Any]:
-        if self.enabled:
+        if self.lambda_arn:
             try:
                 response = self.client.invoke(
                     FunctionName=self.lambda_arn, InvocationType="Event"
