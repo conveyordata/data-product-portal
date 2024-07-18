@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
+from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
@@ -138,6 +139,7 @@ class DataProductService:
         db.add(data_product)
         db.commit()
 
+        RefreshInfrastructureLambda().trigger()
         return {"id": data_product.id}
 
     def remove_data_product(self, id: UUID, db: Session):
@@ -234,7 +236,7 @@ class DataProductService:
                 setattr(current_data_product, k, v) if v else None
 
         db.commit()
-
+        RefreshInfrastructureLambda().trigger()
         return {"id": current_data_product.id}
 
     def update_data_product_about(
@@ -297,6 +299,7 @@ class DataProductService:
         data_product.dataset_links.append(dataset_link)
         db.commit()
         db.refresh(data_product)
+        RefreshInfrastructureLambda().trigger()
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(
@@ -320,6 +323,7 @@ class DataProductService:
             )
         data_product.dataset_links.remove(data_product_dataset)
         db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def get_data_product_role_arn(self, id: UUID, environment: str, db: Session) -> str:
         environment_context = db.get(EnvironmentModel, environment).context

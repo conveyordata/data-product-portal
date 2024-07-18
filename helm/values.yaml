@@ -31,6 +31,7 @@ database:
   port: "!!string 5432"
   server: data-product-portal-postgresql
   username: postgres
+infrastructure_lambda_arn: ""
 
 replicaCount: 1
 

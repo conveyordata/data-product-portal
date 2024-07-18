@@ -1,12 +1,18 @@
 from logging import getLogger
-from app.core.aws.refreshable_session import RefreshableBotoSession
+
 from botocore.client import BaseClient
 from fastapi import HTTPException, status
+
+from app.core.aws.refreshable_session import RefreshableBotoSession
 
 disabled_aws = False
 try:
     session = RefreshableBotoSession().refreshable_session()
-    clients = {"s3": session.client("s3"), "sts": session.client("sts")}
+    clients = {
+        "s3": session.client("s3"),
+        "sts": session.client("sts"),
+        "lambda": session.client("lambda"),
+    }
 except AttributeError:
     logger = getLogger()
     logger.warning(

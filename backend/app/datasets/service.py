@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema import Dataset, DatasetAboutUpdate, DatasetCreateUpdate
@@ -68,6 +69,7 @@ class DatasetService:
         dataset = DatasetModel(**dataset.parse_pydantic_schema())
         db.add(dataset)
         db.commit()
+        RefreshInfrastructureLambda().trigger()
 
         return {"id": dataset.id}
 
@@ -87,6 +89,7 @@ class DatasetService:
         dataset.delete()
 
         db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def update_dataset(self, id: UUID, dataset: DatasetCreateUpdate, db: Session):
         current_dataset = ensure_dataset_exists(id, db)
@@ -103,7 +106,7 @@ class DatasetService:
             else:
                 setattr(current_dataset, k, v) if v else None
         db.commit()
-
+        RefreshInfrastructureLambda().trigger()
         return {"id": current_dataset.id}
 
     def update_dataset_about(self, id: UUID, dataset: DatasetAboutUpdate, db: Session):
@@ -125,6 +128,7 @@ class DatasetService:
 
         dataset.owners.append(user)
         db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def remove_user_from_dataset(
         self, dataset_id: UUID, user_id: UUID, authenticated_user: User, db: Session
@@ -134,3 +138,4 @@ class DatasetService:
         self.ensure_owner(authenticated_user, dataset)
         dataset.owners.remove(user)
         db.commit()
+        RefreshInfrastructureLambda().trigger()

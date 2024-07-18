@@ -21,6 +21,7 @@ data:
   {{- if .Values.api_key.enabled }}
   PORTAL_API_KEY: {{ .Values.api_key.key }}
   {{- end}}
+  INFRASTRUCTURE_LAMBDA_ARN: {{ .Values.infrastructure_lambda_arn }}
 kind: ConfigMap
 metadata:
   name: {{ include "data-product-portal.fullname" . }}
