@@ -5,6 +5,7 @@ import pytz
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
     DataProductUserRole,
@@ -99,7 +100,7 @@ class DataProductMembershipService:
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
         db.commit()
         db.refresh(data_product_membership)
-
+        RefreshInfrastructureLambda().trigger()
         return {"id": data_product_membership.id}
 
     def deny_membership_request(
@@ -152,6 +153,7 @@ class DataProductMembershipService:
 
         data_product.memberships.remove(data_product_membership)
         db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def add_data_product_membership(
         self,
@@ -183,6 +185,7 @@ class DataProductMembershipService:
         data_product.memberships.append(data_product_membership)
         db.commit()
         db.refresh(data_product_membership)
+        RefreshInfrastructureLambda().trigger()
         return {"id": data_product_membership.id}
 
     def update_data_product_membership_role(
@@ -207,5 +210,5 @@ class DataProductMembershipService:
         data_product_membership.role = membership_role
         db.commit()
         db.refresh(data_product_membership)
-
+        RefreshInfrastructureLambda().trigger()
         return {"id": data_product_membership.id}

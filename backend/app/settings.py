@@ -1,6 +1,7 @@
 from functools import lru_cache
 from typing import Optional
 
+from pydantic.networks import HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,14 +17,24 @@ class Settings(BaseSettings):
     # Other
     CORS_ALLOWED_ORIGINS: str = ""
     AWS_DEFAULT_REGION: str = "eu-west-1"
+    AWS_DEFAULT_PROFILE: Optional[str] = None
+    PORTAL_API_KEY: Optional[str] = None
 
     # OIDC Configuration
     OIDC_DISABLED: bool = True
+    OIDC_CLIENT_ID: Optional[str] = None
+    OIDC_CLIENT_SECRET: Optional[str] = None
+    OIDC_AUTHORITY: Optional[HttpUrl] = None
+    OIDC_REDIRECT_URI: Optional[HttpUrl] = None
 
     # Conveyor
     CONVEYOR_API_KEY: Optional[str] = None
     CONVEYOR_SECRET: Optional[str] = None
     LOGGING_DIRECTORY: str = "./tmp/logs"
+
+    # Infrastructure
+    INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
+    ENVIRONMENT_CONTEXT: Optional[str] = None
 
 
 @lru_cache
