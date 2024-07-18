@@ -11,8 +11,9 @@ class RefreshInfrastructureLambda:
     def __init__(self):
         self.enabled = bool(settings.INFRASTRUCTURE_LAMBDA_ARN)
         self.lambda_arn = settings.INFRASTRUCTURE_LAMBDA_ARN
-        self.client = get_client("lambda")
         self.logger = getLogger()
+        if self.enabled:
+            self.client = get_client("lambda")
 
     def trigger(self) -> dict[str, Any]:
         if self.enabled:
