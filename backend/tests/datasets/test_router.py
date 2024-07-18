@@ -1,3 +1,5 @@
+from app.users.model import User as UserModel
+
 ENDPOINT = "/api/datasets"
 
 
@@ -96,6 +98,34 @@ class TestDatasetsRouter:
 
         dataset = self.get_dataset_by_id(client, dataset_id)
         assert dataset.status_code == 200
+        assert len(dataset.json()["owners"]) == 2
+
+    def test_add_user_to_dataset_by_admin(
+        self,
+        client,
+        session,
+        default_dataset_payload,
+        default_user,
+        default_secondary_user,
+        admin_user,
+    ):
+        created_dataset = self.create_default_dataset(client, default_dataset_payload)
+
+        session.add(default_secondary_user)
+
+        dataset_id = created_dataset.json()["id"]
+
+        # Update default user to login under admin user
+        session.query(UserModel).filter_by(
+            id=default_dataset_payload["owners"][0]
+        ).update({"external_id": "default"})
+
+        add_user_to_dataset_response = self.add_user_to_dataset(
+            client, default_secondary_user.id, dataset_id
+        )
+        assert add_user_to_dataset_response.status_code == 200
+
+        dataset = self.get_dataset_by_id(client, dataset_id)
         assert len(dataset.json()["owners"]) == 2
 
     def test_remove_user_from_dataset(
