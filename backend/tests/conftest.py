@@ -99,11 +99,31 @@ def default_user_model_payload():
 
 
 @pytest.fixture()
+def admin_user_model_payload():
+    return UserModel(
+        id=UUID("756aa810-168d-4940-a2b9-c9f3a8b1f777"),
+        email="john.doe@dataminded.com",
+        external_id="admin",
+        first_name="admin",
+        last_name="test",
+        is_admin=True,
+    )
+
+
+@pytest.fixture()
 def default_user(session, default_user_model_payload):
     session.add(default_user_model_payload)
     session.commit()
     session.refresh(default_user_model_payload)
     return default_user_model_payload
+
+
+@pytest.fixture()
+def admin_user(session, admin_user_model_payload):
+    session.add(admin_user_model_payload)
+    session.commit()
+    session.refresh(admin_user_model_payload)
+    return admin_user_model_payload
 
 
 @pytest.fixture()
@@ -164,6 +184,36 @@ def default_data_product(
     return data_product
 
 
+@pytest.fixture
+def admin_data_product_membership(session, admin_user):
+    data_product_membership = DataProductMembershipModel(
+        user_id=admin_user.id,
+        role=DataProductUserRole.MEMBER,
+    )
+    return data_product_membership
+
+
+@pytest.fixture
+def admin_data_product(
+    session,
+    default_data_product_type,
+    default_business_area,
+    admin_data_product_membership,
+):
+    data_product = DataProductModel(
+        name="Test Data Product",
+        description="Test Description",
+        external_id="test-data_product",
+        type_id=default_data_product_type.id,
+        memberships=[
+            admin_data_product_membership,
+        ],
+        business_area_id=default_business_area.id,
+        tags=[],
+    )
+    return data_product
+
+
 @pytest.fixture()
 def default_data_product_payload(
     default_data_product,
@@ -203,6 +253,24 @@ def default_dataset(
     return dataset
 
 
+@pytest.fixture
+def admin_dataset(
+    session,
+    default_business_area,
+    admin_user,
+):
+    dataset = DatasetModel(
+        name="Test Dataset",
+        external_id="test-dataset",
+        description="Test Description",
+        tags=[],
+        access_type=DatasetAccessType.PUBLIC,
+        owners=[admin_user],
+        business_area_id=default_business_area.id,
+    )
+    return dataset
+
+
 @pytest.fixture()
 def default_dataset_payload(
     default_dataset,
@@ -217,6 +285,23 @@ def default_dataset_payload(
         ],
         "access_type": DatasetAccessType.RESTRICTED,
         "business_area_id": str(default_dataset.business_area_id),
+    }
+
+
+@pytest.fixture()
+def admin_dataset_payload(
+    admin_dataset,
+):
+    return {
+        "name": admin_dataset.name,
+        "description": admin_dataset.description,
+        "external_id": admin_dataset.external_id,
+        "tags": [],
+        "owners": [
+            str(admin_dataset.owners[0].id),
+        ],
+        "access_type": DatasetAccessType.RESTRICTED,
+        "business_area_id": str(admin_dataset.business_area_id),
     }
 
 

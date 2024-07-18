@@ -29,6 +29,26 @@ class TestDataProductMembershipsRouter:
         )
         assert secondary_user_membership.status_code == 200
 
+    def test_create_data_product_membership_by_admin(
+        self,
+        client,
+        session,
+        admin_data_product,
+        admin_user,
+        default_secondary_user,
+    ):
+        created_data_product = self.create_default_data_product(
+            client, admin_data_product, admin_user
+        )
+
+        data_product_id = created_data_product.json()["id"]
+
+        session.add(default_secondary_user)
+        secondary_user_membership = self.create_secondary_membership(
+            client, default_secondary_user.id, data_product_id
+        )
+        assert secondary_user_membership.status_code == 200
+
     def test_request_data_product_membership(
         self,
         client,
@@ -168,24 +188,24 @@ class TestDataProductMembershipsRouter:
         assert update_membership_role.status_code == 200
 
     @staticmethod
-    def default_data_product_payload(default_data_product, default_user):
+    def default_data_product_payload(data_product, user):
         return {
-            "name": default_data_product.name,
-            "description": default_data_product.description,
-            "external_id": str(default_data_product.external_id),
-            "tags": default_data_product.tags,
-            "type_id": str(default_data_product.type_id),
+            "name": data_product.name,
+            "description": data_product.description,
+            "external_id": str(data_product.external_id),
+            "tags": data_product.tags,
+            "type_id": str(data_product.type_id),
             "memberships": [
                 {
-                    "user_id": str(default_user.id),
-                    "role": DataProductUserRole.OWNER.value,
+                    "user_id": str(user.id),
+                    "role": data_product.memberships[0].role.value,
                 }
             ],
-            "business_area_id": str(default_data_product.business_area_id),
+            "business_area_id": str(data_product.business_area_id),
         }
 
-    def create_default_data_product(self, client, default_data_product, default_user):
-        data = self.default_data_product_payload(default_data_product, default_user)
+    def create_default_data_product(self, client, data_product, user):
+        data = self.default_data_product_payload(data_product, user)
         response = client.post(DATA_PRODUCTS_ENDPOINT, json=data)
         return response
 
