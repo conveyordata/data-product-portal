@@ -33,6 +33,7 @@ services:
     build: ./nginx
     ports:
       - 8080:80
+      - 5050:5050
     depends_on:
       - backend
       - frontend
