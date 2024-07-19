@@ -7,7 +7,7 @@ from app.business_areas.schema import BusinessArea
 from app.data_products.schema_get import DataProductsGet
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import DatasetAccessType, DatasetType
 from app.datasets.status import DatasetStatus
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
@@ -30,7 +30,7 @@ class DatasetGet(ORMModel):
     tags: list[Tag]
     business_area: BusinessArea
     access_type: DatasetAccessType
-
+    dataset_type: DatasetType
 
 class DatasetsGet(DatasetGet):
     data_product_links: Annotated[list[DataProductLink], Field(exclude=True)]

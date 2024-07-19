@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship, Mapped, Session
 
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
-from app.datasets.enums import DatasetAccessType
+from app.datasets.enums import DatasetAccessType, DatasetType
 from app.datasets.schema import Dataset as DatasetSchema
 from app.datasets.status import DatasetStatus
 from app.shared.model import BaseORM, utcnow
@@ -48,6 +48,7 @@ class Dataset(Base, BaseORM):
     description = Column(String)
     about = Column(String)
     access_type = Column(Enum(DatasetAccessType), default=DatasetAccessType.PUBLIC)
+    dataset_type = Column(Enum(DatasetType), default=DatasetType.TABLE)
     owners: Mapped[list["User"]] = relationship(
         secondary=datasets_owner_table, back_populates="owned_datasets"
     )
