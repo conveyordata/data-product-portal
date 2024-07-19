@@ -43,7 +43,7 @@ export function DataProductTab({ datasetId }: Props) {
     const isDatasetOwner = useMemo(() => {
         if (!dataset || !user) return false;
 
-        return getIsDatasetOwner(dataset, user.id);
+        return getIsDatasetOwner(dataset, user.id) || user.is_admin;
     }, [dataset?.id, user?.id]);
 
     return (

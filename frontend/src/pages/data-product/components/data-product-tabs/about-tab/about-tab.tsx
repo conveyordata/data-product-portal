@@ -29,7 +29,8 @@ export function AboutTab({ dataProductId }: Props) {
         return <EmptyList />;
     }
 
-    const canEdit = getCanUserAccessDataProductData(currentUser?.id, dataProduct?.memberships);
+    const canEdit =
+        getCanUserAccessDataProductData(currentUser?.id, dataProduct?.memberships) || Boolean(currentUser?.is_admin);
 
     async function handleSubmit(content: string) {
         if (canEdit) {

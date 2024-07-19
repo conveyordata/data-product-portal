@@ -26,7 +26,7 @@ export function AboutTab({ datasetId }: Props) {
         return <EmptyList />;
     }
 
-    const canEdit = getIsDatasetOwner(dataset, currentUser?.id);
+    const canEdit = getIsDatasetOwner(dataset, currentUser?.id) || Boolean(currentUser?.is_admin);
 
     async function handleSubmit(content: string) {
         if (canEdit) {
