@@ -9,10 +9,10 @@ module "data_access" {
 
   environment        = each.key
   environment_config = each.value
-  project_name       = var.project_name
-  project_config     = var.project_config
-  data_ids           = var.data_ids
-  data_topics        = var.data_topics
+  data_product_name       = var.data_product_name
+  data_product_config     = var.data_product_config
+  data_outputs           = var.data_outputs
+  datasets        = var.datasets
 }
 
 module "roles" {
@@ -24,8 +24,8 @@ module "roles" {
   aws_account_id = var.aws_account_id
   account_name   = var.account_name
 
-  project_name   = var.project_name
-  project_config = var.project_config
+  data_product_name   = var.data_product_name
+  data_product_config = var.data_product_config
 
   environment        = each.key
   environment_config = each.value
@@ -39,15 +39,15 @@ module "roles" {
 
 module "users" {
   source   = "./users"
-  for_each = var.project_config.services.create_iam_user ? var.environments : {}
+  for_each = var.data_product_config.services.create_iam_user ? var.environments : {}
 
   prefix         = var.prefix
   aws_region     = var.aws_region
   aws_account_id = var.aws_account_id
   account_name   = var.account_name
 
-  project_name   = var.project_name
-  project_config = var.project_config
+  data_product_name   = var.data_product_name
+  data_product_config = var.data_product_config
 
   environment        = each.key
   environment_config = each.value

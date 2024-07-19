@@ -99,7 +99,7 @@ data "aws_iam_policy_document" "permission_ssm" {
 
     resources = [
       "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/platform/public/*",
-      "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/project/${var.project_name}/*",
+      "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/project/${var.data_product_name}/*",
     ]
   }
 
@@ -128,7 +128,7 @@ data "aws_iam_policy_document" "permission_ssm" {
     ]
 
     resources = [
-      "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/project/${var.project_name}/${var.environment}/*",
+      "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/project/${var.data_product_name}/${var.environment}/*",
     ]
   }
 }

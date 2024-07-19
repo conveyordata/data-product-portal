@@ -3,9 +3,9 @@ variable "aws_region" {}
 variable "aws_account_id" {}
 variable "account_name" {}
 
-variable "project_name" {}
+variable "data_product_name" {}
 
-variable "project_config" {
+variable "data_product_config" {
   type = object({
     description      = string
     read_data_topics = list(string)
@@ -53,8 +53,8 @@ variable "environment_config" {
   })
 }
 
-variable "service_policy_arns" {
-  type = list(string)
+variable "athena_output_path_prefix" {
+  default = "athena"
 }
 
 variable "read_data_access_policy_arns" {

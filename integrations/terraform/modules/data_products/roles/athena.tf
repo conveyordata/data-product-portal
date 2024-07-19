@@ -1,12 +1,12 @@
 locals {
-  athena_output_location     = "s3://${var.environment_config.datalake.bucket}/${var.athena_output_path_prefix}/${var.project_name}"
-  athena_output_location_arn = "${var.environment_config.datalake.bucket_arn}/${var.athena_output_path_prefix}/${var.project_name}"
-  athena_workgroup           = "${var.project_name}-${var.environment}"
+  athena_output_location     = "s3://${var.environment_config.datalake.bucket}/${var.athena_output_path_prefix}/${var.data_product_name}"
+  athena_output_location_arn = "${var.environment_config.datalake.bucket_arn}/${var.athena_output_path_prefix}/${var.data_product_name}"
+  athena_workgroup           = "${var.data_product_name}-${var.environment}"
 }
 
 resource "aws_athena_workgroup" "athena" {
   name          = local.athena_workgroup
-  description   = "Athena workgroup of the ${var.project_name} purpose in the ${var.environment} environment"
+  description   = "Athena workgroup of the ${var.data_product_name} purpose in the ${var.environment} environment"
   state         = "ENABLED"
   force_destroy = true
 

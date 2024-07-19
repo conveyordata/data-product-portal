@@ -1,5 +1,5 @@
-output "project_role_arn" {
-  value = aws_iam_role.project.arn
+output "data_product_role_arn" {
+  value = aws_iam_role.data_product.arn
 }
 
 output "service_policy_arns" {

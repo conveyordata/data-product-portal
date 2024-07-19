@@ -1,5 +1,5 @@
 resource "aws_iam_user" "user" {
-  name          = "${var.project_name}-${var.environment}"
+  name          = "${var.data_product_name}-${var.environment}"
   force_destroy = true
 }
 

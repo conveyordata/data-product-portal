@@ -1,9 +1,9 @@
 resource "conveyor_project" "project" {
   count = var.conveyor_enabled ? 1 : 0
-  name  = var.project_name
+  name  = var.data_product_name
 
-  description          = var.project_config.description
-  default_iam_identity = "${var.prefix}-${local.aws_iam}-${var.project_name}-{{ .Env }}-${var.account_name}"
+  description          = var.data_product_config.description
+  default_iam_identity = "${var.prefix}-${local.aws_iam}-${var.data_product_name}-{{ .Env }}-${var.account_name}"
 
   default_ide_config {
     build_steps {

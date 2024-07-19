@@ -3,9 +3,13 @@ variable "aws_region" {}
 variable "aws_account_id" {}
 variable "account_name" {}
 
-variable "project_name" {}
-
-variable "project_config" {
+variable "data_product_name" {
+  validation {
+    condition     = strcontains(var.data_product_name, "_") == false
+    error_message = "Project names should not contain _"
+  }
+}
+variable "data_product_config" {
   type = object({
     description      = string
     read_data_topics = list(string)
@@ -18,10 +22,8 @@ variable "project_config" {
   })
 }
 
-variable "environment" {}
-
-variable "environment_config" {
-  type = object({
+variable "environments" {
+  type = map(object({
     datalake = object({
       bucket      = string
       bucket_arn  = string
@@ -50,17 +52,24 @@ variable "environment_config" {
       glue_database = string
       s3            = string
     }))
-  })
+  }))
 }
 
-variable "athena_output_path_prefix" {
-  default = "athena"
+variable "data_outputs" {
+  type = map(object({
+    s3 = list(object({
+      bucket_name = string
+      path        = string
+    }))
+    glue  = list(string)
+    owner = list(string)
+  }))
 }
 
-variable "read_data_access_policy_arns" {
-  type = list(string)
+variable "datasets" {
+  type = map(object({
+    data_ids = list(string)
+  }))
 }
 
-variable "write_data_access_policy_arns" {
-  type = list(string)
-}
+variable "conveyor_enabled" {}

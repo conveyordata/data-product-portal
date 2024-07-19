@@ -61,9 +61,9 @@ module "environments" {
   database_glossary = local.database_glossary
 }
 
-module "projects" {
-  source   = "../../modules/project"
-  for_each = local.project_glossary
+module "data_products" {
+  source   = "../../modules/data_products"
+  for_each = local.data_product_glossary
 
   aws_region       = local.aws_region
   prefix           = local.prefix
@@ -75,6 +75,6 @@ module "projects" {
   project_config = each.value
 
   environments = module.environments
-  data_ids     = local.data_ids
-  data_topics  = local.data_topics
+  data_ids     = local.data_outputs
+  data_topics  = local.datasets
 }

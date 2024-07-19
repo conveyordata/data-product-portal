@@ -3,6 +3,21 @@ variable "aws_region" {}
 variable "aws_account_id" {}
 variable "account_name" {}
 
+variable "data_product_name" {}
+
+variable "data_product_config" {
+  type = object({
+    description      = string
+    read_data_topics = list(string)
+    services = object({
+      console         = bool
+      ssm             = bool
+      athena          = bool
+      create_iam_user = bool
+    })
+  })
+}
+
 variable "environment" {}
 
 variable "environment_config" {
@@ -38,48 +53,14 @@ variable "environment_config" {
   })
 }
 
-variable "project_name" {}
-
-variable "project_config" {
-  type = object({
-    description      = string
-    read_data_topics = list(string)
-    services = object({
-      console         = bool
-      ssm             = bool
-      athena          = bool
-      create_iam_user = bool
-    })
-  })
+variable "service_policy_arns" {
+  type = list(string)
 }
 
-variable "data_ids" {
-  type = map(object({
-    s3 = list(object({
-      bucket_name = string
-      path        = string
-    }))
-    glue  = list(string)
-    owner = list(string)
-  }))
+variable "read_data_access_policy_arns" {
+  type = list(string)
 }
 
-variable "data_topics" {
-  type = map(object({
-    data_ids = list(string)
-  }))
-}
-
-variable "read_chunk_size" {
-  type    = number
-  default = 30
-}
-
-variable "write_chunk_size" {
-  type    = number
-  default = 30
-}
-
-variable "project_folder_prefix" {
-  default = "project"
+variable "write_data_access_policy_arns" {
+  type = list(string)
 }
