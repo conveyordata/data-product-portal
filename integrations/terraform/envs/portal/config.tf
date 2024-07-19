@@ -13,7 +13,7 @@ locals {
   # Choose whether you want to create a jump host
   create_jump_host = true
   # Choose whether you want to set-up a datahub data catalog on a EKS cluster for your data platform
-  create_datahub = true
+  create_datahub = false
 
   # Account level configuration. This information is only relevant if you enable services running on the EKS cluster
   account = {
@@ -23,6 +23,8 @@ locals {
     hosted_zone = "acme.com"
     # The hostname you want to use for exposing data platform services to. Leave empty if NA
     hostname = "data-platform"
+    # certificate_arn of linked to the hosted zone
+    certificate_arn = ""
   }
 
   # networking configuration that will set-up a VPC structure with secondary CIDR with nat gateway between routable

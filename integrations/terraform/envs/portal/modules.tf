@@ -1,11 +1,11 @@
-module "account" {
-  source = "../../modules/account"
-
-  aws_region      = local.aws_region
-  hosted_zone     = local.account.hosted_zone
-  hosted_zone_arn = local.account.hosted_zone_arn
-  hostname        = local.account.hostname
-}
+# module "account" {
+#   source = "../../modules/account"
+#
+#   aws_region      = local.aws_region
+#   hosted_zone     = local.account.hosted_zone
+#   hosted_zone_arn = local.account.hosted_zone_arn
+#   hostname        = local.account.hostname
+# }
 
 module "networking" {
   source = "../../modules/networking"
@@ -34,7 +34,7 @@ module "infrastructure" {
   account_name   = local.account_name
   aws_account_id = local.aws_account_id
 
-  account_config        = module.account
+  account_config        = local.account
   vpc_config            = module.networking
   infrastructure_config = local.infrastructure
 }
