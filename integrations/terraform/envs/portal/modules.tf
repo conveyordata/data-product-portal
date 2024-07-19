@@ -75,6 +75,6 @@ module "data_products" {
   data_product_config = each.value
 
   environments = module.environments
-  data_outputs     = local.data_outputs
-  datasets  = local.datasets
+  data_outputs = local.data_outputs
+  datasets     = local.datasets
 }

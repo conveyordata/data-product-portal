@@ -42,7 +42,7 @@ variable "data_product_name" {}
 
 variable "data_product_config" {
   type = object({
-    description      = string
+    description   = string
     read_datasets = list(string)
     services = object({
       console         = bool

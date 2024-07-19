@@ -12,7 +12,7 @@ locals {
   data_product_glossary_raw = yamldecode(file("${path.root}/config/data_product_glossary/data_product_glossary.yaml"))
   data_product_glossary = {
     for k, v in local.data_product_glossary_raw : k => {
-      description      = try(v["description"], "")
+      description   = try(v["description"], "")
       read_datasets = try(v["read_datasets"], [])
       services = {
         console         = try(v["services"]["console"], true)          # Console access enabled by default

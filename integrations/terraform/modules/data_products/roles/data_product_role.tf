@@ -14,7 +14,7 @@ data "aws_iam_policy_document" "data_product_arp" {
     }
   }
 
-  dynamic statement {
+  dynamic "statement" {
     for_each = length(var.environment_config.conveyor_oidc_provider_url) > 0 ? toset([0]) : toset([])
     content {
       sid     = "ConveyorWorkerAssumeRoleWebIdentityV2"

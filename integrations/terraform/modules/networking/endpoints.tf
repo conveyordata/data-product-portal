@@ -29,8 +29,8 @@ resource "aws_vpc_endpoint" "s3" {
 
 data "aws_iam_policy_document" "s3_endpoint_policy_empty" {
   statement {
-    effect = "Allow"
-    actions = ["*"]
+    effect    = "Allow"
+    actions   = ["*"]
     resources = ["*"]
     principals {
       type        = "AWS"

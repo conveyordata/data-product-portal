@@ -7,12 +7,12 @@ module "data_access" {
   aws_account_id = var.aws_account_id
   account_name   = var.account_name
 
-  environment        = each.key
-  environment_config = each.value
-  data_product_name       = var.data_product_name
-  data_product_config     = var.data_product_config
-  data_outputs           = var.data_outputs
-  datasets        = var.datasets
+  environment         = each.key
+  environment_config  = each.value
+  data_product_name   = var.data_product_name
+  data_product_config = var.data_product_config
+  data_outputs        = var.data_outputs
+  datasets            = var.datasets
 }
 
 module "roles" {
