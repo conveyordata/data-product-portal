@@ -13,7 +13,7 @@ locals {
   data_product_glossary = {
     for k, v in local.data_product_glossary_raw : k => {
       description      = try(v["description"], "")
-      read_data_topics = try(v["read_data_topics"], [])
+      read_datasets = try(v["read_datasets"], [])
       services = {
         console         = try(v["services"]["console"], true)          # Console access enabled by default
         ssm             = try(v["services"]["ssm"], true)              # SSM access enabled by default
@@ -35,7 +35,7 @@ locals {
   datasets_raw = yamldecode(file("${path.root}/config/data_glossary/datasets.yaml"))
   datasets = {
     for k, v in local.datasets_raw : k => {
-      data_ids = v["data_ids"]
+      data_outputs = v["data_outputs"]
     }
   }
 }
