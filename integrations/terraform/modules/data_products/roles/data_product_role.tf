@@ -14,22 +14,25 @@ data "aws_iam_policy_document" "data_product_arp" {
     }
   }
 
-  statement {
-    sid     = "ConveyorWorkerAssumeRoleWebIdentityV2"
-    effect  = "Allow"
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+  dynamic statement {
+    for_each = length(var.environment_config.conveyor_oidc_provider_url) > 0 ? toset([0]) : toset([])
+    content {
+      sid     = "ConveyorWorkerAssumeRoleWebIdentityV2"
+      effect  = "Allow"
+      actions = ["sts:AssumeRoleWithWebIdentity"]
 
-    condition {
-      variable = "${replace(var.environment_config.conveyor_oidc_provider_url, "https://", "")}:sub"
-      test     = "StringLike"
-      values = [
-        "system:serviceaccount:${var.environment}:${replace(var.data_product_name, "_", ".")}-????????-????-????-????-????????????"
-      ]
-    }
+      condition {
+        variable = "${replace(var.environment_config.conveyor_oidc_provider_url, "https://", "")}:sub"
+        test     = "StringLike"
+        values = [
+          "system:serviceaccount:${var.environment}:${replace(var.data_product_name, "_", ".")}-????????-????-????-????-????????????"
+        ]
+      }
 
-    principals {
-      identifiers = [local.conveyor_oidc_provider_arn]
-      type        = "Federated"
+      principals {
+        identifiers = [local.conveyor_oidc_provider_arn]
+        type        = "Federated"
+      }
     }
   }
 }

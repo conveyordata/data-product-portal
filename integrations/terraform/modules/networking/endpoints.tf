@@ -20,10 +20,22 @@ resource "aws_vpc_endpoint" "s3" {
 
   vpc_id          = aws_vpc.vpc.id
   route_table_ids = data.aws_route_tables.route_tables.ids
-  policy          = var.enforce_endpoint_restrictions ? data.aws_iam_policy_document.s3_endpoint_policy.json : jsonencode({})
+  policy          = var.enforce_endpoint_restrictions ? data.aws_iam_policy_document.s3_endpoint_policy.json : data.aws_iam_policy_document.s3_endpoint_policy_empty.json
 
   tags = {
     Name = "${var.prefix}-${local.aws_s3}-endpoint-${var.account_name}"
+  }
+}
+
+data "aws_iam_policy_document" "s3_endpoint_policy_empty" {
+  statement {
+    effect = "Allow"
+    actions = ["*"]
+    resources = ["*"]
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
   }
 }
 

@@ -6,13 +6,13 @@ variable "account_name" {}
 variable "data_product_name" {
   validation {
     condition     = strcontains(var.data_product_name, "_") == false
-    error_message = "Project names should not contain _"
+    error_message = "Data product names should not contain _"
   }
 }
 variable "data_product_config" {
   type = object({
     description      = string
-    read_data_topics = list(string)
+    read_datasets = list(string)
     services = object({
       console         = bool
       ssm             = bool
@@ -68,7 +68,7 @@ variable "data_outputs" {
 
 variable "datasets" {
   type = map(object({
-    data_ids = list(string)
+    data_outputs = list(string)
   }))
 }
 

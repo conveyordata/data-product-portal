@@ -66,7 +66,7 @@ variable "data_outputs" {
 
 variable "datasets" {
   type = map(object({
-    data_ids = list(string)
+    data_outputs = list(string)
   }))
 }
 

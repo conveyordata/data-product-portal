@@ -25,7 +25,7 @@ resource "conveyor_project" "project" {
         pip install boto3
 
         cat << EOS > ~/.local/lib/toconsole.py
-        ${file("../../modules/project/toconsole.py")}
+        ${file("../../modules/data_products/toconsole.py")}
         EOS
 
         cat << EOF > aws-console

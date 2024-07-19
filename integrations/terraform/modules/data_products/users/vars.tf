@@ -8,7 +8,7 @@ variable "data_product_name" {}
 variable "data_product_config" {
   type = object({
     description      = string
-    read_data_topics = list(string)
+    read_datasets = list(string)
     services = object({
       console         = bool
       ssm             = bool
