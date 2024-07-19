@@ -15,17 +15,3 @@ all_data:
     - clean_test
     - master_test
   owner: kristof.martens@dataminded.com
-
-clean_gemeente_verslagen:
-  data_ids:
-    - raw_gemeente_verslagen
-    - clean_gemeente_verslagen
-
-clean_themas:
-  data_ids:
-    - raw_themas
-    - clean_themas
-
-master_gemeente_verslagen:
-  data_ids:
-    - master_gemeente_verslagen

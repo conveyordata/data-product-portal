@@ -7,19 +7,3 @@ test-project-2:
   read_data_topics:
     - clean_test
 
-verslag-ingest:
-
-verslag-text-extraction:
-
-verslag-analytics:
-  read_data_topics:
-    - clean_gemeente_verslagen
-    - clean_themas
-
-dashboard:
-  description: dashboard project to visualize results of processed gemeente verslagen
-  read_data_topics:
-    - clean_gemeente_verslagen
-    - master_gemeente_verslagen
-  services:
-    create_iam_user: true

@@ -9,7 +9,7 @@ locals {
   aws_region = "eu-west-1"
 
   # Choose whether you want to set up Conveyor integrations
-  conveyor_enabled = true
+  conveyor_enabled = false
   # Choose whether you want to create a jump host
   create_jump_host = true
   # Choose whether you want to set-up a datahub data catalog on a EKS cluster for your data platform

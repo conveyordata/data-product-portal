@@ -3,6 +3,3 @@ clean_test:
 
 master_test:
   s3: master/test
-
-master_gemeente_verslagen:
-  s3: master/gemeente_verslagen
