@@ -7,5 +7,5 @@ output "environments" {
 }
 
 output "projects" {
-  value = module.projects
+  value = module.data_products
 }

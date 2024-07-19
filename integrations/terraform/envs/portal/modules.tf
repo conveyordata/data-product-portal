@@ -71,10 +71,10 @@ module "data_products" {
   aws_account_id   = local.aws_account_id
   conveyor_enabled = local.conveyor_enabled
 
-  project_name   = each.key
-  project_config = each.value
+  data_product_name   = each.key
+  data_product_config = each.value
 
   environments = module.environments
-  data_ids     = local.data_outputs
-  data_topics  = local.datasets
+  data_outputs     = local.data_outputs
+  datasets  = local.datasets
 }

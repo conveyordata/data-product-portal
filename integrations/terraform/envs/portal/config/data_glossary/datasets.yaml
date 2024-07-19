@@ -1,16 +1,16 @@
 clean_test:
-  data_ids:
+  data_outputs:
     - clean_test
     - raw_test
   owner: kristof.martens@dataminded.com
 
 master_test:
-  data_ids:
+  data_outputs:
     - master_test
   owner: kristof.martens@dataminded.com
 
 all_data:
-  data_ids:
+  data_outputs:
     - raw_test
     - clean_test
     - master_test
