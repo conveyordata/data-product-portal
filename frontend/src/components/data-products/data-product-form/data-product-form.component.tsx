@@ -58,7 +58,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         mode === 'edit' &&
             currentDataProduct &&
             currentUser?.id &&
-            getIsDataProductOwner(currentDataProduct, currentUser?.id),
+            (getIsDataProductOwner(currentDataProduct, currentUser?.id) || currentUser?.is_admin),
     );
     const canFillInForm = mode === 'create' || canEditForm;
 

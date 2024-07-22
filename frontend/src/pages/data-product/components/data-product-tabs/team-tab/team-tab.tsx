@@ -51,7 +51,7 @@ export function TeamTab({ dataProductId }: Props) {
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;
 
-        return getIsDataProductOwner(dataProduct, user.id);
+        return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
     }, [dataProduct?.id, user?.id]);
 
     const handleGrantAccessToDataProduct = useCallback(

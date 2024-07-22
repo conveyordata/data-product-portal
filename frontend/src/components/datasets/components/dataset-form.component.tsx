@@ -57,7 +57,10 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const datasetNameValue = Form.useWatch('name', form);
 
     const canEditForm = Boolean(
-        mode === 'edit' && currentDataset && currentUser?.id && getIsDatasetOwner(currentDataset, currentUser?.id),
+        mode === 'edit' &&
+            currentDataset &&
+            currentUser?.id &&
+            (getIsDatasetOwner(currentDataset, currentUser?.id) || currentUser?.is_admin),
     );
     const canFillInForm = mode === 'create' || canEditForm;
 

@@ -33,7 +33,7 @@ export function DataProduct() {
 
     const dataProductOwners = dataProduct ? getDataProductOwners(dataProduct) : [];
     const isCurrentDataProductOwner = Boolean(
-        dataProduct && currentUser && getIsDataProductOwner(dataProduct, currentUser?.id),
+        dataProduct && currentUser && (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
     );
 
     function navigateToEditPage() {

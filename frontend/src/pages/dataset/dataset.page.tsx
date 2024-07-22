@@ -30,7 +30,7 @@ export function Dataset() {
 
     const datasetOwners = useMemo(() => dataset?.owners || [], [dataset?.owners]);
     const isDatasetOwner = useMemo(
-        () => datasetOwners.some((owner) => owner.id === currentUser?.id),
+        () => datasetOwners.some((owner) => owner.id === currentUser?.id) || Boolean(currentUser?.is_admin),
         [datasetOwners, currentUser?.id],
     );
 
