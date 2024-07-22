@@ -10,9 +10,7 @@ router = APIRouter(prefix="/envs", tags=["environments"])
 
 @router.get("")
 def get_environments(db: Session = Depends(get_db_session)) -> list[Environment]:
-    envs = EnvironmentService().get_environments(db)
-    breakpoint()
-    return envs
+    return EnvironmentService().get_environments(db)
 
 
 @router.post("")
