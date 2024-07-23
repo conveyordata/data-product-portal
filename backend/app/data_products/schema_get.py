@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import Field, computed_field
 
 from app.business_areas.schema import BusinessArea
+from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.enums import DataProductMembershipStatus
 from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_product_types.schema import DataProductType
@@ -31,6 +32,7 @@ class DataProductGet(ORMModel):
     memberships: list[DataProductMembershipGet]
     type: DataProductType
     business_area: BusinessArea
+    data_outputs: list[DataOutputGet]
 
 
 class DataProductsGet(DataProductGet):
