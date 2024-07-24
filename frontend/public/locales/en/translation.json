@@ -216,5 +216,15 @@
     "Approved": "Approved",
     "Denied": "Denied",
     "Data Outputs": "Data Outputs",
-    "Produces": "Produces"
+    "Produces": "Produces",
+    "Add Data Output": "Add Data Output",
+    "The name of your data output": "The name of your data output",
+    "Please input the name of the data output": "Please input the name of the data output",
+    "The data product that owns the data output": "The data product that owns the data output",
+    "Failed to create data output": "Failed to create data output",
+    "Configuration": "Configuration",
+    "Configuration field for the specific data output": "Configuration field for the specific data output",
+    "Search data outputs by name": "Search data outputs by name",
+    "S3": "S3",
+    "Glue": "Glue"
 }

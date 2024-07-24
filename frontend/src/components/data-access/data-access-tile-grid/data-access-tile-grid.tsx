@@ -2,7 +2,7 @@ import { Form, Space } from 'antd';
 import styles from './data-access-tile-grid.module.scss';
 import { useGetAllEnvironmentsQuery } from '@/store/features/environments/environments-api-slice.tsx';
 import { CustomDropdownItemProps } from '@/types/shared';
-import { DataPlataforms, DataPlatform } from '@/types/data-platform';
+import { DataPlatforms, DataPlatform } from '@/types/data-platform';
 import { AccessDataTile } from '@/components/data-access/data-access-tile/data-access-tile.component.tsx';
 
 type Props = {
@@ -31,7 +31,7 @@ export function DataAccessTileGrid({
     const [accessDataForm] = Form.useForm<AccessDataForm>();
 
     function getEnvironment(platform: DataPlatform) {
-        if (platform === DataPlataforms.Conveyor) {
+        if (platform === DataPlatforms.Conveyor) {
             return [];
         } else {
             return environments;

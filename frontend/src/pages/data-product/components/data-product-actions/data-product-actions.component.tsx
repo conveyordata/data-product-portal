@@ -16,6 +16,8 @@ import {
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
 import { CustomDropdownItemProps } from '@/types/shared';
 import awsLogo from '@/assets/icons/aws-logo.svg?react';
+import s3Logo from '@/assets/icons/s3-logo.svg?react';
+import glueLogo from '@/assets/icons/glue-logo.svg?react';
 import conveyorLogo from '@/assets/icons/conveyor-logo.svg?react';
 import databricksLogo from '@/assets/icons/databricks-logo.svg?react';
 import jupyerLogo from '@/assets/icons/jupyter-logo.svg?react';
@@ -24,25 +26,42 @@ import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
 import { useMemo } from 'react';
 import { TFunction } from 'i18next';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataPlataforms, DataPlatform } from '@/types/data-platform';
+import { DataPlatforms, DataPlatform } from '@/types/data-platform';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
 
 type Props = {
     dataProductId: string;
 };
 
-const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[] => [
+export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[] => [
     {
         label: t('AWS'),
-        value: DataPlataforms.AWS,
+        value: DataPlatforms.AWS,
         icon: awsLogo,
         hasMenu: true,
+        hasConfig: true,
+        children: [{
+            label: t('S3'),
+            value: DataPlatforms.S3,
+            icon: s3Logo,
+            hasMenu: true,
+            hasConfig: true,
+            children: []
+        },
+        {
+            label: t('Glue'),
+            value: DataPlatforms.Glue,
+            icon: glueLogo,
+            hasMenu: true,
+            hasConfig: true,
+            children: []
+        }]
     },
-    { label: t('Conveyor'), value: DataPlataforms.Conveyor, icon: conveyorLogo, hasMenu: false },
-    { label: t('Jupyter'), value: DataPlataforms.ConveyorNotebook, icon: jupyerLogo, hasMenu: false },
-    { label: t('Snowflake'), value: DataPlataforms.Snowflake, icon: snowflakeLogo, disabled: true },
-    { label: t('Databricks'), value: DataPlataforms.Databricks, icon: databricksLogo, disabled: true },
-    { label: t('Tableau'), value: DataPlataforms.Tableau, icon: tableauLogo, disabled: true },
+    { label: t('Conveyor'), value: DataPlatforms.Conveyor, icon: conveyorLogo, hasMenu: false, hasConfig: false, children: []},
+    { label: t('Jupyter'), value: DataPlatforms.ConveyorNotebook, icon: jupyerLogo, hasMenu: false, hasConfig: false, children: [] },
+    { label: t('Snowflake'), value: DataPlatforms.Snowflake, icon: snowflakeLogo, disabled: true, hasConfig: true, children: [] },
+    { label: t('Databricks'), value: DataPlatforms.Databricks, icon: databricksLogo, disabled: true, hasConfig: false, children: [] },
+    { label: t('Tableau'), value: DataPlatforms.Tableau, icon: tableauLogo, disabled: true, hasConfig: false, children: [] },
 ];
 
 export function DataProductActions({ dataProductId }: Props) {
@@ -64,7 +83,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const canAccessDataProductData = getCanUserAccessDataProductData(user?.id, dataProduct?.memberships);
 
     async function handleAccessToData(environment: string, dataPlatform: DataPlatform) {
-        if (dataPlatform === DataPlataforms.AWS) {
+        if (dataPlatform === DataPlatforms.AWS) {
             try {
                 const signInUrl = await getDataProductSignInUrl({ id: dataProductId, environment }).unwrap();
                 if (signInUrl) {
@@ -80,7 +99,7 @@ export function DataProductActions({ dataProductId }: Props) {
 
     async function handleTileClick(dataPlatform: DataPlatform) {
         switch (dataPlatform) {
-            case DataPlataforms.Conveyor:
+            case DataPlatforms.Conveyor:
                 try {
                     const url = await getConveyorUrl({ id: dataProductId }).unwrap();
                     if (url) {
@@ -98,7 +117,7 @@ export function DataProductActions({ dataProductId }: Props) {
                     });
                 }
                 break;
-            case DataPlataforms.ConveyorNotebook:
+            case DataPlatforms.ConveyorNotebook:
                 try {
                     const url = await getConveyorNotebookUrl({ id: dataProductId }).unwrap();
                     if (url) {

@@ -49,7 +49,7 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
     const columns: TableColumnsType<DataOutput> = useMemo(() => {
         return getDataProductDataOutputsColumns({
             onRemoveDataProductDataOutputLink: () => {},// handleRemoveDataOutputFromDataProduct,
-            //onCancelDataProductDataOutputLinkRequest: () => {},//handleCancelDataOutputLinkRequest,
+            onCancelDataProductDataOutputLinkRequest: () => {},//handleCancelDataOutputLinkRequest,
             t,
             //isDisabled: !isCurrentDataProductOwner,
             //isLoading: () => {},//isRemovingDataOutputFromDataProduct,

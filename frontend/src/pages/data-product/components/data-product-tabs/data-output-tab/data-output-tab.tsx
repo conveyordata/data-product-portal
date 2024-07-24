@@ -9,9 +9,9 @@ import { SearchForm } from '@/types/shared';
 import styles from './data-output-tab.module.scss';
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
-//import { AddDataOutputPopup } from './components/add-data-output-popup/add-data-output-popup.tsx';
 import { DataOutput } from '@/types/data-output'; // TODO FIgure out tab link type
 import { DataOutputTable } from './components/data-output-table/data-output-table.component';
+import { AddDataOutputPopup } from './components/add-data-output-popup/add-data-output-popup';
 
 type Props = {
     dataProductId: string;
@@ -70,7 +70,7 @@ export function DataOutputTab({ dataProductId }: Props) {
                     dataOutputs={filteredDataOutputs}
                 />
             </Flex>
-            {/* {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />} */}
+            {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </>
     );
 }
