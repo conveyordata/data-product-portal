@@ -29,18 +29,6 @@ def setup_and_teardown_database():
     yield
 
 
-# @pytest.fixture()
-# def session() -> Generator[Session, None, None]:
-#     db_session = None
-#     try:
-#         db_session = TestingSessionLocal()
-#         yield db_session
-#         db_session.commit()
-#     finally:
-#         if db_session:
-#             db_session.close()
-
-
 def override_get_db():
     test_db = None
     try:
@@ -295,9 +283,7 @@ def admin_dataset_payload(
 
 
 @pytest.fixture()
-def default_environments(
-    session,
-):
+def default_environments(session):
     return [
         EnvironmentModel(
             name="development",
