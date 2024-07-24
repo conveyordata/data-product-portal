@@ -11,7 +11,7 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-from app.platforms_settings.enums import Platforms
+from app.environments.enums import PlatformTypes
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
@@ -23,19 +23,26 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        "platforms_settings",
+        "platforms",
         sa.Column(
             "id", sa.UUID, primary_key=True, server_default=sa.text("gen_random_uuid()")
         ),
-        sa.Column("platform", sa.Enum(Platforms)),
+        sa.Column("name", sa.Enum(PlatformTypes)),
         sa.Column("settings", sa.String),
         sa.Column("environment", sa.String, sa.ForeignKey("environments.name")),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
     )
+    op.create_unique_constraint(
+        "uq_env_platform_deleted_at", "platforms", ["environment", "name", "deleted_at"]
+    )
+
+    op.drop_column("environments", "context")
 
 
 def downgrade() -> None:
-    op.drop_table("platforms_settings")
-    op.execute("DROP TYPE platforms;")
+    op.drop_table("platforms")
+    op.execute("DROP TYPE platformtypes;")
+
+    op.add_column("environments", sa.Column("context", sa.String))
