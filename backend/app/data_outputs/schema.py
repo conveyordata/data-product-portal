@@ -7,13 +7,21 @@ from app.shared.schema import ORMModel
 
 class DataOutputCreate(ORMModel):
     name: str
+    external_id: str
     owner_id: UUID
+    configuration: DataOutputs
+
+
+class DataOutputRegister(ORMModel):
+    name: str
+    external_id: str
     configuration: DataOutputs
 
 
 class DataOutput(ORMModel):
     id: UUID
     name: str
+    external_id: str
     owner: DataProduct
     configuration: DataOutputs
     configuration_type: DataOutputTypes
@@ -21,6 +29,7 @@ class DataOutput(ORMModel):
 
 class DataOutputToDB(ORMModel):
     name: str
+    external_id: str
     owner_id: UUID
     configuration: str
     configuration_type: DataOutputTypes

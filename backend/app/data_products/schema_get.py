@@ -41,6 +41,7 @@ class DataProductsGet(DataProductGet):
     about: Optional[Annotated[str, Field(exclude=True)]]
     dataset_links: Annotated[list[DatasetLink], Field(exclude=True)]
     memberships: Annotated[list[DataProductMembershipGet], Field(exclude=True)]
+    data_outputs: Annotated[list[DataOutputGet], Field(exclude=True)]
 
     @computed_field
     def user_count(self) -> int:
@@ -59,3 +60,7 @@ class DataProductsGet(DataProductGet):
             if link.status == DataProductDatasetLinkStatus.APPROVED
         ]
         return len(accepted_dataset_links)
+
+    @computed_field
+    def data_outputs_count(self) -> int:
+        return len(self.data_outputs)

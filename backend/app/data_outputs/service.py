@@ -26,8 +26,10 @@ class DataOutputService:
     def create_data_output(
         self, data_output: DataOutputCreate, db: Session
     ) -> dict[str, UUID]:
+        config = data_output.configuration
         data_output = DataOutputToDB(
             name=data_output.name,
+            external_id=data_output.external_id,
             owner_id=data_output.owner_id,
             configuration=data_output.configuration.model_dump_json(),
             configuration_type=data_output.configuration.configuration_type,
@@ -37,5 +39,6 @@ class DataOutputService:
         db.add(data_output)
         db.commit()
 
+        config.on_create()
         RefreshInfrastructureLambda().trigger()
         return {"id": data_output.id}

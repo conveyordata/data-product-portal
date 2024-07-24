@@ -1,5 +1,7 @@
 export enum ApiUrl {
+    DataOutputs = '/api/data_outputs',
     DataProducts = '/api/data_products',
+    DataProductsDataOutput = "/api/data_products/:dataProductId/data_outputs",
     DataProductGet = '/api/data_products/:dataProductId',
     DataProductType = '/api/data_product_types',
     DataProductSignInUrl = '/api/data_products/:dataProductId/signin_url',

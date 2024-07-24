@@ -7,8 +7,10 @@ import styles from './data-product-tabs.module.scss';
 import Icon, { HistoryOutlined, InfoCircleOutlined, PartitionOutlined, TeamOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
 import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/dataset-tab/dataset-tab.tsx';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
+import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
 import { ReactFlowProvider } from 'reactflow';
 
@@ -19,6 +21,7 @@ type Props = {
 
 enum TabKeys {
     About = 'about',
+    DataOutputs = 'dataoutputs',
     Datasets = 'datasets',
     Explorer = 'explorer',
     Team = 'team',
@@ -42,6 +45,12 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 key: TabKeys.About,
                 icon: <InfoCircleOutlined />,
                 children: <AboutTab dataProductId={dataProductId} />,
+            },
+            {
+                label: t('Data Outputs'),
+                key: TabKeys.DataOutputs,
+                icon: <Icon component={dataOutputOutlineIcon} />,
+                children: <DataOutputTab dataProductId={dataProductId} />,
             },
             {
                 label: t('Datasets'),

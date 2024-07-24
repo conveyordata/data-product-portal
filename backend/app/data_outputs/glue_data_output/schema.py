@@ -6,3 +6,6 @@ class GlueDataOutput(ORMModel):
     glue_schema: str
     table_prefixes: list[str]
     configuration_type: DataOutputTypes = DataOutputTypes.GlueDataOutput
+
+    def on_create(self):
+        pass

@@ -25,6 +25,7 @@ def upgrade() -> None:
     op.create_table(
         "data_outputs",
         sa.Column("id", sa.UUID, primary_key=True),
+        sa.Column("external_id", sa.String),
         sa.Column("name", sa.String),
         sa.Column("owner_id", sa.UUID, sa.ForeignKey("data_products.id")),
         # sa.Column("implementations", list[sa.UUID]),

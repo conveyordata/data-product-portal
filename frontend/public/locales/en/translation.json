@@ -153,6 +153,8 @@
     "Edit data product": "Edit data product",
     "Data Product Owners": "Data Product Owners",
     "Access": "Access",
+    "{{count}} data outputs_one": "{{count}} data output",
+    "{{count}} data outputs_other": "{{count}} data outputs",
     "{{count}} users_one": "{{count}} user",
     "{{count}} users_other": "{{count}} users",
     "Consumes": "Consumes",
@@ -212,5 +214,7 @@
     "Available": "Available",
     "Rejected": "Rejected",
     "Approved": "Approved",
-    "Denied": "Denied"
+    "Denied": "Denied",
+    "Data Outputs": "Data Outputs",
+    "Produces": "Produces"
 }

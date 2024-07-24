@@ -18,6 +18,7 @@ import {
 } from '@/types/data-product';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import { datasetsApiSlice } from '@/store/features/datasets/datasets-api-slice.ts';
+import { DataOutputsGetContract } from '@/types/data-output/data-output-get-contract';
 
 export const dataProductTags: string[] = [
     TagTypes.DataProduct,
@@ -47,6 +48,12 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 method: 'GET',
             }),
             providesTags: [{ type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST }],
+        }),
+        getDataProductDataOutputs: builder.query<DataOutputsGetContract, string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataProductsDataOutput, {dataProductId: id}),
+                method: 'GET',
+            })
         }),
         getDataProductById: builder.query<DataProductContract, string>({
             query: (id) => ({
@@ -215,4 +222,5 @@ export const {
     useUpdateDataProductAboutMutation,
     useGetDataProductConveyorNotebookUrlMutation,
     useGetUserDataProductsQuery,
+    useGetDataProductDataOutputsQuery,
 } = dataProductsApiSlice;
