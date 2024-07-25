@@ -1,4 +1,4 @@
-import { Button, Form, FormProps, Input, Space } from 'antd';
+import { Button, Form, FormProps, Input, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import {
@@ -35,6 +35,19 @@ export function GlueDataOutputForm({ }: Props) {
                 tooltip={t('The name of the Glue schema to link the data output to')}
             >
                 <Input/>
+            </Form.Item>
+            <Form.Item<GlueDataOutput>
+                required
+                name={'table_prefixes'}
+                label={t('Table prefixes')}
+                tooltip={t('The tables that your data output can access')}
+            >
+                <Select
+                    tokenSeparators={[',']}
+                    placeholder={t('Select data product tags')}
+                    mode={'tags'}
+                    options={[]}
+                />
             </Form.Item>
         </div>
     )

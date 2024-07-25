@@ -82,7 +82,7 @@ export function AddDataOutputPopup({ onClose, isOpen, dataProductId }: Props) {
             isOpen={isOpen}
             title={t('Add Data Output')}
         >
-            <DataOutputForm mode={'create'} dataProductId={dataProductId} />
+            <DataOutputForm modalCallbackOnSubmit={onClose} mode={'create'} dataProductId={dataProductId} />
         </DataProductDataOutputLinkPopup>
     );
 }

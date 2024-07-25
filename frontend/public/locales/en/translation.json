@@ -227,6 +227,8 @@
     "Search data outputs by name": "Search data outputs by name",
     "S3": "S3",
     "Glue": "Glue",
+    "Table prefixes": "Table prefixes",
+    "The tables that your data output can access": "The tables that your data output can access",
     "The name of the S3 bucket to link the data output to": "The name of the S3 bucket to link the data output to",
     "Bucket": "Bucket",
     "KMS Key": "KMS Key",
@@ -237,5 +239,6 @@
     "The name of the prefix to give write access to": "The name of the prefix to give write access to",
     "Glue schema": "Glue schema",
     "The name of the Glue schema to link the data output to": "The name of the Glue schema to link the data output to",
-    "Data output created successfully": "Data output created successfully"
+    "Data output created successfully": "Data output created successfully",
+    "Provide table prefixes": "Provide table prefixes"
 }

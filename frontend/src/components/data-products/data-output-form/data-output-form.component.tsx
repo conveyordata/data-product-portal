@@ -22,9 +22,10 @@ import { GlueDataOutputForm } from './glue-data-output-form.component';
 type Props = {
     mode: 'create';
     dataProductId: string;
+    modalCallbackOnSubmit: () => void;
 };
 
-export function DataOutputForm({ mode, dataProductId }: Props) {
+export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [selectedDataPlatform, setSelectedDataPlatform] = useState<CustomDropdownItemProps<DataPlatforms> | undefined>(undefined);
@@ -52,7 +53,8 @@ export function DataOutputForm({ mode, dataProductId }: Props) {
                     owner_id: dataProductId,
                 };
                 const response = await createDataOutput(request).unwrap();
-                dispatchMessage({ content: t('Data product created successfully'), type: 'success' });
+                dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
+                modalCallbackOnSubmit();
                 navigate(createDataProductIdPath(dataProductId));
             }
 
