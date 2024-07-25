@@ -8,6 +8,9 @@ import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?r
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 //import { createDataOutputIdPath } from '@/types/navigation.ts';
 import { DataOutput } from '@/types/data-output';
+import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
+import { getDataOutputIcon, getDataOutputSubtitle } from '@/utils/data-output-type-icon.helper';
+import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtitle/data-output-subtitle.component';
 //import { RestrictedDataOutputPopoverTitle } from '@/components/data-outputs/restricted-data-output-popover-title/restricted-data-output-popover-title.tsx';
 //import { RestrictedDataOutputTitle } from '@/components/data-outputs/restricted-data-output-title/restricted-data-output-title.tsx';
 
@@ -25,7 +28,7 @@ export const getDataProductDataOutputsColumns = ({
     t,
     isDisabled,
     isLoading,
-}: Props): TableColumnsType<DataOutput> => {
+}: Props): TableColumnsType<DataOutputsGetContract> => {
     return [
         {
             title: t('Id'),
@@ -35,7 +38,7 @@ export const getDataProductDataOutputsColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { name, external_id,configuration }) => {
+            render: (_, { id, name, external_id,configuration_type }) => {
                 // Render different types of configuration?
                 // const isRestrictedDataOutput = .access_type === 'restricted';
                 // const isDataOutputRequestApproved = status === 'approved';
@@ -49,14 +52,16 @@ export const getDataProductDataOutputsColumns = ({
                     <TableCellAvatar
                         popover={{ title: name, content: external_id }}
                         //linkTo={createDataOutputIdPath(external_id)}
-                        icon={<CustomSvgIconLoader iconComponent={dataOutputOutlineIcon} />}
+                        icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration_type)!}/>}
                         title={name}
                         subtitle={
-                            <Badge
-                                //status={getDataProductDataOutputLinkBadgeStatus(status)}
-                                //text={getDataProductDataOutputLinkStatusLabel(status)}
-                                className={styles.noSelect}
-                            />
+                            <DataOutputSubtitle data_output_id={id}/>
+                            //configuration_type
+                            // <Badge
+                            //     //status={getDataProductDataOutputLinkBadgeStatus(status)}
+                            //     //text={configuration_type}
+                            //     className={styles.noSelect}
+                            // />
                         }
                     />
                 );

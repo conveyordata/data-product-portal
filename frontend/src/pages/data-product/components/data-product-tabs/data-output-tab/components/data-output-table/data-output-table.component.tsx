@@ -9,11 +9,12 @@ import {
 import styles from './data-output-table.module.scss';
 import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
 import { DataOutput } from '@/types/data-output';
+import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
 
 type Props = {
     isCurrentDataProductOwner: boolean;
     dataProductId: string;
-    dataOutputs: DataOutput[];
+    dataOutputs: DataOutputsGetContract[];
 };
 
 export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, dataOutputs }: Props) {
@@ -49,7 +50,7 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
     //     }
     // };
 
-    const columns: TableColumnsType<DataOutput> = useMemo(() => {
+    const columns: TableColumnsType<DataOutputsGetContract> = useMemo(() => {
         return getDataProductDataOutputsColumns({
             onRemoveDataProductDataOutputLink: () => {},// handleRemoveDataOutputFromDataProduct,
             onCancelDataProductDataOutputLinkRequest: () => {},//handleCancelDataOutputLinkRequest,

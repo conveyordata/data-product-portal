@@ -21,7 +21,7 @@ class DataOutputService:
         return parsed_data_outputs
 
     def get_data_output(self, id: UUID, db: Session) -> DataOutput:
-        return db.query(DataOutputModel).filter(DataOutput.id == id).first()
+        return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
 
     def create_data_output(
         self, data_output: DataOutputCreate, db: Session

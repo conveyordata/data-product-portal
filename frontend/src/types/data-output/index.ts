@@ -9,7 +9,7 @@ export type { S3DataOutputContract, S3DataOutput } from './s3-data-output.contra
 export type { GlueDataOutputContract, GlueDataOutput } from './glue-data-output.contract.ts';
 
 
-export interface DataOutputContract {
+export interface DataOutputConfigurationContract {
     config: GlueDataOutput|S3DataOutput
 };
 

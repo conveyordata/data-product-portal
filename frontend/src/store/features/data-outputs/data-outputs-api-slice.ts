@@ -1,7 +1,7 @@
 import { DataOutputsGetContract } from "@/types/data-output/data-output-get.contract";
 import { baseApiSlice } from "../api/base-api-slice";
-import { ApiUrl } from "@/api/api-urls";
-import { DataOutputCreate, DataOutputCreateResponse } from "@/types/data-output";
+import { ApiUrl, buildUrl } from "@/api/api-urls";
+import { DataOutputContract, DataOutputCreate, DataOutputCreateResponse } from "@/types/data-output";
 import { STATIC_TAG_ID, TagTypes } from "../api/tag-types";
 
 export const dataOutputTags: string[] = [
@@ -19,6 +19,13 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 method: 'GET',
             }),
             providesTags: [{ type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST }],
+        }),
+        getDataOutputById: builder.query<DataOutputContract, string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataOutputGet, { dataOutputId: id }),
+                method: 'GET',
+            }),
+            providesTags: (_, __, id) => [{ type: TagTypes.DataProduct as const, id }],
         }),
         createDataOutput: builder.mutation<DataOutputCreateResponse, DataOutputCreate>({
             query: (dataOutput) => ({
@@ -44,5 +51,6 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
 
 export const {
     useGetAllDataOutputsQuery,
+    useGetDataOutputByIdQuery,
     useCreateDataOutputMutation
 } = dataOutputsApiSlice;
