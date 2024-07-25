@@ -48,9 +48,19 @@ def delete_environment_settings(
 
 
 @router.get("/{environment}/platforms", dependencies=[Depends(only_for_admin)])
-def get_environment_platforms(
+def get_all_environment_platforms(
     environment: str,
-    name: PlatformTypes | None = None,
     db: Session = Depends(get_db_session),
-) -> list[Platform] | Platform:
-    return EnvironmentService(db).get_environment_platforms(environment, name)
+) -> list[Platform]:
+    return EnvironmentService(db).get_environment_platforms(environment)
+
+
+@router.get("/{environment}/platforms/{name}", dependencies=[Depends(only_for_admin)])
+def get_environment_platform(
+    environment: str,
+    name: PlatformTypes,
+    db: Session = Depends(get_db_session),
+) -> Platform:
+    return Platform.parse_obj(
+        EnvironmentService(db).get_environment_platforms(environment, name)
+    )

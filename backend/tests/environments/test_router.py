@@ -91,7 +91,7 @@ class TestEnvironmentsRouter:
         response = client.put(f"{ENDPOINT}/{env.name}/platforms", json=payload)
         assert response.status_code == 201
 
-        response = client.get(f"{ENDPOINT}/{env.name}/platforms?name={payload['name']}")
+        response = client.get(f"{ENDPOINT}/{env.name}/platforms/{payload['name']}")
         platform = response.json()
 
         assert isinstance(platform, dict)
@@ -101,3 +101,8 @@ class TestEnvironmentsRouter:
         assert "id" in platform
         assert "s3" in platform["settings"]
         assert "glue" in platform["settings"]
+
+    def test_get_platform_forbidden(self, client):
+        response = client.get(f"{ENDPOINT}/dev/platforms/AWS")
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Only admin can execute this operation"
