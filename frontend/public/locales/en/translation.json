@@ -226,5 +226,16 @@
     "Configuration field for the specific data output": "Configuration field for the specific data output",
     "Search data outputs by name": "Search data outputs by name",
     "S3": "S3",
-    "Glue": "Glue"
+    "Glue": "Glue",
+    "The name of the S3 bucket to link the data output to": "The name of the S3 bucket to link the data output to",
+    "Bucket": "Bucket",
+    "KMS Key": "KMS Key",
+    "KMS Key used to encrypt the data written to this data output": "KMS Key used to encrypt the data written to this data output",
+    "Account ID": "Account ID",
+    "The AWS account ID the bucket is in": "The AWS account ID the bucket is in",
+    "Prefix": "Prefix",
+    "The name of the prefix to give write access to": "The name of the prefix to give write access to",
+    "Glue schema": "Glue schema",
+    "The name of the Glue schema to link the data output to": "The name of the Glue schema to link the data output to",
+    "Data output created successfully": "Data output created successfully"
 }

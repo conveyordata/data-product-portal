@@ -19,6 +19,9 @@ type Props = {
 export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, dataOutputs }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
+    // TODO For some reason this list is not updated automatically when we create a new data output
+
+
     // const [removeDataOutputFromDataProduct, { isLoading: isRemovingDataOutputFromDataProduct }] =
     //     useRemoveDataOutputFromDataProductMutation();
 
