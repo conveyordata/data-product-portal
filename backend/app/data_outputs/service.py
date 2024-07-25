@@ -29,6 +29,7 @@ class DataOutputService:
         config = data_output.configuration
         data_output = DataOutputToDB(
             name=data_output.name,
+            description=data_output.description,
             external_id=data_output.external_id,
             owner_id=data_output.owner_id,
             configuration=data_output.configuration.model_dump_json(),

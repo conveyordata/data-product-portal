@@ -10,7 +10,7 @@ import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createDataProductIdPath } from '@/types/navigation.ts';
-import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { useCreateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { getDataPlatforms } from '@/pages/data-product/components/data-product-actions/data-product-actions.component';
@@ -18,6 +18,7 @@ import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-pl
 import { CustomDropdownItemProps } from '@/types/shared';
 import { S3DataOutputForm } from './s3-data-output-form.component';
 import { GlueDataOutputForm } from './glue-data-output-form.component';
+import TextArea from 'antd/es/input/TextArea';
 
 type Props = {
     mode: 'create';
@@ -49,6 +50,7 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
                 const request: DataOutputCreate = {
                     name: values.name,
                     external_id: values.external_id,
+                    description: values.description,
                     configuration: config,
                     owner_id: dataProductId,
                 };
@@ -96,7 +98,7 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
             form.setFieldsValue({ external_id: generateExternalIdFromName(dataProductNameValue ?? ''), owner: currentDataProduct?.name });
         }
     }, [dataProductNameValue]);
-// TODO Solve error with form can not be descendant of form!
+// TODO Required fields of nested elements do not transcent
     return (
         <Form
             form={form}
@@ -123,8 +125,25 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
             >
                 <Input />
             </Form.Item>
-            {/*Disabled field that will render an external ID everytime the name changes*/}
             <Form.Item<DataOutputCreateFormSchema>
+                name={'description'}
+                label={t('Description')}
+                tooltip={t('A description for the data output')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please input a description of the data output'),
+                    },
+                    {
+                        max: MAX_DESCRIPTION_INPUT_LENGTH,
+                        message: t('Description must be less than 255 characters'),
+                    },
+                ]}
+            >
+                <TextArea rows={1} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+            </Form.Item>
+            {/*Disabled field that will render an external ID everytime the name changes*/}
+            {/* <Form.Item<DataOutputCreateFormSchema>
                 required
                 name={'external_id'}
                 label={t('External ID')}
@@ -139,7 +158,7 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
                 tooltip={t('The data product that owns the data output')}
             >
                 <Input disabled />
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>
                         {dataPlatforms.filter((dataPlatform) => (dataPlatform.hasConfig)).map((dataPlatform) => (

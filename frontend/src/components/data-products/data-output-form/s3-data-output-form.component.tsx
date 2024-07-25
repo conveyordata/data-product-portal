@@ -46,14 +46,14 @@ export function S3DataOutputForm({ mode, dataProductId }: Props) {
     };
     return (
         <div>
-            <Form.Item<S3DataOutput>
+            {/* <Form.Item<S3DataOutput>
                         required
                         name={'bucket'}
                         label={t('Bucket')}
                         tooltip={t('The name of the S3 bucket to link the data output to')}
                     >
                         <Input />
-                    </Form.Item>
+                    </Form.Item> */}
                     <Form.Item<S3DataOutput>
                         required
                         name={'prefix'}
@@ -62,7 +62,7 @@ export function S3DataOutputForm({ mode, dataProductId }: Props) {
                     >
                         <Input/>
                     </Form.Item>
-                    <Form.Item<S3DataOutput>
+                    {/* <Form.Item<S3DataOutput>
                         required
                         name={'account_id'}
                         label={t('Account ID')}
@@ -77,7 +77,7 @@ export function S3DataOutputForm({ mode, dataProductId }: Props) {
                         tooltip={t('KMS Key used to encrypt the data written to this data output')}
                     >
                         <Input/>
-                    </Form.Item>
+                    </Form.Item> */}
         </div>
     )
 };

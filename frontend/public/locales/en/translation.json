@@ -240,5 +240,7 @@
     "Glue schema": "Glue schema",
     "The name of the Glue schema to link the data output to": "The name of the Glue schema to link the data output to",
     "Data output created successfully": "Data output created successfully",
-    "Provide table prefixes": "Provide table prefixes"
+    "Provide table prefixes": "Provide table prefixes",
+    "Please input a description of the data output": "Please input a description of the data output",
+    "A description for the data output": "A description for the data output"
 }

@@ -44,7 +44,7 @@ export function GlueDataOutputForm({ }: Props) {
             >
                 <Select
                     tokenSeparators={[',']}
-                    placeholder={t('Select data product tags')}
+                    placeholder={t('Provide table prefixes')}
                     mode={'tags'}
                     options={[]}
                 />

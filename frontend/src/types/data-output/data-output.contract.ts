@@ -4,6 +4,7 @@ import { DataProductContract } from "../data-product/data-product-contract";
 export interface DataOutputContract {
     id: string;
     external_id: string;
+    description: string;
     name: string;
     owner: DataProductContract;
     configuration: DataOutputConfiguration;

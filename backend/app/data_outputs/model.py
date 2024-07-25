@@ -15,6 +15,7 @@ class DataOutput(Base, BaseORM):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     external_id = Column(String)
     name = Column(String)
+    description = Column(String)
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
     owner: Mapped["DataProduct"] = relationship(back_populates="data_outputs")
     configuration_type: DataOutputTypes = Column(Enum(DataOutputTypes))
