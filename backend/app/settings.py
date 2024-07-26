@@ -1,7 +1,6 @@
 from functools import lru_cache
 from typing import Optional
 
-from pydantic.networks import HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,8 +23,8 @@ class Settings(BaseSettings):
     OIDC_DISABLED: bool = True
     OIDC_CLIENT_ID: Optional[str] = None
     OIDC_CLIENT_SECRET: Optional[str] = None
-    OIDC_AUTHORITY: Optional[HttpUrl] = None
-    OIDC_REDIRECT_URI: Optional[HttpUrl] = None
+    OIDC_AUTHORITY: Optional[str] = None
+    OIDC_REDIRECT_URI: Optional[str] = None
 
     # Conveyor
     CONVEYOR_API_KEY: Optional[str] = None
