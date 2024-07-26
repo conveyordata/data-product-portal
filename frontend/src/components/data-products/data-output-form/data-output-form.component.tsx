@@ -1,4 +1,4 @@
-import { Button, Form, FormProps, Input, Space } from 'antd';
+import { Form, FormInstance, FormProps, Input, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import {
@@ -7,7 +7,7 @@ import {
 import { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-import { useEffect, useMemo, useState } from 'react';
+import { RefObject, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
@@ -22,11 +22,12 @@ import TextArea from 'antd/es/input/TextArea';
 
 type Props = {
     mode: 'create';
+    formRef: RefObject<FormInstance<DataOutputCreateFormSchema>>;
     dataProductId: string;
     modalCallbackOnSubmit: () => void;
 };
 
-export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: Props) {
+export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [selectedDataPlatform, setSelectedDataPlatform] = useState<CustomDropdownItemProps<DataPlatforms> | undefined>(undefined);
@@ -102,6 +103,7 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
     return (
         <Form
             form={form}
+            ref={formRef}
             labelCol={FORM_GRID_WRAPPER_COLS}
             wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
@@ -142,23 +144,6 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
             >
                 <TextArea rows={1} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            {/*Disabled field that will render an external ID everytime the name changes*/}
-            {/* <Form.Item<DataOutputCreateFormSchema>
-                required
-                name={'external_id'}
-                label={t('External ID')}
-                tooltip={t('The external ID of the data product')}
-            >
-                <Input disabled />
-            </Form.Item>
-            <Form.Item<DataOutputCreateFormSchema>
-                required
-                name={'owner'}
-                label={t('Owner')}
-                tooltip={t('The data product that owns the data output')}
-            >
-                <Input disabled />
-            </Form.Item> */}
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>
                         {dataPlatforms.filter((dataPlatform) => (dataPlatform.hasConfig)).map((dataPlatform) => (
@@ -169,7 +154,6 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
                                 isDisabled={isLoading}
                                 isLoading={isLoading}
                                 isSelected={selectedDataPlatform !== undefined && dataPlatform === selectedDataPlatform }
-                                //onMenuItemClick={onDataPlatformClick}
                                 onTileClick={onDataPlatformClick}
                             />
                         ))}
@@ -177,7 +161,6 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
             </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>
-                    {/* TODO Fetch correct data platform children */}
                         {selectedDataPlatform?.children?.map((dataPlatform) => (
                             <DataOutputPlatformTile<DataPlatform>
                                 key={dataPlatform.value}
@@ -186,9 +169,6 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
                                 isDisabled={isLoading}
                                 isSelected={selectedConfiguration !== undefined && dataPlatform === selectedConfiguration}
                                 isLoading={isLoading}
-                                //isDisabled={isDisabled || isLoading || isLoadingEnvironments || !canAccessData}
-                                //isLoading={isLoading || isLoadingEnvironments}
-                                //onMenuItemClick={onDataPlatformClick}
                                 onTileClick={onConfigurationClick}
                             />
                         ))}
@@ -204,28 +184,6 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
                     return null
                 }
             })()}
-            <Form.Item>
-                <Space>
-                    <Button
-                        className={styles.formButton}
-                        type="primary"
-                        htmlType={'submit'}
-                        loading={isCreating}
-                        disabled={isLoading || !canFillInForm}
-                    >
-                        {t('Create')}
-                    </Button>
-                    <Button
-                        className={styles.formButton}
-                        type="default"
-                        onClick={onCancel}
-                        loading={isCreating}
-                        disabled={isLoading || !canFillInForm}
-                    >
-                        {t('Cancel')}
-                    </Button>
-                </Space>
-            </Form.Item>
         </Form>
     );
 }

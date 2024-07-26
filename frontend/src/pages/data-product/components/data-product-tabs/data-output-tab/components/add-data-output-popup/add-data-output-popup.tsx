@@ -12,6 +12,9 @@ import {
 import { DataProductDataOutputLinkPopup } from '@/components/data-products/data-product-data-output-link-popup/data-product-data-output-link-popup.component.tsx';
 import { DataOutputForm } from '@/components/data-products/data-output-form/data-output-form.component';
 import { DataProductContract } from '@/types/data-product';
+import { useRef } from 'react';
+import { FormInstance } from 'antd';
+import { DataOutputCreateFormSchema } from '@/types/data-output';
 // import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 // //import data-outputBorderIcon from '@/assets/icons/data-output-border-icon.svg?react';
 // import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
@@ -47,42 +50,16 @@ type Props = {
 
 export function AddDataOutputPopup({ onClose, isOpen, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
-    //const { data: allDataOutputs = [], isFetching: isFetchingDataOutputs } = useGetAllDataOutputsQuery();
-    // const [requestDataOutputAccessForDataProduct, { isLoading: isRequestingAccess }] =
-    //     useRequestDataOutputAccessForDataProductMutation();
-    // const [searchForm] = Form.useForm<SearchForm>();
-    // const searchTerm = Form.useWatch('search', searchForm);
+    const ref = useRef<FormInstance<DataOutputCreateFormSchema>>(null);
 
-    // const filteredDataOutputs = useMemo(() => {
-    //     const data-outputLinks = dataProduct?.data-output_links ?? [];
-
-    //     const unlinkedDataOutputs = filterOutAlreadyAddedDataOutputs(allDataOutputs, data-outputLinks);
-    //     return searchTerm ? handleDataOutputListFilter(unlinkedDataOutputs, searchTerm) : unlinkedDataOutputs;
-    // }, [dataProduct?.data-output_links, allDataOutputs, searchTerm]);
-
-    // const handleRequestAccessToDataOutput = useCallback(
-    //     async (data-outputId: string, isRestrictedDataOutput?: boolean) => {
-    //         try {
-    //             await requestDataOutputAccessForDataProduct({ dataProductId: dataProductId, data-outputId }).unwrap();
-
-    //             const content = isRestrictedDataOutput
-    //                 ? t('DataOutput access has been requested')
-    //                 : t('DataOutput has been added');
-    //             dispatchMessage({ content, type: 'success' });
-    //         } catch (error) {
-    //             dispatchMessage({ content: t('Failed to request access to the data product'), type: 'error' });
-    //         }
-    //     },
-    //     [dataProductId, t, requestDataOutputAccessForDataProduct],
-    // );
     return (
         <DataProductDataOutputLinkPopup
             onClose={onClose}
             isOpen={isOpen}
             title={t('Add Data Output')}
+            formRef={ref}
         >
-            <DataOutputForm modalCallbackOnSubmit={onClose} mode={'create'} dataProductId={dataProductId} />
+            <DataOutputForm formRef={ref} modalCallbackOnSubmit={onClose} mode={'create'} dataProductId={dataProductId} />
         </DataProductDataOutputLinkPopup>
     );
 }
