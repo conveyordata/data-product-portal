@@ -142,7 +142,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     },
                 ]}
             >
-                <TextArea rows={1} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>

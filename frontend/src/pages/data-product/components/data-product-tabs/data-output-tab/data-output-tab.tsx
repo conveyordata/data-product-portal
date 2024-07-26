@@ -9,15 +9,15 @@ import { SearchForm } from '@/types/shared';
 import styles from './data-output-tab.module.scss';
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
-import { DataOutput } from '@/types/data-output'; // TODO FIgure out tab link type
 import { DataOutputTable } from './components/data-output-table/data-output-table.component';
 import { AddDataOutputPopup } from './components/add-data-output-popup/add-data-output-popup';
+import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 
 type Props = {
     dataProductId: string;
 };
 
-function filterDataOutputs(data_outputs: DataOutput[], searchTerm: string) {
+function filterDataOutputs(data_outputs: DataOutputsGetContract[], searchTerm: string) {
     return (
         data_outputs.filter(
             (data_outputs) =>
