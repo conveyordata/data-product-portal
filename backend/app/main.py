@@ -33,10 +33,7 @@ oidc_kwargs = (
 )
 app = FastAPI(
     title=TITLE,
-    summary=(
-        "Backend API implementation for Data product portal, "
-        "your enterprise-ready data access tool"
-    ),
+    summary=("Backend API implementation for Data product portal"),
     version=API_VERSION,
     contact={"name": "Stijn Janssens", "email": "stijn.janssens@dataminded.com"},
     docs_url="/api/docs",
