@@ -40,6 +40,7 @@ app = FastAPI(
     version=API_VERSION,
     contact={"name": "Stijn Janssens", "email": "stijn.janssens@dataminded.com"},
     docs_url="/api/docs",
+    openapi_url="/api/openapi.json",
     **oidc_kwargs
 )
 
