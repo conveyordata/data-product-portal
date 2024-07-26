@@ -14,7 +14,7 @@ from app.settings import settings
 from app.shared.router import router
 
 with open("./VERSION", "r") as f:
-    API_VERSION = f.read()
+    API_VERSION = f.read().strip()
 
 TITLE = "Data product portal"
 
@@ -33,13 +33,11 @@ oidc_kwargs = (
 )
 app = FastAPI(
     title=TITLE,
-    summary=(
-        "Backend API implementation for Data product portal, "
-        "your enterprise-ready data access tool"
-    ),
+    summary=("Backend API implementation for Data product portal"),
     version=API_VERSION,
     contact={"name": "Stijn Janssens", "email": "stijn.janssens@dataminded.com"},
     docs_url="/api/docs",
+    openapi_url="/api/openapi.json",
     **oidc_kwargs
 )
 
