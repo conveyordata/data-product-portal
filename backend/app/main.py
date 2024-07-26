@@ -14,7 +14,7 @@ from app.settings import settings
 from app.shared.router import router
 
 with open("./VERSION", "r") as f:
-    API_VERSION = f.read()
+    API_VERSION = f.read().strip()
 
 TITLE = "Data product portal"
 
