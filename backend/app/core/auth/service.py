@@ -15,7 +15,7 @@ class AuthService:
         authorized_user: User,
         db: Session,
     ) -> AWSCredentials:
-        envs = EnvironmentService().get_environments(db)
+        envs = EnvironmentService(db).get_environments()
         if environment not in [e.name for e in envs]:
             for env in envs:
                 if env.is_default:
