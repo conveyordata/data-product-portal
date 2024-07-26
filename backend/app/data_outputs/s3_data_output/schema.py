@@ -4,10 +4,12 @@ from app.shared.schema import ORMModel
 
 
 class S3DataOutput(ORMModel):
-    bucket: str
+    bucket: str = (
+        "cvr-pbac-s3-datalake-dev-demo-eqpkja"  # TODO Should come from platform info
+    )
     prefix: str
-    account_id: str
-    kms_key: str
+    account_id: str = "test"
+    kms_key: str = "test"
     configuration_type: DataOutputTypes = DataOutputTypes.S3DataOutput
 
     # @field_validator("bucket")

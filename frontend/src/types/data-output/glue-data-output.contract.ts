@@ -1,5 +1,5 @@
 export interface GlueDataOutputContract {
-    glue_schema: string;
+    glue_database: string;
     table_prefixes: string[];
 }
 

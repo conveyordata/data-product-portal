@@ -49,7 +49,7 @@ export function DataOutputForm({ mode, dataProductId, modalCallbackOnSubmit }: P
 
                 const request: DataOutputCreate = {
                     name: values.name,
-                    external_id: values.external_id,
+                    external_id: generateExternalIdFromName(values.name ?? ''),
                     description: values.description,
                     configuration: config,
                     owner_id: dataProductId,

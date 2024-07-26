@@ -30,9 +30,9 @@ export function GlueDataOutputForm({ }: Props) {
         <div>
             <Form.Item<GlueDataOutput>
                 required
-                name={'glue_schema'}
-                label={t('Glue schema')}
-                tooltip={t('The name of the Glue schema to link the data output to')}
+                name={'glue_database'}
+                label={t('Glue database')}
+                tooltip={t('The name of the Glue database to link the data output to')}
             >
                 <Input/>
             </Form.Item>

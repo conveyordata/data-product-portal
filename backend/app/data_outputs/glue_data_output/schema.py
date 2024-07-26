@@ -3,7 +3,7 @@ from app.shared.schema import ORMModel
 
 
 class GlueDataOutput(ORMModel):
-    glue_schema: str
+    glue_database: str
     table_prefixes: list[str]
     configuration_type: DataOutputTypes = DataOutputTypes.GlueDataOutput
 
