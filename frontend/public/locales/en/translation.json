@@ -242,5 +242,10 @@
     "Data output created successfully": "Data output created successfully",
     "Provide table prefixes": "Provide table prefixes",
     "Please input a description of the data output": "Please input a description of the data output",
-    "A description for the data output": "A description for the data output"
+    "A description for the data output": "A description for the data output",
+    "Resulting prefix": "Resulting prefix",
+    "The path on s3 you can access through this data output": "The path on s3 you can access through this data output",
+    "Please input the prefix of this data output": "Please input the prefix of this data output",
+    "Please input the name of the Glue database for this data output": "Please input the name of the Glue database for this data output",
+    "Please input the tables this data output can access": "Please input the tables this data output can access"
 }

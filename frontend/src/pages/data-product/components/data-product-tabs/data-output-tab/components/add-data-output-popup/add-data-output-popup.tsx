@@ -3,7 +3,7 @@ import { DataProductDataOutputLinkPopup } from '@/components/data-products/data-
 import { DataOutputForm } from '@/components/data-products/data-output-form/data-output-form.component';
 import { useRef } from 'react';
 import { FormInstance } from 'antd';
-import { DataOutputCreateFormSchema } from '@/types/data-output';
+import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
 import styles from './add-data-output-popup.module.scss';
 
 type Props = {
@@ -14,7 +14,7 @@ type Props = {
 
 export function AddDataOutputPopup({ onClose, isOpen, dataProductId }: Props) {
     const { t } = useTranslation();
-    const ref = useRef<FormInstance<DataOutputCreateFormSchema>>(null);
+    const ref = useRef<FormInstance<DataOutputCreateFormSchema&DataOutputConfiguration>>(null);
 
     return (
         <DataProductDataOutputLinkPopup

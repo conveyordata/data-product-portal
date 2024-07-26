@@ -22,7 +22,7 @@ import TextArea from 'antd/es/input/TextArea';
 
 type Props = {
     mode: 'create';
-    formRef: RefObject<FormInstance<DataOutputCreateFormSchema>>;
+    formRef: RefObject<FormInstance<DataOutputCreateFormSchema&DataOutputConfiguration>>;
     dataProductId: string;
     modalCallbackOnSubmit: () => void;
 };
@@ -35,7 +35,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(
         dataProductId);
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
-    const [form] = Form.useForm<DataOutputCreateFormSchema>();
+    const [form] = Form.useForm<DataOutputCreateFormSchema&DataOutputConfiguration>();
     const dataProductNameValue = Form.useWatch('name', form);
     const canFillInForm = mode === 'create';
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
@@ -55,7 +55,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     configuration: config,
                     owner_id: dataProductId,
                 };
-                const response = await createDataOutput(request).unwrap();
+                await createDataOutput(request).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
                 navigate(createDataProductIdPath(dataProductId));
@@ -91,9 +91,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         }
     }
 
-    const onCancel = () => {
-        form.resetFields();
-    }
     useEffect(() => {
         if (mode === 'create') {
             form.setFieldsValue({ external_id: generateExternalIdFromName(dataProductNameValue ?? ''), owner: currentDataProduct?.name });
@@ -177,7 +174,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             {(() => {
                 switch (selectedConfiguration?.value) {
                 case DataPlatforms.S3:
-                    return <S3DataOutputForm mode={mode} dataProductId={dataProductId}/>
+                    return <S3DataOutputForm form={form} external_id={currentDataProduct?.external_id} mode={mode} dataProductId={dataProductId}/>
                 case DataPlatforms.Glue:
                     return <GlueDataOutputForm mode={mode} dataProductId={dataProductId}/>
                 default:

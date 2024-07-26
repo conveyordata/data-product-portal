@@ -33,6 +33,12 @@ export function GlueDataOutputForm({ }: Props) {
                 name={'glue_database'}
                 label={t('Glue database')}
                 tooltip={t('The name of the Glue database to link the data output to')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please input the name of the Glue database for this data output'),
+                    },
+                ]}
             >
                 <Input/>
             </Form.Item>
@@ -41,6 +47,12 @@ export function GlueDataOutputForm({ }: Props) {
                 name={'table_prefixes'}
                 label={t('Table prefixes')}
                 tooltip={t('The tables that your data output can access')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please input the tables this data output can access'),
+                    },
+                ]}
             >
                 <Select
                     tokenSeparators={[',']}
