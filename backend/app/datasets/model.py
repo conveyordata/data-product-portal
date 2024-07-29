@@ -1,10 +1,11 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, String, ForeignKey, Table, Enum
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Table
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship, Mapped, Session
+from sqlalchemy.orm import Mapped, Session, relationship
 
+from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import DatasetAccessType
@@ -56,6 +57,11 @@ class Dataset(Base, BaseORM):
         "DataProductDatasetAssociation",
         back_populates="dataset",
         order_by="DataProductDatasetAssociation.status.desc()",
+    )
+    data_output_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
+        "DataOutputDatasetAssociation",
+        back_populates="dataset",
+        order_by="DataOutputDatasetAssociation.status.desc()",
     )
     tags: Mapped[list[Tag]] = relationship(
         secondary=tag_dataset_table, cascade="all, delete-orphan", single_parent=True

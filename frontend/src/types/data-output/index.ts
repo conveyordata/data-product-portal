@@ -7,7 +7,14 @@ export type { DataOutputContract, DataOutput } from './data-output.contract.ts';
 export type { DataOutputCreate, DataOutputCreateFormSchema, DataOutputCreateResponse } from './data-output-create.contract.ts';
 export type { S3DataOutputContract, S3DataOutput } from './s3-data-output.contract.ts';
 export type { GlueDataOutputContract, GlueDataOutput } from './glue-data-output.contract.ts';
-
+export type {
+    DataOutputDatasetRemoveRequest,
+    DataOutputDatasetRemoveResponse,
+} from './data-output-dataset-remove.contract.ts';
+export type {
+    DataOutputDatasetAccessRequest,
+    DataOutputDatasetAccessResponse,
+} from './data-output-dataset-access.contract.ts';
 
 export interface DataOutputConfigurationContract {
     config: GlueDataOutput|S3DataOutput

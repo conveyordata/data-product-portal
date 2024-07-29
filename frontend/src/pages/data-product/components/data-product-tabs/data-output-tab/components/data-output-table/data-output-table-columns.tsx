@@ -6,26 +6,31 @@ import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-
 //import data-outputBorderIcon from '@/assets/icons/data-output-border-icon.svg?react';
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { LinkOutlined } from '@ant-design/icons';
 //import { createDataOutputIdPath } from '@/types/navigation.ts';
 import { DataOutput } from '@/types/data-output';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
-import { getDataOutputIcon, getDataOutputSubtitle } from '@/utils/data-output-type-icon.helper';
+import { getDataOutputIcon } from '@/utils/data-output-type-icon.helper';
 import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtitle/data-output-subtitle.component';
+import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
+import { AddDatasetPopup } from '../../../dataset-tab/components/add-dataset-popup/add-dataset-popup';
+import Popover from 'antd/lib/popover';
+import { useModal } from '@/hooks/use-modal';
+import { SetStateAction } from 'react';
+import { AddDataOutputPopup } from '../add-data-output-popup/add-data-output-popup';
 //import { RestrictedDataOutputPopoverTitle } from '@/components/data-outputs/restricted-data-output-popover-title/restricted-data-output-popover-title.tsx';
 //import { RestrictedDataOutputTitle } from '@/components/data-outputs/restricted-data-output-title/restricted-data-output-title.tsx';
 
 type Props = {
     t: TFunction;
-    onRemoveDataProductDataOutputLink: (dataOutputId: string, name: string) => void;
-    onCancelDataProductDataOutputLinkRequest: (dataOutputId: string, name: string) => void;
     isLoading?: boolean;
     isDisabled?: boolean;
+    handleOpen: (id: string) => void;
 };
 
 export const getDataProductDataOutputsColumns = ({
-    onRemoveDataProductDataOutputLink,
-    onCancelDataProductDataOutputLinkRequest,
     t,
+    handleOpen,
     isDisabled,
     isLoading,
 }: Props): TableColumnsType<DataOutputsGetContract> => {
@@ -38,19 +43,10 @@ export const getDataProductDataOutputsColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { id, name, external_id,configuration_type }) => {
-                // Render different types of configuration?
-                // const isRestrictedDataOutput = .access_type === 'restricted';
-                // const isDataOutputRequestApproved = status === 'approved';
-                // const popoverTitle = isRestrictedDataOutput ? (
-                //     <RestrictedDataOutputPopoverTitle name={data-output.name} isApproved={isDataOutputRequestApproved} />
-                // ) : (
-                //     data-output.name
-                // );
-                //const title = isRestrictedDataOutput ? <RestrictedDataOutputTitle name={data-output.name} /> : data-output.name;
+            render: (_, { id, name, description, configuration_type }) => {
                 return (
                     <TableCellAvatar
-                        popover={{ title: name, content: external_id }}
+                        popover={{ title: name, content: description }}
                         //linkTo={createDataOutputIdPath(external_id)}
                         icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration_type)!}/>}
                         title={name}
@@ -68,29 +64,70 @@ export const getDataProductDataOutputsColumns = ({
             },
             width: '100%',
         },
-        // {
-        //     title: t('Actions'),
-        //     key: 'action',
-        //     render: (_, { data-output, data-output_id, status }) => {
+        {
+            title: t('Datasets'),
+            dataIndex: 'dataset_links',
+            render: (_, { dataset_links }) => {
+                console.log("data")
+                console.log(dataset_links)
+                return (
+                    <>{dataset_links}</>
+
+                    // <TableCellAvatar
+                    //     popover={{ title: name, content: description }}
+                    //     //linkTo={createDataOutputIdPath(external_id)}
+                    //     icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration_type)!}/>}
+                    //     title={name}
+                    //     subtitle={
+                    //         <DataOutputSubtitle data_output_id={id}/>
+                    //         //configuration_type
+                    //         // <Badge
+                    //         //     //status={getDataProductDataOutputLinkBadgeStatus(status)}
+                    //         //     //text={configuration_type}
+                    //         //     className={styles.noSelect}
+                    //         // />
+                    //     }
+                    // />
+                );
+            },
+            width: '100%',
+        },
+        {
+            title: t('Actions'),
+            key: 'action',
+            render: (_, {id, owner_id }) => {
+                return <>
+                <Popover content={t('Link dataset')}>
+            <Button
+                type="primary"
+                className={styles.submitButton}
+                onClick={() => {handleOpen(id);}}
+                disabled={isDisabled || isLoading}// || isSubmitting}
+                icon={<LinkOutlined />}
+            />
+            </Popover>
+            </>
+            }
+        //     render: (_, { dataset, dataset_id, status }) => {
         //         const buttonText = status === 'pending_approval' ? t('Cancel') : t('Remove');
-        //         const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Remove DataOutput');
+        //         const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Remove Dataset');
         //         const popupDescription =
         //             status === 'pending_approval'
         //                 ? t('Are you sure you want to cancel the request to link {{name}} to the data product?', {
-        //                       name: data-output.name,
+        //                       name: dataset.name,
         //                   })
         //                 : t('Are you sure you want to remove {{name}} from the data product?', {
-        //                       name: data-output.name,
+        //                       name: dataset.name,
         //                   });
         //         const onConfirm =
         //             status === 'pending_approval'
-        //                 ? onCancelDataProductDataOutputLinkRequest
-        //                 : onRemoveDataProductDataOutputLink;
+        //                 ? onCancelDataProductDatasetLinkRequest
+        //                 : onRemoveDataProductDatasetLink;
         //         return (
         //             <Popconfirm
         //                 title={popupTitle}
         //                 description={popupDescription}
-        //                 onConfirm={() => onConfirm(data-output_id, data-output.name)}
+        //                 onConfirm={() => onConfirm(dataset_id, dataset.name)}
         //                 placement={'leftTop'}
         //                 okText={t('Confirm')}
         //                 cancelText={t('Cancel')}
@@ -102,7 +139,7 @@ export const getDataProductDataOutputsColumns = ({
         //                 </Button>
         //             </Popconfirm>
         //         );
-        //     },
         // },
+        },
     ];
 };

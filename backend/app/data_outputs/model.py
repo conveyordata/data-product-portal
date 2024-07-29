@@ -2,12 +2,18 @@ import uuid
 
 from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.data_outputs.data_output_types import DataOutputTypes
+from app.data_outputs.schema import DataOutput as DataOutputSchema
+from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products.model import DataProduct
-from app.database.database import Base
+from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
+
+
+def ensure_data_output_exists(data_output_id: UUID, db: Session) -> DataOutputSchema:
+    return ensure_exists(data_output_id, db, DataOutput)
 
 
 class DataOutput(Base, BaseORM):
@@ -20,3 +26,9 @@ class DataOutput(Base, BaseORM):
     owner: Mapped["DataProduct"] = relationship(back_populates="data_outputs")
     configuration_type: DataOutputTypes = Column(Enum(DataOutputTypes))
     configuration = Column(String)
+    dataset_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
+        "DataOutputDatasetAssociation",
+        back_populates="data_output",
+        cascade="all, delete-orphan",
+        order_by="DataOutputDatasetAssociation.status.desc()",
+    )

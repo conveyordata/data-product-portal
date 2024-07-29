@@ -1,5 +1,6 @@
 import { DataOutputConfiguration } from ".";
 import { DataProductContract } from "../data-product/data-product-contract";
+import { DataOutputDatasetLink } from "./dataset-link.contract";
 
 export interface DataOutputContract {
     id: string;
@@ -9,6 +10,7 @@ export interface DataOutputContract {
     owner: DataProductContract;
     configuration: DataOutputConfiguration;
     configuration_type: string;
+    dataset_links: DataOutputDatasetLink[];
 }
 
 export interface DataOutputModel extends DataOutputContract {}

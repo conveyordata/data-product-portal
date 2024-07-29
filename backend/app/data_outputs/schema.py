@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import field_validator
 
 from app.data_outputs.schema_union import DataOutputs, DataOutputTypes
+from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_products.schema import DataProduct
 from app.shared.schema import ORMModel
 
@@ -31,6 +32,7 @@ class DataOutput(ORMModel):
     owner: DataProduct
     configuration: DataOutputs
     configuration_type: DataOutputTypes
+    dataset_links: list[DataOutputDatasetAssociation]
 
     @field_validator("configuration", mode="before")
     @classmethod

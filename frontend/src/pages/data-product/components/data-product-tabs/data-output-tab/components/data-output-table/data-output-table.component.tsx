@@ -1,5 +1,5 @@
 import { Flex, Table, TableColumnsType } from 'antd';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 //import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useTranslation } from 'react-i18next';
 import {
@@ -10,6 +10,8 @@ import styles from './data-output-table.module.scss';
 import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
 import { DataOutput } from '@/types/data-output';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
+import { useModal } from '@/hooks/use-modal.tsx';
+import { AddDatasetPopup } from '../add-dataset-popup/add-dataset-popup.tsx';
 
 type Props = {
     isCurrentDataProductOwner: boolean;
@@ -20,8 +22,6 @@ type Props = {
 export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, dataOutputs }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
-    // TODO For some reason this list is not updated automatically when we create a new data output
-
 
     // const [removeDataOutputFromDataProduct, { isLoading: isRemovingDataOutputFromDataProduct }] =
     //     useRemoveDataOutputFromDataProductMutation();
@@ -49,22 +49,28 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
     //         console.error('Failed to cancel dataOutput link request', error);
     //     }
     // };
+    const [dataOutput, setDataOutput] = useState<string|undefined>(undefined);
+    const { isVisible, handleOpen, handleClose } = useModal();
 
     const columns: TableColumnsType<DataOutputsGetContract> = useMemo(() => {
         return getDataProductDataOutputsColumns({
-            onRemoveDataProductDataOutputLink: () => {},// handleRemoveDataOutputFromDataProduct,
-            onCancelDataProductDataOutputLinkRequest: () => {},//handleCancelDataOutputLinkRequest,
             t,
+            handleOpen: (id) => {
+                setDataOutput(id);
+                handleOpen()
+            }
             //isDisabled: !isCurrentDataProductOwner,
             //isLoading: () => {},//isRemovingDataOutputFromDataProduct,
         });
     }, [dataProductId, t, isCurrentDataProductOwner]);
 
+
     if (!dataProduct) return null;
 
     return (
+        <>
         <Flex className={styles.dataOutputListContainer}>
-            <Table<DataOutput>
+            <Table<DataOutputsGetContract>
                 loading={isLoadingDataProduct}
                 className={styles.dataOutputListTable}
                 columns={columns}
@@ -75,5 +81,7 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
                 size={'small'}
             />
         </Flex>
+        {isVisible && dataOutput && <AddDatasetPopup onClose={handleClose} isOpen={isVisible} dataOutputId={dataOutput} />}
+        </>
     );
 }
