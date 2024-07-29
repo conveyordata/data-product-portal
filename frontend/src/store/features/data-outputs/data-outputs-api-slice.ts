@@ -28,7 +28,9 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
             }),
             providesTags: (_, __, id) => [
                 { type: TagTypes.DataProduct as const, id },
-                { type: TagTypes.DataOutput as const, id}
+                { type: TagTypes.DataOutput as const, id},
+                { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
         createDataOutput: builder.mutation<DataOutputCreateResponse, DataOutputCreate>({
