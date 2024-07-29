@@ -1,4 +1,4 @@
-import { Badge, Button, Popconfirm, TableColumnsType } from 'antd';
+import { Badge, Button, List, Popconfirm, TableColumnsType, Typography } from 'antd';
 //import { getDataProductDataOutputLinkBadgeStatus, getDataProductDataOutputLinkStatusLabel } from '@/utils/status.helper.ts';
 import styles from './data-output-table.module.scss';
 import { TFunction } from 'i18next';
@@ -9,6 +9,7 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { LinkOutlined } from '@ant-design/icons';
 //import { createDataOutputIdPath } from '@/types/navigation.ts';
 import { DataOutput } from '@/types/data-output';
+import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import { getDataOutputIcon } from '@/utils/data-output-type-icon.helper';
 import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtitle/data-output-subtitle.component';
@@ -18,6 +19,10 @@ import Popover from 'antd/lib/popover';
 import { useModal } from '@/hooks/use-modal';
 import { SetStateAction } from 'react';
 import { AddDataOutputPopup } from '../add-data-output-popup/add-data-output-popup';
+import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title';
+import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title';
+import { createDatasetIdPath } from '@/types/navigation';
+import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper';
 //import { RestrictedDataOutputPopoverTitle } from '@/components/data-outputs/restricted-data-output-popover-title/restricted-data-output-popover-title.tsx';
 //import { RestrictedDataOutputTitle } from '@/components/data-outputs/restricted-data-output-title/restricted-data-output-title.tsx';
 
@@ -62,35 +67,51 @@ export const getDataProductDataOutputsColumns = ({
                     />
                 );
             },
-            width: '100%',
+            width: '50%',
         },
         {
             title: t('Datasets'),
-            dataIndex: 'dataset_links',
+            dataIndex: 'links',
             render: (_, { dataset_links }) => {
-                console.log("data")
-                console.log(dataset_links)
                 return (
-                    <>{dataset_links}</>
-
-                    // <TableCellAvatar
-                    //     popover={{ title: name, content: description }}
-                    //     //linkTo={createDataOutputIdPath(external_id)}
-                    //     icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration_type)!}/>}
-                    //     title={name}
-                    //     subtitle={
-                    //         <DataOutputSubtitle data_output_id={id}/>
-                    //         //configuration_type
-                    //         // <Badge
-                    //         //     //status={getDataProductDataOutputLinkBadgeStatus(status)}
-                    //         //     //text={configuration_type}
-                    //         //     className={styles.noSelect}
-                    //         // />
-                    //     }
-                    // />
-                );
+                    <List
+                    //loading={isLoading || isFetchingUsers}
+                    size={'large'}
+                    locale={{ emptyText: t('No datasets linked') }}
+                    rowKey={(dataset_link: DataOutputDatasetLink) => dataset_link.dataset_id}
+                    dataSource={dataset_links}
+                    renderItem={(dataset_link) => {
+                        const isRestrictedDataset = dataset_link.dataset.access_type === 'restricted';
+                        const isDatasetRequestApproved = status === 'approved';
+                        const popoverTitle = isRestrictedDataset ? (
+                            <RestrictedDatasetPopoverTitle name={dataset_link.dataset.name} isApproved={isDatasetRequestApproved} />
+                        ) : (
+                            dataset_link.dataset.name
+                        );
+                        const title = isRestrictedDataset ? <RestrictedDatasetTitle name={dataset_link.dataset.name} /> : dataset_link.dataset.name;
+                        return (
+                            <List.Item key={dataset_link.dataset_id}>
+                                <TableCellAvatar
+                                    popover={{ title: popoverTitle, content: dataset_link.dataset.description }}
+                                    linkTo={createDatasetIdPath(dataset_link.dataset.id)}
+                                    icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
+                                    title={title}
+                                    subtitle={""}
+                                    // subtitle={
+                                    //     <Badge
+                                    //         status={getDataProductDatasetLinkBadgeStatus(dataset_link.dataset.status)}
+                                    //         text={getDataProductDatasetLinkStatusLabel(dataset_link.dataset.status)}
+                                    //         className={styles.noSelect}
+                                    //     />
+                                    // }
+                                />
+                            </List.Item>
+                        );
+                    }}>
+                    </List>
+                )
             },
-            width: '100%',
+            width: '50%',
         },
         {
             title: t('Actions'),

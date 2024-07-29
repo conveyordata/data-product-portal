@@ -26,7 +26,10 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 url: buildUrl(ApiUrl.DataOutputGet, { dataOutputId: id }),
                 method: 'GET',
             }),
-            providesTags: (_, __, id) => [{ type: TagTypes.DataProduct as const, id }],
+            providesTags: (_, __, id) => [
+                { type: TagTypes.DataProduct as const, id },
+                { type: TagTypes.DataOutput as const, id}
+            ],
         }),
         createDataOutput: builder.mutation<DataOutputCreateResponse, DataOutputCreate>({
             query: (dataOutput) => ({
@@ -54,7 +57,11 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 method: 'POST',
             }),
             invalidatesTags: (_, _error, arg) => [
-                { type: TagTypes.DataOutput as const, id: arg.dataOutputId },
+                //{ type: TagTypes.DataOutput as const, id: arg.dataOutputId },
+                // This should refresh the owner of data output only. Instead, super inefficient, it refreshes all of the data products?
+                // Or maybe it's fine? It seems fine lol
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST} ,
+                //{ type: TagTypes.DataProduct as const, id: dataOutputsApiSlice.util.getDataOutputById(arg.data)},
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const, id: arg.datasetId },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },

@@ -16,6 +16,7 @@ import { createDatasetIdPath } from '@/types/navigation.ts';
 import { useTranslation } from 'react-i18next';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { getDataProductDatasetLinkEdgeStyle } from '@/utils/node-editor.helper.ts';
+import { DataOutputNodeProps } from '@/components/charts/custom-nodes/dataoutput-node/dataoutput-node';
 
 type Props = {
     dataProductId: string;
@@ -28,6 +29,55 @@ function LinkToDatasetNode({ id }: { id: string }) {
             <Button type="default">{t('View dataset')}</Button>
         </Link>
     );
+}
+
+function generateDataProductOutputNodes(
+    dataProduct: DataProductContract,
+    defaultNodePosition: XYPosition,
+): Node[] {
+    const dataProductMainNode: Node<DataProductNodeProps> = {
+        id: dataProduct.id,
+        position: defaultNodePosition,
+        data: {
+            name: dataProduct.name,
+            icon_key: dataProduct.type.icon_key,
+            id: dataProduct.id,
+            isMainNode: true,
+            targetHandlePosition: Position.Right,
+        },
+        draggable: false,
+        type: CustomNodeTypes.DataProductNode,
+        deletable: false,
+    };
+
+    const dataOutputNodeLinks: Node<DataOutputNodeProps>[] = dataProduct.data_outputs.map((link) => ({
+        id: link.id,
+        position: defaultNodePosition,
+        data: {
+            name: link.name,
+            id: link.id,
+            icon: link.configuration_type,
+            //nodeToolbarActions: <LinkToDataOutputNode id={link.id} />,
+            sourceHandlePosition: Position.Left,
+            isActive: true
+            //isActive: link.status === DataProductDatasetLinkStatus.Approved,
+        },
+        draggable: false,
+        type: CustomNodeTypes.DatasetNode,
+        deletable: false,
+    }));
+    return [dataProductMainNode, ...dataOutputNodeLinks];
+}
+
+function generateDataProductOutputEdges(dataProduct: DataProductContract): Edge[] {
+    return dataProduct.data_outputs.map((link) => ({
+        id: `${link.id}-${dataProduct.id}`,
+        source: link.id,
+        target: dataProduct.id,
+        animated: true,
+        deletable: false,
+        //style: getDataProductDatasetLinkEdgeStyle(link.status),
+    }));
 }
 
 function generateDataProductNodes(
@@ -95,6 +145,13 @@ export function ExplorerTab({ dataProductId }: Props) {
         );
         const dataProductEdges: Edge[] = generateDataProductEdges(dataProduct.id, approvedDatasetLinks);
         setNodesAndEdges(dataProductNodes, dataProductEdges, Position.Left);
+
+        const dataProductOutputNodes: Node[] = generateDataProductOutputNodes(
+            dataProduct,
+            defaultNodePosition
+        )
+        const dataProductOutputEdges: Edge[] = generateDataProductOutputEdges(dataProduct);
+        setNodesAndEdges(dataProductOutputNodes.concat(dataProductNodes), dataProductOutputEdges.concat(dataProductEdges));//, Position.Right);
     };
 
     useEffect(() => {

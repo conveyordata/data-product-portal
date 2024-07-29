@@ -36,6 +36,7 @@ export function DataOutputTab({ dataProductId }: Props) {
     const searchTerm = Form.useWatch('search', searchForm);
 
     const filteredDataOutputs = useMemo(() => {
+        console.log(dataProduct?.data_outputs)
         return filterDataOutputs(dataProduct?.data_outputs ?? [], searchTerm);
     }, [dataProduct?.data_outputs, searchTerm]);
 
