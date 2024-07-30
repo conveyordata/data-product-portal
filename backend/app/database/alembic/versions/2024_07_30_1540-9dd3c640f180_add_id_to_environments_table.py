@@ -30,6 +30,7 @@ def upgrade() -> None:
         sa.Column("id", sa.UUID, server_default=sa.text("gen_random_uuid()")),
     )
     op.create_primary_key("environments_pkey", "environments", ["id"])
+    op.create_unique_constraint("uq_environments_name", "environments", ["name"])
     op.add_column(
         "env_platform_service_configs",
         sa.Column("environment_id", sa.UUID, sa.ForeignKey("environments.id")),
@@ -39,6 +40,7 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_column("env_platform_service_configs", "environment_id")
     op.drop_column("environments", "id")
+    op.drop_constraint("uq_environments_name", "environments", type_="unique")
 
     op.create_primary_key("environments_pkey", "environments", ["name"])
     op.add_column(
