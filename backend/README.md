@@ -136,6 +136,11 @@ In order to apply this migration using the database CLI tool you need to execute
 
 ## Testing
 ### Integration testing
+- Install the test dependencies by running
+
+  ```
+  poetry install --with test
+  ```
 - Ensure your Docker service is running.
 - Get the test database up and running by executing the command below.
 
