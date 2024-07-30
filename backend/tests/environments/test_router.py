@@ -1,37 +1,41 @@
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+from ..factories import EnvironmentFactory
+
 ENDPOINT = "/api/envs"
 
 
 class TestEnvironmentsRouter:
-    def test_create_environment(self, client, session, default_environments):
-        for environment in default_environments:
-            response = self.create_environment(client, environment)
-            assert response.status_code == 200
+    def test_create_environment(self, client):
+        response = self.create_environment(
+            client,
+            {"name": "dev", "context": "environment_context{{}}", "is_default": False},
+        )
+        assert response.status_code == 200
 
-    def test_get_environments(self, client, session, default_environments):
-        for environment in default_environments:
-            response = self.create_environment(client, environment)
-            assert response.status_code == 200
+    def test_get_environments(self, client):
+        env_obj = EnvironmentFactory()
 
-        environments = client.get(ENDPOINT)
-        assert environments.status_code == 200
-        assert len(environments.json()) == len(default_environments)
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200
+        environments = response.json()
+        assert len(environments) == 1
+        assert environments[0]["name"] == env_obj.name
 
-    def test_create_environment_with_repeated_name(
-        self, client, session, default_environments
-    ):
-        for environment in default_environments:
-            response = self.create_environment(client, environment)
-            assert response.status_code == 200
-
-        repeated_environment = default_environments[0]
+    def test_create_environment_with_repeated_name(self, client):
+        env_obj = EnvironmentFactory()
         with pytest.raises(IntegrityError):
-            self.create_environment(client, repeated_environment)
+            self.create_environment(
+                client,
+                {
+                    "name": env_obj.name,
+                    "context": "environment_context{{}}",
+                    "is_default": False,
+                },
+            )
 
     @staticmethod
     def create_environment(client, environment):
-        environment_dict = environment.model_dump()
-        response = client.post(ENDPOINT, json=environment_dict)
+        response = client.post(ENDPOINT, json=environment)
         return response
