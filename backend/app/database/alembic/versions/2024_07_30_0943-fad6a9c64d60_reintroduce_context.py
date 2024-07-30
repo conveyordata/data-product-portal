@@ -23,4 +23,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_column("environments", sa.Column("context", sa.String))
+    op.drop_column("environments", "context")

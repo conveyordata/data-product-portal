@@ -6,12 +6,12 @@ Create Date: 2024-07-22 16:30:53.496277
 
 """
 
+from enum import StrEnum
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 
-from app.environments.enums import PlatformTypes
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
@@ -22,6 +22,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    class PlatformTypes(StrEnum):
+        AWS = "AWS"
+
     op.create_table(
         "platforms",
         sa.Column(

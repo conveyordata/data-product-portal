@@ -9,6 +9,7 @@ from app.data_products.router import router as data_product
 from app.data_products_datasets.router import router as data_product_dataset
 from app.datasets.router import router as dataset
 from app.environments.router import router as environment
+from app.platforms.router import router as platform
 from app.users.router import router as user
 
 router = (
@@ -24,3 +25,4 @@ router.include_router(data_product_type)
 router.include_router(business_area)
 router.include_router(data_product_dataset)
 router.include_router(data_product_membership)
+router.include_router(platform)
