@@ -8,4 +8,5 @@ class Environment(Base, BaseORM):
     __tablename__ = "environments"
 
     name = Column(String, primary_key=True)
+    context = Column(String)
     is_default = Column(Boolean, default=False)

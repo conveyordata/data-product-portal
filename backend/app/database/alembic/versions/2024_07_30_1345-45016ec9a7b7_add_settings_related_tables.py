@@ -18,7 +18,7 @@ from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
 revision: str = "45016ec9a7b7"
-down_revision: Union[str, None] = "2e48ad16e9f7"
+down_revision: Union[str, None] = "fad6a9c64d60"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

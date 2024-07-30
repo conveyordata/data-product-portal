@@ -6,12 +6,12 @@ from pydantic import field_validator
 from app.shared.schema import ORMModel
 
 
-class S3BucketsIdentifiers(ORMModel):
-    bucket_identifiers: list[str]
+class Identifiers(ORMModel):
+    identifiers: list[str]
 
 
 class PlatformServiceConfigSchema(ORMModel):
-    config: S3BucketsIdentifiers
+    config: Identifiers
 
     @field_validator("config", mode="before")
     @classmethod
