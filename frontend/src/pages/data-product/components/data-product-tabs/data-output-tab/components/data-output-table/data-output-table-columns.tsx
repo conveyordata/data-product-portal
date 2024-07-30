@@ -22,7 +22,7 @@ import { AddDataOutputPopup } from '../add-data-output-popup/add-data-output-pop
 import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title';
 import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title';
 import { createDatasetIdPath } from '@/types/navigation';
-import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper';
+import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
 //import { RestrictedDataOutputPopoverTitle } from '@/components/data-outputs/restricted-data-output-popover-title/restricted-data-output-popover-title.tsx';
 //import { RestrictedDataOutputTitle } from '@/components/data-outputs/restricted-data-output-title/restricted-data-output-title.tsx';
 
@@ -96,14 +96,13 @@ export const getDataProductDataOutputsColumns = ({
                                     linkTo={createDatasetIdPath(dataset_link.dataset.id)}
                                     icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
                                     title={title}
-                                    subtitle={""}
-                                    // subtitle={
-                                    //     <Badge
-                                    //         status={getDataProductDatasetLinkBadgeStatus(dataset_link.dataset.status)}
-                                    //         text={getDataProductDatasetLinkStatusLabel(dataset_link.dataset.status)}
-                                    //         className={styles.noSelect}
-                                    //     />
-                                    // }
+                                    subtitle={
+                                        <Badge
+                                            status={getDataOutputDatasetLinkBadgeStatus(dataset_link.status)}
+                                            text={getDataOutputDatasetLinkStatusLabel(dataset_link.status)}
+                                            className={styles.noSelect}
+                                        />
+                                    }
                                 />
                             </List.Item>
                         );

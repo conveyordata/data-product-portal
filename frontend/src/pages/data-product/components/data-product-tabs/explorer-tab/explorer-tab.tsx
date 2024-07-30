@@ -73,6 +73,7 @@ function generateDataProductOutputEdges(dataProduct: DataProductContract): Edge[
     return dataProduct.data_outputs.map((link) => ({
         id: `${link.id}-${dataProduct.id}`,
         source: link.id,
+        targetHandle: "right_t",
         target: dataProduct.id,
         animated: true,
         deletable: false,
@@ -144,7 +145,7 @@ export function ExplorerTab({ dataProductId }: Props) {
             defaultNodePosition,
         );
         const dataProductEdges: Edge[] = generateDataProductEdges(dataProduct.id, approvedDatasetLinks);
-        setNodesAndEdges(dataProductNodes, dataProductEdges, Position.Left);
+        //setNodesAndEdges(dataProductNodes, dataProductEdges, Position.Left);
 
         const dataProductOutputNodes: Node[] = generateDataProductOutputNodes(
             dataProduct,

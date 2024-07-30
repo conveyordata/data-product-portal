@@ -253,5 +253,15 @@
     "Link Dataset": "Link Dataset",
     "Dataset link has been requested": "Dataset link has been requested",
     "Dataset has been linked": "Dataset has been linked",
-    "Failed to link dataset to data output": "Failed to link dataset to data output"
+    "Failed to link dataset to data output": "Failed to link dataset to data output",
+    "Allow Data Output Access": "Allow Data Output Access",
+    "Are you sure you want to allow access to data output {{name}}?": "Are you sure you want to allow access to data output {{name}}?",
+    "Deny Data Output Access": "Deny Data Output Access",
+    "Are you sure you want to deny access to data output {{name}}?": "Are you sure you want to deny access to data output {{name}}?",
+    "Revoke Data Output Access": "Revoke Data Output Access",
+    "Are you sure you want to revoke access from data output {{name}}?": "Are you sure you want to revoke access from data output {{name}}?",
+    "Dataset {{name}} has been removed from data output": "Dataset {{name}} has been removed from data output",
+    "Failed to remove dataset from data output": "Failed to remove dataset from data output",
+    "Failed to approve data output dataset link": "Failed to approve data output dataset link",
+    "Failed to reject data output dataset link": "Failed to reject data output dataset link"
 }

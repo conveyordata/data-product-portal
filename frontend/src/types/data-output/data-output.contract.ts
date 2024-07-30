@@ -8,6 +8,7 @@ export interface DataOutputContract {
     description: string;
     name: string;
     owner: DataProductContract;
+    owner_id: string;
     configuration: DataOutputConfiguration;
     configuration_type: string;
     dataset_links: DataOutputDatasetLink[];
