@@ -8,4 +8,5 @@ class EnvironmentFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = Environment
 
     name = "dev"
+    context = "environment_context{{}}"
     is_default = False

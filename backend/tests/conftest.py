@@ -287,11 +287,10 @@ def default_environments(session):
     return [
         EnvironmentModel(
             name="development",
+            context="test_context_{{}}",
             is_default=True,
         ),
-        EnvironmentModel(
-            name="production",
-        ),
+        EnvironmentModel(name="production", context="test_context_{{}}"),
     ]
 
 
