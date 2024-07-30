@@ -10,6 +10,7 @@ from .enums import PlatformTypes
 
 class Environment(ORMModel):
     name: str
+    context: str
     is_default: bool = False
 
 
