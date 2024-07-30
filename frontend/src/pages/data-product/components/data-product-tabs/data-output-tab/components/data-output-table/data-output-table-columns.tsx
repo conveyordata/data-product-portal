@@ -6,7 +6,7 @@ import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-
 //import data-outputBorderIcon from '@/assets/icons/data-output-border-icon.svg?react';
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { LinkOutlined } from '@ant-design/icons';
+import { LinkOutlined, DeleteOutlined } from '@ant-design/icons';
 //import { createDataOutputIdPath } from '@/types/navigation.ts';
 import { DataOutput } from '@/types/data-output';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
@@ -31,6 +31,7 @@ type Props = {
     isLoading?: boolean;
     isDisabled?: boolean;
     handleOpen: (id: string) => void;
+    onRemoveDatasetFromDataOutput: (datasetId: string, dataOutputId: string, name: string) => void;
 };
 
 export const getDataProductDataOutputsColumns = ({
@@ -38,6 +39,7 @@ export const getDataProductDataOutputsColumns = ({
     handleOpen,
     isDisabled,
     isLoading,
+    onRemoveDatasetFromDataOutput
 }: Props): TableColumnsType<DataOutputsGetContract> => {
     return [
         {
@@ -72,7 +74,7 @@ export const getDataProductDataOutputsColumns = ({
         {
             title: t('Datasets'),
             dataIndex: 'links',
-            render: (_, { dataset_links }) => {
+            render: (_, { dataset_links, id, name}) => {
                 return (
                     <List
                     //loading={isLoading || isFetchingUsers}
@@ -104,6 +106,15 @@ export const getDataProductDataOutputsColumns = ({
                                         />
                                     }
                                 />
+                                <Popover content={t('Remove Dataset')}>
+                                            <Button
+                                                type="primary"
+                                                className={styles.submitButton}
+                                                onClick={() => {onRemoveDatasetFromDataOutput(dataset_link.dataset_id, id, name);}}
+                                                disabled={isDisabled || isLoading}// || isSubmitting}
+                                                icon={<DeleteOutlined />}
+                                            />
+                                            </Popover>
                             </List.Item>
                         );
                     }}>
@@ -115,7 +126,7 @@ export const getDataProductDataOutputsColumns = ({
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, {id, owner_id }) => {
+            render: (_, {id }) => {
                 return <>
                 <Popover content={t('Link dataset')}>
             <Button

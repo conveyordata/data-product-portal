@@ -12,6 +12,8 @@ import { DataOutput } from '@/types/data-output';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { AddDatasetPopup } from '../add-dataset-popup/add-dataset-popup.tsx';
+import { useRemoveDatasetFromDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 
 type Props = {
     isCurrentDataProductOwner: boolean;
@@ -23,8 +25,8 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
-    // const [removeDataOutputFromDataProduct, { isLoading: isRemovingDataOutputFromDataProduct }] =
-    //     useRemoveDataOutputFromDataProductMutation();
+    const [removeDatasetFromDataOutput, { isLoading: isRemovingDatasetFromDataOutput }] =
+        useRemoveDatasetFromDataOutputMutation();
 
     // const handleRemoveDataOutputFromDataProduct = async (dataOutputId: string, name: string) => {
     //     try {
@@ -51,6 +53,17 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
     // };
     const [dataOutput, setDataOutput] = useState<string|undefined>(undefined);
     const { isVisible, handleOpen, handleClose } = useModal();
+    const handleRemoveDatasetFromDataOutput = async (datasetId: string, dataOutputId: string, name: string) => {
+        try {
+            await removeDatasetFromDataOutput({ datasetId, dataOutputId: dataOutputId }).unwrap();
+            dispatchMessage({
+                content: t('Dataset {{name}} has been removed from data output', { name }),
+                type: 'success',
+            });
+        } catch (error) {
+            console.error('Failed to remove dataset from data output', error);
+        }
+    };
 
     const columns: TableColumnsType<DataOutputsGetContract> = useMemo(() => {
         return getDataProductDataOutputsColumns({
@@ -58,12 +71,12 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
             handleOpen: (id) => {
                 setDataOutput(id);
                 handleOpen()
-            }
+            },
+            onRemoveDatasetFromDataOutput: handleRemoveDatasetFromDataOutput
             //isDisabled: !isCurrentDataProductOwner,
             //isLoading: () => {},//isRemovingDataOutputFromDataProduct,
         });
     }, [dataProductId, t, isCurrentDataProductOwner]);
-
 
     if (!dataProduct) return null;
 
