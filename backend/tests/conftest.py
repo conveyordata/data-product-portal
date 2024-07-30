@@ -1,7 +1,10 @@
+from typing import Generator
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.business_areas.model import BusinessArea as BusinessAreaModel
 from app.data_product_memberships.model import (
@@ -10,14 +13,30 @@ from app.data_product_memberships.model import (
 from app.data_product_memberships.model import DataProductUserRole
 from app.data_product_types.model import DataProductType as DataProductTypeModel
 from app.data_products.model import DataProduct as DataProductModel
-from app.database.database import Base, get_db_session
+from app.database.database import get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.environments.schema import Environment as EnvironmentModel
 from app.main import app
+from app.settings import settings
 from app.users.model import User as UserModel
 
-from . import TestingSessionLocal
+# Set up a test client using the FastAPI app
+test_client = TestClient(app)
+
+
+def get_test_url():
+    return (
+        f"postgresql://{settings.POSTGRES_USER}:"
+        f"{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}:"
+        f"{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
+    )
+
+
+engine = create_engine(get_test_url(), connect_args={})
+
+#  Create a clean database on each test run
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -29,26 +48,30 @@ def setup_and_teardown_database():
     yield
 
 
-def override_get_db():
-    test_db = None
-    try:
-        test_db = TestingSessionLocal()
-        yield test_db
-        test_db.commit()
-    finally:
-        if test_db:
-            test_db.close()
+@pytest.fixture()
+def session() -> Generator[Session, None, None]:
+    connection = engine.connect()
+    transaction = connection.begin()
+    db_session = TestingSessionLocal(bind=connection)
 
+    yield db_session
 
-session = pytest.fixture(override_get_db)
+    db_session.close()
+    transaction.rollback()
+    connection.close()
 
 
 @pytest.fixture()
-def client():
+def client(session):
+    def override_get_db():
+        try:
+            yield session
+        finally:
+            session.close()
+
     app.dependency_overrides[get_db_session] = override_get_db
-    with TestClient(app) as test_client:
-        yield test_client
-        app.dependency_overrides.clear()
+    yield test_client
+    del app.dependency_overrides[get_db_session]
 
 
 @pytest.fixture()
@@ -283,21 +306,17 @@ def admin_dataset_payload(
 
 
 @pytest.fixture()
-def default_environments(session):
+def default_environments(
+    session,
+):
     return [
         EnvironmentModel(
             name="development",
+            context="dev",
             is_default=True,
         ),
         EnvironmentModel(
             name="production",
+            context="prod",
         ),
     ]
-
-
-@pytest.fixture(autouse=True)
-def clear_db(session: TestingSessionLocal) -> None:
-    """Clear database after each test."""
-    for table in reversed(Base.metadata.sorted_tables):
-        session.execute(table.delete())
-    session.commit()

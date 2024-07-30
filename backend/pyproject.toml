@@ -35,7 +35,6 @@ optional = true
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.2"
 pytest-dotenv= "^0.5.2"
-factory-boy = "^3.3.0"
 
 
 [build-system]
