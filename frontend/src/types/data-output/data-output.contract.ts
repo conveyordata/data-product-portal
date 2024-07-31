@@ -15,4 +15,4 @@ export interface DataOutputContract {
 }
 
 export interface DataOutputModel extends DataOutputContract {}
-export type DataOutput = DataOutputContract
+//export type DataOutput = DataOutputContract

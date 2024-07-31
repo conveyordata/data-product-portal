@@ -1,30 +1,17 @@
-import { Badge, Button, List, Popconfirm, TableColumnsType, Typography } from 'antd';
-//import { getDataProductDataOutputLinkBadgeStatus, getDataProductDataOutputLinkStatusLabel } from '@/utils/status.helper.ts';
+import { Badge, Button, List, TableColumnsType } from 'antd';
 import styles from './data-output-table.module.scss';
 import { TFunction } from 'i18next';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-//import data-outputBorderIcon from '@/assets/icons/data-output-border-icon.svg?react';
-import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { LinkOutlined, DeleteOutlined } from '@ant-design/icons';
-//import { createDataOutputIdPath } from '@/types/navigation.ts';
-import { DataOutput } from '@/types/data-output';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import { getDataOutputIcon } from '@/utils/data-output-type-icon.helper';
 import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtitle/data-output-subtitle.component';
 import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
-import { AddDatasetPopup } from '../../../dataset-tab/components/add-dataset-popup/add-dataset-popup';
-import Popover from 'antd/lib/popover';
-import { useModal } from '@/hooks/use-modal';
-import { SetStateAction } from 'react';
-import { AddDataOutputPopup } from '../add-data-output-popup/add-data-output-popup';
 import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title';
 import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title';
 import { createDatasetIdPath } from '@/types/navigation';
 import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
-//import { RestrictedDataOutputPopoverTitle } from '@/components/data-outputs/restricted-data-output-popover-title/restricted-data-output-popover-title.tsx';
-//import { RestrictedDataOutputTitle } from '@/components/data-outputs/restricted-data-output-title/restricted-data-output-title.tsx';
 
 type Props = {
     t: TFunction;
@@ -106,15 +93,9 @@ export const getDataProductDataOutputsColumns = ({
                                         />
                                     }
                                 />
-                                <Popover content={t('Remove Dataset')}>
-                                            <Button
-                                                type="primary"
-                                                className={styles.submitButton}
-                                                onClick={() => {onRemoveDatasetFromDataOutput(dataset_link.dataset_id, id, name);}}
-                                                disabled={isDisabled || isLoading}// || isSubmitting}
-                                                icon={<DeleteOutlined />}
-                                            />
-                                            </Popover>
+                                <Button onClick={() => {onRemoveDatasetFromDataOutput(dataset_link.dataset_id, id, name);}} loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                    {t('Remove Dataset')}
+                                </Button>
                             </List.Item>
                         );
                     }}>
@@ -127,50 +108,10 @@ export const getDataProductDataOutputsColumns = ({
             title: t('Actions'),
             key: 'action',
             render: (_, {id }) => {
-                return <>
-                <Popover content={t('Link dataset')}>
-            <Button
-                type="primary"
-                className={styles.submitButton}
-                onClick={() => {handleOpen(id);}}
-                disabled={isDisabled || isLoading}// || isSubmitting}
-                icon={<LinkOutlined />}
-            />
-            </Popover>
-            </>
+                return <Button onClick={() => {handleOpen(id);}} loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                            {t('Link Dataset')}
+                        </Button>
             }
-        //     render: (_, { dataset, dataset_id, status }) => {
-        //         const buttonText = status === 'pending_approval' ? t('Cancel') : t('Remove');
-        //         const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Remove Dataset');
-        //         const popupDescription =
-        //             status === 'pending_approval'
-        //                 ? t('Are you sure you want to cancel the request to link {{name}} to the data product?', {
-        //                       name: dataset.name,
-        //                   })
-        //                 : t('Are you sure you want to remove {{name}} from the data product?', {
-        //                       name: dataset.name,
-        //                   });
-        //         const onConfirm =
-        //             status === 'pending_approval'
-        //                 ? onCancelDataProductDatasetLinkRequest
-        //                 : onRemoveDataProductDatasetLink;
-        //         return (
-        //             <Popconfirm
-        //                 title={popupTitle}
-        //                 description={popupDescription}
-        //                 onConfirm={() => onConfirm(dataset_id, dataset.name)}
-        //                 placement={'leftTop'}
-        //                 okText={t('Confirm')}
-        //                 cancelText={t('Cancel')}
-        //                 okButtonProps={{ loading: isLoading }}
-        //                 autoAdjustOverflow={true}
-        //             >
-        //                 <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
-        //                     {buttonText}
-        //                 </Button>
-        //             </Popconfirm>
-        //         );
-        // },
         },
     ];
 };
