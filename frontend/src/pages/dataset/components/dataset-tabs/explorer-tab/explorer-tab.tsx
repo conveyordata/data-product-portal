@@ -66,6 +66,8 @@ function generateDatasetEdges(datasetId: string, dataProductLinks: DataProductLi
         id: `${datasetId}-${link.id}`,
         source: datasetId,
         target: link.id,
+        sourceHandle: "right_s",
+        targetHandle: "left_t",
         animated: link.status === DataProductDatasetLinkStatus.Approved,
         deletable: false,
         style: getDataProductDatasetLinkEdgeStyle(link.status),
