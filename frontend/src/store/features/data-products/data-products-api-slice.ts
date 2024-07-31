@@ -51,17 +51,18 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
         }),
         getDataProductDataOutputs: builder.query<DataOutputsGetContract, string>({
             query: (id) => ({
-                url: buildUrl(ApiUrl.DataProductsDataOutput, {dataProductId: id}),
+                url: buildUrl(ApiUrl.DataProductsDataOutput, { dataProductId: id }),
                 method: 'GET',
-            })
+            }),
         }),
         getDataProductById: builder.query<DataProductContract, string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductGet, { dataProductId: id }),
                 method: 'GET',
             }),
-            providesTags: (_, __, id) => [{ type: TagTypes.DataProduct as const, id },
-                    { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST }
+            providesTags: (_, __, id) => [
+                { type: TagTypes.DataProduct as const, id },
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
         createDataProduct: builder.mutation<DataProductCreateResponse, DataProductCreate>({

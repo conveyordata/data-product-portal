@@ -22,7 +22,7 @@ function filterDataOutputs(data_outputs: DataOutputsGetContract[], searchTerm: s
         data_outputs.filter(
             (data_outputs) =>
                 data_outputs?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-            data_outputs?.external_id?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+                data_outputs?.external_id?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }
@@ -36,7 +36,7 @@ export function DataOutputTab({ dataProductId }: Props) {
     const searchTerm = Form.useWatch('search', searchForm);
 
     const filteredDataOutputs = useMemo(() => {
-        console.log(dataProduct?.data_outputs)
+        console.log(dataProduct?.data_outputs);
         return filterDataOutputs(dataProduct?.data_outputs ?? [], searchTerm);
     }, [dataProduct?.data_outputs, searchTerm]);
 

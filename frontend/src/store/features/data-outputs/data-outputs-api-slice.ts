@@ -1,9 +1,17 @@
-import { DataOutputsGetContract } from "@/types/data-output/data-output-get.contract";
-import { baseApiSlice } from "../api/base-api-slice";
-import { ApiUrl, buildUrl } from "@/api/api-urls";
-import { DataOutputContract, DataOutputCreate, DataOutputCreateResponse, DataOutputDatasetAccessRequest, DataOutputDatasetAccessResponse, DataOutputDatasetRemoveRequest, DataOutputDatasetRemoveResponse } from "@/types/data-output";
-import { STATIC_TAG_ID, TagTypes } from "../api/tag-types";
-import { datasetsApiSlice } from "../datasets/datasets-api-slice";
+import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
+import { baseApiSlice } from '../api/base-api-slice';
+import { ApiUrl, buildUrl } from '@/api/api-urls';
+import {
+    DataOutputContract,
+    DataOutputCreate,
+    DataOutputCreateResponse,
+    DataOutputDatasetAccessRequest,
+    DataOutputDatasetAccessResponse,
+    DataOutputDatasetRemoveRequest,
+    DataOutputDatasetRemoveResponse,
+} from '@/types/data-output';
+import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
+import { datasetsApiSlice } from '../datasets/datasets-api-slice';
 
 export const dataOutputTags: string[] = [
     TagTypes.DataOutput,
@@ -28,7 +36,7 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
             }),
             providesTags: (_, __, id) => [
                 { type: TagTypes.DataProduct as const, id },
-                { type: TagTypes.DataOutput as const, id},
+                { type: TagTypes.DataOutput as const, id },
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
@@ -62,30 +70,23 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 //{ type: TagTypes.DataOutput as const, id: arg.dataOutputId },
                 // This should refresh the owner of data output only. Instead, super inefficient, it refreshes all of the data products?
                 // Or maybe it's fine? It seems fine lol
-                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST} ,
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
                 //{ type: TagTypes.DataProduct as const, id: dataOutputsApiSlice.util.getDataOutputById(arg.data)},
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const, id: arg.datasetId },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        removeDatasetFromDataOutput: builder.mutation<
-            DataOutputDatasetRemoveResponse,
-            DataOutputDatasetRemoveRequest
-        >({
+        removeDatasetFromDataOutput: builder.mutation<DataOutputDatasetRemoveResponse, DataOutputDatasetRemoveRequest>({
             query: ({ dataOutputId, datasetId }) => ({
                 url: buildUrl(ApiUrl.DataOutputsDataset, { dataOutputId, datasetId }),
                 method: 'DELETE',
             }),
             onQueryStarted: async ({ dataOutputId, datasetId }, { dispatch, queryFulfilled }) => {
                 const patchDataProductResult = dispatch(
-                    dataOutputsApiSlice.util.updateQueryData(
-                        'getDataOutputById',
-                        dataOutputId as string,
-                        (draft) => {
-                            draft.dataset_links = draft.dataset_links.filter((d) => d.dataset_id !== datasetId);
-                        },
-                    ),
+                    dataOutputsApiSlice.util.updateQueryData('getDataOutputById', dataOutputId as string, (draft) => {
+                        draft.dataset_links = draft.dataset_links.filter((d) => d.dataset_id !== datasetId);
+                    }),
                 );
                 const patchDatasetResult = dispatch(
                     datasetsApiSlice.util.updateQueryData('getDatasetById', datasetId as string, (draft) => {
@@ -107,13 +108,13 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
         }),
     }),
 
-        overrideExisting: false})
-
+    overrideExisting: false,
+});
 
 export const {
     useGetAllDataOutputsQuery,
     useGetDataOutputByIdQuery,
     useCreateDataOutputMutation,
     useRemoveDatasetFromDataOutputMutation,
-    useRequestDatasetAccessForDataOutputMutation
+    useRequestDatasetAccessForDataOutputMutation,
 } = dataOutputsApiSlice;

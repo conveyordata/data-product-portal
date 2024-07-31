@@ -77,7 +77,7 @@ export const getDataProductTableColumns = ({ t }: { t: TFunction }): TableColumn
             dataIndex: 'data_outputs_count',
             render: (dataOutputCount: number) => {
                 return <TableCellItem text={i18n.t('{{count}} data outputs', { count: dataOutputCount })} />;
-            }
-        }
+            },
+        },
     ];
 };

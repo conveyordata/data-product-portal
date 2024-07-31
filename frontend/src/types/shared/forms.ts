@@ -16,6 +16,6 @@ export type CustomDropdownItemProps<T extends string = string> = {
     disabled?: boolean;
     hasMenu?: boolean;
     hasConfig?: boolean;
-    children?: CustomDropdownItemProps<DataPlatform>[]
-    form?: ComponentType
+    children?: CustomDropdownItemProps<DataPlatform>[];
+    form?: ComponentType;
 };

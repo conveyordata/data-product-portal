@@ -1,9 +1,7 @@
 import { Button, Form, FormProps, Input, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
-import {
-    useGetDataProductByIdQuery,
-} from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { DataOutputCreate, DataOutputCreateFormSchema, GlueDataOutput, S3DataOutput } from '@/types/data-output';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
@@ -17,13 +15,12 @@ import { getDataPlatforms } from '@/pages/data-product/components/data-product-a
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 import { CustomDropdownItemProps } from '@/types/shared';
 
-
 type Props = {
     mode: 'create';
     dataProductId: string;
 };
 
-export function GlueDataOutputForm({ }: Props) {
+export function GlueDataOutputForm({}: Props) {
     const { t } = useTranslation();
 
     return (
@@ -40,7 +37,7 @@ export function GlueDataOutputForm({ }: Props) {
                     },
                 ]}
             >
-                <Input/>
+                <Input />
             </Form.Item>
             <Form.Item<GlueDataOutput>
                 required
@@ -54,13 +51,8 @@ export function GlueDataOutputForm({ }: Props) {
                     },
                 ]}
             >
-                <Select
-                    tokenSeparators={[',']}
-                    placeholder={t('Provide table prefixes')}
-                    mode={'tags'}
-                    options={[]}
-                />
+                <Select tokenSeparators={[',']} placeholder={t('Provide table prefixes')} mode={'tags'} options={[]} />
             </Form.Item>
         </div>
-    )
-};
+    );
+}

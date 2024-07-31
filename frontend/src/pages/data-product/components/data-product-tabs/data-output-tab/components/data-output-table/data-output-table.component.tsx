@@ -51,7 +51,7 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
     //         console.error('Failed to cancel dataOutput link request', error);
     //     }
     // };
-    const [dataOutput, setDataOutput] = useState<string|undefined>(undefined);
+    const [dataOutput, setDataOutput] = useState<string | undefined>(undefined);
     const { isVisible, handleOpen, handleClose } = useModal();
     const handleRemoveDatasetFromDataOutput = async (datasetId: string, dataOutputId: string, name: string) => {
         try {
@@ -70,9 +70,9 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
             t,
             handleOpen: (id) => {
                 setDataOutput(id);
-                handleOpen()
+                handleOpen();
             },
-            onRemoveDatasetFromDataOutput: handleRemoveDatasetFromDataOutput
+            onRemoveDatasetFromDataOutput: handleRemoveDatasetFromDataOutput,
             //isDisabled: !isCurrentDataProductOwner,
             //isLoading: () => {},//isRemovingDataOutputFromDataProduct,
         });
@@ -82,19 +82,21 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
 
     return (
         <>
-        <Flex className={styles.dataOutputListContainer}>
-            <Table<DataOutputsGetContract>
-                loading={isLoadingDataProduct}
-                className={styles.dataOutputListTable}
-                columns={columns}
-                dataSource={dataOutputs}
-                rowKey={({ id }) => id}
-                pagination={false}
-                rowClassName={styles.tableRow}
-                size={'small'}
-            />
-        </Flex>
-        {isVisible && dataOutput && <AddDatasetPopup onClose={handleClose} isOpen={isVisible} dataOutputId={dataOutput} />}
+            <Flex className={styles.dataOutputListContainer}>
+                <Table<DataOutputsGetContract>
+                    loading={isLoadingDataProduct}
+                    className={styles.dataOutputListTable}
+                    columns={columns}
+                    dataSource={dataOutputs}
+                    rowKey={({ id }) => id}
+                    pagination={false}
+                    rowClassName={styles.tableRow}
+                    size={'small'}
+                />
+            </Flex>
+            {isVisible && dataOutput && (
+                <AddDatasetPopup onClose={handleClose} isOpen={isVisible} dataOutputId={dataOutput} />
+            )}
         </>
     );
 }

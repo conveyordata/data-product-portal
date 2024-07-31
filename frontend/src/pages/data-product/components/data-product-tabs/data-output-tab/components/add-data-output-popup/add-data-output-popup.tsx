@@ -14,16 +14,16 @@ type Props = {
 
 export function AddDataOutputPopup({ onClose, isOpen, dataProductId }: Props) {
     const { t } = useTranslation();
-    const ref = useRef<FormInstance<DataOutputCreateFormSchema&DataOutputConfiguration>>(null);
+    const ref = useRef<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>>(null);
 
     return (
-        <DataProductDataOutputLinkPopup
-            onClose={onClose}
-            isOpen={isOpen}
-            title={t('Add Data Output')}
-            formRef={ref}
-        >
-            <DataOutputForm formRef={ref} modalCallbackOnSubmit={onClose} mode={'create'} dataProductId={dataProductId} />
+        <DataProductDataOutputLinkPopup onClose={onClose} isOpen={isOpen} title={t('Add Data Output')} formRef={ref}>
+            <DataOutputForm
+                formRef={ref}
+                modalCallbackOnSubmit={onClose}
+                mode={'create'}
+                dataProductId={dataProductId}
+            />
         </DataProductDataOutputLinkPopup>
     );
 }

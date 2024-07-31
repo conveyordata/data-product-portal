@@ -1,9 +1,7 @@
 import { Form, FormInstance, FormProps, Input, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
-import {
-    useGetDataProductByIdQuery,
-} from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
@@ -22,7 +20,7 @@ import TextArea from 'antd/es/input/TextArea';
 
 type Props = {
     mode: 'create';
-    formRef: RefObject<FormInstance<DataOutputCreateFormSchema&DataOutputConfiguration>>;
+    formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>>;
     dataProductId: string;
     modalCallbackOnSubmit: () => void;
 };
@@ -30,12 +28,15 @@ type Props = {
 export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [selectedDataPlatform, setSelectedDataPlatform] = useState<CustomDropdownItemProps<DataPlatforms> | undefined>(undefined);
-    const [selectedConfiguration, setSelectedConfiguration] = useState<CustomDropdownItemProps<DataPlatforms> | undefined>(undefined);
-    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(
-        dataProductId);
+    const [selectedDataPlatform, setSelectedDataPlatform] = useState<
+        CustomDropdownItemProps<DataPlatforms> | undefined
+    >(undefined);
+    const [selectedConfiguration, setSelectedConfiguration] = useState<
+        CustomDropdownItemProps<DataPlatforms> | undefined
+    >(undefined);
+    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
-    const [form] = Form.useForm<DataOutputCreateFormSchema&DataOutputConfiguration>();
+    const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
     const dataProductNameValue = Form.useWatch('name', form);
     const canFillInForm = mode === 'create';
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
@@ -63,7 +64,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
             form.resetFields();
         } catch (e) {
-            const errorMessage = ('Failed to create data output');
+            const errorMessage = 'Failed to create data output';
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -73,30 +74,33 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     };
 
     const onDataPlatformClick = (dataPlatform: DataPlatform) => {
-        const dropdown = dataPlatforms.filter((platform) => (platform.value === dataPlatform)).at(0)
+        const dropdown = dataPlatforms.filter((platform) => platform.value === dataPlatform).at(0);
         if (selectedDataPlatform !== undefined && selectedDataPlatform === dropdown) {
-            setSelectedDataPlatform(undefined)
-            setSelectedConfiguration(undefined)
+            setSelectedDataPlatform(undefined);
+            setSelectedConfiguration(undefined);
         } else {
-            setSelectedDataPlatform(dropdown)
+            setSelectedDataPlatform(dropdown);
         }
-    }
+    };
 
     const onConfigurationClick = (dataPlatform: DataPlatform) => {
-        const dropdown = selectedDataPlatform?.children?.filter((platform) => (platform.value === dataPlatform)).at(0)
+        const dropdown = selectedDataPlatform?.children?.filter((platform) => platform.value === dataPlatform).at(0);
         if (selectedConfiguration !== undefined && selectedConfiguration === dropdown) {
-            setSelectedConfiguration(undefined)
+            setSelectedConfiguration(undefined);
         } else {
-            setSelectedConfiguration(dropdown)
+            setSelectedConfiguration(dropdown);
         }
-    }
+    };
 
     useEffect(() => {
         if (mode === 'create') {
-            form.setFieldsValue({ external_id: generateExternalIdFromName(dataProductNameValue ?? ''), owner: currentDataProduct?.name });
+            form.setFieldsValue({
+                external_id: generateExternalIdFromName(dataProductNameValue ?? ''),
+                owner: currentDataProduct?.name,
+            });
         }
     }, [dataProductNameValue]);
-// TODO Required fields of nested elements do not transcent
+    // TODO Required fields of nested elements do not transcent
     return (
         <Form
             form={form}
@@ -143,42 +147,51 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>
-                        {dataPlatforms.filter((dataPlatform) => (dataPlatform.hasConfig)).map((dataPlatform) => (
+                    {dataPlatforms
+                        .filter((dataPlatform) => dataPlatform.hasConfig)
+                        .map((dataPlatform) => (
                             <DataOutputPlatformTile<DataPlatform>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
                                 environments={[]}
                                 isDisabled={isLoading}
                                 isLoading={isLoading}
-                                isSelected={selectedDataPlatform !== undefined && dataPlatform === selectedDataPlatform }
+                                isSelected={selectedDataPlatform !== undefined && dataPlatform === selectedDataPlatform}
                                 onTileClick={onDataPlatformClick}
                             />
                         ))}
-                    </Space>
+                </Space>
             </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>
-                        {selectedDataPlatform?.children?.map((dataPlatform) => (
-                            <DataOutputPlatformTile<DataPlatform>
-                                key={dataPlatform.value}
-                                dataPlatform={dataPlatform}
-                                environments={[]}
-                                isDisabled={isLoading}
-                                isSelected={selectedConfiguration !== undefined && dataPlatform === selectedConfiguration}
-                                isLoading={isLoading}
-                                onTileClick={onConfigurationClick}
-                            />
-                        ))}
-                    </Space>
+                    {selectedDataPlatform?.children?.map((dataPlatform) => (
+                        <DataOutputPlatformTile<DataPlatform>
+                            key={dataPlatform.value}
+                            dataPlatform={dataPlatform}
+                            environments={[]}
+                            isDisabled={isLoading}
+                            isSelected={selectedConfiguration !== undefined && dataPlatform === selectedConfiguration}
+                            isLoading={isLoading}
+                            onTileClick={onConfigurationClick}
+                        />
+                    ))}
+                </Space>
             </Form.Item>
             {(() => {
                 switch (selectedConfiguration?.value) {
-                case DataPlatforms.S3:
-                    return <S3DataOutputForm form={form} external_id={currentDataProduct?.external_id} mode={mode} dataProductId={dataProductId}/>
-                case DataPlatforms.Glue:
-                    return <GlueDataOutputForm mode={mode} dataProductId={dataProductId}/>
-                default:
-                    return null
+                    case DataPlatforms.S3:
+                        return (
+                            <S3DataOutputForm
+                                form={form}
+                                external_id={currentDataProduct?.external_id}
+                                mode={mode}
+                                dataProductId={dataProductId}
+                            />
+                        );
+                    case DataPlatforms.Glue:
+                        return <GlueDataOutputForm mode={mode} dataProductId={dataProductId} />;
+                    default:
+                        return null;
                 }
             })()}
         </Form>

@@ -18,7 +18,10 @@ import { TFunction } from 'i18next';
 import styles from './add-dataset-popup.module.scss';
 import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title.tsx';
 import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
-import { useGetDataOutputByIdQuery, useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
+import {
+    useGetDataOutputByIdQuery,
+    useRequestDatasetAccessForDataOutputMutation,
+} from '@/store/features/data-outputs/data-outputs-api-slice';
 
 type Props = {
     onClose: () => void;
@@ -50,7 +53,7 @@ const getActionButtonText = (isRestricted: boolean, t: TFunction) => {
 
 export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
     const { t } = useTranslation();
-    const { data: dataOutput } = useGetDataOutputByIdQuery(dataOutputId)
+    const { data: dataOutput } = useGetDataOutputByIdQuery(dataOutputId);
     const { data: allDatasets = [], isFetching: isFetchingDatasets } = useGetAllDatasetsQuery();
     const [requestDatasetAccessForDataOutput, { isLoading: isRequestingAccess }] =
         useRequestDatasetAccessForDataOutputMutation();

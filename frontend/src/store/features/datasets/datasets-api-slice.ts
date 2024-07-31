@@ -39,7 +39,10 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 url: buildUrl(ApiUrl.DatasetGet, { datasetId: id }),
                 method: 'GET',
             }),
-            providesTags: (_, __, id) => [{ type: TagTypes.Dataset as const, id }, { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST}],
+            providesTags: (_, __, id) => [
+                { type: TagTypes.Dataset as const, id },
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+            ],
         }),
         createDataset: builder.mutation<DatasetCreateResponse, DatasetCreateRequest>({
             query: (dataset) => ({

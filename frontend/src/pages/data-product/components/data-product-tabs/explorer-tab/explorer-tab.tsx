@@ -21,7 +21,6 @@ import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import { greenThemeConfig } from '@/theme/antd-theme';
 
-
 const { getDesignToken } = theme;
 
 const token = getDesignToken(greenThemeConfig);
@@ -39,20 +38,17 @@ function LinkToDatasetNode({ id }: { id: string }) {
     );
 }
 
-function generateDataProductOutputNodes(
-    dataProduct: DataProductContract,
-    defaultNodePosition: XYPosition,
-): Node[] {
+function generateDataProductOutputNodes(dataProduct: DataProductContract, defaultNodePosition: XYPosition): Node[] {
     const dataOutputNodeLinks: Node<DataOutputNodeProps>[] = dataProduct.data_outputs.map((link) => ({
         id: link.id,
-        position: {x: defaultNodePosition.x + 1000, y: defaultNodePosition.y},
+        position: { x: defaultNodePosition.x + 1000, y: defaultNodePosition.y },
         data: {
             name: link.name,
             id: link.id,
             icon_key: link.configuration_type,
             //nodeToolbarActions: <LinkToDataOutputNode id={link.id} />,
             sourceHandlePosition: Position.Left,
-            isActive: true
+            isActive: true,
             //isActive: link.status === DataProductDatasetLinkStatus.Approved,
         },
         draggable: false,
@@ -66,7 +62,7 @@ function generateDataProductOutputEdges(dataProduct: DataProductContract): Edge[
     return dataProduct.data_outputs.map((link) => ({
         id: `${link.id}-${dataProduct.id}`,
         // source: link.id,
-        sourceHandle: "right_s",
+        sourceHandle: 'right_s',
         // target: dataProduct.id,
         source: dataProduct.id,
         target: link.id,
@@ -74,8 +70,8 @@ function generateDataProductOutputEdges(dataProduct: DataProductContract): Edge[
         deletable: false,
         style: {
             strokeDasharray: '5 5',
-            stroke: token.colorPrimary
-        }
+            stroke: token.colorPrimary,
+        },
     }));
 }
 
@@ -85,30 +81,30 @@ function generateDatasetOutputNodes(
     defaultNodePosition: XYPosition,
 ): Node[] {
     const datasetNodeLinks: Node<DatasetNodeProps>[] = datasetLinks.map((link) => ({
-        id: link.id + "_for_data_output",
+        id: link.id + '_for_data_output',
         position: defaultNodePosition,
         data: {
             name: link.dataset.name,
             id: link.dataset_id,
             nodeToolbarActions: <LinkToDatasetNode id={link.dataset_id} />,
             targetHandlePosition: Position.Right,
-            targetHandleId: "left_t",
+            targetHandleId: 'left_t',
             isActive: link.status === DataProductDatasetLinkStatus.Approved,
         },
         draggable: false,
         type: CustomNodeTypes.DatasetNode,
         deletable: false,
     }));
-    return datasetNodeLinks
+    return datasetNodeLinks;
 }
 
 function generateDatasetDataOutputEdges(dataOutputId: string, datasetLinks: DatasetLink[]): Edge[] {
     return datasetLinks.map((link) => ({
         id: `${link.id}-${dataOutputId}`,
         source: dataOutputId,
-        target: link.id + "_for_data_output",
-        targetHandle: "left_t",
-        sourceHandle: "right_s",
+        target: link.id + '_for_data_output',
+        targetHandle: 'left_t',
+        sourceHandle: 'right_s',
         animated: link.status === DataProductDatasetLinkStatus.Approved,
         deletable: false,
         style: getDataProductDatasetLinkEdgeStyle(link.status),
@@ -137,13 +133,13 @@ function generateDataProductNodes(
 
     const datasetNodeLinks: Node<DatasetNodeProps>[] = datasetLinks.map((link) => ({
         id: link.id,
-        position: {x: defaultNodePosition.x - 500, y: defaultNodePosition.y},
+        position: { x: defaultNodePosition.x - 500, y: defaultNodePosition.y },
         data: {
             name: link.dataset.name,
             id: link.dataset_id,
             nodeToolbarActions: <LinkToDatasetNode id={link.dataset_id} />,
             targetHandlePosition: Position.Right,
-            targetHandleId: "left_t",
+            targetHandleId: 'left_t',
             isActive: link.status === DataProductDatasetLinkStatus.Approved,
         },
         draggable: false,
@@ -158,8 +154,8 @@ function generateDataProductEdges(dataProductId: string, datasetLinks: DatasetLi
         id: `${link.id}-${dataProductId}`,
         source: link.id,
         target: dataProductId,
-        targetHandle: "left_t",
-        sourceHandle: "right_s",
+        targetHandle: 'left_t',
+        sourceHandle: 'right_s',
         animated: link.status === DataProductDatasetLinkStatus.Approved,
         deletable: false,
         style: getDataProductDatasetLinkEdgeStyle(link.status),
@@ -184,33 +180,33 @@ export function ExplorerTab({ dataProductId }: Props) {
         const dataProductEdges: Edge[] = generateDataProductEdges(dataProduct.id, approvedDatasetLinks);
         //setNodesAndEdges(dataProductNodes, dataProductEdges, Position.Left);
 
-        const dataProductOutputNodes: Node[] = generateDataProductOutputNodes(
-            dataProduct,
-            defaultNodePosition
-        )
+        const dataProductOutputNodes: Node[] = generateDataProductOutputNodes(dataProduct, defaultNodePosition);
 
-        const combinedNodes = dataProductOutputNodes.concat(...dataProduct.data_outputs.flatMap((data_output) => {
-            const approvedDatasetLinks = data_output.dataset_links.filter(
-                (link) => link.status !== DataOutputDatasetLinkStatus.Denied,
-            );
-            const dataProductNodes: Node[] = generateDatasetOutputNodes(
-                data_output,
-                approvedDatasetLinks,
-                defaultNodePosition,
-            );
-            // const dataProductEdges: Edge[] = generateDatasetDataOutputEdges(data_output.id, approvedDatasetLinks);
+        const combinedNodes = dataProductOutputNodes.concat(
+            ...dataProduct.data_outputs.flatMap((data_output) => {
+                const approvedDatasetLinks = data_output.dataset_links.filter(
+                    (link) => link.status !== DataOutputDatasetLinkStatus.Denied,
+                );
+                const dataProductNodes: Node[] = generateDatasetOutputNodes(
+                    data_output,
+                    approvedDatasetLinks,
+                    defaultNodePosition,
+                );
+                // const dataProductEdges: Edge[] = generateDatasetDataOutputEdges(data_output.id, approvedDatasetLinks);
 
-            return dataProductNodes
-
-        }))
+                return dataProductNodes;
+            }),
+        );
         const dataProductOutputEdges: Edge[] = generateDataProductOutputEdges(dataProduct);
-        const combinedEdges = dataProductOutputEdges.concat(...dataProduct.data_outputs.flatMap((data_output) => {
-            const approvedDatasetLinks = data_output.dataset_links.filter(
-                (link) => link.status !== DataOutputDatasetLinkStatus.Denied,
-            );
-            const dataProductEdges: Edge[] = generateDatasetDataOutputEdges(data_output.id, approvedDatasetLinks);
-            return dataProductEdges
-        }))
+        const combinedEdges = dataProductOutputEdges.concat(
+            ...dataProduct.data_outputs.flatMap((data_output) => {
+                const approvedDatasetLinks = data_output.dataset_links.filter(
+                    (link) => link.status !== DataOutputDatasetLinkStatus.Denied,
+                );
+                const dataProductEdges: Edge[] = generateDatasetDataOutputEdges(data_output.id, approvedDatasetLinks);
+                return dataProductEdges;
+            }),
+        );
         setNodesAndEdges(dataProductNodes.concat(combinedNodes), dataProductEdges.concat(combinedEdges));
     };
 

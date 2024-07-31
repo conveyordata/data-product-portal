@@ -6,4 +6,4 @@ export interface S3DataOutputContract {
 }
 
 export interface S3DataOutputModel extends S3DataOutputContract {}
-export type S3DataOutput = S3DataOutputContract
+export type S3DataOutput = S3DataOutputContract;

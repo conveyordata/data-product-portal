@@ -4,4 +4,4 @@ export interface GlueDataOutputContract {
 }
 
 export interface GlueDataOutputModel extends GlueDataOutputContract {}
-export type GlueDataOutput = GlueDataOutputContract
+export type GlueDataOutput = GlueDataOutputContract;

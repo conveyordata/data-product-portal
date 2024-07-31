@@ -24,8 +24,8 @@ export const dataOutputsDatasetsApiSlice = baseApiSlice
                     },
                 }),
                 invalidatesTags: (_, _error, arg) => [
-                    { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST} ,
-                    { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST} ,
+                    { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.DataOutput as const, id: arg.data_output_id },
                     { type: TagTypes.Dataset as const, id: arg.dataset_id },
                     { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
@@ -42,7 +42,7 @@ export const dataOutputsDatasetsApiSlice = baseApiSlice
                     },
                 }),
                 invalidatesTags: (_, _error, arg) => [
-                    { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST} ,
+                    { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
                     //{ type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST} ,
                     //{ type: TagTypes.DataOutput as const, id: arg.data_output_id },
                     { type: TagTypes.Dataset as const, id: arg.dataset_id },
@@ -64,9 +64,9 @@ export const dataOutputsDatasetsApiSlice = baseApiSlice
                     method: 'POST',
                 }),
                 invalidatesTags: (_, _error, arg) => [
-                    { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST},
-                    { type: TagTypes.DataOutput as const, id: arg.dataOutputId},
-                    { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST} ,
+                    { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataOutput as const, id: arg.dataOutputId },
+                    { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.Dataset as const, id: arg.datasetId },
                     { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },

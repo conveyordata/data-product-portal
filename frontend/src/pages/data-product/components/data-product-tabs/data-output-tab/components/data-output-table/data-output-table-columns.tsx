@@ -26,7 +26,7 @@ export const getDataProductDataOutputsColumns = ({
     handleOpen,
     isDisabled,
     isLoading,
-    onRemoveDatasetFromDataOutput
+    onRemoveDatasetFromDataOutput,
 }: Props): TableColumnsType<DataOutputsGetContract> => {
     return [
         {
@@ -42,10 +42,10 @@ export const getDataProductDataOutputsColumns = ({
                     <TableCellAvatar
                         popover={{ title: name, content: description }}
                         //linkTo={createDataOutputIdPath(external_id)}
-                        icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration_type)!}/>}
+                        icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration_type)!} />}
                         title={name}
                         subtitle={
-                            <DataOutputSubtitle data_output_id={id}/>
+                            <DataOutputSubtitle data_output_id={id} />
                             //configuration_type
                             // <Badge
                             //     //status={getDataProductDataOutputLinkBadgeStatus(status)}
@@ -61,57 +61,80 @@ export const getDataProductDataOutputsColumns = ({
         {
             title: t('Datasets'),
             dataIndex: 'links',
-            render: (_, { dataset_links, id, name}) => {
+            render: (_, { dataset_links, id, name }) => {
                 return (
                     <List
-                    //loading={isLoading || isFetchingUsers}
-                    size={'large'}
-                    locale={{ emptyText: t('No datasets linked') }}
-                    rowKey={(dataset_link: DataOutputDatasetLink) => dataset_link.dataset_id}
-                    dataSource={dataset_links}
-                    renderItem={(dataset_link) => {
-                        const isRestrictedDataset = dataset_link.dataset.access_type === 'restricted';
-                        const isDatasetRequestApproved = status === 'approved';
-                        const popoverTitle = isRestrictedDataset ? (
-                            <RestrictedDatasetPopoverTitle name={dataset_link.dataset.name} isApproved={isDatasetRequestApproved} />
-                        ) : (
-                            dataset_link.dataset.name
-                        );
-                        const title = isRestrictedDataset ? <RestrictedDatasetTitle name={dataset_link.dataset.name} /> : dataset_link.dataset.name;
-                        return (
-                            <List.Item key={dataset_link.dataset_id}>
-                                <TableCellAvatar
-                                    popover={{ title: popoverTitle, content: dataset_link.dataset.description }}
-                                    linkTo={createDatasetIdPath(dataset_link.dataset.id)}
-                                    icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
-                                    title={title}
-                                    subtitle={
-                                        <Badge
-                                            status={getDataOutputDatasetLinkBadgeStatus(dataset_link.status)}
-                                            text={getDataOutputDatasetLinkStatusLabel(dataset_link.status)}
-                                            className={styles.noSelect}
-                                        />
-                                    }
+                        //loading={isLoading || isFetchingUsers}
+                        size={'large'}
+                        locale={{ emptyText: t('No datasets linked') }}
+                        rowKey={(dataset_link: DataOutputDatasetLink) => dataset_link.dataset_id}
+                        dataSource={dataset_links}
+                        renderItem={(dataset_link) => {
+                            const isRestrictedDataset = dataset_link.dataset.access_type === 'restricted';
+                            const isDatasetRequestApproved = status === 'approved';
+                            const popoverTitle = isRestrictedDataset ? (
+                                <RestrictedDatasetPopoverTitle
+                                    name={dataset_link.dataset.name}
+                                    isApproved={isDatasetRequestApproved}
                                 />
-                                <Button onClick={() => {onRemoveDatasetFromDataOutput(dataset_link.dataset_id, id, name);}} loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
-                                    {t('Remove Dataset')}
-                                </Button>
-                            </List.Item>
-                        );
-                    }}>
-                    </List>
-                )
+                            ) : (
+                                dataset_link.dataset.name
+                            );
+                            const title = isRestrictedDataset ? (
+                                <RestrictedDatasetTitle name={dataset_link.dataset.name} />
+                            ) : (
+                                dataset_link.dataset.name
+                            );
+                            return (
+                                <List.Item key={dataset_link.dataset_id}>
+                                    <TableCellAvatar
+                                        popover={{ title: popoverTitle, content: dataset_link.dataset.description }}
+                                        linkTo={createDatasetIdPath(dataset_link.dataset.id)}
+                                        icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
+                                        title={title}
+                                        subtitle={
+                                            <Badge
+                                                status={getDataOutputDatasetLinkBadgeStatus(dataset_link.status)}
+                                                text={getDataOutputDatasetLinkStatusLabel(dataset_link.status)}
+                                                className={styles.noSelect}
+                                            />
+                                        }
+                                    />
+                                    <Button
+                                        onClick={() => {
+                                            onRemoveDatasetFromDataOutput(dataset_link.dataset_id, id, name);
+                                        }}
+                                        loading={isLoading}
+                                        disabled={isLoading || isDisabled}
+                                        type={'link'}
+                                    >
+                                        {t('Remove Dataset')}
+                                    </Button>
+                                </List.Item>
+                            );
+                        }}
+                    ></List>
+                );
             },
             width: '50%',
         },
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, {id }) => {
-                return <Button onClick={() => {handleOpen(id);}} loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
-                            {t('Link Dataset')}
-                        </Button>
-            }
+            render: (_, { id }) => {
+                return (
+                    <Button
+                        onClick={() => {
+                            handleOpen(id);
+                        }}
+                        loading={isLoading}
+                        disabled={isLoading || isDisabled}
+                        type={'link'}
+                    >
+                        {t('Link Dataset')}
+                    </Button>
+                );
+            },
         },
     ];
 };

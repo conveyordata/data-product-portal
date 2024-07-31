@@ -1,4 +1,3 @@
-
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import { ReactNode, RefObject } from 'react';
 import styles from './data-product-data-output-link-popup.module.scss';
@@ -14,34 +13,30 @@ type Props = {
     formRef: RefObject<FormInstance<DataOutputCreateFormSchema>>;
 };
 
-export function DataProductDataOutputLinkPopup({
-    onClose,
-    isOpen,
-    title,
-    formRef,
-    children,
-}: Props) {
+export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef, children }: Props) {
     const { t } = useTranslation();
     return (
-        <FormModal title={title} onClose={onClose} onOk={() => {}} isOpen={isOpen} footer={(_, {}) =>
-            <Space>
-                <Button
-                    className={styles.formButton}
-                    type="primary"
-                    htmlType={'submit'}
-                    onClick={() => formRef.current?.submit()}
-                >
-                    {t('Create')}
-                </Button>
-                <Button
-                    className={styles.formButton}
-                    type="default"
-                    onClick={onClose}
-                >
-                    {t('Cancel')}
-                </Button>
-            </Space>
-        }>
+        <FormModal
+            title={title}
+            onClose={onClose}
+            onOk={() => {}}
+            isOpen={isOpen}
+            footer={(_, {}) => (
+                <Space>
+                    <Button
+                        className={styles.formButton}
+                        type="primary"
+                        htmlType={'submit'}
+                        onClick={() => formRef.current?.submit()}
+                    >
+                        {t('Create')}
+                    </Button>
+                    <Button className={styles.formButton} type="default" onClick={onClose}>
+                        {t('Cancel')}
+                    </Button>
+                </Space>
+            )}
+        >
             <div className={styles.list}>{children}</div>
         </FormModal>
     );
