@@ -18,7 +18,7 @@ import {
 } from '@/types/data-product';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import { datasetsApiSlice } from '@/store/features/datasets/datasets-api-slice.ts';
-import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
+import { DataOutputsGetContract } from '@/types/data-output';
 
 export const dataProductTags: string[] = [
     TagTypes.DataProduct,

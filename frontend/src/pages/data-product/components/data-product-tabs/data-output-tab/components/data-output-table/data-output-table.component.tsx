@@ -17,7 +17,7 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 type Props = {
     isCurrentDataProductOwner: boolean;
     dataProductId: string;
-    dataOutputs: DataOutputsGetContract[];
+    dataOutputs: DataOutputsGetContract;
 };
 
 export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, dataOutputs }: Props) {
@@ -63,7 +63,7 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
         }
     };
 
-    const columns: TableColumnsType<DataOutputsGetContract> = useMemo(() => {
+    const columns: TableColumnsType<DataOutputsGetContract[0]> = useMemo(() => {
         return getDataProductDataOutputsColumns({
             t,
             handleOpen: (id) => {
@@ -81,7 +81,7 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
     return (
         <>
             <Flex className={styles.dataOutputListContainer}>
-                <Table<DataOutputsGetContract>
+                <Table<DataOutputsGetContract[0]>
                     loading={isLoadingDataProduct}
                     className={styles.dataOutputListTable}
                     columns={columns}

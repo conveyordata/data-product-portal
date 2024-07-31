@@ -4,7 +4,7 @@ import { TFunction } from 'i18next';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
+import { DataOutputsGetContract } from '@/types/data-output/data-outputs-get.contract';
 import { getDataOutputIcon } from '@/utils/data-output-type-icon.helper';
 import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtitle/data-output-subtitle.component';
 import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
@@ -27,7 +27,7 @@ export const getDataProductDataOutputsColumns = ({
     isDisabled,
     isLoading,
     onRemoveDatasetFromDataOutput,
-}: Props): TableColumnsType<DataOutputsGetContract> => {
+}: Props): TableColumnsType<DataOutputsGetContract[0]> => {
     return [
         {
             title: t('Id'),
