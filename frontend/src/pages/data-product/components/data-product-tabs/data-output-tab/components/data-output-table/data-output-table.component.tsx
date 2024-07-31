@@ -24,8 +24,7 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
-    const [removeDatasetFromDataOutput] =
-        useRemoveDatasetFromDataOutputMutation();
+    const [removeDatasetFromDataOutput] = useRemoveDatasetFromDataOutputMutation();
 
     // const handleRemoveDataOutputFromDataProduct = async (dataOutputId: string, name: string) => {
     //     try {

@@ -189,7 +189,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             />
                         );
                     case DataPlatforms.Glue:
-                        return <GlueDataOutputForm/>; //mode={mode} dataProductId={dataProductId} />;
+                        return <GlueDataOutputForm />; //mode={mode} dataProductId={dataProductId} />;
                     default:
                         return null;
                 }

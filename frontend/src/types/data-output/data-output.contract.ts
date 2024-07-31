@@ -7,7 +7,6 @@ export enum DataOutputConfigurationTypes {
     GlueDataOutput = 'GlueDataOutput',
 }
 
-
 export interface DataOutputContract {
     id: string;
     external_id: string;
