@@ -10,6 +10,7 @@ from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.errors.error_handling import ErrorHandler
 from app.core.logging.logger import setup_logger
+from app.exceptions import NotFoundInDB
 from app.settings import settings
 from app.shared.router import router
 
@@ -68,6 +69,16 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
     return ErrorHandler().raise_generic_exception(request, exc)
+
+
+@app.exception_handler(NotFoundInDB)
+async def db_not_found_exception_handler(request: Request, exc: NotFoundInDB):
+    return ErrorHandler().raise_bad_request_exception(exc)
+
+
+@app.exception_handler(ValueError)
+async def value_error_exception_handler(request: Request, exc: ValueError):
+    return ErrorHandler().raise_bad_request_exception(exc)
 
 
 async def log_middleware(request: Request, call_next):

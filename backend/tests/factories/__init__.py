@@ -1,4 +1,5 @@
 from .. import TestingSessionLocal
+from .env_platform_service_config import EnvPlatformServiceConfigFactory
 from .environment import EnvironmentFactory
 from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
@@ -10,6 +11,7 @@ factories = [
     PlatformFactory,
     PlatformServiceFactory,
     PlatformServiceConfigFactory,
+    EnvPlatformServiceConfigFactory,
     UserFactory,
 ]
 

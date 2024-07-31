@@ -1,11 +1,14 @@
+import traceback
 from logging import getLogger
 from uuid import uuid4
-from fastapi.encoders import jsonable_encoder
+
 from fastapi import Request, status
-from starlette.exceptions import HTTPException
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-import traceback
+from starlette.exceptions import HTTPException
+
+from app.exceptions import DataProductPortalException
 
 
 class ErrorHandler:
@@ -40,9 +43,7 @@ class ErrorHandler:
             ),
         )
 
-    def raise_generic_exception(
-        self, request: Request, exception: RequestValidationError
-    ):
+    def raise_generic_exception(self, request: Request, exception: Exception):
         error = self._create_basic_error(exception)
         error["status"] = 500
 
@@ -68,6 +69,25 @@ class ErrorHandler:
                 {
                     "correlation_id": error.get("correlation_id"),
                     "detail": exception.detail,
+                }
+            ),
+        )
+
+    def raise_bad_request_exception(
+        self, exception: DataProductPortalException | ValueError
+    ):
+        error = {
+            **self._create_basic_error(exception),
+            "status": status.HTTP_400_BAD_REQUEST,
+            "detail": str(exception),
+        }
+        self.logger.error(error)
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=jsonable_encoder(
+                {
+                    "correlation_id": error.get("correlation_id"),
+                    "detail": error.get("detail"),
                 }
             ),
         )
