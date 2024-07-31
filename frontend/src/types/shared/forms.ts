@@ -1,7 +1,6 @@
 import { ComponentType, ForwardRefExoticComponent, SVGProps } from 'react';
 import { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
 import { DataPlatform } from '../data-platform';
-import { DataOutputConfiguration } from '../data-output';
 
 export type SearchForm = {
     search: string;

@@ -27,8 +27,6 @@ export function BaseNode<T extends BaseNodeProps>({
         icon,
         borderType = 'round',
         nodeToolbarActions,
-        targetHandlePosition = Position.Left,
-        sourceHandlePosition = Position.Right,
         isActive = true,
     },
 }: NodeProps<T>) {

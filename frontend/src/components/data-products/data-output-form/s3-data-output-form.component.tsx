@@ -1,26 +1,26 @@
-import { Button, Form, FormInstance, FormProps, Input, Select, Space } from 'antd';
+import { Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
-import styles from './data-output-form.module.scss';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+// import styles from './data-output-form.module.scss';
+// import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import {
     DataOutputConfiguration,
-    DataOutputCreate,
+    // DataOutputCreate,
     DataOutputCreateFormSchema,
-    GlueDataOutput,
+    // GlueDataOutput,
     S3DataOutput,
-    S3DataOutputContract,
+    // S3DataOutputContract,
 } from '@/types/data-output';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+// import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-import { Component, MutableRefObject, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createDataProductIdPath } from '@/types/navigation.ts';
-import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
-import { useCreateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { DataPlatform, DataPlatforms } from '@/types/data-platform';
-import { getDataPlatforms } from '@/pages/data-product/components/data-product-actions/data-product-actions.component';
-import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
-import { CustomDropdownItemProps } from '@/types/shared';
+import { useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { createDataProductIdPath } from '@/types/navigation.ts';
+// import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
+// import { useCreateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
+// import { DataPlatforms } from '@/types/data-platform';
+// import { getDataPlatforms } from '@/pages/data-product/components/data-product-actions/data-product-actions.component';
+// // import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
+// import { CustomDropdownItemProps } from '@/types/shared';
 
 type Props = {
     mode: 'create';
@@ -29,32 +29,32 @@ type Props = {
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
-export function S3DataOutputForm({ form, mode, dataProductId, external_id }: Props) {
+export function S3DataOutputForm({ form, external_id }: Props) {
     const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [configurationForm, setConfigurationForm] = useState<Element | null>();
-    const [selectedDataPlatform, setSelectedDataPlatform] = useState<
-        CustomDropdownItemProps<DataPlatforms> | undefined
-    >(undefined);
-    const [selectedConfiguration, setSelectedConfiguration] = useState<
-        CustomDropdownItemProps<DataPlatforms> | undefined
-    >(undefined);
-    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
+    // const navigate = useNavigate();
+    // const [configurationForm, setConfigurationForm] = useState<Element | null>();
+    // const [selectedDataPlatform, setSelectedDataPlatform] = useState<
+    //     CustomDropdownItemProps<DataPlatforms> | undefined
+    // >(undefined);
+    // const [selectedConfiguration, setSelectedConfiguration] = useState<
+    //     CustomDropdownItemProps<DataPlatforms> | undefined
+    // >(undefined);
+    // const { data: _, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
 
     const buckets = ['datalake', 'ingress']; // TODO Fetch from AWS platform settings;
     const bucketOptions = buckets.map((bucket) => ({ label: bucket, value: bucket })); //TODO
-    const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
+    // const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const dataProductNameValue: string = Form.useWatch('temp_prefix', form);
-    const canFillInForm = mode === 'create';
-    const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
-    const isLoading = isCreating || isCreating || isFetchingInitialValues;
-    const onCancel = () => {
-        form.resetFields();
-    };
+    // const canFillInForm = mode === 'create';
+    // const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
+    // const isLoading = isCreating || isCreating || isFetchingInitialValues;
+    // const onCancel = () => {
+    //     form.resetFields();
+    // };
 
-    const onSubmitFailed: FormProps<DataOutputConfiguration>['onFinishFailed'] = () => {
-        dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
-    };
+    // const onSubmitFailed: FormProps<DataOutputConfiguration>['onFinishFailed'] = () => {
+    //     dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
+    // };
     useEffect(() => {
         if (dataProductNameValue) {
             form.setFieldsValue({ prefix: external_id + '/' + generateExternalIdFromName(dataProductNameValue) });

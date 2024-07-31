@@ -21,7 +21,7 @@ export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef
             onClose={onClose}
             onOk={() => {}}
             isOpen={isOpen}
-            footer={(_, {}) => (
+            footer={() => (
                 <Space>
                     <Button
                         className={styles.formButton}

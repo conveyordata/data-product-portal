@@ -28,7 +28,6 @@ import { TFunction } from 'i18next';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { DataPlatforms, DataPlatform } from '@/types/data-platform';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
-import { S3DataOutput, DataOutputConfiguration } from '@/types/data-output';
 
 type Props = {
     dataProductId: string;

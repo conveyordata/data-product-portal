@@ -1,5 +1,5 @@
 import { Flex, Table, TableColumnsType } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 //import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,8 +8,7 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import styles from './data-output-table.module.scss';
 import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
-import { DataOutput } from '@/types/data-output';
-import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
+import { DataOutputsGetContract } from '@/types/data-output';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { AddDatasetPopup } from '../add-dataset-popup/add-dataset-popup.tsx';
 import { useRemoveDatasetFromDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
@@ -25,7 +24,7 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
-    const [removeDatasetFromDataOutput, { isLoading: isRemovingDatasetFromDataOutput }] =
+    const [removeDatasetFromDataOutput] =
         useRemoveDatasetFromDataOutputMutation();
 
     // const handleRemoveDataOutputFromDataProduct = async (dataOutputId: string, name: string) => {

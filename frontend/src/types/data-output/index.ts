@@ -1,9 +1,9 @@
-import { S3DataOutputForm } from '@/components/data-products/data-output-form/s3-data-output-form.component.tsx';
+// import { S3DataOutputForm } from '@/components/data-products/data-output-form/s3-data-output-form.component.tsx';
 import { GlueDataOutput } from './glue-data-output.contract.ts';
-import { S3DataOutput, S3DataOutputContract } from './s3-data-output.contract.ts';
-import { GlueDataOutputForm } from '@/components/data-products/data-output-form/glue-data-output-form.component.tsx';
-
-export type { DataOutputContract, DataOutput } from './data-output.contract.ts';
+import { S3DataOutput } from './s3-data-output.contract.ts';
+// import { GlueDataOutputForm } from '@/components/data-products/data-output-form/glue-data-output-form.component.tsx';
+export type { DataOutputsGetContract } from './data-output-get.contract.ts';
+export type { DataOutputContract } from './data-output.contract.ts';
 export type {
     DataOutputCreate,
     DataOutputCreateFormSchema,

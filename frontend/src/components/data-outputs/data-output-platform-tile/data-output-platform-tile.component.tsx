@@ -1,9 +1,9 @@
 import { Environment } from '@/types/environment';
-import { Dropdown, DropdownProps, Flex, MenuProps, Radio, Space, Spin, Typography } from 'antd';
+import { DropdownProps, Flex, Radio, Space, Spin, Typography } from 'antd';
 import styles from './data-output-platform-tile.module.scss';
 import { CustomDropdownItemProps } from '@/types/shared';
-import { useTranslation } from 'react-i18next';
-import { useMemo } from 'react';
+// import { useTranslation } from 'react-i18next';
+// import { useMemo } from 'react';
 import Icon from '@ant-design/icons';
 
 type Props<T extends string> = {
@@ -19,31 +19,30 @@ type Props<T extends string> = {
 
 export function DataOutputPlatformTile<T extends string>({
     dataPlatform,
-    environments,
+    // environments,
     isLoading,
     isDisabled,
     isSelected,
-    onMenuItemClick = () => {},
+    // onMenuItemClick = () => {},
     onTileClick = () => {},
 }: Props<T>) {
-    const { t } = useTranslation();
+    // const { t } = useTranslation();
     const isDisabledDropdown = isDisabled || dataPlatform.disabled;
-    const isMenuDisabled = dataPlatform.hasMenu;
 
-    const items: MenuProps['items'] = useMemo(
-        () => [
-            {
-                type: 'group',
-                // children: environments?.map((env) => ({
-                //     key: env.name,
-                //     label: env.name,
-                //     disabled: isDisabled,
-                //     onClick: ({ key }) => onMenuItemClick(key, dataPlatform.value),
-                // })),
-            },
-        ],
-        [environments, isDisabled, onMenuItemClick, dataPlatform.value, t],
-    );
+    // const items: MenuProps['items'] = useMemo(
+    //     () => [
+    //         {
+    //             type: 'group',
+    //             // children: environments?.map((env) => ({
+    //             //     key: env.name,
+    //             //     label: env.name,
+    //             //     disabled: isDisabled,
+    //             //     onClick: ({ key }) => onMenuItemClick(key, dataPlatform.value),
+    //             // })),
+    //         },
+    //     ],
+    //     [environments, isDisabled, onMenuItemClick, dataPlatform.value, t],
+    // );
 
     return (
         <Flex vertical className={styles.radioButtonContainer}>

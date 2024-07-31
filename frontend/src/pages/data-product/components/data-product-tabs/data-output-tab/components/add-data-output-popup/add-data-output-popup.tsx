@@ -4,7 +4,7 @@ import { DataOutputForm } from '@/components/data-products/data-output-form/data
 import { useRef } from 'react';
 import { FormInstance } from 'antd';
 import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
-import styles from './add-data-output-popup.module.scss';
+// import styles from './add-data-output-popup.module.scss';
 
 type Props = {
     onClose: () => void;
