@@ -4,10 +4,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.data_outputs.schema import DataOutputRegister
+from app.data_outputs.schema_get import DataOutputGet
 from app.data_products.schema import (
+    DataProductAboutUpdate,
     DataProductCreate,
     DataProductUpdate,
-    DataProductAboutUpdate,
 )
 from app.data_products.schema_get import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
@@ -197,3 +199,22 @@ def get_conveyor_notebook_url(id: UUID, db: Session = Depends(get_db_session)) -
 @router.get("/{id}/conveyor_ide_url")
 def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
     return DataProductService().get_conveyor_ide_url(id, db)
+
+
+@router.post("/{id}/data_output")
+def register_new_data_output(
+    id: UUID,
+    data_output: DataOutputRegister,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> dict[str, UUID]:
+    return DataProductService().register_new_data_output(
+        id, data_output, authenticated_user, db
+    )
+
+
+@router.get("/{id}/data_outputs")
+def get_data_outputs(
+    self, id: UUID, db: Session = Depends(get_db_session)
+) -> list[DataOutputGet]:
+    return DataProductService().get_data_outputs(id, db)
