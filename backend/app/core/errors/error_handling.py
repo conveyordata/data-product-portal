@@ -2,13 +2,13 @@ import traceback
 from logging import getLogger
 from uuid import uuid4
 
-from fastapi import Request, status
+from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
-from app.exceptions import DataProductPortalException
+from app.exceptions import DataProductPortalException, NotFoundInDB
 
 
 class ErrorHandler:
@@ -91,3 +91,33 @@ class ErrorHandler:
                 }
             ),
         )
+
+
+def add_exception_handlers(app: FastAPI):
+    app.add_exception_handler(Exception, generic_exception_handler)
+    app.add_exception_handler(HTTPException, http_exception_handler)
+    app.add_exception_handler(RequestValidationError, validation_exception_handler)
+    app.add_exception_handler(NotFoundInDB, db_not_found_exception_handler)
+    app.add_exception_handler(ValueError, value_error_exception_handler)
+
+
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    return ErrorHandler().raise_exception(exc)
+
+
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    return ErrorHandler().raise_validation_exception(exc)
+
+
+async def generic_exception_handler(request: Request, exc: Exception):
+    return ErrorHandler().raise_generic_exception(request, exc)
+
+
+async def db_not_found_exception_handler(request: Request, exc: NotFoundInDB):
+    return ErrorHandler().raise_bad_request_exception(exc)
+
+
+async def value_error_exception_handler(request: Request, exc: ValueError):
+    return ErrorHandler().raise_bad_request_exception(exc)

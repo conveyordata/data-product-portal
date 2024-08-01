@@ -18,6 +18,7 @@ from app.main import app
 from app.users.model import User as UserModel
 
 from . import TestingSessionLocal
+from .factories import UserFactory
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -300,3 +301,8 @@ def clear_db(session: TestingSessionLocal) -> None:
     for table in reversed(Base.metadata.sorted_tables):
         session.execute(table.delete())
     session.commit()
+
+
+@pytest.fixture
+def admin():
+    return UserFactory(external_id="sub", is_admin=True)

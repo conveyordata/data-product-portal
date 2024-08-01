@@ -1,18 +1,17 @@
 import time
 
 from fastapi import FastAPI, Request, Response
-from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.exceptions import HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
-from app.core.errors.error_handling import ErrorHandler
+from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging.logger import setup_logger
-from app.exceptions import NotFoundInDB
 from app.settings import settings
 from app.shared.router import router
+
+logger = setup_logger()
 
 with open("./VERSION", "r") as f:
     API_VERSION = f.read().strip()
@@ -32,53 +31,6 @@ oidc_kwargs = (
         "swagger_ui_oauth2_redirect_url": "/",
     }
 )
-app = FastAPI(
-    title=TITLE,
-    summary=("Backend API implementation for Data product portal"),
-    version=API_VERSION,
-    contact={"name": "Stijn Janssens", "email": "stijn.janssens@dataminded.com"},
-    docs_url="/api/docs",
-    openapi_url="/api/openapi.json",
-    **oidc_kwargs
-)
-
-app.include_router(router, prefix="/api")
-app.include_router(auth, prefix="/api")
-
-logger = setup_logger()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.CORS_ALLOWED_ORIGINS.split(","),
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.exception_handler(HTTPException)
-async def exception_handler(request: Request, exc: HTTPException):
-    return ErrorHandler().raise_exception(exc)
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    return ErrorHandler().raise_validation_exception(exc)
-
-
-@app.exception_handler(Exception)
-async def generic_exception_handler(request: Request, exc: Exception):
-    return ErrorHandler().raise_generic_exception(request, exc)
-
-
-@app.exception_handler(NotFoundInDB)
-async def db_not_found_exception_handler(request: Request, exc: NotFoundInDB):
-    return ErrorHandler().raise_bad_request_exception(exc)
-
-
-@app.exception_handler(ValueError)
-async def value_error_exception_handler(request: Request, exc: ValueError):
-    return ErrorHandler().raise_bad_request_exception(exc)
 
 
 async def log_middleware(request: Request, call_next):
@@ -96,6 +48,28 @@ async def log_middleware(request: Request, call_next):
     return response
 
 
+app = FastAPI(
+    title=TITLE,
+    summary="Backend API implementation for Data product portal",
+    version=API_VERSION,
+    contact={"name": "Stijn Janssens", "email": "stijn.janssens@dataminded.com"},
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json",
+    **oidc_kwargs
+)
+
+app.include_router(router, prefix="/api")
+app.include_router(auth, prefix="/api")
+
+add_exception_handlers(app)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ALLOWED_ORIGINS.split(","),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.add_middleware(BaseHTTPMiddleware, dispatch=log_middleware)
 
 

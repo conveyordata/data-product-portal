@@ -1,3 +1,5 @@
+import json
+
 import factory
 
 from app.environments.model import EnvPlatformServiceConfig
@@ -12,7 +14,16 @@ class EnvPlatformServiceConfigFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = EnvPlatformServiceConfig
 
     id = factory.Faker("uuid4")
-    config = '{"identifiers": ["bucket_1"]}'
+    config = json.dumps(
+        {
+            "bucket_1": {
+                "account_id": 10,
+                "name": "name1",
+                "arn": "arn1",
+                "kms": "kms1",
+            }
+        }
+    )
 
     platform = factory.SubFactory(PlatformFactory)
     service = factory.SubFactory(PlatformServiceFactory)

@@ -41,7 +41,7 @@ def get_environment_platform_service_config(
 @router.post(
     "/{environment_id}/config",
     dependencies=[Depends(only_for_admin)],
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_201_CREATED,
 )
 def create_environment_platform_service_config(
     environment_id: UUID,

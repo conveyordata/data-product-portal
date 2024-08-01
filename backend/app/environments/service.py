@@ -41,12 +41,12 @@ class EnvironmentService:
             PlatformServiceConfig.service_id == service_id,
         )
 
-        pltf_srvc_config = self.db.scalar(stmt)
-        if not pltf_srvc_config:
+        pltfrm_srvc_config = self.db.scalar(stmt)
+        if not pltfrm_srvc_config:
             raise NotFoundInDB("There's no platform service configuration")
 
         identifiers = PlatformServiceConfigSchema(
-            config=pltf_srvc_config
+            config=pltfrm_srvc_config
         ).config.identifiers
         if set(identifiers) != set(config.dict()):
             raise ValueError("Invalid configuration")
