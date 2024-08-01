@@ -17,14 +17,14 @@ from .service import PlatformsService
 router = APIRouter(prefix="/platforms", tags=["platforms"])
 
 
-@router.get("", dependencies=[Depends(only_for_admin)])
+@router.get("")
 def get_all_platforms(
     db: Session = Depends(get_db_session),
 ) -> Sequence[GetPlatformsSchema]:
     return PlatformsService(db).get_all_platforms()
 
 
-@router.get("/{platform_id}/services", dependencies=[Depends(only_for_admin)])
+@router.get("/{platform_id}/services")
 def get_platform_services(
     platform_id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[GetPlatformServicesSchema]:
