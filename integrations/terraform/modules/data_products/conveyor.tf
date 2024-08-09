@@ -17,26 +17,6 @@ resource "conveyor_project" "project" {
         rm -rf awscliv2.zip ./aws
         EOT
     }
-
-    build_steps {
-      name = "AWS console via boto3"
-      cmd  = <<-EOT
-        sudo apt update
-        pip install boto3
-
-        cat << EOS > ~/.local/lib/toconsole.py
-        ${file("../../modules/data_products/toconsole.py")}
-        EOS
-
-        cat << EOF > aws-console
-        #!/bin/sh
-        www-browser \$(python ~/.local/lib/toconsole.py)
-        EOF
-        chmod +x aws-console
-        sudo mv aws-console /usr/bin/
-
-      EOT
-    }
   }
 
   lifecycle {
