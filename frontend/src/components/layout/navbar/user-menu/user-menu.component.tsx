@@ -1,4 +1,4 @@
-import { Avatar, Flex, theme, Typography } from 'antd';
+import { Avatar, Badge, Flex, theme, Typography } from 'antd';
 import styles from '@/components/layout/navbar/navbar.module.scss';
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -37,13 +37,21 @@ export function UserMenu() {
             console.error('Failed to logout', e);
         }
     };
+    const badgeStyle = {
+        backgroundColor: '#3c9673',
+        fontSize: 10,
+        display: user?.is_admin ? 'block' : 'none',
+    };
 
     return (
         <Flex className={styles.userMenuContainer}>
             <Flex className={styles.avatarWrapper}>
-                <Avatar style={{ backgroundColor: colorErrorBorder }} className={styles.avatar}>
-                    {userInitials || <UserOutlined />}
-                </Avatar>
+                <Badge count="admin" style={badgeStyle} size="small">
+                    <Avatar style={{ backgroundColor: colorErrorBorder }} className={styles.avatar}>
+                        {userInitials || <UserOutlined />}
+                    </Avatar>
+                </Badge>
+
                 <Typography.Text strong className={styles.userGreeting}>
                     {t('Hello, {{name}}', { name: user?.first_name || usernameFallback })}
                 </Typography.Text>
