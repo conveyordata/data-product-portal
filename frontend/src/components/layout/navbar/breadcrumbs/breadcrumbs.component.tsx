@@ -1,6 +1,6 @@
 import { useLocation, useParams } from 'react-router-dom';
 import { Breadcrumb, Space, Typography } from 'antd';
-import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
+import { ApplicationPaths, DynamicPathParams, createEnvironmentConfigsPath } from '@/types/navigation.ts';
 import Icon, { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import styles from './breadcrumbs.module.scss';
 import { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadcrumb/Breadcrumb';
@@ -11,7 +11,17 @@ import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-s
 import { ReactNode, useMemo } from 'react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
-import { isDataProductEditPage } from '@/utils/routes.helper.ts';
+import {
+    isDataProductEditPage,
+    isEnvironmentConfigsPage,
+    isEnvironmentConfigCreatePage,
+    isEnvConfigPage,
+} from '@/utils/routes.helper.ts';
+import { useGetPlatformServiceConfigByIdQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
+import {
+    useGetEnvironmentByIdQuery,
+    useGetEnvConfigByIdQuery,
+} from '@/store/features/environments/environments-api-slice';
 
 type BreadcrumbType = Partial<BreadcrumbItemType & BreadcrumbSeparatorType> & { icon?: ReactNode };
 
@@ -21,11 +31,25 @@ export const Breadcrumbs = () => {
     const params = useParams<DynamicPathParams>();
     const pathnames =
         pathname === ApplicationPaths.Home ? [ApplicationPaths.Home] : pathname.split('/').filter((x) => x);
-    const { dataProductId = '', datasetId = '' } = params;
+    const {
+        dataProductId = '',
+        datasetId = '',
+        platformServiceConfigId = '',
+        environmentId = '',
+        envConfigId = '',
+    } = params;
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductByIdQuery(dataProductId, {
         skip: !dataProductId,
     });
     const { data: dataset, isFetching: isFetchingDataset } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
+    const { data: platformServiceConfig, isFetching: isFetchingPlatformServiceConfig } =
+        useGetPlatformServiceConfigByIdQuery(platformServiceConfigId, { skip: !platformServiceConfigId });
+    const { data: environment, isFetching: isFetchingEnvironment } = useGetEnvironmentByIdQuery(environmentId, {
+        skip: !environmentId,
+    });
+    const { data: envConfig, isFetching: isFetchingEnvConfig } = useGetEnvConfigByIdQuery(envConfigId, {
+        skip: !envConfigId,
+    });
 
     const items: BreadcrumbType[] = useMemo(
         () =>
@@ -141,7 +165,41 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
-                        case ApplicationPaths.Settings:
+                        // case ApplicationPaths.Settings:
+                        //     Object.assign(breadcrumbItem, {
+                        //         title: (
+                        //             <Space
+                        //                 classNames={{
+                        //                     item: styles.breadcrumbItem,
+                        //                 }}
+                        //             >
+                        //                 <SettingOutlined />
+                        //                 {t('Settings')}
+                        //             </Space>
+                        //         ),
+                        //     });
+                        //     break;
+                        case ApplicationPaths.PlatformsConfigs:
+                            Object.assign(breadcrumbItem, {
+                                title: (
+                                    <Space classNames={{ item: styles.breadcrumbItem }}>
+                                        <SettingOutlined />
+                                        {t('Platforms Configurations')}
+                                    </Space>
+                                ),
+                            });
+                            break;
+                        case ApplicationPaths.Environments:
+                            Object.assign(breadcrumbItem, {
+                                title: (
+                                    <Space classNames={{ item: styles.breadcrumbItem }}>
+                                        <SettingOutlined />
+                                        {t('Environments')}
+                                    </Space>
+                                ),
+                            });
+                            break;
+                        case ApplicationPaths.EnvironmentNew:
                             Object.assign(breadcrumbItem, {
                                 title: (
                                     <Space
@@ -149,8 +207,20 @@ export const Breadcrumbs = () => {
                                             item: styles.breadcrumbItem,
                                         }}
                                     >
-                                        <SettingOutlined />
-                                        {t('Settings')}
+                                        {t('New Environment')}
+                                    </Space>
+                                ),
+                            });
+                            break;
+                        case ApplicationPaths.PlatformServiceConfigNew:
+                            Object.assign(breadcrumbItem, {
+                                title: (
+                                    <Space
+                                        classNames={{
+                                            item: styles.breadcrumbItem,
+                                        }}
+                                    >
+                                        {t('New Platform Service Configuration')}
                                     </Space>
                                 ),
                             });
@@ -200,7 +270,81 @@ export const Breadcrumbs = () => {
                                 });
                             }
 
+                            if (platformServiceConfigId && platformServiceConfig && !isFetchingPlatformServiceConfig) {
+                                Object.assign(breadcrumbItem, {
+                                    title: (
+                                        <Space classNames={{ item: styles.breadcrumbItem }}>
+                                            {`${platformServiceConfig.platform.name} - ${platformServiceConfig.service.name}`}
+                                        </Space>
+                                    ),
+                                });
+                            }
+
+                            if (environmentId && environment && !isFetchingEnvironment) {
+                                if (isEnvironmentConfigsPage(path, environmentId)) {
+                                    break;
+                                } else if (isEnvironmentConfigCreatePage(path, environmentId)) {
+                                    Object.assign(breadcrumbItem, {
+                                        title: (
+                                            <Space
+                                                classNames={{
+                                                    item: styles.breadcrumbItem,
+                                                }}
+                                            >
+                                                {t('New Environment Configuration')}
+                                            </Space>
+                                        ),
+                                    });
+                                } else {
+                                    Object.assign(breadcrumbItem, {
+                                        path: createEnvironmentConfigsPath(environmentId),
+                                        title: (
+                                            <Space
+                                                classNames={{
+                                                    item: styles.breadcrumbItem,
+                                                }}
+                                            >
+                                                {environment.name}
+                                            </Space>
+                                        ),
+                                    });
+                                }
+                            }
+
+                            if (envConfigId && envConfig && !isFetchingEnvConfig) {
+                                if (isEnvConfigPage(path, envConfigId)) {
+                                    Object.assign(breadcrumbItem, {
+                                        title: (
+                                            <Space
+                                                classNames={{
+                                                    item: styles.breadcrumbItem,
+                                                }}
+                                            >
+                                                {`${envConfig.platform.name}-${envConfig.service.name}`}
+                                            </Space>
+                                        ),
+                                    });
+                                } else {
+                                    Object.assign(breadcrumbItem, {
+                                        path: createEnvironmentConfigsPath(envConfig.environment.id),
+                                        title: (
+                                            <Space
+                                                classNames={{
+                                                    item: styles.breadcrumbItem,
+                                                }}
+                                            >
+                                                {envConfig.environment.name}
+                                            </Space>
+                                        ),
+                                    });
+                                }
+                            }
+
                             break;
+                    }
+
+                    if (breadcrumbItem.title === '') {
+                        return null;
                     }
 
                     return breadcrumbItem;

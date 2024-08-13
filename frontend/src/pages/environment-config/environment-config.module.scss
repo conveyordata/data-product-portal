@@ -1,0 +1,20 @@
+@import '@/styles/variables';
+
+.container {
+    @extend .container;
+    text-align: start;
+    justify-content: flex-start;
+    gap: $column-gap-m;
+}
+
+.textarea-container {
+    width: 50%;
+
+    textarea {
+        padding: $spacing-m;
+
+        &:disabled {
+            color: #808080;
+        }
+    }
+}

@@ -18,6 +18,9 @@ export enum ApiUrl {
     UserDatasets = '/api/datasets/user/:userId',
     Authorize = '/api/auth/user',
     Environments = '/api/envs',
+    EnvironmentGet = '/api/envs/:environmentId',
+    EnvPlatformServiceConfigs = '/api/envs/:environmentId/configs',
+    EnvPlatformServiceConfig = '/api/envs/configs/:configId',
     Datasets = '/api/datasets',
     DatasetUser = '/api/datasets/:datasetId/user/:userId',
     DatasetGet = '/api/datasets/:datasetId',
@@ -27,9 +30,23 @@ export enum ApiUrl {
     DataProductDatasetLinkApprove = '/api/data_product_dataset_links/approve/:datasetLinkId',
     DataProductDatasetLinkReject = '/api/data_product_dataset_links/deny/:datasetLinkId',
     DataProductDatasetLinkRemove = '/api/data_product_dataset_links/remove/:datasetLinkId',
+    Platforms = '/api/platforms',
+    PlatformsConfigs = '/api/platforms/configs',
+    PlatformServices = '/api/platforms/:platformId/services',
+    PlatformServiceConfig = '/api/platforms/:platformId/services/:serviceId',
+    PlatformServiceConfigById = '/api/platforms/configs/:configId',
 }
 
-export type DynamicPathParams = 'dataProductId' | 'userId' | 'datasetId' | 'datasetLinkId' | 'membershipId';
+export type DynamicPathParams =
+    | 'dataProductId'
+    | 'userId'
+    | 'datasetId'
+    | 'datasetLinkId'
+    | 'membershipId'
+    | 'platformId'
+    | 'serviceId'
+    | 'environmentId'
+    | 'configId';
 
 export function buildUrl(url: string, pathParams: Record<DynamicPathParams | string, string>): string {
     return Object.keys(pathParams).reduce((acc, key) => acc.replace(`:${key}`, pathParams[key]), url);

@@ -8,6 +8,10 @@ export enum TagTypes {
     Environment = 'Environment',
     Dataset = 'Dataset',
     BusinessArea = 'BusinessArea',
+    Platform = 'Platform',
+    PlatformService = 'PlatformService',
+    PlatformServiceConfig = 'PlatformServiceConfig',
+    EnvironmentConfigs = 'EnvironmentConfigs',
 }
 
 export const STATIC_TAG_ID = {

@@ -21,7 +21,7 @@ class TestEnvironmentsRouter:
             client,
             {"name": "dev", "context": "environment_context{{}}", "is_default": False},
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
 
     @pytest.mark.usefixtures("admin")
     def test_get_environments(self, client):
@@ -51,11 +51,15 @@ class TestEnvironmentsRouter:
         response = client.post(ENDPOINT, json=environment)
         return response
 
+    @pytest.mark.usefixtures("admin")
+    def test_get_environment(self, client):
+        env = EnvironmentFactory()
+        response = client.get(f"{ENDPOINT}/{env.id}")
+        assert response.status_code == 200
+        assert response.json()["name"] == env.name
+
     def test_get_environment_platform_service_config_forbidden(self, client):
-        response = client.get(
-            f"{ENDPOINT}/environment_uuid/config",
-            params={"platform_id": "platform_uuid", "service_id": "service_uuid"},
-        )
+        response = client.get(f"{ENDPOINT}/configs/config_uuid")
         assert response.status_code == 403
         assert response.json()["detail"] == "Only admin can execute this operation"
 
@@ -66,17 +70,35 @@ class TestEnvironmentsRouter:
             platform=service.platform, service=service
         )
 
-        response = client.get(
-            f"{ENDPOINT}/{config_obj.environment_id}/config",
-            params={"platform_id": service.platform.id, "service_id": service.id},
-        )
+        response = client.get(f"{ENDPOINT}/configs/{config_obj.id}")
 
         assert response.status_code == 200
         actual_config = response.json()
         assert actual_config["config"] == json.loads(config_obj.config)
 
+    def test_get_environment_configs_forbidden(self, client):
+        response = client.get(f"{ENDPOINT}/env_uuid/configs")
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Only admin can execute this operation"
+
+    @pytest.mark.usefixtures("admin")
+    def test_get_environment_configs(self, client):
+        service = PlatformServiceFactory()
+        config_obj = EnvPlatformServiceConfigFactory(
+            platform=service.platform, service=service
+        )
+
+        response = client.get(f"{ENDPOINT}/{config_obj.environment_id}/configs")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["service"]["name"] == service.name
+        assert "platform" in data[0]
+        assert "config" in data[0]
+
     def test_create_config_forbidden(self, client):
-        response = client.post(f"{ENDPOINT}/environment_uuid/config", json={})
+        response = client.post(f"{ENDPOINT}/environment_uuid/configs", json={})
         assert response.status_code == 403
         assert response.json()["detail"] == "Only admin can execute this operation"
 
@@ -86,7 +108,7 @@ class TestEnvironmentsRouter:
         env = EnvironmentFactory()
 
         response = client.post(
-            f"{ENDPOINT}/{env.id}/config",
+            f"{ENDPOINT}/{env.id}/configs",
             json={
                 "platform_id": str(service.platform.id),
                 "service_id": str(service.id),
@@ -108,7 +130,7 @@ class TestEnvironmentsRouter:
         env = EnvironmentFactory()
 
         response = client.post(
-            f"{ENDPOINT}/{env.id}/config",
+            f"{ENDPOINT}/{env.id}/configs",
             json={
                 "platform_id": str(service.platform.id),
                 "service_id": str(service.id),
@@ -126,7 +148,7 @@ class TestEnvironmentsRouter:
         env = EnvironmentFactory()
 
         response = client.post(
-            f"{ENDPOINT}/{env.id}/config",
+            f"{ENDPOINT}/{env.id}/configs",
             json={
                 "platform_id": str(service.platform.id),
                 "service_id": str(service.id),

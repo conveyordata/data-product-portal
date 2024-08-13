@@ -2,13 +2,14 @@ from typing import Sequence
 from uuid import UUID
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.environments.model import Environment, EnvPlatformServiceConfig
 from app.environments.schema import Config
 from app.exceptions import NotFoundInDB
 from app.platforms.models import PlatformServiceConfig
-from app.platforms.schemas import PlatformServiceConfigSchema
+from app.platforms.schemas import PlatformServiceConfigBaseSchema
 
 
 class EnvironmentService:
@@ -18,19 +19,22 @@ class EnvironmentService:
     def get_environments(self) -> Sequence[Environment]:
         return self.db.scalars(select(Environment)).all()
 
+    def get_environment_by_id(self, environment_id: UUID) -> Environment:
+        return self.db.scalar(
+            select(Environment).where(Environment.id == environment_id)
+        )
+
     def create_environment(self, environment: Environment) -> None:
         self.db.add(Environment(**environment.model_dump()))
         self.db.commit()
 
-    def get_config(
-        self, environment_id: UUID, platform_id: UUID, service_id: UUID
-    ) -> str:
-        stmt = select(EnvPlatformServiceConfig.config).where(
-            EnvPlatformServiceConfig.environment_id == environment_id,
-            EnvPlatformServiceConfig.platform_id == platform_id,
-            EnvPlatformServiceConfig.service_id == service_id,
+    def get_environment_configs(
+        self, environment_id: UUID
+    ) -> Sequence[EnvPlatformServiceConfig]:
+        stmt = select(EnvPlatformServiceConfig).where(
+            EnvPlatformServiceConfig.environment_id == environment_id
         )
-        return self.db.scalar(stmt)
+        return self.db.scalars(stmt).all()
 
     def create_config(
         self, environment_id: UUID, platform_id: UUID, service_id: UUID, config: Config
@@ -45,7 +49,7 @@ class EnvironmentService:
         if not platform_service_config:
             raise NotFoundInDB("There's no platform service configuration")
 
-        identifiers = PlatformServiceConfigSchema(
+        identifiers = PlatformServiceConfigBaseSchema(
             config=platform_service_config
         ).config.identifiers
         if set(identifiers) != set(config.dict()):
@@ -59,4 +63,14 @@ class EnvironmentService:
                 config=config.model_dump_json(),
             )
         )
-        self.db.flush()
+        try:
+            self.db.flush()
+        except IntegrityError:
+            raise ValueError("Such configuration already exists")
+
+    def get_environment_config_by_id(self, config_id: UUID):
+        return self.db.scalar(
+            select(EnvPlatformServiceConfig).where(
+                EnvPlatformServiceConfig.id == config_id
+            )
+        )
