@@ -7,7 +7,9 @@ from app.datasets.enums import DatasetAccessType
 from app.main import app
 
 from . import TestingSessionLocal
-from .factories import BusinessAreaFactory, DataProductTypeFactory, UserFactory
+from .factories.business_area import BusinessAreaFactory
+from .factories.data_product_type import DataProductTypeFactory
+from .factories.user import UserFactory
 
 
 @pytest.fixture(scope="session", autouse=True)

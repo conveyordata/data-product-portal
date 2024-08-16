@@ -1,12 +1,12 @@
 import factory
 from tests import test_session
-from tests.factories import UserFactory
 
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset
 from app.datasets.status import DatasetStatus
 
 from .business_area import BusinessAreaFactory
+from .user import UserFactory
 
 
 class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
