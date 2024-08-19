@@ -1,13 +1,12 @@
 from base64 import urlsafe_b64encode
 from datetime import datetime, timedelta
 from hashlib import sha256
-from logging import getLogger
 from typing import Annotated
 from uuid import uuid4
 
 import httpx
 import pytz
-from fastapi import HTTPException, Request, status, Depends
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.orm import Session
@@ -21,6 +20,7 @@ from app.core.auth.device_flows.model import DeviceFlow as DeviceFlowModel
 from app.core.auth.device_flows.schema import DeviceFlow, DeviceFlowStatus
 from app.core.auth.jwt import oidc
 from app.core.helpers.templates import render_html_template
+from app.core.logging.logger import logger
 
 basic_auth = HTTPBasic()
 
@@ -48,7 +48,7 @@ def utc_now() -> datetime:
 
 class DeviceFlowService:
     def __init__(self):
-        self.logger = getLogger()
+        self.logger = logger
 
     def generate_device_flow_codes(
         self, db: Session, client_id: str, scope: str = "openid"

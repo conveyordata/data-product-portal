@@ -1,29 +1,24 @@
 import traceback
-from logging import getLogger
-from uuid import uuid4
 
+from asgi_correlation_id import correlation_id
 from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
+from app.core.logging.logger import logger
 from app.exceptions import DataProductPortalException, NotFoundInDB
 
 
 class ErrorHandler:
     def __init__(self):
-        self.logger = getLogger("error")
+        self.logger = logger
 
-    def _generate_correlation_id(self) -> str:
-        correlation_id = uuid4().hex
-        return correlation_id
-
-    def _create_basic_error(
-        self, exception: Exception
-    ) -> dict[str, str | list[str] | int]:
+    @staticmethod
+    def _create_basic_error(exception: Exception) -> dict[str, str | list[str] | int]:
         return {
-            "correlation_id": self._generate_correlation_id(),
+            "correlation_id": correlation_id.get() or "",
             "stacktrace": traceback.format_exception(exception),
         }
 

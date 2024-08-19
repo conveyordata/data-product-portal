@@ -1,5 +1,6 @@
 import time
 
+from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -7,11 +8,9 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.errors.error_handling import add_exception_handlers
-from app.core.logging.logger import setup_logger
+from app.core.logging.logger import logger
 from app.settings import settings
 from app.shared.router import router
-
-logger = setup_logger()
 
 with open("./VERSION", "r") as f:
     API_VERSION = f.read().strip()
@@ -71,6 +70,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(BaseHTTPMiddleware, dispatch=log_middleware)
+app.add_middleware(
+    CorrelationIdMiddleware,
+    header_name="X-Request-ID",
+    update_request_header=True,
+)
 
 
 # K8S health and liveness check
