@@ -60,3 +60,9 @@ API key you can directly interact with the data product portal to retrieve infor
 
 We also included a sample [python script](./envs/portal/read_portal_config.py) that will retrieve the portal configuration
 and convert it to the same config representation that you can find in the [config folder](./envs/portal/config)
+
+## Automatically updating the terraform configuration with the retrieved configuration files
+For now the data product portal does not support automatically updating the terraform configuration if the configuration
+has changed, so the easiest would be to run the python script and update the configuration files manually or on a schedule
+(daily, hourly,...). We intend to add this functionality in a later release as part of the core data platform portal 
+release.
