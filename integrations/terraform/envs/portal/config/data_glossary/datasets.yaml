@@ -1,0 +1,17 @@
+clean_test:
+  data_outputs:
+    - clean_test
+    - raw_test
+  owner: john.doe@dataminded.com
+
+master_test:
+  data_outputs:
+    - master_test
+  owner: john.doe@dataminded.com
+
+all_data:
+  data_outputs:
+    - raw_test
+    - clean_test
+    - master_test
+  owner: john.doe@dataminded.com
