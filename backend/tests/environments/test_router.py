@@ -51,15 +51,6 @@ class TestEnvironmentsRouter:
         response = client.post(ENDPOINT, json=environment)
         return response
 
-    def test_get_environment_platform_service_config_forbidden(self, client):
-        response = client.get(
-            f"{ENDPOINT}/environment_uuid/config",
-            params={"platform_id": "platform_uuid", "service_id": "service_uuid"},
-        )
-        assert response.status_code == 403
-        assert response.json()["detail"] == "Only admin can execute this operation"
-
-    @pytest.mark.usefixtures("admin")
     def test_get_environment_platform_service_config(self, client):
         service = PlatformServiceFactory()
         config_obj = EnvPlatformServiceConfigFactory(

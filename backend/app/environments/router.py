@@ -17,7 +17,7 @@ from app.environments.service import EnvironmentService
 router = APIRouter(prefix="/envs", tags=["environments"])
 
 
-@router.get("", dependencies=[Depends(only_for_admin)])
+@router.get("")
 def get_environments(db: Session = Depends(get_db_session)) -> Sequence[GetEnvironment]:
     return EnvironmentService(db).get_environments()
 
@@ -27,7 +27,7 @@ def create_environment(environment: Environment, db: Session = Depends(get_db_se
     EnvironmentService(db).create_environment(environment)
 
 
-@router.get("/{environment_id}/config", dependencies=[Depends(only_for_admin)])
+@router.get("/{environment_id}/config")
 def get_environment_platform_service_config(
     environment_id: UUID,
     platform_id: UUID,
