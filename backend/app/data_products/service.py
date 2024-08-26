@@ -326,7 +326,11 @@ class DataProductService:
         RefreshInfrastructureLambda().trigger()
 
     def get_data_product_role_arn(self, id: UUID, environment: str, db: Session) -> str:
-        environment_context = db.get(EnvironmentModel, environment).context
+        environment_context = (
+            db.query(EnvironmentModel)
+            .get_one(EnvironmentModel.name, environment)
+            .context
+        )
         external_id = db.get(DataProductModel, id).external_id
         role_arn = environment_context.replace("{{}}", external_id)
         return role_arn
