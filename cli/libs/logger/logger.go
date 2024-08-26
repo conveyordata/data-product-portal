@@ -81,7 +81,7 @@ func StopSpinnerWithFinalMessage(format string, a ...interface{}) {
 }
 
 func StopSpinnerWithFinalWarning(format string, a ...interface{}) {
-	StopSpinnerWithFinalMessage(color.YellowString(format, a...))
+	StopSpinnerWithFinalMessage(color.YellowString(format, a...), a...)
 }
 
 func InfoSpinnerf(format string, a ...interface{}) {
