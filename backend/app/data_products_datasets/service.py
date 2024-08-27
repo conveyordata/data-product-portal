@@ -36,7 +36,7 @@ class DataProductDatasetService:
         if current_link.status != DataProductDatasetLinkStatus.PENDING_APPROVAL:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Request doesn't require approval",
+                detail="Request already approved/denied",
             )
         current_link.status = DataProductDatasetLinkStatus.APPROVED
         current_link.approved_by = authenticated_user
