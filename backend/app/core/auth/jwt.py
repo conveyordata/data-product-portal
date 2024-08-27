@@ -1,8 +1,9 @@
-from app.core.auth.oidc import OIDCConfiguration
 from jose import jwt
-from logging import getLogger
-from jose.exceptions import JWTClaimsError, JWTError, ExpiredSignatureError
+from jose.exceptions import ExpiredSignatureError, JWTClaimsError, JWTError
 from pydantic import BaseModel
+
+from app.core.auth.oidc import OIDCConfiguration
+from app.core.logging.logger import logger
 
 oidc = OIDCConfiguration()
 
@@ -15,7 +16,7 @@ class JWTToken(BaseModel):
 class JWTTokenValid:
     def __init__(self, token: str):
         self.oidc = oidc
-        self.logger = getLogger()
+        self.logger = logger
         self.token = token
         self.valid_jwt_token: dict[str, str] = {}
 

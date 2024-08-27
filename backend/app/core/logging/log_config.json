@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "filters": {
+    "correlation_id": {
+      "()": "asgi_correlation_id.CorrelationIdFilter",
+      "uuid_length": 32,
+      "default_value": "None"
+    }
+  },
+  "formatters": {
+    "standard": {
+      "format": "%(asctime)s [%(correlation_id)s] [%(levelname)s] %(filename)s L%(lineno)-4d: %(message)s"
+    },
+    "detailedFormatter": {
+      "format": "%(asctime)s [%(correlation_id)s] [%(levelname)s] %(filename)s L%(lineno)-4d: %(message)s  call_trace=%(pathname)s"
+    }
+  },
+  "handlers": {
+    "fileHandler": {
+      "level": "DEBUG",
+      "formatter": "standard",
+      "class": "logging.handlers.TimedRotatingFileHandler",
+      "when": "MIDNIGHT",
+      "interval": 1,
+      "filters": ["correlation_id"],
+      ".": {"suffix": "%Y%m%d.log"}
+    },
+    "consoleHandler": {
+      "level": "DEBUG",
+      "formatter": "standard",
+      "class": "logging.StreamHandler"
+    },
+    "detailedConsoleHandler": {
+      "level": "DEBUG",
+      "formatter": "detailedFormatter",
+      "class": "logging.StreamHandler"
+    }
+  },
+  "loggers": {
+    "": {
+      "handlers": ["fileHandler", "consoleHandler"],
+      "level": "WARNING",
+      "propagate": false
+    }
+  }
+}

@@ -1,24 +1,32 @@
-from logging import getLogger, INFO, config, Logger
-from logging.handlers import TimedRotatingFileHandler
+import json
+import logging
+import logging.config
 import os
 
+from app.settings import LoggerConfig
 
-def setup_logger(prefix: str = "local") -> Logger:
-    config.fileConfig(
-        os.path.join("app", "core", "logging", "logging.conf"),
-        disable_existing_loggers=False,
+settings = LoggerConfig()
+
+LOG_LEVEL = getattr(logging, settings.LOG_LEVEL)
+LOG_CONFIG_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), settings.LOG_CONFIG_FILE
+)
+
+
+def get_logger(name: str, prefix: str = "local"):
+    dict_config = json.load(open(LOG_CONFIG_PATH))
+    dict_config["handlers"]["fileHandler"]["filename"] = os.path.join(
+        settings.LOGGING_DIRECTORY, prefix
     )
-    logger = getLogger("root")
 
-    logging_dir = os.getenv("LOGGING_DIRECTORY", "/var/logs")
+    if not os.path.exists(settings.LOGGING_DIRECTORY):
+        os.makedirs(settings.LOGGING_DIRECTORY)
 
-    if not os.path.exists(logging_dir):
-        os.makedirs(logging_dir)
+    logging.config.dictConfig(dict_config)
 
-    fh = TimedRotatingFileHandler(
-        os.path.join(logging_dir, prefix), when="MIDNIGHT", interval=1
-    )
-    fh.suffix = "%Y%m%d.log"
-    fh.setLevel(INFO)
-    logger.addHandler(fh)
-    return logger
+    app_logger = logging.getLogger(name)
+    app_logger.setLevel(LOG_LEVEL)
+    return app_logger
+
+
+logger = get_logger(__name__)
