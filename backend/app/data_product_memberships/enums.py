@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class DataProductUserRole(Enum):
+class DataProductUserRole(str, Enum):
     OWNER = "owner"
     MEMBER = "member"
 
