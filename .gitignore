@@ -162,3 +162,5 @@ helm/charts
 .vscode/
 tmp/
 .prod.env
+.terraform*
+terraform.tfstate

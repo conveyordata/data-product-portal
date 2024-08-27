@@ -1,0 +1,5 @@
+clean_test:
+  s3: clean/test
+
+master_test:
+  s3: master/test
