@@ -263,5 +263,6 @@
     "Dataset {{name}} has been removed from data output": "Dataset {{name}} has been removed from data output",
     "Failed to remove dataset from data output": "Failed to remove dataset from data output",
     "Failed to approve data output dataset link": "Failed to approve data output dataset link",
-    "Failed to reject data output dataset link": "Failed to reject data output dataset link"
+    "Failed to reject data output dataset link": "Failed to reject data output dataset link",
+    "Is source aligned": "Is source aligned"
 }

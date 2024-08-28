@@ -17,6 +17,7 @@ class DataOutputCreate(ORMModel):
     owner_id: UUID
     status: DataOutputStatus
     configuration: DataOutputs
+    sourceAligned: bool
 
 
 class DataOutputRegister(ORMModel):

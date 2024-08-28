@@ -1,5 +1,6 @@
 from app.core.aws.boto3_clients import get_client
 from app.data_outputs.data_output_types import DataOutputTypes
+from app.data_products.schema import DataProduct
 from app.shared.schema import ORMModel
 
 
@@ -11,6 +12,10 @@ class S3DataOutput(ORMModel):
     account_id: str = "test"
     kms_key: str = "test"
     configuration_type: DataOutputTypes = DataOutputTypes.S3DataOutput
+
+    def validate_configuration(self, data_product: DataProduct):
+        if not self.prefix.startswith(data_product.external_id):
+            raise ValueError("Invalid prefix specified")
 
     # @field_validator("bucket")
     # @classmethod

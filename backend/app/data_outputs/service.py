@@ -10,6 +10,7 @@ from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputToDB
 from app.data_outputs.schema_union import DataOutputMap
+from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
@@ -84,6 +85,18 @@ class DataOutputService:
         self, data_output: DataOutputCreate, db: Session, authenticated_user: User
     ) -> dict[str, UUID]:
         self.ensure_member(authenticated_user, data_output, db)
+
+        if data_output.sourceAligned:
+            data_output.status = DataOutputStatus.PENDING
+        else:
+            data_product = db.get(DataProductModel, data_output.owner_id)
+
+            # TODO Figure out if this validation needs to happen either way
+            # somehow and let sourcealigned be handled internally there?
+            data_output.configuration.validate_configuration(data_product)
+
+        # TODO Test fastapi errors?
+        # TODO This needs to be better implemented > auto convert json
         data_output = DataOutputToDB(
             name=data_output.name,
             description=data_output.description,

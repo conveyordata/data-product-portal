@@ -1,6 +1,6 @@
-import { Form, Input, Select } from 'antd';
+import { Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { GlueDataOutput } from '@/types/data-output';
+import { DataOutputConfiguration, DataOutputCreateFormSchema, GlueDataOutput } from '@/types/data-output';
 // import styles from './data-output-form.module.scss';
 // import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 // import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
@@ -15,12 +15,13 @@ import { GlueDataOutput } from '@/types/data-output';
 // import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 // import { CustomDropdownItemProps } from '@/types/shared';
 
-// type Props = {
-//     mode: 'create';
-//     dataProductId: string;
-// };
+type Props = {
+    sourceAligned: boolean;
+    external_id: string | undefined;
+    form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
+};
 
-export function GlueDataOutputForm() {
+export function GlueDataOutputForm({ form, external_id }: Props) {
     const { t } = useTranslation();
 
     return (

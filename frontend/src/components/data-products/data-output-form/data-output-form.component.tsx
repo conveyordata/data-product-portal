@@ -1,4 +1,4 @@
-import { Form, FormInstance, FormProps, Input, Space } from 'antd';
+import { Checkbox, Form, FormInstance, FormProps, Input, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -38,6 +38,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
+    const sourceAligned = Form.useWatch('is_source_aligned', form);
     const dataProductNameValue = Form.useWatch('name', form);
     const canFillInForm = mode === 'create';
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
@@ -56,6 +57,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     description: values.description,
                     configuration: config,
                     owner_id: dataProductId,
+                    sourceAligned: sourceAligned === undefined ? false : sourceAligned,
                     status: DataOutputStatus.Active
                 };
                 await createDataOutput(request).unwrap();
@@ -102,6 +104,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             });
         }
     }, [dataProductNameValue]);
+
+    useEffect(() => {
+        console.log(sourceAligned)
+    }, [sourceAligned])
     // TODO Required fields of nested elements do not transcent
     return (
         <Form
@@ -147,6 +153,11 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             >
                 <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
+            <Form.Item<DataOutputCreateFormSchema>
+                name={'is_source_aligned'} valuePropName="checked"
+            >
+                <Checkbox>{t('Is source aligned')}</Checkbox>
+            </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>
                     {dataPlatforms
@@ -185,13 +196,14 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         return (
                             <S3DataOutputForm
                                 form={form}
+                                sourceAligned={sourceAligned}
                                 external_id={currentDataProduct?.external_id}
                                 mode={mode}
                                 dataProductId={dataProductId}
                             />
                         );
                     case DataPlatforms.Glue:
-                        return <GlueDataOutputForm />; //mode={mode} dataProductId={dataProductId} />;
+                        return <GlueDataOutputForm form={form} external_id={currentDataProduct?.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
                     default:
                         return null;
                 }

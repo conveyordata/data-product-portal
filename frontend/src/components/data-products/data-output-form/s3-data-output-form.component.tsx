@@ -25,11 +25,12 @@ import { useEffect } from 'react';
 type Props = {
     mode: 'create';
     dataProductId: string;
+    sourceAligned: boolean;
     external_id: string | undefined;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
-export function S3DataOutputForm({ form, external_id }: Props) {
+export function S3DataOutputForm({ form, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
     // const navigate = useNavigate();
     // const [configurationForm, setConfigurationForm] = useState<Element | null>();
@@ -56,12 +57,16 @@ export function S3DataOutputForm({ form, external_id }: Props) {
     //     dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     // };
     useEffect(() => {
-        if (dataProductNameValue) {
-            form.setFieldsValue({ prefix: external_id + '/' + generateExternalIdFromName(dataProductNameValue) });
-        } else {
-            form.setFieldsValue({ prefix: external_id + '/' });
+        let prefix = external_id + "/"
+        if (sourceAligned) {
+            prefix = ""
         }
-    }, [dataProductNameValue]);
+        if (dataProductNameValue) {
+            form.setFieldsValue({ prefix: prefix + generateExternalIdFromName(dataProductNameValue) });
+        } else {
+            form.setFieldsValue({ prefix: prefix });
+        }
+    }, [dataProductNameValue, sourceAligned]);
 
     // TODO form is not really interactive?
 
@@ -100,6 +105,7 @@ export function S3DataOutputForm({ form, external_id }: Props) {
             </Form.Item>
             <Form.Item<S3DataOutput>
                 required
+                hidden={sourceAligned}
                 name={'prefix'}
                 label={t('Resulting prefix')}
                 tooltip={t('The path on s3 you can access through this data output')}
