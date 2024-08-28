@@ -1,0 +1,9 @@
+test-project-1:
+  description: test project 1
+  read_datasets: []
+
+test-project-2:
+  description: test project 2
+  read_datasets:
+    - clean_test
+

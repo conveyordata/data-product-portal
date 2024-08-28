@@ -51,6 +51,23 @@ test = ["anyio[trio]", "coverage[toml] (>=7)", "exceptiongroup (>=1.2.0)", "hypo
 trio = ["trio (>=0.23)"]
 
 [[package]]
+name = "asgi-correlation-id"
+version = "4.3.2"
+description = "Middleware correlating project logs to individual requests"
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "asgi_correlation_id-4.3.2-py3-none-any.whl", hash = "sha256:82c0608b5cbe7abde1da1cbee07d9330d050b6ec179b8c8b7d6cf0ddc2aaa4da"},
+    {file = "asgi_correlation_id-4.3.2.tar.gz", hash = "sha256:84058a64b67e1ac7074177209c756f14e1e4b6958689bf2ef34f8b60a87c794f"},
+]
+
+[package.dependencies]
+starlette = ">=0.18"
+
+[package.extras]
+celery = ["celery"]
+
+[[package]]
 name = "boto3"
 version = "1.34.128"
 description = "The AWS SDK for Python"
@@ -1408,4 +1425,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "83d577c578fc99ae38e1ba481336fd64e11ab460d8a1658d3ffd1252f75d6eba"
+content-hash = "05e45b62bb73fc243dbacc1c282760a2d94722209f1dacf88e7fdc62611c3025"

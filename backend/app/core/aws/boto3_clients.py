@@ -1,9 +1,8 @@
-from logging import getLogger
-
 from botocore.client import BaseClient
 from fastapi import HTTPException, status
 
 from app.core.aws.refreshable_session import RefreshableBotoSession
+from app.core.logging.logger import logger
 
 disabled_aws = False
 try:
@@ -14,7 +13,6 @@ try:
         "lambda": session.client("lambda"),
     }
 except AttributeError:
-    logger = getLogger()
     logger.warning(
         "Could not instantiate AWS session. All AWS functionality will be disabled"
     )

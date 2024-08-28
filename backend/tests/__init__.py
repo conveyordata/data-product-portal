@@ -15,5 +15,7 @@ def get_test_url():
 
 
 engine = create_engine(get_test_url())
-session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+session_factory = sessionmaker(autoflush=False, bind=engine)
 TestingSessionLocal = scoped_session(session_factory)
+
+test_session = TestingSessionLocal()

@@ -1,3 +1,4 @@
+from enum import Enum
 from functools import lru_cache
 from typing import Optional
 
@@ -5,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
@@ -29,11 +30,26 @@ class Settings(BaseSettings):
     # Conveyor
     CONVEYOR_API_KEY: Optional[str] = None
     CONVEYOR_SECRET: Optional[str] = None
-    LOGGING_DIRECTORY: str = "./tmp/logs"
 
     # Infrastructure
     INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
+
+
+class LogLevel(str, Enum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
+
+
+class LoggerConfig(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    LOG_LEVEL: LogLevel = LogLevel.INFO
+    LOG_CONFIG_FILE: str = "log_config.json"
+    LOGGING_DIRECTORY: str = "/var/logs"
 
 
 @lru_cache
