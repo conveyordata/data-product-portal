@@ -17,6 +17,7 @@ import { CustomDropdownItemProps } from '@/types/shared';
 import { S3DataOutputForm } from './s3-data-output-form.component';
 import { GlueDataOutputForm } from './glue-data-output-form.component';
 import TextArea from 'antd/es/input/TextArea';
+import { DataOutputStatus } from '@/types/data-output/data-output.contract';
 
 type Props = {
     mode: 'create';
@@ -55,6 +56,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     description: values.description,
                     configuration: config,
                     owner_id: dataProductId,
+                    status: DataOutputStatus.Active
                 };
                 await createDataOutput(request).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });

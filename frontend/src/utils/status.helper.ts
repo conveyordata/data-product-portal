@@ -1,4 +1,5 @@
 import { DataProductStatus } from '@/types/data-product';
+import { DataOutputStatus } from '@/types/data-output';
 import { BadgeProps } from 'antd';
 import i18n from '@/i18n.ts';
 import { Status } from '@/types/shared';
@@ -8,11 +9,11 @@ import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
 
 export function getStatusLabel(status: Status): string {
     switch (status) {
-        case DataProductStatus.Pending:
+        case DataProductStatus.Pending || DataOutputStatus.Pending:
             return i18n.t('Pending');
-        case DataProductStatus.Active:
+        case DataProductStatus.Active || DataOutputStatus.Active:
             return i18n.t('Active');
-        case DataProductStatus.Archived:
+        case DataProductStatus.Archived || DataOutputStatus.Archived:
             return i18n.t('Archived');
         default:
             return i18n.t('Unknown');
@@ -21,11 +22,11 @@ export function getStatusLabel(status: Status): string {
 
 export function getBadgeStatus(status: Status): BadgeProps['status'] {
     switch (status) {
-        case DataProductStatus.Pending:
+        case DataProductStatus.Pending || DataOutputStatus.Pending:
             return 'processing';
-        case DataProductStatus.Active:
+        case DataProductStatus.Active || DataOutputStatus.Active:
             return 'success';
-        case DataProductStatus.Archived:
+        case DataProductStatus.Archived || DataOutputStatus.Archived:
             return 'error';
         default:
             return 'default';

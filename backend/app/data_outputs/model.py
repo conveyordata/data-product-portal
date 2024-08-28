@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.schema import DataOutput as DataOutputSchema
+from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
@@ -22,6 +23,7 @@ class DataOutput(Base, BaseORM):
     external_id = Column(String)
     name = Column(String)
     description = Column(String)
+    status: DataOutputStatus = Column(Enum(DataOutputStatus))
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
     owner: Mapped["DataProduct"] = relationship(back_populates="data_outputs")
     configuration_type: DataOutputTypes = Column(Enum(DataOutputTypes))

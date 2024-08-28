@@ -15,7 +15,6 @@ from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_product_memberships.enums import DataProductUserRole
-from app.datasets.enums import DatasetAccessType
 from app.datasets.model import ensure_dataset_exists
 from app.users.schema import User
 
@@ -63,6 +62,7 @@ class DataOutputService:
         data_output = DataOutputToDB(
             name=data_output.name,
             description=data_output.description,
+            status=data_output.status,
             external_id=data_output.external_id,
             owner_id=data_output.owner_id,
             configuration=data_output.configuration.model_dump_json(),
@@ -93,11 +93,8 @@ class DataOutputService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Dataset {dataset_id} already exists in data product {id}",
             )
-        approval_status = (
-            DataOutputDatasetLinkStatus.PENDING_APPROVAL
-            if dataset.access_type != DatasetAccessType.PUBLIC
-            else DataOutputDatasetLinkStatus.APPROVED
-        )
+        # Data output requests always need to be approved
+        approval_status = DataOutputDatasetLinkStatus.PENDING_APPROVAL
 
         dataset_link = DataOutputDatasetAssociationModel(
             dataset_id=dataset_id,

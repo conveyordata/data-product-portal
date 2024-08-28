@@ -1,4 +1,4 @@
-import { Badge, Button, List, TableColumnsType } from 'antd';
+import { Badge, Button, Flex, List, TableColumnsType } from 'antd';
 import styles from './data-output-table.module.scss';
 import { TFunction } from 'i18next';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
@@ -11,7 +11,7 @@ import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract
 import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title';
 import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title';
 import { createDatasetIdPath } from '@/types/navigation';
-import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
+import { getBadgeStatus, getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel, getStatusLabel } from '@/utils/status.helper';
 
 type Props = {
     t: TFunction;
@@ -37,7 +37,7 @@ export const getDataProductDataOutputsColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { id, name, description, configuration_type }) => {
+            render: (_, { id, name, status, description, configuration_type }) => {
                 return (
                     <TableCellAvatar
                         popover={{ title: name, content: description }}
@@ -45,13 +45,14 @@ export const getDataProductDataOutputsColumns = ({
                         icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration_type)!} />}
                         title={name}
                         subtitle={
+                            <Flex vertical>
+                             <Badge
+                                     status={getBadgeStatus(status)}
+                               text={getStatusLabel(status)}
+                                 className={styles.noSelect}
+                             />
                             <DataOutputSubtitle data_output_id={id} />
-                            //configuration_type
-                            // <Badge
-                            //     //status={getDataProductDataOutputLinkBadgeStatus(status)}
-                            //     //text={configuration_type}
-                            //     className={styles.noSelect}
-                            // />
+                            </Flex>
                         }
                     />
                 );

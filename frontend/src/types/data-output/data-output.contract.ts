@@ -7,11 +7,18 @@ export enum DataOutputConfigurationTypes {
     GlueDataOutput = 'GlueDataOutput',
 }
 
+export enum DataOutputStatus {
+    Pending = 'pending',
+    Active = 'active',
+    Archived = 'archived',
+}
+
 export interface DataOutputContract {
     id: string;
     external_id: string;
     description: string;
     name: string;
+    status: DataOutputStatus;
     owner: DataProductContract;
     owner_id: string;
     configuration: DataOutputConfiguration;

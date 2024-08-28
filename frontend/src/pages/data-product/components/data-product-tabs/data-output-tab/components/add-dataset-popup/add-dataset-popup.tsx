@@ -43,12 +43,9 @@ const handleDatasetListFilter = (datasets: DatasetsGetContract, searchTerm: stri
     });
 };
 
-const getIsRestrictedDataset = (dataset: DatasetsGetContract[0]) => {
-    return dataset?.access_type === 'restricted';
-};
 
-const getActionButtonText = (isRestricted: boolean, t: TFunction) => {
-    return isRestricted ? t('Request Link') : t('Link Dataset');
+const getActionButtonText = (t: TFunction) => {
+    return t('Request Link');
 };
 
 export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
@@ -68,13 +65,11 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
     }, [dataOutput?.dataset_links, allDatasets, searchTerm]);
 
     const handleRequestAccessToDataset = useCallback(
-        async (datasetId: string, isRestrictedDataset?: boolean) => {
+        async (datasetId: string) => {
             try {
                 await requestDatasetAccessForDataOutput({ dataOutputId: dataOutputId, datasetId }).unwrap();
 
-                const content = isRestrictedDataset
-                    ? t('Dataset link has been requested')
-                    : t('Dataset has been linked');
+                const content = t('Dataset link has been requested')
                 dispatchMessage({ content, type: 'success' });
                 onClose();
             } catch (error) {
@@ -99,19 +94,12 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                 dataSource={filteredDatasets}
                 renderItem={(item) => {
                     const icon = <CustomSvgIconLoader iconComponent={datasetBorderIcon} />;
-                    const isRestrictedDataset = getIsRestrictedDataset(item);
-                    const actionButtonText = getActionButtonText(isRestrictedDataset, t);
+                    const actionButtonText = getActionButtonText(t);
                     return (
                         <List.Item key={item.id}>
                             <TableCellAvatar
                                 icon={icon}
-                                title={
-                                    isRestrictedDataset ? (
-                                        <RestrictedDatasetTitle name={item.name} hasPopover />
-                                    ) : (
-                                        item.name
-                                    )
-                                }
+                                title={item.name}
                                 subtitle={
                                     <Typography.Link className={styles.noCursorPointer}>
                                         {item.business_area.name}
@@ -122,7 +110,7 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                                 disabled={isRequestingAccess}
                                 loading={isRequestingAccess}
                                 type={'link'}
-                                onClick={() => handleRequestAccessToDataset(item.id, isRestrictedDataset)}
+                                onClick={() => handleRequestAccessToDataset(item.id)}
                             >
                                 {actionButtonText}
                             </Button>
