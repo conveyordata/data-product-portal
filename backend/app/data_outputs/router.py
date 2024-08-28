@@ -36,9 +36,11 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
     },
 )
 def create_data_output(
-    data_output: DataOutputCreate, db: Session = Depends(get_db_session)
+    data_output: DataOutputCreate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DataOutputService().create_data_output(data_output, db)
+    return DataOutputService().create_data_output(data_output, db, authenticated_user)
 
 
 @router.post(

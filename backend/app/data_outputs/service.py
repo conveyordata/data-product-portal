@@ -15,20 +15,44 @@ from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_product_memberships.enums import DataProductUserRole
+from app.data_products.model import DataProduct as DataProductModel
 from app.datasets.model import ensure_dataset_exists
 from app.users.schema import User
 
 
 class DataOutputService:
-    @staticmethod
-    def ensure_owner(authenticated_user: User, data_output: DataOutput):
+    def ensure_member(
+        self, authenticated_user: User, data_output: DataOutputCreate, db: Session
+    ):
+        product = db.get(DataProductModel, data_output.owner_id)
         if authenticated_user.is_admin:
             return
 
         data_product_membership = next(
             (
                 membership
-                for membership in data_output.owner.memberships
+                for membership in product.memberships
+                if membership.user_id == authenticated_user.id
+            ),
+            None,
+        )
+        if data_product_membership is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only members can execute this operation",
+            )
+
+    def ensure_owner(
+        self, authenticated_user: User, data_output: DataOutputCreate, db: Session
+    ):
+        product = db.get(DataProductModel, data_output.owner_id)
+        if authenticated_user.is_admin:
+            return
+
+        data_product_membership = next(
+            (
+                membership
+                for membership in product.memberships
                 if membership.user_id == authenticated_user.id
             ),
             None,
@@ -57,8 +81,9 @@ class DataOutputService:
         return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
 
     def create_data_output(
-        self, data_output: DataOutputCreate, db: Session
+        self, data_output: DataOutputCreate, db: Session, authenticated_user: User
     ) -> dict[str, UUID]:
+        self.ensure_member(authenticated_user, data_output, db)
         data_output = DataOutputToDB(
             name=data_output.name,
             description=data_output.description,
@@ -82,7 +107,7 @@ class DataOutputService:
     ):
         dataset = ensure_dataset_exists(dataset_id, db)
         data_output = ensure_data_output_exists(id, db)
-        self.ensure_owner(authenticated_user, data_output)
+        self.ensure_owner(authenticated_user, data_output, db)
 
         if dataset.id in [
             link.dataset_id
@@ -113,7 +138,7 @@ class DataOutputService:
     ):
         ensure_dataset_exists(dataset_id, db)
         data_output = ensure_data_output_exists(id, db)
-        self.ensure_owner(authenticated_user, data_output)
+        self.ensure_owner(authenticated_user, data_output, db)
         data_output_dataset = next(
             (
                 dataset
