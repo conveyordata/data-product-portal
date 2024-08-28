@@ -17,7 +17,7 @@ export function UserMenu() {
     const { signoutRedirect } = useAuth();
     const user = useSelector(selectCurrentUser);
     const {
-        token: { colorErrorBorder },
+        token: { colorErrorBorder, colorPrimary },
     } = theme.useToken();
     const userInitials = user?.first_name && user.first_name.charAt(0);
 
@@ -38,7 +38,7 @@ export function UserMenu() {
         }
     };
     const badgeStyle = {
-        backgroundColor: '#3c9673',
+        backgroundColor: colorPrimary,
         fontSize: 10,
         display: user?.is_admin ? 'block' : 'none',
     };
