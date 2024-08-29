@@ -9,6 +9,8 @@ import { DataOutputLink } from '@/types/dataset';
 import { getDataOutputIcon } from '@/utils/data-output-type-icon.helper';
 import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
 import { DataOutputDatasetLinkRequest, DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 
 type Props = {
     t: TFunction;
@@ -61,7 +63,34 @@ export const getDatasetDataProductsColumns = ({
                     />
                 );
             },
-            width: '100%',
+            width: '50%',
+        },
+        {
+            title: t('Data Product'),
+            dataIndex: 'dataproduct',
+            render: (_, { data_output, status }) => {
+                return (
+                    <TableCellAvatar
+                        linkTo={createDataProductIdPath(data_output.owner_id)}
+                        icon={
+                            <CustomSvgIconLoader
+                                iconComponent={getDataProductTypeIcon(data_output.owner.type.icon_key)!}
+                                hasRoundBorder
+                                size={'default'}
+                            />
+                        }
+                        title={data_output.owner.name}
+                        subtitle={
+                            <Badge
+                                status={getDataOutputDatasetLinkBadgeStatus(status)}
+                                text={getDataOutputDatasetLinkStatusLabel(status)}
+                                className={styles.noSelect}
+                            />
+                        }
+                    />
+                );
+            },
+            width: '50%',
         },
         {
             title: t('Actions'),
