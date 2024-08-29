@@ -81,7 +81,7 @@ function generateDatasetOutputNodes(
     defaultNodePosition: XYPosition,
 ): Node[] {
     const datasetNodeLinks: Node<DatasetNodeProps>[] = datasetLinks.map((link) => ({
-        id: link.id + '_for_data_output',
+        id: link.dataset_id + '_for_data_output',
         position: defaultNodePosition,
         data: {
             name: link.dataset.name,
@@ -100,9 +100,9 @@ function generateDatasetOutputNodes(
 
 function generateDatasetDataOutputEdges(dataOutputId: string, datasetLinks: DatasetLink[]): Edge[] {
     return datasetLinks.map((link) => ({
-        id: `${link.id}-${dataOutputId}`,
+        id: `${link.dataset_id}-${dataOutputId}`,
         source: dataOutputId,
-        target: link.id + '_for_data_output',
+        target: link.dataset_id + '_for_data_output',
         targetHandle: 'left_t',
         sourceHandle: 'right_s',
         animated: link.status === DataProductDatasetLinkStatus.Approved,
