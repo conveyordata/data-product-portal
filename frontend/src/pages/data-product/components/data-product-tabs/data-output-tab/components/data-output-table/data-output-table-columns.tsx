@@ -1,4 +1,4 @@
-import { Badge, Button, Flex, List, TableColumnsType } from 'antd';
+import { Badge, Button, Flex, List, Popconfirm, TableColumnsType } from 'antd';
 import styles from './data-output-table.module.scss';
 import { TFunction } from 'i18next';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
@@ -18,6 +18,7 @@ type Props = {
     isLoading?: boolean;
     isDisabled?: boolean;
     handleOpen: (id: string) => void;
+    onRemoveDataOutput: (id: string, name: string) => void;
     onRemoveDatasetFromDataOutput: (datasetId: string, dataOutputId: string, name: string) => void;
 };
 
@@ -26,6 +27,7 @@ export const getDataProductDataOutputsColumns = ({
     handleOpen,
     isDisabled,
     isLoading,
+    onRemoveDataOutput,
     onRemoveDatasetFromDataOutput,
 }: Props): TableColumnsType<DataOutputsGetContract[0]> => {
     return [
@@ -122,8 +124,9 @@ export const getDataProductDataOutputsColumns = ({
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, { id }) => {
+            render: (_, { id, name }) => {
                 return (
+                    <Flex vertical>
                     <Button
                         onClick={() => {
                             handleOpen(id);
@@ -134,6 +137,25 @@ export const getDataProductDataOutputsColumns = ({
                     >
                         {t('Link Dataset')}
                     </Button>
+                    <Popconfirm
+                        title={t('Remove Data Output')}
+                        description={t('Are you sure you want to delete the data output? This can have impact on downstream dependencies')}
+                        onConfirm={() => onRemoveDataOutput(id, name)}
+                        placement={'leftTop'}
+                        okText={t('Confirm')}
+                        cancelText={t('Cancel')}
+                        okButtonProps={{ loading: isLoading }}
+                        autoAdjustOverflow={true}
+                    >
+                    <Button
+                        loading={isLoading}
+                        disabled={isLoading || isDisabled}
+                        type={'link'}
+                    >
+                        {t('Remove Data Output')}
+                    </Button>
+                    </Popconfirm>
+                    </Flex>
                 );
             },
         },

@@ -22,6 +22,25 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
     return DataOutputService().get_data_output(id, db)
 
 
+@router.delete(
+    "/{id}",
+    responses={
+        404: {
+            "description": "Data Output not found",
+            "content": {
+                "application/json": {"example": {"detail": "Data Output id not found"}}
+            },
+        }
+    },
+)
+def remove_data_output(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+):
+    return DataOutputService().remove_data_output(id, db, authenticated_user)
+
+
 @router.post(
     "",
     responses={

@@ -11,7 +11,7 @@ import { getDataProductDataOutputsColumns } from './data-output-table-columns.ts
 import { DataOutputsGetContract } from '@/types/data-output';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { AddDatasetPopup } from '../add-dataset-popup/add-dataset-popup.tsx';
-import { useRemoveDatasetFromDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
+import { useRemoveDataOutputMutation, useRemoveDatasetFromDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 
 type Props = {
@@ -25,32 +25,21 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
     const [removeDatasetFromDataOutput] = useRemoveDatasetFromDataOutputMutation();
+    const [removeDataOutput] = useRemoveDataOutputMutation();
 
-    // const handleRemoveDataOutputFromDataProduct = async (dataOutputId: string, name: string) => {
-    //     try {
-    //         await removeDataOutputFromDataProduct({ dataOutputId, dataProductId: dataProductId }).unwrap();
-    //         dispatchMessage({
-    //             content: t('DataOutput {{name}} has been removed from data product', { name }),
-    //             type: 'success',
-    //         });
-    //     } catch (error) {
-    //         console.error('Failed to remove dataOutput from data product', error);
-    //     }
-    // };
-
-    // const handleCancelDataOutputLinkRequest = async (dataOutputId: string, name: string) => {
-    //     try {
-    //         await removeDataOutputFromDataProduct({ dataOutputId, dataProductId: dataProductId }).unwrap();
-    //         dispatchMessage({
-    //             content: t('Request to link dataOutput {{name}} has been cancelled', { name }),
-    //             type: 'success',
-    //         });
-    //     } catch (error) {
-    //         console.error('Failed to cancel dataOutput link request', error);
-    //     }
-    // };
     const [dataOutput, setDataOutput] = useState<string | undefined>(undefined);
     const { isVisible, handleOpen, handleClose } = useModal();
+    const handleRemoveDataOutput = async (dataOutputId: string, name: string) => {
+        try {
+            await removeDataOutput(dataOutputId).unwrap();
+            dispatchMessage({
+                content: t("Data Output {{name}} has been successfully removed", { name }),
+                type: 'success',
+            })
+        } catch (error) {
+            console.error("Failed to remove data output", error);
+        }
+    }
     const handleRemoveDatasetFromDataOutput = async (datasetId: string, dataOutputId: string, name: string) => {
         try {
             await removeDatasetFromDataOutput({ datasetId, dataOutputId: dataOutputId }).unwrap();
@@ -70,6 +59,7 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
                 setDataOutput(id);
                 handleOpen();
             },
+            onRemoveDataOutput: handleRemoveDataOutput,
             onRemoveDatasetFromDataOutput: handleRemoveDatasetFromDataOutput,
             //isDisabled: !isCurrentDataProductOwner,
             //isLoading: () => {},//isRemovingDataOutputFromDataProduct,

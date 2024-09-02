@@ -117,6 +117,20 @@ class DataOutputService:
         RefreshInfrastructureLambda().trigger()
         return {"id": data_output.id}
 
+    def remove_data_output(self, id: UUID, db: Session, authenticated_user: User):
+        data_output = db.get(
+            DataOutputModel,
+            id,
+        )
+        if not data_output:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Data Output {id} not found",
+            )
+        self.ensure_owner(authenticated_user, data_output, db)
+        data_output.delete()
+        db.commit()
+
     def link_dataset_to_data_output(
         self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
     ):

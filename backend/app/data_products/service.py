@@ -146,7 +146,7 @@ class DataProductService:
         RefreshInfrastructureLambda().trigger()
         return {"id": data_product.id}
 
-    def remove_data_product(self, id: UUID, db: Session):
+    def remove_data_product(self, id: UUID, db: Session, authenticated_user: User):
         data_product = db.get(
             DataProductModel,
             id,
@@ -157,6 +157,7 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data Product {id} not found",
             )
+        self.ensure_owner(authenticated_user, data_product)
         data_product.memberships = []
         data_product.dataset_links = []
         data_product.delete()
@@ -414,7 +415,9 @@ class DataProductService:
         data_output.owner_id = id
         data_product = ensure_data_product_exists(id, db)
         self.ensure_owner(authenticated_user, data_product)
-        return DataOutputService().create_data_output(data_output, db)
+        return DataOutputService().create_data_output(
+            data_output, db, authenticated_user
+        )
 
     def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
         return db.query(DataOutputModel).filter(DataOutputModel.owner_id == id).all()

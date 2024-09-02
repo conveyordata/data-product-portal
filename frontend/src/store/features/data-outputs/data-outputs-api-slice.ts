@@ -77,6 +77,15 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
+        removeDataOutput: builder.mutation<void, string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataOutputGet, { dataOutputId: id }),
+                method: 'DELETE',
+            }),
+            invalidatesTags: [
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+            ],
+        }),
         removeDatasetFromDataOutput: builder.mutation<DataOutputDatasetRemoveResponse, DataOutputDatasetRemoveRequest>({
             query: ({ dataOutputId, datasetId }) => ({
                 url: buildUrl(ApiUrl.DataOutputsDataset, { dataOutputId, datasetId }),
@@ -116,5 +125,6 @@ export const {
     useGetDataOutputByIdQuery,
     useCreateDataOutputMutation,
     useRemoveDatasetFromDataOutputMutation,
+    useRemoveDataOutputMutation,
     useRequestDatasetAccessForDataOutputMutation,
 } = dataOutputsApiSlice;

@@ -78,8 +78,12 @@ def create_data_product(
         }
     },
 )
-def remove_data_product(id: UUID, db: Session = Depends(get_db_session)):
-    return DataProductService().remove_data_product(id, db)
+def remove_data_product(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+):
+    return DataProductService().remove_data_product(id, db, authenticated_user)
 
 
 @router.put(
