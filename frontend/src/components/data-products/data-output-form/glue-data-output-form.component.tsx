@@ -18,11 +18,12 @@ import { useEffect } from 'react';
 
 type Props = {
     sourceAligned: boolean;
+    identifiers: string[] | undefined;
     external_id: string | undefined;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
-export function GlueDataOutputForm({ form, external_id, sourceAligned }: Props) {
+export function GlueDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
     // const navigate = useNavigate();
     // const [configurationForm, setConfigurationForm] = useState<Element | null>();
@@ -35,8 +36,7 @@ export function GlueDataOutputForm({ form, external_id, sourceAligned }: Props) 
     // const { data: _, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
 
     const database = ["hardcoded_dp_db"]
-    const databases = ['dp1_db', 'dp2_db']; // TODO Fetch from AWS platform settings;
-    let databaseOptions = databases.map((database) => ({ label: database, value: database })); //TODO
+    let databaseOptions = identifiers?.map((database) => ({ label: database, value: database }));
     // const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const dataProductNameValue: string = Form.useWatch('temp_prefix', form);
     // const canFillInForm = mode === 'create';
@@ -51,14 +51,14 @@ export function GlueDataOutputForm({ form, external_id, sourceAligned }: Props) 
     // };
 
     useEffect(() => {
-        let databaseOptionsList = databases //TODO
+        let databaseOptionsList = identifiers //TODO
         if (!sourceAligned) {
             databaseOptionsList = database
             form.setFieldsValue({ glue_database: database[0]});
         } else {
             form.setFieldsValue({glue_database: undefined})
         }
-        databaseOptions = databaseOptionsList.map((database) => ({ label: database, value: database }));
+        databaseOptions = databaseOptionsList?.map((database) => ({ label: database, value: database }));
     }, [sourceAligned]);
 
     return (

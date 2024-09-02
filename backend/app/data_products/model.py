@@ -48,7 +48,7 @@ class DataProduct(Base, BaseORM):
         "DataProductMembership.role",
     )
     status: DataProductStatus = Column(
-        Enum(DataProductStatus), default=DataProductStatus.PENDING
+        Enum(DataProductStatus), default=DataProductStatus.ACTIVE
     )
     dataset_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",

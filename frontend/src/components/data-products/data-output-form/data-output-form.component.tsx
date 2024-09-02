@@ -36,6 +36,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const [selectedConfiguration, setSelectedConfiguration] = useState<
         CustomDropdownItemProps<DataPlatforms> | undefined
     >(undefined);
+
+    const [identifiers, setIdentifiers] = useState<string[]>([]);
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
@@ -46,10 +48,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const isLoading = isCreating || isCreating || isFetchingInitialValues;
 
     const { data: platformConfig, isFetching: isLoadingPlatformConfigs } = useGetAllPlatformsConfigsQuery()
-
-    const buckets = platformConfig?.filter((config) => {
-        return config.platform.name === 'AWS' && config.service.name === 'S3'
-    })[0]?.config.identifiers
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
@@ -99,8 +97,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         const dropdown = selectedDataPlatform?.children?.filter((platform) => platform.value === dataPlatform).at(0);
         if (selectedConfiguration !== undefined && selectedConfiguration === dropdown) {
             setSelectedConfiguration(undefined);
+            setIdentifiers([]);
         } else {
             setSelectedConfiguration(dropdown);
+            setIdentifiers(platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === dropdown?.value.toLowerCase())[0].config.identifiers!);
         }
     };
 
@@ -200,7 +200,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         return (
                             <S3DataOutputForm
                                 form={form}
-                                identifiers={buckets}
+                                identifiers={identifiers}
                                 sourceAligned={sourceAligned}
                                 external_id={currentDataProduct?.external_id}
                                 mode={mode}
@@ -208,7 +208,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             />
                         );
                     case DataPlatforms.Glue:
-                        return <GlueDataOutputForm form={form} external_id={currentDataProduct?.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
+                        return <GlueDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct?.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
                     default:
                         return null;
                 }

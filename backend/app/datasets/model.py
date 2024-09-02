@@ -52,7 +52,7 @@ class Dataset(Base, BaseORM):
     owners: Mapped[list["User"]] = relationship(
         secondary=datasets_owner_table, back_populates="owned_datasets"
     )
-    status: DatasetStatus = Column(Enum(DatasetStatus), default=DatasetStatus.PENDING)
+    status: DatasetStatus = Column(Enum(DatasetStatus), default=DatasetStatus.ACTIVE)
     data_product_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
         back_populates="dataset",
