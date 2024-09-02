@@ -128,6 +128,7 @@ class DataOutputService:
                 detail=f"Data Output {id} not found",
             )
         self.ensure_owner(authenticated_user, data_output, db)
+        data_output.dataset_links = []
         data_output.delete()
         db.commit()
 

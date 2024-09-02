@@ -122,7 +122,7 @@
     "Actions": "Actions",
     "Remove": "Remove",
     "Cancel Request": "Cancel Request",
-    "Remove Dataset": "Remove Dataset",
+    "Unlink Dataset": "Unlink Dataset",
     "Are you sure you want to cancel the request to link {{name}} to the data product?": "Are you sure you want to cancel the request to link {{name}} to the data product?",
     "Are you sure you want to remove {{name}} from the data product?": "Are you sure you want to remove {{name}} from the data product?",
     "Confirm": "Confirm",

@@ -111,7 +111,7 @@ export const getDataProductDataOutputsColumns = ({
                                         disabled={isLoading || isDisabled}
                                         type={'link'}
                                     >
-                                        {t('Remove Dataset')}
+                                        {t('Unlink Dataset')}
                                     </Button>
                                 </List.Item>
                             );
@@ -138,7 +138,7 @@ export const getDataProductDataOutputsColumns = ({
                         {t('Link Dataset')}
                     </Button>
                     <Popconfirm
-                        title={t('Remove Data Output')}
+                        title={t('Remove')}
                         description={t('Are you sure you want to delete the data output? This can have impact on downstream dependencies')}
                         onConfirm={() => onRemoveDataOutput(id, name)}
                         placement={'leftTop'}
@@ -152,7 +152,7 @@ export const getDataProductDataOutputsColumns = ({
                         disabled={isLoading || isDisabled}
                         type={'link'}
                     >
-                        {t('Remove Data Output')}
+                        {t('Remove')}
                     </Button>
                     </Popconfirm>
                     </Flex>

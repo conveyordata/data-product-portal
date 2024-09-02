@@ -88,6 +88,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         if (selectedDataPlatform !== undefined && selectedDataPlatform === dropdown) {
             setSelectedDataPlatform(undefined);
             setSelectedConfiguration(undefined);
+            setIdentifiers([]);
         } else {
             setSelectedDataPlatform(dropdown);
         }
@@ -99,6 +100,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             setSelectedConfiguration(undefined);
             setIdentifiers([]);
         } else {
+            setIdentifiers([]);
             setSelectedConfiguration(dropdown);
             setIdentifiers(platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === dropdown?.value.toLowerCase())[0].config.identifiers!);
         }
