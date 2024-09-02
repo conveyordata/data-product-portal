@@ -15,6 +15,8 @@ class DataOutputCreate(ORMModel):
     description: str
     external_id: str
     owner_id: UUID
+    platform_id: UUID
+    service_id: UUID
     status: DataOutputStatus
     configuration: DataOutputs
     sourceAligned: bool
@@ -32,6 +34,8 @@ class DataOutput(ORMModel):
     name: str
     description: str
     external_id: str
+    platform_id: UUID
+    service_id: UUID
     owner: DataProduct
     status: DataOutputStatus
     configuration: DataOutputs
@@ -51,6 +55,8 @@ class DataOutputToDB(ORMModel):
     description: str
     external_id: str
     owner_id: UUID
+    platform_id: UUID
+    service_id: UUID
     configuration: str
     status: DataOutputStatus
     configuration_type: DataOutputTypes

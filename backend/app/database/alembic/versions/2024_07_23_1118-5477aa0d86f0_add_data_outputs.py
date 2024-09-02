@@ -19,7 +19,7 @@ from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
 revision: str = "5477aa0d86f0"
-down_revision: Union[str, None] = "4e61079eaf16"
+down_revision: Union[str, None] = "926e7e37f11e"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -32,12 +32,11 @@ def upgrade() -> None:
         sa.Column("name", sa.String),
         sa.Column("description", sa.String),
         sa.Column("status", sa.Enum(DataOutputStatus)),
+        sa.Column("platform_id", sa.UUID, sa.ForeignKey("platforms.id")),
+        sa.Column("service_id", sa.UUID, sa.ForeignKey("platform_services.id")),
         sa.Column("owner_id", sa.UUID, sa.ForeignKey("data_products.id")),
-        # sa.Column("implementations", list[sa.UUID]),
         sa.Column("configuration", sa.String),
         sa.Column("configuration_type", sa.Enum(DataOutputTypes)),
-        # sa.Column("account_id", sa.String),
-        # sa.Column("kms_key", sa.String),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),

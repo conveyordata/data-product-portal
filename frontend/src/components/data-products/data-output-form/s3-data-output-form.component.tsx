@@ -13,6 +13,9 @@ import {
 // import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { useEffect } from 'react';
+import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
+import { useGetAllPlatformsConfigsQuery, useGetPlatformServiceConfigQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
+import { useGetAllPlatformServicesQuery } from '@/store/features/platform-services/platform-services-api-slice';
 // import { useNavigate } from 'react-router-dom';
 // import { createDataProductIdPath } from '@/types/navigation.ts';
 // import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
@@ -26,24 +29,15 @@ type Props = {
     mode: 'create';
     dataProductId: string;
     sourceAligned: boolean;
+    identifiers: string[] | undefined;
     external_id: string | undefined;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
-export function S3DataOutputForm({ form, external_id, sourceAligned }: Props) {
+export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned }: Props) {
     const { t } = useTranslation();
-    // const navigate = useNavigate();
-    // const [configurationForm, setConfigurationForm] = useState<Element | null>();
-    // const [selectedDataPlatform, setSelectedDataPlatform] = useState<
-    //     CustomDropdownItemProps<DataPlatforms> | undefined
-    // >(undefined);
-    // const [selectedConfiguration, setSelectedConfiguration] = useState<
-    //     CustomDropdownItemProps<DataPlatforms> | undefined
-    // >(undefined);
-    // const { data: _, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
 
-    const buckets = ['datalake', 'ingress']; // TODO Fetch from AWS platform settings;
-    const bucketOptions = buckets.map((bucket) => ({ label: bucket, value: bucket })); //TODO
+    const bucketOptions = identifiers?.map((bucket) => ({ label: bucket, value: bucket }));
     // const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const dataProductNameValue: string = Form.useWatch('temp_prefix', form);
     // const canFillInForm = mode === 'create';

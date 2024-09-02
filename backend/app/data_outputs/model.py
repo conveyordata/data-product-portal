@@ -24,6 +24,8 @@ class DataOutput(Base, BaseORM):
     name = Column(String)
     description = Column(String)
     status: DataOutputStatus = Column(Enum(DataOutputStatus))
+    platform_id: Mapped[UUID] = Column(ForeignKey("platforms.id"))
+    service_id: Mapped[UUID] = Column(ForeignKey("platform_services.id"))
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
     owner: Mapped["DataProduct"] = relationship(back_populates="data_outputs")
     configuration_type: DataOutputTypes = Column(Enum(DataOutputTypes))

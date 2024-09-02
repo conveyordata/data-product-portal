@@ -44,6 +44,13 @@ begin
     TRUNCATE TABLE public.environments CASCADE;
     TRUNCATE TABLE public.tags CASCADE;
 
+    -- PLATFORMS
+    INSERT INTO public.platforms (id, "name") VALUES ('a9928457-8729-45d9-a341-3095a5ed768b', 'AWS');
+    INSERT INTO public.platform_services (id, platform_id, "name") VALUES ('76c09bb8-1f71-4abf-a303-1f364cb3e1a2', 'a9928457-8729-45d9-a341-3095a5ed768b', 'S3');
+    INSERT INTO public.platform_services (id, platform_id, "name") VALUES ('76c09bb8-1f71-4abf-a303-1f364cb3e1a2', '07c50c94-0a62-4a70-b2d6-f5978d0e9258', 'Glue');
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', 'a9928457-8729-45d9-a341-3095a5ed768b', '76c09bb8-1f71-4abf-a303-1f364cb3e1a2', '{"identifiers":["datalake","ingress","egress"]}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+
     -- ENVIRONMENTS
     INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'dev_context', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'prd_context', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);

@@ -99,6 +99,8 @@ class DataOutputService:
         # TODO This needs to be better implemented > auto convert json
         data_output = DataOutputToDB(
             name=data_output.name,
+            platform_id=data_output.platform_id,
+            service_id=data_output.service_id,
             description=data_output.description,
             status=data_output.status,
             external_id=data_output.external_id,

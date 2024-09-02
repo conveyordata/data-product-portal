@@ -18,6 +18,9 @@ import { S3DataOutputForm } from './s3-data-output-form.component';
 import { GlueDataOutputForm } from './glue-data-output-form.component';
 import TextArea from 'antd/es/input/TextArea';
 import { DataOutputStatus } from '@/types/data-output/data-output.contract';
+import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
+import { useGetAllPlatformServicesQuery } from '@/store/features/platform-services/platform-services-api-slice';
+import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 
 type Props = {
     mode: 'create';
@@ -44,18 +47,25 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
     const isLoading = isCreating || isCreating || isFetchingInitialValues;
 
+    const { data: platformConfig, isFetching: isLoadingPlatformConfigs } = useGetAllPlatformsConfigsQuery()
+
+    const buckets = platformConfig?.filter((config) => {
+        return config.platform.name === 'AWS' && config.service.name === 'S3'
+    })[0]?.config.identifiers
+
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
             if (mode === 'create') {
                 // TODO This is ugly code. We pass along the entire form in the configuration currently.
                 // Should be rewritten to only pass the config attributes
                 const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
-
                 const request: DataOutputCreate = {
                     name: values.name,
                     external_id: generateExternalIdFromName(values.name ?? ''),
                     description: values.description,
                     configuration: config,
+                    platform_id: platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase())[0].platform.id!,
+                    service_id: platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase())[0].service.id!,
                     owner_id: dataProductId,
                     sourceAligned: sourceAligned === undefined ? false : sourceAligned,
                     status: DataOutputStatus.Active
@@ -105,10 +115,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         }
     }, [dataProductNameValue]);
 
-    useEffect(() => {
-        console.log(sourceAligned)
-    }, [sourceAligned])
-    // TODO Required fields of nested elements do not transcent
     return (
         <Form
             form={form}
@@ -196,6 +202,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         return (
                             <S3DataOutputForm
                                 form={form}
+                                identifiers={buckets}
                                 sourceAligned={sourceAligned}
                                 external_id={currentDataProduct?.external_id}
                                 mode={mode}

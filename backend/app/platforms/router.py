@@ -74,7 +74,7 @@ def create_platform_service_config(
     )
 
 
-@router.get("/configs", dependencies=[Depends(only_for_admin)])
+@router.get("/configs")
 def get_platforms_configurations(
     db: Session = Depends(get_db_session),
 ) -> Sequence[PlatformServiceConfigSchema]:

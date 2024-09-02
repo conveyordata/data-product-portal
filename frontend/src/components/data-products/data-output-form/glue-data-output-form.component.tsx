@@ -59,8 +59,6 @@ export function GlueDataOutputForm({ form, external_id, sourceAligned }: Props) 
             form.setFieldsValue({glue_database: undefined})
         }
         databaseOptions = databaseOptionsList.map((database) => ({ label: database, value: database }));
-        console.log(databaseOptions)
-
     }, [sourceAligned]);
 
     return (

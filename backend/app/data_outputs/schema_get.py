@@ -19,6 +19,8 @@ class DataOutputGet(ORMModel):
     external_id: str
     owner: BaseDataProductGet
     owner_id: UUID
+    platform_id: UUID
+    service_id: UUID
     configuration_type: DataOutputTypes
     status: DataOutputStatus
     dataset_links: list[DatasetLink]
