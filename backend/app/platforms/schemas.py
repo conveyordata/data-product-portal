@@ -3,14 +3,22 @@ from uuid import UUID
 
 from pydantic import field_validator
 
-from app.shared.schema import ORMModel
+from app.shared.schema import IdNameSchema, ORMModel
 
 
 class Identifiers(ORMModel):
     identifiers: list[str]
 
 
-class PlatformServiceConfigSchema(ORMModel):
+class PlatformSchema(IdNameSchema):
+    pass
+
+
+class PlatformServiceSchema(IdNameSchema):
+    pass
+
+
+class PlatformServiceConfigBaseSchema(ORMModel):
     config: Identifiers
 
     @field_validator("config", mode="before")
@@ -21,10 +29,7 @@ class PlatformServiceConfigSchema(ORMModel):
         return v
 
 
-class GetPlatformsSchema(ORMModel):
+class PlatformServiceConfigSchema(PlatformServiceConfigBaseSchema):
     id: UUID
-    name: str
-
-
-class GetPlatformServicesSchema(GetPlatformsSchema):
-    pass
+    platform: PlatformSchema
+    service: PlatformServiceSchema

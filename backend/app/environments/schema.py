@@ -4,12 +4,12 @@ from uuid import UUID
 
 from pydantic import RootModel, field_validator
 
-from app.shared.schema import ORMModel
+from app.shared.schema import IdNameSchema, ORMModel
 
 
 class Environment(ORMModel):
     name: str
-    context: str
+    context: str | None = None
     is_default: bool = False
 
 
@@ -29,6 +29,7 @@ class Config(RootModel[Dict[str, _AWSS3Config]]):
 
 
 class EnvPlatformServiceConfig(ORMModel):
+    id: UUID
     config: Config
 
     @field_validator("config", mode="before")
@@ -39,6 +40,13 @@ class EnvPlatformServiceConfig(ORMModel):
         return v
 
 
-class CreateConfigSchema(EnvPlatformServiceConfig):
+class EnvPlatformServiceConfigGet(EnvPlatformServiceConfig):
+    platform: IdNameSchema
+    service: IdNameSchema
+    environment: IdNameSchema
+
+
+class CreateConfigSchema(ORMModel):
     platform_id: UUID
     service_id: UUID
+    config: Config

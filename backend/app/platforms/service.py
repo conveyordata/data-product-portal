@@ -23,9 +23,26 @@ class PlatformsService:
             select(PlatformServiceModel).filter_by(platform_id=platform_id)
         ).all()
 
-    def get_service_config(self, platform_id, service_id):
+    def get_service_config(self, platform_id, service_id) -> PlatformServiceModel:
         return self.db.scalar(
-            select(PlatformServiceConfig.config).filter_by(
+            select(PlatformServiceConfig).filter_by(
                 platform_id=platform_id, service_id=service_id
             )
+        )
+
+    def create_service_config(self, platform_id: UUID, service_id: UUID, config: str):
+        self.db.add(
+            PlatformServiceConfig(
+                platform_id=platform_id,
+                service_id=service_id,
+                config=config,
+            )
+        )
+
+    def get_platforms_configs(self) -> Sequence[PlatformServiceConfig]:
+        return self.db.scalars(select(PlatformServiceConfig)).all()
+
+    def get_platform_service_config(self, config_id: UUID) -> PlatformServiceConfig:
+        return self.db.scalar(
+            select(PlatformServiceConfig).where(PlatformServiceConfig.id == config_id)
         )
