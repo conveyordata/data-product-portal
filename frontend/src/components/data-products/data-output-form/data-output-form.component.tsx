@@ -18,8 +18,6 @@ import { S3DataOutputForm } from './s3-data-output-form.component';
 import { GlueDataOutputForm } from './glue-data-output-form.component';
 import TextArea from 'antd/es/input/TextArea';
 import { DataOutputStatus } from '@/types/data-output/data-output.contract';
-import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
-import { useGetAllPlatformServicesQuery } from '@/store/features/platform-services/platform-services-api-slice';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 
 type Props = {
