@@ -202,13 +202,13 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 form={form}
                                 identifiers={identifiers}
                                 sourceAligned={sourceAligned}
-                                external_id={currentDataProduct?.external_id}
+                                external_id={currentDataProduct!.external_id}
                                 mode={mode}
                                 dataProductId={dataProductId}
                             />
                         );
                     case DataPlatforms.Glue:
-                        return <GlueDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct?.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
+                        return <GlueDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct!.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
                     default:
                         return null;
                 }

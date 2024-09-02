@@ -30,7 +30,7 @@ type Props = {
     dataProductId: string;
     sourceAligned: boolean;
     identifiers: string[] | undefined;
-    external_id: string | undefined;
+    external_id: string;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 

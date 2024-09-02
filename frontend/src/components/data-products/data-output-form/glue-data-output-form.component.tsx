@@ -19,7 +19,7 @@ import { useEffect } from 'react';
 type Props = {
     sourceAligned: boolean;
     identifiers: string[] | undefined;
-    external_id: string | undefined;
+    external_id: string;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
@@ -35,7 +35,6 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
     // >(undefined);
     // const { data: _, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
 
-    const database = ["hardcoded_dp_db"]
     let databaseOptions = identifiers?.map((database) => ({ label: database, value: database }));
     // const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const dataProductNameValue: string = Form.useWatch('temp_prefix', form);
@@ -53,8 +52,8 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
     useEffect(() => {
         let databaseOptionsList = identifiers //TODO
         if (!sourceAligned) {
-            databaseOptionsList = database
-            form.setFieldsValue({ glue_database: database[0]});
+            databaseOptionsList = [external_id]
+            form.setFieldsValue({ glue_database: external_id});
         } else {
             form.setFieldsValue({glue_database: undefined})
         }
