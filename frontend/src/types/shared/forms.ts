@@ -1,5 +1,6 @@
 import { ComponentType, ForwardRefExoticComponent, SVGProps } from 'react';
 import { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
+import { DataPlatform } from '../data-platform';
 
 export type SearchForm = {
     search: string;
@@ -13,4 +14,7 @@ export type CustomDropdownItemProps<T extends string = string> = {
         | ForwardRefExoticComponent<CustomIconComponentProps>;
     disabled?: boolean;
     hasMenu?: boolean;
+    hasConfig?: boolean;
+    children?: CustomDropdownItemProps<DataPlatform>[];
+    form?: ComponentType;
 };

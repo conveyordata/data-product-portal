@@ -1,5 +1,13 @@
 export enum ApiUrl {
+    DataOutputs = '/api/data_outputs',
+    DataOutputGet = '/api/data_outputs/:dataOutputId',
+    DataOutputsDataset = '/api/data_outputs/:dataOutputId/dataset/:datasetId',
+    DataOutputsDatasets = '/api/data_outputs_dataset_links',
+    DataOutputDatasetLinkApprove = '/api/data_output_dataset_links/approve/:datasetLinkId',
+    DataOutputDatasetLinkReject = '/api/data_output_dataset_links/deny/:datasetLinkId',
+    DataOutputDatasetLinkRemove = '/api/data_output_dataset_links/remove/:datasetLinkId',
     DataProducts = '/api/data_products',
+    DataProductsDataOutput = '/api/data_products/:dataProductId/data_outputs',
     DataProductGet = '/api/data_products/:dataProductId',
     DataProductType = '/api/data_product_types',
     DataProductSignInUrl = '/api/data_products/:dataProductId/signin_url',
