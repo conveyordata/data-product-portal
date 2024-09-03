@@ -10,6 +10,7 @@ import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { ReactNode, useMemo } from 'react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
+import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import {
     isDataProductEditPage,
@@ -22,6 +23,7 @@ import {
     useGetEnvironmentByIdQuery,
     useGetEnvConfigByIdQuery,
 } from '@/store/features/environments/environments-api-slice';
+import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 
 type BreadcrumbType = Partial<BreadcrumbItemType & BreadcrumbSeparatorType> & { icon?: ReactNode };
 
@@ -37,9 +39,13 @@ export const Breadcrumbs = () => {
         platformServiceConfigId = '',
         environmentId = '',
         envConfigId = '',
+        dataOutputId = '',
     } = params;
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductByIdQuery(dataProductId, {
         skip: !dataProductId,
+    });
+    const { data: dataOutput, isFetching: isFetchingDataOutput } = useGetDataOutputByIdQuery(dataOutputId, {
+        skip: !dataOutputId,
     });
     const { data: dataset, isFetching: isFetchingDataset } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
     const { data: platformServiceConfig, isFetching: isFetchingPlatformServiceConfig } =
@@ -124,6 +130,20 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
+                        case ApplicationPaths.DataOutputs:
+                                Object.assign(breadcrumbItem, {
+                                    title: (
+                                        <Space
+                                            classNames={{
+                                                item: styles.breadcrumbItem,
+                                            }}
+                                        >
+                                            <Icon component={dataOutputOutlineIcon} />
+                                            {t('Data Outputs')}
+                                        </Space>
+                                    ),
+                                });
+                                break;
                         case ApplicationPaths.Datasets:
                             Object.assign(breadcrumbItem, {
                                 title: (
@@ -257,6 +277,33 @@ export const Breadcrumbs = () => {
                                     });
                                 }
                             }
+                            // Case for data product and dataset
+                            if (dataOutputId && dataOutput && !isFetchingDataOutput) {
+                                // if (isDataProductEditPage(path, dataProductId)) {
+                                //     Object.assign(breadcrumbItem, {
+                                //         title: (
+                                //             <Space
+                                //                 classNames={{
+                                //                     item: styles.breadcrumbItem,
+                                //                 }}
+                                //             >
+                                //                 {t('Edit')}
+                                //             </Space>
+                                //         ),
+                                //     });
+                                // } else {
+                                    Object.assign(breadcrumbItem, {
+                                        title: (
+                                            <Typography.Text
+                                                ellipsis={{ tooltip: dataOutput.name }}
+                                                rootClassName={styles.title}
+                                            >
+                                                {dataOutput.name}
+                                            </Typography.Text>
+                                        ),
+                                    });
+                                // }
+                            }
                             if (datasetId && dataset && !isFetchingDataset) {
                                 Object.assign(breadcrumbItem, {
                                     title: (
@@ -350,7 +397,7 @@ export const Breadcrumbs = () => {
                     return breadcrumbItem;
                 }),
             ].filter(Boolean) as Partial<BreadcrumbItemType & BreadcrumbSeparatorType>[],
-        [pathnames, dataProductId, datasetId],
+        [pathnames, dataProductId, datasetId, dataOutputId],
     );
 
     return (
