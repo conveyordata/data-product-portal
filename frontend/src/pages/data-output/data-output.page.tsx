@@ -19,6 +19,7 @@ import { useSelector } from 'react-redux';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
+import { DataOutputTabs } from './components/data-output-tabs/data-output-tabs';
 
 export function DataOutput() {
     const { t } = useTranslation();
@@ -93,7 +94,7 @@ export function DataOutput() {
                             description={dataOutput.description}
                         />
                         {/*  Tabs  */}
-                        {/* <DataOutputTabs dataOutputId={dataOutput.id} isLoading={isLoading} /> */}
+                        <DataOutputTabs dataOutputId={dataOutput.id} isLoading={isLoading} />
                     </Flex>
                 </Flex>
             </Flex>
