@@ -20,6 +20,8 @@ import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
 import { DataOutputTabs } from './components/data-output-tabs/data-output-tabs';
+import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 
 export function DataOutput() {
     const { t } = useTranslation();
@@ -27,19 +29,19 @@ export function DataOutput() {
     const { dataOutputId = '' } = useParams();
     const { data: dataOutput, isLoading } = useGetDataOutputByIdQuery(dataOutputId, { skip: !dataOutputId });
     const navigate = useNavigate();
+    const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataOutput?.owner.id!, {skip: isLoading || !dataOutput });
 
     const dataOutputTypeIcon = useMemo(() => {
         return getDataOutputIcon(dataOutput?.configuration_type);
     }, [dataOutput?.id, dataOutput?.configuration_type]);
 
-    // const dataOutputOwners = dataOutput ? getDataOutputOwners(dataOutput) : [];
-    // const isCurrentDataOutputOwner = Boolean(
-    //     dataOutput && currentUser && (getIsDataOutputOwner(dataOutput, currentUser?.id) || currentUser?.is_admin),
-    // );
+    const dataOutputOwners = dataProduct ? getDataProductOwners(dataProduct) : [];
+    const isCurrentDataOutputOwner = Boolean(
+        dataProduct && currentUser && (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
+    );
 
     function navigateToEditPage() {
-        if (//isCurrentDataOutputOwner &&
-            dataOutputId) {
+        if (isCurrentDataOutputOwner && dataOutputId) {
             navigate(
                 getDynamicRoutePath(ApplicationPaths.DataOutputEdit, DynamicPathParams.DataOutputId, dataOutputId),
             );
@@ -73,7 +75,7 @@ export function DataOutput() {
                             {dataOutput?.name}
                         </Typography.Title>
                     </Space>
-                    {//isCurrentDataOutputOwner &&
+                    {isCurrentDataOutputOwner &&
                     (
                         <Space className={styles.editIcon}>
                             <CircleIconButton
@@ -99,11 +101,11 @@ export function DataOutput() {
                 </Flex>
             </Flex>
             {/* Sidebar */}
-            {/* <Flex vertical className={styles.sidebar}> */}
+            <Flex vertical className={styles.sidebar}>
                 {/* <DataOutputActions dataOutputId={dataOutputId} /> */}
                 {/*  Data product owners overview */}
-                {/* <UserAccessOverview users={dataOutputOwners} title={t('Data Output Owners')} /> */}
-            {/* </Flex> */}
+                <UserAccessOverview users={dataOutputOwners} title={t('Data Output Owners')} />
+            </Flex>
         </Flex>
     );
 }
