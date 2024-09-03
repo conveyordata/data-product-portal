@@ -301,5 +301,6 @@
     "Remove Data Output": "Remove Data Output",
     "No datasets linked": "No datasets linked",
     "Data Output {{name}} has been successfully removed": "Data Output {{name}} has been successfully removed",
-    "Are you sure you want to delete the data output? This can have impact on downstream dependencies": "Are you sure you want to delete the data output? This can have impact on downstream dependencies"
+    "Are you sure you want to delete the data output? This can have impact on downstream dependencies": "Are you sure you want to delete the data output? This can have impact on downstream dependencies",
+    "View data output": "View data output"
 }

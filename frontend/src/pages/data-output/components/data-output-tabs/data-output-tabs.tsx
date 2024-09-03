@@ -10,9 +10,11 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 // import { DataOutputTab } from '@/pages/data-output/components/data-output-tabs/data-output-tab/data-output-tab.tsx';
 import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
+import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 // import { AboutTab } from '@/pages/data-output/components/data-output-tabs/about-tab/about-tab.tsx';
 import { ReactFlowProvider } from 'reactflow';
+import { DataProductTab } from './data-product-tab/data-product-tab';
 
 type Props = {
     dataOutputId: string;
@@ -22,6 +24,7 @@ type Props = {
 enum TabKeys {
     About = 'about',
     DataOutputs = 'dataoutputs',
+    DataProduct = 'dataproduct',
     Datasets = 'datasets',
     Explorer = 'explorer',
     Team = 'team',
@@ -51,6 +54,12 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 key: TabKeys.Datasets,
                 icon: <Icon component={datasetOutlineIcon} />,
                 children: <DatasetTab dataOutputId={dataOutputId} />,
+            },
+            {
+                label: t('Data Product'),
+                key: TabKeys.DataProduct,
+                icon: <Icon component={dataProductOutlineIcon} />,
+                children: <DataProductTab dataOutputId={dataOutputId} />,
             },
             // {
             //     label: t('Team'),

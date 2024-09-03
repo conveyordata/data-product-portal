@@ -6,7 +6,7 @@ from pydantic import field_validator
 from app.data_outputs.schema_get import DatasetLink
 from app.data_outputs.schema_union import DataOutputs, DataOutputTypes
 from app.data_outputs.status import DataOutputStatus
-from app.data_products.schema import DataProduct
+from app.data_products.schema_base_get import BaseDataProductGet
 from app.shared.schema import ORMModel
 
 
@@ -36,7 +36,7 @@ class DataOutput(ORMModel):
     external_id: str
     platform_id: UUID
     service_id: UUID
-    owner: DataProduct
+    owner: BaseDataProductGet
     status: DataOutputStatus
     configuration: DataOutputs
     configuration_type: DataOutputTypes
