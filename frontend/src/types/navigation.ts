@@ -74,6 +74,7 @@ export function createEnvironmentConfigPath(envConfigId: string) {
 
 export enum DynamicPathParams {
     DataProductId = 'dataProductId',
+    DataOutputId = 'dataOutputId',
     DatasetId = 'datasetId',
     PlatformServiceConfigId = 'platformServiceConfigId',
     EnvironmentId = 'environmentId',

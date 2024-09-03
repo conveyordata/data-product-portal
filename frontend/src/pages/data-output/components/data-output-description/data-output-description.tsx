@@ -8,10 +8,9 @@ type Props = {
     status: DataOutputStatus;
     type: string;
     description: string;
-    businessArea: string;
 };
 
-export function DataOutputDescription({ status, type, description, businessArea }: Props) {
+export function DataOutputDescription({ status, type, description }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -25,10 +24,6 @@ export function DataOutputDescription({ status, type, description, businessArea 
                             text={getStatusLabel(status)}
                             className={styles.noSelect}
                         />
-                    </Flex>
-                    <Flex className={styles.statusBadge}>
-                        <Typography.Text strong>{t('Business Area')}</Typography.Text>
-                        <Typography.Text>{businessArea}</Typography.Text>
                     </Flex>
                     <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Type')}</Typography.Text>

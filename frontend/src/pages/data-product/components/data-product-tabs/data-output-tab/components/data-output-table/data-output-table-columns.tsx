@@ -10,7 +10,7 @@ import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtit
 import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
 import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title';
 import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title';
-import { createDatasetIdPath } from '@/types/navigation';
+import { createDataOutputIdPath, createDatasetIdPath } from '@/types/navigation';
 import { getBadgeStatus, getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel, getStatusLabel } from '@/utils/status.helper';
 
 type Props = {
@@ -43,7 +43,7 @@ export const getDataProductDataOutputsColumns = ({
                 return (
                     <TableCellAvatar
                         popover={{ title: name, content: description }}
-                        //linkTo={createDataOutputIdPath(external_id)}
+                        linkTo={createDataOutputIdPath(id)}
                         icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration_type)!} />}
                         title={name}
                         subtitle={

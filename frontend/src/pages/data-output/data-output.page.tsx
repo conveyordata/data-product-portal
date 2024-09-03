@@ -2,7 +2,7 @@ import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-ou
 import { useNavigate, useParams } from 'react-router-dom';
 import { Flex, Space, Typography } from 'antd';
 import styles from './data-output.module.scss';
-import { DataOutputTabs } from '@/pages/data-output/components/data-output-tabs/data-output-tabs.tsx';
+// import { DataOutputTabs } from '@/pages/data-output/components/data-output-tabs/data-output-tabs.tsx';
 import { DataOutputActions } from '@/pages/data-output/components/data-output-actions/data-output-actions.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataOutputDescription } from '@/pages/data-output/components/data-output-description/data-output-description.tsx';
@@ -28,28 +28,29 @@ export function DataOutput() {
     const navigate = useNavigate();
 
     const dataOutputTypeIcon = useMemo(() => {
-        return getDataOutputTypeIcon(dataOutput?.type?.icon_key);
-    }, [dataOutput?.id, dataOutput?.type.icon_key]);
+        return getDataOutputIcon(dataOutput?.configuration_type);
+    }, [dataOutput?.id, dataOutput?.configuration_type]);
 
-    const dataOutputOwners = dataOutput ? getDataOutputOwners(dataOutput) : [];
-    const isCurrentDataOutputOwner = Boolean(
-        dataOutput && currentUser && (getIsDataOutputOwner(dataOutput, currentUser?.id) || currentUser?.is_admin),
-    );
+    // const dataOutputOwners = dataOutput ? getDataOutputOwners(dataOutput) : [];
+    // const isCurrentDataOutputOwner = Boolean(
+    //     dataOutput && currentUser && (getIsDataOutputOwner(dataOutput, currentUser?.id) || currentUser?.is_admin),
+    // );
 
     function navigateToEditPage() {
-        if (isCurrentDataOutputOwner && dataOutputId) {
+        if (//isCurrentDataOutputOwner &&
+            dataOutputId) {
             navigate(
                 getDynamicRoutePath(ApplicationPaths.DataOutputEdit, DynamicPathParams.DataOutputId, dataOutputId),
             );
         }
     }
 
-    useEffect(() => {
-        setItemToLocalStorage(LocalStorageKeys.LastVisitedDataOutputs, {
-            id: dataOutputId,
-            timestamp: Date.now(),
-        });
-    }, []);
+    // useEffect(() => {
+    //     setItemToLocalStorage(LocalStorageKeys.LastVisitedDataOutputs, {
+    //         id: dataOutputId,
+    //         timestamp: Date.now(),
+    //     });
+    // }, []);
 
     if (isLoading) return <LoadingSpinner />;
 
@@ -71,7 +72,8 @@ export function DataOutput() {
                             {dataOutput?.name}
                         </Typography.Title>
                     </Space>
-                    {isCurrentDataOutputOwner && (
+                    {//isCurrentDataOutputOwner &&
+                    (
                         <Space className={styles.editIcon}>
                             <CircleIconButton
                                 icon={<SettingOutlined />}
@@ -87,21 +89,20 @@ export function DataOutput() {
                     <Flex vertical className={styles.overview}>
                         <DataOutputDescription
                             status={dataOutput.status}
-                            type={dataOutput.type.name}
+                            type={dataOutput.configuration_type}
                             description={dataOutput.description}
-                            businessArea={dataOutput.business_area.name}
                         />
                         {/*  Tabs  */}
-                        <DataOutputTabs dataOutputId={dataOutput.id} isLoading={isLoading} />
+                        {/* <DataOutputTabs dataOutputId={dataOutput.id} isLoading={isLoading} /> */}
                     </Flex>
                 </Flex>
             </Flex>
             {/* Sidebar */}
-            <Flex vertical className={styles.sidebar}>
-                <DataOutputActions dataOutputId={dataOutputId} />
+            {/* <Flex vertical className={styles.sidebar}> */}
+                {/* <DataOutputActions dataOutputId={dataOutputId} /> */}
                 {/*  Data product owners overview */}
-                <UserAccessOverview users={dataOutputOwners} title={t('Data Output Owners')} />
-            </Flex>
+                {/* <UserAccessOverview users={dataOutputOwners} title={t('Data Output Owners')} /> */}
+            {/* </Flex> */}
         </Flex>
     );
 }

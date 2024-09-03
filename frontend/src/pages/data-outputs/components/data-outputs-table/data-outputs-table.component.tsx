@@ -3,10 +3,6 @@ import { Button, Flex, Form, Input, Space, Table, Typography } from 'antd';
 import styles from './data-outputs-table.module.scss';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApplicationPaths, createDataOutputIdPath } from '@/types/navigation.ts';
-// import {
-//     useGetAllDataOutputsQuery,
-//     useGetUserDataOutputsQuery,
-// } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getDataOutputTableColumns } from '@/pages/data-outputs/components/data-outputs-table/data-outputs-table-columns.tsx';
