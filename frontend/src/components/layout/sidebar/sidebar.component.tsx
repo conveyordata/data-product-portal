@@ -7,12 +7,14 @@ import Icon, { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant
 import { useTranslation } from 'react-i18next';
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
+import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 
 const DataProductIcon = () => <Icon component={dataProductOutlineIcon} />;
 const DatasetIcon = () => <Icon component={datasetOutlineIcon} />;
+const DataOutputIcon = () => <Icon component={dataOutputOutlineIcon} />;
 
 export const Sidebar = () => {
     const matches = useMatches();
@@ -29,6 +31,11 @@ export const Sidebar = () => {
             label: <Link to={ApplicationPaths.DataProducts}>{t('Data Products')}</Link>,
             icon: React.createElement(DataProductIcon),
             key: ApplicationPaths.DataProducts,
+        },
+        {
+            label: <Link to={ApplicationPaths.DataOutputs}>{t('Data Outputs')}</Link>,
+            icon: React.createElement(DataOutputIcon),
+            key: ApplicationPaths.DataOutputs,
         },
         {
             label: <Link to={ApplicationPaths.Datasets}>{t('Datasets')}</Link>,

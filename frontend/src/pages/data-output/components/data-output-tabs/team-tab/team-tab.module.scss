@@ -1,0 +1,6 @@
+@import '@/styles/globals';
+
+.container {
+    @extend .container;
+    gap: $column-gap-regular;
+}

@@ -8,6 +8,10 @@ export enum ApplicationPaths {
     Dataset = '/datasets/:datasetId',
     DatasetNew = '/datasets/new',
     DatasetEdit = '/datasets/:datasetId/edit',
+    DataOutputs = '/data-outputs',
+    DataOutput = '/data-outputs/:dataOutputId',
+    DataOutputNew = '/data-outputs/new',
+    DataOutputEdit = '/data-outputs/:dataOutputId/edit',
     AuditLogs = '/audit-logs',
     // Settings = '/settings',
     Logout = '/logout',
@@ -43,6 +47,10 @@ export const authenticatedPaths: string[] = [
 
 export function createDataProductIdPath(dataProductId: string) {
     return ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId));
+}
+
+export function createDataOutputIdPath(dataOutputId: string) {
+    return ApplicationPaths.DataOutput.replace(':dataOutputId', encodeURIComponent(dataOutputId));
 }
 
 export function createDatasetIdPath(datasetId: string) {
