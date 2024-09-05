@@ -50,7 +50,7 @@ spec:
             backend:
               {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
-                name: {{ default $fullName .name }}
+                name: {{ printf "%s-%s" $.Release.Name ( default $fullName .name ) }}
                 port:
                   number: {{ default $svcPort .number }}
               {{- else }}

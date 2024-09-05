@@ -11,17 +11,17 @@ global:
       server: data-product-portal-postgresql
       username: postgres
 postgres_enabled: false
-cloudwatch_enabled: true
+cloudwatch_enabled: false
 api_key:
   enabled: false
   key: ""
-host: pleaseupdateme
+host: www.pleaseupdateme.com
 oidc:
-  disabled: false
+  disabled: true
   client_id: id
   client_secret: secret
-  authority: authority
-  redirect_uri: host
+  authority: www.pleaseupdateme.com
+  redirect_uri: www.pleaseupdateme.com
 conveyor:
   api_key: conveyor_key
   secret: conveyor_secret
@@ -87,11 +87,11 @@ ingress:
     - paths:
       - path: /api
         pathType: Prefix
-        name: portal-data-product-portal
+        name: data-product-portal
         number: 5050
       - path: /
         pathType: Prefix
-        name: portal-frontend
+        name: frontend
         number: 8080
   tls: []
 
