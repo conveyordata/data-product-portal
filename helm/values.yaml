@@ -38,12 +38,12 @@ replicaCount: 1
 image:
   repository: public.ecr.aws/conveyordata/data-product-portal/backend
   pullPolicy: Always
-  tag: 0.1.3
+  tag: 0.1.4
 
 frontendimage:
   repository: public.ecr.aws/conveyordata/data-product-portal/frontend
   pullPolicy: Always
-  tag: 0.1.3
+  tag: 0.1.4
 
 imagePullSecrets: []
 nameOverride: ""
