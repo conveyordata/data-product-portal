@@ -1,6 +1,6 @@
-import { Edge, Node, XYPosition } from 'reactflow';
+import { Edge, Node, Position, XYPosition } from 'reactflow';
 import { useEffect } from 'react';
-import { Button, Flex } from 'antd';
+import { Button, Flex, theme } from 'antd';
 import styles from './explorer-tab.module.scss';
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
@@ -8,14 +8,24 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { DatasetNodeProps } from '@/components/charts/custom-nodes/dataset-node/dataset-node.tsx';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import { DataProductLink, DatasetContract } from '@/types/dataset';
+import { DataOutputLink, DataProductLink, DatasetContract } from '@/types/dataset';
 import 'reactflow/dist/base.css';
 import { useTranslation } from 'react-i18next';
-import { createDataProductIdPath } from '@/types/navigation.ts';
+import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
 import { Link } from 'react-router-dom';
 import { DataProductNodeProps } from '@/components/charts/custom-nodes/data-product-node/data-product-node.tsx';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { getDataProductDatasetLinkEdgeStyle } from '@/utils/node-editor.helper.ts';
+import { DataOutputDatasetLink, DataOutputsGetContract } from '@/types/data-output';
+import { DatasetLink } from '@/types/data-product';
+import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
+import { greenThemeConfig } from '@/theme/antd-theme';
+
+
+const { getDesignToken } = theme;
+
+const token = getDesignToken(greenThemeConfig);
+
 
 type Props = {
     datasetId: string;
@@ -28,6 +38,54 @@ function LinkToDataProductNode({ id }: { id: string }) {
             <Button type="default">{t('View data product')}</Button>
         </Link>
     );
+}
+
+function LinkToDataOutputNode({ id }: {id: string}) {
+    const { t } = useTranslation();
+    return (
+        <Link to={createDataOutputIdPath(id)} className={styles.link}>
+            <Button type="default">{t('View data output')}</Button>
+        </Link>
+    )
+}
+
+function generateDatasetOutputNodes(
+    dataset: DatasetContract,
+    datasetLinks: DataOutputLink[],
+    defaultNodePosition: XYPosition,
+): Node[] {
+    const datasetNodeLinks: Node<DatasetNodeProps>[] = datasetLinks.map((link) => ({
+        id: link.data_output_id,
+        position: defaultNodePosition,
+        data: {
+            name: link.data_output.name,
+            id: link.data_output_id,
+            nodeToolbarActions: <LinkToDataOutputNode id={link.data_output_id} />,
+            targetHandlePosition: Position.Left,
+            targetHandleId: 'right_t',
+            isActive: link.status === DataOutputDatasetLinkStatus.Approved,
+        },
+        draggable: false,
+        type: CustomNodeTypes.DatasetNode,
+        deletable: false,
+    }));
+    return datasetNodeLinks;
+}
+
+function generateDatasetOutputEdges(datasetId: string, dataOutputLinks: DataOutputLink[]): Edge[] {
+    return dataOutputLinks.map((link) => ({
+        id: `${datasetId}-${link.data_output_id}`,
+        target: datasetId,
+        source: link.data_output_id,
+        sourceHandle: 'right_s',
+        targetHandle: 'left_t',
+        animated: link.status === DataOutputDatasetLinkStatus.Approved,
+        deletable: false,
+        style: {
+            strokeDasharray: '5 5',
+            stroke: token.colorPrimary,
+        },
+    }));
 }
 
 function generateDatasetNodes(
@@ -76,6 +134,7 @@ function generateDatasetEdges(datasetId: string, dataProductLinks: DataProductLi
 
 export function ExplorerTab({ datasetId }: Props) {
     const { data: dataset, isFetching } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
+
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition, setNodes } =
         useNodeEditor();
 
@@ -84,9 +143,11 @@ export function ExplorerTab({ datasetId }: Props) {
         const approvedDataProductLinks = dataset.data_product_links.filter(
             (link) => link.status !== DataProductDatasetLinkStatus.Denied,
         );
+        const dataInputNodes: Node[] = generateDatasetOutputNodes(dataset, dataset.data_output_links, defaultNodePosition);
         const datasetNodes: Node[] = generateDatasetNodes(dataset, approvedDataProductLinks, defaultNodePosition);
         const datasetEdges: Edge[] = generateDatasetEdges(dataset.id, approvedDataProductLinks);
-        setNodesAndEdges(datasetNodes, datasetEdges);
+        const dataInputEdges: Edge[] = generateDatasetOutputEdges(dataset.id, dataset.data_output_links);
+        setNodesAndEdges(datasetNodes.concat(dataInputNodes), datasetEdges.concat(dataInputEdges));
     };
     useEffect(() => {
         if (dataset?.data_product_links) {
