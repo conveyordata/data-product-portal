@@ -9,3 +9,12 @@ export function getDataOutputIcon(configuration_type: string|undefined) {
             return s3BorderIcon;
     }
 }
+
+export function getDataOutputType(configuration_type: string|undefined, t: TFunction) {
+    switch (configuration_type) {
+        case 'GlueDataOutput':
+            return t('Glue');
+        case 'S3DataOutput':
+            return t('S3');
+    }
+}

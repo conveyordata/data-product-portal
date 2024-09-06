@@ -7,7 +7,7 @@ import { DataOutputActions } from '@/pages/data-output/components/data-output-ac
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataOutputDescription } from '@/pages/data-output/components/data-output-description/data-output-description.tsx';
 import { useEffect, useMemo } from 'react';
-import { getDataOutputIcon } from '@/utils/data-output-type-icon.helper.ts';
+import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import Icon, { SettingOutlined } from '@ant-design/icons';
 import clsx from 'clsx';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';

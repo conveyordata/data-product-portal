@@ -8,7 +8,7 @@ import { TableStatusTag } from '@/components/list/table-status-tag/table-status-
 // import { getDataOutputTypeIcon } from '@/utils/data-output-type-icon.helper.ts';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { BusinessAreaGetResponse } from '@/types/business-area';
-import { getDataOutputIcon } from '@/utils/data-output-type-icon.helper';
+import { getDataOutputIcon, getDataOutputType } from '@/utils/data-output-type.helper';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component';
 import { createDataProductIdPath } from '@/types/navigation';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
@@ -62,7 +62,8 @@ export const getDataOutputTableColumns = ({ t }: { t: TFunction }): TableColumns
             onFilter: (value, record) => record.configuration_type.startsWith(value as string),
             render: (configuration_type: string) => {
                 const icon = getDataOutputIcon(configuration_type);
-                return <TableCellItem reactSVGComponent={icon} text={configuration_type} />;
+
+                return <TableCellItem reactSVGComponent={icon} text={getDataOutputType(configuration_type, t)} />;
             },
             width: '30%',
         },

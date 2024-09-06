@@ -5,7 +5,7 @@ import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { DataOutputsGetContract } from '@/types/data-output/data-outputs-get.contract';
-import { getDataOutputIcon } from '@/utils/data-output-type-icon.helper';
+import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtitle/data-output-subtitle.component';
 import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
 import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title';

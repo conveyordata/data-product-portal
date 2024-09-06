@@ -3,6 +3,7 @@ import { Badge, Flex, Space, Typography } from 'antd';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { useTranslation } from 'react-i18next';
 import { DataOutputStatus } from '@/types/data-output';
+import { getDataOutputType } from '@/utils/data-output-type.helper';
 
 type Props = {
     status: DataOutputStatus;
@@ -27,7 +28,7 @@ export function DataOutputDescription({ status, type, description }: Props) {
                     </Flex>
                     <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Type')}</Typography.Text>
-                        <Typography.Text>{type}</Typography.Text>
+                        <Typography.Text>{getDataOutputType(type, t)}</Typography.Text>
                     </Flex>
                 </Space>
                 <Space>

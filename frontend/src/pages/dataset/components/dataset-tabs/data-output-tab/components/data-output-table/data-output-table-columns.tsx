@@ -6,7 +6,7 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
 import { DataOutputLink } from '@/types/dataset';
 // import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
-import { getDataOutputIcon } from '@/utils/data-output-type-icon.helper';
+import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
 import { DataOutputDatasetLinkRequest, DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
