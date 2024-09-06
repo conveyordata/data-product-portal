@@ -1,21 +1,21 @@
-// import { DataOutputContract } from '@/types/data-output';
-// import { DataProductContract } from '@/types/data-product';
-// import {
-//     DataProductMembershipRole,
-//     DataProductMembershipRoleType,
-//     DataProductMembershipStatus,
-//     DataProductUserMembership,
-// } from '@/types/data-product-membership';
+import { DataOutputContract } from '@/types/data-output';
+import { DataProductContract } from '@/types/data-product';
+import {
+    DataProductMembershipRole,
+    DataProductMembershipRoleType,
+    DataProductMembershipStatus,
+    DataProductUserMembership,
+} from '@/types/data-product-membership';
 
-// export function getDataOutputUserRole(
-//     dataOutput: DataOutputContract,
-//     userId: string,
-// ): DataProductMembershipRoleType {
-//     return (
-//         dataOutput?.owner.memberships?.find((membership) => membership?.user_id === userId)?.role ||
-//         DataProductMembershipRole.NonMember
-//     );
-// }
+export function getDataOutputUserRole(
+    dataOutput: DataOutputContract,
+    userId: string,
+): DataProductMembershipRoleType {
+    return (
+        dataOutput?.owner.memberships?.find((membership) => membership?.user_id === userId)?.role ||
+        DataProductMembershipRole.NonMember
+    );
+}
 
 // export function getDataOutputOwners(dataOutput: DataOutputContract) {
 //     return (
@@ -37,9 +37,9 @@
 //     return dataOutput?.owner.memberships?.filter((membership) => membership.role === DataProductMembershipRole.Member) || [];
 // }
 
-// export function getIsDataOutputOwner(dataOutput: DataOutputContract, userId: string): boolean {
-//     return getDataOutputUserRole(dataOutput, userId) === DataProductMembershipRole.Owner;
-// }
+export function getIsDataOutputOwner(dataOutput: DataOutputContract, userId: string): boolean {
+    return getDataOutputUserRole(dataOutput, userId) === DataProductMembershipRole.Owner;
+}
 
 // export function getIsDataOutputMember(dataOutput: DataOutputContract, userId: string): boolean {
 //     return getDataOutputUserRole(dataOutput, userId) === DataProductMembershipRole.Member;

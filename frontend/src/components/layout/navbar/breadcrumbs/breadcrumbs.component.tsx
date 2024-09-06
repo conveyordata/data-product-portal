@@ -14,6 +14,7 @@ import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?r
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import {
     isDataProductEditPage,
+    isDataOutputEditPage,
     isEnvironmentConfigsPage,
     isEnvironmentConfigCreatePage,
     isEnvConfigPage,
@@ -279,19 +280,19 @@ export const Breadcrumbs = () => {
                             }
                             // Case for data product and dataset
                             if (dataOutputId && dataOutput && !isFetchingDataOutput) {
-                                // if (isDataProductEditPage(path, dataProductId)) {
-                                //     Object.assign(breadcrumbItem, {
-                                //         title: (
-                                //             <Space
-                                //                 classNames={{
-                                //                     item: styles.breadcrumbItem,
-                                //                 }}
-                                //             >
-                                //                 {t('Edit')}
-                                //             </Space>
-                                //         ),
-                                //     });
-                                // } else {
+                                if (isDataOutputEditPage(path, dataOutputId)) {
+                                    Object.assign(breadcrumbItem, {
+                                        title: (
+                                            <Space
+                                                classNames={{
+                                                    item: styles.breadcrumbItem,
+                                                }}
+                                            >
+                                                {t('Edit')}
+                                            </Space>
+                                        ),
+                                    });
+                                } else {
                                     Object.assign(breadcrumbItem, {
                                         title: (
                                             <Typography.Text
@@ -302,7 +303,7 @@ export const Breadcrumbs = () => {
                                             </Typography.Text>
                                         ),
                                     });
-                                // }
+                                }
                             }
                             if (datasetId && dataset && !isFetchingDataset) {
                                 Object.assign(breadcrumbItem, {

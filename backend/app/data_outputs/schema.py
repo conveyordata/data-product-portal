@@ -22,6 +22,12 @@ class DataOutputCreate(ORMModel):
     sourceAligned: bool
 
 
+class DataOutputUpdate(ORMModel):
+    name: str
+    description: str
+    # configuration: DataOutputs
+
+
 class DataOutputRegister(ORMModel):
     name: str
     description: str

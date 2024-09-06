@@ -10,6 +10,12 @@ export function isDataProductEditPage(path: string, dataProductId: string) {
     );
 }
 
+export function isDataOutputEditPage(path: string, dataOutputId: string) {
+    return (
+        getDynamicRoutePath(ApplicationPaths.DataOutputEdit, DynamicPathParams.DataOutputId, dataOutputId) === path
+    );
+}
+
 export function isEnvironmentConfigsPage(path: string, environmentId: string) {
     return (
         getDynamicRoutePath(ApplicationPaths.EnvironmentConfigs, DynamicPathParams.EnvironmentId, environmentId) ===

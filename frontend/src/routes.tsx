@@ -27,6 +27,7 @@ import { EnvironmentConfigCreate } from './pages/environment-config-create/envir
 import { EnvironmentConfig } from './pages/environment-config/environment-config.page.tsx';
 import { DataOutputs } from './pages/data-outputs/data-outputs.page.tsx';
 import { DataOutput } from './pages/data-output/data-output.page.tsx';
+import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
 
 const router = createBrowserRouter([
     {
@@ -79,10 +80,10 @@ const router = createBrowserRouter([
                             //     path: ApplicationPaths.DataOutputNew,
                             //     element: <DataOutputCreate />,
                             // },
-                            // {
-                            //     path: ApplicationPaths.DataOutputEdit,
-                            //     element: <DataOutputEdit />,
-                            // },
+                            {
+                                path: ApplicationPaths.DataOutputEdit,
+                                element: <DataOutputEdit />,
+                            },
                         ],
                     },
                     {
