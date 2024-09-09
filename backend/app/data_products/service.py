@@ -355,15 +355,6 @@ class DataProductService:
     def generate_signin_url(
         self, id: UUID, environment: str, authenticated_user: User, db: Session
     ) -> str:
-        if authenticated_user.id not in [
-            membership.user_id
-            for membership in db.get(DataProductModel, id).memberships
-        ]:
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                detail="You are not allowed to assume this role",
-            )
-
         role = self.get_data_product_role_arn(id, environment, db)
         json_credentials = self.get_aws_temporary_credentials(role, authenticated_user)
 
