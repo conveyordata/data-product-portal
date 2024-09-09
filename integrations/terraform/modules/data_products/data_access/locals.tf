@@ -4,7 +4,7 @@ locals {
 
   # Retrieve all read data_ids. You can also read what you can write
   read_data_outputs = concat(flatten([
-    for dataset in var.data_product_config.read_datasets : var.datasets[dataset]["data_ids"]]
+    for dataset in var.data_product_config.read_datasets : var.datasets[dataset]["data_outputs"]]
   ), local.write_data_outputs)
 
   # Retrieve all S3 paths for the S3 write data ids
