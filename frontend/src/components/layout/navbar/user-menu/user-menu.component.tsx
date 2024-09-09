@@ -1,5 +1,6 @@
 import { Avatar, Badge, Flex, theme, Typography } from 'antd';
-import styles from '@/components/layout/navbar/navbar.module.scss';
+import headerStyles from '@/components/layout/navbar/navbar.module.scss';
+import styles from './user-menu.module.scss';
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
@@ -37,16 +38,11 @@ export function UserMenu() {
             console.error('Failed to logout', e);
         }
     };
-    const badgeStyle = {
-        backgroundColor: colorPrimary,
-        fontSize: 10,
-        display: user?.is_admin ? 'block' : 'none',
-    };
 
     return (
         <Flex className={styles.userMenuContainer}>
             <Flex className={styles.avatarWrapper}>
-                <Badge count="admin" style={badgeStyle} size="small">
+                <Badge count={user?.is_admin ? t('admin') : 0} showZero={false} color={colorPrimary} style={{fontSize: 10}} size="small">
                     <Avatar style={{ backgroundColor: colorErrorBorder }} className={styles.avatar}>
                         {userInitials || <UserOutlined />}
                     </Avatar>
@@ -56,7 +52,7 @@ export function UserMenu() {
                     {t('Hello, {{name}}', { name: user?.first_name || usernameFallback })}
                 </Typography.Text>
             </Flex>
-            <Flex className={styles.headerActionsWrapper}>
+            <Flex className={headerStyles.headerActionsWrapper}>
                 <CircleIconButton
                     icon={<LogoutOutlined rotate={270} />}
                     tooltip={t('Logout')}

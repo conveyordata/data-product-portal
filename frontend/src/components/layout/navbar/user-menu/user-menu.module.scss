@@ -1,0 +1,27 @@
+@import '@/styles/mixins';
+@import '@/styles/variables';
+@import '@/styles/colors';
+
+.user-menu-container {
+    align-items: center;
+    gap: $column-gap-l;
+}
+
+.avatar-wrapper {
+    align-items: center;
+    gap: $column-gap-sm;
+
+    .avatar {
+        height: $nav-avatar-size;
+        width: $nav-avatar-size;
+    }
+
+    span {
+        @include no-select();
+    }
+
+    .user-greeting {
+        font-size: $font-header-4;
+        font-weight: $font-weight-bold;
+    }
+}
