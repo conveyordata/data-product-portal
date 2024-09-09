@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.exc import NoResultFound
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_product_memberships.enums import DataProductUserRole
@@ -35,7 +36,12 @@ class OnlyProductRoles:
         db: Session = Depends(get_db_session),
     ) -> None:
         if id:
-            data_product = db.get_one(DataProductModel, id)
+            try:
+                data_product = db.get_one(DataProductModel, id)
+            except NoResultFound:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="product not founds"
+                )
         elif data_product_name:
             data_product = db.query(DataProductModel).get_one(
                 DataProductModel.external_id, data_product_name

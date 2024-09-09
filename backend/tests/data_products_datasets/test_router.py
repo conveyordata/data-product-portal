@@ -110,7 +110,7 @@ class TestDataProductsDatasetsRouter:
         assert response.status_code == 200
 
     def test_request_dataset_link_with_invalid_dataset_id(self, client):
-        membership = DataProductMembershipFactory()
+        membership = DataProductMembershipFactory(user=UserFactory(external_id="sub"))
         response = self.request_data_product_dataset_link(
             client, membership.data_product_id, self.invalid_id
         )
