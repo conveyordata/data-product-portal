@@ -71,6 +71,7 @@
     "Logout": "Logout",
     "Configure": "Configure",
     "Add User": "Add User",
+    "admin": "admin",
     "No users found": "No users found",
     "Text": "Text",
     "Heading {{value}}": "Heading {{value}}",
