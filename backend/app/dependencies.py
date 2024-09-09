@@ -23,6 +23,8 @@ class OnlyProductRoles:
     """Only allow users that have a membership of a certain role type to this product"""
 
     def __init__(self, allowed_roles: list[DataProductUserRole]):
+        if allowed_roles == [DataProductUserRole.MEMBER]:
+            allowed_roles.append(DataProductUserRole.OWNER)
         self.allowed_roles = allowed_roles
 
     def __call__(
