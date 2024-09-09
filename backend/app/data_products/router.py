@@ -13,7 +13,7 @@ from app.data_products.schema import (
 from app.data_products.schema_get import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
-from app.dependencies import OnlyProductRoles
+from app.dependencies import OnlyWithProductAccess
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_products", tags=["data_products"])
@@ -77,7 +77,7 @@ def create_data_product(
             },
         }
     },
-    dependencies=[Depends(OnlyProductRoles([DataProductUserRole.OWNER]))],
+    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
 )
 def remove_data_product(id: UUID, db: Session = Depends(get_db_session)):
     return DataProductService().remove_data_product(id, db)
@@ -93,7 +93,7 @@ def remove_data_product(id: UUID, db: Session = Depends(get_db_session)):
             },
         }
     },
-    dependencies=[Depends(OnlyProductRoles([DataProductUserRole.MEMBER]))],
+    dependencies=[Depends(OnlyWithProductAccess())],
 )
 def update_data_product(
     id: UUID, data_product: DataProductUpdate, db: Session = Depends(get_db_session)
@@ -111,7 +111,7 @@ def update_data_product(
             },
         }
     },
-    dependencies=[Depends(OnlyProductRoles([DataProductUserRole.MEMBER]))],
+    dependencies=[Depends(OnlyWithProductAccess())],
 )
 def update_data_product_about(
     id: UUID,
@@ -137,7 +137,7 @@ def update_data_product_about(
             },
         },
     },
-    dependencies=[Depends(OnlyProductRoles([DataProductUserRole.OWNER]))],
+    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
 )
 def link_dataset_to_data_product(
     id: UUID,
@@ -166,7 +166,7 @@ def link_dataset_to_data_product(
             },
         },
     },
-    dependencies=[Depends(OnlyProductRoles([DataProductUserRole.OWNER]))],
+    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
 )
 def unlink_dataset_from_data_product(
     id: UUID,
@@ -179,16 +179,14 @@ def unlink_dataset_from_data_product(
     )
 
 
-@router.get(
-    "/{id}/role", dependencies=[Depends(OnlyProductRoles([DataProductUserRole.MEMBER]))]
-)
+@router.get("/{id}/role", dependencies=[Depends(OnlyWithProductAccess())])
 def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) -> str:
     return DataProductService().get_data_product_role_arn(id, environment, db)
 
 
 @router.get(
     "/{id}/signin_url",
-    dependencies=[Depends(OnlyProductRoles([DataProductUserRole.MEMBER]))],
+    dependencies=[Depends(OnlyWithProductAccess())],
 )
 def get_signin_url(
     id: UUID,
@@ -203,7 +201,7 @@ def get_signin_url(
 
 @router.get(
     "/{id}/conveyor_notebook_url",
-    dependencies=[Depends(OnlyProductRoles([DataProductUserRole.MEMBER]))],
+    dependencies=[Depends(OnlyWithProductAccess())],
 )
 def get_conveyor_notebook_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
     return DataProductService().get_conveyor_notebook_url(id, db)
@@ -211,7 +209,7 @@ def get_conveyor_notebook_url(id: UUID, db: Session = Depends(get_db_session)) -
 
 @router.get(
     "/{id}/conveyor_ide_url",
-    dependencies=[Depends(OnlyProductRoles([DataProductUserRole.MEMBER]))],
+    dependencies=[Depends(OnlyWithProductAccess())],
 )
 def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
     return DataProductService().get_conveyor_ide_url(id, db)

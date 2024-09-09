@@ -2,6 +2,7 @@ from typing import Optional
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -20,12 +21,12 @@ async def only_for_admin(authenticated_user: User = Depends(get_authenticated_us
         )
 
 
-class OnlyProductRoles:
+class OnlyWithProductAccess:
     """Only allow users that have a membership of a certain role type to this product"""
 
-    def __init__(self, allowed_roles: list[DataProductUserRole]):
-        if allowed_roles == [DataProductUserRole.MEMBER]:
-            allowed_roles.append(DataProductUserRole.OWNER)
+    def __init__(self, allowed_roles: Optional[list[DataProductUserRole]] = None):
+        if not allowed_roles:
+            allowed_roles = [DataProductUserRole.OWNER, DataProductUserRole.MEMBER]
         self.allowed_roles = allowed_roles
 
     def __call__(
@@ -35,21 +36,24 @@ class OnlyProductRoles:
         authenticated_user: User = Depends(get_authenticated_user),
         db: Session = Depends(get_db_session),
     ) -> None:
-        if id:
-            try:
-                data_product = db.get_one(DataProductModel, id)
-            except NoResultFound:
+        try:
+            if id:
+                data_product = db.scalars(
+                    select(DataProductModel).filter_by(id=id)
+                ).one()
+
+            elif data_product_name:
+                data_product = db.scalars(
+                    select(DataProductModel).filter_by(external_id=data_product_name)
+                ).one()
+            else:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="product not founds"
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Provide at least a product name or id",
                 )
-        elif data_product_name:
-            data_product = db.query(DataProductModel).get_one(
-                DataProductModel.external_id, data_product_name
-            )
-        else:
+        except NoResultFound:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Provide at least a product name or id",
+                status_code=status.HTTP_404_NOT_FOUND, detail="product not founds"
             )
         if (
             authenticated_user.id
