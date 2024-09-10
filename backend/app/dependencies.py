@@ -10,6 +10,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
 from app.database.database import get_db_session
+from app.datasets.model import Dataset as DatasetModel
 from app.users.schema import User
 
 
@@ -18,6 +19,25 @@ async def only_for_admin(authenticated_user: User = Depends(get_authenticated_us
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only admin can execute this operation",
+        )
+
+
+async def only_with_dataset_access(
+    id: Optional[UUID] = None,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+):
+    try:
+        if id:
+            dataset = db.scalars(select(DatasetModel).filter_by(id=id)).one()
+    except NoResultFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="dataset not founds"
+        )
+    if authenticated_user not in dataset.owners and not authenticated_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not an owner of the dataset",
         )
 
 
