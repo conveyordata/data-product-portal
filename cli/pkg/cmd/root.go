@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -16,16 +13,14 @@ const version = "1.0"
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
-	Use:              "portal",
+	Use:              "data-product-portal",
 	Version:          version,
 	PersistentPreRun: core.EnsureValidConfig,
-	Short:            "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short:            "A CLI utility for interacting with the data product portal CLI",
+	Long: `Data product portal is a portal for managing data products.
+  This CLI utility grants users access to the API, for example to gain
+  local access to cloud resources.
+  `,
 }
 
 func Execute() {

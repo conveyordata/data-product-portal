@@ -1,5 +1,6 @@
-import { Avatar, Flex, theme, Typography } from 'antd';
-import styles from '@/components/layout/navbar/navbar.module.scss';
+import { Avatar, Badge, Flex, theme, Typography } from 'antd';
+import headerStyles from '@/components/layout/navbar/navbar.module.scss';
+import styles from './user-menu.module.scss';
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
@@ -17,7 +18,7 @@ export function UserMenu() {
     const { signoutRedirect } = useAuth();
     const user = useSelector(selectCurrentUser);
     const {
-        token: { colorErrorBorder },
+        token: { colorErrorBorder, colorPrimary },
     } = theme.useToken();
     const userInitials = user?.first_name && user.first_name.charAt(0);
 
@@ -41,14 +42,17 @@ export function UserMenu() {
     return (
         <Flex className={styles.userMenuContainer}>
             <Flex className={styles.avatarWrapper}>
-                <Avatar style={{ backgroundColor: colorErrorBorder }} className={styles.avatar}>
-                    {userInitials || <UserOutlined />}
-                </Avatar>
+                <Badge count={user?.is_admin ? t('admin') : 0} showZero={false} color={colorPrimary} style={{fontSize: 10}} size="small">
+                    <Avatar style={{ backgroundColor: colorErrorBorder }} className={styles.avatar}>
+                        {userInitials || <UserOutlined />}
+                    </Avatar>
+                </Badge>
+
                 <Typography.Text strong className={styles.userGreeting}>
                     {t('Hello, {{name}}', { name: user?.first_name || usernameFallback })}
                 </Typography.Text>
             </Flex>
-            <Flex className={styles.headerActionsWrapper}>
+            <Flex className={headerStyles.headerActionsWrapper}>
                 <CircleIconButton
                     icon={<LogoutOutlined rotate={270} />}
                     tooltip={t('Logout')}
