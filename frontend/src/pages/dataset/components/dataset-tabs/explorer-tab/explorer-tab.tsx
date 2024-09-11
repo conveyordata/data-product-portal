@@ -40,10 +40,10 @@ function LinkToDataProductNode({ id }: { id: string }) {
     );
 }
 
-function LinkToDataOutputNode({ id }: {id: string}) {
+function LinkToDataOutputNode({ id, product_id }: {id: string, product_id: string}) {
     const { t } = useTranslation();
     return (
-        <Link to={createDataOutputIdPath(id)} className={styles.link}>
+        <Link to={createDataOutputIdPath(id, product_id)} className={styles.link}>
             <Button type="default">{t('View data output')}</Button>
         </Link>
     )
@@ -60,7 +60,7 @@ function generateDatasetOutputNodes(
         data: {
             name: link.data_output.name,
             id: link.data_output_id,
-            nodeToolbarActions: <LinkToDataOutputNode id={link.data_output_id} />,
+            nodeToolbarActions: <LinkToDataOutputNode id={link.data_output_id} product_id={link.data_output.owner_id} />,
             targetHandlePosition: Position.Left,
             targetHandleId: 'right_t',
             isActive: link.status === DataOutputDatasetLinkStatus.Approved,
