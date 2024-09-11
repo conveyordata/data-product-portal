@@ -44,7 +44,7 @@ export const getDatasetDataProductsColumns = ({
                 return (
                     <TableCellAvatar
                         popover={{ title: data_output.name, content: data_output.description }}
-                        linkTo={createDataOutputIdPath(data_output.id)}
+                        linkTo={createDataOutputIdPath(data_output.id, data_output.owner.id)}
                         icon={
                             <CustomSvgIconLoader
                                 iconComponent={getDataOutputIcon(data_output.configuration_type)!}
