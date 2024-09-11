@@ -41,9 +41,9 @@ export function DataOutput() {
     );
 
     function navigateToEditPage() {
-        if (isCurrentDataOutputOwner && dataOutputId) {
+        if (isCurrentDataOutputOwner && dataOutputId && dataOutput && !isLoading) {
             navigate(
-                getDynamicRoutePath(ApplicationPaths.DataOutputEdit, DynamicPathParams.DataOutputId, dataOutputId),
+                getDynamicRoutePath(ApplicationPaths.DataOutputEdit, DynamicPathParams.DataOutputId, dataOutputId).replace(":" + DynamicPathParams.DataProductId, dataOutput.owner.id),
             );
         }
     }
@@ -57,10 +57,10 @@ export function DataOutput() {
 
     if (isLoading) return <LoadingSpinner />;
 
-    if (!dataOutput) {
-        navigate(ApplicationPaths.DataOutputs, { replace: true });
-        return null;
-    }
+    // if (!dataOutput) {
+    //     navigate(ApplicationPaths.DataOutputs, { replace: true });
+    //     return null;
+    // }
 
     return (
         <Flex className={styles.dataOutputContainer}>

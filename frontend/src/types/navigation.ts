@@ -8,10 +8,9 @@ export enum ApplicationPaths {
     Dataset = '/datasets/:datasetId',
     DatasetNew = '/datasets/new',
     DatasetEdit = '/datasets/:datasetId/edit',
-    DataOutputs = '/data-outputs',
-    DataOutput = '/data-outputs/:dataOutputId',
+    DataOutput = '/data-products/:dataProductId/:dataOutputId',
     DataOutputNew = '/data-outputs/new',
-    DataOutputEdit = '/data-outputs/:dataOutputId/edit',
+    DataOutputEdit = '/data-products/:dataProductId/:dataOutputId/edit',
     AuditLogs = '/audit-logs',
     // Settings = '/settings',
     Logout = '/logout',
@@ -34,6 +33,8 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.Datasets,
     ApplicationPaths.Dataset,
     ApplicationPaths.AuditLogs,
+    ApplicationPaths.DataOutput,
+    ApplicationPaths.DataOutputEdit,
     // ApplicationPaths.Settings,
     ApplicationPaths.PlatformsConfigs,
     ApplicationPaths.PlatformServiceConfig,
@@ -49,8 +50,8 @@ export function createDataProductIdPath(dataProductId: string) {
     return ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId));
 }
 
-export function createDataOutputIdPath(dataOutputId: string) {
-    return ApplicationPaths.DataOutput.replace(':dataOutputId', encodeURIComponent(dataOutputId));
+export function createDataOutputIdPath(dataOutputId: string, dataProductId: string) {
+    return ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(':dataOutputId', encodeURIComponent(dataOutputId));
 }
 
 export function createDatasetIdPath(datasetId: string) {

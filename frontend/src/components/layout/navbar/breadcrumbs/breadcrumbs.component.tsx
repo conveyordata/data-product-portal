@@ -131,20 +131,6 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
-                        case ApplicationPaths.DataOutputs:
-                                Object.assign(breadcrumbItem, {
-                                    title: (
-                                        <Space
-                                            classNames={{
-                                                item: styles.breadcrumbItem,
-                                            }}
-                                        >
-                                            <Icon component={dataOutputOutlineIcon} />
-                                            {t('Data Outputs')}
-                                        </Space>
-                                    ),
-                                });
-                                break;
                         case ApplicationPaths.Datasets:
                             Object.assign(breadcrumbItem, {
                                 title: (
@@ -253,7 +239,7 @@ export const Breadcrumbs = () => {
 
                             // Case for data product and dataset
                             if (dataProductId && dataProduct && !isFetchingDataProduct) {
-                                if (isDataProductEditPage(path, dataProductId)) {
+                                if (isDataProductEditPage(path, dataProductId) || isDataOutputEditPage(path, dataOutputId, dataProductId)) {
                                     Object.assign(breadcrumbItem, {
                                         title: (
                                             <Space
@@ -266,43 +252,29 @@ export const Breadcrumbs = () => {
                                         ),
                                     });
                                 } else {
-                                    Object.assign(breadcrumbItem, {
-                                        title: (
-                                            <Typography.Text
-                                                ellipsis={{ tooltip: dataProduct.name }}
-                                                rootClassName={styles.title}
-                                            >
-                                                {dataProduct.name}
-                                            </Typography.Text>
-                                        ),
-                                    });
-                                }
-                            }
-                            // Case for data product and dataset
-                            if (dataOutputId && dataOutput && !isFetchingDataOutput) {
-                                if (isDataOutputEditPage(path, dataOutputId)) {
-                                    Object.assign(breadcrumbItem, {
-                                        title: (
-                                            <Space
-                                                classNames={{
-                                                    item: styles.breadcrumbItem,
-                                                }}
-                                            >
-                                                {t('Edit')}
-                                            </Space>
-                                        ),
-                                    });
-                                } else {
-                                    Object.assign(breadcrumbItem, {
-                                        title: (
-                                            <Typography.Text
-                                                ellipsis={{ tooltip: dataOutput.name }}
-                                                rootClassName={styles.title}
-                                            >
-                                                {dataOutput.name}
-                                            </Typography.Text>
-                                        ),
-                                    });
+                                    if (dataOutputId && dataOutput && !isFetchingDataOutput && path.split('/').length == 4) {
+                                        Object.assign(breadcrumbItem, {
+                                            title: (
+                                                <Typography.Text
+                                                    ellipsis={{ tooltip: dataOutput.name }}
+                                                    rootClassName={styles.title}
+                                                >
+                                                    {dataOutput.name}
+                                                </Typography.Text>
+                                            ),
+                                        });
+                                    } else {
+                                        Object.assign(breadcrumbItem, {
+                                            title: (
+                                                <Typography.Text
+                                                    ellipsis={{ tooltip: dataProduct.name }}
+                                                    rootClassName={styles.title}
+                                                >
+                                                    {dataProduct.name}
+                                                </Typography.Text>
+                                            ),
+                                        });
+                                    }
                                 }
                             }
                             if (datasetId && dataset && !isFetchingDataset) {
@@ -400,7 +372,6 @@ export const Breadcrumbs = () => {
             ].filter(Boolean) as Partial<BreadcrumbItemType & BreadcrumbSeparatorType>[],
         [pathnames, dataProductId, datasetId, dataOutputId],
     );
-
     return (
         <Breadcrumb
             itemRender={(route, _params, routes) => {

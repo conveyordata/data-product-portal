@@ -33,11 +33,6 @@ export const Sidebar = () => {
             key: ApplicationPaths.DataProducts,
         },
         {
-            label: <Link to={ApplicationPaths.DataOutputs}>{t('Data Outputs')}</Link>,
-            icon: React.createElement(DataOutputIcon),
-            key: ApplicationPaths.DataOutputs,
-        },
-        {
             label: <Link to={ApplicationPaths.Datasets}>{t('Datasets')}</Link>,
             icon: React.createElement(DatasetIcon),
             key: ApplicationPaths.Datasets,

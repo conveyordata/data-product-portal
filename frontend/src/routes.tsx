@@ -56,33 +56,20 @@ const router = createBrowserRouter([
                                 element: <DataProduct />,
                             },
                             {
+                                path: ApplicationPaths.DataOutput,
+                                element: <DataOutput />,
+                            },
+                            {
+                                path: ApplicationPaths.DataOutputEdit,
+                                element: <DataOutputEdit />,
+                            },
+                            {
                                 path: ApplicationPaths.DataProductNew,
                                 element: <DataProductCreate />,
                             },
                             {
                                 path: ApplicationPaths.DataProductEdit,
                                 element: <DataProductEdit />,
-                            },
-                        ],
-                    },
-                    {
-                        path: ApplicationPaths.DataOutputs,
-                        children: [
-                            {
-                                element: <DataOutputs />,
-                                index: true
-                            },
-                            {
-                                path: ApplicationPaths.DataOutput,
-                                element: <DataOutput />,
-                            },
-                            // {
-                            //     path: ApplicationPaths.DataOutputNew,
-                            //     element: <DataOutputCreate />,
-                            // },
-                            {
-                                path: ApplicationPaths.DataOutputEdit,
-                                element: <DataOutputEdit />,
                             },
                         ],
                     },

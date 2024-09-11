@@ -162,7 +162,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             <Form.Item<DataOutputCreateFormSchema>
                 name={'is_source_aligned'} valuePropName="checked"
             >
-                <Checkbox>{t('Is source aligned')}</Checkbox>
+                <Checkbox>{t('Source aligned')}</Checkbox>
             </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>

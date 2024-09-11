@@ -108,7 +108,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             //     navigate(createDataProductIdPath(dataProductId));
             // }
 
-            if (mode === 'edit' && dataOutputId) {
+            if (mode === 'edit' && dataOutputId && currentDataOutput) {
                 if (!canEditForm) {
                     dispatchMessage({ content: t('You are not allowed to edit this data output'), type: 'error' });
                     return;
@@ -133,7 +133,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 }).unwrap();
                 dispatchMessage({ content: t('Data output updated successfully'), type: 'success' });
 
-                navigate(createDataOutputIdPath(response.id));
+                navigate(createDataOutputIdPath(response.id, currentDataOutput.owner.id));
             }
 
             form.resetFields();
@@ -149,10 +149,10 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
 
     const onCancel = () => {
         form.resetFields();
-        if (mode === 'edit' && dataOutputId) {
-            navigate(createDataOutputIdPath(dataOutputId));
-        } else {
-            navigate(ApplicationPaths.DataOutputs);
+        if (mode === 'edit' && dataOutputId && currentDataOutput) {
+            navigate(createDataOutputIdPath(dataOutputId, currentDataOutput.owner.id));
+        // } else {
+        //     navigate(ApplicationPaths.DataOutputs);
         }
     };
 
