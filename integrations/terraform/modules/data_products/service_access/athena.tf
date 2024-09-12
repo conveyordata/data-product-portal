@@ -1,6 +1,6 @@
 locals {
-  athena_output_location     = "s3://${var.environment_config.datalake.bucket}/${var.athena_output_path_prefix}/${var.data_product_name}"
-  athena_output_location_arn = "${var.environment_config.datalake.bucket_arn}/${var.athena_output_path_prefix}/${var.data_product_name}"
+  athena_output_location     = "s3://${local.default_bucket.bucket_name}/${var.athena_output_path_prefix}/${var.data_product_name}"
+  athena_output_location_arn = "${local.default_bucket.bucket_arn}/${var.athena_output_path_prefix}/${var.data_product_name}"
   athena_workgroup           = "${var.data_product_name}-${var.environment}"
 }
 
@@ -20,7 +20,7 @@ resource "aws_athena_workgroup" "athena" {
 
       encryption_configuration {
         encryption_option = "SSE_KMS"
-        kms_key_arn       = var.environment_config.datalake.kms_key_arn
+        kms_key_arn       = local.default_bucket.kms_key_arn
       }
     }
   }

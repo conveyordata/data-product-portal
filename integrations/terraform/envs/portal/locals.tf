@@ -38,4 +38,7 @@ locals {
       data_outputs = v["data_outputs"]
     }
   }
+
+  # TODO: Read environment from yaml
+  environments = {}
 }

@@ -82,7 +82,7 @@ data "aws_iam_policy_document" "permission_athena" {
     sid       = "AthenaQueryResultsKMSAccess"
     effect    = "Allow"
     actions   = local.aws_actions.kms.readwrite
-    resources = [var.environment_config.datalake.kms_key_arn]
+    resources = [local.default_bucket.kms_key_arn]
   }
 }
 
@@ -98,8 +98,8 @@ data "aws_iam_policy_document" "permission_ssm" {
     ]
 
     resources = [
-      "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/platform/public/*",
-      "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/data_product/${var.data_product_name}/*",
+      "arn:aws:ssm:${var.environment_config.aws_region}:${var.environment_config.aws_account_id}:parameter/platform/public/*",
+      "arn:aws:ssm:${var.environment_config.aws_region}:${var.environment_config.aws_account_id}:parameter/data_product/${var.data_product_name}/*",
     ]
   }
 
@@ -112,7 +112,7 @@ data "aws_iam_policy_document" "permission_ssm" {
       "ssm:DescribeParameters"
     ]
     resources = [
-      "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:*"
+      "arn:aws:ssm:${var.environment_config.aws_region}:${var.environment_config.aws_account_id}:*"
     ]
   }
 
@@ -128,7 +128,7 @@ data "aws_iam_policy_document" "permission_ssm" {
     ]
 
     resources = [
-      "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/data_product/${var.data_product_name}/${var.environment}/*",
+      "arn:aws:ssm:${var.environment_config.aws_region}:${var.environment_config.aws_account_id}:parameter/data_product/${var.data_product_name}/${var.environment}/*",
     ]
   }
 }
