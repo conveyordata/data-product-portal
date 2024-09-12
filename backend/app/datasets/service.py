@@ -7,11 +7,10 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.datasets.schema import Dataset, DatasetAboutUpdate, DatasetCreateUpdate
+from app.datasets.schema import DatasetAboutUpdate, DatasetCreateUpdate
 from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.tags.model import Tag as TagModel
 from app.users.model import ensure_user_exists
-from app.users.schema import User
 
 
 class DatasetService:
@@ -53,14 +52,6 @@ class DatasetService:
             user = ensure_user_exists(owner, db)
             dataset.owners.append(user)
         return dataset
-
-    @staticmethod
-    def ensure_owner(authenticated_user: User, dataset: Dataset):
-        if authenticated_user not in dataset.owners and not authenticated_user.is_admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="User is not an owner of the dataset",
-            )
 
     def create_dataset(
         self, dataset: DatasetCreateUpdate, db: Session
@@ -114,12 +105,9 @@ class DatasetService:
         current_dataset.about = dataset.about
         db.commit()
 
-    def add_user_to_dataset(
-        self, dataset_id: UUID, user_id: UUID, authenticated_user: User, db: Session
-    ):
+    def add_user_to_dataset(self, dataset_id: UUID, user_id: UUID, db: Session):
         dataset = ensure_dataset_exists(dataset_id, db)
         user = ensure_user_exists(user_id, db)
-        self.ensure_owner(authenticated_user, dataset)
         if user in dataset.owners:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -130,12 +118,9 @@ class DatasetService:
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
-    def remove_user_from_dataset(
-        self, dataset_id: UUID, user_id: UUID, authenticated_user: User, db: Session
-    ):
+    def remove_user_from_dataset(self, dataset_id: UUID, user_id: UUID, db: Session):
         dataset = ensure_dataset_exists(dataset_id, db)
         user = ensure_user_exists(user_id, db)
-        self.ensure_owner(authenticated_user, dataset)
         dataset.owners.remove(user)
         db.commit()
         RefreshInfrastructureLambda().trigger()

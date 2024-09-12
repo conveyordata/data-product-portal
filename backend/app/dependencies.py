@@ -8,8 +8,15 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_product_memberships.enums import DataProductUserRole
+from app.data_product_memberships.model import (
+    DataProductMembership as DataProductMembershipModel,
+)
 from app.data_products.model import DataProduct as DataProductModel
+from app.data_products_datasets.model import (
+    DataProductDatasetAssociation as DataProductDatasetAssociationModel,
+)
 from app.database.database import get_db_session
+from app.datasets.model import Dataset as DatasetModel
 from app.users.schema import User
 
 
@@ -18,6 +25,76 @@ async def only_for_admin(authenticated_user: User = Depends(get_authenticated_us
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only admin can execute this operation",
+        )
+
+
+async def only_dataset_owners(
+    id: UUID,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+):
+    try:
+        dataset = db.scalars(select(DatasetModel).filter_by(id=id)).one()
+    except NoResultFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="dataset not found"
+        )
+    if authenticated_user not in dataset.owners and not authenticated_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not an owner of the dataset",
+        )
+
+
+async def only_dataproduct_dataset_link_owners(
+    id: UUID,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+):
+    current_link = db.get(DataProductDatasetAssociationModel, id)
+    if not current_link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Dataset data product link {id} not found",
+        )
+    if (
+        authenticated_user not in current_link.dataset.owners
+        and not authenticated_user.is_admin
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only dataset owners can execute this action",
+        )
+
+
+async def only_product_membership_owners(
+    id: UUID,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+):
+    try:
+        membership = db.scalars(
+            select(DataProductMembershipModel).filter_by(id=id)
+        ).one()
+    except NoResultFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="membership not found"
+        )
+    data_product_membership = next(
+        (
+            membership
+            for membership in membership.data_product.memberships
+            if membership.user_id == authenticated_user.id
+        ),
+        None,
+    )
+    if not authenticated_user.is_admin and (
+        data_product_membership is None
+        or data_product_membership.role != DataProductUserRole.OWNER
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not an owner of the product for the membership request",
         )
 
 
@@ -32,10 +109,13 @@ class OnlyWithProductAccess:
     def __call__(
         self,
         data_product_name: Optional[str] = None,
+        data_product_id: Optional[UUID] = None,
         id: Optional[UUID] = None,
         authenticated_user: User = Depends(get_authenticated_user),
         db: Session = Depends(get_db_session),
     ) -> None:
+        if data_product_id:
+            id = data_product_id
         try:
             if id:
                 data_product = db.scalars(
@@ -53,7 +133,7 @@ class OnlyWithProductAccess:
                 )
         except NoResultFound:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="product not founds"
+                status_code=status.HTTP_404_NOT_FOUND, detail="product not found"
             )
         if (
             authenticated_user.id
@@ -66,5 +146,5 @@ class OnlyWithProductAccess:
         ):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
-                detail="You are not allowed to assume this role",
+                detail="You are not allowed to execute this operation",
             )
