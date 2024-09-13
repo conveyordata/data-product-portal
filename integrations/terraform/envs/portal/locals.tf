@@ -39,6 +39,15 @@ locals {
     }
   }
 
-  # TODO: Read environment from yaml
-  environments = {}
+  environments_raw = yamldecode((file("${path.root}/config/environment_configuration/environments.yaml")))
+  environments = {
+    for environment, config in local.environments_raw : environment => {
+      aws_account_id = local.aws_account_id
+      aws_region = local.aws_region
+      can_read_from = []
+      conveyor_oidc_provider_url = ""
+      bucket_glossary = try(config["S3"], {})
+      database_glossary = try(config["Glue"], {})
+    }
+  }
 }
