@@ -12,7 +12,6 @@ import {
 } from '@/types/data-output';
 import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
 import { datasetsApiSlice } from '../datasets/datasets-api-slice';
-import { DataOutput } from '@/pages/data-output/data-output.page';
 import { DataOutputUpdateRequest, DataOutputUpdateResponse } from '@/types/data-output/data-output-update.contract';
 
 export const dataOutputTags: string[] = [

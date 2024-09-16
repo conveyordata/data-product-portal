@@ -16,8 +16,6 @@ import { Link } from 'react-router-dom';
 import { DataProductNodeProps } from '@/components/charts/custom-nodes/data-product-node/data-product-node.tsx';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { getDataProductDatasetLinkEdgeStyle } from '@/utils/node-editor.helper.ts';
-import { DataOutputDatasetLink, DataOutputsGetContract } from '@/types/data-output';
-import { DatasetLink } from '@/types/data-product';
 import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
 import { greenThemeConfig } from '@/theme/antd-theme';
 

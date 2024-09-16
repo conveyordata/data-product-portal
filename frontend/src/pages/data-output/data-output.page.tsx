@@ -2,11 +2,9 @@ import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-ou
 import { useNavigate, useParams } from 'react-router-dom';
 import { Flex, Space, Typography } from 'antd';
 import styles from './data-output.module.scss';
-// import { DataOutputTabs } from '@/pages/data-output/components/data-output-tabs/data-output-tabs.tsx';
-import { DataOutputActions } from '@/pages/data-output/components/data-output-actions/data-output-actions.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataOutputDescription } from '@/pages/data-output/components/data-output-description/data-output-description.tsx';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import Icon, { SettingOutlined } from '@ant-design/icons';
 import clsx from 'clsx';
@@ -15,10 +13,8 @@ import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle
 import { useTranslation } from 'react-i18next';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useSelector } from 'react-redux';
-// import { getDataOutputOwners, getIsDataOutputOwner } from '@/utils/data-output-user-role.helper.ts';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
-import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
 import { DataOutputTabs } from './components/data-output-tabs/data-output-tabs';
 import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
@@ -29,7 +25,7 @@ export function DataOutput() {
     const { dataOutputId = '' } = useParams();
     const { data: dataOutput, isLoading } = useGetDataOutputByIdQuery(dataOutputId, { skip: !dataOutputId });
     const navigate = useNavigate();
-    const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataOutput?.owner.id!, {skip: isLoading || !dataOutput });
+    const { data: dataProduct } = useGetDataProductByIdQuery(dataOutput!.owner.id, {skip: isLoading || !dataOutput });
 
     const dataOutputTypeIcon = useMemo(() => {
         return getDataOutputIcon(dataOutput?.configuration_type);

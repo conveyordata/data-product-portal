@@ -37,7 +37,7 @@ export function EnvironmentConfigCreateForm() {
         },
     );
 
-    let { data: platformServiceConfig } = useGetPlatformServiceConfigQuery(
+    const { data: platformServiceConfig } = useGetPlatformServiceConfigQuery(
         {
             platformId: platformIdFormValue,
             serviceId: serviceIdFormValue,

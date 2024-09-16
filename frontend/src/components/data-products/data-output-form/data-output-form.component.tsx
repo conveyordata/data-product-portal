@@ -47,7 +47,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
     const isLoading = isCreating || isCreating || isFetchingInitialValues;
 
-    const { data: platformConfig, isFetching: isLoadingPlatformConfigs } = useGetAllPlatformsConfigsQuery()
+    const { data: platformConfig } = useGetAllPlatformsConfigsQuery()
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {

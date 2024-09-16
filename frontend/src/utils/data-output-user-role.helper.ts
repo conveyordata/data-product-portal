@@ -1,10 +1,7 @@
 import { DataOutputContract } from '@/types/data-output';
-import { DataProductContract } from '@/types/data-product';
 import {
     DataProductMembershipRole,
     DataProductMembershipRoleType,
-    DataProductMembershipStatus,
-    DataProductUserMembership,
 } from '@/types/data-product-membership';
 
 export function getDataOutputUserRole(

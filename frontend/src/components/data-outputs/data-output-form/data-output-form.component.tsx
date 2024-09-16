@@ -1,64 +1,40 @@
-import { Button, Checkbox, Form, FormInstance, FormProps, Input, Popconfirm, Space } from 'antd';
+import { Button, Form, FormProps, Input, Popconfirm, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
+import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-import { RefObject, useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ApplicationPaths, createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { useCreateDataOutputMutation, useGetDataOutputByIdQuery, useRemoveDataOutputMutation, useUpdateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { DataPlatform, DataPlatforms } from '@/types/data-platform';
-import { getDataPlatforms } from '@/pages/data-product/components/data-product-actions/data-product-actions.component';
-import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
-import { CustomDropdownItemProps } from '@/types/shared';
-import { S3DataOutputForm } from './s3-data-output-form.component';
-import { GlueDataOutputForm } from './glue-data-output-form.component';
+import { useGetDataOutputByIdQuery, useRemoveDataOutputMutation, useUpdateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import TextArea from 'antd/es/input/TextArea';
-import { DataOutputStatus } from '@/types/data-output/data-output.contract';
-import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
-import { getIsDataOutputOwner } from '@/utils/data-output-user-role.helper';
-import { getDataProductMemberMemberships, getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
-import { current } from '@reduxjs/toolkit';
+import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
 import { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
 import { ApiUrl, buildUrl } from '@/api/api-urls';
 
 type Props = {
     mode: 'create'|'edit';
-    // formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>>;
     dataOutputId: string
-    // dataProductId: string;
-    // modalCallbackOnSubmit: () => void;
 };
 
 export function DataOutputForm({ mode, dataOutputId }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [selectedDataPlatform, setSelectedDataPlatform] = useState<
-        CustomDropdownItemProps<DataPlatforms> | undefined
-    >(undefined);
-    const [selectedConfiguration, setSelectedConfiguration] = useState<
-        CustomDropdownItemProps<DataPlatforms> | undefined
-    >(undefined);
     const { data: currentDataOutput, isFetching: isFetchingInitialValues } = useGetDataOutputByIdQuery(
         dataOutputId || '',
         {
             skip: mode === 'create' || !dataOutputId,
         },
     );
-    const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id!, {skip: isFetchingInitialValues || !dataOutputId || mode === 'create' });
+    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id!, {skip: isFetchingInitialValues || !dataOutputId || mode === 'create' });
     const currentUser = useSelector(selectCurrentUser);
-    const [identifiers, setIdentifiers] = useState<string[]>([]);
-    const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
     const [archiveDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
-    const sourceAligned = Form.useWatch('is_source_aligned', form);
-    const dataProductNameValue = Form.useWatch('name', form);
     const canEditForm = Boolean(
         mode === 'edit' &&
             dataProduct &&
@@ -66,10 +42,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
     );
     const canFillInForm = mode === 'create' || canEditForm;
-    const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
-    const isLoading = isCreating || isCreating || isFetchingInitialValues;
-
-    // const { data: platformConfig, isFetching: isLoadingPlatformConfigs } = useGetAllPlatformsConfigsQuery()
+    const isLoading = isFetchingInitialValues;
 
     const handleArchiveDataProduct = async () => {
         if (canEditForm && currentDataOutput) {
@@ -284,7 +257,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                         className={styles.formButton}
                         type="primary"
                         htmlType={'submit'}
-                        loading={isCreating || isUpdating}
+                        loading={isUpdating}
                         disabled={isLoading || !canFillInForm}
                     >
                         {mode === 'edit' ? t('Edit') : t('Create')}
@@ -293,7 +266,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                         className={styles.formButton}
                         type="default"
                         onClick={onCancel}
-                        loading={isCreating || isUpdating}
+                        loading={isUpdating}
                         disabled={isLoading || !canFillInForm}
                     >
                         {t('Cancel')}

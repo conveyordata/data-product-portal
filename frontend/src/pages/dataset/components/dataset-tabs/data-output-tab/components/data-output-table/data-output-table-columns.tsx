@@ -5,12 +5,10 @@ import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
 import { DataOutputLink } from '@/types/dataset';
-// import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
 import { DataOutputDatasetLinkRequest, DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 
 type Props = {
     t: TFunction;

@@ -1,4 +1,4 @@
-import { Badge, Button, Flex, List, Popconfirm, TableColumnsType } from 'antd';
+import { Badge, Button, Flex, Popconfirm, TableColumnsType } from 'antd';
 import styles from './data-output-table.module.scss';
 import { TFunction } from 'i18next';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
@@ -23,11 +23,9 @@ type Props = {
 
 export const getDataProductDataOutputsColumns = ({
     t,
-    handleOpen,
     isDisabled,
     isLoading,
     onRemoveDataOutput,
-    onRemoveDatasetFromDataOutput,
 }: Props): TableColumnsType<DataOutputsGetContract[0]> => {
     return [
         {

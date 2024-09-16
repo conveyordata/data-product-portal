@@ -1,19 +1,12 @@
 import { Flex, Table, TableColumnsType, Typography } from 'antd';
 // import { useTranslation } from 'react-i18next';
-import { dataOutputTags, useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { DataOutputConfiguration, DataOutputConfigurationContract, DataOutputContract, GlueDataOutputContract, S3DataOutputContract } from '@/types/data-output';
+import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { DataOutputContract, GlueDataOutputContract, S3DataOutputContract } from '@/types/data-output';
 import styles from './data-output-technical-info.module.scss'
 import { useMemo } from 'react';
-import { getDataPlatforms } from '@/pages/data-output/components/data-output-actions/data-output-actions.component';
 import { useTranslation } from 'react-i18next';
-import { CustomDropdownItemProps } from '@/types/shared';
-import { DataPlatform } from '@/types/data-platform';
-import { useGetAllPlatformsConfigsQuery, useGetPlatformServiceConfigByIdQuery, useGetPlatformServiceConfigQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import { PlatformServiceConfigGetResponse } from '@/types/platform-service-config';
-import { useGetAllEnvironmentsQuery, useGetEnvConfigByIdQuery, useGetEnvironmentPlatformServiceConfigQuery } from '@/store/features/environments/environments-api-slice';
-import { Environment, EnvironmentConfig } from '@/types/environment';
-import { platform } from 'os';
-import { getS3TechnicalInformationColumns, getTechnicalInformationColumns } from './data-output-table-s3-columns';
+import { useGetEnvironmentPlatformServiceConfigQuery } from '@/store/features/environments/environments-api-slice';
+import { getS3TechnicalInformationColumns } from './data-output-table-s3-columns';
 import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
 import { getGlueTechnicalInformationColumns } from './data-output-table-glue-columns';
 

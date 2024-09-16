@@ -6,7 +6,6 @@ import { Datasets } from '@/pages/datasets/datasets.page.tsx';
 import { Dataset } from '@/pages/dataset/dataset.page.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
 import { AuditLogs } from '@/pages/audit-logs/audit-logs.page.tsx';
-// import { Settings } from '@/pages/settings/settings.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
 import { DataProductCreate } from '@/pages/data-product-create/data-product-create.page.tsx';
 import { AuthLayout } from '@/components/layout/auth/auth.layout.tsx';
@@ -25,7 +24,6 @@ import { EnvironmentCreate } from './pages/environment-create/environment-create
 import { EnvironmentConfigs } from './pages/environment-configs/environment-configs.page.tsx';
 import { EnvironmentConfigCreate } from './pages/environment-config-create/environment-config-create.page.tsx';
 import { EnvironmentConfig } from './pages/environment-config/environment-config.page.tsx';
-import { DataOutputs } from './pages/data-outputs/data-outputs.page.tsx';
 import { DataOutput } from './pages/data-output/data-output.page.tsx';
 import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
 

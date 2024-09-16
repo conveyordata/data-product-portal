@@ -1,29 +1,12 @@
 import { Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
-// import styles from './data-output-form.module.scss';
-// import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import {
     DataOutputConfiguration,
-    // DataOutputCreate,
     DataOutputCreateFormSchema,
-    // GlueDataOutput,
     S3DataOutput,
-    // S3DataOutputContract,
 } from '@/types/data-output';
-// import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { useEffect } from 'react';
-import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
-import { useGetAllPlatformsConfigsQuery, useGetPlatformServiceConfigQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import { useGetAllPlatformServicesQuery } from '@/store/features/platform-services/platform-services-api-slice';
-// import { useNavigate } from 'react-router-dom';
-// import { createDataProductIdPath } from '@/types/navigation.ts';
-// import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
-// import { useCreateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-// import { DataPlatforms } from '@/types/data-platform';
-// import { getDataPlatforms } from '@/pages/data-product/components/data-product-actions/data-product-actions.component';
-// // import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
-// import { CustomDropdownItemProps } from '@/types/shared';
 
 type Props = {
     mode: 'create';

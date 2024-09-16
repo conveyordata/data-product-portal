@@ -10,7 +10,6 @@ import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { ReactNode, useMemo } from 'react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
-import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import {
     isDataProductEditPage,

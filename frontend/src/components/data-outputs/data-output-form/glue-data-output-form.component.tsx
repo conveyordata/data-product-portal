@@ -1,20 +1,7 @@
-import { Form, FormInstance, Input, Select } from 'antd';
+import { Form, FormInstance, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataOutputConfiguration, DataOutputCreateFormSchema, GlueDataOutput } from '@/types/data-output';
 import { useEffect } from 'react';
-// import styles from './data-output-form.module.scss';
-// import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-// import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-// import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-// import { Component, MutableRefObject, useEffect, useMemo, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import { createDataProductIdPath } from '@/types/navigation.ts';
-// import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
-// import { useCreateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-// import { DataPlatform, DataPlatforms } from '@/types/data-platform';
-// import { getDataPlatforms } from '@/pages/data-product/components/data-product-actions/data-product-actions.component';
-// import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
-// import { CustomDropdownItemProps } from '@/types/shared';
 
 type Props = {
     sourceAligned: boolean;
@@ -37,7 +24,6 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
 
     let databaseOptions = identifiers?.map((database) => ({ label: database, value: database }));
     // const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
-    const dataProductNameValue: string = Form.useWatch('temp_prefix', form);
     // const canFillInForm = mode === 'create';
     // const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
     // const isLoading = isCreating || isCreating || isFetchingInitialValues;
