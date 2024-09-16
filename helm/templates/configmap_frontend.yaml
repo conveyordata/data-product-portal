@@ -4,7 +4,7 @@ data:
         const config = (() => {
             return {
                 API_BASE_URL: "{{ .Values.host }}",
-                OIDC_DISABLED: {{ .Values.oidc.disabled }},
+                OIDC_ENABLED: {{ .Values.oidc.enabled }},
                 OIDC_CLIENT_ID: "{{ .Values.oidc.client_id }}",
                 OIDC_CLIENT_SECRET: "{{ .Values.oidc.client_secret }}",
                 OIDC_AUTHORITY: "{{ .Values.oidc.authority }}",

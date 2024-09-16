@@ -39,7 +39,7 @@ def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> Use
     return db_user
 
 
-if not settings.OIDC_DISABLED:
+if settings.OIDC_ENABLED:
 
     def unvalidated_token(token: str = Depends(oidc.oidc_dependency)) -> str:
         return token
