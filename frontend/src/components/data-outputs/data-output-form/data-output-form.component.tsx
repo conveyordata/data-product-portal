@@ -76,7 +76,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             try {
                 await archiveDataOutput(currentDataOutput?.id).unwrap();
                 dispatchMessage({ content: t('Data output archived successfully'), type: 'success' });
-                navigate(ApplicationPaths.DataOutputs);
+                navigate(createDataProductIdPath(dataProduct!.id));
             } catch (error) {
                 dispatchMessage({
                     content: t('Failed to archive data output, please try again later'),
