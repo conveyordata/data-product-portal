@@ -7,7 +7,7 @@ import yaml
 # API key of the data product portal
 API_KEY: str = os.getenv("API_KEY", "")
 # URL of where to contact the portal API
-API_HOST = "http://localhost:8080"
+API_HOST = "https://portal.acme.com"
 FOLDER = "./"
 proxies: Dict[str, str] = {}
 
@@ -29,8 +29,9 @@ def get_data_products():
         )
         data_product = data_product.json()
         datasets = []
-        for dataset in data_product.get("dataset_links"):
-            datasets.append(dataset.get("dataset").get("external_id"))
+        for dataset_link in data_product.get("dataset_links"):
+            if dataset_link.get("status") == "approved":
+                datasets.append(dataset_link.get("dataset").get("external_id"))
 
         members = {}
         for member in data_product.get("memberships"):
@@ -52,29 +53,28 @@ def get_data_products():
 
 
 def get_datasets():
-    # TODO Only use approved datasets instead of all requests and rejects
     result = session.get(f"{API_HOST}/api/datasets")
 
-    data_products = {}
-    for data_product_info in result.json():
-        data_product = session.get(
-            f"{API_HOST}/api/datasets/{data_product_info.get('id')}"
-        )
-        data_product = data_product.json()
+    datasets = {}
+    for dataset_info in result.json():
+        dataset = session.get(f"{API_HOST}/api/datasets/{dataset_info.get('id')}")
+        dataset = dataset.json()
+
         owners = []
-        for owner in data_product.get("owners"):
+        for owner in dataset.get("owners"):
             owners.append(owner.get("email"))
-        data_products[data_product.get("external_id")] = {
+        datasets[dataset.get("external_id")] = {
             "data_outputs": [
-                data_output.get("external_id")
-                for data_output in data_product.get("data_outputs", [])
+                data_output_link.get("data_output").get("external_id")
+                for data_output_link in dataset.get("data_output_links", [])
+                if data_output_link.get("status") == "approved"
             ],
             "owner": owners[0],
         }
     with open(
         os.path.join(FOLDER, "config", "data_glossary", "datasets.yaml"), "w"
     ) as f:
-        yaml.dump(data_products, f, allow_unicode=True)
+        yaml.dump(datasets, f, allow_unicode=True)
 
 
 def get_data_outputs():
@@ -84,11 +84,15 @@ def get_data_outputs():
     for data_output_info in result.json():
         platform_id = data_output_info.get("platform_id")
         service_id = data_output_info.get("service_id")
-        service = session.get(f"{API_HOST}/api/{platform_id}/services/{service_id}")
+        platform_service = session.get(
+            f"{API_HOST}/api/platforms/{platform_id}/services/{service_id}"
+        ).json()
 
         data_outputs[data_output_info.get("external_id")] = {
-            service.get("name"): data_output_info.get("configuration"),
-            "owner": data_output_info.get("owner").get("external_id"),
+            platform_service.get("service").get("name"): data_output_info.get(
+                "configuration"
+            ),
+            "owner": [data_output_info.get("owner").get("external_id")],
         }
 
     with open(

@@ -26,8 +26,8 @@ locals {
   data_outputs_raw = yamldecode(file("${path.root}/config/data_glossary/data_outputs.yaml"))
   data_outputs = {
     for k, v in local.data_outputs_raw : k => {
-      s3    = try(v["s3"], [])
-      glue  = try(v["glue"], [])
+      s3    = try(v["S3"], [])
+      glue  = try(v["Glue"], [])
       owner = try(v["owner"], [])
     }
   }
