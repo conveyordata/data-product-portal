@@ -4,7 +4,7 @@ locals {
   default_bucket = [for bucket_id, bucket in var.environment_config.bucket_glossary : bucket if bucket.is_default][0]
 
   # Retrieve all write data_ids
-  write_data_outputs = [for data_id, v in var.data_outputs : data_id if contains(v.owner, var.data_product_name)]
+  write_data_outputs = [for data_id, v in var.data_outputs : data_id if v.owner == var.data_product_name]
 
   # Retrieve all read data_ids. You can also read what you can write
   read_data_outputs = concat(flatten([
@@ -34,10 +34,12 @@ locals {
   ]
 
   # Retrieve all S3 paths for the Glue write data_ids
-  write_glue_paths = [
-    for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) :
-    "${local.default_bucket.bucket_arn}/${var.environment_config.database_glossary[split("/", glue)[0]]["s3_path"]}/${split("/", glue)[1]}"
-  ]
+  write_glue_paths = flatten([
+    for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) : [
+        for prefix in glue.table_prefixes :
+        "${local.default_bucket.bucket_arn}/${var.environment_config.database_glossary[glue.database_identifier].s3_path}/${prefix}"
+      ]
+  ])
 
   write_glue_buckets = [
     for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) :
@@ -46,19 +48,23 @@ locals {
 
   write_glue_databases = distinct([
     for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) :
-    var.environment_config.database_glossary[split("/", glue)[0]]["glue_database_name"]
+    var.environment_config.database_glossary[glue.database_identifier].glue_database_name
   ])
 
-  write_glue_tables = [
-    for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) :
-    "${var.environment_config.database_glossary[split("/", glue)[0]]["glue_database_name"]}/${split("/", glue)[1]}"
-  ]
+  write_glue_tables = flatten([
+    for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) : [
+      for prefix in glue.table_prefixes :
+      "${var.environment_config.database_glossary[glue.database_identifier].glue_database_name}/${prefix}"
+    ]
+  ])
 
   # Retrieve all S3 paths for the Glue read data_ids
-  read_glue_paths = [
-    for glue in flatten([for data_id in local.read_data_outputs : var.data_outputs[data_id].glue]) :
-    "${local.default_bucket.bucket_arn}/${var.environment_config.database_glossary[split("/", glue)[0]]["s3_path"]}/${split("/", glue)[1]}"
-  ]
+  read_glue_paths = flatten([
+    for glue in flatten([for data_id in local.read_data_outputs : var.data_outputs[data_id].glue]) : [
+        for prefix in glue.table_prefixes :
+        "${local.default_bucket.bucket_arn}/${var.environment_config.database_glossary[glue.database_identifier].s3_path}/${prefix}"
+      ]
+  ])
 
   read_glue_buckets = [
     for glue in flatten([for data_id in local.read_data_outputs : var.data_outputs[data_id].glue]) :

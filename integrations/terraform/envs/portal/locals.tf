@@ -2,12 +2,6 @@ locals {
   mandatory_tags = merge(local.tags, {
     Terraform = "true"
   })
-  database_glossary_raw = yamldecode(file("${path.root}/config/data_glossary/database_glossary.yaml"))
-  database_glossary = {
-    for k, v in local.database_glossary_raw : k => {
-      s3 = v["s3"]
-    }
-  }
 
   data_product_glossary_raw = yamldecode(file("${path.root}/config/data_product_glossary/data_product_glossary.yaml"))
   data_product_glossary = {
@@ -26,9 +20,15 @@ locals {
   data_outputs_raw = yamldecode(file("${path.root}/config/data_glossary/data_outputs.yaml"))
   data_outputs = {
     for k, v in local.data_outputs_raw : k => {
-      s3    = try(v["S3"], [])
-      glue  = try(v["Glue"], [])
-      owner = try(v["owner"], [])
+      s3 = try([{
+        bucket_identifier = v["S3"]["bucket"]
+        path = v["S3"]["prefix"]
+      }], [])
+      glue  = try([{
+        database_identifier = v["Glue"]["glue_database"]
+        table_prefixes = v["Glue"]["table_prefixes"]
+      }], [])
+      owner = try(v["owner"], "")
     }
   }
 
@@ -42,12 +42,12 @@ locals {
   environments_raw = yamldecode((file("${path.root}/config/environment_configuration/environments.yaml")))
   environments = {
     for environment, config in local.environments_raw : environment => {
-      aws_account_id = local.aws_account_id
-      aws_region = local.aws_region
-      can_read_from = []
+      aws_account_id             = local.aws_account_id
+      aws_region                 = local.aws_region
+      can_read_from              = []
       conveyor_oidc_provider_url = ""
-      bucket_glossary = try(config["S3"], {})
-      database_glossary = try(config["Glue"], {})
+      bucket_glossary            = try(config["S3"], {})
+      database_glossary          = try(config["Glue"], {})
     }
   }
 }

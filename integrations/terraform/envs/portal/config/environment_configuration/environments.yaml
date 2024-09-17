@@ -1,0 +1,38 @@
+development:
+  Glue:
+    clean_test:
+      glue_database_name: clean_test_dev
+      s3_path: clean/test
+    master_test:
+      glue_database_name: master_test_dev
+      s3_path: master/test
+  S3:
+    datalake:
+      bucket_arn: arn:aws:s3:::default-dev
+      bucket_name: default-dev
+      is_default: true
+      kms_key_arn: arn:aws:kms:kms-key-arn
+    other_bucket:
+      bucket_arn: arn:aws:s3:::non-default-dev
+      bucket_name: non-default-dev
+      is_default: false
+      kms_key_arn: arn:aws:kms:kms-key-arn
+production:
+  Glue:
+    clean_test:
+      glue_database_name: clean_test_prd
+      s3_path: clean/test
+    master_test:
+      glue_database_name: master_test_prd
+      s3_path: master/test
+  S3:
+    datalake:
+      bucket_arn: arn:aws:s3:::default-prd
+      bucket_name: default-prd
+      is_default: true
+      kms_key_arn: arn:aws:kms:kms-key-arn
+    other_bucket:
+      bucket_arn: arn:aws:s3:::non-default-prd
+      bucket_name: non-default-prd
+      is_default: false
+      kms_key_arn: arn:aws:kms:kms-key-arn

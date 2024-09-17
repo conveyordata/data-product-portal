@@ -45,10 +45,13 @@ variable "data_outputs" {
   type = map(object({
     s3 = list(object({
       bucket_identifier = string
-      path        = string
+      path              = string
     }))
-    glue  = list(string)
-    owner = list(string)
+    glue  = list(object({
+      database_identifier = string
+      table_prefixes      = list(string)
+    }))
+    owner = string
   }))
 }
 

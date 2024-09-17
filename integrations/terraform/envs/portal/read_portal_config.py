@@ -24,25 +24,28 @@ def get_data_products():
         exit(1)
     data_products = {}
     for data_product_info in result.json():
-        data_product = session.get(
+        data_product_result = session.get(
             f"{API_HOST}/api/data_products/{data_product_info.get('id')}"
         )
-        data_product = data_product.json()
+        data_product = data_product_result.json()
+
         datasets = []
         for dataset_link in data_product.get("dataset_links"):
             if dataset_link.get("status") == "approved":
                 datasets.append(dataset_link.get("dataset").get("external_id"))
 
-        members = {}
-        for member in data_product.get("memberships"):
-            # EXT is never present in user name?"
-            role = "admin" if member.get("role") == "owner" else "member"
-            members[member.get("user").get("email")] = role
+        # members = {}
+        # for member in data_product.get("memberships"):
+        #     # EXT is never present in user name?"
+        #     role = "admin" if member.get("role") == "owner" else "member"
+        #     members[member.get("user").get("email")] = role
+
         data_products[data_product.get("external_id")] = {
             "description": data_product.get("description"),
             "read_datasets": datasets,
-            "users": members,
+            # "users": members,
         }
+
     with open(
         os.path.join(
             FOLDER, "config", "data_product_glossary", "data_product_glossary.yaml"
@@ -57,19 +60,22 @@ def get_datasets():
 
     datasets = {}
     for dataset_info in result.json():
-        dataset = session.get(f"{API_HOST}/api/datasets/{dataset_info.get('id')}")
-        dataset = dataset.json()
+        dataset_result = session.get(
+            f"{API_HOST}/api/datasets/{dataset_info.get('id')}"
+        )
+        dataset = dataset_result.json()
 
-        owners = []
-        for owner in dataset.get("owners"):
-            owners.append(owner.get("email"))
+        # owners = []
+        # for owner in dataset.get("owners"):
+        #     owners.append(owner.get("email"))
+
         datasets[dataset.get("external_id")] = {
             "data_outputs": [
                 data_output_link.get("data_output").get("external_id")
-                for data_output_link in dataset.get("data_output_links", [])
+                for data_output_link in dataset.get("data_output_links")
                 if data_output_link.get("status") == "approved"
             ],
-            "owner": owners[0],
+            # "owner": owners[0],
         }
     with open(
         os.path.join(FOLDER, "config", "data_glossary", "datasets.yaml"), "w"
@@ -84,15 +90,16 @@ def get_data_outputs():
     for data_output_info in result.json():
         platform_id = data_output_info.get("platform_id")
         service_id = data_output_info.get("service_id")
-        platform_service = session.get(
+        platform_service_result = session.get(
             f"{API_HOST}/api/platforms/{platform_id}/services/{service_id}"
-        ).json()
+        )
+        platform_service = platform_service_result.json()
 
         data_outputs[data_output_info.get("external_id")] = {
             platform_service.get("service").get("name"): data_output_info.get(
                 "configuration"
             ),
-            "owner": [data_output_info.get("owner").get("external_id")],
+            "owner": data_output_info.get("owner").get("external_id"),
         }
 
     with open(
