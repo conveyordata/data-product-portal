@@ -6,10 +6,10 @@ const config = (() => {
          */
         API_BASE_URL: 'http://localhost:8080',
         /**
-         * Indicates whether OpenID Connect (OIDC) should be disabled.
-         * If true, OIDC is disabled.
+         * Indicates whether OpenID Connect (OIDC) should be enabled.
+         * If true, OIDC is enabled.
          */
-        OIDC_DISABLED: true,
+        OIDC_ENABLED: false,
         /**
          * The client ID for the OIDC provider.
          * This is used to identify the application to the OIDC provider.

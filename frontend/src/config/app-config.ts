@@ -11,7 +11,7 @@ interface Config {
      * Indicates whether OpenID Connect (OIDC) is disabled.
      * @description If true, OIDC is disabled.
      */
-    OIDC_DISABLED: boolean;
+    OIDC_ENABLED: boolean;
     /**
      * The client ID for your OIDC provider.
      * @description This is used to identify your application to the OIDC provider.
@@ -48,8 +48,8 @@ export class AppConfig {
         return config.API_BASE_URL;
     }
 
-    public static isOidcDisabled(): boolean {
-        return config.OIDC_DISABLED;
+    public static isOidcEnabled(): boolean {
+        return config.OIDC_ENABLED;
     }
 
     public static getOidcCognitoLogoutParams() {

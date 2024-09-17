@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     PORTAL_API_KEY: Optional[str] = None
 
     # OIDC Configuration
-    OIDC_DISABLED: bool = True
+    OIDC_ENABLED: bool = False
     OIDC_CLIENT_ID: Optional[str] = None
     OIDC_CLIENT_SECRET: Optional[str] = None
     OIDC_AUTHORITY: Optional[str] = None
