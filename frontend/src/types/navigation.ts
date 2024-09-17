@@ -8,6 +8,9 @@ export enum ApplicationPaths {
     Dataset = '/datasets/:datasetId',
     DatasetNew = '/datasets/new',
     DatasetEdit = '/datasets/:datasetId/edit',
+    DataOutput = '/data-products/:dataProductId/:dataOutputId',
+    DataOutputNew = '/data-outputs/new',
+    DataOutputEdit = '/data-products/:dataProductId/:dataOutputId/edit',
     AuditLogs = '/audit-logs',
     // Settings = '/settings',
     Logout = '/logout',
@@ -30,6 +33,8 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.Datasets,
     ApplicationPaths.Dataset,
     ApplicationPaths.AuditLogs,
+    ApplicationPaths.DataOutput,
+    ApplicationPaths.DataOutputEdit,
     // ApplicationPaths.Settings,
     ApplicationPaths.PlatformsConfigs,
     ApplicationPaths.PlatformServiceConfig,
@@ -43,6 +48,10 @@ export const authenticatedPaths: string[] = [
 
 export function createDataProductIdPath(dataProductId: string) {
     return ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId));
+}
+
+export function createDataOutputIdPath(dataOutputId: string, dataProductId: string) {
+    return ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(':dataOutputId', encodeURIComponent(dataOutputId));
 }
 
 export function createDatasetIdPath(datasetId: string) {
@@ -66,6 +75,7 @@ export function createEnvironmentConfigPath(envConfigId: string) {
 
 export enum DynamicPathParams {
     DataProductId = 'dataProductId',
+    DataOutputId = 'dataOutputId',
     DatasetId = 'datasetId',
     PlatformServiceConfigId = 'platformServiceConfigId',
     EnvironmentId = 'environmentId',

@@ -12,6 +12,7 @@ import {
 } from '@/types/data-output';
 import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
 import { datasetsApiSlice } from '../datasets/datasets-api-slice';
+import { DataOutputUpdateRequest, DataOutputUpdateResponse } from '@/types/data-output/data-output-update.contract';
 
 export const dataOutputTags: string[] = [
     TagTypes.DataOutput,
@@ -57,6 +58,25 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
             //     { type: TagTypes.DataOutput as const, id: arg.dataOutputId },
             //     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             // ],
+        }),
+        updateDataOutput: builder.mutation<
+            DataOutputUpdateResponse,
+            {
+                dataOutput: DataOutputUpdateRequest;
+                dataOutputId: string;
+            }
+        >({
+            query: ({ dataOutput, dataOutputId }) => ({
+                url: buildUrl(ApiUrl.DataOutputGet, { dataOutputId: dataOutputId }),
+                method: 'PUT',
+                data: dataOutput,
+            }),
+            invalidatesTags: (_, __, { dataOutputId }) => [
+                { type: TagTypes.DataOutput as const, id: dataOutputId },
+                { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.Dataset as const },
+                { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+            ],
         }),
         requestDatasetAccessForDataOutput: builder.mutation<
             DataOutputDatasetAccessResponse,
@@ -125,6 +145,7 @@ export const {
     useGetDataOutputByIdQuery,
     useCreateDataOutputMutation,
     useRemoveDatasetFromDataOutputMutation,
+    useUpdateDataOutputMutation,
     useRemoveDataOutputMutation,
     useRequestDatasetAccessForDataOutputMutation,
 } = dataOutputsApiSlice;

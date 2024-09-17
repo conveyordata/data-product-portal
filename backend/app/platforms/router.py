@@ -34,7 +34,6 @@ def get_platform_services(
 
 @router.get(
     "/{platform_id}/services/{service_id}",
-    dependencies=[Depends(only_for_admin)],
     description="Get Platform Service config",
     responses={
         404: {

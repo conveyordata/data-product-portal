@@ -59,6 +59,18 @@ export const environmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             }),
             invalidatesTags: [{ type: TagTypes.EnvironmentConfigs as const, id: STATIC_TAG_ID.LIST }],
         }),
+        getEnvironmentPlatformServiceConfig: builder.query<EnvironmentConfig[], {platform_id: string, service_id: string}>({
+            query: ({ platform_id, service_id }) => ({
+                url: ApiUrl.EnvPlatformServiceConfigNoId,
+                method: 'GET',
+                params: {
+                    platform_id,
+                    service_id
+                }
+            }),
+            //providesTags: (result) =>
+             //   result ? [{ type: TagTypes.EnvironmentConfigs as const, id: result.id }] : [],
+        }),
         getEnvironmentById: builder.query<Environment, string>({
             query: (environmentId) => ({
                 url: buildUrl(ApiUrl.EnvironmentGet, { environmentId }),
@@ -86,4 +98,6 @@ export const {
     useCreateEnvPlatformServiceConfigMutation,
     useGetEnvironmentByIdQuery,
     useGetEnvConfigByIdQuery,
+    useGetEnvironmentPlatformServiceConfigQuery,
+    //useGetEnvironmentPlatformServiceConfigQuery,
 } = environmentsApiSlice;

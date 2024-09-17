@@ -47,12 +47,6 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 children: <AboutTab dataProductId={dataProductId} />,
             },
             {
-                label: t('Data Outputs'),
-                key: TabKeys.DataOutputs,
-                icon: <Icon component={dataOutputOutlineIcon} />,
-                children: <DataOutputTab dataProductId={dataProductId} />,
-            },
-            {
                 label: t('Datasets'),
                 key: TabKeys.Datasets,
                 icon: <Icon component={datasetOutlineIcon} />,
@@ -63,6 +57,12 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 key: TabKeys.Team,
                 icon: <TeamOutlined />,
                 children: <TeamTab dataProductId={dataProductId} />,
+            },
+            {
+                label: t('Data Outputs'),
+                key: TabKeys.DataOutputs,
+                icon: <Icon component={dataOutputOutlineIcon} />,
+                children: <DataOutputTab dataProductId={dataProductId} />,
             },
             {
                 label: t('Explorer'),

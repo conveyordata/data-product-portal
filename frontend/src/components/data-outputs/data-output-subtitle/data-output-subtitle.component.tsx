@@ -19,23 +19,14 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
                     <Typography.Text strong>Glue database: </Typography.Text>
                     <Typography.Text>{glue_configuration.glue_database}</Typography.Text>
                     </div>
-                    <div>
-                    <Typography.Text strong>Glue tables: </Typography.Text>
-                    <Typography.Text>{glue_configuration.table_prefixes}</Typography.Text>
-                    </div>
                 </Flex>
-            return <Typography.Text>Schema {glue_configuration.glue_database}</Typography.Text>;
         }
         case 'S3DataOutput': {
             const s3_configuration = data_output.configuration as S3DataOutputContract;
             return (
                 <Flex vertical>
                     <div>
-                    <Typography.Text strong>Bucket identifier: </Typography.Text>
-                    <Typography.Text>{s3_configuration.bucket}</Typography.Text>
-                    </div>
-                    <div>
-                    <Typography.Text strong>Full path: </Typography.Text>
+                    <Typography.Text strong>S3 Path: </Typography.Text>
                     <Typography.Text>{s3_configuration.bucket}/{s3_configuration.prefix}/*</Typography.Text>
                     </div>
                 </Flex>

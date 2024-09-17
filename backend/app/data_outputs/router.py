@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.data_outputs.schema import DataOutput, DataOutputCreate
+from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.users.schema import User
@@ -60,6 +60,23 @@ def create_data_output(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
     return DataOutputService().create_data_output(data_output, db, authenticated_user)
+
+
+@router.put(
+    "/{id}",
+    responses={
+        404: {
+            "description": "Data Output not found",
+            "content": {
+                "application/json": {"example": {"detail": "Data Output id not found"}}
+            },
+        }
+    },
+)
+def update_data_product(
+    id: UUID, data_output: DataOutputUpdate, db: Session = Depends(get_db_session)
+):
+    return DataOutputService().update_data_output(id, data_output, db)
 
 
 @router.post(

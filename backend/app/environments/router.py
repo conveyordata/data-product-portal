@@ -17,6 +17,15 @@ from app.environments.service import EnvironmentService
 router = APIRouter(prefix="/envs", tags=["environments"])
 
 
+@router.get("/configs")
+def get_environment_platform_service_config(
+    platform_id: UUID,
+    service_id: UUID,
+    db: Session = Depends(get_db_session),
+) -> Sequence[EnvPlatformServiceConfigGet]:
+    return EnvironmentService(db).get_environment_config(platform_id, service_id)
+
+
 @router.get("")
 def get_environments(db: Session = Depends(get_db_session)) -> Sequence[GetEnvironment]:
     return EnvironmentService(db).get_environments()
@@ -29,19 +38,9 @@ def get_environment(
     return EnvironmentService(db).get_environment_by_id(environment_id)
 
 
-@router.post(
-    "", dependencies=[Depends(only_for_admin)], status_code=status.HTTP_201_CREATED
-)
+@router.post("", dependencies=[Depends(only_for_admin)])
 def create_environment(environment: Environment, db: Session = Depends(get_db_session)):
     EnvironmentService(db).create_environment(environment)
-
-
-@router.get("/{environment_id}/configs", dependencies=[Depends(only_for_admin)])
-def get_environment_configs(
-    environment_id: UUID,
-    db: Session = Depends(get_db_session),
-) -> Sequence[EnvPlatformServiceConfigGet]:
-    return EnvironmentService(db).get_environment_configs(environment_id)
 
 
 @router.post(
@@ -62,11 +61,16 @@ def create_environment_platform_service_config(
     )
 
 
-@router.get(
-    "/configs/{config_id}",
-    dependencies=[Depends(only_for_admin)],
-)
+@router.get("/{environment_id}/configs", dependencies=[Depends(only_for_admin)])
+def get_environment_configs(
+    environment_id: UUID, db: Session = Depends(get_db_session)
+) -> Sequence[EnvPlatformServiceConfigGet]:
+    return EnvironmentService(db).get_environment_configs(environment_id)
+
+
+@router.get("/configs/{config_id}")
 def get_environment_config_by_id(
-    config_id: UUID, db: Session = Depends(get_db_session)
+    config_id: UUID,
+    db: Session = Depends(get_db_session),
 ) -> EnvPlatformServiceConfigGet:
     return EnvironmentService(db).get_environment_config_by_id(config_id)

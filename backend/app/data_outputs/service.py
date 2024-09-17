@@ -8,8 +8,12 @@ from sqlalchemy.orm import Session
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
-from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputToDB
-from app.data_outputs.schema_union import DataOutputMap
+from app.data_outputs.schema import (
+    DataOutput,
+    DataOutputCreate,
+    DataOutputToDB,
+    DataOutputUpdate,
+)
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
@@ -69,14 +73,15 @@ class DataOutputService:
 
     def get_data_outputs(self, db: Session) -> list[DataOutput]:
         data_outputs = db.query(DataOutputModel).all()
-        parsed_data_outputs = []
-        for data_output in data_outputs:
-            parsed_data_output = data_output
-            parsed_data_output.configuration = DataOutputMap[
-                data_output.configuration_type
-            ].model_validate_json(data_output.configuration)
-            parsed_data_outputs.append(parsed_data_output)
-        return parsed_data_outputs
+        return data_outputs
+        # parsed_data_outputs = []
+        # for data_output in data_outputs:
+        #     parsed_data_output = data_output
+        #     parsed_data_output.configuration = DataOutputMap[
+        #         data_output.configuration_type
+        #     ].model_validate_json(data_output.configuration)
+        #     parsed_data_outputs.append(parsed_data_output)
+        # return parsed_data_outputs
 
     def get_data_output(self, id: UUID, db: Session) -> DataOutput:
         return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
@@ -185,3 +190,13 @@ class DataOutputService:
         data_output.dataset_links.remove(data_output_dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()
+
+    def update_data_output(self, id: UUID, data_output: DataOutputUpdate, db: Session):
+        current_data_output = ensure_data_output_exists(id, db)
+        update_data_output = data_output.model_dump(exclude_unset=True)
+
+        for k, v in update_data_output.items():
+            setattr(current_data_output, k, v) if v else None
+        db.commit()
+        RefreshInfrastructureLambda().trigger()
+        return {"id": current_data_output.id}

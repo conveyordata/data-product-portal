@@ -1,5 +1,5 @@
 import styles from './environment-config.module.scss';
-import { Typography, Flex, Space } from 'antd';
+import { Typography, Flex } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { DynamicPathParams } from '@/types/navigation';

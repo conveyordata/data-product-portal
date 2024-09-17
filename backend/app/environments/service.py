@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.environments.model import Environment, EnvPlatformServiceConfig
-from app.environments.schema import Config
+from app.environments.schema import Config, EnvPlatformServiceConfigGet
 from app.exceptions import NotFoundInDB
 from app.platforms.models import PlatformServiceConfig
 from app.platforms.schemas import PlatformServiceConfigBaseSchema
@@ -33,6 +33,16 @@ class EnvironmentService:
     ) -> Sequence[EnvPlatformServiceConfig]:
         stmt = select(EnvPlatformServiceConfig).where(
             EnvPlatformServiceConfig.environment_id == environment_id
+        )
+        return self.db.scalars(stmt).all()
+
+    def get_environment_config(
+        self, platform_id: UUID, service_id: UUID
+    ) -> Sequence[EnvPlatformServiceConfigGet]:
+        print("Called")
+        stmt = select(EnvPlatformServiceConfig).where(
+            EnvPlatformServiceConfig.platform_id == platform_id,
+            EnvPlatformServiceConfig.service_id == service_id,
         )
         return self.db.scalars(stmt).all()
 

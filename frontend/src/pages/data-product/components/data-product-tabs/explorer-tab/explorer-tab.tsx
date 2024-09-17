@@ -12,7 +12,7 @@ import { DataProductNodeProps } from '@/components/charts/custom-nodes/data-prod
 import { DatasetNodeProps } from '@/components/charts/custom-nodes/dataset-node/dataset-node.tsx';
 import 'reactflow/dist/base.css';
 import { Link } from 'react-router-dom';
-import { createDatasetIdPath } from '@/types/navigation.ts';
+import { createDataOutputIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 import { useTranslation } from 'react-i18next';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { getDataProductDatasetLinkEdgeStyle } from '@/utils/node-editor.helper.ts';
@@ -38,6 +38,15 @@ function LinkToDatasetNode({ id }: { id: string }) {
     );
 }
 
+function LinkToDataOutputNode({ id, product_id }: {id: string, product_id: string}) {
+    const { t } = useTranslation();
+    return (
+        <Link to={createDataOutputIdPath(id, product_id)} className={styles.link}>
+            <Button type="default">{t('View data output')}</Button>
+        </Link>
+    )
+}
+
 function generateDataProductOutputNodes(dataProduct: DataProductContract, defaultNodePosition: XYPosition): Node[] {
     const dataOutputNodeLinks: Node<DataOutputNodeProps>[] = dataProduct.data_outputs.map((link) => ({
         id: link.id,
@@ -46,7 +55,7 @@ function generateDataProductOutputNodes(dataProduct: DataProductContract, defaul
             name: link.name,
             id: link.id,
             icon_key: link.configuration_type,
-            //nodeToolbarActions: <LinkToDataOutputNode id={link.id} />,
+            nodeToolbarActions: <LinkToDataOutputNode id={link.id} product_id={dataProduct.id} />,
             sourceHandlePosition: Position.Left,
             isActive: true,
             //isActive: link.status === DataProductDatasetLinkStatus.Approved,

@@ -47,7 +47,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
     const isLoading = isCreating || isCreating || isFetchingInitialValues;
 
-    const { data: platformConfig, isFetching: isLoadingPlatformConfigs } = useGetAllPlatformsConfigsQuery()
+    const { data: platformConfig } = useGetAllPlatformsConfigsQuery()
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
@@ -162,7 +162,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             <Form.Item<DataOutputCreateFormSchema>
                 name={'is_source_aligned'} valuePropName="checked"
             >
-                <Checkbox>{t('Is source aligned')}</Checkbox>
+                <Checkbox>{t('Source aligned')}</Checkbox>
             </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>

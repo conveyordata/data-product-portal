@@ -5,26 +5,13 @@ from app.shared.schema import ORMModel
 
 
 class S3DataOutput(ORMModel):
-    bucket: str = (
-        "cvr-pbac-s3-datalake-dev-demo-eqpkja"  # TODO Should come from platform info
-    )
+    bucket: str
     prefix: str
-    account_id: str = "test"
-    kms_key: str = "test"
     configuration_type: DataOutputTypes = DataOutputTypes.S3DataOutput
 
     def validate_configuration(self, data_product: DataProduct):
         if not self.prefix.startswith(data_product.external_id):
             raise ValueError("Invalid prefix specified")
-
-    # @field_validator("bucket")
-    # @classmethod
-    # def valid_bucket_arn(cls, v: str) -> str:
-    #     if not v.startswith("arn:aws:s3:::") or v == "arn:aws:s3:::":
-    #         raise ValueError("Invalid arn specified")
-    #     return v
-
-    # TODO Add custom validators
 
     def on_create(self):
         # TODO Automatically create everything? To be seen
