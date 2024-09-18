@@ -22,11 +22,10 @@ import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-
 export function DataOutput() {
     const { t } = useTranslation();
     const currentUser = useSelector(selectCurrentUser);
-    const { dataOutputId = '' } = useParams();
+    const { dataOutputId = '', dataProductId = ''} = useParams();
     const { data: dataOutput, isLoading } = useGetDataOutputByIdQuery(dataOutputId, { skip: !dataOutputId });
     const navigate = useNavigate();
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataOutput!.owner.id, {skip: isLoading || !dataOutput });
-
+    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId, {skip: !dataProductId});
     const dataOutputTypeIcon = useMemo(() => {
         return getDataOutputIcon(dataOutput?.configuration.configuration_type);
     }, [dataOutput?.id, dataOutput?.configuration.configuration_type]);
@@ -87,12 +86,12 @@ export function DataOutput() {
                     {/* Data product description */}
                     <Flex vertical className={styles.overview}>
                         <DataOutputDescription
-                            status={dataOutput.status}
-                            type={dataOutput.configuration_type}
-                            description={dataOutput.description}
+                            status={dataOutput!.status}
+                            type={dataOutput!.configuration.configuration_type!}
+                            description={dataOutput!.description}
                         />
                         {/*  Tabs  */}
-                        <DataOutputTabs dataOutputId={dataOutput.id} isLoading={isLoading} />
+                        <DataOutputTabs dataOutputId={dataOutput!.id} isLoading={isLoading} />
                     </Flex>
                 </Flex>
             </Flex>

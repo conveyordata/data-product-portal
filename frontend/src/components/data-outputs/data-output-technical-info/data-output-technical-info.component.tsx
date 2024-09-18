@@ -54,34 +54,34 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
                 size={'small'}
             />
     // // TODO Better styling
-    switch (data_output?.configuration_type) {
-        case 'GlueDataOutput': {
-            const glue_configuration = data_output.configuration as GlueDataOutputContract;
-            return <Flex vertical>
-                    <div>
-                    <Typography.Text strong>Glue database: </Typography.Text>
-                    <Typography.Text>{glue_configuration.glue_database}</Typography.Text>
-                    </div>
-                    <div>
-                    <Typography.Text strong>Glue tables: </Typography.Text>
-                    <Typography.Text>{glue_configuration.table_prefixes}</Typography.Text>
-                    </div>
-                </Flex>
-        }
-        case 'S3DataOutput': {
-            const s3_configuration = data_output.configuration as S3DataOutputContract;
-            return (
-                <Flex vertical>
-                    <div>
-                    <Typography.Text strong>Bucket identifier: </Typography.Text>
-                    <Typography.Text>{s3_configuration.bucket}</Typography.Text>
-                    </div>
-                    <div>
-                    <Typography.Text strong>Full path: </Typography.Text>
-                    <Typography.Text>{s3_configuration.bucket}/{s3_configuration.prefix}/*</Typography.Text>
-                    </div>
-                </Flex>
-            );
-        }
-    }
+    // switch (data_output?.configuration_type) {
+    //     case 'GlueDataOutput': {
+    //         const glue_configuration = data_output.configuration as GlueDataOutputContract;
+    //         return <Flex vertical>
+    //                 <div>
+    //                 <Typography.Text strong>Glue database: </Typography.Text>
+    //                 <Typography.Text>{glue_configuration.glue_database}</Typography.Text>
+    //                 </div>
+    //                 <div>
+    //                 <Typography.Text strong>Glue tables: </Typography.Text>
+    //                 <Typography.Text>{glue_configuration.table_prefixes}</Typography.Text>
+    //                 </div>
+    //             </Flex>
+    //     }
+    //     case 'S3DataOutput': {
+    //         const s3_configuration = data_output.configuration as S3DataOutputContract;
+    //         return (
+    //             <Flex vertical>
+    //                 <div>
+    //                 <Typography.Text strong>Bucket identifier: </Typography.Text>
+    //                 <Typography.Text>{s3_configuration.bucket}</Typography.Text>
+    //                 </div>
+    //                 <div>
+    //                 <Typography.Text strong>Full path: </Typography.Text>
+    //                 <Typography.Text>{s3_configuration.bucket}/{s3_configuration.prefix}/*</Typography.Text>
+    //                 </div>
+    //             </Flex>
+    //         );
+    //     }
+    // }
 }
