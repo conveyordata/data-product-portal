@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 
 const cognitoLogoutParams = AppConfig.getOidcCognitoLogoutParams();
-const isAuthDisabled = AppConfig.isOidcDisabled();
+const isAuthDisabled = !AppConfig.isOidcEnabled();
 
 export function UserMenu() {
     const { t } = useTranslation();

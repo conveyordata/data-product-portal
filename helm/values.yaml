@@ -17,7 +17,7 @@ api_key:
   key: ""
 host: www.pleaseupdateme.com
 oidc:
-  disabled: true
+  enabled: false
   client_id: id
   client_secret: secret
   authority: www.pleaseupdateme.com

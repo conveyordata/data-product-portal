@@ -13,9 +13,9 @@ from app.platforms.router import router as platform
 from app.users.router import router as user
 
 router = (
-    APIRouter()
-    if get_boolean_variable("OIDC_DISABLED", True)
-    else APIRouter(dependencies=[Security(api_key_authenticated)])
+    APIRouter(dependencies=[Security(api_key_authenticated)])
+    if get_boolean_variable("OIDC_ENABLED", False)
+    else APIRouter()
 )
 router.include_router(user)
 router.include_router(environment)
