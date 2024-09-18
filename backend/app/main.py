@@ -18,9 +18,7 @@ with open("./VERSION", "r") as f:
 TITLE = "Data product portal"
 
 oidc_kwargs = (
-    {}
-    if settings.OIDC_DISABLED
-    else {
+    {
         "swagger_ui_init_oauth": {
             "clientId": oidc.client_id,
             "appName": TITLE,
@@ -29,6 +27,8 @@ oidc_kwargs = (
         },
         "swagger_ui_oauth2_redirect_url": "/",
     }
+    if settings.OIDC_ENABLED
+    else {}
 )
 
 

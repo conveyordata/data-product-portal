@@ -8,6 +8,7 @@ from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.schema import DataProductMembershipCreate
 from app.data_product_memberships.service import DataProductMembershipService
 from app.database.database import get_db_session
+from app.dependencies import OnlyWithProductAccess, only_product_membership_owners
 from app.users.schema import User
 
 router = APIRouter(
@@ -15,7 +16,10 @@ router = APIRouter(
 )
 
 
-@router.post("/create")
+@router.post(
+    "/create",
+    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
+)
 def create_data_product_membership(
     data_product_id: UUID,
     data_product_membership: DataProductMembershipCreate,
@@ -39,7 +43,7 @@ def request_data_product_membership(
     )
 
 
-@router.post("/{id}/approve")
+@router.post("/{id}/approve", dependencies=[Depends(only_product_membership_owners)])
 def approve_data_product_membership(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -50,7 +54,7 @@ def approve_data_product_membership(
     )
 
 
-@router.post("/{id}/deny")
+@router.post("/{id}/deny", dependencies=[Depends(only_product_membership_owners)])
 def deny_data_product_membership(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -61,7 +65,7 @@ def deny_data_product_membership(
     )
 
 
-@router.post("/{id}/remove")
+@router.post("/{id}/remove", dependencies=[Depends(only_product_membership_owners)])
 def remove_data_product_membership(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -84,13 +88,13 @@ def remove_data_product_membership(
             },
         },
     },
+    dependencies=[Depends(only_product_membership_owners)],
 )
 def update_data_product_role(
     id: UUID,
     membership_role: DataProductUserRole,
-    authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
     return DataProductMembershipService().update_data_product_membership_role(
-        id, membership_role, authenticated_user, db
+        id, membership_role, db
     )

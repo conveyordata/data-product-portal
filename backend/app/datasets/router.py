@@ -3,12 +3,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.auth.auth import get_authenticated_user
 from app.database.database import get_db_session
-from app.datasets.schema import DatasetCreateUpdate, DatasetAboutUpdate
+from app.datasets.schema import DatasetAboutUpdate, DatasetCreateUpdate
 from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
-from app.users.schema import User
+from app.dependencies import only_dataset_owners
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
@@ -65,6 +64,7 @@ def create_dataset(
             },
         }
     },
+    dependencies=[Depends(only_dataset_owners)],
 )
 def remove_dataset(id: UUID, db: Session = Depends(get_db_session)):
     return DatasetService().remove_dataset(id, db)
@@ -80,6 +80,7 @@ def remove_dataset(id: UUID, db: Session = Depends(get_db_session)):
             },
         }
     },
+    dependencies=[Depends(only_dataset_owners)],
 )
 def update_dataset(
     id: UUID, dataset: DatasetCreateUpdate, db: Session = Depends(get_db_session)
@@ -97,6 +98,7 @@ def update_dataset(
             },
         }
     },
+    dependencies=[Depends(only_dataset_owners)],
 )
 def update_dataset_about(
     id: UUID, dataset: DatasetAboutUpdate, db: Session = Depends(get_db_session)
@@ -120,14 +122,14 @@ def update_dataset_about(
             },
         },
     },
+    dependencies=[Depends(only_dataset_owners)],
 )
 def add_user_to_dataset(
     id: UUID,
     user_id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
-    return DatasetService().add_user_to_dataset(id, user_id, authenticated_user, db)
+    return DatasetService().add_user_to_dataset(id, user_id, db)
 
 
 @router.delete(
@@ -146,13 +148,11 @@ def add_user_to_dataset(
             },
         },
     },
+    dependencies=[Depends(only_dataset_owners)],
 )
 def remove_user_from_dataset(
     id: UUID,
     user_id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
-    return DatasetService().remove_user_from_dataset(
-        id, user_id, authenticated_user, db
-    )
+    return DatasetService().remove_user_from_dataset(id, user_id, db)
