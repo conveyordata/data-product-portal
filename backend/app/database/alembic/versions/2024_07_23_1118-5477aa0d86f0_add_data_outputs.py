@@ -12,7 +12,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import UUID
 
-from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.shared.model import utcnow
@@ -36,7 +35,6 @@ def upgrade() -> None:
         sa.Column("service_id", sa.UUID, sa.ForeignKey("platform_services.id")),
         sa.Column("owner_id", sa.UUID, sa.ForeignKey("data_products.id")),
         sa.Column("configuration", sa.String),
-        sa.Column("configuration_type", sa.Enum(DataOutputTypes)),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),

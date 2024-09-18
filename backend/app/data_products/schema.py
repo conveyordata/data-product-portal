@@ -7,18 +7,11 @@ from app.data_product_memberships.schema import (
     DataProductMembership,
     DataProductMembershipCreate,
 )
+from app.data_products.schema_base import BaseDataProduct
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.shared.schema import ORMModel
-from app.tags.schema import Tag, TagCreate
-
-
-class BaseDataProduct(ORMModel):
-    name: str
-    external_id: str
-    description: str
-    tags: list[TagCreate]
-    type_id: UUID
+from app.tags.schema import Tag
 
 
 class DataProductCreate(BaseDataProduct):

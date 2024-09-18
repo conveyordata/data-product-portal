@@ -22,7 +22,7 @@ export interface DataOutputContract {
     owner: DataProductContract;
     owner_id: string;
     configuration: DataOutputConfiguration;
-    configuration_type: string;
+    //configuration_type: string;
     platform_id: string;
     service_id: string;
     dataset_links: DataOutputDatasetLink[];

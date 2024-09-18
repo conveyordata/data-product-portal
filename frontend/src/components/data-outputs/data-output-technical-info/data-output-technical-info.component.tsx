@@ -33,7 +33,7 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
     ), [data_output, environmentConfig])
 
     const columns: TableColumnsType<TechnicalInfoContract> = useMemo(() => {
-        switch (data_output?.configuration_type) {
+        switch (data_output?.configuration.configuration_type) {
             case 'S3DataOutput':
                 return getS3TechnicalInformationColumns({t})
             case 'GlueDataOutput':

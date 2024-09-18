@@ -36,12 +36,12 @@ export const getDataProductDataOutputsColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { id, owner_id, name, status, description, configuration_type }) => {
+            render: (_, { id, owner_id, name, status, description, configuration }) => {
                 return (
                     <TableCellAvatar
                         popover={{ title: name, content: description }}
                         linkTo={createDataOutputIdPath(id, owner_id)}
-                        icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration_type)!} />}
+                        icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration.configuration_type)!} />}
                         title={name}
                         subtitle={
                             <Flex vertical>
