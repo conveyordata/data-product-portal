@@ -6,16 +6,12 @@ from pydantic import field_validator
 from app.shared.schema import ORMModel
 
 
-class Identifiers(ORMModel):
+class PlatformServiceConfigSchema(ORMModel):
     identifiers: list[str]
 
-
-class PlatformServiceConfigSchema(ORMModel):
-    config: Identifiers
-
-    @field_validator("config", mode="before")
+    @field_validator("identifiers", mode="before")
     @classmethod
-    def parse_settings(cls, v: str | dict) -> dict:
+    def parse_settings(cls, v: str | list) -> list:
         if isinstance(v, str):
             return json.loads(v)
         return v

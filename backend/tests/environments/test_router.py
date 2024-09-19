@@ -5,8 +5,8 @@ from sqlalchemy.exc import IntegrityError
 
 from ..factories import (
     EnvironmentFactory,
+    EnvPlatformConfigFactory,
     EnvPlatformServiceConfigFactory,
-    PlatformServiceConfigFactory,
     PlatformServiceFactory,
     UserFactory,
 )
@@ -53,8 +53,8 @@ class TestEnvironmentsRouter:
 
     def test_get_environment_platform_service_config_forbidden(self, client):
         response = client.get(
-            f"{ENDPOINT}/environment_uuid/config",
-            params={"platform_id": "platform_uuid", "service_id": "service_uuid"},
+            f"{ENDPOINT}/environment_uuid/platforms/platform_uuid"
+            f"/services/service_id/config",
         )
         assert response.status_code == 403
         assert response.json()["detail"] == "Only admin can execute this operation"
@@ -67,77 +67,30 @@ class TestEnvironmentsRouter:
         )
 
         response = client.get(
-            f"{ENDPOINT}/{config_obj.environment_id}/config",
-            params={"platform_id": service.platform.id, "service_id": service.id},
+            f"{ENDPOINT}/{config_obj.environment_id}/platforms/{service.platform.id}"
+            f"/services/{service.id}/config",
         )
 
         assert response.status_code == 200
         actual_config = response.json()
         assert actual_config["config"] == json.loads(config_obj.config)
 
-    def test_create_config_forbidden(self, client):
-        response = client.post(f"{ENDPOINT}/environment_uuid/config", json={})
+    def test_get_environment_platform_config_forbidden(self, client):
+        response = client.get(
+            f"{ENDPOINT}/environment_uuid/platforms/platform_uuid/config",
+        )
         assert response.status_code == 403
         assert response.json()["detail"] == "Only admin can execute this operation"
 
     @pytest.mark.usefixtures("admin")
-    def test_create_failed_no_pltfrm_srvc_config(self, client):
-        service = PlatformServiceFactory()
-        env = EnvironmentFactory()
+    def test_get_environment_platform_config(self, client):
+        config_obj = EnvPlatformConfigFactory()
 
-        response = client.post(
-            f"{ENDPOINT}/{env.id}/config",
-            json={
-                "platform_id": str(service.platform.id),
-                "service_id": str(service.id),
-                "config": {},
-            },
+        response = client.get(
+            f"{ENDPOINT}/{config_obj.environment_id}/platforms"
+            f"/{config_obj.platform.id}/config",
         )
 
-        assert response.status_code == 400
-        assert response.json()["detail"] == "There's no platform service configuration"
-
-    @pytest.mark.usefixtures("admin")
-    def test_create_failed_invalid_config(self, client):
-        service = PlatformServiceFactory()
-        PlatformServiceConfigFactory(
-            platform=service.platform,
-            service=service,
-            config='{"identifiers": ["random_name"]}',
-        )
-        env = EnvironmentFactory()
-
-        response = client.post(
-            f"{ENDPOINT}/{env.id}/config",
-            json={
-                "platform_id": str(service.platform.id),
-                "service_id": str(service.id),
-                "config": {},
-            },
-        )
-
-        assert response.status_code == 400
-        assert response.json()["detail"] == "Invalid configuration"
-
-    @pytest.mark.usefixtures("admin")
-    def test_create_config(self, client):
-        service = PlatformServiceFactory()
-        PlatformServiceConfigFactory(platform=service.platform, service=service)
-        env = EnvironmentFactory()
-
-        response = client.post(
-            f"{ENDPOINT}/{env.id}/config",
-            json={
-                "platform_id": str(service.platform.id),
-                "service_id": str(service.id),
-                "config": {
-                    "bucket_1": {
-                        "account_id": 10,
-                        "name": "test_name",
-                        "arn": "test_arn",
-                        "kms": "test_kms",
-                    }
-                },
-            },
-        )
-        assert response.status_code == 201
+        assert response.status_code == 200
+        actual_config = response.json()
+        assert actual_config["config"] == json.loads(config_obj.config)

@@ -15,14 +15,15 @@ class EnvPlatformServiceConfigFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     config = json.dumps(
-        {
-            "bucket_1": {
-                "account_id": 10,
-                "name": "name1",
+        [
+            {
+                "identifier": "identifier",
+                "bucket_name": "name1",
                 "arn": "arn1",
-                "kms": "kms1",
+                "kms_key": "kms1",
+                "is_default": True,
             }
-        }
+        ]
     )
 
     platform = factory.SubFactory(PlatformFactory)

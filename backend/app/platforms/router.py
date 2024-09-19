@@ -57,4 +57,4 @@ def get_service_config(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Service configuration not found",
         )
-    return PlatformServiceConfigSchema(config=service_config)
+    return PlatformServiceConfigSchema(identifiers=service_config)

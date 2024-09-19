@@ -11,7 +11,7 @@ class PlatformServiceConfigFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = PlatformServiceConfig
 
     id = factory.Faker("uuid4")
-    config = '{"identifiers": ["bucket_1"]}'
+    config = '["identifier_1"]'
 
     platform = factory.SubFactory(PlatformFactory)
     service = factory.SubFactory(PlatformServiceFactory)

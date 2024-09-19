@@ -1,8 +1,7 @@
 import json
-from typing import Dict
 from uuid import UUID
 
-from pydantic import RootModel, field_validator
+from pydantic import field_validator
 
 from app.shared.schema import ORMModel
 
@@ -18,18 +17,39 @@ class GetEnvironment(Environment):
 
 
 class _AWSS3Config(ORMModel):
-    account_id: int
-    name: str
+    identifier: str
+    bucket_name: str
     arn: str
-    kms: str
+    kms_key: str
+    is_default: bool
 
 
-class Config(RootModel[Dict[str, _AWSS3Config]]):
-    pass
+class _AWSGlueConfig(ORMModel):
+    identifier: str
+    database_name: str
+    bucket_name: str
+    s3_path: str
 
 
 class EnvPlatformServiceConfig(ORMModel):
-    config: Config
+    config: list[_AWSS3Config | _AWSGlueConfig]
+
+    @field_validator("config", mode="before")
+    @classmethod
+    def parse_settings(cls, v: str | list) -> list:
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
+
+
+class _AWSConfig(ORMModel):
+    account_id: str
+    region: str
+    can_read_from: list[str]
+
+
+class EnvPlatformConfig(ORMModel):
+    config: _AWSConfig
 
     @field_validator("config", mode="before")
     @classmethod
@@ -37,8 +57,3 @@ class EnvPlatformServiceConfig(ORMModel):
         if isinstance(v, str):
             return json.loads(v)
         return v
-
-
-class CreateConfigSchema(EnvPlatformServiceConfig):
-    platform_id: UUID
-    service_id: UUID

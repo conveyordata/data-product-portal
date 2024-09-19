@@ -4,11 +4,11 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.environments.model import Environment, EnvPlatformServiceConfig
-from app.environments.schema import Config
-from app.exceptions import NotFoundInDB
-from app.platforms.models import PlatformServiceConfig
-from app.platforms.schemas import PlatformServiceConfigSchema
+from app.environments.model import (
+    Environment,
+    EnvPlatformConfig,
+    EnvPlatformServiceConfig,
+)
 
 
 class EnvironmentService:
@@ -22,7 +22,7 @@ class EnvironmentService:
         self.db.add(Environment(**environment.model_dump()))
         self.db.commit()
 
-    def get_config(
+    def get_environment_platform_service_config(
         self, environment_id: UUID, platform_id: UUID, service_id: UUID
     ) -> str:
         stmt = select(EnvPlatformServiceConfig.config).where(
@@ -32,31 +32,11 @@ class EnvironmentService:
         )
         return self.db.scalar(stmt)
 
-    def create_config(
-        self, environment_id: UUID, platform_id: UUID, service_id: UUID, config: Config
-    ):
-        # Check if config contains configuration for all the identifiers
-        stmt = select(PlatformServiceConfig.config).where(
-            PlatformServiceConfig.platform_id == platform_id,
-            PlatformServiceConfig.service_id == service_id,
+    def get_environment_platform_config(
+        self, environment_id: UUID, platform_id: UUID
+    ) -> str:
+        stmt = select(EnvPlatformConfig.config).where(
+            EnvPlatformConfig.environment_id == environment_id,
+            EnvPlatformConfig.platform_id == platform_id,
         )
-
-        platform_service_config = self.db.scalar(stmt)
-        if not platform_service_config:
-            raise NotFoundInDB("There's no platform service configuration")
-
-        identifiers = PlatformServiceConfigSchema(
-            config=platform_service_config
-        ).config.identifiers
-        if set(identifiers) != set(config.dict()):
-            raise ValueError("Invalid configuration")
-
-        self.db.add(
-            EnvPlatformServiceConfig(
-                environment_id=environment_id,
-                platform_id=platform_id,
-                service_id=service_id,
-                config=config.model_dump_json(),
-            )
-        )
-        self.db.flush()
+        return self.db.scalar(stmt)
