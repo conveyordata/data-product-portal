@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
-from app.environments.schema import (
+from app.environments.schemas import (
     Environment,
     EnvPlatformConfig,
     EnvPlatformServiceConfig,
