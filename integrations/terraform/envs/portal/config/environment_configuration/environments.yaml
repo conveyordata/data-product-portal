@@ -1,4 +1,8 @@
 development:
+  account_id: 123456789012
+  region: eu-west-1
+  can_read_from:
+  - production
   Glue:
     - identifier: clean_test
       glue_database_name: clean_test_dev
@@ -20,6 +24,9 @@ development:
       is_default: false
       kms_key_arn: arn:aws:kms:kms-key-arn
 production:
+  account_id: 123456789012
+  region: eu-west-1
+  can_read_from: []
   Glue:
     - identifier: clean_test
       glue_database_name: clean_test_prd

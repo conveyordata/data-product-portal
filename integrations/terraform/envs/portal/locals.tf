@@ -42,9 +42,9 @@ locals {
   environments_raw = yamldecode((file("${path.root}/config/environment_configuration/environments.yaml")))
   environments = {
     for environment, config in local.environments_raw : environment => {
-      aws_account_id             = local.aws_account_id
-      aws_region                 = local.aws_region
-      can_read_from              = []
+      aws_account_id             = config["account_id"]
+      aws_region                 = config["region"]
+      can_read_from              = config["can_read_from"]
       conveyor_oidc_provider_url = ""
       bucket_glossary            = {
         for s3 in try(config["S3"], []) : s3["identifier"] => {
