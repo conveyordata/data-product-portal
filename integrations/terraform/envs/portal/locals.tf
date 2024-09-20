@@ -46,8 +46,21 @@ locals {
       aws_region                 = local.aws_region
       can_read_from              = []
       conveyor_oidc_provider_url = ""
-      bucket_glossary            = try(config["S3"], {})
-      database_glossary          = try(config["Glue"], {})
+      bucket_glossary            = {
+        for s3 in try(config["S3"], []) : s3["identifier"] => {
+          bucket_name = s3["bucket_name"]
+          bucket_arn = s3["bucket_arn"]
+          kms_key_arn = s3["kms_key_arn"]
+          is_default = s3["is_default"]
+        }
+      }
+      database_glossary          = {
+        for glue in try(config["Glue"], []) : glue["identifier"] => {
+          glue_database_name = glue["glue_database_name"]
+          bucket_identifier = glue["bucket_identifier"]
+          s3_path = glue["s3_path"]
+        }
+      }
     }
   }
 }
