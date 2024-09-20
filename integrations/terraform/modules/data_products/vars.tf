@@ -35,7 +35,7 @@ variable "environments" {
     conveyor_oidc_provider_url = string
     database_glossary = map(object({
       glue_database_name = string
-      # Path on the default bucket
+      bucket_identifier  = string
       s3_path            = string
     }))
   }))

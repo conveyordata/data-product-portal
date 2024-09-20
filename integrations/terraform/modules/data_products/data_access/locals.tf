@@ -1,7 +1,9 @@
 locals {
+  bucket_glossary = var.environment_config.bucket_glossary
+  database_glossary = var.environment_config.database_glossary
   # ? Add validation?
   # Default datalake bucket
-  default_bucket = [for bucket_id, bucket in var.environment_config.bucket_glossary : bucket if bucket.is_default][0]
+  default_bucket = [for bucket_id, bucket in local.bucket_glossary : bucket if bucket.is_default][0]
 
   # Retrieve all write data_ids
   write_data_outputs = [for data_id, v in var.data_outputs : data_id if v.owner == var.data_product_name]
@@ -14,47 +16,47 @@ locals {
   # Retrieve all S3 paths for the S3 write data ids
   write_s3_paths = [
     for s3 in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].s3]) :
-    "${var.environment_config.bucket_glossary[s3["bucket_identifier"]]["bucket_arn"]}${s3["path"]}"
+    "${local.bucket_glossary[s3["bucket_identifier"]]["bucket_arn"]}${s3["path"]}"
   ]
 
   write_s3_buckets = [
     for s3 in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].s3]) :
-    var.environment_config.bucket_glossary[s3["bucket_identifier"]]["bucket_arn"]
+    local.bucket_glossary[s3["bucket_identifier"]]["bucket_arn"]
   ]
 
   # Retrieve all S3 paths for the S3 read data_ids
   read_s3_paths = [
     for s3 in flatten([for data_id in local.read_data_outputs : var.data_outputs[data_id].s3]) :
-    "${var.environment_config.bucket_glossary[s3["bucket_identifier"]]["bucket_arn"]}${s3["path"]}"
+    "${local.bucket_glossary[s3["bucket_identifier"]]["bucket_arn"]}${s3["path"]}"
   ]
 
   read_s3_buckets = [
     for s3 in flatten([for data_id in local.read_data_outputs : var.data_outputs[data_id].s3]) :
-    var.environment_config.bucket_glossary[s3["bucket_identifier"]]["bucket_arn"]
+    local.bucket_glossary[s3["bucket_identifier"]]["bucket_arn"]
   ]
 
   # Retrieve all S3 paths for the Glue write data_ids
   write_glue_paths = flatten([
     for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) : [
         for prefix in glue.table_prefixes :
-        "${local.default_bucket.bucket_arn}/${var.environment_config.database_glossary[glue.database_identifier].s3_path}/${prefix}"
+        "${local.bucket_glossary[local.database_glossary[glue.database_identifier].bucket_identifier].bucket_arn}/${local.database_glossary[glue.database_identifier].s3_path}/${prefix}"
       ]
   ])
 
   write_glue_buckets = [
     for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) :
-    local.default_bucket.bucket_arn
+    local.bucket_glossary[local.database_glossary[glue.database_identifier].bucket_identifier].bucket_arn
   ]
 
   write_glue_databases = distinct([
     for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) :
-    var.environment_config.database_glossary[glue.database_identifier].glue_database_name
+    local.database_glossary[glue.database_identifier].glue_database_name
   ])
 
   write_glue_tables = flatten([
     for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) : [
       for prefix in glue.table_prefixes :
-      "${var.environment_config.database_glossary[glue.database_identifier].glue_database_name}/${prefix}"
+      "${local.database_glossary[glue.database_identifier].glue_database_name}/${prefix}"
     ]
   ])
 
@@ -62,13 +64,13 @@ locals {
   read_glue_paths = flatten([
     for glue in flatten([for data_id in local.read_data_outputs : var.data_outputs[data_id].glue]) : [
         for prefix in glue.table_prefixes :
-        "${local.default_bucket.bucket_arn}/${var.environment_config.database_glossary[glue.database_identifier].s3_path}/${prefix}"
+        "${local.bucket_glossary[local.database_glossary[glue.database_identifier].bucket_identifier].bucket_arn}/${local.database_glossary[glue.database_identifier].s3_path}/${prefix}"
       ]
   ])
 
   read_glue_buckets = [
     for glue in flatten([for data_id in local.read_data_outputs : var.data_outputs[data_id].glue]) :
-    local.default_bucket.bucket_arn
+    local.bucket_glossary[local.database_glossary[glue.database_identifier].bucket_identifier].bucket_arn
   ]
 
   # Add datalake explicitly as we always grant it default /project access
@@ -103,7 +105,10 @@ locals {
   # Read KMS keys
   read_kms_keys = distinct(concat([
     for s3 in flatten([for data_id in local.read_data_outputs : var.data_outputs[data_id].s3]) :
-    var.environment_config.bucket_glossary[s3["bucket_identifier"]]["kms_key_arn"]
+    local.bucket_glossary[s3["bucket_identifier"]]["kms_key_arn"]
+    ], [
+    for glue in flatten([for data_id in local.read_data_outputs : var.data_outputs[data_id].glue]) :
+      local.bucket_glossary[local.database_glossary[glue.database_identifier].bucket_identifier].kms_key_arn
     ], [
     local.default_bucket.kms_key_arn
   ]))
@@ -111,7 +116,10 @@ locals {
   # Write KMS keys
   write_kms_keys = distinct(concat([
     for s3 in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].s3]) :
-    var.environment_config.bucket_glossary[s3["bucket_identifier"]]["kms_key_arn"]
+    local.bucket_glossary[s3["bucket_identifier"]]["kms_key_arn"]
+    ], [
+    for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) :
+      local.bucket_glossary[local.database_glossary[glue.database_identifier].bucket_identifier].kms_key_arn
     ], [
     local.default_bucket.kms_key_arn
   ]))
