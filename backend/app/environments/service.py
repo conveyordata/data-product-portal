@@ -24,8 +24,8 @@ class EnvironmentService:
 
     def get_environment_platform_service_config(
         self, environment_id: UUID, platform_id: UUID, service_id: UUID
-    ) -> str:
-        stmt = select(EnvPlatformServiceConfig.config).where(
+    ) -> EnvPlatformServiceConfig:
+        stmt = select(EnvPlatformServiceConfig).where(
             EnvPlatformServiceConfig.environment_id == environment_id,
             EnvPlatformServiceConfig.platform_id == platform_id,
             EnvPlatformServiceConfig.service_id == service_id,
@@ -34,9 +34,17 @@ class EnvironmentService:
 
     def get_environment_platform_config(
         self, environment_id: UUID, platform_id: UUID
-    ) -> str:
-        stmt = select(EnvPlatformConfig.config).where(
+    ) -> EnvPlatformConfig:
+        stmt = select(EnvPlatformConfig).where(
             EnvPlatformConfig.environment_id == environment_id,
             EnvPlatformConfig.platform_id == platform_id,
         )
         return self.db.scalar(stmt)
+
+    def get_environment_configs(
+        self, environment_id: UUID
+    ) -> Sequence[EnvPlatformServiceConfig]:
+        stmt = select(EnvPlatformServiceConfig).where(
+            EnvPlatformServiceConfig.environment_id == environment_id
+        )
+        return self.db.scalars(stmt).all()

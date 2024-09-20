@@ -1,8 +1,9 @@
 import json
+from uuid import UUID
 
 from pydantic import field_validator
 
-from app.shared.schema import ORMModel
+from app.shared.schema import IdNameSchema, ORMModel
 
 
 class _AWSConfig(ORMModel):
@@ -12,7 +13,10 @@ class _AWSConfig(ORMModel):
 
 
 class EnvPlatformConfig(ORMModel):
+    id: UUID
     config: _AWSConfig
+    environment: IdNameSchema
+    platform: IdNameSchema
 
     @field_validator("config", mode="before")
     @classmethod

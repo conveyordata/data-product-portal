@@ -94,3 +94,24 @@ class TestEnvironmentsRouter:
         assert response.status_code == 200
         actual_config = response.json()
         assert actual_config["config"] == json.loads(config_obj.config)
+
+    def test_get_environment_configs_forbidden(self, client):
+        response = client.get(f"{ENDPOINT}/env_uuid/configs")
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Only admin can execute this operation"
+
+    @pytest.mark.usefixtures("admin")
+    def test_get_environment_configs(self, client):
+        service = PlatformServiceFactory()
+        config_obj = EnvPlatformServiceConfigFactory(
+            platform=service.platform, service=service
+        )
+
+        response = client.get(f"{ENDPOINT}/{config_obj.environment_id}/configs")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["service"]["name"] == service.name
+        assert "platform" in data[0]
+        assert "config" in data[0]

@@ -27,6 +27,14 @@ def create_environment(environment: Environment, db: Session = Depends(get_db_se
     EnvironmentService(db).create_environment(environment)
 
 
+@router.get("/{environment_id}/configs", dependencies=[Depends(only_for_admin)])
+def get_environment_configs(
+    environment_id: UUID,
+    db: Session = Depends(get_db_session),
+) -> Sequence[EnvPlatformServiceConfig]:
+    return EnvironmentService(db).get_environment_configs(environment_id)
+
+
 @router.get(
     "/{environment_id}/platforms/{platform_id}/services/{service_id}/config",
     dependencies=[Depends(only_for_admin)],
@@ -37,10 +45,9 @@ def get_environment_platform_service_config(
     service_id: UUID,
     db: Session = Depends(get_db_session),
 ) -> EnvPlatformServiceConfig:
-    config = EnvironmentService(db).get_environment_platform_service_config(
+    return EnvironmentService(db).get_environment_platform_service_config(
         environment_id, platform_id, service_id
     )
-    return EnvPlatformServiceConfig(config=config)
 
 
 @router.get(
@@ -52,7 +59,6 @@ def get_environment_platform_config(
     platform_id: UUID,
     db: Session = Depends(get_db_session),
 ) -> EnvPlatformConfig:
-    config = EnvironmentService(db).get_environment_platform_config(
+    return EnvironmentService(db).get_environment_platform_config(
         environment_id, platform_id
     )
-    return EnvPlatformConfig(config=config)

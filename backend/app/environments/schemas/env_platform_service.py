@@ -1,8 +1,9 @@
 import json
+from uuid import UUID
 
 from pydantic import field_validator
 
-from app.shared.schema import ORMModel
+from app.shared.schema import IdNameSchema, ORMModel
 
 
 class _AWSS3Config(ORMModel):
@@ -21,7 +22,11 @@ class _AWSGlueConfig(ORMModel):
 
 
 class EnvPlatformServiceConfig(ORMModel):
+    id: UUID
     config: list[_AWSS3Config | _AWSGlueConfig]
+    environment: IdNameSchema
+    platform: IdNameSchema
+    service: IdNameSchema
 
     @field_validator("config", mode="before")
     @classmethod

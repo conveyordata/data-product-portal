@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel
 
 
@@ -32,3 +34,8 @@ class ORMModel(BaseModel):
                     "Found nested Pydantic model but Meta.orm_model was not specified."
                 )
         return parsed_schema
+
+
+class IdNameSchema(ORMModel):
+    id: UUID
+    name: str
