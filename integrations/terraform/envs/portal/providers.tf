@@ -14,7 +14,7 @@ terraform {
 
 provider "aws" {
   region              = local.aws_region
-  allowed_account_ids = [local.aws_account_id]
+  allowed_account_ids = distinct([for env, config in local.environments : config.aws_account_id])
   default_tags {
     tags = local.mandatory_tags
   }

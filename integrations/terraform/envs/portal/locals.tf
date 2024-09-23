@@ -44,7 +44,7 @@ locals {
     for environment, config in local.environments_raw : environment => {
       aws_account_id             = config["account_id"]
       aws_region                 = config["region"]
-      can_read_from              = config["can_read_from"]
+      can_read_from              = try(config["can_read_from"], [])
       conveyor_oidc_provider_url = ""
       bucket_glossary            = {
         for s3 in try(config["S3"], []) : s3["identifier"] => {
