@@ -49,3 +49,11 @@ class EnvironmentService:
             EnvironmentPlatformConfigurationModel.platform_id == platform_id,
         )
         return self.db.scalar(stmt)
+
+    def get_environment_configs(
+        self, environment_id: UUID
+    ) -> Sequence[EnvironmentPlatformServiceConfiguration]:
+        stmt = select(EnvPlatformServiceConfigurationModel).where(
+            EnvPlatformServiceConfigurationModel.environment_id == environment_id
+        )
+        return self.db.scalars(stmt).all()
