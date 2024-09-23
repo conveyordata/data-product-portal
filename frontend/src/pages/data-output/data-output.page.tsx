@@ -18,6 +18,7 @@ import { UserAccessOverview } from '@/components/data-access/user-access-overvie
 import { DataOutputTabs } from './components/data-output-tabs/data-output-tabs';
 import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
+import { DataOutputActions } from './components/data-output-actions/data-output-actions.component';
 
 export function DataOutput() {
     const { t } = useTranslation();
@@ -97,7 +98,7 @@ export function DataOutput() {
             </Flex>
             {/* Sidebar */}
             <Flex vertical className={styles.sidebar}>
-                {/* <DataOutputActions dataOutputId={dataOutputId} /> */}
+                <DataOutputActions dataOutputId={dataOutputId} isCurrentDataOutputOwner={isCurrentDataOutputOwner} />
                 {/*  Data product owners overview */}
                 <UserAccessOverview users={dataOutputOwners} title={t('Data Output Owners')} />
             </Flex>
