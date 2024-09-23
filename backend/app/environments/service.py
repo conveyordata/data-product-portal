@@ -4,11 +4,20 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.environments.model import (
-    Environment,
-    EnvPlatformConfig,
-    EnvPlatformServiceConfig,
+from app.environment_platform_configurations.model import (
+    EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
+from app.environment_platform_configurations.schema import (
+    EnvironmentPlatformConfiguration,
+)
+from app.environment_platform_service_configurations.model import (
+    EnvironmentPlatformServiceConfiguration as EnvPlatformServiceConfigurationModel,
+)
+from app.environment_platform_service_configurations.schema import (
+    EnvironmentPlatformServiceConfiguration,
+)
+from app.environments.model import Environment as EnvironmentModel
+from app.environments.schema import Environment
 
 
 class EnvironmentService:
@@ -16,27 +25,27 @@ class EnvironmentService:
         self.db = db
 
     def get_environments(self) -> Sequence[Environment]:
-        return self.db.scalars(select(Environment)).all()
+        return self.db.scalars(select(EnvironmentModel)).all()
 
     def create_environment(self, environment: Environment) -> None:
-        self.db.add(Environment(**environment.model_dump()))
+        self.db.add(EnvironmentModel(**environment.model_dump()))
         self.db.commit()
 
     def get_environment_platform_service_config(
         self, environment_id: UUID, platform_id: UUID, service_id: UUID
-    ) -> str:
-        stmt = select(EnvPlatformServiceConfig.config).where(
-            EnvPlatformServiceConfig.environment_id == environment_id,
-            EnvPlatformServiceConfig.platform_id == platform_id,
-            EnvPlatformServiceConfig.service_id == service_id,
+    ) -> EnvironmentPlatformServiceConfiguration:
+        stmt = select(EnvPlatformServiceConfigurationModel).where(
+            EnvPlatformServiceConfigurationModel.environment_id == environment_id,
+            EnvPlatformServiceConfigurationModel.platform_id == platform_id,
+            EnvPlatformServiceConfigurationModel.service_id == service_id,
         )
         return self.db.scalar(stmt)
 
     def get_environment_platform_config(
         self, environment_id: UUID, platform_id: UUID
-    ) -> str:
-        stmt = select(EnvPlatformConfig.config).where(
-            EnvPlatformConfig.environment_id == environment_id,
-            EnvPlatformConfig.platform_id == platform_id,
+    ) -> EnvironmentPlatformConfiguration:
+        stmt = select(EnvironmentPlatformConfigurationModel).where(
+            EnvironmentPlatformConfigurationModel.environment_id == environment_id,
+            EnvironmentPlatformConfigurationModel.platform_id == platform_id,
         )
         return self.db.scalar(stmt)

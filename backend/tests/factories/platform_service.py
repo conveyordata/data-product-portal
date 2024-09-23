@@ -1,6 +1,6 @@
 import factory
 
-from app.platforms.models import PlatformService
+from app.platform_services.model import PlatformService
 
 from .platform import PlatformFactory
 

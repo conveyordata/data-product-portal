@@ -2,7 +2,9 @@ import json
 
 import factory
 
-from app.environments.model import EnvPlatformConfig
+from app.environment_platform_configurations.model import (
+    EnvironmentPlatformConfiguration,
+)
 
 from .environment import EnvironmentFactory
 from .platform import PlatformFactory
@@ -10,7 +12,7 @@ from .platform import PlatformFactory
 
 class EnvPlatformConfigFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
-        model = EnvPlatformConfig
+        model = EnvironmentPlatformConfiguration
 
     id = factory.Faker("uuid4")
     config = json.dumps(

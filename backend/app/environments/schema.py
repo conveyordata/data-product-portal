@@ -3,11 +3,11 @@ from uuid import UUID
 from app.shared.schema import ORMModel
 
 
-class Environment(ORMModel):
+class EnvironmentCreate(ORMModel):
     name: str
     context: str
     is_default: bool = False
 
 
-class GetEnvironment(Environment):
+class Environment(EnvironmentCreate):
     id: UUID

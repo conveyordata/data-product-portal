@@ -4,9 +4,12 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.platforms.models import Platform
-from app.platforms.models import PlatformService as PlatformServiceModel
-from app.platforms.models import PlatformServiceConfig
+from app.platform_service_configurations.model import (
+    PlatformServiceConfiguration as PlatformServiceConfigurationModel,
+)
+from app.platform_services.model import PlatformService as PlatformServiceModel
+from app.platforms.model import Platform as PlatformModel
+from app.platforms.schema import Platform
 
 
 class PlatformsService:
@@ -14,7 +17,7 @@ class PlatformsService:
         self.db = db
 
     def get_all_platforms(self) -> Sequence[Platform]:
-        return self.db.scalars(select(Platform)).all()
+        return self.db.scalars(select(PlatformModel)).all()
 
     def get_platform_services(
         self, platform_id: UUID
@@ -25,7 +28,7 @@ class PlatformsService:
 
     def get_service_config(self, platform_id, service_id):
         return self.db.scalar(
-            select(PlatformServiceConfig.config).filter_by(
+            select(PlatformServiceConfigurationModel.config).filter_by(
                 platform_id=platform_id, service_id=service_id
             )
         )

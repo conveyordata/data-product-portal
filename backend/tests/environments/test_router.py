@@ -65,12 +65,10 @@ class TestEnvironmentsRouter:
         config_obj = EnvPlatformServiceConfigFactory(
             platform=service.platform, service=service
         )
-
         response = client.get(
             f"{ENDPOINT}/{config_obj.environment_id}/platforms/{service.platform.id}"
             f"/services/{service.id}/config",
         )
-
         assert response.status_code == 200
         actual_config = response.json()
         assert actual_config["config"] == json.loads(config_obj.config)
