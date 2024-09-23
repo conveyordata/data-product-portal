@@ -42,12 +42,12 @@ locals {
   environments_raw = yamldecode((file("${path.root}/config/environment_configuration/environments.yaml")))
   environments = {
     for environment, config in local.environments_raw : environment => {
-      aws_account_id             = config["account_id"]
-      aws_region                 = config["region"]
-      can_read_from              = try(config["can_read_from"], [])
+      aws_account_id             = config["AWS"]["account_id"]
+      aws_region                 = config["AWS"]["region"]
+      can_read_from              = try(config["AWS"]["can_read_from"], [])
       conveyor_oidc_provider_url = ""
       bucket_glossary            = {
-        for s3 in try(config["S3"], []) : s3["identifier"] => {
+        for s3 in try(config["AWS"]["S3"], []) : s3["identifier"] => {
           bucket_name = s3["bucket_name"]
           bucket_arn = s3["bucket_arn"]
           kms_key_arn = s3["kms_key_arn"]
@@ -55,7 +55,7 @@ locals {
         }
       }
       database_glossary          = {
-        for glue in try(config["Glue"], []) : glue["identifier"] => {
+        for glue in try(config["AWS"]["Glue"], []) : glue["identifier"] => {
           glue_database_name = glue["glue_database_name"]
           bucket_identifier = glue["bucket_identifier"]
           s3_path = glue["s3_path"]
