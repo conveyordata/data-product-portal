@@ -113,17 +113,37 @@ def get_environments():
 
     environments = {}
     for environment_info in result.json():
-        configs = session.get(
-            f"{API_HOST}/api/envs/{environment_info.get('id')}/configs"
+        environment = environment_info.get("name")
+        environment_id = environment_info.get("id")
+
+        environment_configurations = {}
+        # Fetch environment - platform - service specific configuration
+        platform_service_configs = session.get(
+            f"{API_HOST}/api/envs/{environment_id}/configs"
         )
+        for config_info in platform_service_configs.json():
+            platform = config_info.get("platform").get("name")
+            platform_id = config_info.get("platform").get("id")
+            service = config_info.get("service").get("name")
+            config = config_info.get("config")
 
-        environment_configuration = {}
-        for config_info in configs.json():
-            environment_configuration[config_info.get("service").get("name")] = (
-                config_info.get("config")
+            if platform not in environment_configurations:
+                environment_configurations[platform] = {
+                    "id": platform_id,
+                    service: config,
+                }
+            else:
+                environment_configurations[platform][service] = config
+
+        # Fetch environment - platform specific configuration
+        for platform, platform_info in environment_configurations:
+            platform_id = platform_info["id"]
+            platform_config = session.get(
+                f"{API_HOST}/api/envs/{environment_id}/platforms/{platform_id}/config"
             )
+            platform_info.update(**platform_config.json())
 
-        environments[environment_info.get("name")] = environment_configuration
+        environments[environment] = environment_configurations
 
     with open(
         os.path.join(
