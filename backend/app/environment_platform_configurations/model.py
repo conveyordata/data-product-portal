@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.database import Base
 
 if TYPE_CHECKING:
-    from app.platforms.models import Platform
+    from app.platforms.model import Platform
     from app.environments.model import Environment
 
 from app.shared.model import BaseORM
