@@ -1,6 +1,6 @@
 import factory
 
-from app.platforms.models import Platform
+from app.platforms.model import Platform
 
 
 class PlatformFactory(factory.alchemy.SQLAlchemyModelFactory):

@@ -32,6 +32,9 @@ declare
     products_data_id uuid;
     stores_data_id uuid;
     employees_data_id uuid;
+
+    returned_platform_id uuid;
+    returned_service_id uuid;
 begin
     TRUNCATE TABLE public.data_product_memberships CASCADE;
     TRUNCATE TABLE public.data_products_datasets CASCADE;
@@ -45,10 +48,9 @@ begin
     TRUNCATE TABLE public.tags CASCADE;
 
     -- PLATFORMS
-    INSERT INTO public.platforms (id, "name") VALUES ('a9928457-8729-45d9-a341-3095a5ed768b', 'AWS');
-    INSERT INTO public.platform_services (id, platform_id, "name") VALUES ('76c09bb8-1f71-4abf-a303-1f364cb3e1a2', 'a9928457-8729-45d9-a341-3095a5ed768b', 'S3');
-    INSERT INTO public.platform_services (id, platform_id, "name") VALUES ('07c50c94-0a62-4a70-b2d6-f5978d0e9258', 'a9928457-8729-45d9-a341-3095a5ed768b', 'Glue');
-    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', 'a9928457-8729-45d9-a341-3095a5ed768b', '76c09bb8-1f71-4abf-a303-1f364cb3e1a2', '{"identifiers":["datalake","ingress","egress"]}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    SELECT id FROM public.platforms WHERE name = 'AWS' INTO returned_platform_id;
+    SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'S3' INTO returned_service_id;
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', returned_platform_id, returned_service_id, '{"identifiers":["datalake","ingress","egress"]}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
 
     -- ENVIRONMENTS
