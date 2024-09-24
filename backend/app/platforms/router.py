@@ -7,10 +7,14 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
 from app.platform_service_configurations.schema import PlatformServiceConfiguration
+from app.platform_service_configurations.service import (
+    PlatformServiceConfigurationService,
+)
 from app.platform_services.schema import PlatformService
+from app.platform_services.service import PlatformServiceService
 from app.platforms.schema import Platform
 
-from .service import PlatformsService
+from .service import PlatformService as PlatformsService
 
 router = APIRouter(prefix="/platforms", tags=["platforms"])
 
@@ -26,7 +30,7 @@ def get_all_platforms(
 def get_platform_services(
     platform_id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[PlatformService]:
-    return PlatformsService(db).get_platform_services(platform_id)
+    return PlatformServiceService(db).get_platform_services(platform_id)
 
 
 @router.get(
@@ -47,9 +51,9 @@ def get_service_config(
     platform_id: UUID, service_id: UUID, db: Session = Depends(get_db_session)
 ) -> PlatformServiceConfiguration:
     if not (
-        service_config := PlatformsService(db).get_service_config(
-            platform_id, service_id
-        )
+        service_config := PlatformServiceConfigurationService(
+            db
+        ).get_platform_service_configuration(platform_id, service_id)
     ):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

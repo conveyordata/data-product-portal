@@ -9,8 +9,14 @@ from app.dependencies import only_for_admin
 from app.environment_platform_configurations.schema import (
     EnvironmentPlatformConfiguration,
 )
+from app.environment_platform_configurations.service import (
+    EnvironmentPlatformConfigurationService,
+)
 from app.environment_platform_service_configurations.schema import (
     EnvironmentPlatformServiceConfiguration,
+)
+from app.environment_platform_service_configurations.service import (
+    EnvironmentPlatformServiceConfigurationService,
 )
 from app.environments.schema import Environment
 from app.environments.service import EnvironmentService
@@ -28,7 +34,9 @@ def get_environment_configs(
     environment_id: UUID,
     db: Session = Depends(get_db_session),
 ) -> Sequence[EnvironmentPlatformServiceConfiguration]:
-    return EnvironmentService(db).get_environment_configs(environment_id)
+    return EnvironmentPlatformServiceConfigurationService(
+        db
+    ).get_environment_platform_service_configs(environment_id)
 
 
 @router.get(
@@ -41,9 +49,9 @@ def get_environment_platform_service_config(
     service_id: UUID,
     db: Session = Depends(get_db_session),
 ) -> EnvironmentPlatformServiceConfiguration:
-    return EnvironmentService(db).get_environment_platform_service_config(
-        environment_id, platform_id, service_id
-    )
+    return EnvironmentPlatformServiceConfigurationService(
+        db
+    ).get_environment_platform_service_config(environment_id, platform_id, service_id)
 
 
 @router.get(
@@ -55,6 +63,6 @@ def get_environment_platform_config(
     platform_id: UUID,
     db: Session = Depends(get_db_session),
 ) -> EnvironmentPlatformConfiguration:
-    return EnvironmentService(db).get_environment_platform_config(
+    return EnvironmentPlatformConfigurationService(db).get_environment_platform_config(
         environment_id, platform_id
     )
