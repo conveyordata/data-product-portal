@@ -1,8 +1,5 @@
-from uuid import UUID
-
-from app.shared.schema import ORMModel
+from app.shared.schema import IdNameSchema
 
 
-class Platform(ORMModel):
-    id: UUID
-    name: str
+class Platform(IdNameSchema):
+    pass
