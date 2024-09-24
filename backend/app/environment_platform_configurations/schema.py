@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import field_validator
 
-from app.environment_platform_configurations.aws_schema import (
+from app.environment_platform_configurations.schemas import (
     AWSEnvironmentPlatformConfiguration,
 )
 from app.environments.schema import Environment

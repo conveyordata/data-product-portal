@@ -12,7 +12,7 @@ from app.environment_platform_configurations.schema import (
 from app.environment_platform_service_configurations.schema import (
     EnvironmentPlatformServiceConfiguration,
 )
-from app.environments.schema import Environment, EnvironmentCreate
+from app.environments.schema import Environment
 from app.environments.service import EnvironmentService
 
 router = APIRouter(prefix="/envs", tags=["environments"])
@@ -21,13 +21,6 @@ router = APIRouter(prefix="/envs", tags=["environments"])
 @router.get("")
 def get_environments(db: Session = Depends(get_db_session)) -> Sequence[Environment]:
     return EnvironmentService(db).get_environments()
-
-
-@router.post("", dependencies=[Depends(only_for_admin)])
-def create_environment(
-    environment: EnvironmentCreate, db: Session = Depends(get_db_session)
-):
-    EnvironmentService(db).create_environment(environment)
 
 
 @router.get("/{environment_id}/configs", dependencies=[Depends(only_for_admin)])

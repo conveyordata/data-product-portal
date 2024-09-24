@@ -11,7 +11,10 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy import orm
 
+from app.platform_services.model import PlatformService
+from app.platforms.model import Platform
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
@@ -68,6 +71,15 @@ def upgrade() -> None:
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
     )
+
+    # Adding initial data
+    bind = op.get_bind()
+    session = orm.Session(bind=bind)
+
+    platform = Platform(name="AWS")
+    platform.services = [PlatformService(name="S3"), PlatformService(name="Glue")]
+    session.add(platform)
+    session.commit()
 
 
 def downgrade() -> None:

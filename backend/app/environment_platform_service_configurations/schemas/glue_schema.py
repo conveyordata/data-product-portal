@@ -1,6 +1,4 @@
-from app.environment_platform_service_configurations.config_schema import (
-    BaseEnvironmentPlatformServiceConfigurationDetail,
-)
+from .config_schema import BaseEnvironmentPlatformServiceConfigurationDetail
 
 
 class AWSGlueConfig(BaseEnvironmentPlatformServiceConfigurationDetail):

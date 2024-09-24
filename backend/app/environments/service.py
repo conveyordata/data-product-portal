@@ -27,10 +27,6 @@ class EnvironmentService:
     def get_environments(self) -> Sequence[Environment]:
         return self.db.scalars(select(EnvironmentModel)).all()
 
-    def create_environment(self, environment: Environment) -> None:
-        self.db.add(EnvironmentModel(**environment.model_dump()))
-        self.db.commit()
-
     def get_environment_platform_service_config(
         self, environment_id: UUID, platform_id: UUID, service_id: UUID
     ) -> EnvironmentPlatformServiceConfiguration:
