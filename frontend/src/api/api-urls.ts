@@ -30,6 +30,7 @@ export enum ApiUrl {
     EnvPlatformServiceConfigs = '/api/envs/:environmentId/configs',
     EnvPlatformServiceConfig = '/api/envs/configs/:configId',
     EnvPlatformServiceConfigNoId = '/api/envs/configs',
+    EnvPlatformServiceConfigId = '/api/envs/platforms/:platformId/services/:serviceId/config',
     Datasets = '/api/datasets',
     DatasetUser = '/api/datasets/:datasetId/user/:userId',
     DatasetGet = '/api/datasets/:datasetId',

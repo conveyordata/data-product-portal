@@ -102,7 +102,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         } else {
             setIdentifiers([]);
             setSelectedConfiguration(dropdown);
-            setIdentifiers(platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === dropdown?.value.toLowerCase())[0].config.identifiers!);
+            setIdentifiers(platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === dropdown?.value.toLowerCase())[0].config!);
         }
     };
 

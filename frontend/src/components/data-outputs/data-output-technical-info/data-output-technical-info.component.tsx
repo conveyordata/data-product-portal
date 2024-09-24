@@ -18,8 +18,8 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
     const { t } = useTranslation();
     const { data: data_output, isLoading: isLoadingDataOutput } = useGetDataOutputByIdQuery(data_output_id);
     const { data: environmentConfig, isFetching: isLoadingConfig} = useGetEnvironmentPlatformServiceConfigQuery({
-        platform_id: data_output!.platform_id,
-        service_id: data_output!.service_id
+        platformId: data_output!.platform_id,
+        serviceId: data_output!.service_id
     }, {
         skip: !data_output
     });

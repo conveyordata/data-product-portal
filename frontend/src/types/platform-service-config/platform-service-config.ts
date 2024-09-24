@@ -12,7 +12,7 @@ export interface PlatformServiceConfigCreateRequest {
 
 export interface PlatformServiceConfigGetResponse {
     id: string;
-    config: Config;
+    config: string[];
     platform: IdName;
     service: IdName;
 }

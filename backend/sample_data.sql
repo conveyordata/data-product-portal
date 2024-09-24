@@ -35,6 +35,8 @@ declare
 
     returned_platform_id uuid;
     returned_service_id uuid;
+    returned_environment_id_dev uuid;
+    returned_environment_id_prd uuid;
 begin
     TRUNCATE TABLE public.data_product_memberships CASCADE;
     TRUNCATE TABLE public.data_products_datasets CASCADE;
@@ -44,18 +46,20 @@ begin
     TRUNCATE TABLE public.users CASCADE;
     TRUNCATE TABLE public.data_product_types CASCADE;
     TRUNCATE TABLE public.business_areas CASCADE;
-    TRUNCATE TABLE public.environments CASCADE;
     TRUNCATE TABLE public.tags CASCADE;
 
     -- PLATFORMS
     SELECT id FROM public.platforms WHERE name = 'AWS' INTO returned_platform_id;
     SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'S3' INTO returned_service_id;
-    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', returned_platform_id, returned_service_id, '{"identifiers":["datalake","ingress","egress"]}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', returned_platform_id, returned_service_id, '["datalake","ingress","egress"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- ENVIRONMENTS
-    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'dev_context', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'prd_context', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'dev_context', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_dev;
+    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'prd_context', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_prd;
+
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('93f4b677-5ae8-450d-91a6-e15196b2e774', returned_environment_id_dev, returned_platform_id, returned_service_id, '[{"identifier":"datalake","bucket_name":"datalake_bucket_dev","arn":"datalake_bucket_arn_dev","kms_key":"datalake_kms_key_dev","is_default":true},{"identifier":"ingress","bucket_name":"ingress_bucket_dev","arn":"ingress_bucket_arn_dev","kms_key":"ingress_kms_key_dev","is_default":false},{"identifier":"egress","bucket_name":"egress_bucket_dev","arn":"egress_bucket_arn_dev","kms_key":"egress_kms_key_dev","is_default":false}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('9c1d025c-f342-4665-8461-ba8b9f4035ff', returned_environment_id_prd, returned_platform_id, returned_service_id,  '[{"identifier":"datalake","bucket_name":"datalake_bucket_prd","arn":"datalake_bucket_arn_prd","kms_key":"datalake_kms_key_prd","is_default":true},{"identifier":"ingress","bucket_name":"ingress_bucket_prd","arn":"ingress_bucket_arn_prd","kms_key":"ingress_kms_key_prd","is_default":false},{"identifier":"egress","bucket_name":"egress_bucket_prd","arn":"egress_bucket_arn_prd","kms_key":"egress_kms_key_prd","is_default":false}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
 
     -- BUSINESS AREAS
     INSERT INTO public.business_areas (id, "name", description, created_on, updated_on, deleted_at) VALUES ('672debaf-31f9-4233-820b-ad2165af044e', 'HR', 'Human Resources', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO hr_id;
@@ -75,7 +79,7 @@ begin
     INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('alice.baker@gmail.com', 'a02d3714-97e3-40d8-92b7-3b018fd1229f', 'alice.baker@gmail.com', 'Alice', 'Baker', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO alice_id;
     INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('bob.baker@gmail.com', '35f2dd11-3119-4eb3-8f19-01b323131221', 'bob.baker@gmail.com', 'Bob', 'Baker', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO bob_id;
     INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('jane.doe@dataminded.com', 'd9f3aae2-391e-46c1-aec6-a7ae1114a7da', 'jane.doe@dataminded.com', 'Jane', 'Doe', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO jane_id;
-    INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('john.doe@dataminded.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', 'john.doe@dataminded.com', 'John', 'Doe', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO john_id;
+    INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at, is_admin) VALUES ('john.doe@dataminded.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', 'john.doe@dataminded.com', 'John', 'Doe', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, true) returning id INTO john_id;
 
     -- DATA PRODUCTS
     INSERT INTO public.data_products (id, "name", external_id, description, about, status, type_id, business_area_id, created_on, updated_on, deleted_at) VALUES ('e269fd59-14f4-4710-9ce0-bb31b1c8b541', 'Sales Funnel Optimization', 'sales_funnel_optimization', 'Analyze data to optimize the Sales Funnel', '<h2>Sales Funnel Optimization</h2><p></p><p>This data product aims to analyze the current sales funnel, identify drop-off points,  implement improvements, and test new strategies.</p><p></p><p><strong>Key objectives include:</strong></p><ul><li><p>Increase Conversion Rates</p></li><li><p>Enhance Lead Quality</p></li><li><p>Optimize Lead Nurturing Processes</p></li><li><p>Improve Sales Team Efficiency</p></li><li><p>Maximize Customer Lifetime Value (CLV)</p></li><li><p>Data-Driven Decision Making</p></li><li><p>Align Marketing and Sales Efforts</p></li><li><p>Enhance Customer Experience</p></li><li><p>Drive Revenue Growth</p></li></ul>', 'ACTIVE', exploration_type_id, sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_funnel_optimization_id;

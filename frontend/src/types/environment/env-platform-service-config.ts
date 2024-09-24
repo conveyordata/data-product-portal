@@ -2,7 +2,7 @@ import { IdName } from '../shared';
 
 export interface EnvironmentConfig {
     id: string;
-    config: Config;
+    config: AWSS3Config[];
     platform: IdName;
     service: IdName;
     environment: IdName;
@@ -10,6 +10,7 @@ export interface EnvironmentConfig {
 
 interface AWSS3Config {
     account_id: number;
+    identifier: string;
     name: string;
     arn: string;
     kms: string;

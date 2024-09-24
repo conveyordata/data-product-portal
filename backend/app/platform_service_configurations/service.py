@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -19,3 +21,8 @@ class PlatformServiceConfigurationService:
                 platform_id=platform_id, service_id=service_id
             )
         )
+
+    def get_platform_service_configurations(
+        self,
+    ) -> Sequence[PlatformServiceConfiguration]:
+        return self.db.scalars(select(PlatformServiceConfigurationModel)).all()
