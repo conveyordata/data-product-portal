@@ -32,7 +32,7 @@ jobs:
       - name: Check Version Update
         id: versionupdate
         if: ${{ env.TAG != env.APP_VERSION }}
-        uses: actions/github-script@v3
+        uses: actions/github-script@v7
         with:
           script: |
               core.setFailed('VERSION is not the latest tag, did you do a version bump?')
