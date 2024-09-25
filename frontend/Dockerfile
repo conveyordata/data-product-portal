@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:20-alpine as build-stage
+FROM --platform=linux/amd64 node:22-alpine as build-stage
 
 WORKDIR /app
 COPY . .
@@ -10,7 +10,7 @@ RUN npm ci
 RUN npm run build:prd
 
 # Use official nginx image as the base image
-FROM --platform=linux/amd64 nginx:1.25-alpine
+FROM --platform=linux/amd64 nginx:1.27-alpine
 
 # Copy the build output
 COPY --from=build-stage /app/dist /app/dist
