@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.schema import DataOutputRegister
 from app.data_outputs.schema_get import DataOutputGet
+from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.schema import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -14,6 +15,7 @@ from app.data_products.schema import (
 from app.data_products.schema_get import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
+from app.dependencies import OnlyWithProductAccess
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_products", tags=["data_products"])
@@ -77,6 +79,7 @@ def create_data_product(
             },
         }
     },
+    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
 )
 def remove_data_product(
     id: UUID,
@@ -96,6 +99,7 @@ def remove_data_product(
             },
         }
     },
+    dependencies=[Depends(OnlyWithProductAccess())],
 )
 def update_data_product(
     id: UUID, data_product: DataProductUpdate, db: Session = Depends(get_db_session)
@@ -113,6 +117,7 @@ def update_data_product(
             },
         }
     },
+    dependencies=[Depends(OnlyWithProductAccess())],
 )
 def update_data_product_about(
     id: UUID,
@@ -138,6 +143,7 @@ def update_data_product_about(
             },
         },
     },
+    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
 )
 def link_dataset_to_data_product(
     id: UUID,
@@ -166,6 +172,7 @@ def link_dataset_to_data_product(
             },
         },
     },
+    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
 )
 def unlink_dataset_from_data_product(
     id: UUID,
@@ -178,12 +185,10 @@ def unlink_dataset_from_data_product(
     )
 
 
-@router.get("/{id}/role")
-def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) -> str:
-    return DataProductService().get_data_product_role_arn(id, environment, db)
-
-
-@router.get("/{id}/signin_url")
+@router.get(
+    "/{id}/signin_url",
+    dependencies=[Depends(OnlyWithProductAccess())],
+)
 def get_signin_url(
     id: UUID,
     environment: str,
@@ -195,12 +200,18 @@ def get_signin_url(
     )
 
 
-@router.get("/{id}/conveyor_notebook_url")
+@router.get(
+    "/{id}/conveyor_notebook_url",
+    dependencies=[Depends(OnlyWithProductAccess())],
+)
 def get_conveyor_notebook_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
     return DataProductService().get_conveyor_notebook_url(id, db)
 
 
-@router.get("/{id}/conveyor_ide_url")
+@router.get(
+    "/{id}/conveyor_ide_url",
+    dependencies=[Depends(OnlyWithProductAccess())],
+)
 def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
     return DataProductService().get_conveyor_ide_url(id, db)
 

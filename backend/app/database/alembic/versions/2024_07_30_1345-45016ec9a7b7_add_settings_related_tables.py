@@ -12,7 +12,12 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
+# from app.platform_services.model import PlatformService
+# from app.platforms.model import Platform
 from app.shared.model import utcnow
+
+# from sqlalchemy import orm
+
 
 # revision identifiers, used by Alembic.
 revision: str = "45016ec9a7b7"

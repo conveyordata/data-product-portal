@@ -2,6 +2,9 @@ name: Tests
 on:
   pull_request:
     branches: '*'
+permissions:
+  contents: read
+
 jobs:
   environment:
     runs-on: ubuntu-latest
@@ -71,6 +74,9 @@ jobs:
         run: poetry run pytest -v
 
   lint-golang:
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+      pull-requests: read  # for golangci/golangci-lint-action to fetch pull requests
     name: Run Go linters
     if: ${{ github.actor != 'dependabot[bot]' || contains(github.head_ref, 'dependabot/go_modules')}}
     runs-on: ubuntu-22.04

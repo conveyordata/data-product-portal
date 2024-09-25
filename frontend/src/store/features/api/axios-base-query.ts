@@ -13,7 +13,7 @@ interface CustomAxiosError extends AxiosError {
 }
 
 function getUser() {
-    const skipAuth = AppConfig.isOidcDisabled();
+    const skipAuth = !AppConfig.isOidcEnabled();
     if (skipAuth) {
         return null;
     }

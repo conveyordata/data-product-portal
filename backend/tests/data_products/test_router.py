@@ -7,6 +7,7 @@ from tests.factories import (
     DataProductTypeFactory,
     UserFactory,
 )
+from tests.factories.data_product_membership import DataProductMembershipFactory
 
 from app.data_product_memberships.enums import DataProductUserRole
 
@@ -59,8 +60,18 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
 
-    def test_update_data_product(self, payload, client):
+    def test_update_data_product_no_member(self, payload, client):
         data_product = DataProductFactory()
+        update_payload = deepcopy(payload)
+        update_payload["name"] = "Updated Data Product"
+        response = self.update_data_product(client, update_payload, data_product.id)
+
+        assert response.status_code == 403
+
+    def test_update_data_product(self, payload, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
         update_payload = deepcopy(payload)
         update_payload["name"] = "Updated Data Product"
         response = self.update_data_product(client, update_payload, data_product.id)
@@ -68,13 +79,27 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
 
-    def test_update_data_product_about(self, client):
+    def test_update_data_product_about_no_member(self, client):
         data_product = DataProductFactory()
+        response = self.update_data_product_about(client, data_product.id)
+        assert response.status_code == 403
+
+    def test_update_data_product_about(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
         response = self.update_data_product_about(client, data_product.id)
         assert response.status_code == 200
 
-    def test_remove_data_product(self, client):
+    def test_remove_data_product_no_member(self, client):
         data_product = DataProductFactory()
+        response = self.delete_data_product(client, data_product.id)
+        assert response.status_code == 403
+
+    def test_remove_data_product(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
 

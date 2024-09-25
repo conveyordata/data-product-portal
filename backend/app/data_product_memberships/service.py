@@ -13,35 +13,11 @@ from app.data_product_memberships.enums import (
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_memberships.schema import DataProductMembershipCreate
 from app.data_products.model import ensure_data_product_exists
-from app.data_products.schema import DataProduct
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 
 
 class DataProductMembershipService:
-
-    @staticmethod
-    def ensure_data_product_owner(authenticated_user: User, data_product: DataProduct):
-        if authenticated_user.is_admin:
-            return
-
-        data_product_membership = next(
-            (
-                membership
-                for membership in data_product.memberships
-                if membership.user_id == authenticated_user.id
-            ),
-            None,
-        )
-        if (
-            data_product_membership is None
-            or data_product_membership.role != DataProductUserRole.OWNER
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only owners can execute this operation",
-            )
-
     @staticmethod
     def request_user_access_to_data_product(
         user_id: UUID,
@@ -83,8 +59,6 @@ class DataProductMembershipService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product membership {id} not found",
             )
-        data_product = data_product_membership.data_product
-        self.ensure_data_product_owner(authenticated_user, data_product)
 
         if (
             data_product_membership.status
@@ -117,8 +91,6 @@ class DataProductMembershipService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product membership {id} not found",
             )
-        data_product = data_product_membership.data_product
-        self.ensure_data_product_owner(authenticated_user, data_product)
 
         if (
             data_product_membership.status
@@ -148,8 +120,6 @@ class DataProductMembershipService:
             )
 
         data_product = data_product_membership.data_product
-        if data_product_membership.user_id != authenticated_user.id:
-            self.ensure_data_product_owner(authenticated_user, data_product)
 
         data_product.memberships.remove(data_product_membership)
         db.commit()
@@ -163,7 +133,6 @@ class DataProductMembershipService:
         authenticated_user: User,
     ):
         data_product = ensure_data_product_exists(data_product_id, db)
-        self.ensure_data_product_owner(authenticated_user, data_product)
 
         if data_product_membership.user_id in [
             membership.user_id for membership in data_product.memberships
@@ -192,7 +161,6 @@ class DataProductMembershipService:
         self,
         id: UUID,
         membership_role: DataProductUserRole,
-        authenticated_user: User,
         db: Session,
     ):
         data_product_membership = (
@@ -203,8 +171,6 @@ class DataProductMembershipService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product membership {id} not found",
             )
-        data_product = data_product_membership.data_product
-        self.ensure_data_product_owner(authenticated_user, data_product)
 
         data_product_membership = db.get(DataProductMembership, id)
         data_product_membership.role = membership_role

@@ -1,5 +1,8 @@
-from jose import jwt
-from jose.exceptions import ExpiredSignatureError, JWTClaimsError, JWTError
+import json
+
+import jwt
+from jwt.algorithms import RSAAlgorithm
+from jwt.exceptions import ExpiredSignatureError, PyJWTError
 from pydantic import BaseModel
 
 from app.core.auth.oidc import OIDCConfiguration
@@ -23,23 +26,26 @@ class JWTTokenValid:
     def is_valid(self) -> bool:
         verifyable_token = bytes(self.token[len("Bearer ") :], encoding="utf-8")
 
-        # get the algorithm type from the request header
-        algorithm = jwt.get_unverified_header(verifyable_token).get("alg")
+        public_keys = {}
+        for jwk in self.oidc.jwks_keys["keys"]:
+            kid = jwk["kid"]
+            public_keys[kid] = RSAAlgorithm.from_jwk(json.dumps(jwk))
 
+        kid = jwt.get_unverified_header(verifyable_token)["kid"]
         try:
             self.valid_jwt_token = jwt.decode(
-                token=verifyable_token,
-                key=self.oidc.jwks_keys,
-                algorithms=algorithm,
+                jwt=verifyable_token,
+                key=public_keys[kid],
+                algorithms=["RS256"],
                 issuer=self.oidc.authority,
             )
-        except JWTClaimsError as e:
-            self.logger.debug("Invalid claims in jwt token", e)
-            return False
         except ExpiredSignatureError as e:
             self.logger.debug("jwt token is expired", e)
             return False
-        except JWTError as e:
+        except PyJWTError as e:
             self.logger.debug("Problem parsing jwt token", e)
+            return False
+        except Exception as e:
+            self.logger.debug("Generic exception: Problem parsing jwt token", e)
             return False
         return True
