@@ -6,13 +6,15 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
-
-from .schemas import (
-    GetPlatformServicesSchema,
-    GetPlatformsSchema,
-    PlatformServiceConfigSchema,
+from app.platform_service_configurations.schema import PlatformServiceConfiguration
+from app.platform_service_configurations.service import (
+    PlatformServiceConfigurationService,
 )
-from .service import PlatformsService
+from app.platform_services.schema import PlatformService
+from app.platform_services.service import PlatformServiceService
+from app.platforms.schema import Platform
+
+from .service import PlatformService as PlatformsService
 
 router = APIRouter(prefix="/platforms", tags=["platforms"])
 
@@ -20,15 +22,15 @@ router = APIRouter(prefix="/platforms", tags=["platforms"])
 @router.get("")
 def get_all_platforms(
     db: Session = Depends(get_db_session),
-) -> Sequence[GetPlatformsSchema]:
+) -> Sequence[Platform]:
     return PlatformsService(db).get_all_platforms()
 
 
 @router.get("/{platform_id}/services")
 def get_platform_services(
     platform_id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[GetPlatformServicesSchema]:
-    return PlatformsService(db).get_platform_services(platform_id)
+) -> Sequence[PlatformService]:
+    return PlatformServiceService(db).get_platform_services(platform_id)
 
 
 @router.get(
@@ -47,14 +49,14 @@ def get_platform_services(
 )
 def get_service_config(
     platform_id: UUID, service_id: UUID, db: Session = Depends(get_db_session)
-) -> PlatformServiceConfigSchema:
+) -> PlatformServiceConfiguration:
     if not (
-        service_config := PlatformsService(db).get_service_config(
-            platform_id, service_id
-        )
+        service_config := PlatformServiceConfigurationService(
+            db
+        ).get_platform_service_configuration(platform_id, service_id)
     ):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Service configuration not found",
         )
-    return PlatformServiceConfigSchema(config=service_config)
+    return service_config

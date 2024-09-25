@@ -5,6 +5,7 @@ from .data_product_membership import DataProductMembershipFactory
 from .data_product_type import DataProductTypeFactory
 from .data_products_datasets import DataProductDatasetAssociationFactory
 from .dataset import DatasetFactory
+from .env_platform_config import EnvPlatformConfigFactory
 from .env_platform_service_config import EnvPlatformServiceConfigFactory
 from .environment import EnvironmentFactory
 from .platform import PlatformFactory
@@ -25,6 +26,7 @@ factories = [
     DataProductMembershipFactory,
     DataProductTypeFactory,
     DataProductDatasetAssociationFactory,
+    EnvPlatformConfigFactory,
 ]
 
 for factory_model in factories:
