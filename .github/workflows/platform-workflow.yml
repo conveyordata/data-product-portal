@@ -61,7 +61,7 @@ jobs:
           registry-type: public
           mask-password: "true"
       - name: Publish Helm package
-        uses: WyriHaximus/github-action-helm3@v3
+        uses: WyriHaximus/github-action-helm3@v4
         env:
           VERSION: ${{ needs.prep-version.outputs.version }}
         with:
