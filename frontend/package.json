@@ -15,7 +15,7 @@
     "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js"
   },
   "dependencies": {
-    "@ant-design/colors": "^7.0.2",
+    "@ant-design/colors": "^7.1.0",
     "@dagrejs/dagre": "^1.1.2",
     "@fontsource/inter": "^5.0.17",
     "@reduxjs/toolkit": "^2.2.3",
