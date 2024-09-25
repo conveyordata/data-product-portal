@@ -1,0 +1,49 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/cli"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    groups:
+      docker:
+        patterns:
+          - "github.com/docker/*"
+      k8s:
+        patterns:
+          - "k8s.io/*"
+          - "sigs.k8s.io/*"
+      aws-sdk:
+        patterns:
+          - "github.com/aws/aws-sdk-*"
+          - "github.com/aws/smithy-go"
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+      aws-sdk:
+        patterns:
+          - "@aws-sdk/*"
+  - package-ecosystem: "pip"
+    directory: "/backend"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+  - package-ecosystem: "docker"
+    directories:
+    - "/backend"
+    - "/frontend"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
