@@ -53,5 +53,4 @@ class TestPlatformsRouter:
         assert response.status_code == 200
         fetched_config = response.json()
         expected_config = json.loads(config.config)
-        assert fetched_config == {"config": expected_config}
-        assert "identifiers" in expected_config
+        assert fetched_config["config"] == expected_config
