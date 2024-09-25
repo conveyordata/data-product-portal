@@ -45,7 +45,7 @@
     "react-redux": "^9.1.1",
     "react-router-dom": "^6.22.3",
     "reactflow": "^11.11.3",
-    "sass": "^1.74.1"
+    "sass": "^1.79.3"
   },
   "devDependencies": {
     "@types/react": "^18.3.9",
