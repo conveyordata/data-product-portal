@@ -9,6 +9,7 @@ from app.dependencies import only_for_admin
 from app.environments.schema import (
     CreateConfigSchema,
     Environment,
+    EnvironmentsConfigurations,
     EnvPlatformServiceConfigGet,
     GetEnvironment,
 )
@@ -70,3 +71,11 @@ def get_environment_config_by_id(
     config_id: UUID, db: Session = Depends(get_db_session)
 ) -> EnvPlatformServiceConfigGet:
     return EnvironmentService(db).get_environment_config_by_id(config_id)
+
+
+@router.put("/configs", dependencies=[Depends(only_for_admin)])
+def save_environments_configurations(
+    configurations: EnvironmentsConfigurations, db: Session = Depends(get_db_session)
+):
+    EnvironmentService(db).save_environments_configurations(configurations)
+    return "hello"

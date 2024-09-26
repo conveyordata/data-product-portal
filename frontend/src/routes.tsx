@@ -6,7 +6,7 @@ import { Datasets } from '@/pages/datasets/datasets.page.tsx';
 import { Dataset } from '@/pages/dataset/dataset.page.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
 import { AuditLogs } from '@/pages/audit-logs/audit-logs.page.tsx';
-// import { Settings } from '@/pages/settings/settings.page.tsx';
+import { Settings } from '@/pages/settings/settings.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
 import { DataProductCreate } from '@/pages/data-product-create/data-product-create.page.tsx';
 import { AuthLayout } from '@/components/layout/auth/auth.layout.tsx';
@@ -17,14 +17,6 @@ import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
 import { DataProductEdit } from '@/pages/data-product-edit/data-product-edit.page.tsx';
 import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
-import { PlatformsConfigs } from './pages/platforms-configs/platforms-configs.page.tsx';
-import { PlatformServiceConfig } from './pages/platform-service-config/platform-service-config.page.tsx';
-import { PlatformServiceConfigCreate } from './pages/platform-service-config-create/platform-service-config-create.page.tsx';
-import { Environments } from './pages/environments/environments.page.tsx';
-import { EnvironmentCreate } from './pages/environment-create/environment-create.page.tsx';
-import { EnvironmentConfigs } from './pages/environment-configs/environment-configs.page.tsx';
-import { EnvironmentConfigCreate } from './pages/environment-config-create/environment-config-create.page.tsx';
-import { EnvironmentConfig } from './pages/environment-config/environment-config.page.tsx';
 
 const router = createBrowserRouter([
     {
@@ -88,48 +80,14 @@ const router = createBrowserRouter([
                         path: ApplicationPaths.AuditLogs,
                         element: <AuditLogs />,
                     },
-                    {
-                        path: ApplicationPaths.PlatformsConfigs,
-                        element: <ProtectedRoute />,
-                        children: [
-                            {
-                                index: true,
-                                element: <PlatformsConfigs />,
-                            },
-                            {
-                                path: ApplicationPaths.PlatformServiceConfig,
-                                element: <PlatformServiceConfig />,
-                            },
-                            {
-                                path: ApplicationPaths.PlatformServiceConfigNew,
-                                element: <PlatformServiceConfigCreate />,
-                            },
-                        ],
-                    },
 
                     {
-                        path: ApplicationPaths.Environments,
+                        path: ApplicationPaths.Settings,
                         element: <ProtectedRoute />,
                         children: [
                             {
                                 index: true,
-                                element: <Environments />,
-                            },
-                            {
-                                path: ApplicationPaths.EnvironmentNew,
-                                element: <EnvironmentCreate />,
-                            },
-                            {
-                                path: ApplicationPaths.EnvironmentConfigs,
-                                element: <EnvironmentConfigs />,
-                            },
-                            {
-                                path: ApplicationPaths.EnvironmentConfigNew,
-                                element: <EnvironmentConfigCreate />,
-                            },
-                            {
-                                path: ApplicationPaths.EnvironmentConfig,
-                                element: <EnvironmentConfig />,
+                                element: <Settings />,
                             },
                         ],
                     },

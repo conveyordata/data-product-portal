@@ -10,7 +10,6 @@ export enum TagTypes {
     BusinessArea = 'BusinessArea',
     Platform = 'Platform',
     PlatformService = 'PlatformService',
-    PlatformServiceConfig = 'PlatformServiceConfig',
     EnvironmentConfigs = 'EnvironmentConfigs',
 }
 
