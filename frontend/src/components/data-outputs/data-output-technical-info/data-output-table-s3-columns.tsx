@@ -2,6 +2,7 @@ import { TableColumnsType } from 'antd';
 import { TFunction } from 'i18next';
 import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
 import { S3DataOutputContract } from '@/types/data-output';
+import { env } from 'process';
 
 type Props = {
     t: TFunction;
@@ -29,7 +30,8 @@ export const getS3TechnicalInformationColumns = ({
             dataIndex: 'path',
             render: (_, { environmentConfig, data_output }) => {
                 const configuration: S3DataOutputContract = data_output.configuration as S3DataOutputContract
-                const bucket_arn = environmentConfig.config[configuration.bucket].arn
+                const bucket_arn = environmentConfig.config.filter(({identifier}) => (identifier == configuration.bucket))[0].arn
+                //const bucket_arn = environmentConfig.config().arn
 
                 return bucket_arn + '/' + configuration.prefix
             },

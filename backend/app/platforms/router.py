@@ -61,3 +61,10 @@ def get_platform_service_config(
             detail="Platform service configuration not found",
         )
     return service_config
+
+
+@router.get("/configs")
+def get_all_platform_service_configurations(
+    db: Session = Depends(get_db_session),
+) -> Sequence[PlatformServiceConfiguration]:
+    return PlatformServiceConfigurationService(db).get_platform_service_configurations()

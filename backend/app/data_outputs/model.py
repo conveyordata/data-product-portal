@@ -1,10 +1,9 @@
 import uuid
 
-from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy import Boolean, Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, relationship
 
-from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.schema import DataOutput as DataOutputSchema
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
@@ -28,7 +27,6 @@ class DataOutput(Base, BaseORM):
     service_id: Mapped[UUID] = Column(ForeignKey("platform_services.id"))
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
     owner: Mapped["DataProduct"] = relationship(back_populates="data_outputs")
-    configuration_type: DataOutputTypes = Column(Enum(DataOutputTypes))
     configuration = Column(String)
     dataset_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
         "DataOutputDatasetAssociation",
@@ -36,3 +34,4 @@ class DataOutput(Base, BaseORM):
         cascade="all, delete-orphan",
         order_by="DataOutputDatasetAssociation.status.desc()",
     )
+    sourceAligned = Column(Boolean)

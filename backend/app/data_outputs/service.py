@@ -8,12 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
-from app.data_outputs.schema import (
-    DataOutput,
-    DataOutputCreate,
-    DataOutputToDB,
-    DataOutputUpdate,
-)
+from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
@@ -74,14 +69,6 @@ class DataOutputService:
     def get_data_outputs(self, db: Session) -> list[DataOutput]:
         data_outputs = db.query(DataOutputModel).all()
         return data_outputs
-        # parsed_data_outputs = []
-        # for data_output in data_outputs:
-        #     parsed_data_output = data_output
-        #     parsed_data_output.configuration = DataOutputMap[
-        #         data_output.configuration_type
-        #     ].model_validate_json(data_output.configuration)
-        #     parsed_data_outputs.append(parsed_data_output)
-        # return parsed_data_outputs
 
     def get_data_output(self, id: UUID, db: Session) -> DataOutput:
         return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
@@ -99,20 +86,6 @@ class DataOutputService:
             # TODO Figure out if this validation needs to happen either way
             # somehow and let sourcealigned be handled internally there?
             data_output.configuration.validate_configuration(data_product)
-
-        # TODO Test fastapi errors?
-        # TODO This needs to be better implemented > auto convert json
-        data_output = DataOutputToDB(
-            name=data_output.name,
-            platform_id=data_output.platform_id,
-            service_id=data_output.service_id,
-            description=data_output.description,
-            status=data_output.status,
-            external_id=data_output.external_id,
-            owner_id=data_output.owner_id,
-            configuration=data_output.configuration.model_dump_json(),
-            configuration_type=data_output.configuration.configuration_type,
-        )
         data_output = DataOutputModel(**data_output.parse_pydantic_schema())
 
         db.add(data_output)

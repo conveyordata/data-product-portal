@@ -75,7 +75,7 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime),
     )
 
-    # # Adding initial data
+    # Adding initial data
     bind = op.get_bind()
     session = orm.Session(bind=bind)
 

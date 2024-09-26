@@ -4,7 +4,7 @@ from uuid import UUID
 from pydantic import field_validator
 
 from app.data_outputs.schema_get import DatasetLink
-from app.data_outputs.schema_union import DataOutputs, DataOutputTypes
+from app.data_outputs.schema_union import DataOutputs
 from app.data_outputs.status import DataOutputStatus
 from app.data_products.schema_base_get import BaseDataProductGet
 from app.shared.schema import ORMModel
@@ -21,11 +21,17 @@ class DataOutputCreate(ORMModel):
     configuration: DataOutputs
     sourceAligned: bool
 
+    @field_validator("configuration", mode="before")
+    @classmethod
+    def parse_settings(cls, v: str | dict) -> dict:
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
+
 
 class DataOutputUpdate(ORMModel):
     name: str
     description: str
-    # configuration: DataOutputs
 
 
 class DataOutputRegister(ORMModel):
@@ -45,7 +51,6 @@ class DataOutput(ORMModel):
     owner: BaseDataProductGet
     status: DataOutputStatus
     configuration: DataOutputs
-    configuration_type: DataOutputTypes
     dataset_links: list[DatasetLink]
 
     @field_validator("configuration", mode="before")
@@ -54,15 +59,3 @@ class DataOutput(ORMModel):
         if isinstance(v, str):
             return json.loads(v)
         return v
-
-
-class DataOutputToDB(ORMModel):
-    name: str
-    description: str
-    external_id: str
-    owner_id: UUID
-    platform_id: UUID
-    service_id: UUID
-    configuration: str
-    status: DataOutputStatus
-    configuration_type: DataOutputTypes

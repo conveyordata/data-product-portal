@@ -157,7 +157,6 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data Product {id} not found",
             )
-        self.ensure_owner(authenticated_user, data_product)
         data_product.memberships = []
         data_product.dataset_links = []
         data_product.delete()
@@ -413,8 +412,6 @@ class DataProductService:
         db: Session,
     ) -> dict[str, UUID]:
         data_output.owner_id = id
-        data_product = ensure_data_product_exists(id, db)
-        self.ensure_owner(authenticated_user, data_product)
         return DataOutputService().create_data_output(
             data_output, db, authenticated_user
         )

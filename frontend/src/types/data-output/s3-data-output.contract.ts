@@ -3,6 +3,7 @@ export interface S3DataOutputContract {
     prefix: string;
     account_id: string;
     kms_key: string;
+    configuration_type: string;
 }
 
 export interface S3DataOutputModel extends S3DataOutputContract {}

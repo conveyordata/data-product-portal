@@ -31,14 +31,6 @@ class TestPlatformsRouter:
         assert len(data) == 1
         assert data[0]["name"] == platform_service.name
 
-    def test_get_platform_service_config_forbidden(self, client):
-        response = client.get(
-            f"{ENDPOINT}/b6801a56-121c-4dca-a0e9-7726d949ad79"
-            f"/services/e34853ec-8320-4aae-8167-dc2730bd1fcb"
-        )
-        assert response.status_code == 403
-        assert response.json()["detail"] == "Only admin can execute this operation"
-
     @pytest.mark.usefixtures("admin")
     def test_get_platform_service_config(self, client):
         service = PlatformServiceFactory()

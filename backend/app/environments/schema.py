@@ -6,5 +6,5 @@ from app.shared.schema import ORMModel
 class Environment(ORMModel):
     id: UUID
     name: str
-    context: str | None = None
+    context: str
     is_default: bool = False

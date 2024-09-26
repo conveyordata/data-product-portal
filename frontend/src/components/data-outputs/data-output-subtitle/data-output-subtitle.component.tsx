@@ -11,7 +11,7 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
     // const { t } = useTranslation();
     const { data: data_output } = useGetDataOutputByIdQuery(data_output_id);
     // TODO Better styling
-    switch (data_output?.configuration_type) {
+    switch (data_output?.configuration.configuration_type) {
         case 'GlueDataOutput': {
             const glue_configuration = data_output.configuration as GlueDataOutputContract;
             return <Flex vertical>

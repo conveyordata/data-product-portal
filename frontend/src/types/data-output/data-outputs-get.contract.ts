@@ -1,6 +1,6 @@
 import { DataOutputContract } from '@/types/data-output';
 
-export type DataOutputsGetContract = (Omit<DataOutputContract, 'configuration'> & {
+export type DataOutputsGetContract = (DataOutputContract & {
     owner_id: string;
-    configuration_type: string;
+    //configuration_type: string;
 })[];

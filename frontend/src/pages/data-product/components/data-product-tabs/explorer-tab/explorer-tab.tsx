@@ -54,7 +54,7 @@ function generateDataProductOutputNodes(dataProduct: DataProductContract, defaul
         data: {
             name: link.name,
             id: link.id,
-            icon_key: link.configuration_type,
+            icon_key: link.configuration.configuration_type,
             nodeToolbarActions: <LinkToDataOutputNode id={link.id} product_id={dataProduct.id} />,
             sourceHandlePosition: Position.Left,
             isActive: true,

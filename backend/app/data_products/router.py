@@ -216,7 +216,10 @@ def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str
     return DataProductService().get_conveyor_ide_url(id, db)
 
 
-@router.post("/{id}/data_output")
+@router.post(
+    "/{id}/data_output",
+    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
+)
 def register_new_data_output(
     id: UUID,
     data_output: DataOutputRegister,
@@ -230,6 +233,6 @@ def register_new_data_output(
 
 @router.get("/{id}/data_outputs")
 def get_data_outputs(
-    self, id: UUID, db: Session = Depends(get_db_session)
+    id: UUID, db: Session = Depends(get_db_session)
 ) -> list[DataOutputGet]:
     return DataProductService().get_data_outputs(id, db)
