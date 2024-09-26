@@ -17,9 +17,6 @@ from app.platform_services.model import PlatformService
 from app.platforms.model import Platform
 from app.shared.model import utcnow
 
-# from sqlalchemy import orm
-
-
 # revision identifiers, used by Alembic.
 revision: str = "45016ec9a7b7"
 down_revision: Union[str, None] = "fad6a9c64d60"
