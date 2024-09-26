@@ -3,7 +3,8 @@ from uuid import UUID
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
 
-from app.users.model import User as UserModel, ensure_user_exists
+from app.users.model import User as UserModel
+from app.users.model import ensure_user_exists
 from app.users.schema import User
 
 

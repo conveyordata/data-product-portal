@@ -1,15 +1,17 @@
-from app.core.helpers.local import add_additional_env_vars
+import os
+
 import typer
+from alembic import command
+from alembic.config import Config
 from rich import print
 from rich.console import Console
-from alembic import command
-import os
-from alembic.config import Config
-from sqlalchemy_utils.functions import database_exists, create_database, drop_database
+from sqlalchemy_utils.functions import create_database, database_exists, drop_database
+
+from app.core.helpers.local import add_additional_env_vars
 
 add_additional_env_vars()
-from app.seed import seed_db  # noqa: E402
 from app.database.database import get_url  # noqa: E402
+from app.seed import seed_db  # noqa: E402
 
 app = typer.Typer(help="Database migration toolkit for the Data product portal.")
 write_console = Console()

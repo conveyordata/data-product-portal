@@ -2,8 +2,8 @@ from datetime import datetime
 from uuid import UUID
 
 from app.data_product_memberships.enums import (
-    DataProductUserRole,
     DataProductMembershipStatus,
+    DataProductUserRole,
 )
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
