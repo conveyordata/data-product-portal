@@ -1,10 +1,6 @@
-from uuid import UUID
-
 from app.platforms.schema import Platform
-from app.shared.schema import ORMModel
+from app.shared.schema import IdNameSchema
 
 
-class PlatformService(ORMModel):
-    id: UUID
-    name: str
+class PlatformService(IdNameSchema):
     platform: Platform
