@@ -1,6 +1,6 @@
 development:
   AWS:
-    account_id: "123456789012"
+    account_id: "012345678901"
     region: eu-west-1
     can_read_from:
     - production
@@ -26,7 +26,7 @@ development:
         kms_key_arn: arn:aws:kms:kms-key-arn
 production:
   AWS:
-    account_id: "123456789012"
+    account_id: "012345678901"
     region: eu-west-1
     can_read_from: []
     Glue:

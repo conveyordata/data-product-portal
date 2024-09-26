@@ -21,12 +21,12 @@ variable "environment" {}
 variable "environment_config" {
   type = object({
     aws_account_id = string
-    aws_region = string
+    aws_region     = string
     bucket_glossary = map(object({
       bucket_name = string
       bucket_arn  = string
       kms_key_arn = string
-      is_default = bool
+      is_default  = bool
     }))
     can_read_from              = list(string)
     conveyor_oidc_provider_url = string

@@ -2,8 +2,8 @@ module "data_access" {
   source   = "./data_access"
   for_each = var.environments
 
-  prefix         = var.prefix
-  account_name   = var.account_name
+  prefix       = var.prefix
+  account_name = var.account_name
 
   environment         = each.key
   environment_config  = each.value
@@ -17,8 +17,8 @@ module "service_access" {
   source   = "./service_access"
   for_each = var.environments
 
-  prefix         = var.prefix
-  account_name   = var.account_name
+  prefix       = var.prefix
+  account_name = var.account_name
 
   environment         = each.key
   environment_config  = each.value
@@ -30,8 +30,8 @@ module "roles" {
   source   = "./roles"
   for_each = var.environments
 
-  prefix         = var.prefix
-  account_name   = var.account_name
+  prefix       = var.prefix
+  account_name = var.account_name
 
   data_product_name   = var.data_product_name
   data_product_config = var.data_product_config
@@ -51,8 +51,8 @@ module "users" {
   source   = "./users"
   for_each = var.data_product_config.services.create_iam_user ? var.environments : {}
 
-  prefix         = var.prefix
-  account_name   = var.account_name
+  prefix       = var.prefix
+  account_name = var.account_name
 
   data_product_name   = var.data_product_name
   data_product_config = var.data_product_config
