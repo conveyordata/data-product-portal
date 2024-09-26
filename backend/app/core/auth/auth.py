@@ -3,7 +3,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.api_key import secured_api_key
-from app.core.auth.jwt import JWTError, JWTToken, JWTTokenValid, oidc
+from app.core.auth.jwt import JWTToken, JWTTokenValid, PyJWTError, oidc
 from app.core.auth.oidc import OIDCIdentity
 from app.database.database import get_db_session
 from app.settings import settings
@@ -39,7 +39,7 @@ def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> Use
     return db_user
 
 
-if not settings.OIDC_DISABLED:
+if settings.OIDC_ENABLED:
 
     def unvalidated_token(token: str = Depends(oidc.oidc_dependency)) -> str:
         return token
@@ -47,7 +47,7 @@ if not settings.OIDC_DISABLED:
     def secured_call(token: str = Depends(oidc.oidc_dependency)) -> JWTToken:
         jwt = JWTTokenValid(token)
         if not jwt.is_valid():
-            raise JWTError()
+            raise PyJWTError()
         return JWTToken(sub=jwt.valid_jwt_token.get("sub"), token=token)
 
     def authorize_user(

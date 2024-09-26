@@ -20,19 +20,6 @@ class DataProductDatasetService:
         self, id: UUID, db: Session, authenticated_user: User
     ):
         current_link = db.get(DataProductDatasetAssociationModel, id)
-        if not current_link:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Dataset data product link {id} not found",
-            )
-        if (
-            authenticated_user not in current_link.dataset.owners
-            and not authenticated_user.is_admin
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only dataset owners can execute this action",
-            )
         if current_link.status != DataProductDatasetLinkStatus.PENDING_APPROVAL:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -46,18 +33,10 @@ class DataProductDatasetService:
 
     def deny_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
         current_link = db.get(DataProductDatasetAssociationModel, id)
-        if not current_link:
+        if current_link.status != DataProductDatasetLinkStatus.PENDING_APPROVAL:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Dataset data product link {id} not found",
-            )
-        if (
-            authenticated_user not in current_link.dataset.owners
-            and not authenticated_user.is_admin
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only dataset owners can execute this action",
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Request already approved/denied",
             )
         current_link.status = DataProductDatasetLinkStatus.DENIED
         current_link.denied_by = authenticated_user
@@ -66,18 +45,8 @@ class DataProductDatasetService:
 
     def remove_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
         current_link = db.get(DataProductDatasetAssociationModel, id)
-        if not current_link:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Dataset data product link {id} not found",
-            )
         dataset = current_link.dataset
         ensure_dataset_exists(dataset.id, db)
-        if authenticated_user not in dataset.owners and not authenticated_user.is_admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only dataset owners can execute this action",
-            )
         linked_data_product = current_link.data_product
         data_product = ensure_data_product_exists(linked_data_product.id, db)
         data_product.dataset_links.remove(current_link)

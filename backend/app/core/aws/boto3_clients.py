@@ -1,4 +1,5 @@
 from botocore.client import BaseClient
+from botocore.exceptions import NoRegionError
 from fastapi import HTTPException, status
 
 from app.core.aws.refreshable_session import RefreshableBotoSession
@@ -12,7 +13,7 @@ try:
         "sts": session.client("sts"),
         "lambda": session.client("lambda"),
     }
-except AttributeError:
+except (AttributeError, NoRegionError):
     logger.warning(
         "Could not instantiate AWS session. All AWS functionality will be disabled"
     )

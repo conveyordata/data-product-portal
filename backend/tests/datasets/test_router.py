@@ -55,8 +55,24 @@ class TestDatasetsRouter:
         assert str(user_2.id) in [owner["id"] for owner in data[0]["owners"]]
         assert data[0]["id"] == str(ds.id)
 
-    def test_update_dataset(self, client):
+    def test_update_dataset_not_owner(self, client):
         ds = DatasetFactory()
+        update_payload = {
+            "name": "new_name",
+            "external_id": "new_external_id",
+            "description": "new_description",
+            "tags": [],
+            "access_type": "public",
+            "owners": [str(ds.owners[0].id)],
+            "business_area_id": str(ds.business_area_id),
+        }
+
+        updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
+
+        assert updated_dataset.status_code == 403
+
+    def test_update_dataset(self, client):
+        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
         update_payload = {
             "name": "new_name",
             "external_id": "new_external_id",
@@ -72,13 +88,23 @@ class TestDatasetsRouter:
         assert updated_dataset.status_code == 200
         assert updated_dataset.json()["id"] == str(ds.id)
 
-    def test_update_dataset_about(self, client):
+    def test_update_dataset_about_not_owners(self, client):
         ds = DatasetFactory()
+        response = self.update_dataset_about(client, ds.id)
+        assert response.status_code == 403
+
+    def test_update_dataset_about(self, client):
+        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
         response = self.update_dataset_about(client, ds.id)
         assert response.status_code == 200
 
-    def test_remove_dataset(self, client):
+    def test_remove_dataset_not_owner(self, client):
         ds = DatasetFactory()
+        response = self.delete_default_dataset(client, ds.id)
+        assert response.status_code == 403
+
+    def test_remove_dataset(self, client):
+        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
 
@@ -149,7 +175,7 @@ class TestDatasetsRouter:
         assert dataset.status_code == 404
 
     def test_remove_user_from_dataset_with_invalid_user_id(self, client):
-        ds = DatasetFactory()
+        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
         response = self.delete_dataset_user(client, self.invalid_id, ds.id)
         assert response.status_code == 404
 

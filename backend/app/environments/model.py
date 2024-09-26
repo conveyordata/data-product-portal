@@ -1,11 +1,9 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, ForeignKey, String
+from sqlalchemy import Boolean, Column, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
-from app.platforms.models import Platform, PlatformService
 from app.shared.model import BaseORM
 
 
@@ -16,37 +14,3 @@ class Environment(Base, BaseORM):
     name = Column(String, primary_key=True)
     context = Column(String)
     is_default = Column(Boolean, default=False)
-
-    env_platform_service_configs = relationship(
-        "EnvPlatformServiceConfig",
-        cascade="all, delete-orphan, delete",
-        backref="environment",
-    )
-
-
-class EnvPlatformServiceConfig(Base, BaseORM):
-    __tablename__ = "env_platform_service_configs"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    environment_id: Mapped[UUID] = mapped_column(
-        ForeignKey("environments.id", ondelete="CASCADE")
-    )
-    platform_id: Mapped[UUID] = mapped_column(ForeignKey("platforms.id"))
-    service_id: Mapped[UUID] = mapped_column(ForeignKey("platform_services.id"))
-    config = Column(String)
-
-    platform: Mapped[Platform] = relationship()
-    service: Mapped[PlatformService] = relationship()
-
-
-class EnvironmentPlatformConfig(Base, BaseORM):
-    __tablename__ = "env_platform_configs"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    environment_id: Mapped[UUID] = mapped_column(
-        ForeignKey("environments.id", ondelete="CASCADE")
-    )
-    platform_id: Mapped[UUID] = mapped_column(ForeignKey("platforms.id"))
-    config = Column(String)
-
-    platform: Mapped[Platform] = relationship()

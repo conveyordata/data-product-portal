@@ -13,7 +13,7 @@ const oidcCognitoParams = AppConfig.getOidcCognitoLogoutParams();
 export const AuthLayout = () => {
     const [authorizeUser] = useAuthorizeMutation();
     const navigate = useNavigate();
-    const isOidcDisabled = AppConfig.isOidcDisabled();
+    const isOidcEnabled = AppConfig.isOidcEnabled();
     const dispatch = useAppDispatch();
     const { isAuthenticated, isLoading, signinRedirect, events, activeNavigator, signoutRedirect, signinSilent } =
         useAuth();
@@ -37,13 +37,7 @@ export const AuthLayout = () => {
         }
     };
     useEffect(() => {
-        if (isOidcDisabled) {
-            if (!user) {
-                handleAuthorizeUser().then(() => {
-                    navigate({ search: '' });
-                });
-            }
-        } else {
+        if (isOidcEnabled) {
             if (!isLoading) {
                 if (isAuthenticated) {
                     handleAuthorizeUser().then(() => {
@@ -54,6 +48,12 @@ export const AuthLayout = () => {
                         console.error('Failed to sign in', e);
                     });
                 }
+            }
+        } else {
+            if (!user) {
+                handleAuthorizeUser().then(() => {
+                    navigate({ search: '' });
+                });
             }
         }
     }, [isAuthenticated, isLoading]);
@@ -100,7 +100,7 @@ export const AuthLayout = () => {
     if (isLoading || isSettingUserCredentialsInStore) {
         return <LoadingSpinner />;
     } else {
-        if (isOidcDisabled || isAuthenticated) {
+        if (!isOidcEnabled || isAuthenticated) {
             return <Outlet />;
         }
 

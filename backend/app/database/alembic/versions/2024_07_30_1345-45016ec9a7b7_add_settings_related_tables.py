@@ -13,7 +13,8 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import orm
 
-from app.platforms.models import Platform, PlatformService
+from app.platform_services.model import PlatformService
+from app.platforms.model import Platform
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.

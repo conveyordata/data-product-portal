@@ -11,10 +11,10 @@ data:
   OIDC_AUTHORITY: {{ .Values.oidc.authority }}
   OIDC_REDIRECT_URI: {{ .Values.oidc.redirect_uri }}
   FRONTEND_CONFIG_BASE_URL: {{ .Values.host }}
-  {{- if .Values.oidc.disabled }}
-  OIDC_DISABLED: "true"
+  {{- if .Values.oidc.enabled }}
+  OIDC_ENABLED: "true"
   {{- else }}
-  OIDC_DISABLED: "false"
+  OIDC_ENABLED: "false"
   {{- end }}
   CONVEYOR_API_KEY: {{ .Values.conveyor.api_key }}
   CONVEYOR_SECRET: {{ .Values.conveyor.secret }}
