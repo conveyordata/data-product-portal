@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Any, Dict
 
 import requests
 import yaml
@@ -17,17 +17,35 @@ session.proxies = proxies
 session.headers.update(HEADERS)
 
 
-def get_data_products():
-    result = session.get(f"{API_HOST}/api/data_products")
-    if "correlation_id" in result.json():
-        print(result.json())
+# Definitions to allow for values to be exported as quoted strings in the yaml outputs
+class QuotedString(str):
+    pass
+
+
+def quoted_scalar(dumper: yaml.Dumper, data: Any):
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data, style='"')
+
+
+yaml.Dumper.add_representer(QuotedString, quoted_scalar)
+
+
+# Verification of API responses
+def verify_response(response: Dict[str, Any]):
+    if "correlation_id" in response:
+        print(response)
         exit(1)
-    data_products = {}
-    for data_product_info in result.json():
-        data_product_result = session.get(
+
+
+def get_data_products():
+    data_products = session.get(f"{API_HOST}/api/data_products").json()
+    verify_response(data_products)
+
+    data_products_export = {}
+    for data_product_info in data_products:
+        data_product = session.get(
             f"{API_HOST}/api/data_products/{data_product_info.get('id')}"
-        )
-        data_product = data_product_result.json()
+        ).json()
+        verify_response(data_product)
 
         datasets = []
         for dataset_link in data_product.get("dataset_links"):
@@ -40,7 +58,7 @@ def get_data_products():
         #     role = "admin" if member.get("role") == "owner" else "member"
         #     members[member.get("user").get("email")] = role
 
-        data_products[data_product.get("external_id")] = {
+        data_products_export[data_product.get("external_id")] = {
             "description": data_product.get("description"),
             "read_datasets": datasets,
             # "users": members,
@@ -52,24 +70,25 @@ def get_data_products():
         ),
         "w",
     ) as f:
-        yaml.dump(data_products, f, allow_unicode=True)
+        yaml.dump(data_products_export, f, allow_unicode=True)
 
 
 def get_datasets():
-    result = session.get(f"{API_HOST}/api/datasets")
+    datasets = session.get(f"{API_HOST}/api/datasets").json()
+    verify_response(datasets)
 
-    datasets = {}
-    for dataset_info in result.json():
-        dataset_result = session.get(
+    datasets_export = {}
+    for dataset_info in datasets:
+        dataset = session.get(
             f"{API_HOST}/api/datasets/{dataset_info.get('id')}"
-        )
-        dataset = dataset_result.json()
+        ).json()
+        verify_response(dataset)
 
         # owners = []
         # for owner in dataset.get("owners"):
         #     owners.append(owner.get("email"))
 
-        datasets[dataset.get("external_id")] = {
+        datasets_export[dataset.get("external_id")] = {
             "data_outputs": [
                 data_output_link.get("data_output").get("external_id")
                 for data_output_link in dataset.get("data_output_links")
@@ -77,25 +96,28 @@ def get_datasets():
             ],
             # "owner": owners[0],
         }
+
     with open(
         os.path.join(FOLDER, "config", "data_glossary", "datasets.yaml"), "w"
     ) as f:
-        yaml.dump(datasets, f, allow_unicode=True)
+        yaml.dump(datasets_export, f, allow_unicode=True)
 
 
 def get_data_outputs():
-    result = session.get(f"{API_HOST}/api/data_outputs")
+    data_outputs = session.get(f"{API_HOST}/api/data_outputs").json()
+    verify_response(data_outputs)
 
-    data_outputs = {}
-    for data_output_info in result.json():
+    data_outputs_export = {}
+    for data_output_info in data_outputs:
         platform_id = data_output_info.get("platform_id")
         service_id = data_output_info.get("service_id")
-        platform_service_result = session.get(
-            f"{API_HOST}/api/platforms/{platform_id}/services/{service_id}"
-        )
-        platform_service = platform_service_result.json()
 
-        data_outputs[data_output_info.get("external_id")] = {
+        platform_service = session.get(
+            f"{API_HOST}/api/platforms/{platform_id}/services/{service_id}"
+        ).json()
+        verify_response(platform_service)
+
+        data_outputs_export[data_output_info.get("external_id")] = {
             platform_service.get("service").get("name"): data_output_info.get(
                 "configuration"
             ),
@@ -105,45 +127,50 @@ def get_data_outputs():
     with open(
         os.path.join(FOLDER, "config", "data_glossary", "data_outputs.yaml"), "w"
     ) as f:
-        yaml.dump(data_outputs, f, allow_unicode=True)
+        yaml.dump(data_outputs_export, f, allow_unicode=True)
 
 
 def get_environments():
-    result = session.get(f"{API_HOST}/api/envs")
+    environments = session.get(f"{API_HOST}/api/envs").json()
+    verify_response(environments)
 
-    environments = {}
-    for environment_info in result.json():
+    environments_export = {}
+    for environment_info in environments:
         environment = environment_info.get("name")
         environment_id = environment_info.get("id")
 
-        environment_configurations = {}
         # Fetch environment - platform - service specific configuration
         platform_service_configs = session.get(
             f"{API_HOST}/api/envs/{environment_id}/configs"
-        )
-        for config_info in platform_service_configs.json():
+        ).json()
+        verify_response(platform_service_configs)
+
+        environment_configuration = {}
+        for config_info in platform_service_configs:
             platform = config_info.get("platform").get("name")
             platform_id = config_info.get("platform").get("id")
             service = config_info.get("service").get("name")
-            config = config_info.get("config")
+            service_config = config_info.get("config")
 
-            if platform not in environment_configurations:
-                environment_configurations[platform] = {
-                    "id": platform_id,
-                    service: config,
+            # Fetch environment - platform specific configuration
+            platform_config_info = session.get(
+                f"{API_HOST}/api/envs/{environment_id}/platforms/{platform_id}/config"
+            ).json()
+            verify_response(platform_config_info)
+
+            platform_config = platform_config_info.get("config")
+            # Explicitly quote the account ID to avoid Terraform to drop leading zeros
+            platform_config["account_id"] = QuotedString(platform_config["account_id"])
+
+            if platform not in environment_configuration:
+                environment_configuration[platform] = {
+                    **platform_config,
+                    service: service_config,
                 }
             else:
-                environment_configurations[platform][service] = config
+                environment_configuration[platform][service] = service_config
 
-        # Fetch environment - platform specific configuration
-        for platform, platform_info in environment_configurations:
-            platform_id = platform_info["id"]
-            platform_config = session.get(
-                f"{API_HOST}/api/envs/{environment_id}/platforms/{platform_id}/config"
-            )
-            platform_info.update(**platform_config.json())
-
-        environments[environment] = environment_configurations
+        environments_export[environment] = environment_configuration
 
     with open(
         os.path.join(
@@ -151,7 +178,7 @@ def get_environments():
         ),
         "w",
     ) as f:
-        yaml.dump(environments, f, allow_unicode=True)
+        yaml.dump(environments_export, f, allow_unicode=True)
 
 
 def generate():
