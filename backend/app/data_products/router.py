@@ -177,12 +177,14 @@ def link_dataset_to_data_product(
 def unlink_dataset_from_data_product(
     id: UUID,
     dataset_id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
-    return DataProductService().unlink_dataset_from_data_product(
-        id, dataset_id, authenticated_user, db
-    )
+    return DataProductService().unlink_dataset_from_data_product(id, dataset_id, db)
+
+
+@router.get("/{id}/role", dependencies=[Depends(OnlyWithProductAccess())])
+def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) -> str:
+    return DataProductService().get_data_product_role_arn(id, environment, db)
 
 
 @router.get(

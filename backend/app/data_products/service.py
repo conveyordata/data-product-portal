@@ -250,34 +250,11 @@ class DataProductService:
         current_data_product.about = data_product.about
         db.commit()
 
-    @staticmethod
-    def ensure_owner(authenticated_user: User, data_product: DataProduct):
-        if authenticated_user.is_admin:
-            return
-
-        data_product_membership = next(
-            (
-                membership
-                for membership in data_product.memberships
-                if membership.user_id == authenticated_user.id
-            ),
-            None,
-        )
-        if (
-            data_product_membership is None
-            or data_product_membership.role != DataProductUserRole.OWNER
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only owners can execute this operation",
-            )
-
     def link_dataset_to_data_product(
         self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
     ):
         dataset = ensure_dataset_exists(dataset_id, db)
         data_product = ensure_data_product_exists(id, db)
-        self.ensure_owner(authenticated_user, data_product)
 
         if dataset.id in [
             link.dataset_id
@@ -306,12 +283,9 @@ class DataProductService:
         RefreshInfrastructureLambda().trigger()
         return {"id": dataset_link.id}
 
-    def unlink_dataset_from_data_product(
-        self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
-    ):
+    def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID, db: Session):
         ensure_dataset_exists(dataset_id, db)
         data_product = ensure_data_product_exists(id, db)
-        self.ensure_owner(authenticated_user, data_product)
         data_product_dataset = next(
             (
                 dataset
@@ -359,15 +333,6 @@ class DataProductService:
     def generate_signin_url(
         self, id: UUID, environment: str, authenticated_user: User, db: Session
     ) -> str:
-        if authenticated_user.id not in [
-            membership.user_id
-            for membership in db.get(DataProductModel, id).memberships
-        ]:
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                detail="You are not allowed to assume this role",
-            )
-
         role = self.get_data_product_role_arn(id, environment, db)
         json_credentials = self.get_aws_temporary_credentials(role, authenticated_user)
 
