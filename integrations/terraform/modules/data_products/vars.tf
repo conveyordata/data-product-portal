@@ -2,10 +2,10 @@ variable "prefix" {}
 variable "account_name" {}
 
 variable "data_product_name" {
-  validation {
-    condition     = strcontains(var.data_product_name, "_") == false
-    error_message = "Data product names should not contain _"
-  }
+  # validation {
+  #   condition     = strcontains(var.data_product_name, "_") == false
+  #   error_message = "Data product names should not contain _"
+  # }
 }
 
 variable "data_product_config" {
