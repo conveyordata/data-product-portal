@@ -64,7 +64,7 @@
     "msw": "^2.2.13",
     "prettier": "3.3.3",
     "typescript": "^5.2.2",
-    "vite": "^5.4.6",
+    "vite": "^5.4.8",
     "vite-plugin-svgr": "^4.2.0"
   },
   "volta": {
