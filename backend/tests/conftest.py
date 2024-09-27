@@ -64,6 +64,26 @@ def default_data_product_payload():
     }
 
 
+# @pytest.fixture
+# def default_data_output_payload():
+#     data_product = DataProductFactory()
+#     platform = PlatformFactory()
+#     service = PlatformServiceFactory()
+#     return {
+#         "name": "Data Output Name",
+#         "description": "Updated Data Output Description",
+#         "external_id": "Updated Data Output External ID",
+#         "tags": [
+#             {"value": "Updated tag"},
+#         ],
+#         "sourceAligned": True,
+#         "configuration": "{}",
+#         "owner_id": str(data_product.id),
+#         "platform_id": str(platform.id),
+#         "service_id": str(service.id)
+#     }
+
+
 @pytest.fixture
 def default_dataset_payload():
     user = UserFactory()

@@ -1,3 +1,5 @@
+from tests.factories.data_output import DataOutputFactory
+
 from .. import test_session
 from .business_area import BusinessAreaFactory
 from .data_product import DataProductFactory
@@ -22,6 +24,7 @@ factories = [
     UserFactory,
     BusinessAreaFactory,
     DatasetFactory,
+    DataOutputFactory,
     DataProductFactory,
     DataProductMembershipFactory,
     DataProductTypeFactory,

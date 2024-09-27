@@ -9,6 +9,8 @@ from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
+from app.platform_services.schema import PlatformService
+from app.platforms.schema import Platform
 from app.shared.model import BaseORM
 
 
@@ -35,3 +37,6 @@ class DataOutput(Base, BaseORM):
         order_by="DataOutputDatasetAssociation.status.desc()",
     )
     sourceAligned = Column(Boolean)
+
+    platform: Mapped["Platform"] = relationship()
+    service: Mapped["PlatformService"] = relationship()
