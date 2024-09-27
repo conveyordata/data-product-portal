@@ -27,7 +27,7 @@
     "@tiptap/extension-text-style": "^2.4.0",
     "@tiptap/extension-typography": "^2.7.4",
     "@tiptap/extension-underline": "^2.7.2",
-    "@tiptap/pm": "^2.4.0",
+    "@tiptap/pm": "^2.7.4",
     "@tiptap/react": "^2.4.0",
     "@tiptap/starter-kit": "^2.7.3",
     "@types/node": "^22.7.3",
