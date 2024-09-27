@@ -65,4 +65,16 @@ def get_platform_service_config(
 def get_all_platform_service_configurations(
     db: Session = Depends(get_db_session),
 ) -> Sequence[PlatformServiceConfiguration]:
-    return PlatformServiceConfigurationService(db).get_platform_service_configurations()
+    return PlatformServiceConfigurationService(
+        db
+    ).get_all_platform_service_configurations()
+
+
+@router.get("/configs/{config_id}")
+def get_signle_platform_service_configuration(
+    config_id: UUID,
+    db: Session = Depends(get_db_session),
+) -> PlatformServiceConfiguration:
+    return PlatformServiceConfigurationService(
+        db
+    ).get_single_platform_service_configuration(config_id)
