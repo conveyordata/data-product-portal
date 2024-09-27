@@ -103,6 +103,19 @@ class TestDataOutputsRouter:
         )
         assert response.status_code == 403
 
+    def test_remove_data_output_no_member(self, client):
+        data_output = DataOutputFactory()
+        response = self.delete_data_output(client, data_output.id)
+        assert response.status_code == 403
+
+    def test_remove_data_output(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        data_output = DataOutputFactory(owner=data_product)
+        response = self.delete_data_output(client, data_output.id)
+        assert response.status_code == 200
+
     @staticmethod
     def create_data_output(client, default_data_output_payload):
         return client.post(ENDPOINT, json=default_data_output_payload)

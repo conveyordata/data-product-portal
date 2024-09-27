@@ -1,4 +1,5 @@
 from tests.factories.data_output import DataOutputFactory
+from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
 
 from .. import test_session
 from .business_area import BusinessAreaFactory
@@ -28,6 +29,7 @@ factories = [
     DataProductFactory,
     DataProductMembershipFactory,
     DataProductTypeFactory,
+    DataOutputDatasetAssociationFactory,
     DataProductDatasetAssociationFactory,
     EnvPlatformConfigFactory,
 ]
