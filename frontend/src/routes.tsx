@@ -16,6 +16,7 @@ import { Logout } from '@/pages/auth/logout/logout-page.tsx';
 import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
 import { DataProductEdit } from '@/pages/data-product-edit/data-product-edit.page.tsx';
 import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
+import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
 
 const router = createBrowserRouter([
     {
@@ -79,9 +80,16 @@ const router = createBrowserRouter([
                         path: ApplicationPaths.AuditLogs,
                         element: <AuditLogs />,
                     },
+
                     {
                         path: ApplicationPaths.Settings,
-                        element: <Settings />,
+                        element: <ProtectedRoute />,
+                        children: [
+                            {
+                                index: true,
+                                element: <Settings />,
+                            },
+                        ],
                     },
                 ],
             },
