@@ -22,7 +22,7 @@
     "@tiptap/extension-bubble-menu": "^2.7.4",
     "@tiptap/extension-document": "^2.4.0",
     "@tiptap/extension-hard-break": "^2.4.0",
-    "@tiptap/extension-link": "^2.4.0",
+    "@tiptap/extension-link": "^2.7.4",
     "@tiptap/extension-placeholder": "^2.4.0",
     "@tiptap/extension-text-style": "^2.4.0",
     "@tiptap/extension-typography": "^2.7.4",
