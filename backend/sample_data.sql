@@ -33,8 +33,10 @@ declare
     stores_data_id uuid;
     employees_data_id uuid;
 
+    -- PLATFORMS
     returned_platform_id uuid;
-    returned_service_id uuid;
+    s3_service_id uuid;
+    glue_service_id uuid;
     returned_environment_id_dev uuid;
     returned_environment_id_prd uuid;
 begin
@@ -50,17 +52,23 @@ begin
 
     -- PLATFORMS
     SELECT id FROM public.platforms WHERE name = 'AWS' INTO returned_platform_id;
-    SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'S3' INTO returned_service_id;
-    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', returned_platform_id, returned_service_id, '["datalake","ingress","egress"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('fa026b3a-7a17-4c32-b279-995af021f6c2', returned_platform_id, returned_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'S3' INTO s3_service_id;
+    SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'Glue' INTO glue_service_id;
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', returned_platform_id, s3_service_id, '["datalake","ingress","egress"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('fa026b3a-7a17-4c32-b279-995af021f6c2', returned_platform_id, glue_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- ENVIRONMENTS
     INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'dev_context', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_dev;
     INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'prd_context', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_prd;
 
-    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('93f4b677-5ae8-450d-91a6-e15196b2e774', returned_environment_id_dev, returned_platform_id, returned_service_id, '[{"identifier":"datalake","bucket_name":"datalake_bucket_dev","arn":"datalake_bucket_arn_dev","kms_key":"datalake_kms_key_dev","is_default":true},{"identifier":"ingress","bucket_name":"ingress_bucket_dev","arn":"ingress_bucket_arn_dev","kms_key":"ingress_kms_key_dev","is_default":false},{"identifier":"egress","bucket_name":"egress_bucket_dev","arn":"egress_bucket_arn_dev","kms_key":"egress_kms_key_dev","is_default":false}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('9c1d025c-f342-4665-8461-ba8b9f4035ff', returned_environment_id_prd, returned_platform_id, returned_service_id,  '[{"identifier":"datalake","bucket_name":"datalake_bucket_prd","arn":"datalake_bucket_arn_prd","kms_key":"datalake_kms_key_prd","is_default":true},{"identifier":"ingress","bucket_name":"ingress_bucket_prd","arn":"ingress_bucket_arn_prd","kms_key":"ingress_kms_key_prd","is_default":false},{"identifier":"egress","bucket_name":"egress_bucket_prd","arn":"egress_bucket_arn_prd","kms_key":"egress_kms_key_prd","is_default":false}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_configs (platform_id, environment_id, config) VALUES (returned_platform_id, returned_environment_id_dev, '{"account_id": "012345678901", "region": "eu-west-1", "can_read_from": ["production"]}');
+	INSERT INTO public.env_platform_configs (platform_id, environment_id, config) VALUES (returned_platform_id, returned_environment_id_prd, '{"account_id": "012345678901", "region": "eu-west-1", "can_read_from": []}');
 
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('93f4b677-5ae8-450d-91a6-e15196b2e774', returned_environment_id_dev, returned_platform_id, s3_service_id, '[{"identifier":"datalake","bucket_name":"datalake_bucket_dev","bucket_arn":"datalake_bucket_arn_dev","kms_key_arn":"datalake_kms_key_dev","is_default":true},{"identifier":"ingress","bucket_name":"ingress_bucket_dev","bucket_arn":"ingress_bucket_arn_dev","kms_key_arn":"ingress_kms_key_dev","is_default":false},{"identifier":"egress","bucket_name":"egress_bucket_dev","bucket_arn":"egress_bucket_arn_dev","kms_key_arn":"egress_kms_key_dev","is_default":false}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('9c1d025c-f342-4665-8461-ba8b9f4035ff', returned_environment_id_prd, returned_platform_id, s3_service_id, '[{"identifier":"datalake","bucket_name":"datalake_bucket_prd","bucket_arn":"datalake_bucket_arn_prd","kms_key_arn":"datalake_kms_key_prd","is_default":true},{"identifier":"ingress","bucket_name":"ingress_bucket_prd","bucket_arn":"ingress_bucket_arn_prd","kms_key_arn":"ingress_kms_key_prd","is_default":false},{"identifier":"egress","bucket_name":"egress_bucket_prd","bucket_arn":"egress_bucket_arn_prd","kms_key_arn":"egress_kms_key_prd","is_default":false}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('1c52b0e5-961f-412a-995e-0c1efae19f41', returned_environment_id_dev, returned_platform_id, glue_service_id, '[{"identifier":"clean_test","glue_database_name":"clean_test_dev","bucket_identifier":"datalake","s3_path":"clean/test"},{"identifier":"master_test","glue_database_name":"master_test_dev","bucket_identifier":"datalake","s3_path":"master/test"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('ba42ca59-ab5d-498e-8cd0-cdd680f80bb0', returned_environment_id_prd, returned_platform_id, glue_service_id, '[{"identifier":"clean_test","glue_database_name":"clean_test_prd","bucket_identifier":"datalake","s3_path":"clean/test"},{"identifier":"master_test","glue_database_name":"master_test_prd","bucket_identifier":"datalake","s3_path":"master/test"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- BUSINESS AREAS
     INSERT INTO public.business_areas (id, "name", description, created_on, updated_on, deleted_at) VALUES ('672debaf-31f9-4233-820b-ad2165af044e', 'HR', 'Human Resources', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO hr_id;
