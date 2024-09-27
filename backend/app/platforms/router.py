@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 from app.platform_service_configurations.schema import PlatformServiceConfiguration
 from app.platform_service_configurations.service import (
     PlatformServiceConfigurationService,
@@ -35,7 +34,6 @@ def get_platform_services(
 
 @router.get(
     "/{platform_id}/services/{service_id}",
-    dependencies=[Depends(only_for_admin)],
     description="Get Platform Service config",
     responses={
         404: {
