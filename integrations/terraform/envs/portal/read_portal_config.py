@@ -118,9 +118,9 @@ def get_data_outputs():
         verify_response(platform_service)
 
         data_outputs_export[data_output_info.get("external_id")] = {
-            platform_service.get("service").get("name"): data_output_info.get(
-                "configuration"
-            ),
+            platform_service.get("service")
+            .get("name")
+            .lower(): data_output_info.get("configuration"),
             "owner": data_output_info.get("owner").get("external_id"),
         }
 
@@ -147,9 +147,9 @@ def get_environments():
 
         environment_configuration = {}
         for config_info in platform_service_configs:
-            platform = config_info.get("platform").get("name")
+            platform = config_info.get("platform").get("name").lower()
             platform_id = config_info.get("platform").get("id")
-            service = config_info.get("service").get("name")
+            service = config_info.get("service").get("name").lower()
             service_config = config_info.get("config")
 
             # Fetch environment - platform specific configuration

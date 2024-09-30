@@ -21,12 +21,12 @@ locals {
   data_outputs = {
     for k, v in local.data_outputs_raw : k => {
       s3 = try([{
-        bucket_identifier = v["S3"]["bucket"]
-        path              = v["S3"]["prefix"]
+        bucket_identifier = v["s3"]["bucket"]
+        path              = v["s3"]["prefix"]
       }], [])
       glue = try([{
-        database_identifier = v["Glue"]["glue_database"]
-        table_prefixes      = v["Glue"]["table_prefixes"]
+        database_identifier = v["glue"]["glue_database"]
+        table_prefixes      = v["glue"]["table_prefixes"]
       }], [])
       owner = try(v["owner"], "")
     }
@@ -42,12 +42,12 @@ locals {
   environments_raw = yamldecode((file("${path.root}/config/environment_configuration/environments.yaml")))
   environments = {
     for environment, config in local.environments_raw : environment => {
-      aws_account_id             = config["AWS"]["account_id"]
-      aws_region                 = config["AWS"]["region"]
-      can_read_from              = try(config["AWS"]["can_read_from"], [])
+      aws_account_id             = config["aws"]["account_id"]
+      aws_region                 = config["aws"]["region"]
+      can_read_from              = try(config["aws"]["can_read_from"], [])
       conveyor_oidc_provider_url = ""
       bucket_glossary = {
-        for s3 in try(config["AWS"]["S3"], []) : s3["identifier"] => {
+        for s3 in try(config["aws"]["s3"], []) : s3["identifier"] => {
           bucket_name = s3["bucket_name"]
           bucket_arn  = s3["bucket_arn"]
           kms_key_arn = s3["kms_key_arn"]
@@ -55,7 +55,7 @@ locals {
         }
       }
       database_glossary = {
-        for glue in try(config["AWS"]["Glue"], []) : glue["identifier"] => {
+        for glue in try(config["aws"]["glue"], []) : glue["identifier"] => {
           glue_database_name = glue["glue_database_name"]
           bucket_identifier  = glue["bucket_identifier"]
           s3_path            = glue["s3_path"]

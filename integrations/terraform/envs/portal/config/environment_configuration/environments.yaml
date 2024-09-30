@@ -1,10 +1,10 @@
 development:
-  AWS:
+  aws:
     account_id: "012345678901"
     region: eu-west-1
     can_read_from:
     - production
-    Glue:
+    glue:
       - identifier: clean_test
         glue_database_name: clean_test_dev
         bucket_identifier: datalake
@@ -13,7 +13,7 @@ development:
         glue_database_name: master_test_dev
         bucket_identifier: datalake
         s3_path: master/test
-    S3:
+    s3:
       - identifier: datalake
         bucket_arn: arn:aws:s3:::default-dev
         bucket_name: default-dev
@@ -25,11 +25,11 @@ development:
         is_default: false
         kms_key_arn: arn:aws:kms:kms-key-arn
 production:
-  AWS:
+  aws:
     account_id: "012345678901"
     region: eu-west-1
     can_read_from: []
-    Glue:
+    glue:
       - identifier: clean_test
         glue_database_name: clean_test_prd
         bucket_identifier: datalake
@@ -38,7 +38,7 @@ production:
         glue_database_name: master_test_prd
         bucket_identifier: datalake
         s3_path: master/test
-    S3:
+    s3:
       - identifier: datalake
         bucket_arn: arn:aws:s3:::default-prd
         bucket_name: default-prd

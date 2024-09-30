@@ -1,18 +1,18 @@
 raw_test:
-  S3:
+  s3:
     bucket: datalake
     prefix: /raw/test
   owner: test-project-1
 
 clean_test:
-  Glue:
+  glue:
     glue_database: clean_test
     table_prefixes:
     - '*'
   owner: test-project-1
 
 master_test:
-  Glue:
+  glue:
     glue_database: master_test
     table_prefixes:
     - table1
