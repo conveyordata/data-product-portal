@@ -52,16 +52,16 @@ def get_data_products():
             if dataset_link.get("status") == "approved":
                 datasets.append(dataset_link.get("dataset").get("external_id"))
 
-        # members = {}
-        # for member in data_product.get("memberships"):
-        #     # EXT is never present in user name?"
-        #     role = "admin" if member.get("role") == "owner" else "member"
-        #     members[member.get("user").get("email")] = role
+        members = {}
+        for member in data_product.get("memberships"):
+            # EXT is never present in user name?"
+            role = "admin" if member.get("role") == "owner" else "member"
+            members[member.get("user").get("email")] = role
 
         data_products_export[data_product.get("external_id")] = {
             "description": data_product.get("description"),
             "read_datasets": datasets,
-            # "users": members,
+            "users": members,
         }
 
     with open(
@@ -84,9 +84,9 @@ def get_datasets():
         ).json()
         verify_response(dataset)
 
-        # owners = []
-        # for owner in dataset.get("owners"):
-        #     owners.append(owner.get("email"))
+        owners = []
+        for owner in dataset.get("owners"):
+            owners.append(owner.get("email"))
 
         datasets_export[dataset.get("external_id")] = {
             "data_outputs": [
@@ -94,7 +94,7 @@ def get_datasets():
                 for data_output_link in dataset.get("data_output_links")
                 if data_output_link.get("status") == "approved"
             ],
-            # "owner": owners[0],
+            "owner": owners[0],
         }
 
     with open(

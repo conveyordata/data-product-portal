@@ -1,9 +1,14 @@
 test-project-1:
   description: test project 1
   read_datasets: []
+  users:
+    jane.doe@dataminded.com: admin
+    john.doe@dataminded.com: member
 
 test-project-2:
   description: test project 2
   read_datasets:
     - clean_test
-
+  users:
+    jane.doe@dataminded.com: member
+    john.doe@dataminded.com: admin
