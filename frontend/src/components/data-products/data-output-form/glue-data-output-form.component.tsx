@@ -1,4 +1,4 @@
-import { Form, FormInstance, Select } from 'antd';
+import { Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataOutputConfiguration, DataOutputCreateFormSchema, GlueDataOutput } from '@/types/data-output';
 import { useEffect } from 'react';
@@ -22,7 +22,7 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
     // >(undefined);
     // const { data: _, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
 
-    let databaseOptions = identifiers?.map((database) => ({ label: database, value: database }));
+    let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
     // const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     // const canFillInForm = mode === 'create';
     // const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
@@ -39,17 +39,26 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
         let databaseOptionsList = identifiers //TODO
         if (!sourceAligned) {
             databaseOptionsList = [external_id]
-            form.setFieldsValue({ glue_database: external_id});
+            form.setFieldsValue({ database: external_id});
         } else {
-            form.setFieldsValue({glue_database: undefined})
+            form.setFieldsValue({database: undefined})
         }
-        databaseOptions = databaseOptionsList?.map((database) => ({ label: database, value: database }));
+        databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
     }, [sourceAligned]);
+
+    const suffix: string = Form.useWatch('temp_suffix', form);
+    useEffect(() => {
+        if (suffix) {
+            form.setFieldsValue({ database_suffix: suffix[0] });
+        } else {
+            form.setFieldsValue({ database_suffix: '' });
+        }
+    }, [suffix]);
 
     return (
         <div>
             <Form.Item<GlueDataOutput>
-                name={'glue_database'}
+                name={'database'}
                 label={t('Glue database')}
                 tooltip={t('The name of the Glue database to link the data output to')}
                 //hidden={!sourceAligned}
@@ -64,43 +73,52 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
                     //loading={isFetchingDataProductTypes}
                     allowClear
                     showSearch
+                    mode='tags'
                     disabled={!sourceAligned}
+                    maxCount={1}
                     options={databaseOptions}
                     //filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
-            {/* <Form.Item<GlueDataOutput>
-                name={'glue_database'}
-                label={t('Glue database')}
-                tooltip={t('The name of the Glue database to link the data output to')}
-                //hidden={sourceAligned}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please input the name of the Glue database for this data output'),
-                    },
-                ]}
+            <Form.Item<GlueDataOutput & { temp_suffix: string }>
+                name={'temp_suffix'}
+                label={t('Database suffix')}
+                tooltip={t('The suffix of the Glue database to link the data output to')}
             >
                 <Select
                     //loading={isFetchingDataProductTypes}
-                    disabled={true}
-                    options={databaseOptions}
+                    allowClear
+                    maxCount={1}
+                    showSearch
+                    mode='tags'
+                    options={[]} // TODO
                     //filterOption={selectFilterOptionByLabelAndValue}
                 />
-            </Form.Item> */}
+            </Form.Item>
             <Form.Item<GlueDataOutput>
                 required
-                name={'table_prefixes'}
-                label={t('Table prefixes')}
-                tooltip={t('The tables that your data output can access')}
+                name={'table'}
+                label={t('Table')}
+                tooltip={t('The table that your data output can access')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the tables this data output can access'),
+                        message: t('Please input the table this data output can access'),
+                    },
+                    {
+                        required: true,
+                        message: t('Please input the suffix of the Glue database for this data output'),
                     },
                 ]}
             >
-                <Select tokenSeparators={[',']} placeholder={t('Provide table prefixes')} mode={'tags'} options={[]} />
+                <Input/>
+            </Form.Item>
+            <Form.Item<GlueDataOutput>
+                required
+                hidden={true}
+                name={'database_suffix'}
+            >
+                <Input disabled />
             </Form.Item>
         </div>
     );

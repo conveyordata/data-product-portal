@@ -5,12 +5,15 @@ from app.shared.schema import ORMModel
 
 class S3DataOutput(ORMModel):
     bucket: str
-    prefix: str
+    suffix: str = ""
+    path: str
     configuration_type: DataOutputTypes = DataOutputTypes.S3DataOutput
 
     def validate_configuration(self, data_product: BaseDataProduct):
-        if not self.prefix.startswith(data_product.external_id):
-            raise ValueError("Invalid prefix specified")
+        # TODO
+        # if not self.suffix.startswith(data_product.external_id):
+        #     raise ValueError("Invalid suffix specified")
+        pass
 
     def on_create(self):
         # TODO Automatically create everything? To be seen

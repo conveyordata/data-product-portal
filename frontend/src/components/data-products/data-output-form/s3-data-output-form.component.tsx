@@ -39,9 +39,9 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
             prefix = ""
         }
         if (dataProductNameValue) {
-            form.setFieldsValue({ prefix: prefix + generateExternalIdFromName(dataProductNameValue) });
+            form.setFieldsValue({ path: prefix + generateExternalIdFromName(dataProductNameValue) });
         } else {
-            form.setFieldsValue({ prefix: prefix });
+            form.setFieldsValue({ path: prefix });
         }
     }, [dataProductNameValue, sourceAligned]);
 
@@ -83,7 +83,7 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
             <Form.Item<S3DataOutput>
                 required
                 hidden={sourceAligned}
-                name={'prefix'}
+                name={'path'}
                 label={t('Resulting prefix')}
                 tooltip={t('The path on s3 you can access through this data output')}
             >
