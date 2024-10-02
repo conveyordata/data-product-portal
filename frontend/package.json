@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@ant-design/colors": "^7.1.0",
-    "@dagrejs/dagre": "^1.1.2",
+    "@dagrejs/dagre": "^1.1.4",
     "@fontsource/inter": "^5.1.0",
     "@reduxjs/toolkit": "^2.2.7",
     "@tiptap/extension-bubble-menu": "^2.7.4",
