@@ -29,7 +29,7 @@
     "@tiptap/extension-underline": "^2.7.2",
     "@tiptap/pm": "^2.7.4",
     "@tiptap/react": "^2.8.0",
-    "@tiptap/starter-kit": "^2.7.3",
+    "@tiptap/starter-kit": "^2.8.0",
     "@types/node": "^22.7.3",
     "antd": "^5.17.0",
     "axios": "^1.7.5",
