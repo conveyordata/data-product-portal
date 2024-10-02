@@ -71,7 +71,7 @@ def get_all_platform_service_configurations(
 
 
 @router.get("/configs/{config_id}")
-def get_signle_platform_service_configuration(
+def get_single_platform_service_configuration(
     config_id: UUID,
     db: Session = Depends(get_db_session),
 ) -> PlatformServiceConfiguration:
