@@ -2,13 +2,13 @@
 import { TableColumnsType } from 'antd';
 import { TFunction } from 'i18next';
 import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
-import { GlueDataOutputContract } from '@/types/data-output';
+import { DatabricksDataOutputContract, GlueDataOutputContract } from '@/types/data-output';
 
 type Props = {
     t: TFunction;
 };
 
-export const getGlueTechnicalInformationColumns = ({
+export const getDatabricksTechnicalInformationColumns = ({
     t,
 }: Props): TableColumnsType<TechnicalInfoContract> => {
     return [
@@ -29,7 +29,7 @@ export const getGlueTechnicalInformationColumns = ({
             title: t('Database'),
             dataIndex: 'database',
             render: (_, { data_output }) => {
-                const configuration: GlueDataOutputContract = data_output.configuration as GlueDataOutputContract
+                const configuration: DatabricksDataOutputContract = data_output.configuration as DatabricksDataOutputContract
                 // TODO figure out how to use product aligned databases here and get their ARN?
                 return configuration.database
             },
