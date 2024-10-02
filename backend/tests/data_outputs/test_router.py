@@ -22,7 +22,7 @@ def data_output_payload():
         "sourceAligned": True,
         "configuration": {
             "bucket": "test",
-            "prefix": "test",
+            "path": "test",
             "configuration_type": "S3DataOutput",
         },
         "owner_id": str(data_product.id),
@@ -44,7 +44,7 @@ def data_output_payload_not_owner():
         "sourceAligned": True,
         "configuration": {
             "bucket": "test",
-            "prefix": "test",
+            "path": "test",
             "configuration_type": "S3DataOutput",
         },
         "owner_id": str(data_product.id),

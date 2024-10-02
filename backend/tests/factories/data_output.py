@@ -30,5 +30,5 @@ class DataOutputFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     sourceAligned = False
     configuration = json.dumps(
-        {"bucket": "test", "prefix": "test", "configuration_type": "S3DataOutput"}
+        {"bucket": "test", "path": "test", "configuration_type": "S3DataOutput"}
     )
