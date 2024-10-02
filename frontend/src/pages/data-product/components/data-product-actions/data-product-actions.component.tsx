@@ -87,8 +87,8 @@ export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlat
         label: t('Databricks'),
         value: DataPlatforms.Databricks,
         icon: databricksLogo,
-        disabled: true,
-        hasConfig: false,
+        disabled: false,
+        hasConfig: true,
         children: [],
     },
     {
