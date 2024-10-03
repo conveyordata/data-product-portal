@@ -1,4 +1,4 @@
-import { Form, FormInstance, Input, Select } from 'antd';
+import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataOutputConfiguration, DataOutputCreateFormSchema, GlueDataOutput } from '@/types/data-output';
 import { useEffect } from 'react';
@@ -12,6 +12,7 @@ type Props = {
 
 export function GlueDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
+    const entireSchema = Form.useWatch('entire_schema', form);
     // const navigate = useNavigate();
     // const [configurationForm, setConfigurationForm] = useState<Element | null>();
     // const [selectedDataPlatform, setSelectedDataPlatform] = useState<
@@ -98,18 +99,24 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
                     //filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
+            <Form.Item
+                name={'entire_schema'} valuePropName="checked" initialValue={true}
+            >
+                <Checkbox defaultChecked={true}>{t('Include entire schema')}</Checkbox>
+            </Form.Item>
             <Form.Item<GlueDataOutput>
                 required
                 name={'table'}
+                hidden={entireSchema}
                 label={t('Table')}
                 tooltip={t('The table that your data output can access')}
                 rules={[
                     {
-                        required: true,
+                        required: !entireSchema,
                         message: t('Please input the table this data output can access'),
                     },
                     {
-                        required: true,
+                        required: !entireSchema,
                         message: t('Please input the suffix of the Glue database for this data output'),
                     },
                 ]}
