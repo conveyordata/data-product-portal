@@ -54,7 +54,7 @@
     "@typescript-eslint/parser": "^8.8.0",
     "@vitejs/plugin-react": "^4.3.2",
     "axios-mock-adapter": "^1.22.0",
-    "eslint": "^8.8.0",
+    "eslint": "^9.11.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-prettier": "^5.2.1",
