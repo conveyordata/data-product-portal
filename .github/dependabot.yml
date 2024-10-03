@@ -22,11 +22,18 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    ignore:
+    - dependency-name: eslint
     groups:
       react:
         patterns:
           - "react"
           - "react-dom"
+      eslint:
+        patterns:
+          - "eslint"
+          - "eslint-plugin-import"
+          - "@eslint/*"
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
