@@ -22,6 +22,8 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    ignore:
+    - dependency-name: eslint
     groups:
       react:
         patterns:
