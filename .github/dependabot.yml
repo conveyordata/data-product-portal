@@ -27,6 +27,10 @@ updates:
         patterns:
           - "react"
           - "react-dom"
+      eslint:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
