@@ -30,6 +30,7 @@ updates:
       eslint:
         patterns:
           - "eslint"
+          - "eslint-plugin-import"
           - "@eslint/*"
       aws-sdk:
         patterns:
