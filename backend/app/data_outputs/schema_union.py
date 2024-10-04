@@ -1,4 +1,6 @@
-from typing import Union
+from typing import Annotated, Union
+
+from pydantic import Field
 
 from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.databricks_data_output.schema import DatabricksDataOutput
@@ -12,3 +14,8 @@ DataOutputMap = {
     DataOutputTypes.GlueDataOutput: GlueDataOutput,
     DataOutputTypes.DatabricksDataOutput: DatabricksDataOutput,
 }
+
+DataOutputConfiguration = Annotated[
+    Union[S3DataOutput, GlueDataOutput, DatabricksDataOutput],
+    Field(discriminator="configuration_type"),
+]
