@@ -261,8 +261,8 @@
     "Search data outputs by name": "Search data outputs by name",
     "S3": "S3",
     "Glue": "Glue",
-    "Table prefixes": "Table prefixes",
-    "The tables that your data output can access": "The tables that your data output can access",
+    "Table": "Table",
+    "The table that your data output can access": "The table that your data output can access",
     "The name of the S3 bucket to link the data output to": "The name of the S3 bucket to link the data output to",
     "Bucket": "Bucket",
     "KMS Key": "KMS Key",
@@ -281,7 +281,7 @@
     "The path on s3 you can access through this data output": "The path on s3 you can access through this data output",
     "Please input the prefix of this data output": "Please input the prefix of this data output",
     "Please input the name of the Glue database for this data output": "Please input the name of the Glue database for this data output",
-    "Please input the tables this data output can access": "Please input the tables this data output can access",
+    "Please input the table this data output can access": "Please input the table this data output can access",
     "Link dataset": "Link dataset",
     "Request Link": "Request Link",
     "Link Dataset": "Link Dataset",
@@ -310,5 +310,8 @@
     "Edit data output": "Edit data output",
     "Data Output Owners": "Data Output Owners",
     "Technical information": "Technical information",
-    "Are you sure you want to cancel the request to link {{name}} to the data output?": "Are you sure you want to cancel the request to link {{name}} to the data output?"
+    "Are you sure you want to cancel the request to link {{name}} to the data output?": "Are you sure you want to cancel the request to link {{name}} to the data output?",
+    "Please input the suffix of the Glue database for this data output": "Please input the suffix of the Glue database for this data output",
+    "The suffix of the Glue database to link the data output to": "The suffix of the Glue database to link the data output to",
+    "Database suffix": "Database suffix"
 }

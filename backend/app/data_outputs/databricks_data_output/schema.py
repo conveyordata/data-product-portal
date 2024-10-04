@@ -3,24 +3,24 @@ from typing import Literal, Self
 from pydantic import model_validator
 
 from app.data_outputs.data_output_types import DataOutputTypes
-from app.data_outputs.glue_data_output.model import (
-    GlueDataOutput as GlueDataOutputModel,
+from app.data_outputs.databricks_data_output.model import (
+    DatabricksDataOutput as DatabricksDataOutputModel,
 )
 from app.data_outputs.schema_base import BaseDataOutputConfiguration
 from app.data_products.schema_base import BaseDataProduct
 
 
-class GlueDataOutput(BaseDataOutputConfiguration):
+class DatabricksDataOutput(BaseDataOutputConfiguration):
     database: str
-    database_suffix: str = ""
-    table: str = "*"
-    bucket_identifier: str = ""
-    database_path: str = ""
-    table_path: str = ""
-    configuration_type: Literal[DataOutputTypes.GlueDataOutput]
+    database_suffix: str
+    table: str
+    bucket_identifier: str
+    database_path: str
+    table_path: str
+    configuration_type: Literal[DataOutputTypes.DatabricksDataOutput]
 
     class Meta:
-        orm_model = GlueDataOutputModel
+        orm_model = DatabricksDataOutputModel
 
     @model_validator(mode="after")
     def validate_paths(self) -> Self:
@@ -31,7 +31,7 @@ class GlueDataOutput(BaseDataOutputConfiguration):
         return self
 
     def validate_configuration(self, data_product: BaseDataProduct):
-        # TODO Force defaul t bucket identifier if bucket = ''
+        # If product aligned
         if not self.database.startswith(data_product.external_id):
             raise ValueError("Invalid database specified")
 

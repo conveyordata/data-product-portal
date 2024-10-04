@@ -1,14 +1,22 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, relationship
 
+from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.schema import DataOutput as DataOutputSchema
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
-from app.data_products.model import DataProduct
+
+if TYPE_CHECKING:
+    from app.data_products.model import DataProduct
+    from app.data_outputs.base_model import BaseDataOutputConfiguration
+
 from app.database.database import Base, ensure_exists
+from app.platform_services.schema import PlatformService
+from app.platforms.schema import Platform
 from app.shared.model import BaseORM
 
 
@@ -27,7 +35,9 @@ class DataOutput(Base, BaseORM):
     service_id: Mapped[UUID] = Column(ForeignKey("platform_services.id"))
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
     owner: Mapped["DataProduct"] = relationship(back_populates="data_outputs")
-    configuration = Column(String)
+    configuration: Mapped["BaseDataOutputConfiguration"] = relationship()
+    configuration_id: Mapped[UUID] = Column(ForeignKey("data_output_configurations.id"))
+    configuration_type: Mapped[DataOutputTypes] = Column(Enum(DataOutputTypes))
     dataset_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
         "DataOutputDatasetAssociation",
         back_populates="data_output",
@@ -35,3 +45,6 @@ class DataOutput(Base, BaseORM):
         order_by="DataOutputDatasetAssociation.status.desc()",
     )
     sourceAligned = Column(Boolean)
+
+    platform: Mapped["Platform"] = relationship()
+    service: Mapped["PlatformService"] = relationship()

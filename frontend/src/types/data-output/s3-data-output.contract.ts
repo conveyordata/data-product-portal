@@ -1,6 +1,7 @@
 export interface S3DataOutputContract {
     bucket: string;
-    prefix: string;
+    suffix: string;
+    path: string;
     account_id: string;
     kms_key: string;
     configuration_type: string;

@@ -1,9 +1,6 @@
-import json
 from uuid import UUID
 
-from pydantic import field_validator
-
-from app.data_outputs.schema_union import DataOutputs
+from app.data_outputs.schema_union import DataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_products.schema_base_get import BaseDataProductGet
@@ -24,13 +21,6 @@ class DataOutputGet(ORMModel):
     owner_id: UUID
     platform_id: UUID
     service_id: UUID
-    configuration: DataOutputs
+    configuration: DataOutputConfiguration
     status: DataOutputStatus
     dataset_links: list[DatasetLink]
-
-    @field_validator("configuration", mode="before")
-    @classmethod
-    def parse_settings(cls, v: str | dict) -> dict:
-        if isinstance(v, str):
-            return json.loads(v)
-        return v

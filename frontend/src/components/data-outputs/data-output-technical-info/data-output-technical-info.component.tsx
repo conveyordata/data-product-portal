@@ -9,6 +9,7 @@ import { useGetEnvironmentPlatformServiceConfigQuery } from '@/store/features/en
 import { getS3TechnicalInformationColumns } from './data-output-table-s3-columns';
 import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
 import { getGlueTechnicalInformationColumns } from './data-output-table-glue-columns';
+import { getDatabricksTechnicalInformationColumns } from './data-output-table-databricks-columns';
 
 type Props = {
     data_output_id: string;
@@ -38,6 +39,8 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
                 return getS3TechnicalInformationColumns({t})
             case 'GlueDataOutput':
                 return getGlueTechnicalInformationColumns({t})
+            case 'DatabricksDataOutput':
+                return getDatabricksTechnicalInformationColumns({t})
             default:
                 return []
         }

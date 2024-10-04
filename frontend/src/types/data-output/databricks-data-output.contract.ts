@@ -1,4 +1,4 @@
-export interface GlueDataOutputContract {
+export interface DatabricksDataOutputContract {
     database: string;
     database_suffix: string | undefined;
     table: string;
@@ -8,5 +8,5 @@ export interface GlueDataOutputContract {
     configuration_type: string;
 }
 
-export interface GlueDataOutputModel extends GlueDataOutputContract {}
-export type GlueDataOutput = GlueDataOutputContract;
+export interface DatabricksDataOutputModel extends DatabricksDataOutputContract {}
+export type DatabricksDataOutput = DatabricksDataOutputContract;

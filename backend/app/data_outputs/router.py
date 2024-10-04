@@ -7,6 +7,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
+from app.dependencies import only_data_output_owners
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
@@ -32,6 +33,7 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
             },
         }
     },
+    dependencies=[Depends(only_data_output_owners)],
 )
 def remove_data_output(
     id: UUID,
@@ -72,6 +74,7 @@ def create_data_output(
             },
         }
     },
+    dependencies=[Depends(only_data_output_owners)],
 )
 def update_data_product(
     id: UUID, data_output: DataOutputUpdate, db: Session = Depends(get_db_session)
@@ -95,6 +98,7 @@ def update_data_product(
             },
         },
     },
+    dependencies=[Depends(only_data_output_owners)],
 )
 def link_dataset_to_data_output(
     id: UUID,
@@ -123,6 +127,7 @@ def link_dataset_to_data_output(
             },
         },
     },
+    dependencies=[Depends(only_data_output_owners)],
 )
 def unlink_dataset_from_data_output(
     id: UUID,

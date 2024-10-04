@@ -19,6 +19,7 @@ import { GlueDataOutputForm } from './glue-data-output-form.component';
 import TextArea from 'antd/es/input/TextArea';
 import { DataOutputStatus } from '@/types/data-output/data-output.contract';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
+import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
 
 type Props = {
     mode: 'create';
@@ -91,6 +92,11 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             setIdentifiers([]);
         } else {
             setSelectedDataPlatform(dropdown);
+            if (dropdown!.children?.length === 0) {
+                setSelectedConfiguration(dropdown);
+            } else {
+                setSelectedConfiguration(undefined);
+            }
         }
     };
 
@@ -181,7 +187,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         ))}
                 </Space>
             </Form.Item>
-            <Form.Item>
+            <Form.Item hidden={selectedDataPlatform?.children?.length === 0}>
                 <Space wrap className={styles.radioButtonContainer}>
                     {selectedDataPlatform?.children?.map((dataPlatform) => (
                         <DataOutputPlatformTile<DataPlatform>
@@ -211,6 +217,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         );
                     case DataPlatforms.Glue:
                         return <GlueDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct!.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
+                    case DataPlatforms.Databricks:
+                        return <DatabricksDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct!.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
                     default:
                         return null;
                 }
