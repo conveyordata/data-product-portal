@@ -22,7 +22,7 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
 
     const bucketOptions = identifiers?.map((bucket) => ({ label: bucket, value: bucket }));
     // const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
-    const dataProductNameValue: string = Form.useWatch('temp_prefix', form);
+    const dataProductNameValue: string = Form.useWatch('temp_path', form);
     // const canFillInForm = mode === 'create';
     // const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
     // const isLoading = isCreating || isCreating || isFetchingInitialValues;
@@ -34,14 +34,14 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
     //     dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     // };
     useEffect(() => {
-        let prefix = external_id + "/"
+        let path = external_id + "/"
         if (sourceAligned) {
-            prefix = ""
+            path = ""
         }
         if (dataProductNameValue) {
-            form.setFieldsValue({ path: prefix + generateExternalIdFromName(dataProductNameValue) });
+            form.setFieldsValue({ path: path + generateExternalIdFromName(dataProductNameValue) });
         } else {
-            form.setFieldsValue({ path: prefix });
+            form.setFieldsValue({ path: path });
         }
     }, [dataProductNameValue, sourceAligned]);
 
@@ -67,14 +67,14 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
                     //filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
-            <Form.Item<S3DataOutput & { temp_prefix: string }>
-                name={'temp_prefix'}
-                label={t('Prefix')}
-                tooltip={t('The name of the prefix to give write access to')}
+            <Form.Item<S3DataOutput & { temp_path: string }>
+                name={'temp_path'}
+                label={t('Path')}
+                tooltip={t('The name of the path to give write access to')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the prefix of this data output'),
+                        message: t('Please input the path of this data output'),
                     },
                 ]}
             >
@@ -84,7 +84,7 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
                 required
                 hidden={sourceAligned}
                 name={'path'}
-                label={t('Resulting prefix')}
+                label={t('Resulting path')}
                 tooltip={t('The path on s3 you can access through this data output')}
             >
                 <Input disabled />
