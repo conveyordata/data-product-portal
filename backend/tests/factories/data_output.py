@@ -1,9 +1,8 @@
-import json
-
 import factory
 from tests import test_session
 from tests.factories.data_product import DataProductFactory
 from tests.factories.platform_service import PlatformServiceFactory
+from tests.factories.s3_data_output import S3DataOutputFactory
 
 from app.data_outputs.model import DataOutput
 from app.data_outputs.status import DataOutputStatus
@@ -29,6 +28,4 @@ class DataOutputFactory(factory.alchemy.SQLAlchemyModelFactory):
     owner = factory.SubFactory(DataProductFactory)
 
     sourceAligned = False
-    configuration = json.dumps(
-        {"bucket": "test", "path": "test", "configuration_type": "S3DataOutput"}
-    )
+    configuration = factory.SubFactory(S3DataOutputFactory)
