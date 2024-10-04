@@ -17,8 +17,6 @@ class DataOutputGet(ORMModel):
     name: str
     description: str
     external_id: str
-    database: str
-    suffix: str
     owner: BaseDataProductGet
     owner_id: UUID
     platform_id: UUID
