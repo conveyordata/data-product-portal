@@ -4,15 +4,6 @@ development:
     region: eu-west-1
     can_read_from:
     - production
-    glue:
-      - identifier: clean_test
-        glue_database_name: clean_test_dev
-        bucket_identifier: datalake
-        s3_path: clean/test
-      - identifier:  master_test
-        glue_database_name: master_test_dev
-        bucket_identifier: datalake
-        s3_path: master/test
     s3:
       - identifier: datalake
         bucket_arn: arn:aws:s3:::default-dev
@@ -29,15 +20,6 @@ production:
     account_id: "012345678901"
     region: eu-west-1
     can_read_from: []
-    glue:
-      - identifier: clean_test
-        glue_database_name: clean_test_prd
-        bucket_identifier: datalake
-        s3_path: clean/test
-      - identifier: master_test
-        glue_database_name: master_test_prd
-        bucket_identifier: datalake
-        s3_path: master/test
     s3:
       - identifier: datalake
         bucket_arn: arn:aws:s3:::default-prd

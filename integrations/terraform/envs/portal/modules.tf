@@ -1,3 +1,15 @@
+module "data_product_managed_objects" {
+  source   = "../../modules/data_product_managed_objects"
+  for_each = local.environments
+
+  prefix = local.prefix
+
+  environment        = each.key
+  environment_config = each.value
+
+  data_outputs = local.data_outputs
+}
+
 module "data_products" {
   source   = "../../modules/data_products"
   for_each = local.data_product_glossary
@@ -12,4 +24,6 @@ module "data_products" {
   environments = local.environments
   data_outputs = local.data_outputs
   datasets     = local.datasets
+
+  managed_objects = module.data_product_managed_objects
 }

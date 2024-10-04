@@ -7,6 +7,7 @@ module "data_access" {
 
   environment         = each.key
   environment_config  = each.value
+  managed_objects     = var.managed_objects[each.key]
   data_product_name   = var.data_product_name
   data_product_config = var.data_product_config
   data_outputs        = var.data_outputs

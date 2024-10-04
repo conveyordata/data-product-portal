@@ -22,11 +22,24 @@ locals {
     for k, v in local.data_outputs_raw : k => {
       s3 = try([{
         bucket_identifier = v["s3"]["bucket"]
-        path              = v["s3"]["prefix"]
+        suffix            = v["s3"]["suffix"]
+        path              = v["s3"]["path"]
       }], [])
       glue = try([{
-        database_identifier = v["glue"]["glue_database"]
-        table_prefixes      = v["glue"]["table_prefixes"]
+        database          = v["glue"]["database"]
+        suffix            = v["glue"]["database_suffix"]
+        table             = v["glue"]["table"]
+        bucket_identifier = v["glue"]["bucket_identifier"]
+        database_path     = v["glue"]["database_path"]
+        table_path        = v["glue"]["table_path"]
+      }], [])
+      dbx = try([{
+        database          = v["databricks"]["database"]
+        suffix            = v["databricks"]["database_suffix"]
+        table             = v["databricks"]["table"]
+        bucket_identifier = v["databricks"]["bucket_identifier"]
+        database_path     = v["databricks"]["database_path"]
+        table_path        = v["databricks"]["table_path"]
       }], [])
       owner = try(v["owner"], "")
     }
@@ -52,13 +65,6 @@ locals {
           bucket_arn  = s3["bucket_arn"]
           kms_key_arn = s3["kms_key_arn"]
           is_default  = s3["is_default"]
-        }
-      }
-      database_glossary = {
-        for glue in try(config["aws"]["glue"], []) : glue["identifier"] => {
-          glue_database_name = glue["glue_database_name"]
-          bucket_identifier  = glue["bucket_identifier"]
-          s3_path            = glue["s3_path"]
         }
       }
     }
