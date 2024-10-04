@@ -36,7 +36,7 @@ def get_environment(
     return EnvironmentService(db).get_environment(environment_id)
 
 
-@router.get("/{environment_id}/configs", dependencies=[Depends(only_for_admin)])
+@router.get("/{environment_id}/configs")
 def get_environment_configs(
     environment_id: UUID,
     db: Session = Depends(get_db_session),
