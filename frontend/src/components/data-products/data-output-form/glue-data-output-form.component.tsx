@@ -105,6 +105,12 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
                 <Checkbox defaultChecked={true}>{t('Include entire schema')}</Checkbox>
             </Form.Item>
             <Form.Item<GlueDataOutput>
+                    required
+                    hidden={true}
+                    name={'configuration_type'}
+                    initialValue={'GlueDataOutput'}
+                ></Form.Item>
+            <Form.Item<GlueDataOutput>
                 required
                 name={'table'}
                 hidden={entireSchema}
