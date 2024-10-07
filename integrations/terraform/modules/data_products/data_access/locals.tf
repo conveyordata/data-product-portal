@@ -42,7 +42,7 @@ locals {
   # Retrieve all S3 paths for the Glue write data_ids
   write_glue_paths = flatten([
     for glue in flatten([for data_id in local.write_data_outputs : var.data_outputs[data_id].glue]) :
-    glue.table_path == "" ?
+    (glue.table_path == "" || glue.table_path == "*" ) ?
     "${local.bucket_glossary[glue.bucket_identifier].bucket_arn}/${glue.database_path}" :
     "${local.bucket_glossary[glue.bucket_identifier].bucket_arn}/${glue.database_path}/${glue.table_path}"
   ])
@@ -65,7 +65,7 @@ locals {
   # Retrieve all S3 paths for the Glue read data_ids
   read_glue_paths = flatten([
     for glue in flatten([for data_id in local.read_data_outputs : var.data_outputs[data_id].glue]) :
-    glue.table_path == "" ?
+    (glue.table_path == "" || glue.table_path == "*" ) ?
     "${local.bucket_glossary[glue.bucket_identifier].bucket_arn}/${glue.database_path}" :
     "${local.bucket_glossary[glue.bucket_identifier].bucket_arn}/${glue.database_path}/${glue.table_path}"
   ])
