@@ -1,9 +1,10 @@
-from sqlalchemy import Column, DateTime
-from sqlalchemy_easy_softdelete.mixin import generate_soft_delete_mixin_class
 from datetime import datetime
 from typing import Callable
-from sqlalchemy.sql import expression
+
+from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql import expression
+from sqlalchemy_easy_softdelete.mixin import generate_soft_delete_mixin_class
 
 
 class utcnow(expression.FunctionElement):

@@ -1,6 +1,6 @@
-from uuid import uuid4
 from datetime import datetime
 from time import time
+from uuid import uuid4
 
 import pytz
 from boto3 import Session

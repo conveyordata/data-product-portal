@@ -3,14 +3,14 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy.orm import Mapped, relationship
 
 from app.database.database import Base
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
-    from app.datasets.model import Dataset
     from app.data_products.model import DataProduct
+    from app.datasets.model import Dataset
 
 
 class BusinessArea(Base, BaseORM):

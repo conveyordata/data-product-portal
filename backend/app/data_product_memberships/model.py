@@ -1,19 +1,21 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Enum, Column, UUID, UniqueConstraint, DateTime
-from sqlalchemy.orm import Mapped, relationship, mapped_column
+from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.data_product_memberships.enums import (
-    DataProductUserRole,
     DataProductMembershipStatus,
+    DataProductUserRole,
 )
 from app.database.database import Base
 
 if TYPE_CHECKING:
     from app.users.model import User
     from app.data_products.model import DataProduct
-from app.shared.model import BaseORM, utcnow
+
 import uuid
+
+from app.shared.model import BaseORM, utcnow
 
 
 class DataProductMembership(Base, BaseORM):

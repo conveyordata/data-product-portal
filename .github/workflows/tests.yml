@@ -94,3 +94,9 @@ jobs:
         with:
           args: --timeout 15m0s
           working-directory: cli
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - uses: pre-commit/action@v3.0.1

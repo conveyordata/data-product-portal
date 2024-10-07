@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.business_areas.model import BusinessArea as BusinessAreaModel
-from app.business_areas.schema import BusinessAreaCreate, BusinessArea
+from app.business_areas.schema import BusinessArea, BusinessAreaCreate
 
 
 class BusinessAreaService:

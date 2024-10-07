@@ -1,8 +1,8 @@
 import uuid
 
-from sqlalchemy import Column, String, Enum
+from sqlalchemy import Column, Enum, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy.orm import Mapped, relationship
 
 from app.data_product_types.enums import DataProductIconKey
 from app.data_products.model import DataProduct

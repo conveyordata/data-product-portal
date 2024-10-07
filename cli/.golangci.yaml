@@ -71,4 +71,3 @@ linters-settings:
         disabled: false
         arguments:
           - [ "call-chain", "loop" ]
-

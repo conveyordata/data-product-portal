@@ -6,4 +6,3 @@ test-project-2:
   description: test project 2
   read_datasets:
     - clean_test
-
