@@ -109,6 +109,9 @@ def get_data_outputs():
 
     data_outputs_export = {}
     for data_output_info in data_outputs:
+        if data_output_info.get("status") != "active":
+            continue
+
         platform_id = data_output_info.get("platform_id")
         service_id = data_output_info.get("service_id")
 
