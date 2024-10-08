@@ -38,7 +38,6 @@ begin
     TRUNCATE TABLE public.datasets_owners CASCADE;
     TRUNCATE TABLE public.datasets CASCADE;
     TRUNCATE TABLE public.data_products CASCADE;
-    TRUNCATE TABLE public.users CASCADE;
     TRUNCATE TABLE public.data_product_types CASCADE;
     TRUNCATE TABLE public.business_areas CASCADE;
     TRUNCATE TABLE public.environments CASCADE;
