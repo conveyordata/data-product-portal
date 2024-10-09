@@ -109,6 +109,7 @@ class DataOutputService:
         data_output.dataset_links = []
         data_output.delete()
         db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def link_dataset_to_data_output(
         self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
