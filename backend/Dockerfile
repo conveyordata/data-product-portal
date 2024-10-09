@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.12-slim-bookworm as build-stage
+FROM --platform=linux/amd64 python:3.13-slim-bookworm as build-stage
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -19,7 +19,7 @@ COPY poetry.lock pyproject.toml alembic.ini sample_data.sql .
 
 RUN poetry install
 
-FROM --platform=linux/amd64 python:3.12-slim-bookworm
+FROM --platform=linux/amd64 python:3.13-slim-bookworm
 
 COPY --from=build-stage /usr/local /usr/local
 COPY --from=build-stage alembic.ini .
