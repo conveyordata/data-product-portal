@@ -113,3 +113,8 @@ else:
         if not user:
             return authorize_user(token, db)
         return user
+
+    def api_key_authenticated(
+        api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
+    ):
+        return secured_call(jwt_token)
