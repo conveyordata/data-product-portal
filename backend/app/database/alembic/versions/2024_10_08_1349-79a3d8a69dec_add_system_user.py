@@ -22,7 +22,8 @@ def upgrade() -> None:
     id = uuid4()
     op.execute(
         "INSERT INTO users (id, email, external_id, first_name, last_name, is_admin)"
-        f" VALUES('{id}', '','systemaccount_bot', 'Systemaccount', 'Bot', true)"
+        f" VALUES('{id}',"
+        "'systemaccount@noreply.com','systemaccount_bot', 'Systemaccount', 'Bot', true)"
     )
 
 
