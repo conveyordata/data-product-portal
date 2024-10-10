@@ -22,7 +22,14 @@ class PlatformServiceConfigurationService:
             )
         )
 
-    def get_platform_service_configurations(
+    def get_all_platform_service_configurations(
         self,
     ) -> Sequence[PlatformServiceConfiguration]:
         return self.db.scalars(select(PlatformServiceConfigurationModel)).all()
+
+    def get_single_platform_service_configuration(
+        self, config_id
+    ) -> PlatformServiceConfiguration:
+        return self.db.scalar(
+            select(PlatformServiceConfigurationModel).filter_by(id=config_id)
+        )

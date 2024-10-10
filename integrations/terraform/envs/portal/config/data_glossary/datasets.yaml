@@ -6,12 +6,22 @@ clean_test:
 
 master_test:
   data_outputs:
-    - master_test
+    - master_test_table1
+    - master_test_table2
+  owner: john.doe@dataminded.com
+
+dbx_outputs:
+  data_outputs:
+    - dbx_output_schema
+    - dbx_output_table
   owner: john.doe@dataminded.com
 
 all_data:
   data_outputs:
     - raw_test
     - clean_test
-    - master_test
+    - master_test_table1
+    - master_test_table2
+    - dbx_output_schema
+    - dbx_output_table
   owner: john.doe@dataminded.com
