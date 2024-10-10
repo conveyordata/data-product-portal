@@ -1,9 +1,9 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, String, ForeignKey, Table, Enum
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Table
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, relationship, mapped_column, Session
+from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.data_product_memberships.model import DataProductMembership
 from app.data_products.schema import DataProduct as DataProductSchema
@@ -15,6 +15,7 @@ from app.tags.model import Tag
 
 if TYPE_CHECKING:
     from app.business_areas.model import BusinessArea
+    from app.data_outputs.model import DataOutput
     from app.data_product_types.model import DataProductType
 
 tag_data_product_table = Table(
@@ -47,7 +48,7 @@ class DataProduct(Base, BaseORM):
         "DataProductMembership.role",
     )
     status: DataProductStatus = Column(
-        Enum(DataProductStatus), default=DataProductStatus.PENDING
+        Enum(DataProductStatus), default=DataProductStatus.ACTIVE
     )
     dataset_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
@@ -64,3 +65,6 @@ class DataProduct(Base, BaseORM):
     type: Mapped["DataProductType"] = relationship(back_populates="data_products")
     business_area_id: Mapped[UUID] = Column(ForeignKey("business_areas.id"))
     business_area: Mapped["BusinessArea"] = relationship(back_populates="data_products")
+    data_outputs: Mapped[list["DataOutput"]] = relationship(
+        "DataOutput", back_populates="owner"
+    )

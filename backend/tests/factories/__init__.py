@@ -1,3 +1,7 @@
+from tests.factories.data_output import DataOutputFactory
+from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
+from tests.factories.s3_data_output import S3DataOutputFactory
+
 from .. import test_session
 from .business_area import BusinessAreaFactory
 from .data_product import DataProductFactory
@@ -22,11 +26,14 @@ factories = [
     UserFactory,
     BusinessAreaFactory,
     DatasetFactory,
+    DataOutputFactory,
     DataProductFactory,
     DataProductMembershipFactory,
     DataProductTypeFactory,
+    DataOutputDatasetAssociationFactory,
     DataProductDatasetAssociationFactory,
     EnvPlatformConfigFactory,
+    S3DataOutputFactory,
 ]
 
 for factory_model in factories:

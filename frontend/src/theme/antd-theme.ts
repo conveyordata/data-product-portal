@@ -108,6 +108,9 @@ const greenThemeConfig: ThemeConfig = {
             colorPrimaryBg: '#4D918B',
             darkItemBg: '#2F4044',
             itemBorderRadius: 10,
+            darkPopupBg: '#2F4044',
+            subMenuItemBorderRadius: 10,
+            itemMarginInline: 5,
         },
         Table: {
             headerBorderRadius: 8,
