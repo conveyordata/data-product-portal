@@ -45,7 +45,6 @@ begin
     TRUNCATE TABLE public.datasets_owners CASCADE;
     TRUNCATE TABLE public.datasets CASCADE;
     TRUNCATE TABLE public.data_products CASCADE;
-    TRUNCATE TABLE public.users CASCADE;
     TRUNCATE TABLE public.data_product_types CASCADE;
     TRUNCATE TABLE public.business_areas CASCADE;
     TRUNCATE TABLE public.tags CASCADE;
@@ -60,10 +59,8 @@ begin
     -- ENVIRONMENTS
     INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'dev_context', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_dev;
     INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'prd_context', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_prd;
-
-    INSERT INTO public.env_platform_configs (platform_id, environment_id, config) VALUES (returned_platform_id, returned_environment_id_dev, '{"account_id": "012345678901", "region": "eu-west-1", "can_read_from": ["production"]}');
-	INSERT INTO public.env_platform_configs (platform_id, environment_id, config) VALUES (returned_platform_id, returned_environment_id_prd, '{"account_id": "012345678901", "region": "eu-west-1", "can_read_from": []}');
-
+    INSERT INTO public.env_platform_configs (id, environment_id, platform_id, "config", created_on, updated_on, deleted_at) VALUES ('daa8e3e8-1485-4eb2-8b4b-575e8d10a570', returned_environment_id_dev, returned_platform_id, '{"account_id": "012345678901", "region": "eu-west-1", "can_read_from": ["production"]}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_configs (id, environment_id, platform_id, "config", created_on, updated_on, deleted_at) VALUES ('e2aa2f6d-585f-4b43-8ea4-982b7bab0142', returned_environment_id_prd, returned_platform_id, '{"account_id": "012345678901", "region": "eu-west-1", "can_read_from": []}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('93f4b677-5ae8-450d-91a6-e15196b2e774', returned_environment_id_dev, returned_platform_id, s3_service_id, '[{"identifier":"datalake","bucket_name":"datalake_bucket_dev","bucket_arn":"datalake_bucket_arn_dev","kms_key_arn":"datalake_kms_key_dev","is_default":true},{"identifier":"ingress","bucket_name":"ingress_bucket_dev","bucket_arn":"ingress_bucket_arn_dev","kms_key_arn":"ingress_kms_key_dev","is_default":false},{"identifier":"egress","bucket_name":"egress_bucket_dev","bucket_arn":"egress_bucket_arn_dev","kms_key_arn":"egress_kms_key_dev","is_default":false}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('9c1d025c-f342-4665-8461-ba8b9f4035ff', returned_environment_id_prd, returned_platform_id, s3_service_id, '[{"identifier":"datalake","bucket_name":"datalake_bucket_prd","bucket_arn":"datalake_bucket_arn_prd","kms_key_arn":"datalake_kms_key_prd","is_default":true},{"identifier":"ingress","bucket_name":"ingress_bucket_prd","bucket_arn":"ingress_bucket_arn_prd","kms_key_arn":"ingress_kms_key_prd","is_default":false},{"identifier":"egress","bucket_name":"egress_bucket_prd","bucket_arn":"egress_bucket_arn_prd","kms_key_arn":"egress_kms_key_prd","is_default":false}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
