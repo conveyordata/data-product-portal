@@ -43,7 +43,7 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
                 return <TableStatusTag status={status} />;
             },
             ...new FilterSettings(data, dp => getStatusLabel(dp.status)),
-            sorter: sorter.stringSorter(dp => dp.status),
+            sorter: sorter.stringSorter(dp => getStatusLabel(dp.status)),
         },
         {
             title: t('Business Area'),
