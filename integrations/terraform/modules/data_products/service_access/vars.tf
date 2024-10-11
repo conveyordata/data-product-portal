@@ -33,14 +33,6 @@ variable "environment_config" {
   })
 }
 
-variable "read_data_access_policy_arns" {
-  type = list(string)
-}
-
-variable "write_data_access_policy_arns" {
-  type = list(string)
-}
-
-variable "service_policy_arns" {
-  type = list(string)
+variable "athena_output_path_prefix" {
+  default = "athena"
 }

@@ -1,17 +1,56 @@
 raw_test:
   s3:
-    - bucket_name: datalake
-      path: /raw/test
-  owner: ["test-project-1"]
+    bucket: datalake
+    suffix: /raw/test
+    path: ''
+  owner: test-project-1
 
 clean_test:
   glue:
-    - clean_test/*
-  owner: ["test-project-1"]
+    database: clean_test
+    database_suffix: suffix
+    table: '*'
+    bucket_identifier: datalake
+    database_path: clean/test/suffix
+    table_path: ''
+  owner: test-project-1
 
-master_test:
+master_test_table1:
   glue:
-    - master_test/table1
-    - master_test/table2
-  owner: ["test-project-2"]
+    database: master_test
+    database_suffix: ''
+    table: table1
+    bucket_identifier: datalake
+    database_path: master/test
+    table_path: table1
+  owner: test-project-2
 
+master_test_table2:
+  glue:
+    database: master_test
+    database_suffix: ''
+    table: table2
+    bucket_identifier: datalake
+    database_path: master/test
+    table_path: something_other_than_table2
+  owner: test-project-2
+
+dbx_output_schema:
+  databricks:
+    database: schema
+    database_suffix: suffix
+    table: '*'
+    bucket_identifier: datalake
+    database_path: data_product/test-project-2/schema/suffix
+    table_path: ''
+  owner: test-project-2
+
+dbx_output_table:
+  databricks:
+    database: schema
+    database_suffix: other_suffix
+    table: table
+    bucket_identifier: datalake
+    database_path: data_product/test-project-2/schema/other_suffix
+    table_path: something_other_than_table
+  owner: test-project-2
