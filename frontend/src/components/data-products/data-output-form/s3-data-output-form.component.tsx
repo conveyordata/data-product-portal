@@ -89,22 +89,6 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
             >
                 <Input disabled />
             </Form.Item>
-            {/* <Form.Item<S3DataOutput>
-                        required
-                        name={'account_id'}
-                        label={t('Account ID')}
-                        tooltip={t('The AWS account ID the bucket is in')}
-                    >
-                        <Input/>
-                    </Form.Item>
-                    <Form.Item<S3DataOutput>
-                        required
-                        name={'kms_key'}
-                        label={t('KMS Key')}
-                        tooltip={t('KMS Key used to encrypt the data written to this data output')}
-                    >
-                        <Input/>
-                    </Form.Item> */}
         </div>
     );
 }
