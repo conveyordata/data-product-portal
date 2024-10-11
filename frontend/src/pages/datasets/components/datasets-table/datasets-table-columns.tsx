@@ -10,72 +10,80 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
+import { Sorter } from '@/utils/table-sorter.helper';
 
 const iconColumnWidth = 30;
-export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets: DatasetsGetContract }): TableColumnsType<DatasetsGetContract[0]> => [
-    {
-        title: t('Id'),
-        dataIndex: 'id',
-        hidden: true,
-    },
-    {
-        title: undefined,
-        width: iconColumnWidth,
-        dataIndex: 'access_type',
-        render: (accessType: string) => {
-            const isRestricted = accessType === 'restricted';
-            return isRestricted ? (
-                <Popover content={t('Restricted access')} placement={'left'}>
-                    <>
-                        <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
-                    </>
-                </Popover>
-            ) : null;
+export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets: DatasetsGetContract }): TableColumnsType<DatasetsGetContract[0]> => {
+    const sorter = new Sorter<DatasetsGetContract[0]>;
+    return [
+        {
+            title: t('Id'),
+            dataIndex: 'id',
+            hidden: true,
         },
-    },
-    {
-        title: t('Name'),
-        dataIndex: 'name',
-        defaultSortOrder: 'ascend',
-        ellipsis: {
-            showTitle: false,
+        {
+            title: undefined,
+            width: iconColumnWidth,
+            dataIndex: 'access_type',
+            render: (accessType: string) => {
+                const isRestricted = accessType === 'restricted';
+                return isRestricted ? (
+                    <Popover content={t('Restricted access')} placement={'left'}>
+                        <>
+                            <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
+                        </>
+                    </Popover>
+                ) : null;
+            },
         },
-        render: (name: string) => {
-            return <TableCellItem text={name} tooltip={{ content: name }} />;
+        {
+            title: t('Name'),
+            dataIndex: 'name',
+            defaultSortOrder: 'ascend',
+            ellipsis: {
+                showTitle: false,
+            },
+            render: (name: string) => {
+                return <TableCellItem text={name} tooltip={{ content: name }} />;
+            },
+            sorter: sorter.stringSorter(ds => ds.name),
         },
-        ...new FilterSettings(datasets, ds => ds.name),
-    },
-    {
-        title: t('Status'),
-        dataIndex: 'status',
-        render: (status) => {
-            return <TableStatusTag status={status} />;
+        {
+            title: t('Status'),
+            dataIndex: 'status',
+            render: (status) => {
+                return <TableStatusTag status={status} />;
+            },
+            ...new FilterSettings(datasets, ds => getStatusLabel(ds.status)),
+            sorter: sorter.stringSorter(ds => getStatusLabel(ds.status)),
         },
-        ...new FilterSettings(datasets, ds => getStatusLabel(ds.status)),
-    },
-    {
-        title: t('Business Area'),
-        dataIndex: 'business_area',
-        render: (businessArea: BusinessAreaContract) => {
-            return <TableCellItem text={businessArea.name} />;
+        {
+            title: t('Business Area'),
+            dataIndex: 'business_area',
+            render: (businessArea: BusinessAreaContract) => {
+                return <TableCellItem text={businessArea.name} />;
+            },
+            ellipsis: true,
+            ...new FilterSettings(datasets, ds => ds.business_area.name),
+            sorter: sorter.stringSorter(ds => ds.business_area.name),
         },
-        ellipsis: true,
-        ...new FilterSettings(datasets, ds => ds.business_area.name),
-    },
-    {
-        title: t('Access Type'),
-        dataIndex: 'access_type',
-        render: (accessType: DatasetAccess) => {
-            return <TableCellItem text={getDatasetAccessTypeLabel(accessType)} />;
+        {
+            title: t('Access Type'),
+            dataIndex: 'access_type',
+            render: (accessType: DatasetAccess) => {
+                return <TableCellItem text={getDatasetAccessTypeLabel(accessType)} />;
+            },
+            ellipsis: true,
+            ...new FilterSettings(datasets, ds => getDatasetAccessTypeLabel(ds.access_type)),
+            sorter: sorter.stringSorter(ds => getDatasetAccessTypeLabel(ds.access_type)),
         },
-        ellipsis: true,
-        ...new FilterSettings(datasets, ds => getDatasetAccessTypeLabel(ds.access_type)),
-    },
-    {
-        title: t('Shared With'),
-        dataIndex: 'data_product_count',
-        render: (count: number) => {
-            return <TableCellItem text={i18n.t('{{count}} data products', { count })} />;
+        {
+            title: t('Shared With'),
+            dataIndex: 'data_product_count',
+            render: (count: number) => {
+                return <TableCellItem text={i18n.t('{{count}} data products', { count })} />;
+            },
+            sorter: sorter.numberSorter(ds => ds.data_product_count),
         },
-    },
-];
+    ]
+};
