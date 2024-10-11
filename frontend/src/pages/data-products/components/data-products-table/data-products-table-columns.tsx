@@ -3,14 +3,16 @@ import { DataProductsGetContract, DataProductStatus } from '@/types/data-product
 import { TeamOutlined } from '@ant-design/icons';
 import i18n from '@/i18n';
 import { TFunction } from 'i18next';
+import { getStatusLabel } from '@/utils/status.helper.ts';
 import { TableStatusTag } from '@/components/list/table-status-tag/table-status-tag.component.tsx';
 import { DataProductTypeContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { BusinessAreaGetResponse } from '@/types/business-area';
+import { FilterSettings } from '@/utils/table-filter.helper';
 
 const iconColumnWidth = 30;
-export const getDataProductTableColumns = ({ t }: { t: TFunction }): TableColumnsType<DataProductsGetContract[0]> => {
+export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunction, dataProducts: DataProductsGetContract }): TableColumnsType<DataProductsGetContract[0]> => {
     return [
         {
             title: t('Id'),
@@ -25,9 +27,7 @@ export const getDataProductTableColumns = ({ t }: { t: TFunction }): TableColumn
         {
             title: t('Name'),
             dataIndex: 'name',
-            filterSearch: true,
             defaultSortOrder: 'ascend',
-            onFilter: (value, record) => record.name.startsWith(value as string),
             ellipsis: {
                 showTitle: false,
             },
@@ -39,6 +39,7 @@ export const getDataProductTableColumns = ({ t }: { t: TFunction }): TableColumn
             render: (status: DataProductStatus) => {
                 return <TableStatusTag status={status} />;
             },
+            ...new FilterSettings(data, dp => getStatusLabel(dp.status))
         },
         {
             title: t('Business Area'),
@@ -46,17 +47,17 @@ export const getDataProductTableColumns = ({ t }: { t: TFunction }): TableColumn
             render: (businessArea: BusinessAreaGetResponse) => {
                 return <TableCellItem text={businessArea.name} />;
             },
+            ...new FilterSettings(data, dp => dp.business_area.name)
         },
         {
             title: t('Type'),
             dataIndex: 'type',
-            filterSearch: true,
-            onFilter: (value, record) => record.type.name.startsWith(value as string),
             render: (type: DataProductTypeContract) => {
                 const icon = getDataProductTypeIcon(type.icon_key);
                 return <TableCellItem reactSVGComponent={icon} text={type.name} />;
             },
             ellipsis: true,
+            ...new FilterSettings(data, dp => dp.type.name)
         },
         {
             title: t('Access'),
