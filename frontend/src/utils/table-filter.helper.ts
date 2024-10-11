@@ -27,6 +27,6 @@ function generateOnFilter<T>(accessor: (record: T) => any): (value: boolean | Ke
 };
 
 function generateFilters<T>(data: T[], accessor: (record: T) => any) {
-    const uniqueValues = Array.from(new Set(data.map(e => accessor(e))));
+    const uniqueValues = Array.from(new Set(data.map(e => accessor(e)))).sort();
     return uniqueValues.map(value => new FilterEntry(String(value), value))
 };
