@@ -100,12 +100,6 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                 />
             </Form.Item>
             <Form.Item<DatabricksDataOutput>
-                    required
-                    hidden={true}
-                    name={'configuration_type'}
-                    initialValue={'DatabricksDataOutput'}
-                ></Form.Item>
-            <Form.Item<DatabricksDataOutput>
                 required
                 name={'table'}
                 label={t('Table')}

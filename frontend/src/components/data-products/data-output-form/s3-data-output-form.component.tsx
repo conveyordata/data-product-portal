@@ -89,12 +89,6 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
             >
                 <Input disabled />
             </Form.Item>
-            <Form.Item<S3DataOutput>
-                    required
-                    hidden={true}
-                    name={'configuration_type'}
-                    initialValue={'S3DataOutput'}
-                ></Form.Item>
             {/* <Form.Item<S3DataOutput>
                         required
                         name={'account_id'}

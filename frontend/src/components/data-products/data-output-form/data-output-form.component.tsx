@@ -56,6 +56,17 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 // TODO This is ugly code. We pass along the entire form in the configuration currently.
                 // Should be rewritten to only pass the config attributes
                 const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
+                switch (selectedConfiguration?.value) {
+                    case DataPlatforms.S3:
+                        config["configuration_type"] = "S3DataOutput"
+                        break
+                    case DataPlatforms.Glue:
+                        config["configuration_type"] = "GlueDataOutput"
+                        break
+                    case DataPlatforms.Databricks:
+                        config["configuration_type"] = "DatabricksDataOutput"
+                        break
+                }
                 const request: DataOutputCreate = {
                     name: values.name,
                     external_id: generateExternalIdFromName(values.name ?? ''),
