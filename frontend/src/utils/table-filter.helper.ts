@@ -5,7 +5,7 @@ export class FilterSettings<T>{
     filters: FilterEntry[];
     onFilter: (value: boolean | Key, record: T) => boolean;
 
-    constructor(data: T[], accessor: (record: T) => any){
+    constructor(data: T[], accessor: (record: T) => boolean | Key){
         this.filterSearch = true;
         this.filters = generateFilters<T>(data, accessor);
         this.onFilter = generateOnFilter(accessor);
@@ -14,19 +14,19 @@ export class FilterSettings<T>{
 
 class FilterEntry{
     text: string;
-    value: any;
+    value: boolean | Key;
 
-    constructor(text: string, value: any) {
+    constructor(text: string, value: boolean | Key) {
         this.text = text
         this.value = value
     }
 };
 
-function generateOnFilter<T>(accessor: (record: T) => any): (value: boolean | Key, record: T) => boolean {
+function generateOnFilter<T>(accessor: (record: T) => boolean | Key): (value: boolean | Key, record: T) => boolean {
     return (value, record) => accessor(record) === value;
 };
 
-function generateFilters<T>(data: T[], accessor: (record: T) => any) {
+function generateFilters<T>(data: T[], accessor: (record: T) => boolean | Key) {
     const uniqueValues = Array.from(new Set(data.map(e => accessor(e)))).sort();
     return uniqueValues.map(value => new FilterEntry(String(value), value))
 };
