@@ -51,10 +51,11 @@ export function DatasetTable({ isCurrentDataProductOwner, dataProductId, dataset
             onRemoveDataProductDatasetLink: handleRemoveDatasetFromDataProduct,
             onCancelDataProductDatasetLinkRequest: handleCancelDatasetLinkRequest,
             t,
+            datasetLinks: datasets,
             isDisabled: !isCurrentDataProductOwner,
             isLoading: isRemovingDatasetFromDataProduct,
         });
-    }, [dataProductId, t, isCurrentDataProductOwner]);
+    }, [dataProductId, t, datasets, isCurrentDataProductOwner]);
 
     if (!dataProduct) return null;
 
