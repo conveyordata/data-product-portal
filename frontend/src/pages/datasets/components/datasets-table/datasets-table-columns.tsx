@@ -2,79 +2,88 @@ import { DatasetAccess, DatasetsGetContract } from '@/types/dataset';
 import { TFunction } from 'i18next';
 import { Popover, TableColumnsType } from 'antd';
 import i18n from '@/i18n.ts';
+import { getStatusLabel } from '@/utils/status.helper.ts';
 import { TableStatusTag } from '@/components/list/table-status-tag/table-status-tag.component.tsx';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { BusinessAreaContract } from '@/types/business-area';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { FilterSettings } from '@/utils/table-filter.helper';
+import { Sorter } from '@/utils/table-sorter.helper';
 
 const iconColumnWidth = 30;
-export const getDatasetTableColumns = ({ t }: { t: TFunction }): TableColumnsType<DatasetsGetContract[0]> => [
-    {
-        title: t('Id'),
-        dataIndex: 'id',
-        hidden: true,
-    },
-    {
-        title: undefined,
-        width: iconColumnWidth,
-        dataIndex: 'access_type',
-        render: (accessType: string) => {
-            const isRestricted = accessType === 'restricted';
-            return isRestricted ? (
-                <Popover content={t('Restricted access')} placement={'left'}>
-                    <>
-                        <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
-                    </>
-                </Popover>
-            ) : null;
+export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets: DatasetsGetContract }): TableColumnsType<DatasetsGetContract[0]> => {
+    const sorter = new Sorter<DatasetsGetContract[0]>;
+    return [
+        {
+            title: t('Id'),
+            dataIndex: 'id',
+            hidden: true,
         },
-    },
-    {
-        title: t('Name'),
-        dataIndex: 'name',
-        filterSearch: true,
-        defaultSortOrder: 'ascend',
-        onFilter: (value, record) => record.name.startsWith(value as string),
-        ellipsis: {
-            showTitle: false,
+        {
+            title: undefined,
+            width: iconColumnWidth,
+            dataIndex: 'access_type',
+            render: (accessType: string) => {
+                const isRestricted = accessType === 'restricted';
+                return isRestricted ? (
+                    <Popover content={t('Restricted access')} placement={'left'}>
+                        <>
+                            <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
+                        </>
+                    </Popover>
+                ) : null;
+            },
         },
-        render: (name: string) => {
-            return <TableCellItem text={name} tooltip={{ content: name }} />;
+        {
+            title: t('Name'),
+            dataIndex: 'name',
+            defaultSortOrder: 'ascend',
+            ellipsis: {
+                showTitle: false,
+            },
+            render: (name: string) => {
+                return <TableCellItem text={name} tooltip={{ content: name }} />;
+            },
+            sorter: sorter.stringSorter(ds => ds.name),
         },
-    },
-    {
-        title: t('Status'),
-        dataIndex: 'status',
-        render: (status) => {
-            return <TableStatusTag status={status} />;
+        {
+            title: t('Status'),
+            dataIndex: 'status',
+            render: (status) => {
+                return <TableStatusTag status={status} />;
+            },
+            ...new FilterSettings(datasets, ds => getStatusLabel(ds.status)),
+            sorter: sorter.stringSorter(ds => getStatusLabel(ds.status)),
         },
-    },
-    {
-        title: t('Business Area'),
-        dataIndex: 'business_area',
-        filterSearch: true,
-        onFilter: (value, record) => record.description.startsWith(value as string),
-        render: (businessArea: BusinessAreaContract) => {
-            return <TableCellItem text={businessArea.name} />;
+        {
+            title: t('Business Area'),
+            dataIndex: 'business_area',
+            render: (businessArea: BusinessAreaContract) => {
+                return <TableCellItem text={businessArea.name} />;
+            },
+            ellipsis: true,
+            ...new FilterSettings(datasets, ds => ds.business_area.name),
+            sorter: sorter.stringSorter(ds => ds.business_area.name),
         },
-        ellipsis: true,
-    },
-    {
-        title: t('Access Type'),
-        dataIndex: 'access_type',
-        filterSearch: true,
-        render: (accessType: DatasetAccess) => {
-            return <TableCellItem text={getDatasetAccessTypeLabel(accessType)} />;
+        {
+            title: t('Access Type'),
+            dataIndex: 'access_type',
+            render: (accessType: DatasetAccess) => {
+                return <TableCellItem text={getDatasetAccessTypeLabel(accessType)} />;
+            },
+            ellipsis: true,
+            ...new FilterSettings(datasets, ds => getDatasetAccessTypeLabel(ds.access_type)),
+            sorter: sorter.stringSorter(ds => getDatasetAccessTypeLabel(ds.access_type)),
         },
-        ellipsis: true,
-    },
-    {
-        title: t('Shared With'),
-        dataIndex: 'data_product_count',
-        render: (count: number) => {
-            return <TableCellItem text={i18n.t('{{count}} data products', { count })} />;
+        {
+            title: t('Shared With'),
+            dataIndex: 'data_product_count',
+            render: (count: number) => {
+                return <TableCellItem text={i18n.t('{{count}} data products', { count })} />;
+            },
+            sorter: sorter.numberSorter(ds => ds.data_product_count),
         },
-    },
-];
+    ]
+};

@@ -33,7 +33,6 @@ export function DatasetsTable() {
         { skip: !currentUser },
     );
     const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
-    const columns = useMemo(() => getDatasetTableColumns({ t }), [t]);
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 
@@ -41,6 +40,8 @@ export function DatasetsTable() {
         const data = quickFilter === QuickFilterParticipation.All ? datasets : userDatasets;
         return filterDatasets(data, searchTerm);
     }, [quickFilter, datasets, userDatasets, searchTerm]);
+
+    const columns = useMemo(() => getDatasetTableColumns({ t, datasets: filteredDatasets }), [t, filteredDatasets]);
 
     const onChange: TableProps<DatasetsGetContract[0]>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
