@@ -30,7 +30,7 @@ export const getS3TechnicalInformationColumns = ({
             dataIndex: 'path',
             render: (_, { environmentConfig, data_output }) => {
                 const configuration: S3DataOutputContract = data_output.configuration as S3DataOutputContract
-                const bucket_arn = environmentConfig.config.filter(({identifier}) => (identifier == configuration.bucket))[0].arn
+                const bucket_arn = environmentConfig.config.filter(({identifier}) => (identifier == configuration.bucket))[0].bucket_arn
                 let suffix = '/' + configuration.suffix + '/'
                 if (configuration.suffix === '') {
                     suffix = '/'

@@ -11,9 +11,9 @@ export interface EnvironmentConfig {
 interface AWSS3Config {
     account_id: number;
     identifier: string;
-    name: string;
-    arn: string;
-    kms: string;
+    bucket_name: string;
+    bucket_arn: string;
+    kms_key_arn: string;
 }
 
 interface Config {
