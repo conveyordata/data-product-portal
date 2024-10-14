@@ -155,6 +155,7 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
+
                         default:
                             Object.assign(breadcrumbItem, {
                                 title: '',
@@ -201,6 +202,10 @@ export const Breadcrumbs = () => {
                             }
 
                             break;
+                    }
+
+                    if (breadcrumbItem.title === '') {
+                        return null;
                     }
 
                     return breadcrumbItem;

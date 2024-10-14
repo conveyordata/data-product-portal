@@ -18,6 +18,7 @@ export enum ApiUrl {
     UserDatasets = '/api/datasets/user/:userId',
     Authorize = '/api/auth/user',
     Environments = '/api/envs',
+    EnvPlatformServiceConfigs = '/api/envs/:environmentId/configs',
     Datasets = '/api/datasets',
     DatasetUser = '/api/datasets/:datasetId/user/:userId',
     DatasetGet = '/api/datasets/:datasetId',
@@ -27,6 +28,8 @@ export enum ApiUrl {
     DataProductDatasetLinkApprove = '/api/data_product_dataset_links/approve/:datasetLinkId',
     DataProductDatasetLinkReject = '/api/data_product_dataset_links/deny/:datasetLinkId',
     DataProductDatasetLinkRemove = '/api/data_product_dataset_links/remove/:datasetLinkId',
+    Platforms = '/api/platforms',
+    PlatformServices = '/api/platforms/:platformId/services',
 }
 
 export type DynamicPathParams = 'dataProductId' | 'userId' | 'datasetId' | 'datasetLinkId' | 'membershipId';
