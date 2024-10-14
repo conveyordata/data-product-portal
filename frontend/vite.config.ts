@@ -33,6 +33,11 @@ export default defineConfig(() => {
             open: true,
         },
         css: {
+            preprocessorOptions: {
+                scss: {
+                    api: 'modern-compiler'
+                }
+            },
             modules: {
                 localsConvention: 'camelCase' as const,
             },
