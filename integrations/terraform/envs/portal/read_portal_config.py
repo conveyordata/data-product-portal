@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict
+from typing import Any
 
 import requests
 import yaml
@@ -9,7 +9,7 @@ API_KEY: str = os.getenv("API_KEY", "")
 # URL of where to contact the portal API
 API_HOST = "https://portal.acme.com"
 FOLDER = "./"
-proxies: Dict[str, str] = {}
+proxies: dict[str, str] = {}
 
 HEADERS = {"x-key": f"{API_KEY}"}
 session = requests.Session()
@@ -30,7 +30,7 @@ yaml.Dumper.add_representer(QuotedString, quoted_scalar)
 
 
 # Verification of API responses
-def verify_response(response: Dict[str, Any]):
+def verify_response(response: dict[str, Any]):
     if "correlation_id" in response:
         print(response)
         exit(1)
@@ -63,7 +63,6 @@ def get_data_products():
             "read_datasets": datasets,
             "users": members,
         }
-
     with open(
         os.path.join(
             FOLDER, "config", "data_product_glossary", "data_product_glossary.yaml"

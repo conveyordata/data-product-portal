@@ -37,7 +37,6 @@ export function DataProductsTable() {
         { skip: !currentUser },
     );
     const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
-    const columns = useMemo(() => getDataProductTableColumns({ t }), [t]);
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 
@@ -45,6 +44,8 @@ export function DataProductsTable() {
         const data = quickFilter === QuickFilterParticipation.Me ? userDataProducts : dataProducts;
         return filterDataProducts(data, searchTerm);
     }, [quickFilter, userDataProducts, dataProducts, searchTerm]);
+
+    const columns = useMemo(() => getDataProductTableColumns({ t, dataProducts: filteredDataProducts }), [t, filteredDataProducts]);
 
     const onChange: TableProps<DataProductsGetContract[0]>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);

@@ -2,6 +2,7 @@ import { TFunction } from 'i18next';
 import { Button, Popconfirm, TableColumnsType } from 'antd';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { UserContract } from '@/types/users';
+import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
@@ -16,6 +17,7 @@ export const getDatasetTeamColumns = ({
     isRemovingUser,
     canPerformTeamActions,
 }: Props): TableColumnsType<UserContract> => {
+    const sorter = new Sorter<UserContract>();
     return [
         {
             title: t('Id'),
@@ -28,8 +30,9 @@ export const getDatasetTeamColumns = ({
             render: (_, user) => {
                 return <UserAvatar name={`${user.first_name} ${user.last_name}`} email={user.email} />;
             },
-            sorter: (a, b) => a.last_name.localeCompare(b.last_name),
             width: '70%',
+            sorter: sorter.stringSorter(user => user.last_name),
+            defaultSortOrder: 'ascend',
         },
         {
             title: t('Actions'),

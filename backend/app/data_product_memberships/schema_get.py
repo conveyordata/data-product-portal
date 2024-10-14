@@ -4,8 +4,8 @@ from uuid import UUID
 from pydantic import Field
 
 from app.data_product_memberships.enums import (
-    DataProductUserRole,
     DataProductMembershipStatus,
+    DataProductUserRole,
 )
 from app.data_products.schema import DataProduct
 from app.shared.schema import ORMModel

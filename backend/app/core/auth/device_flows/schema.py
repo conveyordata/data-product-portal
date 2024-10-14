@@ -1,7 +1,9 @@
-from uuid import UUID
-from app.shared.schema import ORMModel
-from pydantic import computed_field
 from enum import Enum
+from uuid import UUID
+
+from pydantic import computed_field
+
+from app.shared.schema import ORMModel
 
 
 class DeviceFlowStatus(str, Enum):
