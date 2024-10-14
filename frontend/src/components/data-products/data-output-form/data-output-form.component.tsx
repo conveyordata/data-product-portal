@@ -45,10 +45,13 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const sourceAligned = Form.useWatch('is_source_aligned', form);
     const dataProductNameValue = Form.useWatch('name', form);
     const canFillInForm = mode === 'create';
-    const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
     const isLoading = isCreating || isCreating || isFetchingInitialValues;
 
-    const { data: platformConfig } = useGetAllPlatformsConfigsQuery()
+    const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery()
+
+    const dataPlatforms = useMemo(() => getDataPlatforms(t).filter((platform) => {
+        return platformConfig?.map(config => config.service.name).includes(platform.label) || platformConfig?.map(config => config.platform.name).includes(platform.label)
+    }), [t, platformConfig, platformsLoading]);
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
