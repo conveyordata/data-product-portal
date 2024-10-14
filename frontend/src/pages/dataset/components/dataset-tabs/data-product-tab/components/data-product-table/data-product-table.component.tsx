@@ -76,13 +76,14 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
         return getDatasetDataProductsColumns({
             onRemoveDataProductDatasetLink: handleRemoveDatasetFromDataProduct,
             t,
+            dataProductLinks: dataProducts,
             isDisabled: !isCurrentDatasetOwner,
             isLoading: isRemovingDatasetFromDataProduct || isRejectingLink || isApprovingLink,
             isCurrentDatasetOwner,
             onRejectDataProductDatasetLink: handleRejectDataProductDatasetLink,
             onAcceptDataProductDatasetLink: handleAcceptDataProductDatasetLink,
         });
-    }, [datasetId, t, isCurrentDatasetOwner]);
+    }, [datasetId, t, dataProducts, isCurrentDatasetOwner]);
 
     return (
         <Flex className={styles.datasetListContainer}>

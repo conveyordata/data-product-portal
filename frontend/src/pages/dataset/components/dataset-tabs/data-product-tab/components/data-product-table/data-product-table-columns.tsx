@@ -8,9 +8,12 @@ import { createDataProductIdPath } from '@/types/navigation.ts';
 import { DataProductLink } from '@/types/dataset';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { DataProductDatasetLinkRequest, DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
+import { Sorter } from '@/utils/table-sorter.helper';
+import { FilterSettings } from '@/utils/table-filter.helper';
 
 type Props = {
     t: TFunction;
+    dataProductLinks: DataProductLink[];
     onRemoveDataProductDatasetLink: (data_productId: string, name: string, datasetLinkId: string) => void;
     onAcceptDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void;
     onRejectDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void;
@@ -24,10 +27,12 @@ export const getDatasetDataProductsColumns = ({
     onRejectDataProductDatasetLink,
     onAcceptDataProductDatasetLink,
     t,
+    dataProductLinks,
     isDisabled,
     isLoading,
     isCurrentDatasetOwner,
 }: Props): TableColumnsType<DataProductLink> => {
+    const sorter = new Sorter<DataProductLink>();
     return [
         {
             title: t('Id'),
@@ -61,6 +66,9 @@ export const getDatasetDataProductsColumns = ({
                 );
             },
             width: '100%',
+            ... new FilterSettings(dataProductLinks, dpl => getDataProductDatasetLinkStatusLabel(dpl.status)),
+            sorter: sorter.stringSorter(dpl => dpl.data_product.name),
+            defaultSortOrder: 'ascend',
         },
         {
             title: t('Actions'),
