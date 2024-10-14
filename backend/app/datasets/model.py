@@ -1,9 +1,9 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, String, ForeignKey, Table, Enum
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Table
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship, Mapped, Session
+from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists

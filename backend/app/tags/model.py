@@ -1,8 +1,10 @@
-from app.shared.model import BaseORM
+import uuid
+
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
+
 from app.database.database import Base
+from app.shared.model import BaseORM
 
 
 class Tag(Base, BaseORM):

@@ -1,12 +1,13 @@
+import uuid
+from string import ascii_lowercase, digits
+
+from shortuuid import ShortUUID
+from sqlalchemy import Column, DateTime, Enum, Integer, String
+from sqlalchemy.dialects.postgresql import UUID
+
 from app.core.auth.device_flows.schema import DeviceFlowStatus
 from app.database.database import Base
 from app.shared.model import BaseORM, utcnow
-from sqlalchemy import Column, Integer, String, Enum, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
-from string import ascii_lowercase, digits
-from shortuuid import ShortUUID
-
 
 alphabet = ascii_lowercase + digits
 su = ShortUUID(alphabet=alphabet)

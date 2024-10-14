@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Enum, Column, UUID, UniqueConstraint
-from sqlalchemy.orm import Mapped, relationship, mapped_column
+from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.database.database import Base
@@ -10,8 +10,10 @@ if TYPE_CHECKING:
     from app.users.model import User
     from app.datasets.model import Dataset
     from app.data_products.model import DataProduct
-from app.shared.model import BaseORM, utcnow
+
 import uuid
+
+from app.shared.model import BaseORM, utcnow
 
 
 class DataProductDatasetAssociation(Base, BaseORM):

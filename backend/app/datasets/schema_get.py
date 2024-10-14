@@ -1,7 +1,7 @@
 from typing import Annotated, Optional
 from uuid import UUID
 
-from pydantic import computed_field, Field
+from pydantic import Field, computed_field
 
 from app.business_areas.schema import BusinessArea
 from app.data_products.schema_get import DataProductsGet

@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.data_product_types.model import DataProductType as DataProductTypeModel
-from app.data_product_types.schema import DataProductTypeCreate, DataProductType
+from app.data_product_types.schema import DataProductType, DataProductTypeCreate
 
 
 class DataProductTypeService:
