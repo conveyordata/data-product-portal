@@ -146,7 +146,7 @@ class DataProductService:
         RefreshInfrastructureLambda().trigger()
         return {"id": data_product.id}
 
-    def remove_data_product(self, id: UUID, db: Session, authenticated_user: User):
+    def remove_data_product(self, id: UUID, db: Session):
         data_product = db.get(
             DataProductModel,
             id,
