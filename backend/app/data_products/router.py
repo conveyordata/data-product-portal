@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.data_outputs.schema import DataOutputRegister
+from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.schema import (
     DataProductAboutUpdate,
@@ -79,7 +81,10 @@ def create_data_product(
     },
     dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
 )
-def remove_data_product(id: UUID, db: Session = Depends(get_db_session)):
+def remove_data_product(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+):
     return DataProductService().remove_data_product(id, db)
 
 
@@ -210,3 +215,25 @@ def get_conveyor_notebook_url(id: UUID, db: Session = Depends(get_db_session)) -
 )
 def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
     return DataProductService().get_conveyor_ide_url(id, db)
+
+
+@router.post(
+    "/{id}/data_output",
+    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
+)
+def register_new_data_output(
+    id: UUID,
+    data_output: DataOutputRegister,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> dict[str, UUID]:
+    return DataProductService().register_new_data_output(
+        id, data_output, authenticated_user, db
+    )
+
+
+@router.get("/{id}/data_outputs")
+def get_data_outputs(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> list[DataOutputGet]:
+    return DataProductService().get_data_outputs(id, db)

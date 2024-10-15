@@ -1,6 +1,6 @@
 import { TagContract } from '@/types/tag';
 import { UserContract } from '@/types/users';
-import { DataProductLink } from '@/types/dataset';
+import { DataOutputLink, DataProductLink } from '@/types/dataset';
 import { BusinessAreaContract } from '@/types/business-area';
 
 export enum DatasetStatus {
@@ -24,6 +24,7 @@ export interface DatasetContract {
     status: DatasetStatus;
     tags: TagContract[];
     data_product_links: DataProductLink[];
+    data_output_links: DataOutputLink[];
     access_type: DatasetAccess;
     business_area: BusinessAreaContract;
     external_id: string;
