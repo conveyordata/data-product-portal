@@ -14,7 +14,7 @@ gunicorn = "^23.0.0"
 pydantic = { version = "^2.9.2", extras = ['email'] }
 python-dotenv = "^1.0.1"
 sqlalchemy = "^2.0.35"
-psycopg2-binary = "^2.9.9"
+psycopg2-binary = "^2.9.10"
 alembic = "^1.13.3"
 pyyaml = "^6.0.2"
 sqlalchemy-easy-softdelete = "^0.8.3"
