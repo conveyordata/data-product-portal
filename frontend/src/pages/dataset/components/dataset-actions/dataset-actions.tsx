@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 import { TFunction } from 'i18next';
 import styles from './dataset-actions.module.scss';
 import { Flex } from 'antd';
-import { DataPlataforms, DataPlatform } from '@/types/data-platform';
+import { DataPlatforms, DataPlatform } from '@/types/data-platform';
 
 type Props = {
     datasetId: string;
@@ -17,10 +17,10 @@ type Props = {
 const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[] => [
     {
         label: t('Collibra'),
-        value: DataPlataforms.Collibra,
+        value: DataPlatforms.Collibra,
         icon: collibraLogo,
     },
-    { label: t('Datahub'), value: DataPlataforms.Datahub, icon: datahubLogo, disabled: true },
+    { label: t('Datahub'), value: DataPlatforms.Datahub, icon: datahubLogo, disabled: true },
 ];
 
 export function DatasetActions({ datasetId, isCurrentDatasetOwner }: Props) {

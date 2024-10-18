@@ -1,0 +1,15 @@
+@import '@/styles/variables';
+
+.status-info {
+    gap: $column-gap-regular;
+
+    .content-subtitle {
+        gap: $column-gap-l;
+
+        .status-badge {
+            align-items: center;
+            justify-content: center;
+            gap: $column-gap-badge;
+        }
+    }
+}

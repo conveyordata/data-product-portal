@@ -68,9 +68,9 @@ data "aws_iam_policy_document" "permission_glue_read" {
       "glue:*GetPartition*",
     ]
     resources = [
-      "arn:aws:glue:${var.aws_region}:${var.aws_account_id}:catalog",
-      "arn:aws:glue:${var.aws_region}:${var.aws_account_id}:database/*",
-      "arn:aws:glue:${var.aws_region}:${var.aws_account_id}:table/*/*",
+      "arn:aws:glue:${var.environment_config.aws_region}:${var.environment_config.aws_account_id}:catalog",
+      "arn:aws:glue:${var.environment_config.aws_region}:${var.environment_config.aws_account_id}:database/*",
+      "arn:aws:glue:${var.environment_config.aws_region}:${var.environment_config.aws_account_id}:table/*/*",
     ]
   }
 }
@@ -86,9 +86,9 @@ data "aws_iam_policy_document" "permission_glue_write" {
     ]
 
     resources = concat(
-      ["arn:aws:glue:${var.aws_region}:${var.aws_account_id}:catalog"],
-      [for v in local.write_glue_databases : "arn:aws:glue:${var.aws_region}:${var.aws_account_id}:database/${v}"],
-      [for v in local.write_glue_tables : "arn:aws:glue:${var.aws_region}:${var.aws_account_id}:table/${v}"],
+      ["arn:aws:glue:${var.environment_config.aws_region}:${var.environment_config.aws_account_id}:catalog"],
+      [for v in local.write_glue_databases : "arn:aws:glue:${var.environment_config.aws_region}:${var.environment_config.aws_account_id}:database/${v}"],
+      [for v in local.write_glue_tables : "arn:aws:glue:${var.environment_config.aws_region}:${var.environment_config.aws_account_id}:table/${v}"],
     )
   }
 }

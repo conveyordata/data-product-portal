@@ -1,0 +1,55 @@
+@import '@/styles/globals';
+@import '@/styles/variables';
+@import '@/styles/colors';
+@import '@/styles/shared';
+
+.data-output-container {
+    @extend .container;
+    gap: $column-gap-xl;
+}
+
+.header-container {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.edit-icon {
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-l;
+    gap: $column-gap-regular;
+
+    h3 {
+        margin: 0;
+        text-wrap: avoid;
+    }
+}
+
+.content {
+    @extend .container;
+
+    .overview {
+        flex: 1;
+        gap: $column-gap-regular;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+}
+
+.sidebar {
+    flex: 0.3;
+    min-width: $min-sidebar-width;
+    gap: $column-gap-xl;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.main-content {
+    flex: 1;
+    gap: $column-gap-xl;
+}

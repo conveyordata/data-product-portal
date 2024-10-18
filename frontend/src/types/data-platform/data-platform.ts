@@ -1,4 +1,4 @@
-export enum DataPlataforms {
+export enum DataPlatforms {
     AWS = 'aws',
     Conveyor = 'conveyor',
     ConveyorNotebook = 'conveyor-notebook',
@@ -7,14 +7,18 @@ export enum DataPlataforms {
     Collibra = 'collibra',
     Datahub = 'datahub',
     Snowflake = 'snowflake',
+    S3 = 's3',
+    Glue = 'glue',
 }
 
 export type DataPlatform =
-    | DataPlataforms.AWS
-    | DataPlataforms.Conveyor
-    | DataPlataforms.ConveyorNotebook
-    | DataPlataforms.Databricks
-    | DataPlataforms.Collibra
-    | DataPlataforms.Datahub
-    | DataPlataforms.Tableau
-    | DataPlataforms.Snowflake;
+    | DataPlatforms.AWS
+    | DataPlatforms.Conveyor
+    | DataPlatforms.ConveyorNotebook
+    | DataPlatforms.Databricks
+    | DataPlatforms.Collibra
+    | DataPlatforms.Datahub
+    | DataPlatforms.Tableau
+    | DataPlatforms.Snowflake
+    | DataPlatforms.S3
+    | DataPlatforms.Glue;
