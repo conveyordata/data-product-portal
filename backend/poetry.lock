@@ -52,16 +52,17 @@ trio = ["trio (>=0.23)"]
 
 [[package]]
 name = "asgi-correlation-id"
-version = "4.3.3"
+version = "4.3.4"
 description = "Middleware correlating project logs to individual requests"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "asgi_correlation_id-4.3.3-py3-none-any.whl", hash = "sha256:62ba38c359aa004c1c3e2b8e0cdf0e8ad4aa5a93864eaadc46e77d5c142a206a"},
-    {file = "asgi_correlation_id-4.3.3.tar.gz", hash = "sha256:25d89b52f3d32c0f3b4915a9fc38d9cffc7395960d05910bdce5c13023dc237b"},
+    {file = "asgi_correlation_id-4.3.4-py3-none-any.whl", hash = "sha256:36ce69b06c7d96b4acb89c7556a4c4f01a972463d3d49c675026cbbd08e9a0a2"},
+    {file = "asgi_correlation_id-4.3.4.tar.gz", hash = "sha256:ea6bc310380373cb9f731dc2e8b2b6fb978a76afe33f7a2384f697b8d6cd811d"},
 ]
 
 [package.dependencies]
+packaging = "*"
 starlette = ">=0.18"
 
 [package.extras]
@@ -1519,4 +1520,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "eae4ab62cee6361c80bf2f725c7b96ae1008bdfea80f5569cb14570aac840a60"
+content-hash = "070c2e0cf4f1b313fc89a0f5bf9000cc47bf806b7421d549c72b6a9fc996ec67"
