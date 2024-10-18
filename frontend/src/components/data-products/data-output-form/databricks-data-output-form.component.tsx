@@ -101,24 +101,6 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
             </Form.Item>
             <Form.Item<DatabricksDataOutput>
                 required
-                name={'table'}
-                label={t('Table')}
-                tooltip={t('The table that your data output can access')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please input the table this data output can access'),
-                    },
-                    {
-                        required: true,
-                        message: t('Please input the suffix of the Databricks database for this data output'),
-                    },
-                ]}
-            >
-                <Input/>
-            </Form.Item>
-            <Form.Item<DatabricksDataOutput>
-                required
                 hidden={true}
                 name={'configuration_type'}
                 initialValue={"DatabricksDataOutput"}

@@ -2,7 +2,7 @@
 import { TableColumnsType } from 'antd';
 import { TFunction } from 'i18next';
 import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
-import { DatabricksDataOutputContract, GlueDataOutputContract } from '@/types/data-output';
+import { DatabricksDataOutputContract } from '@/types/data-output';
 
 type Props = {
     t: TFunction;

@@ -17,7 +17,7 @@ import { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.
 import { ApiUrl, buildUrl } from '@/api/api-urls';
 
 type Props = {
-    mode: 'create'|'edit';
+    mode: 'edit';
     dataOutputId: string
 };
 
@@ -27,7 +27,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const { data: currentDataOutput, isFetching: isFetchingInitialValues } = useGetDataOutputByIdQuery(
         dataOutputId || '',
         {
-            skip: mode === 'create' || !dataOutputId,
+            skip: !dataOutputId,
         },
     );
     const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id!, {skip: isFetchingInitialValues || !dataOutputId || mode === 'create' });
@@ -41,7 +41,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             currentUser?.id &&
             (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
     );
-    const canFillInForm = mode === 'create' || canEditForm;
+    const canFillInForm = canEditForm;
     const isLoading = isFetchingInitialValues;
 
     const handleArchiveDataProduct = async () => {
@@ -60,27 +60,6 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     };
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
-            // if (mode === 'create') {
-            //     // TODO This is ugly code. We pass along the entire form in the configuration currently.
-            //     // Should be rewritten to only pass the config attributes
-            //     const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
-            //     const request: DataOutputCreate = {
-            //         name: values.name,
-            //         external_id: generateExternalIdFromName(values.name ?? ''),
-            //         description: values.description,
-            //         configuration: config,
-            //         platform_id: platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase())[0].platform.id!,
-            //         service_id: platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase())[0].service.id!,
-            //         owner_id: dataProductId,
-            //         sourceAligned: sourceAligned === undefined ? false : sourceAligned,
-            //         status: DataOutputStatus.Active
-            //     };
-            //     await createDataOutput(request).unwrap();
-            //     dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
-            //     modalCallbackOnSubmit();
-            //     navigate(createDataProductIdPath(dataProductId));
-            // }
-
             if (mode === 'edit' && dataOutputId && currentDataOutput) {
                 if (!canEditForm) {
                     dispatchMessage({ content: t('You are not allowed to edit this data output'), type: 'error' });
@@ -90,14 +69,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 // TODO Figure out what fields are updateable and which are not
                 const request: DataOutputUpdateRequest = {
                     name: values.name,
-                    // external_id: values.external_id,
                     description: values.description,
-                    // owner_id: values.owner_id,
-                    // platform_id: values.platform_id,
-                    // service_id: values.service_id,
-                    // status: values.status,
-                    // configuration: values.configuration,
-                    // sourceAligned: values.sourceAligned
                 };
                 console.log(buildUrl(ApiUrl.DataOutputGet, { dataOutputId: dataOutputId }),)
                 const response = await updateDataOutput({
@@ -124,8 +96,6 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
         form.resetFields();
         if (mode === 'edit' && dataOutputId && currentDataOutput) {
             navigate(createDataOutputIdPath(dataOutputId, currentDataOutput.owner.id));
-        // } else {
-        //     navigate(ApplicationPaths.DataOutputs);
         }
     };
 
@@ -135,22 +105,9 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 owner_id: currentDataOutput.owner_id,
                 name: currentDataOutput.name,
                 description: currentDataOutput.description,
-                // type_id: currentDataProduct.type.id,
-                // business_area_id: currentDataProduct.business_area.id,
-                // tags: currentDataProduct.tags.map((tag) => tag.value),
-                // owners: getDataProductOwnerIds(currentDataProduct),
             });
         }
     }, [currentDataOutput, mode]);
-
-    // useEffect(() => {
-    //     if (mode === 'create') {
-    //         form.setFieldsValue({
-    //             external_id: generateExternalIdFromName(dataProductNameValue ?? ''),
-    //             owner: currentDataOutput?.name,
-    //         });
-    //     }
-    // }, [dataProductNameValue]);
 
     return (
         <Form
@@ -195,62 +152,6 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             >
                 <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            {/* <Form.Item<DataOutputCreateFormSchema>
-                name={'is_source_aligned'} valuePropName="checked"
-            >
-                <Checkbox>{t('Is source aligned')}</Checkbox>
-            </Form.Item>
-            <Form.Item>
-                <Space wrap className={styles.radioButtonContainer}>
-                    {dataPlatforms
-                        .filter((dataPlatform) => dataPlatform.hasConfig)
-                        .map((dataPlatform) => (
-                            <DataOutputPlatformTile<DataPlatform>
-                                key={dataPlatform.value}
-                                dataPlatform={dataPlatform}
-                                environments={[]}
-                                isDisabled={isLoading}
-                                isLoading={isLoading}
-                                isSelected={selectedDataPlatform !== undefined && dataPlatform === selectedDataPlatform}
-                                onTileClick={onDataPlatformClick}
-                            />
-                        ))}
-                </Space>
-            </Form.Item>
-            <Form.Item>
-                <Space wrap className={styles.radioButtonContainer}>
-                    {selectedDataPlatform?.children?.map((dataPlatform) => (
-                        <DataOutputPlatformTile<DataPlatform>
-                            key={dataPlatform.value}
-                            dataPlatform={dataPlatform}
-                            environments={[]}
-                            isDisabled={isLoading}
-                            isSelected={selectedConfiguration !== undefined && dataPlatform === selectedConfiguration}
-                            isLoading={isLoading}
-                            onTileClick={onConfigurationClick}
-                        />
-                    ))}
-                </Space>
-            </Form.Item>
-            {(() => {
-                switch (selectedConfiguration?.value) {
-                    case DataPlatforms.S3:
-                        return (
-                            <S3DataOutputForm
-                                form={form}
-                                identifiers={identifiers}
-                                sourceAligned={sourceAligned}
-                                external_id={currentDataProduct!.external_id}
-                                mode={mode}
-                                dataProductId={dataProductId}
-                            />
-                        );
-                    case DataPlatforms.Glue:
-                        return <GlueDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct!.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
-                    default:
-                        return null;
-                }
-            })()} */}
             <Form.Item>
                 <Space>
                     <Button

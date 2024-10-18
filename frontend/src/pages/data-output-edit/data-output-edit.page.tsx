@@ -11,7 +11,7 @@ export function DataOutputEdit() {
     const navigate = useNavigate();
 
     if (!dataOutputId || isError) {
-        navigate(ApplicationPaths.DataOutputs, { replace: true });
+        navigate(ApplicationPaths.DataProducts, { replace: true });
         return null;
     }
 
