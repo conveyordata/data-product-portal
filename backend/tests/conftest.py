@@ -1,5 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session, scoped_session
 
 from app.data_product_memberships.model import DataProductUserRole
 from app.database.database import Base, get_db_session
@@ -80,7 +81,7 @@ def default_dataset_payload():
 
 
 @pytest.fixture(autouse=True)
-def clear_db(session: TestingSessionLocal) -> None:
+def clear_db(session: scoped_session[Session]) -> None:
     """Clear database after each test."""
     for table in reversed(Base.metadata.sorted_tables):
         session.execute(table.delete())
