@@ -321,5 +321,7 @@
     "Include entire schema": "Include entire schema",
     "Please input the path of this data output": "Please input the path of this data output",
     "Resulting path": "Resulting path",
-    "Path": "Path"
+    "Path": "Path",
+    "S3 path": "S3 path",
+    "Databricks schema": "Databricks schema"
 }

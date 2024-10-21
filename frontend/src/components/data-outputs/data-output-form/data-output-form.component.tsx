@@ -30,13 +30,12 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             skip: !dataOutputId,
         },
     );
-    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id!, {skip: isFetchingInitialValues || !dataOutputId || mode === 'create' });
+    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id!, {skip: isFetchingInitialValues || !dataOutputId});
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
     const [archiveDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
     const canEditForm = Boolean(
-        mode === 'edit' &&
             dataProduct &&
             currentUser?.id &&
             (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
@@ -60,7 +59,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     };
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
-            if (mode === 'edit' && dataOutputId && currentDataOutput) {
+            if (dataOutputId && currentDataOutput) {
                 if (!canEditForm) {
                     dispatchMessage({ content: t('You are not allowed to edit this data output'), type: 'error' });
                     return;
@@ -94,13 +93,13 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
 
     const onCancel = () => {
         form.resetFields();
-        if (mode === 'edit' && dataOutputId && currentDataOutput) {
+        if (dataOutputId && currentDataOutput) {
             navigate(createDataOutputIdPath(dataOutputId, currentDataOutput.owner.id));
         }
     };
 
     useEffect(() => {
-        if (currentDataOutput && mode === 'edit') {
+        if (currentDataOutput) {
             form.setFieldsValue({
                 owner_id: currentDataOutput.owner_id,
                 name: currentDataOutput.name,

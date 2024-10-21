@@ -41,10 +41,9 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const [identifiers, setIdentifiers] = useState<string[]>([]);
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
-    const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
+    const [form] = Form.useForm();
     const sourceAligned = Form.useWatch('is_source_aligned', form);
     const dataProductNameValue = Form.useWatch('name', form);
-    const canFillInForm = mode === 'create';
     const isLoading = isCreating || isCreating || isFetchingInitialValues;
 
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery()
@@ -55,37 +54,33 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
-            if (mode === 'create') {
-                // TODO This is ugly code. We pass along the entire form in the configuration currently.
-                // Should be rewritten to only pass the config attributes
-                const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
-                switch (selectedConfiguration?.value) {
-                    case DataPlatforms.S3:
-                        config["configuration_type"] = "S3DataOutput"
-                        break
-                    case DataPlatforms.Glue:
-                        config["configuration_type"] = "GlueDataOutput"
-                        break
-                    case DataPlatforms.Databricks:
-                        config["configuration_type"] = "DatabricksDataOutput"
-                        break
-                }
-                const request: DataOutputCreate = {
-                    name: values.name,
-                    external_id: generateExternalIdFromName(values.name ?? ''),
-                    description: values.description,
-                    configuration: config,
-                    platform_id: platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase())[0].platform.id!,
-                    service_id: platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase())[0].service.id!,
-                    owner_id: dataProductId,
-                    sourceAligned: sourceAligned === undefined ? false : sourceAligned,
-                    status: DataOutputStatus.Active
-                };
-                await createDataOutput(request).unwrap();
-                dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
-                modalCallbackOnSubmit();
-                navigate(createDataProductIdPath(dataProductId));
+            const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
+            switch (selectedConfiguration?.value) {
+                case DataPlatforms.S3:
+                    config["configuration_type"] = "S3DataOutput"
+                    break
+                case DataPlatforms.Glue:
+                    config["configuration_type"] = "GlueDataOutput"
+                    break
+                case DataPlatforms.Databricks:
+                    config["configuration_type"] = "DatabricksDataOutput"
+                    break
             }
+            const request: DataOutputCreate = {
+                name: values.name,
+                external_id: generateExternalIdFromName(values.name ?? ''),
+                description: values.description,
+                configuration: config,
+                platform_id: platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase())[0].platform.id!,
+                service_id: platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase())[0].service.id!,
+                owner_id: dataProductId,
+                sourceAligned: sourceAligned === undefined ? false : sourceAligned,
+                status: DataOutputStatus.Active
+            };
+            await createDataOutput(request).unwrap();
+            dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
+            modalCallbackOnSubmit();
+            navigate(createDataProductIdPath(dataProductId));
 
             form.resetFields();
         } catch (e) {
@@ -147,7 +142,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             autoComplete={'off'}
             requiredMark={'optional'}
             labelWrap
-            disabled={isLoading || !canFillInForm}
+            disabled={isLoading}
         >
             <Form.Item<DataOutputCreateFormSchema>
                 name={'name'}
