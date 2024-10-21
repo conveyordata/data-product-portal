@@ -171,20 +171,6 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
-                        // case ApplicationPaths.Settings:
-                        //     Object.assign(breadcrumbItem, {
-                        //         title: (
-                        //             <Space
-                        //                 classNames={{
-                        //                     item: styles.breadcrumbItem,
-                        //                 }}
-                        //             >
-                        //                 <SettingOutlined />
-                        //                 {t('Settings')}
-                        //             </Space>
-                        //         ),
-                        //     });
-                        //     break;
                         case ApplicationPaths.PlatformsConfigs:
                             Object.assign(breadcrumbItem, {
                                 title: (

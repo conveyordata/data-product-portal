@@ -12,6 +12,7 @@ import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { AddDatasetPopup } from '../../../../data-product/components/data-product-tabs/data-output-tab/components/add-dataset-popup/add-dataset-popup.tsx'
 import { DataOutputDatasetLink } from '@/types/data-output';
+import { getIsDataOutputOwner } from '@/utils/data-output-user-role.helper.ts';
 
 type Props = {
     dataOutputId: string;
@@ -40,9 +41,8 @@ export function DatasetTab({ dataOutputId }: Props) {
     }, [dataOutput?.dataset_links, searchTerm]);
 
     const isDataOutputOwner = useMemo(() => {
-        return true // TODO
         if (!dataOutput || !user) return false;
-        // return getIsDataOutputOwner(dataOutput, user.id) || user.is_admin;
+        return getIsDataOutputOwner(dataOutput, user.id) || user.is_admin;
     }, [dataOutput?.id, user?.id]);
 
     return (
