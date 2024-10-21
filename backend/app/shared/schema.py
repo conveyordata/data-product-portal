@@ -30,7 +30,9 @@ class ORMModel(BaseModel):
                     if self.is_pydantic(value):
                         parsed_schema[key] = value.Meta.orm_model(**value.dict())
             except AttributeError:
-                parsed_schema[key] = value.model_dump_json()
+                raise AttributeError(
+                    "Found nested Pydantic model but Meta.orm_model was not specified."
+                )
         return parsed_schema
 
 
