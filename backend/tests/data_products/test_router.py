@@ -60,6 +60,15 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
 
+    def test_get_data_product_by_user_id(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductMembershipFactory(user=user).data_product
+
+        response = self.get_data_product_by_user_id(client, user.id)
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+        assert response.json()[0]["id"] == str(data_product.id)
+
     def test_update_data_product_no_member(self, payload, client):
         data_product = DataProductFactory()
         update_payload = deepcopy(payload)
@@ -135,3 +144,7 @@ class TestDataProductsRouter:
     @staticmethod
     def get_data_product_by_id(client, data_product_id):
         return client.get(f"{ENDPOINT}/{data_product_id}")
+
+    @staticmethod
+    def get_data_product_by_user_id(client, user_id):
+        return client.get(f"{ENDPOINT}/user/{user_id}")
