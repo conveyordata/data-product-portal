@@ -30,7 +30,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             skip: !dataOutputId,
         },
     );
-    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id!, {skip: isFetchingInitialValues || !dataOutputId});
+    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? "", {skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId});
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
     const [archiveDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();

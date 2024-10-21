@@ -54,35 +54,37 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
-            const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
-            switch (selectedConfiguration?.value) {
-                case DataPlatforms.S3:
-                    config["configuration_type"] = "S3DataOutput"
-                    break
-                case DataPlatforms.Glue:
-                    config["configuration_type"] = "GlueDataOutput"
-                    break
-                case DataPlatforms.Databricks:
-                    config["configuration_type"] = "DatabricksDataOutput"
-                    break
-            }
-            const request: DataOutputCreate = {
-                name: values.name,
-                external_id: generateExternalIdFromName(values.name ?? ''),
-                description: values.description,
-                configuration: config,
-                platform_id: platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase())[0].platform.id!,
-                service_id: platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase())[0].service.id!,
-                owner_id: dataProductId,
-                sourceAligned: sourceAligned === undefined ? false : sourceAligned,
-                status: DataOutputStatus.Active
-            };
-            await createDataOutput(request).unwrap();
-            dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
-            modalCallbackOnSubmit();
-            navigate(createDataProductIdPath(dataProductId));
+            if (!platformsLoading) {
+                const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
+                switch (selectedConfiguration?.value) {
+                    case DataPlatforms.S3:
+                        config["configuration_type"] = "S3DataOutput"
+                        break
+                    case DataPlatforms.Glue:
+                        config["configuration_type"] = "GlueDataOutput"
+                        break
+                    case DataPlatforms.Databricks:
+                        config["configuration_type"] = "DatabricksDataOutput"
+                        break
+                }
+                const request: DataOutputCreate = {
+                    name: values.name,
+                    external_id: generateExternalIdFromName(values.name ?? ''),
+                    description: values.description,
+                    configuration: config,
+                    platform_id: platformConfig!.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase())[0].platform.id,
+                    service_id: platformConfig!.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase())[0].service.id,
+                    owner_id: dataProductId,
+                    sourceAligned: sourceAligned === undefined ? false : sourceAligned,
+                    status: DataOutputStatus.Active
+                };
+                await createDataOutput(request).unwrap();
+                dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
+                modalCallbackOnSubmit();
+                navigate(createDataProductIdPath(dataProductId));
 
-            form.resetFields();
+                form.resetFields();
+            }
         } catch (_e) {
             const errorMessage = 'Failed to create data output';
             dispatchMessage({ content: errorMessage, type: 'error' });
@@ -110,14 +112,16 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     };
 
     const onConfigurationClick = (dataPlatform: DataPlatform) => {
-        const dropdown = selectedDataPlatform?.children?.filter((platform) => platform.value === dataPlatform).at(0);
-        if (selectedConfiguration !== undefined && selectedConfiguration === dropdown) {
-            setSelectedConfiguration(undefined);
-            setIdentifiers([]);
-        } else {
-            setIdentifiers([]);
-            setSelectedConfiguration(dropdown);
-            setIdentifiers(platformConfig?.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === dropdown?.value.toLowerCase())[0].config!);
+        if (!platformsLoading) {
+            const dropdown = selectedDataPlatform?.children?.filter((platform) => platform.value === dataPlatform).at(0);
+            if (selectedConfiguration !== undefined && selectedConfiguration === dropdown) {
+                setSelectedConfiguration(undefined);
+                setIdentifiers([]);
+            } else {
+                setIdentifiers([]);
+                setSelectedConfiguration(dropdown);
+                setIdentifiers(platformConfig!.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === dropdown?.value.toLowerCase())[0].config);
+            }
         }
     };
 
