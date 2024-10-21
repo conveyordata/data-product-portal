@@ -84,4 +84,5 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("data_outputs_datasets")
+    op.drop_table("data_output_configurations")
     op.drop_table("data_outputs")
