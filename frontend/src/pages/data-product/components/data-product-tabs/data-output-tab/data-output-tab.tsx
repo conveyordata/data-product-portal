@@ -17,12 +17,12 @@ type Props = {
     dataProductId: string;
 };
 
-function filterDataOutputs(data_outputs: DataOutputsGetContract[], searchTerm: string) {
+function filterDataOutputs(data_outputs: DataOutputsGetContract, searchTerm: string) {
     return (
         data_outputs.filter(
-            (data_outputs) =>
-                data_outputs?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                data_outputs?.external_id?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+            (data_output) =>
+                data_output?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                data_output?.external_id?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }

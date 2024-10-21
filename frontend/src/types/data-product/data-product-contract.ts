@@ -25,7 +25,7 @@ export interface DataProductContract {
     business_area: BusinessAreaContract;
     business_area_id: string;
     external_id: string;
-    data_outputs: DataOutputsGetContract[];
+    data_outputs: DataOutputsGetContract;
 }
 
 export interface DataProductModel extends DataProductContract {}
