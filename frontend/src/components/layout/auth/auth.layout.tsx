@@ -32,7 +32,7 @@ export const AuthLayout = () => {
                     }),
                 );
             }
-        } catch (_e) {
+        } catch (e) {
             console.error('Failed to authorize user', e);
         }
     };
