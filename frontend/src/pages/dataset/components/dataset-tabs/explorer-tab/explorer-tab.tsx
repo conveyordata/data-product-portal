@@ -48,7 +48,6 @@ function LinkToDataOutputNode({ id, product_id }: {id: string, product_id: strin
 }
 
 function generateDatasetOutputNodes(
-    dataset: DatasetContract,
     datasetLinks: DataOutputLink[],
     defaultNodePosition: XYPosition,
 ): Node[] {
@@ -141,7 +140,7 @@ export function ExplorerTab({ datasetId }: Props) {
         const approvedDataProductLinks = dataset.data_product_links.filter(
             (link) => link.status !== DataProductDatasetLinkStatus.Denied,
         );
-        const dataInputNodes: Node[] = generateDatasetOutputNodes(dataset, dataset.data_output_links, defaultNodePosition);
+        const dataInputNodes: Node[] = generateDatasetOutputNodes(dataset.data_output_links, defaultNodePosition);
         const datasetNodes: Node[] = generateDatasetNodes(dataset, approvedDataProductLinks, defaultNodePosition);
         const datasetEdges: Edge[] = generateDatasetEdges(dataset.id, approvedDataProductLinks);
         const dataInputEdges: Edge[] = generateDatasetOutputEdges(dataset.id, dataset.data_output_links);
