@@ -67,7 +67,7 @@ export function EnvironmentConfigCreateForm() {
             await createEnvPlatformServiceConfig({ environmentId, body }).unwrap();
             dispatchMessage({ content: t('Environment Configuration created successfully'), type: 'success' });
             navigate(buildUrl(ApplicationPaths.EnvironmentConfigs, { environmentId }));
-        } catch (e) {
+        } catch (_e) {
             const errorMessage = t('Failed to create environment configuration');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }

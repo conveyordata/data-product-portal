@@ -62,7 +62,7 @@ export function AddDataProductPopup({ onClose, isOpen, datasetId }: Props) {
             try {
                 await requestDatasetAccessForDataProduct({ datasetId, dataProductId }).unwrap();
                 dispatchMessage({ content: t('Dataset access has been requested'), type: 'success' });
-            } catch (error) {
+            } catch (_error) {
                 dispatchMessage({ content: t('Failed to grant access to the data product'), type: 'error' });
             }
         },

@@ -33,7 +33,7 @@ export function AboutTab({ datasetId }: Props) {
             try {
                 await updateDatasetAbout({ datasetId, about: content }).unwrap();
                 dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
-            } catch (error) {
+            } catch (_error) {
                 dispatchMessage({ content: t('Could not update about section'), type: 'error' });
             }
         } else {

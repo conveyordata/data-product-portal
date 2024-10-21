@@ -43,7 +43,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
 
             await removeUserFromDataProduct({ membershipId }).unwrap();
             dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
         }
     };
@@ -52,7 +52,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         try {
             await grantMembershipAccess({ membershipId }).unwrap();
             dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
         }
     };
@@ -61,7 +61,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         try {
             await denyMembershipAccess({ membershipId }).unwrap();
             dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
         }
     };
@@ -71,7 +71,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         try {
             await updateMembershipRole({ dataProductId: dataProduct.id, membershipId, role }).unwrap();
             dispatchMessage({ content: t('User role has been updated'), type: 'success' });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Failed to update user role'), type: 'error' });
         }
     };

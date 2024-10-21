@@ -32,7 +32,7 @@ export const AuthLayout = () => {
                     }),
                 );
             }
-        } catch (e) {
+        } catch (_e) {
             console.error('Failed to authorize user', e);
         }
     };
@@ -63,7 +63,7 @@ export const AuthLayout = () => {
         events.addUserLoaded(async () => {
             try {
                 await handleAuthorizeUser();
-            } catch (e) {
+            } catch (_e) {
                 await signoutRedirect({
                     extraQueryParams: {
                         ...oidcCognitoParams,

@@ -83,7 +83,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             navigate(createDataProductIdPath(dataProductId));
 
             form.resetFields();
-        } catch (e) {
+        } catch (_e) {
             const errorMessage = 'Failed to create data output';
             dispatchMessage({ content: errorMessage, type: 'error' });
         }

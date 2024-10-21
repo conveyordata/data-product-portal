@@ -49,7 +49,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 await archiveDataOutput(currentDataOutput?.id).unwrap();
                 dispatchMessage({ content: t('Data output archived successfully'), type: 'success' });
                 navigate(createDataProductIdPath(dataProduct!.id));
-            } catch (error) {
+            } catch (_error) {
                 dispatchMessage({
                     content: t('Failed to archive data output, please try again later'),
                     type: 'error',
@@ -81,7 +81,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             }
 
             form.resetFields();
-        } catch (e) {
+        } catch (_e) {
             const errorMessage = 'Failed to create data output';
             dispatchMessage({ content: errorMessage, type: 'error' });
         }

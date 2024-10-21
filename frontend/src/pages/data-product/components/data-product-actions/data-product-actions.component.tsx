@@ -128,7 +128,7 @@ export function DataProductActions({ dataProductId }: Props) {
                 } else {
                     dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
                 }
-            } catch (error) {
+            } catch (_error) {
                 dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
             }
         }
@@ -147,7 +147,7 @@ export function DataProductActions({ dataProductId }: Props) {
                             content: t('Failed to get Conveyor url'),
                         });
                     }
-                } catch (error) {
+                } catch (_error) {
                     dispatchMessage({
                         type: 'error',
                         content: t('Failed to get Conveyor url'),
@@ -165,7 +165,7 @@ export function DataProductActions({ dataProductId }: Props) {
                             content: t('Failed to get Conveyor Notebook url'),
                         });
                     }
-                } catch (error) {
+                } catch (_error) {
                     dispatchMessage({
                         type: 'error',
                         content: t('Failed to get Conveyor Notebook url'),

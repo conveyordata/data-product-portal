@@ -30,7 +30,7 @@ export function PlatformServiceConfig() {
             setIsEdit(false);
             // TODO: Implement config update
             dispatchMessage({ content: t('Platform Service Configuration updated successfully'), type: 'success' });
-        } catch (e) {
+        } catch (_e) {
             dispatchMessage({ content: t('Invalid config format'), type: 'error' });
         }
     };

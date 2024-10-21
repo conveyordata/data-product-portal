@@ -58,7 +58,7 @@ export function PlatformServiceConfigCreateForm() {
             await createPlatformServiceConfig(request).unwrap();
             dispatchMessage({ content: t('Platform Service Configuration created successfully'), type: 'success' });
             navigate(ApplicationPaths.PlatformsConfigs);
-        } catch (e) {
+        } catch (_e) {
             const errorMessage = t('Failed to create platform service configuration');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }

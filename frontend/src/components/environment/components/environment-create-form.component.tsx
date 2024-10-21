@@ -35,7 +35,7 @@ export function EnvironmentCreateForm() {
             await createEnvironment(request).unwrap();
             dispatchMessage({ content: t('Environment created successfully'), type: 'success' });
             navigate(ApplicationPaths.Environments);
-        } catch (e) {
+        } catch (_e) {
             const errorMessage = t('Failed to create environment');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }

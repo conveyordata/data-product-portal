@@ -17,7 +17,7 @@ export const DataOutputRequestAccessButton = ({ dataOutputId, userId }: Props) =
         try {
             await userRequestDataOutputAcces({ dataOutputId, userId }).unwrap();
             dispatchMessage({ content: t('Request sent successfully'), type: 'success' });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Failed to request access to data output'), type: 'error' });
         }
     };
