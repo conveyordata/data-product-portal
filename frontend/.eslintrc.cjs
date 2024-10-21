@@ -23,5 +23,6 @@ module.exports = {
             {allowConstantExport: true},
         ],
         'import/newline-after-import': ['error', {count: 1}],
+        "@typescript-eslint/no-unused-vars": ["error", { "caughtErrorsIgnorePattern": "^_" }],
     },
 }

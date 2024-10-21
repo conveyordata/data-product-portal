@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
 from app.core.auth.auth import get_authenticated_user
+from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
@@ -65,6 +66,22 @@ async def only_dataproduct_dataset_link_owners(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only dataset owners can execute this action",
         )
+
+
+async def only_data_output_owners(
+    id: UUID,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+):
+    data_output = db.get(DataOutputModel, id)
+    if not data_output:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Data Output {id} not found",
+        )
+    return OnlyWithProductAccess()(
+        id=data_output.owner_id, authenticated_user=authenticated_user, db=db
+    )
 
 
 async def only_product_membership_owners(

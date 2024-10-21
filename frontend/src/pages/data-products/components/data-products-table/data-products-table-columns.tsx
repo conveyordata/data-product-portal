@@ -81,5 +81,12 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             },
             sorter: sorter.numberSorter(dp => dp.dataset_count),
         },
+        {
+            title: t('Produces'),
+            dataIndex: 'data_outputs_count',
+            render: (dataOutputCount: number) => {
+                return <TableCellItem text={i18n.t('{{count}} data outputs', { count: dataOutputCount })} />;
+            },
+        },
     ];
 };

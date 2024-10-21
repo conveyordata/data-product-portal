@@ -15,6 +15,8 @@ from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
+from app.data_outputs.model import DataOutput as DataOutputModel
+from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
     DataProductUserRole,
@@ -364,3 +366,6 @@ class DataProductService:
     def get_conveyor_ide_url(self, id: UUID, db: Session) -> str:
         data_product = db.get(DataProductModel, id)
         return CONVEYOR_SERVICE.generate_ide_url(data_product.external_id)
+
+    def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
+        return db.query(DataOutputModel).filter(DataOutputModel.owner_id == id).all()

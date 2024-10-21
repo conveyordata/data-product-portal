@@ -124,7 +124,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             }
 
             form.resetFields();
-        } catch (e) {
+        } catch (_e) {
             const errorMessage =
                 mode === 'edit' ? t('Failed to update data product') : t('Failed to create data product');
             dispatchMessage({ content: errorMessage, type: 'error' });
@@ -150,7 +150,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 await archiveDataProduct(currentDataProduct?.id).unwrap();
                 dispatchMessage({ content: t('Data product archived successfully'), type: 'success' });
                 navigate(ApplicationPaths.DataProducts);
-            } catch (error) {
+            } catch (_error) {
                 dispatchMessage({
                     content: t('Failed to archive data product, please try again later'),
                     type: 'error',

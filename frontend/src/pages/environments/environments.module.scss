@@ -1,0 +1,9 @@
+@import '@/styles/globals';
+@import '@/styles/variables';
+
+.container {
+    @extend .container;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: $column-gap-l;
+}

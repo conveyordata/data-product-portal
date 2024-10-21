@@ -37,7 +37,7 @@ export function AboutTab({ dataProductId }: Props) {
             try {
                 await updateDataProductAbout({ dataProductId: dataProductId, about: content }).unwrap();
                 dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
-            } catch (error) {
+            } catch (_error) {
                 dispatchMessage({ content: t('Could not update about section'), type: 'error' });
             }
         } else {

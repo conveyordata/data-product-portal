@@ -15,7 +15,7 @@ ENV PYTHONFAULTHANDLER=1 \
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 RUN curl -sSL https://install.python-poetry.org | python - && poetry --version
 
-COPY poetry.lock pyproject.toml alembic.ini sample_data.sql .
+COPY poetry.lock pyproject.toml alembic.ini sample_data.sql /
 
 RUN poetry install
 

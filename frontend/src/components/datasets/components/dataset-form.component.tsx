@@ -112,7 +112,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
             }
 
             form.resetFields();
-        } catch (e) {
+        } catch (_e) {
             const errorMessage = mode === 'edit' ? t('Failed to update dataset') : t('Failed to create dataset');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
@@ -137,7 +137,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 await archiveDataset(currentDataset?.id).unwrap();
                 dispatchMessage({ content: t('Dataset archived successfully'), type: 'success' });
                 navigate(ApplicationPaths.Datasets);
-            } catch (error) {
+            } catch (_error) {
                 dispatchMessage({
                     content: t('Failed to archive dataset, please try again later'),
                     type: 'error',

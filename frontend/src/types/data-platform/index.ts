@@ -1,1 +1,1 @@
-export { DataPlataforms, type DataPlatform } from './data-platform';
+export { DataPlatforms as DataPlatforms, type DataPlatform } from './data-platform';

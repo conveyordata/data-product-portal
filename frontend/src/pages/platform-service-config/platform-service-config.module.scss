@@ -1,0 +1,26 @@
+@import '@/styles/globals';
+@import '@/styles/variables';
+
+.container {
+    @extend .container;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: $column-gap-m;
+}
+
+.buttons-container {
+    @extend .container;
+    margin-top: $spacing-l;
+}
+
+.textarea-container {
+    width: 50%;
+
+    textarea {
+        padding: $spacing-m;
+
+        &:disabled {
+            color: #808080;
+        }
+    }
+}

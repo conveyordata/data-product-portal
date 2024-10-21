@@ -8,6 +8,8 @@ import { HistoryTab } from './history-tab/history-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
+import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
+import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab.tsx';
 import { AboutTab } from './about-tab/about-tab.tsx';
 import { TeamTab } from './team-tab/team-tab.tsx';
 import { ReactFlowProvider } from 'reactflow';
@@ -20,6 +22,7 @@ type Props = {
 enum TabKeys {
     About = 'about',
     DataProduct = 'data-product',
+    DataOutput = 'data-output',
     Team = 'team',
     Explorer = 'explorer',
     History = 'history',
@@ -48,6 +51,12 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 key: TabKeys.DataProduct,
                 icon: <Icon component={dataProductOutlineIcon} />,
                 children: <DataProductTab datasetId={datasetId} />,
+            },
+            {
+                label: t('Data Outputs'),
+                key: TabKeys.DataOutput,
+                icon: <Icon component={dataOutputOutlineIcon} />,
+                children: <DataOutputTab datasetId={datasetId} />,
             },
             {
                 label: t('Team'),

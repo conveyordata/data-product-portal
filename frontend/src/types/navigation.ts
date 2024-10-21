@@ -8,9 +8,20 @@ export enum ApplicationPaths {
     Dataset = '/datasets/:datasetId',
     DatasetNew = '/datasets/new',
     DatasetEdit = '/datasets/:datasetId/edit',
+    DataOutput = '/data-products/:dataProductId/:dataOutputId',
+    DataOutputNew = '/data-outputs/new',
+    DataOutputEdit = '/data-products/:dataProductId/:dataOutputId/edit',
     AuditLogs = '/audit-logs',
-    Settings = '/settings',
+    // Settings = '/settings',
     Logout = '/logout',
+    PlatformsConfigs = '/platforms-configs',
+    PlatformServiceConfigNew = '/platforms-configs/new',
+    PlatformServiceConfig = '/platforms-configs/:platformServiceConfigId',
+    Environments = '/environments',
+    EnvironmentConfigs = '/environments/:environmentId/configs',
+    EnvironmentConfig = '/environments/configs/:envConfigId',
+    EnvironmentConfigNew = '/environments/:environmentId/new',
+    EnvironmentNew = '/environments/new',
 }
 
 export const authenticatedPaths: string[] = [
@@ -22,20 +33,53 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.Datasets,
     ApplicationPaths.Dataset,
     ApplicationPaths.AuditLogs,
-    ApplicationPaths.Settings,
+    ApplicationPaths.DataOutput,
+    ApplicationPaths.DataOutputEdit,
+    // ApplicationPaths.Settings,
+    ApplicationPaths.PlatformsConfigs,
+    ApplicationPaths.PlatformServiceConfig,
+    ApplicationPaths.PlatformServiceConfigNew,
+    ApplicationPaths.Environments,
+    ApplicationPaths.EnvironmentNew,
+    ApplicationPaths.EnvironmentConfig,
+    ApplicationPaths.EnvironmentConfigs,
+    ApplicationPaths.EnvironmentConfigNew,
 ];
 
 export function createDataProductIdPath(dataProductId: string) {
     return ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId));
 }
 
+export function createDataOutputIdPath(dataOutputId: string, dataProductId: string) {
+    return ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(':dataOutputId', encodeURIComponent(dataOutputId));
+}
+
 export function createDatasetIdPath(datasetId: string) {
     return ApplicationPaths.Dataset.replace(':datasetId', encodeURIComponent(datasetId));
 }
 
+export function createPlatformServiceConfigIdPath(platformServiceConfigId: string) {
+    return ApplicationPaths.PlatformServiceConfig.replace(
+        ':platformServiceConfigId',
+        encodeURIComponent(platformServiceConfigId),
+    );
+}
+
+export function createEnvironmentConfigsPath(environmentId: string) {
+    return ApplicationPaths.EnvironmentConfigs.replace(':environmentId', encodeURIComponent(environmentId));
+}
+
+export function createEnvironmentConfigPath(envConfigId: string) {
+    return ApplicationPaths.EnvironmentConfig.replace(':envConfigId', encodeURIComponent(envConfigId));
+}
+
 export enum DynamicPathParams {
     DataProductId = 'dataProductId',
+    DataOutputId = 'dataOutputId',
     DatasetId = 'datasetId',
+    PlatformServiceConfigId = 'platformServiceConfigId',
+    EnvironmentId = 'environmentId',
+    EnvConfigId = 'envConfigId',
 }
 
 export enum ApplicationPageTitles {
@@ -45,5 +89,5 @@ export enum ApplicationPageTitles {
     Datasets = 'Datasets',
     Dataset = 'Dataset',
     AuditLogs = 'Audit Logs',
-    Settings = 'Settings',
+    // Settings = 'Settings',
 }
