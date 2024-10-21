@@ -316,5 +316,10 @@
     "Database suffix": "Database suffix",
     "The suffix of the Databricks schema to link the data output to": "The suffix of the Databricks schema to link the data output to",
     "Please input the name of the Databricks schema for this data output": "Please input the name of the Databricks schema for this data output",
-    "The name of the Databricks schema to link the data output to": "The name of the Databricks schema to link the data output to"
+    "The name of the Databricks schema to link the data output to": "The name of the Databricks schema to link the data output to",
+    "The name of the path to give write access to": "The name of the path to give write access to",
+    "Include entire schema": "Include entire schema",
+    "Please input the path of this data output": "Please input the path of this data output",
+    "Resulting path": "Resulting path",
+    "Path": "Path"
 }
