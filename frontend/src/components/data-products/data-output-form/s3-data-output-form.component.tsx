@@ -21,18 +21,7 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
     const { t } = useTranslation();
 
     const bucketOptions = identifiers?.map((bucket) => ({ label: bucket, value: bucket }));
-    // const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const dataProductNameValue: string = Form.useWatch('temp_path', form);
-    // const canFillInForm = mode === 'create';
-    // const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
-    // const isLoading = isCreating || isCreating || isFetchingInitialValues;
-    // const onCancel = () => {
-    //     form.resetFields();
-    // };
-
-    // const onSubmitFailed: FormProps<DataOutputConfiguration>['onFinishFailed'] = () => {
-    //     dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
-    // };
     useEffect(() => {
         let path = external_id + "/"
         if (sourceAligned) {
@@ -44,8 +33,6 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
             form.setFieldsValue({ path: path });
         }
     }, [dataProductNameValue, sourceAligned]);
-
-    // TODO form is not really interactive?
 
     return (
         <div>
@@ -60,11 +47,9 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
                 ]}
             >
                 <Select
-                    //loading={isFetchingDataProductTypes}
                     allowClear
                     showSearch
                     options={bucketOptions}
-                    //filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
             <Form.Item<S3DataOutput & { temp_path: string }>

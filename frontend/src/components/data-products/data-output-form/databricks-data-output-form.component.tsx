@@ -12,28 +12,7 @@ type Props = {
 
 export function DatabricksDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
-    // const navigate = useNavigate();
-    // const [configurationForm, setConfigurationForm] = useState<Element | null>();
-    // const [selectedDataPlatform, setSelectedDataPlatform] = useState<
-    //     CustomDropdownItemProps<DataPlatforms> | undefined
-    // >(undefined);
-    // const [selectedConfiguration, setSelectedConfiguration] = useState<
-    //     CustomDropdownItemProps<DataPlatforms> | undefined
-    // >(undefined);
-    // const { data: _, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
-
     let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
-    // const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
-    // const canFillInForm = mode === 'create';
-    // const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
-    // const isLoading = isCreating || isCreating || isFetchingInitialValues;
-    // const onCancel = () => {
-    //     form.resetFields();
-    // };
-
-    // const onSubmitFailed: FormProps<DataOutputConfiguration>['onFinishFailed'] = () => {
-    //     dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
-    // };
 
     useEffect(() => {
         let databaseOptionsList = identifiers //TODO
@@ -52,7 +31,6 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                 name={'schema'}
                 label={t('Databricks schema')}
                 tooltip={t('The name of the Databricks schema to link the data output to')}
-                //hidden={!sourceAligned}
                 rules={[
                     {
                         required: true,
@@ -61,20 +39,17 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                 ]}
             >
                 <Select
-                    //loading={isFetchingDataProductTypes}
                     allowClear
                     showSearch
                     mode='tags'
                     disabled={!sourceAligned}
                     onChange={value => {
-                        // update data only when select one item or clear action
                         if (value.length > 0) {
                             form.setFieldsValue({ database: value[0] });
                         }
                     }}
                     maxCount={1}
                     options={databaseOptions}
-                    //filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
             <Form.Item<DatabricksDataOutput & { temp_suffix: string }>
@@ -83,20 +58,16 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                 tooltip={t('The suffix of the Databricks schema to link the data output to')}
             >
                 <Select
-                    //loading={isFetchingDataProductTypes}
                     allowClear
                     maxCount={1}
                     showSearch
                     mode='tags'
                     options={[]} // TODO
                     onChange={value => {
-                        // update data only when select one item or clear action
                         if (value.length > 0) {
                             form.setFieldsValue({ database_suffix: value[0] });
                         }
                     }}
-
-                    //filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
             <Form.Item<DatabricksDataOutput>
