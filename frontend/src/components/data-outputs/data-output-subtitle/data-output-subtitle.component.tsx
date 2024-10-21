@@ -25,8 +25,8 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
             const databricks_configuration = data_output.configuration as DatabricksDataOutputContract;
             return <Flex vertical>
                     <div>
-                    <Typography.Text strong>Databricks database: </Typography.Text>
-                    <Typography.Text>{databricks_configuration.database}</Typography.Text>
+                    <Typography.Text strong>Databricks schema: </Typography.Text>
+                    <Typography.Text>{databricks_configuration.schema}</Typography.Text>
                     </div>
                 </Flex>
         }

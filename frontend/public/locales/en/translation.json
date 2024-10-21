@@ -313,5 +313,8 @@
     "Are you sure you want to cancel the request to link {{name}} to the data output?": "Are you sure you want to cancel the request to link {{name}} to the data output?",
     "Please input the suffix of the Glue database for this data output": "Please input the suffix of the Glue database for this data output",
     "The suffix of the Glue database to link the data output to": "The suffix of the Glue database to link the data output to",
-    "Database suffix": "Database suffix"
+    "Database suffix": "Database suffix",
+    "The suffix of the Databricks schema to link the data output to": "The suffix of the Databricks schema to link the data output to",
+    "Please input the name of the Databricks schema for this data output": "Please input the name of the Databricks schema for this data output",
+    "The name of the Databricks schema to link the data output to": "The name of the Databricks schema to link the data output to"
 }

@@ -26,12 +26,12 @@ export const getDatabricksTechnicalInformationColumns = ({
             width: '30%',
         },
         {
-            title: t('Database'),
-            dataIndex: 'database',
+            title: t('Schema'),
+            dataIndex: 'schema',
             render: (_, { data_output }) => {
                 const configuration: DatabricksDataOutputContract = data_output.configuration as DatabricksDataOutputContract
                 // TODO figure out how to use product aligned databases here and get their ARN?
-                return configuration.database
+                return configuration.schema
             },
             width: '30%',
         },

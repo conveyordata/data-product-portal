@@ -49,14 +49,14 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
     return (
         <div>
             <Form.Item<DatabricksDataOutput>
-                name={'database'}
-                label={t('Databricks database')}
-                tooltip={t('The name of the Databricks database to link the data output to')}
+                name={'schema'}
+                label={t('Databricks schema')}
+                tooltip={t('The name of the Databricks schema to link the data output to')}
                 //hidden={!sourceAligned}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the Databricks database for this data output'),
+                        message: t('Please input the name of the Databricks schema for this data output'),
                     },
                 ]}
             >
@@ -78,9 +78,9 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                 />
             </Form.Item>
             <Form.Item<DatabricksDataOutput & { temp_suffix: string }>
-                name={'database_suffix'}
-                label={t('Database suffix')}
-                tooltip={t('The suffix of the Databricks database to link the data output to')}
+                name={'schema_suffix'}
+                label={t('Schema suffix')}
+                tooltip={t('The suffix of the Databricks schema to link the data output to')}
             >
                 <Select
                     //loading={isFetchingDataProductTypes}
