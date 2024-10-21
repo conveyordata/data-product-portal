@@ -16,9 +16,7 @@ from app.core.aws.boto3_clients import get_client
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.data_outputs.model import DataOutput as DataOutputModel
-from app.data_outputs.schema import DataOutputRegister
 from app.data_outputs.schema_get import DataOutputGet
-from app.data_outputs.service import DataOutputService
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
     DataProductUserRole,
@@ -368,18 +366,6 @@ class DataProductService:
     def get_conveyor_ide_url(self, id: UUID, db: Session) -> str:
         data_product = db.get(DataProductModel, id)
         return CONVEYOR_SERVICE.generate_ide_url(data_product.external_id)
-
-    def register_new_data_output(
-        self,
-        id: UUID,
-        data_output: DataOutputRegister,
-        authenticated_user: User,
-        db: Session,
-    ) -> dict[str, UUID]:
-        data_output.owner_id = id
-        return DataOutputService().create_data_output(
-            data_output, db, authenticated_user
-        )
 
     def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
         return db.query(DataOutputModel).filter(DataOutputModel.owner_id == id).all()

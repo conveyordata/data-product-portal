@@ -24,13 +24,6 @@ class DataOutputUpdate(ORMModel):
     description: str
 
 
-class DataOutputRegister(ORMModel):
-    name: str
-    description: str
-    external_id: str
-    configuration: DataOutputConfiguration
-
-
 class DataOutput(ORMModel):
     id: UUID
     name: str
