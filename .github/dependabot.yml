@@ -29,11 +29,15 @@ updates:
         patterns:
           - "react"
           - "react-dom"
+      i18n:
+        patterns:
+          - "i18next"
+          - "react-i18next"
       eslint:
         patterns:
-          - "eslint"
-          - "eslint-plugin-import"
+          - "*eslint*"
           - "@eslint/*"
+          - "@typescript-eslint/parser"
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
@@ -54,3 +58,7 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    groups:
+      actions-deps:
+        patterns:
+          - "*"
