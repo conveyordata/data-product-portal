@@ -33,12 +33,10 @@ variable "data_outputs" {
       table_path        = string
     }))
     dbx = list(object({
-      database          = string
+      schema            = string
       suffix            = string
-      table             = string
       bucket_identifier = string
-      database_path     = string
-      table_path        = string
+      schema_path       = string
     }))
     owner = string
   }))
