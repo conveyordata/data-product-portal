@@ -13,6 +13,8 @@ import { useModal } from '@/hooks/use-modal.tsx';
 import { AddDatasetPopup } from '../../../../data-product/components/data-product-tabs/data-output-tab/components/add-dataset-popup/add-dataset-popup.tsx'
 import { DataOutputDatasetLink } from '@/types/data-output';
 import { getIsDataOutputOwner } from '@/utils/data-output-user-role.helper.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 
 type Props = {
     dataOutputId: string;
@@ -32,7 +34,13 @@ export function DatasetTab({ dataOutputId }: Props) {
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
     const { t } = useTranslation();
-    const { data: dataOutput } = useGetDataOutputByIdQuery(dataOutputId);
+    const { data: dataOutput, isFetching: isFetchingInitialValues } = useGetDataOutputByIdQuery(
+        dataOutputId || '',
+        {
+            skip: !dataOutputId,
+        },
+    );
+    const { data: dataProduct } = useGetDataProductByIdQuery(dataOutput?.owner.id ?? "", {skip: !dataOutput?.owner.id || isFetchingInitialValues || !dataOutputId});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 
@@ -41,9 +49,9 @@ export function DatasetTab({ dataOutputId }: Props) {
     }, [dataOutput?.dataset_links, searchTerm]);
 
     const isDataOutputOwner = useMemo(() => {
-        if (!dataOutput || !user) return false;
-        return getIsDataOutputOwner(dataOutput, user.id) || user.is_admin;
-    }, [dataOutput?.id, user?.id]);
+        if (!dataProduct || !user) return false;
+        return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
+    }, [dataProduct?.id, user?.id]);
 
     return (
         <>
