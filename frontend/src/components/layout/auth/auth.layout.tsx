@@ -63,7 +63,7 @@ export const AuthLayout = () => {
         events.addUserLoaded(async () => {
             try {
                 await handleAuthorizeUser();
-            } catch (e) {
+            } catch (_e) {
                 await signoutRedirect({
                     extraQueryParams: {
                         ...oidcCognitoParams,

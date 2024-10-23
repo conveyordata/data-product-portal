@@ -33,7 +33,7 @@ export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Pr
             if (!dataset) return;
             await removeDatasetUser({ datasetId: dataset.id, userId }).unwrap();
             dispatchMessage({ content: t('User access to dataset has been removed'), type: 'success' });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Failed to remove user access from dataset'), type: 'error' });
         }
     };

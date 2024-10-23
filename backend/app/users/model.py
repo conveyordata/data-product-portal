@@ -14,6 +14,7 @@ from app.shared.model import BaseORM
 from app.users.schema import User as UserSchema
 
 if TYPE_CHECKING:
+    from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
 
@@ -70,5 +71,20 @@ class User(Base, BaseORM):
     approved_datasets: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
         foreign_keys="DataProductDatasetAssociation.approved_by_id",
+        back_populates="approved_by",
+    )
+    requested_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
+        "DataOutputDatasetAssociation",
+        foreign_keys="DataOutputDatasetAssociation.requested_by_id",
+        back_populates="requested_by",
+    )
+    denied_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
+        "DataOutputDatasetAssociation",
+        foreign_keys="DataOutputDatasetAssociation.denied_by_id",
+        back_populates="denied_by",
+    )
+    approved_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
+        "DataOutputDatasetAssociation",
+        foreign_keys="DataOutputDatasetAssociation.approved_by_id",
         back_populates="approved_by",
     )

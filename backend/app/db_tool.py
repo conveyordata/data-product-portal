@@ -42,7 +42,7 @@ def migrate():
         cfg = Config(
             os.path.join(os.path.dirname(os.path.abspath("__file__")), "alembic.ini")
         )
-        command.upgrade(cfg, "head")
+        command.upgrade(cfg, "heads")
         print("Migration finished successfully")
     except Exception as e:
         print("Something went wrong when migrating", e)

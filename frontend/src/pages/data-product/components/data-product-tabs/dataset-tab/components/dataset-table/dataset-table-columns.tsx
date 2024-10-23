@@ -74,7 +74,7 @@ export const getDataProductDatasetsColumns = ({
             key: 'action',
             render: (_, { dataset, dataset_id, status }) => {
                 const buttonText = status === 'pending_approval' ? t('Cancel') : t('Remove');
-                const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Remove Dataset');
+                const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Unlink Dataset');
                 const popupDescription =
                     status === 'pending_approval'
                         ? t('Are you sure you want to cancel the request to link {{name}} to the data product?', {

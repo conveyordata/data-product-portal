@@ -4,6 +4,8 @@ from uuid import UUID
 from pydantic import Field, computed_field
 
 from app.business_areas.schema import BusinessArea
+from app.data_outputs.schema_get import DataOutputGet
+from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_products.schema_get import DataProductsGet
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
@@ -18,6 +20,10 @@ class DataProductLink(DataProductDatasetAssociation):
     data_product: DataProductsGet
 
 
+class DataOutputLink(DataOutputDatasetAssociation):
+    data_output: DataOutputGet
+
+
 class DatasetGet(ORMModel):
     id: UUID
     external_id: str
@@ -30,6 +36,7 @@ class DatasetGet(ORMModel):
     tags: list[Tag]
     business_area: BusinessArea
     access_type: DatasetAccessType
+    data_output_links: list[DataOutputLink]
 
 
 class DatasetsGet(DatasetGet):

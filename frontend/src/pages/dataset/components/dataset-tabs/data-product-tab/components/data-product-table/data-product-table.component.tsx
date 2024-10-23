@@ -34,7 +34,7 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
                 content: t('Dataset {{name}} has been removed from data product', { name }),
                 type: 'success',
             });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({
                 content: t('Failed to remove dataset from data product'),
                 type: 'error',
@@ -49,7 +49,7 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
                 content: t('Dataset request has been successfully approved'),
                 type: 'success',
             });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({
                 content: t('Failed to approve data product dataset link'),
                 type: 'error',
@@ -64,7 +64,7 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
                 content: t('Dataset access request has been successfully rejected'),
                 type: 'success',
             });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({
                 content: t('Failed to reject data product dataset link'),
                 type: 'error',
