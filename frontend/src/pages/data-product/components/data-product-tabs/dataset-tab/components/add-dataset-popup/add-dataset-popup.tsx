@@ -71,7 +71,7 @@ export function AddDatasetPopup({ onClose, isOpen, dataProductId }: Props) {
                     ? t('Dataset access has been requested')
                     : t('Dataset has been added');
                 dispatchMessage({ content, type: 'success' });
-            } catch (error) {
+            } catch (_error) {
                 dispatchMessage({ content: t('Failed to request access to the data product'), type: 'error' });
             }
         },

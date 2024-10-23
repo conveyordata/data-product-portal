@@ -1,6 +1,4 @@
 variable "prefix" {}
-variable "aws_region" {}
-variable "aws_account_id" {}
 variable "account_name" {}
 
 variable "data_product_name" {}
@@ -22,33 +20,15 @@ variable "environment" {}
 
 variable "environment_config" {
   type = object({
-    datalake = object({
-      bucket      = string
-      bucket_arn  = string
-      kms_key_arn = string
-    })
-    logs = object({
-      bucket      = string
-      bucket_arn  = string
-      kms_key_arn = string
-    })
-    ingress_enabled = bool
-    ingress = object({
-      bucket      = string
-      bucket_arn  = string
-      kms_key_arn = string
-    })
-    egress_enabled = bool
-    egress = object({
-      bucket      = string
-      bucket_arn  = string
-      kms_key_arn = string
-    })
+    aws_account_id             = string
+    aws_region                 = string
     can_read_from              = list(string)
     conveyor_oidc_provider_url = string
-    database_glossary = map(object({
-      glue_database = string
-      s3            = string
+    bucket_glossary = map(object({
+      bucket_name = string
+      bucket_arn  = string
+      kms_key_arn = string
+      is_default  = bool
     }))
   })
 }

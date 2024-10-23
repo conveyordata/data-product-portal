@@ -18,12 +18,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    op.execute("ALTER TABLE data_products DROP CONSTRAINT IF EXISTS uq_data_product")
     op.create_unique_constraint(
         "uq_data_product",
         "data_products",
         ["external_id", "name"],
         postgresql_nulls_not_distinct=True,
     )
+    op.execute("ALTER TABLE datasets DROP CONSTRAINT IF EXISTS uq_dataset")
+
     op.create_unique_constraint(
         "uq_dataset",
         "datasets",

@@ -1,13 +1,16 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, relationship
 
 from app.data_product_types.enums import DataProductIconKey
-from app.data_products.model import DataProduct
 from app.database.database import Base
 from app.shared.model import BaseORM
+
+if TYPE_CHECKING:
+    from app.data_products.model import DataProduct
 
 
 class DataProductType(Base, BaseORM):

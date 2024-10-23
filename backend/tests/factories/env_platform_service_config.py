@@ -21,8 +21,8 @@ class EnvPlatformServiceConfigFactory(factory.alchemy.SQLAlchemyModelFactory):
             {
                 "identifier": "identifier",
                 "bucket_name": "name1",
-                "arn": "arn1",
-                "kms_key": "kms1",
+                "bucket_arn": "arn1",
+                "kms_key_arn": "kms1",
                 "is_default": True,
             }
         ]

@@ -1,14 +1,9 @@
 variable "prefix" {}
-variable "aws_region" {}
-variable "aws_account_id" {}
 variable "account_name" {}
 
 variable "data_product_name" {
-  validation {
-    condition     = strcontains(var.data_product_name, "_") == false
-    error_message = "Data product names should not contain _"
-  }
 }
+
 variable "data_product_config" {
   type = object({
     description   = string
@@ -24,45 +19,49 @@ variable "data_product_config" {
 
 variable "environments" {
   type = map(object({
-    datalake = object({
-      bucket      = string
-      bucket_arn  = string
-      kms_key_arn = string
-    })
-    logs = object({
-      bucket      = string
-      bucket_arn  = string
-      kms_key_arn = string
-    })
-    ingress_enabled = bool
-    ingress = object({
-      bucket      = string
-      bucket_arn  = string
-      kms_key_arn = string
-    })
-    egress_enabled = bool
-    egress = object({
-      bucket      = string
-      bucket_arn  = string
-      kms_key_arn = string
-    })
+    aws_account_id             = string
+    aws_region                 = string
     can_read_from              = list(string)
     conveyor_oidc_provider_url = string
-    database_glossary = map(object({
-      glue_database = string
-      s3            = string
+    bucket_glossary = map(object({
+      bucket_name = string
+      bucket_arn  = string
+      kms_key_arn = string
+      is_default  = bool
     }))
+  }))
+}
+
+variable "managed_objects" {
+  # Per environment
+  type = map(object({
+    # database_glossary[database][suffix] => database_name
+    database_glossary = map(map(string))
   }))
 }
 
 variable "data_outputs" {
   type = map(object({
     s3 = list(object({
-      bucket_name = string
-      path        = string
+      bucket_identifier = string
+      suffix            = string
+      path              = string
     }))
-    glue  = list(string)
-    owner = list(string)
+    glue = list(object({
+      database          = string
+      suffix            = string
+      table             = string
+      bucket_identifier = string
+      database_path     = string
+      table_path        = string
+    }))
+    dbx = list(object({
+      schema            = string
+      suffix            = string
+      bucket_identifier = string
+      schema_path       = string
+    }))
+    owner = string
   }))
 }
 

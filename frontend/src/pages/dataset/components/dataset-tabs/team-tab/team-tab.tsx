@@ -58,7 +58,7 @@ export function TeamTab({ datasetId }: Props) {
         try {
             await addUserToDataset({ datasetId, userId: user.id }).unwrap();
             dispatchMessage({ content: t('User has been added to dataset'), type: 'success' });
-        } catch (e) {
+        } catch (_e) {
             dispatchMessage({ content: t('Failed to add user to dataset'), type: 'error' });
         }
     };

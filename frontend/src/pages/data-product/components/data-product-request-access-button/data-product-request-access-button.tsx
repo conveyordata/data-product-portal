@@ -17,7 +17,7 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
         try {
             await userRequestDataProductAcces({ dataProductId, userId }).unwrap();
             dispatchMessage({ content: t('Request sent successfully'), type: 'success' });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Failed to request access to data product'), type: 'error' });
         }
     };

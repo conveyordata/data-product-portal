@@ -1,0 +1,62 @@
+@import '@/styles/variables';
+@import '@/styles/mixins';
+@import '@/styles/colors';
+@import '@/styles/globals';
+
+.table-container {
+    width: 100%;
+    height: 100%;
+    gap: $column-gap-l;
+
+    .search-container {
+        justify-content: space-between;
+        align-items: center;
+        gap: $column-gap-m;
+
+        h3 {
+            margin: 0;
+            text-wrap: avoid;
+            white-space: nowrap;
+        }
+    }
+
+    .search-form {
+        width: 100%;
+
+        .form-item {
+            margin-bottom: unset;
+        }
+    }
+
+    .table-filters {
+        display: flex;
+        gap: $column-gap-m;
+    }
+}
+
+.table {
+    width: 100%;
+    height: 100%;
+
+    .row {
+        &:hover {
+            cursor: pointer;
+        }
+    }
+}
+
+.tag-wrapper {
+    @include no-select();
+    gap: $column-gap-xs;
+}
+
+.icon-wrapper {
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+
+    .icon {
+        height: $icon-size-table-cell;
+        width: $icon-size-table-cell;
+    }
+}
