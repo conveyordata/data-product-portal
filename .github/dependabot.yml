@@ -38,6 +38,12 @@ updates:
           - "*eslint*"
           - "@eslint/*"
           - "@typescript-eslint/parser"
+      tiptap:
+        patterns:
+          - "@tiptap/*"
+      types:
+        patterns:
+          - "@types/*"
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
