@@ -5,14 +5,12 @@ import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-ou
 import { DatasetTable } from './components/dataset-table/dataset-table.component.tsx';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-// import { getIsDataOutputOwner } from '@/utils/data-output-user-role.helper.ts';
 import { SearchForm } from '@/types/shared';
 import styles from './dataset-tab.module.scss';
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { AddDatasetPopup } from '../../../../data-product/components/data-product-tabs/data-output-tab/components/add-dataset-popup/add-dataset-popup.tsx'
 import { DataOutputDatasetLink } from '@/types/data-output';
-import { getIsDataOutputOwner } from '@/utils/data-output-user-role.helper.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 
