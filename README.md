@@ -13,11 +13,10 @@
 
 ## Introduction
 
-The Data Product Portal enables companies to build data products in a self-service manner, enabling the creation of data
-products across all departments and domains within an organization. It introduces simple but powerful concepts that
-are easy to understand and extensible to various types of data platform implementations. The portal is a process tool
-that helps data professionals while providing governance and insights into how data is being used throughout the
-organization.
+The Data Product Portal enables to **_scale_** building data products across all departments in an organisation in a 
+**_self-service_** manner. It does so by providing a guided setup for creating data products, with proper approval processes
+that will **_enable governance by design_** for data initiatives. The portal is a process tool that helps data professionals
+do their work more efficiently while providing governance and insights into how data is being used throughout the organisation.
 
 Unlike traditional data catalogs that primarily focus on describing data, the Data Product Portal guides you through
 the entire data product development lifecycle. This includes self-service and secure access to tools, data platforms,
@@ -78,6 +77,10 @@ allowing safe development until they are ready for organizational sharing.
 Adopting the Data Product Portal offers several benefits:
 - **Guided Setup:** Step-by-step assistance involving the right stakeholders for creating data products, requesting
 access, adding users and registering new data for sharing with other data products.
+- **Governance by Design:** Ensures that data products are compliant with the organization’s data governance policies and
+standards, with proper approval processes and access controls.
+- **Scale across the organization:** Enables all departments to start new data initiatives easily without having to depend on
+a central team.
 - **Tech Translation:** Converts high-level concepts into specific configurations settings for platforms like AWS,
 Azure, Databricks, Snowflake, and others, making sure that each data product is correctly separated and not impacting
 each other.
@@ -87,6 +90,22 @@ the data landscape.
 central team. 
 - **Comprehensive Overview:** Combines data catalogs, data platforms and data governance aspects into a single 360
 overview of all ongoing data initiatives.
+
+# Additional resources
+
+## General Blogposts
+
+- [Announcement Blogpost](https://medium.com/conveyordata/introducing-data-product-portal-an-open-source-tool-for-scaling-your-data-products-c05cf86afbf4)
+- [Interface to your data platform](https://medium.com/conveyordata/build-an-interface-to-your-data-platform-f1927c33c5ad)
+- [State of data products](https://medium.com/conveyordata/the-state-of-data-products-9e1bc5c39bcb)
+- [How to effectively structure data for self service data teams](https://medium.com/conveyordata/how-to-effectively-structure-data-for-self-service-data-teams-09c6d48f3beb)
+
+## Technical Blogposts
+
+- [Data product integrations: OIDC](https://medium.com/conveyordata/data-product-portal-integrations-1-oidc-8d1dcdc0896e)
+- [Data product integrations: Helm and Kubernetes](https://medium.com/conveyordata/data-product-portal-integrations-2-helm-982f4a54c0f0)
+- [Data product integrations: Data platforms](https://medium.com/conveyordata/data-product-portal-integrating-with-your-data-platform-41bf9fcf1fc1)
+- [Data product integrations: AWS](https://medium.com/conveyordata/data-product-portal-integrating-with-your-data-platform-41bf9fcf1fc1)
 
 # Getting Started
 
