@@ -13,7 +13,7 @@
 
 ## Introduction
 
-The Data Product Portal enables to **_scale_** building data products across all departments in an organisation in a 
+The Data Product Portal enables to **_scale_** building data products across all departments in an organisation in a
 **_self-service_** manner. It does so by providing a guided setup for creating data products, with proper approval processes
 that will **_enable governance by design_** for data initiatives. The portal is a process tool that helps data professionals
 do their work more efficiently while providing governance and insights into how data is being used throughout the organisation.
