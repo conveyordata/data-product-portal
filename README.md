@@ -132,8 +132,11 @@ overview of all ongoing data initiatives.
 - Now visit http://localhost:8080 to check it out!
 
 ### Sample Data
-While running in sandbox mode, the Portal will be automatically seeded with sample data (incl. users, data products, datasets, ...). The source of this data can be found in the [sample_data.sql](./backend/sample_data.sql) file.
-If you want to see different data in the sandbox mode, you can either modify this file or create your custom data file and reference that one in the [compose.yaml](compose.yaml) instead of the 'sample_data.sql' file. See the comments to learn how to pass a local file to that container.
+While running in sandbox mode, the Portal will be automatically seeded with sample data (incl. users, data products,
+datasets, ...). The source of this data can be found in the [sample_data.sql](./backend/sample_data.sql) file.
+If you want to see different data in the sandbox mode, you can either modify this file or create your custom data file
+and reference that one in the [compose.yaml](compose.yaml) instead of the 'sample_data.sql' file. See the comments to learn how
+to pass a local file to that container.
 
 ### Limitations
 
