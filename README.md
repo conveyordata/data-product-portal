@@ -63,14 +63,14 @@ is used in the right context.
 
 ### Datasets
 
-Datasets group one or more data objects and are the level at which read data access is granted to a data product.
+Datasets group one or more data outputs and are the level at which read data access is granted to a data product.
 Dataset owners, typically business-related individuals, approve access to specific data products. Access is granted to
 data products rather than users, guaranteeing that data is used only for the approved scope.
 
-### Data Objects
+### Data Outputs
 
-Data objects are outputs of a data product, such as files, tables, or topics. They are associated with a data product
-that has full read and write permissions. Data objects are never directly shared unless they are part of a dataset,
+Data outputs are outputs of a data product, such as files, tables, or topics. They are associated with a data product
+that has full read and write permissions. Data outputs are never directly shared unless they are part of a dataset,
 allowing safe development until they are ready for organizational sharing.
 
 ## Benefits
