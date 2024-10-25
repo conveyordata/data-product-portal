@@ -162,6 +162,24 @@ For backend specific instructions, check [backend/README.md](backend/README.md)
 
 For frontend specific instructions, check [frontend/README.md](frontend/README.md)
 
+# Integrations
+The data product portal comes with default integrations for many different platform technologies. Check out the
+[integrations](integrations/README.md) folder for more information. These integrations are meant as an example on how
+you can translate the data product portal configuration to a practical implementation for your data platform.
+
+![Integrating portal with your data platform](images/img.png)
+
+Right now we support the following integrations:
+- **AWS**: S3, Glue, Athena, (Redshift serverless coming soon)
+- **Conveyor**: A data product workflow manager that helps you build data products in a self-service manner
+
+A more detailed explanation of how to integrate the data product portal with your data platform can be found in our
+[platform integration blogpost](https://medium.com/conveyordata/data-product-portal-integrating-with-your-data-platform-41bf9fcf1fc1).
+
+We are currently working on Databricks and Snowflake integrations and more are to come soon. If you have a specific
+request for a technology integration, please don't hesitate to reach out to us. Even better would be to create a pull
+request with the integration you would like to see in the data product portal.
+
 # Production Installation
 Please find the relevant info in [Installation](docs/INSTALLATION.md)
 
