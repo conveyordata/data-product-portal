@@ -25,7 +25,7 @@ data sources, and sharing concepts, ensuring control and oversight for business 
 Our goal is to bridge the gap between data governance, data platforms and data catalogs and provide a 360 view of all
 ongoing data initiatives that is easy to understand by everybody.
 
-To read more about it, please checkout our [announcement blogpost](https://hubs.li/Q02DGGpR0)
+To read more about it, please checkout our [announcement blogpost](https://conveyordata.com/portal-introducing-new-open-source-data-product-portal?utm_source=github-portal-readme&utm_medium=referral)
 
 ## Who is it for?
 
@@ -95,16 +95,16 @@ overview of all ongoing data initiatives.
 
 ## General Blogposts
 
-- [Announcement Blogpost](https://medium.com/conveyordata/introducing-data-product-portal-an-open-source-tool-for-scaling-your-data-products-c05cf86afbf4)
-- [Interface to your data platform](https://medium.com/conveyordata/build-an-interface-to-your-data-platform-f1927c33c5ad)
+- [Announcement Blogpost](https://conveyordata.com/portal-introducing-new-open-source-data-product-portal?utm_source=github-portal-readme&utm_medium=referral)
+- [Interface to your data platform](https://conveyordata.com/portal-give-your-business-users-a-friendly-interface-to-your-data-platform?utm_source=github-portal-readme&utm_medium=referral)
 - [State of data products](https://medium.com/conveyordata/the-state-of-data-products-9e1bc5c39bcb)
-- [How to effectively structure data for self service data teams](https://medium.com/conveyordata/how-to-effectively-structure-data-for-self-service-data-teams-09c6d48f3beb)
+- [How to effectively structure data for self service data teams](https://conveyordata.com/portal-how-to-structure-data-for-self-service-data-teams?utm_source=github-portal-readme&utm_medium=referral)
 
 ## Technical Blogposts
 
 - [Data product integrations: OIDC](https://medium.com/conveyordata/data-product-portal-integrations-1-oidc-8d1dcdc0896e)
 - [Data product integrations: Helm and Kubernetes](https://medium.com/conveyordata/data-product-portal-integrations-2-helm-982f4a54c0f0)
-- [Data product integrations: Data platforms](https://medium.com/conveyordata/data-product-portal-integrating-with-your-data-platform-41bf9fcf1fc1)
+- [Data product integrations: Data platforms](https://conveyordata.com/portal-how-portal-integrates-with-data-platforms?utm_source=github-portal-readme&utm_medium=referral)
 - [Data product integrations: AWS](https://medium.com/conveyordata/data-product-portal-integrating-with-your-data-platform-41bf9fcf1fc1)
 
 # Getting Started
@@ -177,7 +177,7 @@ Right now we support the following integrations:
 - **Conveyor**: A data product workflow manager that helps you build data products in a self-service manner
 
 A more detailed explanation of how to integrate the data product portal with your data platform can be found in our
-[platform integration blogpost](https://medium.com/conveyordata/data-product-portal-integrating-with-your-data-platform-41bf9fcf1fc1).
+[platform integration blogpost](https://conveyordata.com/portal-how-portal-integrates-with-data-platforms?utm_source=github-portal-readme&utm_medium=referral).
 
 We are currently working on Databricks and Snowflake integrations and more are to come soon. If you have a specific
 request for a technology integration, please don't hesitate to reach out to us. Even better would be to create a pull
@@ -199,7 +199,8 @@ Distributed under the APACHE 2.0 License Copyright 2024 Dataminded. See [LICENSE
 
 # Contact
 
-Email: [info@dataminded.com](mailto:info@dataminded.com)
+**Email**: [info@dataminded.com](mailto:info@dataminded.com) \
+**Slack**: [link to join](https://join.slack.com/t/dataproductportal/shared_invite/zt-2r47r0icj-PAYbbklmH6gPz9A6bJ144Q)
 
 Project Link: [https://github.com/conveyordata/data-product-portal](https://github.com/conveyordata/data-product-portal)
 
