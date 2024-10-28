@@ -1,5 +1,4 @@
-@import '@/styles/globals';
-@import '@/styles/shared';
+@use '@/styles/globals';
 
 .team-list-container {
     @extend .no-select;

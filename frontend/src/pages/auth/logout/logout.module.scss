@@ -1,11 +1,9 @@
-@import '@/styles/variables';
-@import '@/styles/globals';
-@import '@/styles/mixins';
+@use '@/styles/globals' ;
 
 $logo-width: 6rem;
 
 .resultContainer {
-    @include no-select();
+    @include globals.no-select();
     display: flex;
     align-items: center;
     justify-content: center;

@@ -1,15 +1,15 @@
-@import '@/styles/globals';
+@use '@/styles/globals' ;
 
 .container {
     width: 100%;
-    gap: $column-gap-regular;
-    min-width: $button-large-width;
+    gap: globals.$column-gap-regular;
+    min-width: globals.$button-large-width;
 }
 
 .section-wrapper {
-    gap: $column-gap-regular;
+    gap: globals.$column-gap-regular;
 }
 
 .user-avatar-list {
-    gap: $avatar-list-gap;
+    gap: globals.$avatar-list-gap;
 }

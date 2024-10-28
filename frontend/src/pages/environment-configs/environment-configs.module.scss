@@ -1,9 +1,8 @@
-@import '@/styles/globals';
-@import '@/styles/variables';
+@use '@/styles/globals';
 
 .container {
     @extend .container;
     align-items: flex-start;
     justify-content: flex-start;
-    gap: $column-gap-l;
+    gap: globals.$column-gap-l;
 }

@@ -1,11 +1,10 @@
-@import '@/styles/variables';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 $text-type-dropdown-width: 120px;
 
 .menuBar {
     width: 100%;
-    margin-bottom: $spacing-m;
+    margin-bottom: globals.$spacing-m;
 
     .actions-container {
         justify-content: flex-start;
@@ -15,8 +14,8 @@ $text-type-dropdown-width: 120px;
 
 .menuButton {
     &.active {
-        background-color: $primary-color;
-        color: $blue-1;
+        background-color: globals.$primary-color;
+        color: globals.$blue-1;
     }
 }
 
