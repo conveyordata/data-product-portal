@@ -1,17 +1,16 @@
-@import '@/styles/variables';
-@import '@/styles/shared';
+@use '@/styles/globals';
 
 .search-field-wrapper {
     margin-bottom: 0 !important;
 }
 
 .data-output-list {
-    max-height: $modal-content-max-height-xl;
+    max-height: globals.$modal-content-max-height-xl;
     overflow: auto;
 }
 
 .data-output-name {
-    font-weight: $font-weight-normal;
+    font-weight: globals.$font-weight-normal;
 }
 
 .data-output-item {

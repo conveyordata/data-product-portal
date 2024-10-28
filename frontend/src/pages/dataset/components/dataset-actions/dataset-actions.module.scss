@@ -1,16 +1,14 @@
-@import '@/styles/colors';
-@import '@/styles/variables';
-@import '@/styles/globals';
+@use '@/styles/globals';
 
 .actions-container {
-    gap: $column-gap-xl;
+    gap: globals.$column-gap-xl;
     justify-content: flex-start;
     align-items: stretch;
     width: 100%;
 }
 
 .access-data-container {
-    gap: $column-gap-sm;
+    gap: globals.$column-gap-sm;
     justify-content: flex-start;
     align-items: stretch;
     width: 100%;

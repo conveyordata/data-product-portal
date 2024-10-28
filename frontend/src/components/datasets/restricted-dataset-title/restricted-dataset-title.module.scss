@@ -1,7 +1,7 @@
-@import '@/styles/variables';
+@use '@/styles/globals' ;
 
 .dataset-title {
     justify-content: center;
     align-items: center;
-    gap: $column-gap-sm;
+    gap: globals.$column-gap-sm;
 }

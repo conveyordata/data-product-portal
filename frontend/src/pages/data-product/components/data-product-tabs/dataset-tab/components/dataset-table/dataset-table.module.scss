@@ -1,6 +1,4 @@
-@import '@/styles/globals';
-@import '@/styles/shared';
-@import '@/styles/colors';
+@use '@/styles/globals';
 
 .dataset-list-container {
     @extend .no-select;
@@ -16,11 +14,11 @@
 }
 
 .icon {
-    color: $color-text;
+    color: globals.$color-text;
 }
 
 .dataset-title {
     align-items: center;
     justify-content: center;
-    gap: $column-gap-sm;
+    gap: globals.$column-gap-sm;
 }

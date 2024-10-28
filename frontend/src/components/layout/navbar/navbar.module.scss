@@ -1,23 +1,21 @@
-@import '@/styles/mixins';
-@import '@/styles/variables';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 .header {
-    height: $navbar-height;
+    height: globals.$navbar-height;
     position: sticky;
     top: 0;
     z-index: 1;
     padding: 0;
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid globals.$border-color;
 
     .header-content {
         height: 100%;
         width: 100%;
-        padding: 0 $spacing-l;
+        padding: 0 globals.$spacing-l;
         justify-content: space-between;
     }
 }
 
 .header-actions-wrapper {
-    gap: $column-gap-sm;
+    gap: globals.$column-gap-sm;
 }

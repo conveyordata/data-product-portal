@@ -1,11 +1,8 @@
-@import '@/styles/globals';
-@import '@/styles/variables';
-@import '@/styles/colors';
-@import '@/styles/shared';
+@use '@/styles/globals' ;
 
 .data-output-container {
     @extend .container;
-    gap: $column-gap-xl;
+    gap: globals.$column-gap-xl;
 }
 
 .header-container {
@@ -21,8 +18,8 @@
 .header {
     display: flex;
     align-items: center;
-    margin-bottom: $spacing-l;
-    gap: $column-gap-regular;
+    margin-bottom: globals.$spacing-l;
+    gap: globals.$column-gap-regular;
 
     h3 {
         margin: 0;
@@ -35,7 +32,7 @@
 
     .overview {
         flex: 1;
-        gap: $column-gap-regular;
+        gap: globals.$column-gap-regular;
         justify-content: flex-start;
         align-items: flex-start;
     }
@@ -43,13 +40,13 @@
 
 .sidebar {
     flex: 0.3;
-    min-width: $min-sidebar-width;
-    gap: $column-gap-xl;
+    min-width: globals.$min-sidebar-width;
+    gap: globals.$column-gap-xl;
     justify-content: flex-start;
     align-items: flex-start;
 }
 
 .main-content {
     flex: 1;
-    gap: $column-gap-xl;
+    gap: globals.$column-gap-xl;
 }

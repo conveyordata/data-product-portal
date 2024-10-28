@@ -1,6 +1,4 @@
-@import '@/styles/variables';
-@import '@/styles/colors';
-@import '@/styles/mixins';
+@use '@/styles/globals' ;
 
 .sidebar-wrapper {
     overflow: auto;
@@ -11,20 +9,20 @@
     bottom: 0;
 
     .sidebar-content {
-        gap: $column-gap-m;
+        gap: globals.$column-gap-m;
     }
 }
 
 .logoWrapper {
-    height: $navbar-height;
+    height: globals.$navbar-height;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: $column-gap-sm;
+    padding: globals.$column-gap-sm;
 
     width: 100%;
 }
 
 .sub-menu-title {
-    font-size: $font-header-6;
+    font-size: globals.$font-header-6;
 }

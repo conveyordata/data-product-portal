@@ -1,21 +1,19 @@
-@import '@/styles/variables';
-@import '@/styles/mixins';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 $button-width: 100px;
 $icon-size: 65px;
 
 .radio-button-container {
     align-items: center;
-    gap: $column-gap-badge;
+    gap: globals.$column-gap-badge;
 }
 
 .radio-button {
     height: 100%;
     min-height: $button-width;
     width: $button-width;
-    padding: $standard-div-padding;
-    border-radius: $border-radius-lg;
+    padding: globals.$standard-div-padding;
+    border-radius: globals.$border-radius-lg;
     overflow: hidden;
     display: flex;
     align-items: center;

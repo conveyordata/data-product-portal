@@ -1,11 +1,10 @@
-@import '@/styles/variables';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 .current {
     font-weight: 600;
     text-decoration: none;
     cursor: default;
-    color: $breadcrumb-last-item-color;
+    color: globals.$breadcrumb-last-item-color;
 
     &:hover {
         color: #000;
@@ -13,15 +12,15 @@
 }
 
 .breadcrumb-wrapper {
-    gap: $column-gap-sm;
+    gap: globals.$column-gap-sm;
     max-width: 100%;
 }
 
 .link-container {
-    color: $breadcrumb-link-color;
+    color: globals.$breadcrumb-link-color;
     align-items: center;
     justify-content: center;
-    gap: $column-gap-sm;
+    gap: globals.$column-gap-sm;
 }
 
 .link {
