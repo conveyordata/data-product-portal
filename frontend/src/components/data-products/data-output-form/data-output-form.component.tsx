@@ -20,6 +20,7 @@ import TextArea from 'antd/es/input/TextArea';
 import { DataOutputStatus } from '@/types/data-output/data-output.contract';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
+import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 
 type Props = {
     mode: 'create';
@@ -66,6 +67,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     case DataPlatforms.Databricks:
                         config["configuration_type"] = "DatabricksDataOutput"
                         break
+                    case DataPlatforms.Snowflake:
+                        config["configuration_type"] = "SnowflakeDataOutput"
                 }
                 const request: DataOutputCreate = {
                     name: values.name,
@@ -232,6 +235,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         return <GlueDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct!.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
                     case DataPlatforms.Databricks:
                         return <DatabricksDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct!.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
+                    case DataPlatforms.Snowflake:
+                        return <SnowflakeDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct!.external_id} sourceAligned={sourceAligned}/>;
                     default:
                         return null;
                 }
