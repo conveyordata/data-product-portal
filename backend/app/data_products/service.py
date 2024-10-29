@@ -8,7 +8,7 @@ import httpx
 import pytz
 from botocore.exceptions import ClientError
 from fastapi import HTTPException, status
-from sqlalchemy import asc
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth.credentials import AWSCredentials
@@ -39,7 +39,11 @@ from app.data_products_datasets.model import (
 from app.data_products_datasets.schema import DataProductDatasetAssociationCreate
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import ensure_dataset_exists
+from app.environment_platform_configurations.model import (
+    EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
+)
 from app.environments.model import Environment as EnvironmentModel
+from app.platforms.model import Platform as PlatformModel
 from app.tags.model import Tag as TagModel
 from app.users.model import ensure_user_exists
 from app.users.schema import User
@@ -369,3 +373,40 @@ class DataProductService:
 
     def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
         return db.query(DataOutputModel).filter(DataOutputModel.owner_id == id).all()
+
+    def get_databricks_workspace_url(
+        self, id: UUID, environment: str, db: Session
+    ) -> str:
+        data_product = db.get(DataProductModel, id)
+        environment_model = db.scalar(
+            select(EnvironmentModel).where(EnvironmentModel.name == environment)
+        )
+        platform = db.scalar(
+            select(PlatformModel).where(PlatformModel.name == "Databricks")
+        )
+
+        stmt = select(EnvironmentPlatformConfigurationModel).where(
+            EnvironmentPlatformConfigurationModel.environment_id
+            == environment_model.id,
+            EnvironmentPlatformConfigurationModel.platform_id == platform.id,
+        )
+        config = db.scalar(stmt)
+        if not config:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=(
+                    "Workspace not configured for business"
+                    f"area {data_product.business_area.name}"
+                ),
+            )
+
+        config = json.loads(config.config)["workspace_urls"]
+        if not str(data_product.business_area_id) in config:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=(
+                    "Workspace not configured for business"
+                    f"area {data_product.business_area.name}"
+                ),
+            )
+        return config[str(data_product.business_area_id)]

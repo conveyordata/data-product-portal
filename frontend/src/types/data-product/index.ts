@@ -11,6 +11,10 @@ export type {
     DataProductGetConveyorUrlResponse,
 } from './data-product-conveyor-url.contract.ts';
 export type {
+    DataProductGetDatabricksWorkspaceUrlRequest,
+    DataProductGetDatabricksWorkspaceUrlResponse,
+} from './data-product-databricks-workspace-url.contract.ts';
+export type {
     DataProductGetSignInUrlRequest,
     DataProductGetSignInUrlResponse,
 } from './data-product-sign-in-url.contract.ts';

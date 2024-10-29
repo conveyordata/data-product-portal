@@ -55,6 +55,7 @@ begin
     SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'Glue' INTO glue_service_id;
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', returned_platform_id, s3_service_id, '["datalake","ingress","egress"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('fa026b3a-7a17-4c32-b279-995af021f6c2', returned_platform_id, glue_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platforms (id, "name") VALUES ('baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'Databricks');
 
     -- ENVIRONMENTS
     INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'dev_context', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_dev;
@@ -72,6 +73,9 @@ begin
     INSERT INTO public.business_areas (id, "name", description, created_on, updated_on, deleted_at) VALUES ('bd09093e-14ff-41c1-b74d-7c2ce9821d1c', 'Sales', 'Sales', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_id;
     INSERT INTO public.business_areas (id, "name", description, created_on, updated_on, deleted_at) VALUES ('7d9ec9fd-89cf-477e-b077-4c8d1a3ce3cc', 'Marketing', 'Marketing', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO marketing_id;
     INSERT INTO public.business_areas (id, "name", description, created_on, updated_on, deleted_at) VALUES ('623e6fbf-3a06-434e-995c-b0336e71806e', 'Manufacturing', 'Manufacturing', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO manufacturing_id;
+
+    INSERT INTO public.env_platform_configs (id, environment_id, platform_id, "config", created_on, updated_on, deleted_at) VALUES ('28d428dd-ef2f-4df4-948d-e3f4137d69ed', returned_environment_id_prd, 'baa5c47b-805a-4cbb-ad8b-038c66e81b7e', '{"workspace_urls": {"672debaf-31f9-4233-820b-ad2165af044e": "https://dbc-034e5af0-78ec.cloud.databricks.com", "bd09093e-14ff-41c1-b74d-7c2ce9821d1c":"https://dbc-4d5e759f-265f.cloud.databricks.com"}}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_configs (id, environment_id, platform_id, "config", created_on, updated_on, deleted_at) VALUES ('ed3cb74f-39e5-483f-ab51-1580520c4e15', returned_environment_id_dev, 'baa5c47b-805a-4cbb-ad8b-038c66e81b7e', '{"workspace_urls": {"672debaf-31f9-4233-820b-ad2165af044e": "https://dbc-0faee868-d188.cloud.databricks.com", "bd09093e-14ff-41c1-b74d-7c2ce9821d1c":"https://dbc-4922127f-cba2.cloud.databricks.com"}}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- DATA PRODUCT TYPES
     INSERT INTO public.data_product_types (id, "name", description, icon_key, created_on, updated_on, deleted_at) VALUES ('90ab1128-329f-47dd-9420-c9681bfc68c4', 'Processing', 'Processing', 'PROCESSING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO processing_type_id;

@@ -8,6 +8,7 @@ import {
     useGetDataProductConveyorIDEUrlMutation,
     useGetDataProductConveyorNotebookUrlMutation,
     useGetDataProductSignInUrlMutation,
+    useGetDataProductDatabricksWorkspaceUrlMutation
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import {
     getCanUserAccessDataProductData,
@@ -87,8 +88,8 @@ export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlat
         label: t('Databricks'),
         value: DataPlatforms.Databricks,
         icon: databricksLogo,
-        disabled: false,
         hasConfig: true,
+        hasMenu: true,
         children: [],
     },
     {
@@ -110,6 +111,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
     const [getConveyorNotebookUrl, { isLoading: isConveyorNotebookLoading }] =
         useGetDataProductConveyorNotebookUrlMutation();
+    const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading}] = useGetDataProductDatabricksWorkspaceUrlMutation();
 
     if (!dataProduct || !user) return null;
 
@@ -120,17 +122,33 @@ export function DataProductActions({ dataProductId }: Props) {
     const canAccessDataProductData = getCanUserAccessDataProductData(user?.id, dataProduct?.memberships);
 
     async function handleAccessToData(environment: string, dataPlatform: DataPlatform) {
-        if (dataPlatform === DataPlatforms.AWS) {
-            try {
-                const signInUrl = await getDataProductSignInUrl({ id: dataProductId, environment }).unwrap();
-                if (signInUrl) {
-                    window.open(signInUrl, '_blank');
-                } else {
+        switch (dataPlatform) {
+            case DataPlatforms.AWS:
+                try {
+                    const signInUrl = await getDataProductSignInUrl({ id: dataProductId, environment }).unwrap();
+                    if (signInUrl) {
+                        window.open(signInUrl, '_blank');
+                    } else {
+                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+                    }
+                } catch (_error) {
                     dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
                 }
-            } catch (_error) {
-                dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-            }
+                break;
+            case DataPlatforms.Databricks:
+                try {
+                    const signInUrl = await getDatabricksWorkspaceUrl({ id: dataProductId, environment }).unwrap();
+                    if (signInUrl) {
+                        window.open(signInUrl, '_blank');
+                    } else {
+                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+                    }
+                } catch (_error) {
+                    dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -190,7 +208,7 @@ export function DataProductActions({ dataProductId }: Props) {
                         onDataPlatformClick={handleAccessToData}
                         onTileClick={handleTileClick}
                         isDisabled={isLoading || !canAccessDataProductData}
-                        isLoading={isLoading || isConveyorLoading || isConveyorNotebookLoading}
+                        isLoading={isLoading || isConveyorLoading || isConveyorNotebookLoading || isDatabricksLoading}
                     />
                 </Flex>
             </Flex>

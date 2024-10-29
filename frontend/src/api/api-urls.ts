@@ -13,6 +13,7 @@ export enum ApiUrl {
     DataProductSignInUrl = '/api/data_products/:dataProductId/signin_url',
     DataProductConveyorNotebookUrl = '/api/data_products/:dataProductId/conveyor_notebook_url',
     DataProductConveyorIdeUrl = '/api/data_products/:dataProductId/conveyor_ide_url',
+    DataProductDatabricksWorkspaceUrl = '/api/data_products/:dataProductId/databricks_workspace_url',
     DataProductDataset = '/api/data_products/:dataProductId/dataset/:datasetId',
     DataProductAbout = '/api/data_products/:dataProductId/about',
     DataProductMembershipAdd = '/api/data_product_memberships/create',
