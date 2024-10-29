@@ -1,7 +1,7 @@
 import { Flex, Typography } from 'antd';
 // import { useTranslation } from 'react-i18next';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { DatabricksDataOutputContract, GlueDataOutputContract, S3DataOutputContract } from '@/types/data-output';
+import { DatabricksDataOutputContract, GlueDataOutputContract, S3DataOutputContract, SnowflakeDataOutputContract } from '@/types/data-output';
 import { useTranslation } from 'react-i18next';
 
 type Props = {
@@ -18,6 +18,15 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
                     <div>
                     <Typography.Text strong>{t('Glue database')}: </Typography.Text>
                     <Typography.Text>{glue_configuration.database}</Typography.Text>
+                    </div>
+                </Flex>
+        }
+        case 'SnowflakeDataOutput': {
+            const snowflake_configuration = data_output.configuration as SnowflakeDataOutputContract;
+            return <Flex vertical>
+                    <div>
+                    <Typography.Text strong>{t('Snowflake schema')}: </Typography.Text>
+                    <Typography.Text>{snowflake_configuration.schema}</Typography.Text>
                     </div>
                 </Flex>
         }

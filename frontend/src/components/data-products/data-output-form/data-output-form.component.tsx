@@ -108,8 +108,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             setSelectedDataPlatform(dropdown);
             if (dropdown!.children?.length === 0) {
                 setSelectedConfiguration(dropdown);
+                setIdentifiers(platformConfig!.filter((config) => config.platform.name.toLowerCase() === dropdown?.value.toLowerCase() && config.service.name.toLowerCase() === dropdown?.value.toLowerCase())[0].config);
             } else {
                 setSelectedConfiguration(undefined);
+                setIdentifiers([]);
             }
         }
     };

@@ -18,9 +18,9 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
         let databaseOptionsList = identifiers //TODO
         if (!sourceAligned) {
             databaseOptionsList = [external_id]
-            form.setFieldsValue({ database: external_id});
+            form.setFieldsValue({ schema: external_id});
         } else {
-            form.setFieldsValue({database: undefined})
+            form.setFieldsValue({schema: undefined})
         }
         databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
     }, [sourceAligned]);
@@ -45,7 +45,7 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
                     disabled={!sourceAligned}
                     onChange={value => {
                         if (value.length > 0) {
-                            form.setFieldsValue({ database: value[0] });
+                            form.setFieldsValue({ schema: value[0] });
                         }
                     }}
                     maxCount={1}
@@ -65,7 +65,7 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
                     options={[]} // TODO
                     onChange={value => {
                         if (value.length > 0) {
-                            form.setFieldsValue({ database_suffix: value[0] });
+                            form.setFieldsValue({ schema_suffix: value[0] });
                         }
                     }}
                 />
