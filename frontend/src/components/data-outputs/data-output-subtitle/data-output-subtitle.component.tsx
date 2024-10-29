@@ -26,7 +26,7 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
             return <Flex vertical>
                     <div>
                     <Typography.Text strong>{t('Snowflake schema')}: </Typography.Text>
-                    <Typography.Text>{snowflake_configuration.schema}</Typography.Text>
+                    <Typography.Text>{snowflake_configuration.schema}__{snowflake_configuration.schema_suffix}</Typography.Text>
                     </div>
                 </Flex>
         }

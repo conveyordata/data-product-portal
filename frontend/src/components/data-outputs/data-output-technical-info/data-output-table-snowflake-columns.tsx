@@ -30,7 +30,7 @@ export const getSnowflakeTechnicalInformationColumns = ({
             render: (_, { data_output }) => {
                 const configuration: SnowflakeDataOutputContract = data_output.configuration as SnowflakeDataOutputContract
                 // TODO figure out how to use product aligned databases here and get their ARN?
-                return configuration.schema
+                return configuration.schema + "__" + configuration.schema_suffix
             },
             width: '30%',
         },
