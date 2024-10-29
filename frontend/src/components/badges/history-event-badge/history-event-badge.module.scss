@@ -1,5 +1,5 @@
-@import '@/styles/globals';
+@use '@/styles/globals' ;
 
 .badge-container {
-    gap: $column-gap-sm;
+    gap: globals.$column-gap-sm;
 }

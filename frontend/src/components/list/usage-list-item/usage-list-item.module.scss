@@ -1,19 +1,18 @@
-@import '@/styles/variables';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 $item-card-width: 360px;
 
 .list-item {
     width: 100%;
-    background-color: $quaternary-color-fill;
-    border: 1px solid $border-color-secondary;
-    border-radius: $border-radius-lg;
+    background-color: globals.$quaternary-color-fill;
+    border: 1px solid globals.$border-color-secondary;
+    border-radius: globals.$border-radius-lg;
     padding: unset !important;
-    margin-bottom: $spacing-m;
+    margin-bottom: globals.$spacing-m;
     transition: border-color 0.3s;
 
     &:hover {
-        border-color: $primary-color-border-hover;
+        border-color: globals.$primary-color-border-hover;
         transition: border-color 0.3s;
     }
 
@@ -22,7 +21,7 @@ $item-card-width: 360px;
         display: flex;
         align-items: center !important;
         height: 100%;
-        padding: $spacing-m $spacing-l;
+        padding: globals.$spacing-m globals.$spacing-l;
         min-width: $item-card-width;
     }
 }

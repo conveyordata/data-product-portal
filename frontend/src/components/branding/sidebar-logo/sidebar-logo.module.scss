@@ -1,16 +1,14 @@
-@import '@/styles/variables';
-@import '@/styles/colors';
-@import '@/styles/mixins';
+@use '@/styles/globals' ;
 
 .logo-text {
-    @include no-select();
+    @include globals.no-select();
     cursor: pointer;
-    color: $blue-1;
-    font-weight: $font-weight-bold;
+    color: globals.$blue-1;
+    font-weight: globals.$font-weight-bold;
     line-height: unset;
 
     &.dark {
-        color: $primary-color;
+        color: globals.$primary-color;
     }
 }
 
@@ -21,5 +19,5 @@
 .logo-wrapper {
     display: flex;
     align-items: center;
-    gap: $column-gap-sm;
+    gap: globals.$column-gap-sm;
 }

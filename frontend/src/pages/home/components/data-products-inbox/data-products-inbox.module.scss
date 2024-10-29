@@ -1,8 +1,7 @@
-@import '@/styles/variables';
-@import '@/styles/globals';
+@use '@/styles/globals';
 
 .section {
-    margin-top: $spacing-regular;
+    margin-top: globals.$spacing-regular;
     height: 100%;
 }
 

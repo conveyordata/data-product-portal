@@ -1,13 +1,11 @@
-@import '@/styles/variables';
-@import '@/styles/mixins';
-@import '@/styles/colors';
+@use '@/styles/globals';
 
 $tile-size: 72px;
 $icon-size: calc(#{$tile-size} / 2);
 
 .radio-button-container {
     align-items: center;
-    gap: $column-gap-badge;
+    gap: globals.$column-gap-badge;
     width: $tile-size;
     min-width: max-content;
 }
@@ -15,8 +13,8 @@ $icon-size: calc(#{$tile-size} / 2);
 .radio-button {
     height: $tile-size;
     width: $tile-size;
-    padding: $standard-div-padding;
-    border-radius: $border-radius-lg;
+    padding: globals.$standard-div-padding;
+    border-radius: globals.$border-radius-lg;
     overflow: hidden;
     display: flex;
     align-items: center;

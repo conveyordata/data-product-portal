@@ -1,7 +1,7 @@
-@import '@/styles/variables';
+@use '@/styles/globals' ;
 
 .tag {
-    border-radius: $border-radius-status-tag;
-    padding: $status-tag-padding;
-    min-width: $status-tag-min-width;
+    border-radius: globals.$border-radius-status-tag;
+    padding: globals.$status-tag-padding;
+    min-width: globals.$status-tag-min-width;
 }

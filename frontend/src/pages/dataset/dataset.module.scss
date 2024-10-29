@@ -1,9 +1,8 @@
-@import '@/styles/globals';
-@import '@/styles/variables';
+@use '@/styles/globals';
 
 .dataset-container {
     @extend .container;
-    gap: $column-gap-xl;
+    gap: globals.$column-gap-xl;
 }
 
 .dataset-header-container {
@@ -12,13 +11,13 @@
 }
 
 .dataset-header {
-    margin-bottom: $spacing-l;
-    gap: $column-gap-regular;
+    margin-bottom: globals.$spacing-l;
+    gap: globals.$column-gap-regular;
     align-items: center;
 
     .dataset-icon {
-        width: $icon-size-ml;
-        height: $icon-size-ml;
+        width: globals.$icon-size-ml;
+        height: globals.$icon-size-ml;
     }
 
     h3 {
@@ -33,7 +32,7 @@
 
     .dataset-overview {
         flex: 1;
-        gap: $column-gap-regular;
+        gap: globals.$column-gap-regular;
         justify-content: flex-start;
         align-items: flex-start;
     }
@@ -41,22 +40,22 @@
 
 .sidebar {
     flex: 0.3;
-    min-width: $min-sidebar-width;
-    gap: $column-gap-xl;
+    min-width: globals.$min-sidebar-width;
+    gap: globals.$column-gap-xl;
     justify-content: flex-start;
     align-items: flex-start;
 }
 
 .main-content {
     flex: 1;
-    gap: $column-gap-xl;
+    gap: globals.$column-gap-xl;
 }
 
 .actions-container {
     width: 100%;
-    gap: $column-gap-sm;
+    gap: globals.$column-gap-sm;
 }
 
 .sectionWrapper {
-    gap: $column-gap-regular;
+    gap: globals.$column-gap-regular;
 }

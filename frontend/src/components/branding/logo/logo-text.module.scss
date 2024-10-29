@@ -1,14 +1,12 @@
-@import '@/styles/variables';
-@import '@/styles/colors';
-@import '@/styles/mixins';
+@use '@/styles/globals' ;
 
 .logo-text {
-    @include no-select();
+    @include globals.no-select();
     cursor: pointer;
-    color: $blue-1 !important;
-    font-weight: $font-weight-bolder;
+    color: globals.$blue-1 !important;
+    font-weight: globals.$font-weight-bolder;
 
     &.dark {
-        color: $primary-color !important;
+        color: globals.$primary-color !important;
     }
 }
