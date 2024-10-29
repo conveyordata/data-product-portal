@@ -80,7 +80,7 @@ export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlat
         label: t('Snowflake'),
         value: DataPlatforms.Snowflake,
         icon: snowflakeLogo,
-        disabled: true,
+        disabled: false,
         hasConfig: true,
         children: [],
     },
