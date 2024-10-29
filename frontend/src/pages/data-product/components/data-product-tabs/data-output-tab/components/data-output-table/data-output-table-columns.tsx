@@ -62,18 +62,19 @@ export const getDataProductDataOutputsColumns = ({
             render: (_, { dataset_links }) => {
                 return <TableCellItem icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />} text={i18n.t('linked to {{count}} datasets', { count: dataset_links.length })} />;
             },
-            width: '15%'
+            width: '30%'
         },
         {
             title: t('Technical information'),
             render: (_, {id}) => {
                 return <DataOutputSubtitle data_output_id={id} />
             },
-            width: '45%'
+            width: '30%'
         },
         {
             title: t('Actions'),
             key: 'action',
+            width: '10%',
             render: (_, { id, name }) => {
                 return (
                     <Flex vertical>
