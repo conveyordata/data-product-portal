@@ -19,6 +19,7 @@ import { DataOutputTabs } from './components/data-output-tabs/data-output-tabs';
 import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { DataOutputActions } from './components/data-output-actions/data-output-actions.component';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 
 export function DataOutput() {
     const { t } = useTranslation();
@@ -63,10 +64,7 @@ export function DataOutput() {
             <Flex vertical className={styles.content}>
                 <Flex className={styles.headerContainer}>
                     <Space className={styles.header}>
-                        <Icon
-                            component={dataOutputTypeIcon}
-                            className={clsx([styles.defaultIcon, styles.iconBorder])}
-                        />
+                        <CustomSvgIconLoader iconComponent={dataOutputTypeIcon!} size="large" />
                         <Typography.Title level={3} ellipsis={{ tooltip: dataOutput?.name, rows: 2 }}>
                             {dataOutput?.name}
                         </Typography.Title>
