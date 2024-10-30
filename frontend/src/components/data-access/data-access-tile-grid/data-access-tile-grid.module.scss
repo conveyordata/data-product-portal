@@ -1,12 +1,11 @@
-@import '@/styles/variables';
-@import '@/styles/globals';
+@use '@/styles/globals' ;
 
 .form-container {
     @extend .container;
-    gap: $spacing-l;
+    gap: globals.$spacing-l;
 }
 
 .radio-button-container {
     display: flex;
-    gap: $spacing-m;
+    gap: globals.$spacing-m;
 }

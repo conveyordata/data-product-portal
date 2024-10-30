@@ -1,6 +1,6 @@
-@import '@/styles/variables';
+@use '@/styles/globals' ;
 
 .circle-icon-button {
-    height: $circle-icon-button-size !important;
-    width: $circle-icon-button-size !important;
+    height: globals.$circle-icon-button-size !important;
+    width: globals.$circle-icon-button-size !important;
 }

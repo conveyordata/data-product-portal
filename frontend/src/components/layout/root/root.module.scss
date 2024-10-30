@@ -1,5 +1,4 @@
-@import '@/styles/variables';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 .layout-content {
     position: relative;
@@ -11,15 +10,15 @@
     display: flex;
     height: 100%;
     width: 100%;
-    min-width: $app-min-width;
+    min-width: globals.$app-min-width;
 }
 
 .children-wrapper {
     height: 100%;
     overflow-x: auto;
-    padding: $container-padding-large;
-    background: $background-color-container;
-    border-radius: $border-radius-lg;
+    padding: globals.$container-padding-large;
+    background: globals.$background-color-container;
+    border-radius: globals.$border-radius-lg;
 
     &.layout-content-home {
         padding: unset;

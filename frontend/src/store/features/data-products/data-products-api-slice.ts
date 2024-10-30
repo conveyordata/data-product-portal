@@ -10,6 +10,8 @@ import {
     DataProductDatasetRemoveResponse,
     DataProductGetConveyorUrlRequest,
     DataProductGetConveyorUrlResponse,
+    DataProductGetDatabricksWorkspaceUrlRequest,
+    DataProductGetDatabricksWorkspaceUrlResponse,
     DataProductGetSignInUrlRequest,
     DataProductGetSignInUrlResponse,
     DataProductsGetContract,
@@ -121,6 +123,16 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 method: 'GET',
             }),
         }),
+        getDataProductDatabricksWorkspaceUrl: builder.mutation<
+            DataProductGetDatabricksWorkspaceUrlResponse,
+            DataProductGetDatabricksWorkspaceUrlRequest
+        >({
+            query: ({ id, environment }) => ({
+                url: buildUrl(ApiUrl.DataProductDatabricksWorkspaceUrl, { dataProductId: id }),
+                method: 'GET',
+                params: {environment}
+            }),
+        }),
         getDataProductConveyorNotebookUrl: builder.mutation<
             DataProductGetConveyorUrlResponse,
             DataProductGetConveyorUrlRequest
@@ -226,4 +238,5 @@ export const {
     useGetDataProductConveyorNotebookUrlMutation,
     useGetUserDataProductsQuery,
     useGetDataProductDataOutputsQuery,
+    useGetDataProductDatabricksWorkspaceUrlMutation,
 } = dataProductsApiSlice;

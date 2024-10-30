@@ -1,9 +1,14 @@
-@import 'mixins';
-@import 'fonts';
-@import 'variables';
+@forward 'fonts';
+@use 'variables';
+@use 'fonts';
+@use'mixins';
+@forward 'variables';
+@forward 'colors';
+@forward 'mixins';
+@forward 'shared';
 
 * {
-    @include border-box-sizing();
+    @include mixins.border-box-sizing();
     margin: 0;
 }
 
@@ -17,7 +22,7 @@ body {
     height: 100%;
     min-height: 100dvh;
 
-    font-family: $font-family;
+    font-family: variables.$font-family;
 
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -40,16 +45,16 @@ h6 {
 }
 
 .form-button {
-    min-width: $button-width;
+    min-width: variables.$button-width;
 }
 
 .large-button {
-    min-width: $button-large-width;
+    min-width: variables.$button-large-width;
     width: 100%;
 }
 
 .no-select {
-    @include no-select();
+    @include mixins.no-select();
 }
 
 .full-width {
