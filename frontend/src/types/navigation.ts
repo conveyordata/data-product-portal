@@ -1,3 +1,8 @@
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
+import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/dataset-tab/dataset-tab';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
+
+
 export enum ApplicationPaths {
     Home = '/',
     DataProducts = '/data-products',
@@ -47,7 +52,7 @@ export const authenticatedPaths: string[] = [
 ];
 
 export function createDataProductIdPath(dataProductId: string) {
-    return ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId));
+    return ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId)) + '#' + DataProductTabKeys.About;
 }
 
 export function createDataOutputIdPath(dataOutputId: string, dataProductId: string) {
@@ -55,7 +60,7 @@ export function createDataOutputIdPath(dataOutputId: string, dataProductId: stri
 }
 
 export function createDatasetIdPath(datasetId: string) {
-    return ApplicationPaths.Dataset.replace(':datasetId', encodeURIComponent(datasetId));
+    return ApplicationPaths.Dataset.replace(':datasetId', encodeURIComponent(datasetId)) + '#' + DatasetTabKeys.About;
 }
 
 export function createPlatformServiceConfigIdPath(platformServiceConfigId: string) {

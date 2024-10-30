@@ -20,7 +20,7 @@ type Props = {
     isLoading: boolean;
 };
 
-enum TabKeys {
+export enum TabKeys {
     About = 'about',
     DataOutputs = 'dataoutputs',
     Datasets = 'datasets',
