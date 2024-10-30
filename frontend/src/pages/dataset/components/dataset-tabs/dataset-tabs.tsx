@@ -1,5 +1,5 @@
 import { Tabs } from 'antd';
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import styles from './dataset-tabs.module.scss';
 import Icon, { HistoryOutlined, InfoCircleOutlined, PartitionOutlined, TeamOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -13,13 +13,14 @@ import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-outp
 import { AboutTab } from './about-tab/about-tab.tsx';
 import { TeamTab } from './team-tab/team-tab.tsx';
 import { ReactFlowProvider } from 'reactflow';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 type Props = {
     datasetId: string;
     isLoading: boolean;
 };
 
-enum TabKeys {
+export enum TabKeys {
     About = 'about',
     DataProduct = 'data-product',
     DataOutput = 'data-output',
@@ -87,9 +88,24 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
         return <LoadingSpinner />;
     }
 
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
+
+    useEffect(() => {
+        const hash = location.hash.slice(1);
+        if(hash) {
+            setActiveTab(hash);
+        }
+    }, [location])
+
+    const onTabChange = (key: string) => {
+        navigate(`#${key}`);
+    };
+
     return (
         <Tabs
-            defaultActiveKey={TabKeys.About}
+            activeKey={activeTab}
             items={tabs.map(({ key, label, icon, children }) => {
                 return {
                     label,
@@ -102,6 +118,7 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
             })}
             size={'middle'}
             rootClassName={styles.tabContainer}
+            onChange={onTabChange}
         />
     );
 }
