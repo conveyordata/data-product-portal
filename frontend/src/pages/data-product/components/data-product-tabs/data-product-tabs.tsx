@@ -1,5 +1,5 @@
 import { Tabs } from 'antd';
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { ExplorerTab } from '@/pages/data-product/components/data-product-tabs/explorer-tab/explorer-tab.tsx';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { HistoryTab } from '@/pages/data-product/components/data-product-tabs/history-tab/history-tab.tsx';
@@ -13,13 +13,14 @@ import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
 import { ReactFlowProvider } from 'reactflow';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 type Props = {
     dataProductId: string;
     isLoading: boolean;
 };
 
-enum TabKeys {
+export enum TabKeys {
     About = 'about',
     DataOutputs = 'dataoutputs',
     Datasets = 'datasets',
@@ -87,9 +88,24 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
         return <LoadingSpinner />;
     }
 
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
+
+    useEffect(() => {
+        const hash = location.hash.slice(1);
+        if(hash) {
+            setActiveTab(hash);
+        }
+    }, [location])
+
+    const onTabChange = (key: string) => {
+        navigate(`#${key}`);
+    };
+
     return (
         <Tabs
-            defaultActiveKey={TabKeys.About}
+            activeKey={activeTab}
             items={tabs.map(({ key, label, icon, children }) => {
                 return {
                     label,
@@ -102,6 +118,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
             })}
             size={'middle'}
             rootClassName={styles.tabContainer}
+            onChange={onTabChange}
         />
     );
 }
