@@ -1,5 +1,7 @@
+from pydantic import ConfigDict
+
 from app.shared.schema import ORMModel
 
 
 class DatabricksConfig(ORMModel):
-    pass
+    model_config = ConfigDict(extra="forbid")
