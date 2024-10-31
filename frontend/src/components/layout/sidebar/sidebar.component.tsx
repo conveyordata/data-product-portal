@@ -86,7 +86,6 @@ export const Sidebar = () => {
                     </Link>
                 </Space>
                 <Menu theme="dark" mode="vertical" selectedKeys={[rootPath]} items={navigationMenuItems} />
-                {/* <Typography.Text className={styles.sidebarContent}>Version</Typography.Text> */}
             </Flex>
         </Layout.Sider>
     );
