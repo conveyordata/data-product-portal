@@ -46,6 +46,7 @@ export enum ApiUrl {
     PlatformServices = '/api/platforms/:platformId/services',
     PlatformServiceConfig = '/api/platforms/:platformId/services/:serviceId',
     PlatformServiceConfigById = '/api/platforms/configs/:configId',
+    Version = '/api/version',
 }
 
 export type DynamicPathParams =
