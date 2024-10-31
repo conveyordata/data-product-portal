@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from app.shared.schema import ORMModel
@@ -10,3 +11,4 @@ class BaseDataProduct(ORMModel):
     description: str
     tags: list[TagCreate]
     type_id: UUID
+    about: Optional[str] = None
