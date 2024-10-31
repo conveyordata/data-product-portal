@@ -57,13 +57,14 @@ function generateDatasetOutputNodes(
         data: {
             name: link.data_output.name,
             id: link.data_output_id,
+            icon_key: link.data_output.configuration.configuration_type,
             nodeToolbarActions: <LinkToDataOutputNode id={link.data_output_id} product_id={link.data_output.owner_id} />,
             targetHandlePosition: Position.Left,
             targetHandleId: 'right_t',
             isActive: link.status === DataOutputDatasetLinkStatus.Approved,
         },
         draggable: false,
-        type: CustomNodeTypes.DatasetNode,
+        type: CustomNodeTypes.DataOutputNode,
         deletable: false,
     }));
     return datasetNodeLinks;
