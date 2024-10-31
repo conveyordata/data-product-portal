@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 
 from app.business_areas.schema import BusinessArea
@@ -34,5 +33,4 @@ class DataProduct(BaseDataProduct):
     tags: list[Tag]
     memberships: list[DataProductMembership]
     business_area: BusinessArea
-    about: Optional[str] = None
     data_outputs: list[DataOutputGet]

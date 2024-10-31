@@ -14,6 +14,7 @@ class BaseDataset(ORMModel):
     description: str
     tags: list[TagCreate]
     access_type: DatasetAccessType
+    about: Optional[str] = None
 
 
 class DatasetAboutUpdate(ORMModel):
@@ -29,4 +30,3 @@ class Dataset(BaseDataset):
     id: UUID
     owners: list[User]
     business_area: BusinessArea
-    about: Optional[str] = None
