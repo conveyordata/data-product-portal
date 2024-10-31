@@ -1,4 +1,4 @@
-import { Flex, Layout, Menu, MenuProps, Space } from 'antd';
+import { Flex, Layout, Typography, Menu, MenuProps, Space } from 'antd';
 import styles from './sidebar.module.scss';
 import React from 'react';
 import { Link, useMatches } from 'react-router-dom';
@@ -10,12 +10,14 @@ import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
 
 const DataProductIcon = () => <Icon component={dataProductOutlineIcon} />;
 const DatasetIcon = () => <Icon component={datasetOutlineIcon} />;
 
 export const Sidebar = () => {
     const matches = useMatches();
+    const { data: version } = useGetVersionQuery();
     const { t } = useTranslation();
     const currentUser = useSelector(selectCurrentUser);
 
@@ -80,9 +82,11 @@ export const Sidebar = () => {
                 <Space className={styles.logoWrapper}>
                     <Link to={ApplicationPaths.Home}>
                         <SidebarLogo />
+                        {version ? version.version : ""}
                     </Link>
                 </Space>
                 <Menu theme="dark" mode="vertical" selectedKeys={[rootPath]} items={navigationMenuItems} />
+                {/* <Typography.Text className={styles.sidebarContent}>Version</Typography.Text> */}
             </Flex>
         </Layout.Sider>
     );

@@ -81,3 +81,8 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {"message": "Hello World"}
+
+
+@app.get("/api/version")
+def get_version():
+    return {"version": app.version}
