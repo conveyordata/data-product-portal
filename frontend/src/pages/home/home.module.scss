@@ -1,4 +1,4 @@
-@import '@/styles/globals';
+@use '@/styles/globals';
 
 $landing-banner-height: 260px;
 $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgba(3, 79, 165, 0.1) 45.13%);
@@ -29,7 +29,7 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     justify-content: center;
     align-items: center;
     text-align: center;
-    gap: $spacing-regular;
+    gap: globals.$spacing-regular;
 }
 
 .search-bar {
@@ -38,5 +38,5 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 
 .content {
     flex: 0.6;
-    padding: $container-padding-large;
+    padding: globals.$container-padding-large;
 }

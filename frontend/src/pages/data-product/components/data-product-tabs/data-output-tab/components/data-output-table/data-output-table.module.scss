@@ -1,0 +1,24 @@
+@use '@/styles/globals';
+
+.data-output-list-container {
+    @extend .no-select;
+    width: 100%;
+
+    .data-output-list-table {
+        width: 100%;
+    }
+}
+
+.data-output-cell-wrapper {
+    width: 100%;
+}
+
+.icon {
+    color: globals.$color-text;
+}
+
+.data-output-title {
+    align-items: center;
+    justify-content: center;
+    gap: globals.$column-gap-sm;
+}

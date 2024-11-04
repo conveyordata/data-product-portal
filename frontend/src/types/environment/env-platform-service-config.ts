@@ -2,24 +2,38 @@ import { IdName } from '../shared';
 
 export interface EnvironmentConfig {
     id: string;
-    config: Config[];
+    config: AWSS3Config[];
     platform: IdName;
     service: IdName;
     environment: IdName;
 }
 
 interface AWSS3Config {
+    account_id: number;
     identifier: string;
     bucket_name: string;
-    kms_key: string;
-    is_default: boolean;
+    bucket_arn: string;
+    kms_key_arn: string;
 }
 
-interface AWSGlueConfig {
-    identifier: string;
-    database_name: string;
-    bucket_identifier: string;
-    s3_path: string;
+interface Config {
+    [key: string]: AWSS3Config;
 }
 
-type Config = AWSS3Config | AWSGlueConfig;
+export type EnvironmentConfigContract = Omit<EnvironmentConfig, 'platform' | 'service'> & {
+    platformName: string;
+    serviceName: string;
+};
+
+export interface EnvironmentConfigCreateRequest {
+    platform_id: string;
+    service_id: string;
+    config: Config;
+}
+
+export interface EnvironmentConfigCreateFormSchema {
+    platformId: string;
+    serviceId: string;
+    config: string;
+    identifiers: string;
+}

@@ -10,6 +10,8 @@ import {
     DataProductDatasetRemoveResponse,
     DataProductGetConveyorUrlRequest,
     DataProductGetConveyorUrlResponse,
+    DataProductGetDatabricksWorkspaceUrlRequest,
+    DataProductGetDatabricksWorkspaceUrlResponse,
     DataProductGetSignInUrlRequest,
     DataProductGetSignInUrlResponse,
     DataProductsGetContract,
@@ -18,6 +20,7 @@ import {
 } from '@/types/data-product';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import { datasetsApiSlice } from '@/store/features/datasets/datasets-api-slice.ts';
+import { DataOutputsGetContract } from '@/types/data-output';
 
 export const dataProductTags: string[] = [
     TagTypes.DataProduct,
@@ -48,12 +51,21 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             }),
             providesTags: [{ type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST }],
         }),
+        getDataProductDataOutputs: builder.query<DataOutputsGetContract, string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataProductsDataOutput, { dataProductId: id }),
+                method: 'GET',
+            }),
+        }),
         getDataProductById: builder.query<DataProductContract, string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductGet, { dataProductId: id }),
                 method: 'GET',
             }),
-            providesTags: (_, __, id) => [{ type: TagTypes.DataProduct as const, id }],
+            providesTags: (_, __, id) => [
+                { type: TagTypes.DataProduct as const, id },
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+            ],
         }),
         createDataProduct: builder.mutation<DataProductCreateResponse, DataProductCreate>({
             query: (dataProduct) => ({
@@ -109,6 +121,16 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             query: ({ id }) => ({
                 url: buildUrl(ApiUrl.DataProductConveyorIdeUrl, { dataProductId: id }),
                 method: 'GET',
+            }),
+        }),
+        getDataProductDatabricksWorkspaceUrl: builder.mutation<
+            DataProductGetDatabricksWorkspaceUrlResponse,
+            DataProductGetDatabricksWorkspaceUrlRequest
+        >({
+            query: ({ id, environment }) => ({
+                url: buildUrl(ApiUrl.DataProductDatabricksWorkspaceUrl, { dataProductId: id }),
+                method: 'GET',
+                params: {environment}
             }),
         }),
         getDataProductConveyorNotebookUrl: builder.mutation<
@@ -215,4 +237,6 @@ export const {
     useUpdateDataProductAboutMutation,
     useGetDataProductConveyorNotebookUrlMutation,
     useGetUserDataProductsQuery,
+    useGetDataProductDataOutputsQuery,
+    useGetDataProductDatabricksWorkspaceUrlMutation,
 } = dataProductsApiSlice;

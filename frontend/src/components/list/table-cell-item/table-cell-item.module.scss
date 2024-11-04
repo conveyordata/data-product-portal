@@ -1,21 +1,19 @@
-@import '@/styles/variables';
-@import '@/styles/mixins';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 .table-cell-wrapper {
-    @include no-select();
-    gap: $column-gap-sm;
+    @include globals.no-select();
+    gap: globals.$column-gap-sm;
     align-items: center;
 }
 
 .custom-icon {
     margin: auto 0;
-    height: $icon-size-table-cell;
-    width: $icon-size-table-cell;
-    color: $primary-color;
+    height: globals.$icon-size-table-cell;
+    width: globals.$icon-size-table-cell;
+    color: globals.$primary-color;
 
     svg {
-        height: $icon-size-table-cell;
-        width: $icon-size-table-cell;
+        height: globals.$icon-size-table-cell;
+        width: globals.$icon-size-table-cell;
     }
 }

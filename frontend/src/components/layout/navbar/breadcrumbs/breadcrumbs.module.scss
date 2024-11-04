@@ -1,10 +1,9 @@
-@import '@/styles/mixins';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 $max-dynamic-title-width: 260px;
 
 .breadcrumb {
-    @include no-select();
+    @include globals.no-select();
     font-weight: 400;
     text-decoration: none;
     cursor: pointer;

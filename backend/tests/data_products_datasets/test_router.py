@@ -24,6 +24,20 @@ class TestDataProductsDatasetsRouter:
         )
         assert response.status_code == 200
 
+    def test_request_data_product_remove(self, client):
+        membership = DataProductMembershipFactory(user=UserFactory(external_id="sub"))
+        ds = DatasetFactory()
+        response = self.request_data_product_dataset_link(
+            client, membership.data_product_id, ds.id
+        )
+
+        assert response.status_code == 200
+
+        response = self.request_data_product_dataset_unlink(
+            client, membership.data_product_id, ds.id
+        )
+        assert response.status_code == 200
+
     @pytest.mark.usefixtures("admin")
     def test_request_data_product_link_by_admin(self, client):
         membership = DataProductMembershipFactory()
@@ -133,3 +147,9 @@ class TestDataProductsDatasetsRouter:
     @staticmethod
     def remove_data_product_dataset_link(client, link_id):
         return client.post(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/remove/{link_id}")
+
+    @staticmethod
+    def request_data_product_dataset_unlink(client, data_product_id, dataset_id):
+        return client.delete(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/dataset/{dataset_id}"
+        )

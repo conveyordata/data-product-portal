@@ -13,11 +13,10 @@
 
 ## Introduction
 
-The Data Product Portal enables companies to build data products in a self-service manner, enabling the creation of data
-products across all departments and domains within an organization. It introduces simple but powerful concepts that
-are easy to understand and extensible to various types of data platform implementations. The portal is a process tool
-that helps data professionals while providing governance and insights into how data is being used throughout the
-organization.
+The Data Product Portal enables to **_scale_** building data products across all departments in an organisation in a
+**_self-service_** manner. It does so by providing a guided setup for creating data products, with proper approval processes
+that will **_enable governance by design_** for data initiatives. The portal is a process tool that helps data professionals
+do their work more efficiently while providing governance and insights into how data is being used throughout the organisation.
 
 Unlike traditional data catalogs that primarily focus on describing data, the Data Product Portal guides you through
 the entire data product development lifecycle. This includes self-service and secure access to tools, data platforms,
@@ -26,7 +25,7 @@ data sources, and sharing concepts, ensuring control and oversight for business 
 Our goal is to bridge the gap between data governance, data platforms and data catalogs and provide a 360 view of all
 ongoing data initiatives that is easy to understand by everybody.
 
-To read more about it, please checkout our [announcement blogpost](https://hubs.li/Q02DGGpR0)
+To read more about it, please checkout our [announcement blogpost](https://conveyordata.com/portal-introducing-new-open-source-data-product-portal?utm_source=github-portal-readme&utm_medium=referral)
 
 ## Who is it for?
 
@@ -63,14 +62,14 @@ is used in the right context.
 
 ### Datasets
 
-Datasets group one or more data objects and are the level at which read data access is granted to a data product.
+Datasets group one or more data outputs and are the level at which read data access is granted to a data product.
 Dataset owners, typically business-related individuals, approve access to specific data products. Access is granted to
 data products rather than users, guaranteeing that data is used only for the approved scope.
 
-### Data Objects
+### Data Outputs
 
-Data objects are outputs of a data product, such as files, tables, or topics. They are associated with a data product
-that has full read and write permissions. Data objects are never directly shared unless they are part of a dataset,
+Data outputs are outputs of a data product, such as files, tables, or topics. They are associated with a data product
+that has full read and write permissions. Data outputs are never directly shared unless they are part of a dataset,
 allowing safe development until they are ready for organizational sharing.
 
 ## Benefits
@@ -78,6 +77,10 @@ allowing safe development until they are ready for organizational sharing.
 Adopting the Data Product Portal offers several benefits:
 - **Guided Setup:** Step-by-step assistance involving the right stakeholders for creating data products, requesting
 access, adding users and registering new data for sharing with other data products.
+- **Governance by Design:** Ensures that data products are compliant with the organization’s data governance policies and
+standards, with proper approval processes and access controls.
+- **Scale across the organization:** Enables all departments to start new data initiatives easily without having to depend on
+a central team.
 - **Tech Translation:** Converts high-level concepts into specific configurations settings for platforms like AWS,
 Azure, Databricks, Snowflake, and others, making sure that each data product is correctly separated and not impacting
 each other.
@@ -87,6 +90,22 @@ the data landscape.
 central team. 
 - **Comprehensive Overview:** Combines data catalogs, data platforms and data governance aspects into a single 360
 overview of all ongoing data initiatives.
+
+# Additional resources
+
+## General Blogposts
+
+- [Announcement Blogpost](https://conveyordata.com/portal-introducing-new-open-source-data-product-portal?utm_source=github-portal-readme&utm_medium=referral)
+- [Interface to your data platform](https://conveyordata.com/portal-give-your-business-users-a-friendly-interface-to-your-data-platform?utm_source=github-portal-readme&utm_medium=referral)
+- [State of data products](https://medium.com/conveyordata/the-state-of-data-products-9e1bc5c39bcb)
+- [How to effectively structure data for self service data teams](https://conveyordata.com/portal-how-to-structure-data-for-self-service-data-teams?utm_source=github-portal-readme&utm_medium=referral)
+
+## Technical Blogposts
+
+- [Data product integrations: OIDC](https://medium.com/conveyordata/data-product-portal-integrations-1-oidc-8d1dcdc0896e)
+- [Data product integrations: Helm and Kubernetes](https://medium.com/conveyordata/data-product-portal-integrations-2-helm-982f4a54c0f0)
+- [Data product integrations: Data platforms](https://conveyordata.com/portal-how-portal-integrates-with-data-platforms?utm_source=github-portal-readme&utm_medium=referral)
+- [Data product integrations: AWS](https://medium.com/conveyordata/data-product-portal-integrating-with-your-data-platform-41bf9fcf1fc1)
 
 # Getting Started
 
@@ -113,8 +132,11 @@ overview of all ongoing data initiatives.
 - Now visit http://localhost:8080 to check it out!
 
 ### Sample Data
-While running in sandbox mode, the Portal will be automatically seeded with sample data (incl. users, data products, datasets, ...). The source of this data can be found in the [sample_data.sql](./backend/sample_data.sql) file.
-If you want to see different data in the sandbox mode, you can either modify this file or create your custom data file and reference that one in the [compose.yaml](compose.yaml) instead of the 'sample_data.sql' file. See the comments to learn how to pass a local file to that container.
+While running in sandbox mode, the Portal will be automatically seeded with sample data (incl. users, data products,
+datasets, ...). The source of this data can be found in the [sample_data.sql](./backend/sample_data.sql) file.
+If you want to see different data in the sandbox mode, you can either modify this file or create your custom data file
+and reference that one in the [compose.yaml](compose.yaml) instead of the 'sample_data.sql' file. See the comments to learn how
+to pass a local file to that container.
 
 ### Limitations
 
@@ -143,6 +165,24 @@ For backend specific instructions, check [backend/README.md](backend/README.md)
 
 For frontend specific instructions, check [frontend/README.md](frontend/README.md)
 
+# Integrations
+The data product portal comes with default integrations for many different platform technologies. Check out the
+[integrations](integrations/README.md) folder for more information. These integrations are meant as an example on how
+you can translate the data product portal configuration to a practical implementation for your data platform.
+
+![Integrating portal with your data platform](images/img.png)
+
+Right now we support the following integrations:
+- **AWS**: S3, Glue, Athena, (Redshift serverless coming soon)
+- **Conveyor**: A data product workflow manager that helps you build data products in a self-service manner
+
+A more detailed explanation of how to integrate the data product portal with your data platform can be found in our
+[platform integration blogpost](https://conveyordata.com/portal-how-portal-integrates-with-data-platforms?utm_source=github-portal-readme&utm_medium=referral).
+
+We are currently working on Databricks and Snowflake integrations and more are to come soon. If you have a specific
+request for a technology integration, please don't hesitate to reach out to us. Even better would be to create a pull
+request with the integration you would like to see in the data product portal.
+
 # Production Installation
 Please find the relevant info in [Installation](docs/INSTALLATION.md)
 
@@ -159,7 +199,8 @@ Distributed under the APACHE 2.0 License Copyright 2024 Dataminded. See [LICENSE
 
 # Contact
 
-Email: [info@dataminded.com](mailto:info@dataminded.com)
+**Email**: [info@dataminded.com](mailto:info@dataminded.com) \
+**Slack**: [link to join](https://join.slack.com/t/dataproductportal/shared_invite/zt-2r47r0icj-PAYbbklmH6gPz9A6bJ144Q)
 
 Project Link: [https://github.com/conveyordata/data-product-portal](https://github.com/conveyordata/data-product-portal)
 

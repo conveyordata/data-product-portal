@@ -1,0 +1,25 @@
+@use '@/styles/globals';
+
+.container {
+    @extend .container;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: globals.$column-gap-m;
+}
+
+.buttons-container {
+    @extend .container;
+    margin-top: globals.$spacing-l;
+}
+
+.textarea-container {
+    width: 50%;
+
+    textarea {
+        padding: globals.$spacing-m;
+
+        &:disabled {
+            color: #808080;
+        }
+    }
+}

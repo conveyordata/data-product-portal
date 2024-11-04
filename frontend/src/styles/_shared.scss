@@ -1,119 +1,119 @@
-@import '@/styles/colors';
-@import '@/styles/variables';
+@use 'colors';
+@use 'variables';
 
 .default-icon {
-    width: $icon-size-default;
-    height: $icon-size-default;
-    color: $primary-color;
+    width: variables.$icon-size-default;
+    height: variables.$icon-size-default;
+    color: colors.$primary-color;
 
     &.primary {
-        color: $primary-color;
+        color: colors.$primary-color;
     }
 
     &.success {
-        color: $success-color;
+        color: colors.$success-color;
     }
 
     &.warning {
-        color: $warning-color;
+        color: colors.$warning-color;
     }
 
     &.danger {
-        color: $error-color;
+        color: colors.$error-color;
     }
 
     &.info {
-        color: $info-color;
+        color: colors.$info-color;
     }
 
     &.light {
-        color: $primary-color-border;
+        color: colors.$primary-color-border;
     }
 
     &.dark {
-        color: $color-text;
+        color: colors.$color-text;
     }
 
     &.x-small {
-        width: $icon-size-extra-small;
-        height: $icon-size-extra-small;
+        width: variables.$icon-size-extra-small;
+        height: variables.$icon-size-extra-small;
     }
 
     &.small {
-        width: $icon-size-small;
-        height: $icon-size-small;
+        width: variables.$icon-size-small;
+        height: variables.$icon-size-small;
     }
 
     &.regular {
-        width: $icon-size-regular;
-        height: $icon-size-regular;
+        width: variables.$icon-size-regular;
+        height: variables.$icon-size-regular;
     }
 
     &.large {
-        width: $icon-size-large;
-        height: $icon-size-large;
+        width: variables.$icon-size-large;
+        height: variables.$icon-size-large;
     }
 
     &.x-large {
-        width: $icon-size-extra-large;
-        height: $icon-size-extra-large;
+        width: variables.$icon-size-extra-large;
+        height: variables.$icon-size-extra-large;
     }
 
     &.inverted:not(.square-border) {
-        color: $color-white;
-        background: $primary-color;
+        color: colors.$color-white;
+        background: colors.$primary-color;
 
         svg {
-            fill: $color-white;
+            fill: colors.$color-white;
         }
     }
 
     &.icon-border {
-        padding: $spacing-s;
-        border: 2px solid $primary-color;
+        padding: variables.$spacing-s;
+        border: 2px solid colors.$primary-color;
         border-radius: 50%;
 
         &.primary {
-            border-color: $primary-color;
+            border-color: colors.$primary-color;
         }
 
         &.success {
-            border-color: $success-color;
+            border-color: colors.$success-color;
         }
 
         &.warning {
-            border-color: $warning-color;
+            border-color: colors.$warning-color;
         }
 
         &.danger {
-            border-color: $error-color;
+            border-color: colors.$error-color;
         }
 
         &.info {
-            border-color: $info-color;
+            border-color: colors.$info-color;
         }
 
         &.light {
-            border-color: $primary-color-border;
+            border-color: colors.$primary-color-border;
         }
 
         &.dark {
-            border-color: $color-text;
+            border-color: colors.$color-text;
         }
     }
 
     &.inverted {
-        color: $color-white;
+        color: colors.$color-white;
 
         svg {
-            fill: $color-white;
+            fill: colors.$color-white;
 
             rect {
-                fill: $primary-color;
+                fill: colors.$primary-color;
             }
 
             path {
-                fill: $color-white;
+                fill: colors.$color-white;
             }
         }
     }
@@ -127,7 +127,7 @@
 .search-container {
     width: 100%;
     justify-content: space-between;
-    gap: $column-gap-m;
+    gap: variables.$column-gap-m;
 
     form {
         flex: 1;
@@ -135,7 +135,7 @@
 }
 
 .table-row {
-    height: $table-row-height-default;
+    height: variables.$table-row-height-default;
 }
 
 .no-cursor-pointer {

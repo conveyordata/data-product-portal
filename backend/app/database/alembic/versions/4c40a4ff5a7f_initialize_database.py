@@ -14,8 +14,8 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.core.auth.device_flows.schema import DeviceFlowStatus
 from app.data_product_memberships.enums import (
-    DataProductUserRole,
     DataProductMembershipStatus,
+    DataProductUserRole,
 )
 from app.data_product_types.enums import DataProductIconKey
 from app.data_products.status import DataProductStatus

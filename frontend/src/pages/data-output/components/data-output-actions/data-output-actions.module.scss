@@ -1,0 +1,15 @@
+@use '@/styles/globals' ;
+
+.actions-container {
+    gap: globals.$column-gap-xl;
+    justify-content: flex-start;
+    align-items: stretch;
+    width: 100%;
+}
+
+.access-data-container {
+    gap: globals.$column-gap-sm;
+    justify-content: flex-start;
+    align-items: stretch;
+    width: 100%;
+}

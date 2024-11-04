@@ -22,11 +22,28 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    ignore:
+    - dependency-name: eslint
     groups:
       react:
         patterns:
           - "react"
           - "react-dom"
+      i18n:
+        patterns:
+          - "i18next"
+          - "react-i18next"
+      eslint:
+        patterns:
+          - "*eslint*"
+          - "@eslint/*"
+          - "@typescript-eslint/parser"
+      tiptap:
+        patterns:
+          - "@tiptap/*"
+      types:
+        patterns:
+          - "@types/*"
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
@@ -47,3 +64,7 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    groups:
+      actions-deps:
+        patterns:
+          - "*"

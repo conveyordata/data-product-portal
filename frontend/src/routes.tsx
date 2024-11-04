@@ -6,7 +6,6 @@ import { Datasets } from '@/pages/datasets/datasets.page.tsx';
 import { Dataset } from '@/pages/dataset/dataset.page.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
 import { AuditLogs } from '@/pages/audit-logs/audit-logs.page.tsx';
-import { Settings } from '@/pages/settings/settings.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
 import { DataProductCreate } from '@/pages/data-product-create/data-product-create.page.tsx';
 import { AuthLayout } from '@/components/layout/auth/auth.layout.tsx';
@@ -17,6 +16,9 @@ import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
 import { DataProductEdit } from '@/pages/data-product-edit/data-product-edit.page.tsx';
 import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
+import { DataOutput } from './pages/data-output/data-output.page.tsx';
+import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
+import { Settings } from './pages/settings/settings.page.tsx';
 
 const router = createBrowserRouter([
     {
@@ -45,6 +47,14 @@ const router = createBrowserRouter([
                                 element: <DataProduct />,
                             },
                             {
+                                path: ApplicationPaths.DataOutput,
+                                element: <DataOutput />,
+                            },
+                            {
+                                path: ApplicationPaths.DataOutputEdit,
+                                element: <DataOutputEdit />,
+                            },
+                            {
                                 path: ApplicationPaths.DataProductNew,
                                 element: <DataProductCreate />,
                             },
@@ -54,7 +64,6 @@ const router = createBrowserRouter([
                             },
                         ],
                     },
-
                     {
                         path: ApplicationPaths.Datasets,
                         children: [

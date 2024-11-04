@@ -1,0 +1,15 @@
+@use '@/styles/globals' ;
+
+.status-info {
+    gap: globals.$column-gap-regular;
+
+    .content-subtitle {
+        gap: globals.$column-gap-l;
+
+        .status-badge {
+            align-items: center;
+            justify-content: center;
+            gap: globals.$column-gap-badge;
+        }
+    }
+}

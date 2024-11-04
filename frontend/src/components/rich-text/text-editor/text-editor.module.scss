@@ -1,9 +1,8 @@
-@import '@/styles/variables';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 .editorContainer {
     height: 100%;
-    min-height: $text-editor-min-height;
+    min-height: globals.$text-editor-min-height;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -16,37 +15,49 @@
 
 .submitButton {
     position: absolute;
-    bottom: $spacing-regular;
-    right: $spacing-regular;
+    bottom: globals.$spacing-regular;
+    right: globals.$spacing-regular;
     border-radius: 50%;
 }
 
 .editor {
     height: 100%;
     border: 1px solid transparent;
-    border-radius: $border-radius;
-    padding: $spacing-s $spacing-m;
+    border-radius: globals.$border-radius;
+    padding: globals.$spacing-s globals.$spacing-m;
     overflow-y: auto;
 
     &:focus {
         outline: none;
-        border: 1px solid $primary-color;
+        border: 1px solid globals.$primary-color;
     }
 
     pre {
-        margin-top: $spacing-xs;
-        background: $base-text-color;
-        border-radius: $border-radius;
-        color: $base-text-bg-base;
-        padding: $spacing-s $spacing-m;
-        font-family: $font-family-mono;
+        margin-top: globals.$spacing-xs;
+        background: globals.$base-text-color;
+        border-radius: globals.$border-radius;
+        color: globals.$base-text-bg-base;
+        padding: globals.$spacing-s globals.$spacing-m;
+        font-family: globals.$font-family-mono;
 
         code {
             background: none;
             color: inherit;
-            font-size: $font-size-sm;
+            font-size: globals.$font-size-sm;
             padding: 0;
         }
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
     }
 }
 

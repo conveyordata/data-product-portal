@@ -1,4 +1,5 @@
 from typing import Sequence
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -13,3 +14,6 @@ class EnvironmentService:
 
     def get_environments(self) -> Sequence[Environment]:
         return self.db.scalars(select(EnvironmentModel)).all()
+
+    def get_environment(self, environment_id: UUID) -> Environment:
+        return self.db.scalar(select(EnvironmentModel).filter_by(id=environment_id))

@@ -1,0 +1,12 @@
+@use '@/styles/globals' ;
+
+.search-field-wrapper {
+    margin-bottom: 0 !important;
+}
+
+.list {
+    height: 100%;
+    flex: 1;
+    max-height: globals.$modal-content-max-height-xl;
+    overflow: auto;
+}

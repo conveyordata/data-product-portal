@@ -1,0 +1,49 @@
+@use '@/styles/globals' ;
+
+
+$tile-size: 72px;
+$icon-size: calc(#{$tile-size} / 2);
+
+.radio-button-container {
+    align-items: center;
+    gap: globals.$column-gap-badge;
+    width: $tile-size;
+    min-width: max-content;
+}
+
+.radio-button {
+    height: $tile-size;
+    width: $tile-size;
+    padding: globals.$standard-div-padding;
+    border-radius: globals.$border-radius-lg;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-wrapper {
+    height: 100%;
+    min-height: $icon-size;
+    min-width: $icon-size;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+
+    svg {
+        height: $icon-size;
+        width: $icon-size;
+    }
+}
+
+.label {
+    white-space: nowrap;
+}

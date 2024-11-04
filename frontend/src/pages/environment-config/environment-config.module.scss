@@ -1,0 +1,20 @@
+@use '@/styles/globals';
+
+.container {
+    @extend .container;
+    text-align: start;
+    justify-content: flex-start;
+    gap: globals.$column-gap-m;
+}
+
+.textarea-container {
+    width: 50%;
+
+    textarea {
+        padding: globals.$spacing-m;
+
+        &:disabled {
+            color: #808080;
+        }
+    }
+}

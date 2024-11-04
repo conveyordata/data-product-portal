@@ -32,21 +32,62 @@ declare
     products_data_id uuid;
     stores_data_id uuid;
     employees_data_id uuid;
+
+    -- PLATFORMS
+    returned_platform_id uuid;
+    s3_service_id uuid;
+    glue_service_id uuid;
+    returned_environment_id_dev uuid;
+    returned_environment_id_prd uuid;
+    databricks_id uuid;
+    databricks_service_id uuid;
+    snowflake_id uuid;
+    snowflake_service_id uuid;
+
+    -- DATA OUTPUTS
+    glue_configuration_id uuid;
+    glue_data_output_id uuid;
+    databricks_configuration_id uuid;
+    databricks_data_output_id uuid;
 begin
     TRUNCATE TABLE public.data_product_memberships CASCADE;
     TRUNCATE TABLE public.data_products_datasets CASCADE;
     TRUNCATE TABLE public.datasets_owners CASCADE;
     TRUNCATE TABLE public.datasets CASCADE;
     TRUNCATE TABLE public.data_products CASCADE;
-    TRUNCATE TABLE public.users CASCADE;
     TRUNCATE TABLE public.data_product_types CASCADE;
     TRUNCATE TABLE public.business_areas CASCADE;
-    TRUNCATE TABLE public.environments CASCADE;
     TRUNCATE TABLE public.tags CASCADE;
 
+    -- PLATFORMS
+    SELECT id FROM public.platforms WHERE name = 'AWS' INTO returned_platform_id;
+    SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'S3' INTO s3_service_id;
+    SELECT id FROM public.platform_services WHERE platform_id = returned_platform_id AND name = 'Glue' INTO glue_service_id;
+
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', returned_platform_id, s3_service_id, '["datalake","ingress","egress"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('fa026b3a-7a17-4c32-b279-995af021f6c2', returned_platform_id, glue_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platforms (id, "name") VALUES ('9be7613c-42fb-4b93-952d-1874ed1ddf77', 'Snowflake') returning id INTO snowflake_id;
+    INSERT INTO public.platform_services (id, "name", platform_id) VALUES ('a75189c1-fa42-4980-9497-4bea4c968a5b', 'Snowflake', '9be7613c-42fb-4b93-952d-1874ed1ddf77') returning id INTO snowflake_service_id;
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('e5f82cba-28fd-4895-b8b2-4b31cba06cde', '9be7613c-42fb-4b93-952d-1874ed1ddf77', 'a75189c1-fa42-4980-9497-4bea4c968a5b', '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platforms (id, "name") VALUES ('baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'Databricks') returning id INTO databricks_id;
+    INSERT INTO public.platform_services (id, "name", platform_id) VALUES ('ce208413-b629-44d2-9f98-e5b47a315a56', 'Databricks', databricks_id) returning id INTO databricks_service_id;
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('0b9a0e7f-8fee-4fd3-97e0-830e1612b77a', databricks_id, databricks_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
     -- ENVIRONMENTS
-    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'custom_arn_development_project{{}}', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'custom_arn_production_project{{}}', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'dev_context', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_dev;
+    INSERT INTO public.environments ("name", context, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'prd_context', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_prd;
+    INSERT INTO public.env_platform_configs (id, environment_id, platform_id, "config", created_on, updated_on, deleted_at) VALUES('f8d7e6c5-b4a3-492d-8c1b-9a0b8c7d6e5f', returned_environment_id_dev, databricks_id, '{"account_id":"012345678901","metastore_id":"012345678901","credential_name":"dbx-uc-access", "workspace_urls": {"7d9ec9fd-89cf-477e-b077-4c8d1a3ce3cc": "databricks_prd_link1", "bd09093e-14ff-41c1-b74d-7c2ce9821d1c":"databricks_prd_link2"}}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_configs (id, environment_id, platform_id, "config", created_on, updated_on, deleted_at) VALUES('a9b8c7d6-e5f4-483e-9d2c-1b3a4c5d6e7f', returned_environment_id_prd, databricks_id, '{"account_id":"012345678901","metastore_id":"012345678901","credential_name":"dbx-uc-access", "workspace_urls": {"7d9ec9fd-89cf-477e-b077-4c8d1a3ce3cc": "databricks_dev_link1", "bd09093e-14ff-41c1-b74d-7c2ce9821d1c":"databricks_dev_link2"}}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    INSERT INTO public.env_platform_configs (id, environment_id, platform_id, "config", created_on, updated_on, deleted_at) VALUES ('daa8e3e8-1485-4eb2-8b4b-575e8d10a570', returned_environment_id_dev, returned_platform_id, '{"account_id": "012345678901", "region": "eu-west-1", "can_read_from": ["production"]}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_configs (id, environment_id, platform_id, "config", created_on, updated_on, deleted_at) VALUES ('e2aa2f6d-585f-4b43-8ea4-982b7bab0142', returned_environment_id_prd, returned_platform_id, '{"account_id": "012345678901", "region": "eu-west-1", "can_read_from": []}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('93f4b677-5ae8-450d-91a6-e15196b2e774', returned_environment_id_dev, returned_platform_id, s3_service_id, '[{"identifier":"datalake","bucket_name":"datalake_bucket_dev","bucket_arn":"datalake_bucket_arn_dev","kms_key_arn":"datalake_kms_key_dev","is_default":true},{"identifier":"ingress","bucket_name":"ingress_bucket_dev","bucket_arn":"ingress_bucket_arn_dev","kms_key_arn":"ingress_kms_key_dev","is_default":false},{"identifier":"egress","bucket_name":"egress_bucket_dev","bucket_arn":"egress_bucket_arn_dev","kms_key_arn":"egress_kms_key_dev","is_default":false}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('9c1d025c-f342-4665-8461-ba8b9f4035ff', returned_environment_id_prd, returned_platform_id, s3_service_id, '[{"identifier":"datalake","bucket_name":"datalake_bucket_prd","bucket_arn":"datalake_bucket_arn_prd","kms_key_arn":"datalake_kms_key_prd","is_default":true},{"identifier":"ingress","bucket_name":"ingress_bucket_prd","bucket_arn":"ingress_bucket_arn_prd","kms_key_arn":"ingress_kms_key_prd","is_default":false},{"identifier":"egress","bucket_name":"egress_bucket_prd","bucket_arn":"egress_bucket_arn_prd","kms_key_arn":"egress_kms_key_prd","is_default":false}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('1c52b0e5-961f-412a-995e-0c1efae19f41', returned_environment_id_dev, returned_platform_id, glue_service_id, '[{"identifier":"clean_test","database_name":"clean_test_dev","bucket_identifier":"datalake","s3_path":"clean/test"},{"identifier":"master_test","database_name":"master_test_dev","bucket_identifier":"datalake","s3_path":"master/test"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('ba42ca59-ab5d-498e-8cd0-cdd680f80bb0', returned_environment_id_prd, returned_platform_id, glue_service_id, '[{"identifier":"clean_test","database_name":"clean_test_prd","bucket_identifier":"datalake","s3_path":"clean/test"},{"identifier":"master_test","database_name":"master_test_prd","bucket_identifier":"datalake","s3_path":"master/test"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('f8d7e6c5-b4a3-492d-8c1b-9a0b8c7d6e5f', returned_environment_id_dev, databricks_id, databricks_service_id, '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('a9b8c7d6-e5f4-483e-9d2c-1b3a4c5d6e7f', returned_environment_id_prd, databricks_id, databricks_service_id, '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- BUSINESS AREAS
     INSERT INTO public.business_areas (id, "name", description, created_on, updated_on, deleted_at) VALUES ('672debaf-31f9-4233-820b-ad2165af044e', 'HR', 'Human Resources', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO hr_id;
@@ -66,7 +107,7 @@ begin
     INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('alice.baker@gmail.com', 'a02d3714-97e3-40d8-92b7-3b018fd1229f', 'alice.baker@gmail.com', 'Alice', 'Baker', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO alice_id;
     INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('bob.baker@gmail.com', '35f2dd11-3119-4eb3-8f19-01b323131221', 'bob.baker@gmail.com', 'Bob', 'Baker', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO bob_id;
     INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('jane.doe@dataminded.com', 'd9f3aae2-391e-46c1-aec6-a7ae1114a7da', 'jane.doe@dataminded.com', 'Jane', 'Doe', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO jane_id;
-    INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('john.doe@dataminded.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', 'john.doe@dataminded.com', 'John', 'Doe', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO john_id;
+    INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at, is_admin) VALUES ('john.doe@dataminded.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', 'john.doe@dataminded.com', 'John', 'Doe', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, true) returning id INTO john_id;
 
     -- DATA PRODUCTS
     INSERT INTO public.data_products (id, "name", external_id, description, about, status, type_id, business_area_id, created_on, updated_on, deleted_at) VALUES ('e269fd59-14f4-4710-9ce0-bb31b1c8b541', 'Sales Funnel Optimization', 'sales_funnel_optimization', 'Analyze data to optimize the Sales Funnel', '<h2>Sales Funnel Optimization</h2><p></p><p>This data product aims to analyze the current sales funnel, identify drop-off points,  implement improvements, and test new strategies.</p><p></p><p><strong>Key objectives include:</strong></p><ul><li><p>Increase Conversion Rates</p></li><li><p>Enhance Lead Quality</p></li><li><p>Optimize Lead Nurturing Processes</p></li><li><p>Improve Sales Team Efficiency</p></li><li><p>Maximize Customer Lifetime Value (CLV)</p></li><li><p>Data-Driven Decision Making</p></li><li><p>Align Marketing and Sales Efforts</p></li><li><p>Enhance Customer Experience</p></li><li><p>Drive Revenue Growth</p></li></ul>', 'ACTIVE', exploration_type_id, sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_funnel_optimization_id;
@@ -93,8 +134,8 @@ begin
     INSERT INTO public.datasets_owners (dataset_id, users_id, created_on, updated_on) VALUES (employees_data_id, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL);
 
     -- DATA PRODUCTS - DATASETS
-    INSERT INTO public.data_products_datasets (id, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('0658e52e-b69e-4787-b7b1-df215d75329c', sales_funnel_optimization_id, sales_data_id, 'PENDING_APPROVAL', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.data_products_datasets (id, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('8c9ae075-aac3-47f3-b46f-1e7d66ea008a', sales_funnel_optimization_id, stores_data_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.data_products_datasets (id, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('0658e52e-b69e-4787-b7b1-df215d75329c', sales_funnel_optimization_id, sales_data_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.data_products_datasets (id, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('8c9ae075-aac3-47f3-b46f-1e7d66ea008a', sales_funnel_optimization_id, stores_data_id, 'PENDING_APPROVAL', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.data_products_datasets (id, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('9cc43cb5-f943-4f4e-8b41-8001fd33a0a0', sales_funnel_optimization_id, customer_data_id, 'APPROVED', bob_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.data_products_datasets (id, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('7df30caf-d2a7-4a39-b528-45a1aed7b4c0', sales_funnel_optimization_id, products_data_id, 'APPROVED', bob_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.data_products_datasets (id, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('f5923c52-d89e-429d-b2f2-ad8eb431a85e', customer_segmentation_id, sales_data_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
@@ -122,4 +163,12 @@ begin
     INSERT INTO public.data_product_memberships (id, data_product_id, user_id, "role", status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('c9e06816-e026-4495-aa0b-ed02419a4767', sales_forecast_id, bob_id, 'MEMBER','APPROVED', NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.data_product_memberships (id, data_product_id, user_id, "role", status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('00cb14d8-3b80-4a27-a743-cb8ae1548407', sales_forecast_id, alice_id, 'MEMBER','APPROVED', NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
+    -- DATA OUTPUTS
+    INSERT INTO public.data_output_configurations (id, configuration_type, bucket_identifier, "database", database_suffix, "table", table_path, database_path, created_on, updated_on, deleted_at) VALUES ('b6bc5710-8706-45fb-bf85-6ed90d8a7428', 'GlueDataOutput', 'datalake', 'digital_marketing', 'glue_output', '*', '*', 'digital_marketing', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into glue_configuration_id;
+    INSERT INTO public.data_outputs (id, configuration_id, "name", external_id, description, status, owner_id, platform_id, service_id, created_on, updated_on, deleted_at) VALUES ('4d35e5ef-6205-4d4d-aec1-a9456b3a3ba6', glue_configuration_id, 'Marketing Glue table', 'marketing-glue-table', 'A Glue table containing marketing data', 'ACTIVE', marketing_campaign_id,returned_platform_id, glue_service_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO glue_data_output_id;
+    INSERT INTO public.data_output_configurations (id, configuration_type, bucket_identifier, "schema", schema_suffix, schema_path, created_on, updated_on, deleted_at) VALUES ('cdd627e5-08b2-4dc8-add6-32ff569f543b', 'DatabricksDataOutput', 'datalake', 'digital_marketing', 'databricks_output', 'digital_marketing', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into databricks_configuration_id;
+    INSERT INTO public.data_outputs (id, configuration_id, "name", external_id, description, status, owner_id, platform_id, service_id, created_on, updated_on, deleted_at) VALUES ('4bbe93f4-3514-4839-a705-6532a6cb041f', databricks_configuration_id, 'Marketing Databricks table', 'marketing-databricks-table', 'A Databricks table containing marketing data', 'ACTIVE', marketing_campaign_id,databricks_id, databricks_service_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO databricks_data_output_id;
+
+    INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('90238525-841a-4e50-9387-9dc8ebbf8fe8', databricks_data_output_id, sales_data_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('6c2ea4b3-48af-448d-9e9e-2892d3dddf50', glue_data_output_id, sales_data_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 end $$;

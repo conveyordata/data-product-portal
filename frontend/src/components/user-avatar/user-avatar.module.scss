@@ -1,21 +1,20 @@
-@import '@/styles/globals';
-@import '@/styles/variables';
+@use '@/styles/globals' ;
 
 .user-avatar-container {
-    gap: $column-gap-regular;
+    gap: globals.$column-gap-regular;
     align-items: center;
 }
 
 .avatar {
-    width: $nav-avatar-size;
-    min-width: $nav-avatar-size;
-    height: $nav-avatar-size;
-    min-height: $nav-avatar-size;
+    width: globals.$nav-avatar-size;
+    min-width: globals.$nav-avatar-size;
+    height: globals.$nav-avatar-size;
+    min-height: globals.$nav-avatar-size;
 }
 
 .user-info {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: $column-gap-xxs;
+    gap: globals.$column-gap-xxs;
 }

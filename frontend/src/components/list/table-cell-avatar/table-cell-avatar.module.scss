@@ -1,11 +1,11 @@
-@import '@/styles/variables';
+@use '@/styles/globals' ;
 
 .avatar-container {
     width: 100%;
     align-items: center;
-    gap: $column-gap-regular;
+    gap: globals.$column-gap-regular;
 }
 
 .popover-content {
-    max-width: $popover-max-width;
+    max-width: globals.$popover-max-width;
 }

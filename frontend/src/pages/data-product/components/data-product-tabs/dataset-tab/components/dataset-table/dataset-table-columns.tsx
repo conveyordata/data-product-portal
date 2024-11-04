@@ -9,9 +9,12 @@ import { createDatasetIdPath } from '@/types/navigation.ts';
 import { DatasetLink } from '@/types/data-product';
 import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title.tsx';
 import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title.tsx';
+import { Sorter } from '@/utils/table-sorter.helper';
+import { FilterSettings } from '@/utils/table-filter.helper';
 
 type Props = {
     t: TFunction;
+    datasetLinks: DatasetLink[];
     onRemoveDataProductDatasetLink: (datasetId: string, name: string) => void;
     onCancelDataProductDatasetLinkRequest: (datasetId: string, name: string) => void;
     isLoading?: boolean;
@@ -22,9 +25,11 @@ export const getDataProductDatasetsColumns = ({
     onRemoveDataProductDatasetLink,
     onCancelDataProductDatasetLinkRequest,
     t,
+    datasetLinks,
     isDisabled,
     isLoading,
 }: Props): TableColumnsType<DatasetLink> => {
+    const sorter = new Sorter<DatasetLink>()
     return [
         {
             title: t('Id'),
@@ -60,13 +65,16 @@ export const getDataProductDatasetsColumns = ({
                 );
             },
             width: '100%',
+            ...new FilterSettings(datasetLinks, datasetLink => getDataProductDatasetLinkStatusLabel(datasetLink.status)),
+            sorter: sorter.stringSorter(datasetLink => datasetLink.dataset.name),
+            defaultSortOrder: 'ascend',
         },
         {
             title: t('Actions'),
             key: 'action',
             render: (_, { dataset, dataset_id, status }) => {
                 const buttonText = status === 'pending_approval' ? t('Cancel') : t('Remove');
-                const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Remove Dataset');
+                const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Unlink Dataset');
                 const popupDescription =
                     status === 'pending_approval'
                         ? t('Are you sure you want to cancel the request to link {{name}} to the data product?', {

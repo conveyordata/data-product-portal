@@ -1,0 +1,21 @@
+@use '@/styles/globals';
+
+.search-field-wrapper {
+    margin-bottom: 0 !important;
+}
+
+.data-output-list {
+    max-height: globals.$modal-content-max-height-xl;
+    overflow: auto;
+}
+
+.data-output-name {
+    font-weight: globals.$font-weight-normal;
+}
+
+.data-output-item {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

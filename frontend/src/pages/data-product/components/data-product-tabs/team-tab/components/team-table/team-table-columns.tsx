@@ -8,6 +8,8 @@ import { Badge, Button, Popconfirm, Space, TableColumnsType } from 'antd';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form.tsx';
 import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper.ts';
+import { Sorter } from '@/utils/table-sorter.helper';
+import { FilterSettings } from '@/utils/table-filter.helper';
 
 type Props = {
     t: TFunction;
@@ -34,6 +36,7 @@ export const getDataProductUsersTableColumns = ({
     canPerformTeamActions,
     hasCurrentUserMembership,
 }: Props): TableColumnsType<DataProductUserMembership> => {
+    const sorter = new Sorter<DataProductUserMembership>();
     return [
         {
             title: t('Id'),
@@ -54,8 +57,8 @@ export const getDataProductUsersTableColumns = ({
                     />
                 );
             },
-            sorter: (a, b) => a.user.last_name.localeCompare(b.user.last_name),
             width: '50%',
+            sorter: sorter.stringSorter(membership => membership.user.last_name),
         },
         {
             title: t('Role'),
@@ -73,6 +76,8 @@ export const getDataProductUsersTableColumns = ({
                 );
             },
             width: '25%',
+            ...new FilterSettings(dataProductUsers, membership => membership.role),
+            sorter: sorter.stringSorter(membership => membership.role),
         },
         {
             title: t('Status'),
@@ -86,6 +91,8 @@ export const getDataProductUsersTableColumns = ({
                 );
             },
             width: '20%',
+            ...new FilterSettings(dataProductUsers, membership => getDataProductMembershipStatusLabel(membership.status)),
+            sorter: sorter.stringSorter(membership => getDataProductMembershipStatusLabel(membership.status)),
         },
         {
             title: t('Actions'),

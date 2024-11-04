@@ -1,17 +1,19 @@
 import { DataProductStatus } from '@/types/data-product';
+import { DataOutputStatus } from '@/types/data-output';
 import { BadgeProps } from 'antd';
 import i18n from '@/i18n.ts';
 import { Status } from '@/types/shared';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { DataProductMembershipStatus } from '@/types/data-product-membership';
+import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
 
 export function getStatusLabel(status: Status): string {
     switch (status) {
-        case DataProductStatus.Pending:
+        case DataProductStatus.Pending || DataOutputStatus.Pending:
             return i18n.t('Pending');
-        case DataProductStatus.Active:
+        case DataProductStatus.Active || DataOutputStatus.Active:
             return i18n.t('Active');
-        case DataProductStatus.Archived:
+        case DataProductStatus.Archived || DataOutputStatus.Archived:
             return i18n.t('Archived');
         default:
             return i18n.t('Unknown');
@@ -20,11 +22,11 @@ export function getStatusLabel(status: Status): string {
 
 export function getBadgeStatus(status: Status): BadgeProps['status'] {
     switch (status) {
-        case DataProductStatus.Pending:
+        case DataProductStatus.Pending || DataOutputStatus.Pending:
             return 'processing';
-        case DataProductStatus.Active:
+        case DataProductStatus.Active || DataOutputStatus.Active:
             return 'success';
-        case DataProductStatus.Archived:
+        case DataProductStatus.Archived || DataOutputStatus.Archived:
             return 'error';
         default:
             return 'default';
@@ -41,6 +43,32 @@ export function getDataProductDatasetLinkStatusLabel(status: DataProductDatasetL
             return i18n.t('Rejected');
         default:
             return i18n.t('Unknown');
+    }
+}
+
+export function getDataOutputDatasetLinkStatusLabel(status: DataOutputDatasetLinkStatus): string {
+    switch (status) {
+        case DataOutputDatasetLinkStatus.Pending:
+            return i18n.t('Requested');
+        case DataOutputDatasetLinkStatus.Approved:
+            return i18n.t('Available');
+        case DataOutputDatasetLinkStatus.Denied:
+            return i18n.t('Rejected');
+        default:
+            return i18n.t('Unknown');
+    }
+}
+
+export function getDataOutputDatasetLinkBadgeStatus(status: DataOutputDatasetLinkStatus): BadgeProps['status'] {
+    switch (status) {
+        case DataOutputDatasetLinkStatus.Pending:
+            return 'processing';
+        case DataOutputDatasetLinkStatus.Approved:
+            return 'success';
+        case DataOutputDatasetLinkStatus.Denied:
+            return 'error';
+        default:
+            return 'default';
     }
 }
 

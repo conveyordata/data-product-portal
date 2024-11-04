@@ -63,7 +63,7 @@ export function TeamTab({ dataProductId }: Props) {
                     role: DataProductMembershipRole.Member,
                 }).unwrap();
                 dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
-            } catch (error) {
+            } catch (_error) {
                 dispatchMessage({ content: t('Failed to grant access to the data product'), type: 'error' });
             }
         },

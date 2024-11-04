@@ -1,5 +1,4 @@
-@import '@/styles/variables';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 .handle {
     visibility: hidden;

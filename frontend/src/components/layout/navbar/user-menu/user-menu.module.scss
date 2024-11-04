@@ -1,27 +1,25 @@
-@import '@/styles/mixins';
-@import '@/styles/variables';
-@import '@/styles/colors';
+@use '@/styles/globals' ;
 
 .user-menu-container {
     align-items: center;
-    gap: $column-gap-l;
+    gap: globals.$column-gap-l;
 }
 
 .avatar-wrapper {
     align-items: center;
-    gap: $column-gap-sm;
+    gap: globals.$column-gap-sm;
 
     .avatar {
-        height: $nav-avatar-size;
-        width: $nav-avatar-size;
+        height: globals.$nav-avatar-size;
+        width: globals.$nav-avatar-size;
     }
 
     span {
-        @include no-select();
+        @include globals.no-select();
     }
 
     .user-greeting {
-        font-size: $font-header-4;
-        font-weight: $font-weight-bold;
+        font-size: globals.$font-header-4;
+        font-weight: globals.$font-weight-bold;
     }
 }

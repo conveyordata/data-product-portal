@@ -1,13 +1,13 @@
-@import '@/styles/variables';
+@use '@/styles/globals';
 
 .container {
-  text-align: start;
-  justify-content: flex-start;
-  height: 100%;
-  width: 100%;
-  gap: $column-gap-m;
+    text-align: start;
+    justify-content: flex-start;
+    height: 100%;
+    width: 100%;
+    gap: globals.$column-gap-m;
 
-  h1 {
-    margin-bottom: 0;
-  }
+    h1 {
+        margin-bottom: 0;
+    }
 }

@@ -1,26 +1,26 @@
-@import '@/styles/variables';
+@use '@/styles/globals' ;
 
 .container {
     width: 100%;
-    max-width: $modal-max-width;
+    max-width: globals.$modal-max-width;
 
     .form-modal-content {
         height: 100%;
         display: flex;
         flex-direction: column;
-        min-height: $modal-content-min-height;
-        padding: $modal-padding;
+        min-height: globals.$modal-content-min-height;
+        padding: globals.$modal-padding;
     }
 
     .form-modal-header {
-        margin-bottom: $modal-gap-header;
+        margin-bottom: globals.$modal-gap-header;
     }
 
     .form-modal-body {
         overflow: auto;
         display: flex;
         flex-direction: column;
-        gap: $column-gap-regular;
+        gap: globals.$column-gap-regular;
         flex: 1;
     }
 }

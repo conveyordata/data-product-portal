@@ -59,8 +59,21 @@ if settings.OIDC_ENABLED:
         oidc_user = OIDCIdentity.model_validate(response.json())
         return update_db_user(oidc_user, token, db)
 
+    def api_key_authenticated(
+        api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
+    ):
+        if not (api_key or jwt_token):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Unauthenticated"
+            )
+        if not api_key:
+            return secured_call(jwt_token)
+        else:
+            return JWTToken(sub="systemaccount_bot", token="")
+
     def get_authenticated_user(
-        token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
+        token: JWTToken = Depends(api_key_authenticated),
+        db: Session = Depends(get_db_session),
     ) -> User:
         user = (
             db.query(UserModel).filter(UserModel.external_id == token.sub).one_or_none()
@@ -101,13 +114,7 @@ else:
             return authorize_user(token, db)
         return user
 
-
-def api_key_authenticated(
-    api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
-):
-    if not (api_key or jwt_token):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Unauthenticated"
-        )
-    if not api_key:
+    def api_key_authenticated(
+        api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
+    ):
         return secured_call(jwt_token)
