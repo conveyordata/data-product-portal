@@ -1,4 +1,4 @@
-import { Form, FormInstance, Input, Select } from 'antd';
+import { Form, FormInstance, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataOutputConfiguration, DataOutputCreateFormSchema, SnowflakeDataOutput } from '@/types/data-output';
 import { useEffect } from 'react';

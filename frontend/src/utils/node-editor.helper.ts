@@ -4,6 +4,7 @@ import { theme } from 'antd';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { CSSProperties } from 'react';
 import { greenThemeConfig } from '@/theme/antd-theme.ts';
+import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
 
 const { getDesignToken } = theme;
 
@@ -74,6 +75,24 @@ export const getDataProductDatasetLinkEdgeStyle = (status: DataProductDatasetLin
             break;
         case DataProductDatasetLinkStatus.Denied:
         case DataProductDatasetLinkStatus.Pending:
+        default:
+            edgeStyles.stroke = token.colorPrimaryBorder;
+            break;
+    }
+
+    return edgeStyles;
+};
+
+export const getDataOutputDatasetLinkEdgeStyle = (status: DataOutputDatasetLinkStatus): CSSProperties => {
+    const edgeStyles: CSSProperties = {
+        strokeDasharray: '5 5',
+    };
+    switch (status) {
+        case DataOutputDatasetLinkStatus.Approved:
+            edgeStyles.stroke = token.colorPrimary;
+            break;
+        case DataOutputDatasetLinkStatus.Denied:
+        case DataOutputDatasetLinkStatus.Pending:
         default:
             edgeStyles.stroke = token.colorPrimaryBorder;
             break;
