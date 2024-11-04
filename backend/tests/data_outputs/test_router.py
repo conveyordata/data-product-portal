@@ -3,6 +3,7 @@ from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_product import DataProductFactory
 from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.platform_service import PlatformServiceFactory
+from tests.factories.schema import SchemaFactory
 from tests.factories.user import UserFactory
 
 ENDPOINT = "/api/data_outputs"
@@ -116,6 +117,13 @@ class TestDataOutputsRouter:
         response = self.delete_data_output(client, data_output.id)
         assert response.status_code == 200
 
+    def test_get_data_contracts(self, client):
+        data_output = DataOutputFactory()
+        data_contract = SchemaFactory(data_output_id=data_output.id)
+        response = self.get_data_contracts(client, data_output.id)
+        assert response.status_code == 200
+        assert response.json()[0]["id"] == str(data_contract.id)
+
     @staticmethod
     def create_data_output(client, default_data_output_payload):
         return client.post(ENDPOINT, json=default_data_output_payload)
@@ -131,3 +139,7 @@ class TestDataOutputsRouter:
     @staticmethod
     def delete_data_output(client, data_output_id):
         return client.delete(f"{ENDPOINT}/{data_output_id}")
+
+    @staticmethod
+    def get_data_contracts(client, data_output_id):
+        return client.get(f"{ENDPOINT}/{data_output_id}/data_contracts")

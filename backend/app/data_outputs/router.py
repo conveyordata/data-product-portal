@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.data_contracts.schema.schema import SchemaGet
 from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
@@ -138,3 +139,10 @@ def unlink_dataset_from_data_output(
     return DataOutputService().unlink_dataset_from_data_output(
         id, dataset_id, authenticated_user, db
     )
+
+
+@router.get("/{id}/data_contracts")
+def get_data_contracts(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> list[SchemaGet]:
+    return DataOutputService().get_data_contracts(id, db)
