@@ -3,6 +3,7 @@ from fastapi import APIRouter, Security
 from app.business_areas.router import router as business_area
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
+from app.data_contracts.router import router as data_contract
 from app.data_outputs.router import router as data_outputs
 from app.data_outputs_datasets.router import router as data_output_dataset
 from app.data_product_memberships.router import router as data_product_membership
@@ -30,3 +31,4 @@ router.include_router(data_output_dataset)
 router.include_router(data_product_membership)
 router.include_router(data_outputs)
 router.include_router(platform)
+router.include_router(data_contract)

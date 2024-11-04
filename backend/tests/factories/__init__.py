@@ -4,6 +4,7 @@ from tests.factories.s3_data_output import S3DataOutputFactory
 
 from .. import test_session
 from .business_area import BusinessAreaFactory
+from .column import ColumnFactory
 from .data_product import DataProductFactory
 from .data_product_membership import DataProductMembershipFactory
 from .data_product_type import DataProductTypeFactory
@@ -15,6 +16,8 @@ from .environment import EnvironmentFactory
 from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
 from .platform_service_config import PlatformServiceConfigFactory
+from .schema import SchemaFactory
+from .service_level_objective import ServiceLevelObjectiveFactory
 from .user import UserFactory
 
 factories = [
@@ -34,6 +37,9 @@ factories = [
     DataProductDatasetAssociationFactory,
     EnvPlatformConfigFactory,
     S3DataOutputFactory,
+    SchemaFactory,
+    ColumnFactory,
+    ServiceLevelObjectiveFactory,
 ]
 
 for factory_model in factories:
