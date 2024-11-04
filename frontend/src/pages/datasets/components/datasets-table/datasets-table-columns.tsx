@@ -1,6 +1,6 @@
-import { DatasetAccess, DatasetsGetContract } from '@/types/dataset';
+import { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
 import { TFunction } from 'i18next';
-import { Popover, TableColumnsType } from 'antd';
+import { Popover, Table, TableColumnsType } from 'antd';
 import i18n from '@/i18n.ts';
 import { getStatusLabel } from '@/utils/status.helper.ts';
 import { TableStatusTag } from '@/components/list/table-status-tag/table-status-tag.component.tsx';
@@ -47,6 +47,7 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
                 return <TableCellItem text={name} tooltip={{ content: name }} />;
             },
             sorter: sorter.stringSorter(ds => ds.name),
+            width: "20%"
         },
         {
             title: t('Status'),
@@ -56,6 +57,7 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             },
             ...new FilterSettings(datasets, ds => getStatusLabel(ds.status)),
             sorter: sorter.stringSorter(ds => getStatusLabel(ds.status)),
+            width: "10%"
         },
         {
             title: t('Business Area'),
@@ -66,6 +68,7 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             ellipsis: true,
             ...new FilterSettings(datasets, ds => ds.business_area.name),
             sorter: sorter.stringSorter(ds => ds.business_area.name),
+            width: "15%"
         },
         {
             title: t('Access Type'),
@@ -76,6 +79,22 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             ellipsis: true,
             ...new FilterSettings(datasets, ds => getDatasetAccessTypeLabel(ds.access_type)),
             sorter: sorter.stringSorter(ds => getDatasetAccessTypeLabel(ds.access_type)),
+            width: "15%"
+        },
+        {
+            title: t('Produced by Data Product'),
+            dataIndex: 'data_output_links',
+            render: (data_output_links: DataOutputLink[]) => {
+                console.log(data_output_links)
+                if (data_output_links !== undefined) {
+                    return <TableCellItem text={[... new Set(data_output_links.map(data_output_link =>
+                        data_output_link.data_output.owner.name
+                    ))].join(',')}/>;
+                }
+            },
+            width: "25%"
+            // ...new FilterSettings(datasets, ds => ds.business_area.name),
+            // sorter: sorter.stringSorter(ds => ds.data_output_links.data_output.owner.name),
         },
         {
             title: t('Shared With'),
@@ -84,6 +103,7 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
                 return <TableCellItem text={i18n.t('{{count}} data products', { count })} />;
             },
             sorter: sorter.numberSorter(ds => ds.data_product_count),
+            width: "15%"
         },
     ]
 };
