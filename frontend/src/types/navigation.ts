@@ -1,5 +1,4 @@
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
-import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/dataset-tab/dataset-tab';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
 
 
@@ -17,7 +16,7 @@ export enum ApplicationPaths {
     DataOutputNew = '/data-outputs/new',
     DataOutputEdit = '/data-products/:dataProductId/:dataOutputId/edit',
     AuditLogs = '/audit-logs',
-    // Settings = '/settings',
+    Settings = '/settings',
     Logout = '/logout',
     PlatformsConfigs = '/platforms-configs',
     PlatformServiceConfigNew = '/platforms-configs/new',
@@ -94,5 +93,5 @@ export enum ApplicationPageTitles {
     Datasets = 'Datasets',
     Dataset = 'Dataset',
     AuditLogs = 'Audit Logs',
-    // Settings = 'Settings',
+    Settings = 'Settings',
 }

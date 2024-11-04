@@ -217,6 +217,7 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
+
                         default:
                             Object.assign(breadcrumbItem, {
                                 title: '',

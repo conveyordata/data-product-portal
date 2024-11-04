@@ -36,7 +36,13 @@ export const environmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 method: 'POST',
                 data: request,
             }),
-            invalidatesTags: [{ type: TagTypes.Environment, id: STATIC_TAG_ID.LIST }],
+            providesTags: (result = []) =>
+                result
+                    ? [
+                          { type: TagTypes.EnvironmentConfigs as const, id: STATIC_TAG_ID.LIST },
+                          ...result.map(({ id }) => ({ type: TagTypes.EnvironmentConfigs as const, id })),
+                      ]
+                    : [{ type: TagTypes.EnvironmentConfigs, id: STATIC_TAG_ID.LIST }],
         }),
         getAllEnvironmentConfigs: builder.query<EnvironmentConfig[], string>({
             query: (environmentId) => ({
