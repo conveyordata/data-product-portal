@@ -21,6 +21,7 @@ import {
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import { datasetsApiSlice } from '@/store/features/datasets/datasets-api-slice.ts';
 import { DataOutputsGetContract } from '@/types/data-output';
+import { GraphContract } from '@/types/graph/graph-contract';
 
 export const dataProductTags: string[] = [
     TagTypes.DataProduct,
@@ -66,6 +67,12 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.DataProduct as const, id },
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
             ],
+        }),
+        getDataProductGraphData: builder.query<GraphContract, string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataProductGraph, { dataProductId: id }),
+                method: 'GET',
+            })
         }),
         createDataProduct: builder.mutation<DataProductCreateResponse, DataProductCreate>({
             query: (dataProduct) => ({
@@ -238,5 +245,6 @@ export const {
     useGetDataProductConveyorNotebookUrlMutation,
     useGetUserDataProductsQuery,
     useGetDataProductDataOutputsQuery,
+    useGetDataProductGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
 } = dataProductsApiSlice;

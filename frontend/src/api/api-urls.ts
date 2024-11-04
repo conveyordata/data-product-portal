@@ -16,6 +16,7 @@ export enum ApiUrl {
     DataProductDatabricksWorkspaceUrl = '/api/data_products/:dataProductId/databricks_workspace_url',
     DataProductDataset = '/api/data_products/:dataProductId/dataset/:datasetId',
     DataProductAbout = '/api/data_products/:dataProductId/about',
+    DataProductGraph = '/api/data_products/:dataProductId/graph',
     DataProductMembershipAdd = '/api/data_product_memberships/create',
     DataProductMembershipUpdate = '/api/data_product_memberships/:membershipId/role',
     DataProductMembershipRequest = '/api/data_product_memberships/request',
