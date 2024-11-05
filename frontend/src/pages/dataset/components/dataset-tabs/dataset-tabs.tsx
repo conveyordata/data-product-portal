@@ -48,22 +48,22 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 children: <AboutTab datasetId={datasetId} />,
             },
             {
-                label: t('Data Products'),
-                key: TabKeys.DataProduct,
-                icon: <Icon component={dataProductOutlineIcon} />,
-                children: <DataProductTab datasetId={datasetId} />,
-            },
-            {
-                label: t('Data Outputs'),
+                label: t('Producing Data Products'),
                 key: TabKeys.DataOutput,
                 icon: <Icon component={dataOutputOutlineIcon} />,
                 children: <DataOutputTab datasetId={datasetId} />,
             },
             {
-                label: t('Team'),
+                label: t('Dataset Owners'),
                 key: TabKeys.Team,
                 icon: <TeamOutlined />,
                 children: <TeamTab datasetId={datasetId} />,
+            },
+            {
+                label: t('Consuming Data Products'),
+                key: TabKeys.DataProduct,
+                icon: <Icon component={dataProductOutlineIcon} />,
+                children: <DataProductTab datasetId={datasetId} />,
             },
             {
                 label: t('Explorer'),

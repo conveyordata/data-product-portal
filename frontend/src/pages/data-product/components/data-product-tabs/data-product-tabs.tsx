@@ -48,7 +48,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 children: <AboutTab dataProductId={dataProductId} />,
             },
             {
-                label: t('Datasets'),
+                label: t('Input Datasets'),
                 key: TabKeys.Datasets,
                 icon: <Icon component={datasetOutlineIcon} />,
                 children: <DatasetTab dataProductId={dataProductId} />,
