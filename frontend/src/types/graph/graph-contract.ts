@@ -6,6 +6,7 @@ export interface NodeContract {
         id: string,
         name: string
         icon_key: string | undefined
+        link_to_id: string | undefined
     }
     isMain: boolean
     type: CustomNodeTypes

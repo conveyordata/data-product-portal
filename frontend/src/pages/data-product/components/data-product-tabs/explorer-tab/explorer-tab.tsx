@@ -10,7 +10,7 @@ import { DataProductContract } from '@/types/data-product';
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import 'reactflow/dist/base.css';
 import { Link } from 'react-router-dom';
-import { createDataOutputIdPath, createDatasetIdPath } from '@/types/navigation.ts';
+import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 import { useTranslation } from 'react-i18next';
 import { greenThemeConfig } from '@/theme/antd-theme';
 import { NodeContract, EdgeContract } from '@/types/graph/graph-contract.ts';
@@ -22,6 +22,16 @@ const token = getDesignToken(greenThemeConfig);
 type Props = {
     dataProductId: string;
 };
+
+
+function LinkToDataProductNode({ id }: { id: string }) {
+    const { t } = useTranslation();
+    return (
+        <Link to={createDataProductIdPath(id)} className={styles.link}>
+            <Button type="default">{t('View data product')}</Button>
+        </Link>
+    );
+}
 
 function LinkToDatasetNode({ id }: { id: string }) {
     const { t } = useTranslation();
@@ -79,10 +89,13 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, data
                     targetHandleId: 'left_t',
                 }
                 break
-            default:
+            case CustomNodeTypes.DataProductNode:
                 extra_attributes = {
-                    targetHandlePosition: Position.Left
+                    targetHandlePosition: Position.Left,
+                    nodeToolbarActions: node.isMain ? "" : <LinkToDataProductNode id={node.data.id} />,
                 }
+                break
+            default:
                 break
         }
         return {
@@ -103,7 +116,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, data
 }
 export function ExplorerTab({ dataProductId }: Props) {
     const { data: dataProduct, isFetching } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition, setNodes } =
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
     const {data: graph} = useGetDataProductGraphDataQuery(dataProductId, {skip: !dataProductId});

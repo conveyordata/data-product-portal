@@ -8,6 +8,7 @@ from pydantic import BaseModel
 class NodeData(BaseModel):
     id: str | UUID
     name: str
+    link_to_id: Optional[str | UUID] = None
     icon_key: Optional[str] = None
 
 

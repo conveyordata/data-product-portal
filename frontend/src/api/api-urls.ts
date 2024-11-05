@@ -37,6 +37,7 @@ export enum ApiUrl {
     DatasetUser = '/api/datasets/:datasetId/user/:userId',
     DatasetGet = '/api/datasets/:datasetId',
     DatasetAbout = '/api/datasets/:datasetId/about',
+    DatasetGraph = '/api/datasets/:datasetId/graph',
     BusinessAreas = '/api/business_areas',
     DataProductsDatasets = '/api/data_product_dataset_links',
     DataProductDatasetLinkApprove = '/api/data_product_dataset_links/approve/:datasetLinkId',
