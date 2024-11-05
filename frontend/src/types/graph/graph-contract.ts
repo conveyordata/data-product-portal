@@ -12,12 +12,13 @@ export interface NodeContract {
 }
 
 export interface EdgeContract {
-    id: string,
-    source: string,
-    target: string
+    id: string;
+    source: string;
+    target: string;
+    animated: boolean;
 }
 
 export interface GraphContract {
-    nodes: NodeContract[],
-    edges: EdgeContract[]
+    nodes: NodeContract[];
+    edges: EdgeContract[];
 }

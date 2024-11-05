@@ -22,3 +22,6 @@ class Node(BaseModel):
     data: NodeData
     type: NodeType
     isMain: bool = False
+
+    def __hash__(self) -> int:
+        return self.id.__hash__()

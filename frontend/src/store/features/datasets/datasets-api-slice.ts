@@ -44,12 +44,6 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        getDatasetByIdMutation: builder.mutation<DatasetContract, string>({
-            query: (id) => ({
-                url: buildUrl(ApiUrl.DatasetGet, { datasetId: id }),
-                method: 'GET',
-            }),
-        }),
         createDataset: builder.mutation<DatasetCreateResponse, DatasetCreateRequest>({
             query: (dataset) => ({
                 url: ApiUrl.Datasets,
@@ -152,7 +146,6 @@ export const {
     useGetAllDatasetsQuery,
     useGetDatasetByIdQuery,
     useCreateDatasetMutation,
-    useGetDatasetByIdMutationMutation,
     useRemoveDatasetMutation,
     useUpdateDatasetMutation,
     useUpdateDatasetAboutMutation,

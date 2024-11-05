@@ -8,3 +8,8 @@ class Edge(BaseModel):
     source: str | UUID
     target: str | UUID
     animated: bool
+    sourceHandle: str = "right_s"
+    targetHandle: str = "left_t"
+
+    def __hash__(self) -> int:
+        return self.id.__hash__()

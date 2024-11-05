@@ -462,8 +462,8 @@ class DataProductService:
             edges.append(
                 Edge(
                     id=f"{data_output.id}-{product.id}",
-                    target=product.id,
-                    source=data_output.id,
+                    source=product.id,
+                    target=data_output.id,
                     animated=True,
                 )
             )
@@ -471,7 +471,7 @@ class DataProductService:
                 for downstream_datasets in data_output.dataset_links:
                     nodes.append(
                         Node(
-                            id=f"{downstream_datasets.id}_2",
+                            id=f"{downstream_datasets.dataset_id}_2",
                             data=NodeData(
                                 id=f"{downstream_datasets.dataset_id}",
                                 name=downstream_datasets.dataset.name,
@@ -481,8 +481,8 @@ class DataProductService:
                     )
                     edges.append(
                         Edge(
-                            id=f"{downstream_datasets.id}-{data_output.id}-2",
-                            target=f"{downstream_datasets.id}_2",
+                            id=f"{downstream_datasets.dataset_id}-{data_output.id}-2",
+                            target=f"{downstream_datasets.dataset_id}_2",
                             source=data_output.id,
                             animated=downstream_datasets.status
                             == DataOutputDatasetLinkStatus.APPROVED,
@@ -516,4 +516,4 @@ class DataProductService:
                             )
                         )
 
-        return Graph(nodes=nodes, edges=edges)
+        return Graph(nodes=set(nodes), edges=set(edges))
