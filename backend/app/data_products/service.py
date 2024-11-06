@@ -165,6 +165,9 @@ class DataProductService:
             )
         data_product.memberships = []
         data_product.dataset_links = []
+        for output in data_product.data_outputs:
+            output.dataset_links = []
+            output.delete()
         data_product.delete()
         db.commit()
 
