@@ -455,6 +455,7 @@ class DataProductService:
                         id=data_output.id,
                         icon_key=data_output.configuration.configuration_type,
                         name=data_output.name,
+                        link_to_id=data_output.owner_id,
                     ),
                     type=NodeType.dataOutputNode,
                 )

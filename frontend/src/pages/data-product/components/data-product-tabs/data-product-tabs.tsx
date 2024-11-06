@@ -1,6 +1,5 @@
 import { Tabs } from 'antd';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
-import { ExplorerTab } from '@/pages/data-product/components/data-product-tabs/explorer-tab/explorer-tab.tsx';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { HistoryTab } from '@/pages/data-product/components/data-product-tabs/history-tab/history-tab.tsx';
 import styles from './data-product-tabs.module.scss';
@@ -14,6 +13,7 @@ import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?r
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
 import { ReactFlowProvider } from 'reactflow';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Explorer } from '@/components/explorer/explorer';
 
 type Props = {
     dataProductId: string;
@@ -71,7 +71,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 icon: <PartitionOutlined />,
                 children: (
                     <ReactFlowProvider>
-                        <ExplorerTab dataProductId={dataProductId} />
+                        <Explorer id={dataProductId} type={"dataproduct"}/>
                     </ReactFlowProvider>
                 ),
             },

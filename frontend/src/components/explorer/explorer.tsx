@@ -1,12 +1,11 @@
-import { useGetDataProductByIdQuery, useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { Edge, Node, Position, XYPosition } from 'reactflow';
 import { useEffect } from 'react';
 import { Button, Flex, theme } from 'antd';
-import styles from './explorer-tab.module.scss';
+import styles from './explorer.module.scss';
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { DataProductContract } from '@/types/data-product';
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import 'reactflow/dist/base.css';
 import { Link } from 'react-router-dom';
@@ -14,20 +13,24 @@ import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } 
 import { useTranslation } from 'react-i18next';
 import { greenThemeConfig } from '@/theme/antd-theme';
 import { NodeContract, EdgeContract } from '@/types/graph/graph-contract.ts';
+import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
 
 const { getDesignToken } = theme;
 
 const token = getDesignToken(greenThemeConfig);
 
 type Props = {
-    dataProductId: string;
+    id: string;
+    type: "dataset" | "dataproduct";
 };
 
 
 function LinkToDataProductNode({ id }: { id: string }) {
     const { t } = useTranslation();
     return (
-        <Link to={createDataProductIdPath(id)} className={styles.link}>
+        <Link to={createDataProductIdPath(id, DataProductTabKeys.Explorer)} className={styles.link}>
             <Button type="default">{t('View data product')}</Button>
         </Link>
     );
@@ -36,7 +39,7 @@ function LinkToDataProductNode({ id }: { id: string }) {
 function LinkToDatasetNode({ id }: { id: string }) {
     const { t } = useTranslation();
     return (
-        <Link to={createDatasetIdPath(id)} className={styles.link}>
+        <Link to={createDatasetIdPath(id, DatasetTabKeys.Explorer)} className={styles.link}>
             <Button type="default">{t('View dataset')}</Button>
         </Link>
     );
@@ -69,13 +72,13 @@ function parseEdges(edges: EdgeContract[]): Edge[] {
     });
 }
 
-function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, dataProduct: DataProductContract): Node[] {
+function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Node[] {
     return nodes.map(node => {
         let extra_attributes = {}
         switch (node.type) {
             case CustomNodeTypes.DataOutputNode:
                 extra_attributes = {
-                    nodeToolbarActions: <LinkToDataOutputNode id={node.id} product_id={dataProduct.id} />,
+                    nodeToolbarActions: node.isMain ? "" : <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id!} />,
                     sourceHandlePosition: Position.Left,
                     isActive: true,
                     targetHandlePosition: Position.Right,
@@ -84,7 +87,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, data
                 break
             case CustomNodeTypes.DatasetNode:
                 extra_attributes = {
-                    nodeToolbarActions: <LinkToDatasetNode id={node.data.id} />,
+                    nodeToolbarActions: node.isMain ? "" : <LinkToDatasetNode id={node.data.id} />,
                     targetHandlePosition: Position.Right,
                     targetHandleId: 'left_t',
                 }
@@ -114,16 +117,15 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, data
         }
     })
 }
-export function ExplorerTab({ dataProductId }: Props) {
-    const { data: dataProduct, isFetching } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
+export function Explorer({ id, type }: Props) {
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
-    const {data: graph} = useGetDataProductGraphDataQuery(dataProductId, {skip: !dataProductId});
+    const {data: graph, isFetching} = type == "dataproduct" ? useGetDataProductGraphDataQuery(id, {skip: !id}) :  useGetDatasetGraphDataQuery(id, {skip: !id}) ;
 
     const generateGraph = () => {
-        if (dataProduct && graph) {
-            let nodes = parseNodes(graph.nodes, defaultNodePosition, dataProduct)
+        if (graph) {
+            let nodes = parseNodes(graph.nodes, defaultNodePosition)
             let edges = parseEdges(graph.edges)
             setNodesAndEdges(nodes, edges);
         }
