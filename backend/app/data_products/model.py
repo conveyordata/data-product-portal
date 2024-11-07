@@ -66,5 +66,7 @@ class DataProduct(Base, BaseORM):
     business_area_id: Mapped[UUID] = Column(ForeignKey("business_areas.id"))
     business_area: Mapped["BusinessArea"] = relationship(back_populates="data_products")
     data_outputs: Mapped[list["DataOutput"]] = relationship(
-        "DataOutput", back_populates="owner"
+        "DataOutput",
+        back_populates="owner",
+        cascade="all, delete-orphan",
     )
