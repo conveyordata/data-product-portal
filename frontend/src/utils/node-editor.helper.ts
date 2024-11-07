@@ -1,14 +1,5 @@
 import { Edge, FitViewOptions, Node, Position } from 'reactflow';
 import Dagre from '@dagrejs/dagre';
-import { theme } from 'antd';
-import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
-import { CSSProperties } from 'react';
-import { greenThemeConfig } from '@/theme/antd-theme.ts';
-import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
-
-const { getDesignToken } = theme;
-
-const token = getDesignToken(greenThemeConfig);
 
 export function getDagreDirection(direction: Position) {
     switch (direction) {
@@ -63,40 +54,4 @@ export const generateDagreLayout = (
 export const defaultFitViewOptions: FitViewOptions = {
     padding: 0.1,
     maxZoom: 1.25,
-};
-
-export const getDataProductDatasetLinkEdgeStyle = (status: DataProductDatasetLinkStatus): CSSProperties => {
-    const edgeStyles: CSSProperties = {
-        strokeDasharray: '5 5',
-    };
-    switch (status) {
-        case DataProductDatasetLinkStatus.Approved:
-            edgeStyles.stroke = token.colorPrimary;
-            break;
-        case DataProductDatasetLinkStatus.Denied:
-        case DataProductDatasetLinkStatus.Pending:
-        default:
-            edgeStyles.stroke = token.colorPrimaryBorder;
-            break;
-    }
-
-    return edgeStyles;
-};
-
-export const getDataOutputDatasetLinkEdgeStyle = (status: DataOutputDatasetLinkStatus): CSSProperties => {
-    const edgeStyles: CSSProperties = {
-        strokeDasharray: '5 5',
-    };
-    switch (status) {
-        case DataOutputDatasetLinkStatus.Approved:
-            edgeStyles.stroke = token.colorPrimary;
-            break;
-        case DataOutputDatasetLinkStatus.Denied:
-        case DataOutputDatasetLinkStatus.Pending:
-        default:
-            edgeStyles.stroke = token.colorPrimaryBorder;
-            break;
-    }
-
-    return edgeStyles;
 };
