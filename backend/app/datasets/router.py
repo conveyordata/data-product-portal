@@ -8,6 +8,7 @@ from app.datasets.schema import DatasetAboutUpdate, DatasetCreateUpdate
 from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
 from app.dependencies import only_dataset_owners
+from app.graph.graph import Graph
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
@@ -156,3 +157,10 @@ def remove_user_from_dataset(
     db: Session = Depends(get_db_session),
 ):
     return DatasetService().remove_user_from_dataset(id, user_id, db)
+
+
+@router.get("/{id}/graph")
+def get_graph_data(
+    id: UUID, db: Session = Depends(get_db_session), level: int = 3
+) -> Graph:
+    return DatasetService().get_graph_data(id, level, db)

@@ -17,6 +17,7 @@ from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLamb
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_get import DataOutputGet
+from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
     DataProductUserRole,
@@ -43,6 +44,9 @@ from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
 from app.environments.model import Environment as EnvironmentModel
+from app.graph.edge import Edge
+from app.graph.graph import Graph
+from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
 from app.tags.model import Tag as TagModel
 from app.users.model import ensure_user_exists
@@ -413,3 +417,107 @@ class DataProductService:
                 ),
             )
         return config[str(data_product.business_area_id)]
+
+    def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
+        product = db.get(DataProductModel, id)
+        nodes = [
+            Node(
+                id=id,
+                isMain=True,
+                data=NodeData(id=id, name=product.name, icon_key=product.type.icon_key),
+                type=NodeType.dataProductNode,
+            )
+        ]
+        edges = []
+        for upstream_datasets in product.dataset_links:
+            nodes.append(
+                Node(
+                    id=upstream_datasets.id,
+                    data=NodeData(
+                        id=upstream_datasets.dataset_id,
+                        name=upstream_datasets.dataset.name,
+                    ),
+                    type=NodeType.datasetNode,
+                )
+            )
+            edges.append(
+                Edge(
+                    id=f"{upstream_datasets.id}-{product.id}",
+                    target=product.id,
+                    source=upstream_datasets.id,
+                    animated=upstream_datasets.status
+                    == DataProductDatasetLinkStatus.APPROVED,
+                )
+            )
+
+        for data_output in product.data_outputs:
+            nodes.append(
+                Node(
+                    id=data_output.id,
+                    data=NodeData(
+                        id=data_output.id,
+                        icon_key=data_output.configuration.configuration_type,
+                        name=data_output.name,
+                        link_to_id=data_output.owner_id,
+                    ),
+                    type=NodeType.dataOutputNode,
+                )
+            )
+            edges.append(
+                Edge(
+                    id=f"{data_output.id}-{product.id}",
+                    source=product.id,
+                    target=data_output.id,
+                    animated=True,
+                )
+            )
+            if level >= 2:
+                for downstream_datasets in data_output.dataset_links:
+                    nodes.append(
+                        Node(
+                            id=f"{downstream_datasets.dataset_id}_2",
+                            data=NodeData(
+                                id=f"{downstream_datasets.dataset_id}",
+                                name=downstream_datasets.dataset.name,
+                            ),
+                            type=NodeType.datasetNode,
+                        )
+                    )
+                    edges.append(
+                        Edge(
+                            id=f"{downstream_datasets.dataset_id}-{data_output.id}-2",
+                            target=f"{downstream_datasets.dataset_id}_2",
+                            source=data_output.id,
+                            animated=downstream_datasets.status
+                            == DataOutputDatasetLinkStatus.APPROVED,
+                        )
+                    )
+                if level >= 3:
+                    for (
+                        downstream_dps
+                    ) in downstream_datasets.dataset.data_product_links:
+                        nodes.append(
+                            Node(
+                                id=f"{downstream_dps.id}_3",
+                                data=NodeData(
+                                    id=f"{downstream_dps.data_product_id}",
+                                    icon_key=downstream_dps.data_product.type.icon_key,
+                                    name=downstream_dps.data_product.name,
+                                ),
+                                type=NodeType.dataProductNode,
+                            )
+                        )
+                        edges.append(
+                            Edge(
+                                id=(
+                                    f"{downstream_dps.id}-"
+                                    f"{downstream_datasets.dataset.id}-3"
+                                ),
+                                target=f"{downstream_dps.id}_3",
+                                source=f"{downstream_datasets.dataset.id}_2",
+                                animated=downstream_dps.status
+                                == DataProductDatasetLinkStatus.APPROVED,
+                            )
+                        )
+
+        return Graph(nodes=set(nodes), edges=set(edges))

@@ -1,4 +1,4 @@
-import { Flex, Layout, Typography, Menu, MenuProps, Space } from 'antd';
+import { Flex, Layout, Menu, MenuProps, Space } from 'antd';
 import styles from './sidebar.module.scss';
 import React from 'react';
 import { Link, useMatches } from 'react-router-dom';
