@@ -4,7 +4,7 @@ go 1.22.4
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.32.4
-	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.46.4
+	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.46.5
 	github.com/briandowns/spinner v1.23.1
 	github.com/deepmap/oapi-codegen v1.16.3
 	github.com/fatih/color v1.18.0
