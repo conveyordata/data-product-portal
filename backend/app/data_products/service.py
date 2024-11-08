@@ -492,32 +492,33 @@ class DataProductService:
                             == DataOutputDatasetLinkStatus.APPROVED,
                         )
                     )
-                if level >= 3:
-                    for (
-                        downstream_dps
-                    ) in downstream_datasets.dataset.data_product_links:
-                        nodes.append(
-                            Node(
-                                id=f"{downstream_dps.id}_3",
-                                data=NodeData(
-                                    id=f"{downstream_dps.data_product_id}",
-                                    icon_key=downstream_dps.data_product.type.icon_key,
-                                    name=downstream_dps.data_product.name,
-                                ),
-                                type=NodeType.dataProductNode,
+                    if level >= 3:
+                        for (
+                            downstream_dps
+                        ) in downstream_datasets.dataset.data_product_links:
+                            icon = downstream_dps.data_product.type.icon_key
+                            nodes.append(
+                                Node(
+                                    id=f"{downstream_dps.id}_3",
+                                    data=NodeData(
+                                        id=f"{downstream_dps.data_product_id}",
+                                        icon_key=icon,
+                                        name=downstream_dps.data_product.name,
+                                    ),
+                                    type=NodeType.dataProductNode,
+                                )
                             )
-                        )
-                        edges.append(
-                            Edge(
-                                id=(
-                                    f"{downstream_dps.id}-"
-                                    f"{downstream_datasets.dataset.id}-3"
-                                ),
-                                target=f"{downstream_dps.id}_3",
-                                source=f"{downstream_datasets.dataset.id}_2",
-                                animated=downstream_dps.status
-                                == DataProductDatasetLinkStatus.APPROVED,
+                            edges.append(
+                                Edge(
+                                    id=(
+                                        f"{downstream_dps.id}-"
+                                        f"{downstream_datasets.dataset.id}-3"
+                                    ),
+                                    target=f"{downstream_dps.id}_3",
+                                    source=f"{downstream_datasets.dataset.id}_2",
+                                    animated=downstream_dps.status
+                                    == DataProductDatasetLinkStatus.APPROVED,
+                                )
                             )
-                        )
 
         return Graph(nodes=set(nodes), edges=set(edges))
