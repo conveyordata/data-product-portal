@@ -14,8 +14,8 @@ jobs:
           fetch-depth: 0
       - name: Test Docker Compose
         run: |
-            docker-compose up -d
-            docker-compose ps
+            docker compose up -d
+            docker compose ps
             sleep 30
       - name: Test Curl command
         id: run_command
