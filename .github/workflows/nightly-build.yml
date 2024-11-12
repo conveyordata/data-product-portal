@@ -1,0 +1,13 @@
+name: Nightly Docker Compose Test
+on:
+  pull_request:
+    branches: '*'
+permissions:
+  contents: read
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Docker Compose
+        run: docker compose up -d
