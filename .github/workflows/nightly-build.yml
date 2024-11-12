@@ -13,9 +13,14 @@ jobs:
         with:
           fetch-depth: 0
       - name: Test Docker Compose
+        run: |
+            docker-compose up -d
+            docker-compose ps
+            sleep 30
+      - name: Test Curl command
         id: run_command
         run: |
-            STATUS_CODE=$(docker compose up -d && curl -s -o /dev/null -w "%{http_code}" localhost:8080)
+            STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" localhost:8080)
             echo "Status code: $STATUS_CODE"
             # Set the output for GitHub Actions
             echo "::set-output name=status_code::$STATUS_CODE"
