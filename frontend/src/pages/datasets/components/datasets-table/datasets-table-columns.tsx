@@ -1,6 +1,6 @@
 import { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
 import { TFunction } from 'i18next';
-import { Popover, Table, TableColumnsType } from 'antd';
+import { Popover, TableColumnsType } from 'antd';
 import i18n from '@/i18n.ts';
 import { getStatusLabel } from '@/utils/status.helper.ts';
 import { TableStatusTag } from '@/components/list/table-status-tag/table-status-tag.component.tsx';
