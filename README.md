@@ -5,7 +5,7 @@
 [![Issues][issues-shield]][issues-url]
 [![APACHE License][license-shield]][license-url]
 [![OpenSSF Scorecard][scorecard-shield]][scorecard-url]
-
+[![Nightly Docker Compose][nightly-docker-shield]][nightly-docker-url]
 
 # Data Product Portal
 
@@ -232,3 +232,7 @@ Project Link: [https://github.com/conveyordata/data-product-portal](https://gith
 [license-url]: https://github.com/conveyordata/data-product-portal/blob/master/LICENSE.md
 
 [product-screenshot]: images/screenshot.png
+
+[nightly-docker-shield]: https://img.shields.io/github/actions/workflow/status/conveyordata/data-product-portal/nightly-build.yml?label=Nightly%20Docker%20Compose&style=for-the-badge
+
+[nightly-docker-url]: https://github.com/conveyordata/data-product-portal/actions/workflows/nightly-build.yml
