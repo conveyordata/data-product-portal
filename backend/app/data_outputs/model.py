@@ -5,7 +5,6 @@ from sqlalchemy import Boolean, Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, relationship
 
-from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.schema import DataOutput as DataOutputSchema
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
@@ -37,7 +36,6 @@ class DataOutput(Base, BaseORM):
     owner: Mapped["DataProduct"] = relationship(back_populates="data_outputs")
     configuration: Mapped["BaseDataOutputConfiguration"] = relationship()
     configuration_id: Mapped[UUID] = Column(ForeignKey("data_output_configurations.id"))
-    configuration_type: Mapped[DataOutputTypes] = Column(Enum(DataOutputTypes))
     dataset_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
         "DataOutputDatasetAssociation",
         back_populates="data_output",

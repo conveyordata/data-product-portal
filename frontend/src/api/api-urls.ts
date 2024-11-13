@@ -6,6 +6,7 @@ export enum ApiUrl {
     DataOutputDatasetLinkApprove = '/api/data_output_dataset_links/approve/:datasetLinkId',
     DataOutputDatasetLinkReject = '/api/data_output_dataset_links/deny/:datasetLinkId',
     DataOutputDatasetLinkRemove = '/api/data_output_dataset_links/remove/:datasetLinkId',
+    DataOutputGraph = '/api/data_outputs/:dataOutputId/graph',
     DataProducts = '/api/data_products',
     DataProductsDataOutput = '/api/data_products/:dataProductId/data_outputs',
     DataProductGet = '/api/data_products/:dataProductId',

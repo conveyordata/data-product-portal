@@ -16,6 +16,8 @@ import { NodeContract, EdgeContract } from '@/types/graph/graph-contract.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
+import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabs.tsx';
+import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 
 const { getDesignToken } = theme;
 
@@ -23,7 +25,7 @@ const token = getDesignToken(greenThemeConfig);
 
 type Props = {
     id: string;
-    type: "dataset" | "dataproduct";
+    type: "dataset" | "dataproduct" | "dataoutput";
 };
 
 
@@ -48,7 +50,7 @@ function LinkToDatasetNode({ id }: { id: string }) {
 function LinkToDataOutputNode({ id, product_id }: {id: string, product_id: string}) {
     const { t } = useTranslation();
     return (
-        <Link to={createDataOutputIdPath(id, product_id)} className={styles.link}>
+        <Link to={createDataOutputIdPath(id, product_id, DataOutputTabKeys.Explorer)} className={styles.link}>
             <Button type="default">{t('View data output')}</Button>
         </Link>
     )
@@ -121,8 +123,20 @@ export function Explorer({ id, type }: Props) {
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
-    const {data: graph, isFetching} = type == "dataproduct" ? useGetDataProductGraphDataQuery(id, {skip: !id}) :  useGetDatasetGraphDataQuery(id, {skip: !id}) ;
+        let graphDataQuery;
+        switch (type) {
+          case "dataproduct":
+            graphDataQuery = useGetDataProductGraphDataQuery(id, { skip: !id });
+            break;
+          case "dataset":
+            graphDataQuery = useGetDatasetGraphDataQuery(id, { skip: !id });
+            break;
+          case "dataoutput":
+            graphDataQuery = useGetDataOutputGraphDataQuery(id, { skip: !id });
+            break;
+        }
 
+        const { data: graph, isFetching } = graphDataQuery;
     const generateGraph = () => {
         if (graph) {
             let nodes = parseNodes(graph.nodes, defaultNodePosition)
