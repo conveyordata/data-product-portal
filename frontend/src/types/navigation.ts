@@ -1,5 +1,6 @@
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
+import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabs.tsx';
 
 
 export enum ApplicationPaths {
@@ -54,8 +55,8 @@ export function createDataProductIdPath(dataProductId: string, tabKey: DataProdu
     return ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId)) + '#' + tabKey;
 }
 
-export function createDataOutputIdPath(dataOutputId: string, dataProductId: string) {
-    return ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(':dataOutputId', encodeURIComponent(dataOutputId));
+export function createDataOutputIdPath(dataOutputId: string, dataProductId: string, tabKey: DataOutputTabKeys = DataOutputTabKeys.Datasets) {
+    return ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(':dataOutputId', encodeURIComponent(dataOutputId)) + '#' + tabKey;
 }
 
 export function createDatasetIdPath(datasetId: string, tabKey: DatasetTabKeys = DatasetTabKeys.About) {

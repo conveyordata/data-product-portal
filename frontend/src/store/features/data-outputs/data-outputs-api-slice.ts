@@ -13,6 +13,7 @@ import {
 import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
 import { datasetsApiSlice } from '../datasets/datasets-api-slice';
 import { DataOutputUpdateRequest, DataOutputUpdateResponse } from '@/types/data-output/data-output-update.contract';
+import { GraphContract } from '@/types/graph/graph-contract';
 
 export const dataOutputTags: string[] = [
     TagTypes.DataOutput,
@@ -58,6 +59,12 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
             //     { type: TagTypes.DataOutput as const, id: arg.dataOutputId },
             //     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             // ],
+        }),
+        getDataOutputGraphData: builder.query<GraphContract, string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataOutputGraph, { dataOutputId: id }),
+                method: 'GET',
+            })
         }),
         updateDataOutput: builder.mutation<
             DataOutputUpdateResponse,
@@ -148,4 +155,5 @@ export const {
     useUpdateDataOutputMutation,
     useRemoveDataOutputMutation,
     useRequestDatasetAccessForDataOutputMutation,
+    useGetDataOutputGraphDataQuery,
 } = dataOutputsApiSlice;

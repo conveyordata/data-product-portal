@@ -16,7 +16,9 @@ from app.data_outputs_datasets.model import (
 )
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
+from app.graph.graph import Graph
 from app.users.schema import User
 
 
@@ -174,3 +176,15 @@ class DataOutputService:
         db.commit()
         RefreshInfrastructureLambda().trigger()
         return {"id": current_data_output.id}
+
+    def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
+        dataOutput = db.get(DataOutputModel, id)
+        graph = DataProductService().get_graph_data(dataOutput.owner_id, level, db)
+
+        for node in graph.nodes:
+            if node.isMain:
+                node.isMain = False
+            if node.id == id:
+                node.isMain = True
+
+        return graph
