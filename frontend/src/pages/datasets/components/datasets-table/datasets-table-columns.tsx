@@ -57,7 +57,7 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             },
             ...new FilterSettings(datasets, ds => getStatusLabel(ds.status)),
             sorter: sorter.stringSorter(ds => getStatusLabel(ds.status)),
-            width: "10%"
+            width: "12%"
         },
         {
             title: t('Business Area'),
@@ -68,7 +68,7 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             ellipsis: true,
             ...new FilterSettings(datasets, ds => ds.business_area.name),
             sorter: sorter.stringSorter(ds => ds.business_area.name),
-            width: "15%"
+            width: "13%"
         },
         {
             title: t('Access Type'),
