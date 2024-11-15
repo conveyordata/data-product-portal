@@ -1,5 +1,5 @@
 import factory
-from tests.factories.schema import SchemaFactory
+from tests.factories.data_contract import DataContractFactory
 
 from app.data_contracts.service_level_objective.model import ServiceLevelObjective
 
@@ -13,4 +13,4 @@ class ServiceLevelObjectiveFactory(factory.alchemy.SQLAlchemyModelFactory):
     value = factory.Faker("word")
     severity = factory.Faker("word")
 
-    schema = factory.SubFactory(SchemaFactory)
+    data_contract = factory.SubFactory(DataContractFactory)

@@ -6,8 +6,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.data_contracts.schema.model import Schema as SchemaModel
-from app.data_contracts.schema.schema import SchemaGet
+from app.data_contracts.model import DataContract as DataContractModel
+from app.data_contracts.schema import DataContractGet
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
@@ -177,9 +177,11 @@ class DataOutputService:
         RefreshInfrastructureLambda().trigger()
         return {"id": current_data_output.id}
 
-    def get_data_contracts(self, data_output_id: UUID, db: Session) -> list[SchemaGet]:
+    def get_data_contracts(
+        self, data_output_id: UUID, db: Session
+    ) -> list[DataContractGet]:
         return (
-            db.query(SchemaModel)
-            .filter(SchemaModel.data_output_id == data_output_id)
+            db.query(DataContractModel)
+            .filter(DataContractModel.data_output_id == data_output_id)
             .all()
         )

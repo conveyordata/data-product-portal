@@ -1,7 +1,7 @@
 import factory
-from tests.factories.schema import SchemaFactory
+from tests.factories.data_contract import DataContractFactory
 
-from app.data_contracts.schema.column.model import Column
+from app.data_contracts.column.model import Column
 
 
 class ColumnFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -14,4 +14,4 @@ class ColumnFactory(factory.alchemy.SQLAlchemyModelFactory):
     data_type = factory.Faker("word")
     checks = factory.Faker("word")
 
-    schema = factory.SubFactory(SchemaFactory)
+    data_contract = factory.SubFactory(DataContractFactory)

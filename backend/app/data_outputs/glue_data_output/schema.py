@@ -1,6 +1,7 @@
-from typing import Literal, Self
+from typing import Literal
 
 from pydantic import model_validator
+from typing_extensions import Self
 
 from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.glue_data_output.model import (

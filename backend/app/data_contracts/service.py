@@ -2,29 +2,31 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.data_contracts.schema.model import Schema as SchemaModel
-from app.data_contracts.schema.schema import SchemaCreate, SchemaGet
+from app.data_contracts.model import DataContract as DataContractModel
+from app.data_contracts.schema import DataContractCreate, DataContractGet
 
 
 class DataContractService:
-    def get_schemas(self, db: Session) -> list[SchemaGet]:
-        return db.query(SchemaModel).all()
+    def get_data_contracts(self, db: Session) -> list[DataContractGet]:
+        return db.query(DataContractModel).all()
 
-    def get_schema(self, id: UUID, db: Session) -> SchemaGet:
-        return db.get(SchemaModel, id)
+    def get_data_contract(self, id: UUID, db: Session) -> DataContractGet:
+        return db.get(DataContractModel, id)
 
-    def create_schema(self, schema: SchemaCreate, db: Session) -> dict[str, UUID]:
-        schema = SchemaModel(**schema.parse_pydantic_schema())
+    def create_data_contract(
+        self, data_contract: DataContractCreate, db: Session
+    ) -> dict[str, UUID]:
+        data_contract = DataContractModel(**data_contract.parse_pydantic_schema())
 
-        db.add(schema)
+        db.add(data_contract)
         db.commit()
 
-        return {"id": schema.id}
+        return {"id": data_contract.id}
 
-    def delete_schema(self, id: UUID, db: Session):
-        schema = db.get(SchemaModel, id)
+    def delete_data_contract(self, id: UUID, db: Session):
+        data_contract = db.get(DataContractModel, id)
 
-        schema.columns = []
-        schema.service_level_objectives = []
-        schema.delete()
+        data_contract.columns = []
+        data_contract.service_level_objectives = []
+        data_contract.delete()
         db.commit()

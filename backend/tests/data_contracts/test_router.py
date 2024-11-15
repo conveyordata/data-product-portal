@@ -1,12 +1,12 @@
 import pytest
+from tests.factories.data_contract import DataContractFactory
 from tests.factories.data_output import DataOutputFactory
-from tests.factories.schema import SchemaFactory
 
 ENDPOINT = "/api/data_contracts"
 
 
 @pytest.fixture
-def schema_payload():
+def data_contract_payload():
     data_output = DataOutputFactory()
 
     return {
@@ -29,42 +29,42 @@ def schema_payload():
 
 
 class TestDataContractsRouter:
-    @staticmethod
-    def create_schema(client, payload):
-        return client.post(f"{ENDPOINT}", json=payload)
+    def test_create_data_contract(self, data_contract_payload, client):
+        created_data_contract = self.create_data_contract(client, data_contract_payload)
+        assert created_data_contract.status_code == 200
+        assert "id" in created_data_contract.json()
 
-    @staticmethod
-    def get_schemas(client):
-        return client.get(f"{ENDPOINT}")
-
-    @staticmethod
-    def get_schema_by_id(client, schema_id):
-        return client.get(f"{ENDPOINT}/{schema_id}")
-
-    @staticmethod
-    def delete_schema(client, schema_id):
-        return client.delete(f"{ENDPOINT}/{schema_id}")
-
-    def test_create_schema(self, schema_payload, client):
-        created_schema = self.create_schema(client, schema_payload)
-        assert created_schema.status_code == 200
-        assert "id" in created_schema.json()
-
-    def test_get_schemas(self, client):
-        schema = SchemaFactory()
-        response = self.get_schemas(client)
+    def test_get_data_contracts(self, client):
+        data_contract = DataContractFactory()
+        response = self.get_data_contracts(client)
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
-        assert data[0]["id"] == str(schema.id)
+        assert data[0]["id"] == str(data_contract.id)
 
-    def test_get_schema_by_id(self, client):
-        schema = SchemaFactory()
-        response = self.get_schema_by_id(client, schema.id)
+    def test_get_data_contract_by_id(self, client):
+        data_contract = DataContractFactory()
+        response = self.get_data_contract_by_id(client, data_contract.id)
         assert response.status_code == 200
-        assert response.json()["id"] == str(schema.id)
+        assert response.json()["id"] == str(data_contract.id)
 
-    def test_remove_schema(self, client):
-        schema = SchemaFactory()
-        response = self.delete_schema(client, schema.id)
+    def test_delete_data_contract(self, client):
+        data_contract = DataContractFactory()
+        response = self.delete_data_contract(client, data_contract.id)
         assert response.status_code == 200
+
+    @staticmethod
+    def create_data_contract(client, payload):
+        return client.post(f"{ENDPOINT}", json=payload)
+
+    @staticmethod
+    def get_data_contracts(client):
+        return client.get(f"{ENDPOINT}")
+
+    @staticmethod
+    def get_data_contract_by_id(client, data_contract_id):
+        return client.get(f"{ENDPOINT}/{data_contract_id}")
+
+    @staticmethod
+    def delete_data_contract(client, data_contract_id):
+        return client.delete(f"{ENDPOINT}/{data_contract_id}")

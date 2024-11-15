@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.data_contracts.schema.column.schema import ColumnCreate, ColumnGet
+from app.data_contracts.column.schema import ColumnCreate, ColumnGet
 from app.data_contracts.service_level_objective.schema import (
     ServiceLevelObjectiveCreate,
     ServiceLevelObjectiveGet,
@@ -8,7 +8,7 @@ from app.data_contracts.service_level_objective.schema import (
 from app.shared.schema import ORMModel
 
 
-class SchemaGet(ORMModel):
+class DataContractGet(ORMModel):
     id: UUID
     table: str
     description: str
@@ -17,7 +17,7 @@ class SchemaGet(ORMModel):
     service_level_objectives: list[ServiceLevelObjectiveGet]
 
 
-class SchemaCreate(ORMModel):
+class DataContractCreate(ORMModel):
     data_output_id: UUID
     table: str
     description: str

@@ -1,9 +1,9 @@
 import pytest
+from tests.factories.data_contract import DataContractFactory
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_product import DataProductFactory
 from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.platform_service import PlatformServiceFactory
-from tests.factories.schema import SchemaFactory
 from tests.factories.user import UserFactory
 
 ENDPOINT = "/api/data_outputs"
@@ -119,7 +119,7 @@ class TestDataOutputsRouter:
 
     def test_get_data_contracts(self, client):
         data_output = DataOutputFactory()
-        data_contract = SchemaFactory(data_output_id=data_output.id)
+        data_contract = DataContractFactory(data_output_id=data_output.id)
         response = self.get_data_contracts(client, data_output.id)
         assert response.status_code == 200
         assert response.json()[0]["id"] == str(data_contract.id)

@@ -22,7 +22,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        "schemas",
+        "data_contracts",
         sa.Column("id", sa.UUID, primary_key=True),
         sa.Column("data_output_id", sa.UUID, sa.ForeignKey("data_outputs.id")),
         sa.Column("table", sa.String),
@@ -35,7 +35,7 @@ def upgrade() -> None:
     op.create_table(
         "columns",
         sa.Column("id", sa.UUID, primary_key=True),
-        sa.Column("schema_id", sa.UUID, sa.ForeignKey("schemas.id")),
+        sa.Column("data_contract_id", sa.UUID, sa.ForeignKey("data_contracts.id")),
         sa.Column("name", sa.String),
         sa.Column("description", sa.String),
         sa.Column("data_type", sa.String),
@@ -47,7 +47,7 @@ def upgrade() -> None:
     op.create_table(
         "service_level_objectives",
         sa.Column("id", sa.UUID, primary_key=True),
-        sa.Column("schema_id", sa.UUID, sa.ForeignKey("schemas.id")),
+        sa.Column("data_contract_id", sa.UUID, sa.ForeignKey("data_contracts.id")),
         sa.Column("type", sa.String),
         sa.Column("value", sa.String),
         sa.Column("severity", sa.String),
@@ -58,6 +58,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("schemas")
+    op.drop_table("data_contracts")
     op.drop_table("columns")
     op.drop_table("service_level_objectives")

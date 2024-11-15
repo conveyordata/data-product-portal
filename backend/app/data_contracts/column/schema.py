@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.data_contracts.schema.column.model import Column as ColumnModel
+from app.data_contracts.column.model import Column as ColumnModel
 from app.shared.schema import ORMModel
 
 
@@ -13,7 +13,6 @@ class ColumnGet(ORMModel):
 
 
 class ColumnCreate(ORMModel):
-    # schema_id: UUID
     name: str
     description: str
     data_type: str

@@ -1,11 +1,11 @@
 import factory
 
-from app.data_contracts.schema.model import Schema
+from app.data_contracts.model import DataContract
 
 
-class SchemaFactory(factory.alchemy.SQLAlchemyModelFactory):
+class DataContractFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
-        model = Schema
+        model = DataContract
 
     id = factory.Faker("uuid4")
     table = factory.Faker("word")

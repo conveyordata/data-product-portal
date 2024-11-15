@@ -14,7 +14,6 @@ class ServiceLevelObjectiveGet(ORMModel):
 
 
 class ServiceLevelObjectiveCreate(ORMModel):
-    # schema_id: UUID
     type: str
     value: str
     severity: str

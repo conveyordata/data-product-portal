@@ -9,17 +9,17 @@ from app.database.database import Base
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
-    from app.data_contracts.schema.model import Schema as SchemaModel
+    from app.data_contracts.model import DataContract as DataContractModel
 
 
 class ServiceLevelObjective(Base, BaseORM):
     __tablename__ = "service_level_objectives"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    schema_id: Mapped[UUID] = mapped_column(ForeignKey("schemas.id"))
+    data_contract_id: Mapped[UUID] = mapped_column(ForeignKey("data_contracts.id"))
     type = Column(String)
     value = Column(String)
     severity = Column(String)
 
-    schema: Mapped["SchemaModel"] = relationship(
-        "Schema", back_populates="service_level_objectives"
+    data_contract: Mapped["DataContractModel"] = relationship(
+        "DataContract", back_populates="service_level_objectives"
     )
