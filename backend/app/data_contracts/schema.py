@@ -1,4 +1,7 @@
+import json
 from uuid import UUID
+
+from pydantic import field_validator
 
 from app.data_contracts.column.schema import ColumnCreate, ColumnGet
 from app.data_contracts.service_level_objective.schema import (
@@ -8,19 +11,26 @@ from app.data_contracts.service_level_objective.schema import (
 from app.shared.schema import ORMModel
 
 
-class DataContractGet(ORMModel):
-    id: UUID
+class DataContractBase(ORMModel):
     table: str
     description: str
-    checks: str
+    checks: list[str]
+
+    @field_validator("checks", mode="before")
+    @classmethod
+    def parse_settings(cls, v: str | list) -> list:
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
+
+
+class DataContractGet(DataContractBase):
+    id: UUID
     columns: list[ColumnGet]
     service_level_objectives: list[ServiceLevelObjectiveGet]
 
 
-class DataContractCreate(ORMModel):
+class DataContractCreate(DataContractBase):
     data_output_id: UUID
-    table: str
-    description: str
-    checks: str
     columns: list[ColumnCreate]
     service_level_objectives: list[ServiceLevelObjectiveCreate]

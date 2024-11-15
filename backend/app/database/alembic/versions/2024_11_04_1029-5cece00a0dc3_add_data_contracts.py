@@ -10,6 +10,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from app.shared.model import utcnow
 
@@ -27,7 +28,7 @@ def upgrade() -> None:
         sa.Column("data_output_id", sa.UUID, sa.ForeignKey("data_outputs.id")),
         sa.Column("table", sa.String),
         sa.Column("description", sa.String),
-        sa.Column("checks", sa.String),
+        sa.Column("checks", ARRAY(sa.String)),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
@@ -39,7 +40,7 @@ def upgrade() -> None:
         sa.Column("name", sa.String),
         sa.Column("description", sa.String),
         sa.Column("data_type", sa.String),
-        sa.Column("checks", sa.String),
+        sa.Column("checks", ARRAY(sa.String)),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),

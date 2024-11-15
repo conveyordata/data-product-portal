@@ -3,5 +3,5 @@ export interface ColumnContract {
     name: string;
     description: string;
     data_type: string;
-    checks: string;
+    checks: string[];
 }

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column as SQLColumn
 from sqlalchemy import ForeignKey, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
@@ -20,7 +20,7 @@ class Column(Base, BaseORM):
     name = SQLColumn(String)
     description = SQLColumn(String)
     data_type = SQLColumn(String)
-    checks = SQLColumn(String)
+    checks = SQLColumn(ARRAY(String))
 
     data_contract: Mapped["DataContractModel"] = relationship(
         "DataContract", back_populates="columns"

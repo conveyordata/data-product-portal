@@ -2,7 +2,7 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, ForeignKey, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
@@ -19,7 +19,7 @@ class DataContract(Base, BaseORM):
     data_output_id: Mapped[UUID] = mapped_column(ForeignKey("data_outputs.id"))
     table = Column(String)
     description = Column(String)
-    checks = Column(String)
+    checks = Column(ARRAY(String))
 
     columns: Mapped[list["SchemaColumn"]] = relationship(
         "Column", back_populates="data_contract", cascade="all, delete-orphan"

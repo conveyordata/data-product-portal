@@ -5,7 +5,7 @@ export interface DataContractContract {
     id: string;
     table: string;
     description: string;
-    checks: string;
+    checks: string[];
     columns: ColumnContract[];
     service_level_objectives: ServiceLevelObjectiveContract[];
 }
