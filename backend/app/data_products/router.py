@@ -202,14 +202,6 @@ def get_signin_url(
 
 
 @router.get(
-    "/{id}/conveyor_notebook_url",
-    dependencies=[Depends(OnlyWithProductAccess())],
-)
-def get_conveyor_notebook_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
-    return DataProductService().get_conveyor_notebook_url(id, db)
-
-
-@router.get(
     "/{id}/conveyor_ide_url",
     dependencies=[Depends(OnlyWithProductAccess())],
 )

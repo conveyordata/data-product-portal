@@ -140,15 +140,6 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 params: {environment}
             }),
         }),
-        getDataProductConveyorNotebookUrl: builder.mutation<
-            DataProductGetConveyorUrlResponse,
-            DataProductGetConveyorUrlRequest
-        >({
-            query: ({ id }) => ({
-                url: buildUrl(ApiUrl.DataProductConveyorNotebookUrl, { dataProductId: id }),
-                method: 'GET',
-            }),
-        }),
         requestDatasetAccessForDataProduct: builder.mutation<
             DataProductDatasetAccessResponse,
             DataProductDatasetAccessRequest
@@ -242,7 +233,6 @@ export const {
     useRemoveDatasetFromDataProductMutation,
     useRequestDatasetAccessForDataProductMutation,
     useUpdateDataProductAboutMutation,
-    useGetDataProductConveyorNotebookUrlMutation,
     useGetUserDataProductsQuery,
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,

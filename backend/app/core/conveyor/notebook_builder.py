@@ -82,11 +82,6 @@ class NotebookBuilderConveyor:
             )
         return data_product_id
 
-    def generate_notebook_url(self, data_product: str) -> str:
-        data_product_id = self.get_conveyor_data_product_id(data_product)
-        url = f"https://app.conveyordata.com/projects/{data_product_id}/notebooks"
-        return url
-
     def generate_ide_url(self, data_product: str) -> str:
         data_product_id = self.get_conveyor_data_product_id(data_product)
         url = f"https://app.conveyordata.com/projects/{data_product_id}/executions"

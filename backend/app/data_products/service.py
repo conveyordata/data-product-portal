@@ -370,10 +370,6 @@ class DataProductService:
 
         return request_url
 
-    def get_conveyor_notebook_url(self, id: UUID, db: Session) -> str:
-        data_product = db.get(DataProductModel, id)
-        return CONVEYOR_SERVICE.generate_notebook_url(data_product.external_id)
-
     def get_conveyor_ide_url(self, id: UUID, db: Session) -> str:
         data_product = db.get(DataProductModel, id)
         return CONVEYOR_SERVICE.generate_ide_url(data_product.external_id)
