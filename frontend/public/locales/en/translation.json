@@ -330,5 +330,6 @@
     "Producing Data Products": "Producing Data Products",
     "Produced by Data Product": "Produced by Data Product",
     "Data Output name": "Data Output name",
+    "Product aligned": "Product aligned",
     "Product aligned Data Outputs are active by default, they live within the namespace of the owning Data Product. Source aligned Data Outputs need to be approved by the platform admins. They can live in a more global, shared namespace. By default or when in doubt, leave this checkbox unchecked.": "Product aligned Data Outputs are active by default, they live within the namespace of the owning Data Product. Source aligned Data Outputs need to be approved by the platform admins. They can live in a more global, shared namespace. By default or when in doubt, leave this checkbox unchecked."
 }

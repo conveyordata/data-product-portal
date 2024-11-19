@@ -1,4 +1,4 @@
-import { Checkbox, Form, FormInstance, FormProps, Input, Space } from 'antd';
+import { Checkbox, Form, FormInstance, FormProps, Input, Space, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -185,11 +185,11 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>
                 name={'is_source_aligned'} valuePropName="checked"
-                label={t('Source aligned')}
+                label={sourceAligned? t('Source aligned') : t('Product aligned')}
                 required
                 tooltip={t('Product aligned Data Outputs are active by default, they live within the namespace of the owning Data Product. Source aligned Data Outputs need to be approved by the platform admins. They can live in a more global, shared namespace. By default or when in doubt, leave this checkbox unchecked.')}
             >
-                <Checkbox>{t('Source aligned')}</Checkbox>
+                <Switch/>
             </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>
