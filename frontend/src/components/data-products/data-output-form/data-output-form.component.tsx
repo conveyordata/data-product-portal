@@ -185,6 +185,9 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>
                 name={'is_source_aligned'} valuePropName="checked"
+                label={t('Source aligned')}
+                required
+                tooltip={t('Product aligned Data Outputs are active by default, they live within the namespace of the owning Data Product. Source aligned Data Outputs need to be approved by the platform admins. They can live in a more global, shared namespace. By default or when in doubt, leave this checkbox unchecked.')}
             >
                 <Checkbox>{t('Source aligned')}</Checkbox>
             </Form.Item>
