@@ -3,6 +3,7 @@
     "Logo": "Data Product Portal",
     "Nodes": "Nodes",
     "Environments": "Environments",
+    "Under construction": "Under construction",
     "Input Datasets": "Input Datasets",
     "Data product created successfully": "Data product created successfully",
     "You are not allowed to edit this data product": "You are not allowed to edit this data product",
@@ -328,5 +329,8 @@
     "Consuming Data Products": "Consuming Data Products",
     "Producing Data Products": "Producing Data Products",
     "Produced by Data Product": "Produced by Data Product",
-    "Data Output name": "Data Output name"
+    "Data Output name": "Data Output name",
+    "Product aligned": "Product aligned",
+    "If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.": "If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.",
+    "Alignment": "Alignment"
 }
