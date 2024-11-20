@@ -3,7 +3,7 @@ locals {
     Terraform = "true"
   })
 
-  data_product_glossary_raw = yamldecode(file("${path.root}/config/data_product_glossary/data_product_glossary.yaml"))
+  data_product_glossary_raw = yamldecode(file("../config/data_product_glossary/data_product_glossary.yaml"))
   data_product_glossary = {
     for k, v in local.data_product_glossary_raw : k => {
       description   = try(v["description"], "")
@@ -17,7 +17,7 @@ locals {
     }
   }
 
-  data_outputs_raw = yamldecode(file("${path.root}/config/data_glossary/data_outputs.yaml"))
+  data_outputs_raw = yamldecode(file("../config/data_glossary/data_outputs.yaml"))
   data_outputs = {
     for k, v in local.data_outputs_raw : k => {
       s3 = try([{
@@ -43,14 +43,14 @@ locals {
     }
   }
 
-  datasets_raw = yamldecode(file("${path.root}/config/data_glossary/datasets.yaml"))
+  datasets_raw = yamldecode(file("../config/data_glossary/datasets.yaml"))
   datasets = {
     for k, v in local.datasets_raw : k => {
       data_outputs = v["data_outputs"]
     }
   }
 
-  environments_raw = yamldecode((file("${path.root}/config/environment_configuration/environments.yaml")))
+  environments_raw = yamldecode((file("../config/environment_configuration/environments.yaml")))
   environments = {
     for environment, config in local.environments_raw : environment => {
       aws_account_id             = config["aws"]["account_id"]

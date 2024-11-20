@@ -1,5 +1,5 @@
 module "data_product_managed_objects" {
-  source   = "../../modules/data_product_managed_objects"
+  source   = "../../../modules/data_product_managed_objects/aws"
   for_each = local.environments
 
   prefix = local.prefix
@@ -11,7 +11,7 @@ module "data_product_managed_objects" {
 }
 
 module "data_products" {
-  source   = "../../modules/data_products"
+  source   = "../../../modules/data_products/aws"
   for_each = local.data_product_glossary
 
   prefix           = local.prefix
