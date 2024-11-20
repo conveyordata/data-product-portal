@@ -29,6 +29,7 @@ def upgrade() -> None:
         sa.Column("table", sa.String),
         sa.Column("description", sa.String),
         sa.Column("checks", ARRAY(sa.String)),
+        sa.Column("quality_score", sa.Integer),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),

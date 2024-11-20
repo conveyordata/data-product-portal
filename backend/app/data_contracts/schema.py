@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 from uuid import UUID
 
 from pydantic import field_validator
@@ -28,6 +29,7 @@ class DataContractGet(DataContractBase):
     id: UUID
     columns: list[ColumnGet]
     service_level_objectives: list[ServiceLevelObjectiveGet]
+    quality_score: Optional[int]
 
 
 class DataContractCreate(DataContractBase):

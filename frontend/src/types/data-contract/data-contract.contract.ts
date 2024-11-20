@@ -6,6 +6,7 @@ export interface DataContractContract {
     table: string;
     description: string;
     checks: string[];
+    quality_score: number;
     columns: ColumnContract[];
     service_level_objectives: ServiceLevelObjectiveContract[];
 }

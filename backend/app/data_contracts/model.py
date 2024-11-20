@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,6 +20,7 @@ class DataContract(Base, BaseORM):
     table = Column(String)
     description = Column(String)
     checks = Column(ARRAY(String))
+    quality_score = Column(Integer, default=100)
 
     columns: Mapped[list["SchemaColumn"]] = relationship(
         "Column", back_populates="data_contract", cascade="all, delete-orphan"

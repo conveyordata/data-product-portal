@@ -12,7 +12,7 @@ export const getCollapseItems = ({ dataContracts }: Props): CollapseProps['items
     return dataContracts.map((dataContract) => ({
         key: dataContract.id,
         label: dataContract.table,
-        extra: genExtra(90),
+        extra: genExtra(dataContract.quality_score),
         children: (
             <Flex vertical>
             <Typography.Title level={5}>Description</Typography.Title>
