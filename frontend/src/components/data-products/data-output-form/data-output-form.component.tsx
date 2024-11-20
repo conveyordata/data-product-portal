@@ -1,4 +1,4 @@
-import { Checkbox, Form, FormInstance, FormProps, Input, Select, Space, Switch } from 'antd';
+import { Form, FormInstance, FormProps, Input, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -154,6 +154,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             requiredMark={'optional'}
             labelWrap
             disabled={isLoading}
+            className={styles.form}
         >
             <Form.Item<DataOutputCreateFormSchema>
                 name={'name'}
