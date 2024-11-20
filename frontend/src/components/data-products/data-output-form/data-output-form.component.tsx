@@ -1,4 +1,4 @@
-import { Checkbox, Form, FormInstance, FormProps, Input, Space, Switch } from 'antd';
+import { Checkbox, Form, FormInstance, FormProps, Input, Select, Space, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -21,6 +21,7 @@ import { DataOutputStatus } from '@/types/data-output/data-output.contract';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
+import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
 
 type Props = {
     mode: 'create';
@@ -84,7 +85,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 await createDataOutput(request).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
-                navigate(createDataProductIdPath(dataProductId));
+                navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
 
                 form.resetFields();
             }
@@ -138,6 +139,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             });
         }
     }, [dataProductNameValue]);
+    const options = [{label: t('Product aligned'), value: false}, {label: t('Source aligned'), value: true}]
 
     return (
         <Form
@@ -185,11 +187,16 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>
                 name={'is_source_aligned'} valuePropName="checked"
-                label={sourceAligned? t('Source aligned') : t('Product aligned')}
+                label={t('Alignment')}
                 required
-                tooltip={t('Product aligned Data Outputs are active by default, they live within the namespace of the owning Data Product. Source aligned Data Outputs need to be approved by the platform admins. They can live in a more global, shared namespace. By default or when in doubt, leave this checkbox unchecked.')}
+                tooltip={t('If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.')}
             >
-                <Switch/>
+                <Select
+                    allowClear={false}
+                    defaultActiveFirstOption
+                    defaultValue={false}
+                    options={options}
+                />
             </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>
