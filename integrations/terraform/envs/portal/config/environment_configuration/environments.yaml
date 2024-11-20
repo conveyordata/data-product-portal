@@ -15,6 +15,15 @@ development:
         bucket_name: non-default-dev
         is_default: false
         kms_key_arn: arn:aws:kms:kms-key-arn
+  dbx:
+    account_id: UUID
+    metastore_id: UUID
+    credential_name: dbx-unity-catalog-access
+    env_cluster_params:
+      autotermination_minutes: 20
+  business_units: # TODO: Find a better place for this
+    - business-unit-1
+    - business-unit-2
 production:
   aws:
     account_id: "012345678901"
@@ -31,3 +40,12 @@ production:
         bucket_name: non-default-prd
         is_default: false
         kms_key_arn: arn:aws:kms:kms-key-arn
+  dbx:
+    account_id: UUID
+    metastore_id: UUID
+    credential_name: dbx-unity-catalog-access
+    env_cluster_params:
+      autotermination_minutes: 30
+  business_units: # TODO: Find a better place for this
+    - business-unit-1
+    - business-unit-2
