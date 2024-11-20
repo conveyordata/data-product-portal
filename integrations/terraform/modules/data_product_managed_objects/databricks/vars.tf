@@ -67,6 +67,3 @@ variable "environment_config" {
     business_units             = list(string)
   })
 }
-variable "data_product_folder_prefix" {
-  default = "data_product"
-}
