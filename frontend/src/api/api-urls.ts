@@ -6,6 +6,7 @@ export enum ApiUrl {
     DataOutputDatasetLinkApprove = '/api/data_output_dataset_links/approve/:datasetLinkId',
     DataOutputDatasetLinkReject = '/api/data_output_dataset_links/deny/:datasetLinkId',
     DataOutputDatasetLinkRemove = '/api/data_output_dataset_links/remove/:datasetLinkId',
+    DataOutputDataContracts = '/api/data_outputs/:dataOutputId/data_contracts',
     DataProducts = '/api/data_products',
     DataProductsDataOutput = '/api/data_products/:dataProductId/data_outputs',
     DataProductGet = '/api/data_products/:dataProductId',
@@ -22,7 +23,7 @@ export enum ApiUrl {
     DataProductMembershipApprove = '/api/data_product_memberships/:membershipId/approve',
     DataProductMembershipDeny = '/api/data_product_memberships/:membershipId/deny',
     DataProductMembershipRemove = '/api/data_product_memberships/:membershipId/remove',
-    getDataContractByOutputId = '/api/data_outputs/:dataOutputId/data_contracts',
+    DataContractGet = '/api/data_contracts/:dataContractId',
     Users = '/api/users',
     UserDataProducts = '/api/data_products/user/:userId',
     UserDatasets = '/api/datasets/user/:userId',
@@ -59,7 +60,9 @@ export type DynamicPathParams =
     | 'platformId'
     | 'serviceId'
     | 'environmentId'
-    | 'configId';
+    | 'configId'
+    | 'dataContractId'
+    | 'dataOutputId';
 
 export function buildUrl(url: string, pathParams: Record<DynamicPathParams | string, string>): string {
     return Object.keys(pathParams).reduce((acc, key) => acc.replace(`:${key}`, pathParams[key]), url);

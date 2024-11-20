@@ -10,9 +10,18 @@ export const dataContractTags: string[] = [
 
 export const dataContractsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dataContractTags }).injectEndpoints({
     endpoints: (builder) => ({
+        getDataContractById: builder.query<DataContractContract, string>({
+            query: (dataContractId) => ({
+                url: buildUrl(ApiUrl.DataContractGet, { dataContractId}),
+                method: 'GET',
+            }),
+            providesTags: (_, __, id) => [
+                { type: TagTypes.DataContract, id},
+            ]
+        }),
         getDataContractByOutputId: builder.query<DataContractContract[], string>({
             query: (dataOutputId) => ({
-                url: buildUrl(ApiUrl.getDataContractByOutputId, { dataOutputId }),
+                url: buildUrl(ApiUrl.DataOutputDataContracts, { dataOutputId }),
                 method: 'GET',
             }),
             providesTags: (_, __, id ) => [
@@ -25,5 +34,6 @@ export const dataContractsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
 });
 
 export const {
+    useGetDataContractByIdQuery,
     useGetDataContractByOutputIdQuery,
 } = dataContractsApiSlice;
