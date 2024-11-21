@@ -52,7 +52,7 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
         <div>
             <Form.Item<SnowflakeDataOutput>
                 name={'schema'}
-                label={t('Snowflake schema')}
+                label={t('Schema')}
                 tooltip={t('The name of the Snowflake schema to link the data output to')}
                 rules={[
                     {
@@ -105,7 +105,7 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
             <Form.Item<SnowflakeDataOutput & {result: string}>
                 required
                 name={'result'}
-                label={t('Resulting database and schema')}
+                label={t('Resulting schema and table')}
                 tooltip={t('The schema on Snowflake you can access through this data output')}
             >
                 <Input disabled />

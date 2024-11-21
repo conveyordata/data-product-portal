@@ -332,5 +332,12 @@
     "Data Output name": "Data Output name",
     "Product aligned": "Product aligned",
     "If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.": "If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.",
-    "Alignment": "Alignment"
+    "Alignment": "Alignment",
+    "The schema on Databricks you can access through this data output": "The schema on Databricks you can access through this data output",
+    "Resulting catalog and schema": "Resulting catalog and schema",
+    "The schema to link the data output to": "The schema to link the data output to",
+    "Schema": "Schema",
+    "Catalog": "Catalog",
+    "Please input the name of the Databricks catalog for this data output": "Please input the name of the Databricks catalog for this data output",
+    "The name of the Databricks catalog to link the data output to": "The name of the Databricks catalog to link the data output to",
 }

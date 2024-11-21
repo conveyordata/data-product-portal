@@ -52,12 +52,12 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
         <div>
             <Form.Item<DatabricksDataOutput>
                 name={'schema'}
-                label={t('Databricks schema')}
-                tooltip={t('The name of the Databricks schema to link the data output to')}
+                label={t('Catalog')}
+                tooltip={t('The name of the Databricks catalog to link the data output to')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the Databricks schema for this data output'),
+                        message: t('Please input the name of the Databricks catalog for this data output'),
                     },
                 ]}
             >
@@ -77,8 +77,8 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
             </Form.Item>
             <Form.Item<DatabricksDataOutput & { temp_suffix: string }>
                 name={'schema_suffix'}
-                label={t('Schema suffix')}
-                tooltip={t('The suffix of the Databricks schema to link the data output to')}
+                label={t('Schema')}
+                tooltip={t('The schema to link the data output to')}
             >
                 <Input/>
             </Form.Item>
@@ -105,7 +105,7 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
             <Form.Item<DatabricksDataOutput & {result: string}>
                 required
                 name={'result'}
-                label={t('Resulting database and schema')}
+                label={t('Resulting catalog and schema')}
                 tooltip={t('The schema on Databricks you can access through this data output')}
             >
                 <Input disabled />
