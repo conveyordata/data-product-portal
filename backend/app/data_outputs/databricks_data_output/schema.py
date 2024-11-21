@@ -12,10 +12,12 @@ from app.data_products.schema_base import BaseDataProduct
 
 class DatabricksDataOutput(BaseDataOutputConfiguration):
     schema: str
-    schema_suffix: str
-    bucket_identifier: str
-    schema_path: str
+    schema_suffix: str = ""
     configuration_type: Literal[DataOutputTypes.DatabricksDataOutput]
+    table: str = "*"
+    bucket_identifier: str = ""
+    schema_path: str = ""
+    table_path: str = ""
 
     class Meta:
         orm_model = DatabricksDataOutputModel
@@ -24,10 +26,12 @@ class DatabricksDataOutput(BaseDataOutputConfiguration):
     def validate_paths(self) -> Self:
         if not self.schema_path:
             self.schema_path = self.schema
+        if not self.table_path:
+            self.table_path = self.table
         return self
 
     def validate_configuration(self, data_product: BaseDataProduct):
-        # If product aligned
+        # TODO Force defaul t bucket identifier if bucket = ''
         if not self.schema.startswith(data_product.external_id):
             raise ValueError("Invalid database specified")
 

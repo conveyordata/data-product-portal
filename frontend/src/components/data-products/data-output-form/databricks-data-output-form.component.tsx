@@ -1,4 +1,4 @@
-import { Form, FormInstance, Input, Select } from 'antd';
+import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataOutputConfiguration, DataOutputCreateFormSchema, DatabricksDataOutput } from '@/types/data-output';
 import { useEffect } from 'react';
@@ -12,18 +12,41 @@ type Props = {
 
 export function DatabricksDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
+    const entireSchema = Form.useWatch('entire_schema', form);
     let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
-
+    const databaseValue = Form.useWatch('schema', form);
+    const suffixValue = Form.useWatch('schema_suffix', form);
+    const tableValue = Form.useWatch('table', form);
     useEffect(() => {
         let databaseOptionsList = identifiers //TODO
         if (!sourceAligned) {
             databaseOptionsList = [external_id]
-            form.setFieldsValue({ database: external_id});
+            form.setFieldsValue({ schema: external_id});
         } else {
-            form.setFieldsValue({database: undefined})
+            form.setFieldsValue({schema: undefined})
         }
         databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
     }, [sourceAligned]);
+
+
+    useEffect(() => {
+        let result = databaseValue;
+        if (databaseValue){
+            if (suffixValue) {
+                result += `__${suffixValue}`;
+            }
+            if (entireSchema) {
+                result += '.*'
+            }
+            else if (tableValue) {
+                result += `.${tableValue}`;
+            }
+        } else {
+            result = ""
+        }
+
+        form.setFieldsValue({ result: result });
+    }, [databaseValue, sourceAligned, suffixValue, tableValue, entireSchema]);
 
     return (
         <div>
@@ -45,7 +68,7 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                     disabled={!sourceAligned}
                     onChange={value => {
                         if (value.length > 0) {
-                            form.setFieldsValue({ database: value[0] });
+                            form.setFieldsValue({ schema: value[0] });
                         }
                     }}
                     maxCount={1}
@@ -57,24 +80,33 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                 label={t('Schema suffix')}
                 tooltip={t('The suffix of the Databricks schema to link the data output to')}
             >
-                <Select
-                    allowClear
-                    maxCount={1}
-                    showSearch
-                    mode='tags'
-                    options={[]} // TODO
-                    onChange={value => {
-                        if (value.length > 0) {
-                            form.setFieldsValue({ database_suffix: value[0] });
-                        }
-                    }}
-                />
+                <Input/>
+            </Form.Item>
+            <Form.Item
+                name={'entire_schema'} valuePropName="checked" initialValue={true}
+            >
+                <Checkbox defaultChecked={true}>{t('Include entire schema')}</Checkbox>
             </Form.Item>
             <Form.Item<DatabricksDataOutput>
                 required
-                hidden={true}
-                name={'configuration_type'}
-                initialValue={"DatabricksDataOutput"}
+                name={'table'}
+                hidden={entireSchema}
+                label={t('Table')}
+                tooltip={t('The table that your data output can access')}
+                rules={[
+                    {
+                        required: !entireSchema,
+                        message: t('Please input the table this data output can access'),
+                    }
+                ]}
+            >
+                <Input/>
+            </Form.Item>
+            <Form.Item<DatabricksDataOutput & {result: string}>
+                required
+                name={'result'}
+                label={t('Resulting database and schema')}
+                tooltip={t('The schema on Databricks you can access through this data output')}
             >
                 <Input disabled />
             </Form.Item>

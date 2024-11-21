@@ -9,6 +9,8 @@ class DatabricksDataOutput(BaseDataOutputConfiguration):
     bucket_identifier: Mapped[str] = mapped_column(
         nullable=True, use_existing_column=True
     )
+    table: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
+    table_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
     schema_path: Mapped[str] = mapped_column(nullable=True, use_existing_column=True)
 
     __mapper_args__ = {

@@ -1,4 +1,4 @@
-import { Form, FormInstance, Select } from 'antd';
+import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataOutputConfiguration, DataOutputCreateFormSchema, SnowflakeDataOutput } from '@/types/data-output';
 import { useEffect } from 'react';
@@ -12,8 +12,11 @@ type Props = {
 
 export function SnowflakeDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
+    const entireSchema = Form.useWatch('entire_schema', form);
     let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
-
+    const databaseValue = Form.useWatch('schema', form);
+    const suffixValue = Form.useWatch('schema_suffix', form);
+    const tableValue = Form.useWatch('table', form);
     useEffect(() => {
         let databaseOptionsList = identifiers //TODO
         if (!sourceAligned) {
@@ -24,6 +27,26 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
         }
         databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
     }, [sourceAligned]);
+
+
+    useEffect(() => {
+        let result = databaseValue;
+        if (databaseValue){
+            if (suffixValue) {
+                result += `__${suffixValue}`;
+            }
+            if (entireSchema) {
+                result += '.*'
+            }
+            else if (tableValue) {
+                result += `.${tableValue}`;
+            }
+        } else {
+            result = ""
+        }
+
+        form.setFieldsValue({ result: result });
+    }, [databaseValue, sourceAligned, suffixValue, tableValue, entireSchema]);
 
     return (
         <div>
@@ -57,18 +80,35 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
                 label={t('Schema suffix')}
                 tooltip={t('The suffix of the Snowflake schema to link the data output to')}
             >
-                <Select
-                    allowClear
-                    maxCount={1}
-                    showSearch
-                    mode='tags'
-                    options={[]} // TODO
-                    onChange={value => {
-                        if (value.length > 0) {
-                            form.setFieldsValue({ schema_suffix: value[0] });
-                        }
-                    }}
-                />
+                <Input/>
+            </Form.Item>
+            <Form.Item
+                name={'entire_schema'} valuePropName="checked" initialValue={true}
+            >
+                <Checkbox defaultChecked={true}>{t('Include entire schema')}</Checkbox>
+            </Form.Item>
+            <Form.Item<SnowflakeDataOutput>
+                required
+                name={'table'}
+                hidden={entireSchema}
+                label={t('Table')}
+                tooltip={t('The table that your data output can access')}
+                rules={[
+                    {
+                        required: !entireSchema,
+                        message: t('Please input the table this data output can access'),
+                    },
+                ]}
+            >
+                <Input/>
+            </Form.Item>
+            <Form.Item<SnowflakeDataOutput & {result: string}>
+                required
+                name={'result'}
+                label={t('Resulting database and schema')}
+                tooltip={t('The schema on Snowflake you can access through this data output')}
+            >
+                <Input disabled />
             </Form.Item>
         </div>
     );
