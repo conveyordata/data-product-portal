@@ -123,24 +123,29 @@ export function Explorer({ id, type }: Props) {
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
-        let graphDataQuery;
-        switch (type) {
-          case "dataproduct":
-            graphDataQuery = useGetDataProductGraphDataQuery(id, { skip: !id });
-            break;
-          case "dataset":
-            graphDataQuery = useGetDatasetGraphDataQuery(id, { skip: !id });
-            break;
-          case "dataoutput":
-            graphDataQuery = useGetDataOutputGraphDataQuery(id, { skip: !id });
-            break;
-        }
+    const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== "dataproduct" || !id });
+    const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== "dataset" || !id });
+    const dataOutputQuery = useGetDataOutputGraphDataQuery(id, { skip: type !== "dataoutput" || !id });
 
-        const { data: graph, isFetching } = graphDataQuery;
+    let graphDataQuery;
+
+    switch (type) {
+        case "dataproduct":
+            graphDataQuery = dataProductQuery;
+            break;
+        case "dataset":
+            graphDataQuery = datasetQuery;
+            break;
+        case "dataoutput":
+            graphDataQuery = dataOutputQuery;
+            break;
+    }
+
+    const { data: graph, isFetching } = graphDataQuery;
     const generateGraph = () => {
         if (graph) {
-            let nodes = parseNodes(graph.nodes, defaultNodePosition)
-            let edges = parseEdges(graph.edges)
+            const nodes = parseNodes(graph.nodes, defaultNodePosition)
+            const edges = parseEdges(graph.edges)
             setNodesAndEdges(nodes, edges);
         }
     }
