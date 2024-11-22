@@ -22,12 +22,12 @@ export function SchemaTable({ dataContractId }: Props) {
 
     return (
         <>
-            <Flex className={styles.dataOutputListContainer}>
+            <Flex className={styles.schemaListContainer}>
                 <Table<ColumnContract>
                     loading={isLoading}
-                    className={styles.dataOutputListTable}
+                    className={styles.schemaListTable}
                     columns={columns}
-                    dataSource={dataContract?.columns}
+                    dataSource={dataContract.columns}
                     rowKey={({ id }) => id}
                     pagination={false}
                     rowClassName={styles.tableRow}

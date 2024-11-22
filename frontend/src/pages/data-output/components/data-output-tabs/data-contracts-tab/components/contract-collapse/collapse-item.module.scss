@@ -1,11 +1,13 @@
+@use '@/styles/globals';
+
 .good {
-    color: green;
+    color: globals.$success-color-text-active;
 }
 
 .average {
-    color: orange;
+    color: globals.$warning-color-text-active;
 }
 
 .bad {
-    color: red;
+    color: globals.$error-color-text-active;
 }

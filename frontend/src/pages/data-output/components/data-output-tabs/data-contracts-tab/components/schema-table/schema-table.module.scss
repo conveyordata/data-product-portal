@@ -1,1 +1,14 @@
 @use '@/styles/globals';
+
+.schema-list-container {
+    @extend .no-select;
+    width: 100%;
+
+    .schema-list-table {
+        width: 100%;
+    }
+}
+
+.schema-cell-wrapper {
+    width: 100%;
+}
