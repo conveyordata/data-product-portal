@@ -3,7 +3,11 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.data_contracts.model import DataContract as DataContractModel
-from app.data_contracts.schema import DataContractCreate, DataContractGet
+from app.data_contracts.schema import (
+    DataContractCreate,
+    DataContractGet,
+    QualityScoreUpdate,
+)
 
 
 class DataContractService:
@@ -29,4 +33,11 @@ class DataContractService:
         data_contract.columns = []
         data_contract.service_level_objectives = []
         data_contract.delete()
+        db.commit()
+
+    def update_quality_score(
+        self, id: UUID, new_score: QualityScoreUpdate, db: Session
+    ):
+        data_contract = db.get(DataContractModel, id)
+        data_contract.quality_score = new_score.quality_score
         db.commit()

@@ -36,3 +36,7 @@ class DataContractCreate(DataContractBase):
     data_output_id: UUID
     columns: list[ColumnCreate]
     service_level_objectives: list[ServiceLevelObjectiveCreate]
+
+
+class QualityScoreUpdate(ORMModel):
+    quality_score: int

@@ -3,7 +3,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.data_contracts.schema import DataContractCreate, DataContractGet
+from app.data_contracts.schema import (
+    DataContractCreate,
+    DataContractGet,
+    QualityScoreUpdate,
+)
 from app.data_contracts.service import DataContractService
 from app.database.database import get_db_session
 
@@ -32,3 +36,10 @@ def create_data_contract(
 @router.delete("/{id}")
 def delete_data_contract(id: UUID, db: Session = Depends(get_db_session)):
     return DataContractService().delete_data_contract(id, db)
+
+
+@router.put("/{id}/score")
+def update_quality_score(
+    id: UUID, schema: QualityScoreUpdate, db: Session = Depends(get_db_session)
+):
+    return DataContractService().update_quality_score(id, schema, db)

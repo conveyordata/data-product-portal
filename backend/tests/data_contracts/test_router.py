@@ -13,14 +13,20 @@ def data_contract_payload():
         "data_output_id": str(data_output.id),
         "table": "Some table",
         "description": "Some description",
-        "checks": "Some checks",
+        "checks": ["Some checks", "Some more checks"],
         "columns": [
             {
                 "name": "Some column",
                 "description": "Some column description",
                 "data_type": "Some data type",
-                "checks": "Some column checks",
-            }
+                "checks": ["Some column checks"],
+            },
+            {
+                "name": "Another column",
+                "description": "Another column description",
+                "data_type": "Some data type",
+                "checks": [],
+            },
         ],
         "service_level_objectives": [
             {"type": "Some type", "value": "Some value", "severity": "Some severity"}
@@ -53,6 +59,12 @@ class TestDataContractsRouter:
         response = self.delete_data_contract(client, data_contract.id)
         assert response.status_code == 200
 
+    def test_update_data_contract_score(self, client):
+        data_contract = DataContractFactory()
+        payload = {"quality_score": 80}
+        response = self.update_quality_score(client, data_contract.id, payload)
+        assert response.status_code == 200
+
     @staticmethod
     def create_data_contract(client, payload):
         return client.post(f"{ENDPOINT}", json=payload)
@@ -68,3 +80,7 @@ class TestDataContractsRouter:
     @staticmethod
     def delete_data_contract(client, data_contract_id):
         return client.delete(f"{ENDPOINT}/{data_contract_id}")
+
+    @staticmethod
+    def update_quality_score(client, data_contract_id, payload):
+        return client.put(f"{ENDPOINT}/{data_contract_id}/score", json=payload)
