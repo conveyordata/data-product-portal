@@ -19,7 +19,7 @@
     "@dagrejs/dagre": "^1.1.4",
     "@fontsource/inter": "^5.1.0",
     "@reduxjs/toolkit": "^2.3.0",
-    "@tiptap/extension-bubble-menu": "^2.10.0",
+    "@tiptap/extension-bubble-menu": "^2.10.1",
     "@tiptap/extension-document": "^2.10.0",
     "@tiptap/extension-hard-break": "^2.10.0",
     "@tiptap/extension-link": "^2.10.0",
