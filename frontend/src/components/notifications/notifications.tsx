@@ -10,6 +10,10 @@ import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-ta
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
 import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
 import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
+import { DataOutputDatasetContract } from '@/types/data-output-dataset';
+import { DataProductDatasetContract } from '@/types/data-product-dataset';
+import { DataProductMembershipContract } from '@/types/data-product-membership';
+import { TFunction } from 'i18next';
 
 export function Notifications() {
     const {
@@ -19,121 +23,116 @@ export function Notifications() {
     const navigate = useNavigate();
 
     const { data: pending_actions_datasets } = useGetDataProductDatasetPendingActionsQuery();
-    const pending_datasets = useMemo(() => {
-        return pending_actions_datasets?.map((action) => {
-            return {
-                key: action.id,
-                label: (
-                    <Flex>
-                        <Typography.Text style={{ marginRight: '4px' }}>
-                            {t('{{name}}, on behalf of ', {name:action.requested_by?.first_name})}
-                        </Typography.Text>
-                        <Link
-                            onClick={(e) => {
-                                e.stopPropagation();
-                            }}
-                            to={createDataProductIdPath(action.data_product_id)}
-                        >
-                            {t('data product {{name}}', {name: action.data_product.name})}
-                        </Link>
-                        <Typography.Text style={{ marginLeft: '4px', marginRight: '4px' }}>
-                            {t('requests read access to')}
-                        </Typography.Text>
-                        <Link onClick={(e) => {
-                                e.stopPropagation();
-                            }}
-                         to={createDatasetIdPath(action.dataset_id)}> {t('dataset {{name}}', {name: action.dataset.name})}</Link>
-                    </Flex>
-                ),
-                extra: <ExportOutlined/>,
-                onClick: () => {
-                    navigate(createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct));
-                },
-            };
-        });
-    }, [pending_actions_datasets]);
-
     const { data: pending_actions_dataoutputs } = useGetDataOutputDatasetPendingActionsQuery();
-    const pending_data_outputs = useMemo(() => {
-        return pending_actions_dataoutputs?.map((action) => {
-            return {
-                key: action.id,
-                label: (
-                    <Flex>
-                        <Typography.Text style={{ marginRight: '4px' }}>
-                            {t('{{name}}, on behalf of ', {name:action.requested_by?.first_name})}
-                        </Typography.Text>
-                        <Link
-                            onClick={(e) => {
-                                e.stopPropagation();
-                            }}
-                            to={createDataOutputIdPath(action.data_output_id, action.data_output.owner_id)}
-                        >
-                            {t('data output {{name}}', {name: action.data_output.name})}
-                        </Link>
-                        <Typography.Text style={{ marginLeft: '4px', marginRight: '4px' }}>
-                            {t('requests a link to')}
-                        </Typography.Text>
-                        <Link onClick={(e) => {
-                                e.stopPropagation();
-                            }}
-                         to={createDatasetIdPath(action.dataset_id)}> {t('dataset {{name}}', {name: action.dataset.name})}</Link>
-                    </Flex>
-                ),
-                extra: <ExportOutlined/>,
-                onClick: () => {
-                    navigate(createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput));
-                },
-            };
-        });
-    }, [pending_actions_dataoutputs]);
-
     const { data: pending_actions_data_products } = useGetDataProductMembershipPendingActionsQuery();
-    const pending_data_products = useMemo(() => {
-        return pending_actions_data_products?.map((action) => {
-            return {
-                key: action.id,
-                label: (
-                    <Flex>
-                        <Typography.Text style={{ marginRight: '4px' }}>
-                            {t('{{name}} would like to join the ', {name:action.user.first_name})}
-                        </Typography.Text>
-                        <Link
-                            onClick={(e) => {
-                                e.stopPropagation();
-                            }}
-                            to={createDataProductIdPath(action.data_product_id)}
-                        >
-                            {t('data product {{name}}', {name: action.data_product.name})}
-                        </Link>
-                        <Typography.Text style={{ marginLeft: '4px', marginRight: '4px' }}>
-                            {t('team')}
-                        </Typography.Text>
-                    </Flex>
-                ),
-                extra: <ExportOutlined/>,
-                onClick: () => {
-                    navigate(createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team));
-                },
-            };
-        });
-    }, [pending_actions_data_products]);
 
-    const total_items = useMemo(() => {
-        return pending_datasets?.concat(pending_data_outputs ?? []).concat(pending_data_products ?? []);
-    }, [pending_datasets, pending_data_outputs, pending_data_products]);
+    type PendingAction =
+    | { type: "data_product"} & DataProductDatasetContract
+    | { type: "data_output"} & DataOutputDatasetContract
+    | { type: "team"} & DataProductMembershipContract
+
+    const createPendingItem = (action: PendingAction, navigate: Function, t: TFunction) => {
+        let link, description, navigatePath;
+
+        switch (action.type) {
+            case "data_product":
+                link = createDataProductIdPath(action.data_product_id);
+                description = (
+                    <>
+                        <Typography.Text style={{marginRight: '4px'}}>
+                        {t('{{name}}, on behalf of ', { name: action.requested_by?.first_name })}
+                        </Typography.Text>
+                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                            {t('data product {{name}}', { name: action.data_product.name })}
+                        </Link>
+                        <Typography.Text style={{marginRight: '4px', marginLeft: '4px'}}>
+                        {t('requests read access to')}
+                        </Typography.Text>
+                        <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                            {t('dataset {{name}}', { name: action.dataset.name })}
+                        </Link>
+                    </>
+                );
+                navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
+                break;
+
+            case "data_output":
+                link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
+                description = (
+                    <>
+                        <Typography.Text style={{marginRight: '4px'}}>
+                        {t('{{name}}, on behalf of ', { name: action.requested_by?.first_name })}
+                        </Typography.Text>
+                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                            {t('data output {{name}}', { name: action.data_output.name })}
+                        </Link>
+                        <Typography.Text style={{marginRight: '4px', marginLeft: '4px'}}>
+                        {t('requests a link to')}
+                        </Typography.Text>
+                        <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                            {t('dataset {{name}}', { name: action.dataset.name })}
+                        </Link>
+                    </>
+                );
+                navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
+                break;
+
+            case "team":
+                link = createDataProductIdPath(action.data_product_id);
+                description = (
+                    <>
+                        <Typography.Text style={{marginRight: '4px'}}>
+                        {t('{{name}} would like to join the ', { name: action.user?.first_name })}
+                        </Typography.Text>
+                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                            {t('data product {{name}}', { name: action.data_product.name })}
+                        </Link>
+                        <Typography.Text style={{marginLeft: '4px'}}>
+                        {t('team')}
+                        </Typography.Text>
+                    </>
+                );
+                navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
+                break;
+
+            default:
+                return null;
+        }
+
+        return {
+            key: action.id,
+            label: <Flex>{description}</Flex>,
+            extra: <ExportOutlined />,
+            onClick: () => navigate(navigatePath),
+        };
+    };
+
+    const pendingItems = useMemo(() => {
+        const datasets = pending_actions_datasets?.map((action) =>
+            createPendingItem({...action, type: "data_product"}, navigate, t)
+        );
+        const dataOutputs = pending_actions_dataoutputs?.map((action) =>
+            createPendingItem({...action, type: "data_output"}, navigate, t)
+        );
+        const dataProducts = pending_actions_data_products?.map((action) =>
+            createPendingItem({...action, type: "team"}, navigate, t)
+        );
+
+        return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])];
+    }, [pending_actions_datasets, pending_actions_dataoutputs, pending_actions_data_products, navigate, t]);
+
     const items: MenuProps['items'] = [
         {
             type: 'group',
             label: t('Pending actions'),
-            children: total_items,
+            children: pendingItems,
         },
     ];
 
     return (
         <Flex>
             <Badge
-                count={total_items?.length}
+                count={pendingItems?.length}
                 showZero={false}
                 color={colorPrimary}
                 style={{ fontSize: 10 }}
@@ -145,16 +144,12 @@ export function Notifications() {
                         items,
                     }}
                     trigger={['click']}
-                    // {...dropdownProps}
                 >
                     <Space>
                         <Button
                             shape={'circle'}
                             className={styles.iconButton}
                             icon={<BellOutlined />}
-                            onClick={() => {
-                                console.log('clicked');
-                            }}
                         />
                     </Space>
                 </Dropdown>
