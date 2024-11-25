@@ -3,7 +3,8 @@ from uuid import UUID
 
 import pytz
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy import asc
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products.model import ensure_data_product_exists
@@ -11,7 +12,9 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
+from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
+from app.users.model import User as UserModel
 from app.users.schema import User
 
 
@@ -52,3 +55,26 @@ class DataProductDatasetService:
         data_product.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()
+
+    def get_user_pending_actions(self, db: Session, authenticated_user: User):
+        return (
+            db.query(DataProductDatasetAssociationModel)
+            .options(
+                joinedload(DataProductDatasetAssociationModel.dataset).joinedload(
+                    DatasetModel.owners
+                ),
+                joinedload(DataProductDatasetAssociationModel.data_product),
+                joinedload(DataProductDatasetAssociationModel.requested_by),
+            )
+            .filter(
+                DataProductDatasetAssociationModel.status
+                == DataProductDatasetLinkStatus.PENDING_APPROVAL
+            )
+            .filter(
+                DataProductDatasetAssociationModel.dataset.has(
+                    DatasetModel.owners.any(UserModel.id == authenticated_user.id)
+                )
+            )
+            .order_by(asc(DataProductDatasetAssociationModel.requested_on))
+            .all()
+        )

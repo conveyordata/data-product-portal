@@ -42,3 +42,11 @@ def remove_data_output_link(
     return DataOutputDatasetService().remove_data_output_link(
         id, db, authenticated_user
     )
+
+
+@router.get("/actions")
+def get_user_pending_actions(
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+):
+    return DataOutputDatasetService().get_user_pending_actions(db, authenticated_user)
