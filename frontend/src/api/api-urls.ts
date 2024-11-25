@@ -24,6 +24,7 @@ export enum ApiUrl {
     DataProductMembershipApprove = '/api/data_product_memberships/:membershipId/approve',
     DataProductMembershipDeny = '/api/data_product_memberships/:membershipId/deny',
     DataProductMembershipRemove = '/api/data_product_memberships/:membershipId/remove',
+    DataProductMembershipPendingActions = '/api/data_product_memberships/actions',
     Users = '/api/users',
     UserDataProducts = '/api/data_products/user/:userId',
     UserDatasets = '/api/datasets/user/:userId',

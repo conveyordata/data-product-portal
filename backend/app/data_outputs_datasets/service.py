@@ -12,6 +12,7 @@ from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
+from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.users.model import User as UserModel
@@ -85,7 +86,9 @@ class DataOutputDatasetService:
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
-    def get_user_pending_actions(self, db: Session, authenticated_user: User):
+    def get_user_pending_actions(
+        self, db: Session, authenticated_user: User
+    ) -> list[DataOutputDatasetAssociation]:
         return (
             db.query(DataOutputDatasetAssociationModel)
             .options(

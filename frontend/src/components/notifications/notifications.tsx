@@ -1,4 +1,4 @@
-import { Flex, Badge, Button, theme, Dropdown, MenuProps, Space, Menu, Typography } from 'antd';
+import { Flex, Badge, Button, theme, Dropdown, MenuProps, Space, Typography } from 'antd';
 import { BellOutlined, ExportOutlined } from '@ant-design/icons';
 import styles from './notifications.module.scss';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +7,9 @@ import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/da
 import { Link, useNavigate } from 'react-router-dom';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
 import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
+import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
 
 export function Notifications() {
     const {
@@ -86,9 +88,40 @@ export function Notifications() {
         });
     }, [pending_actions_dataoutputs]);
 
+    const { data: pending_actions_data_products } = useGetDataProductMembershipPendingActionsQuery();
+    const pending_data_products = useMemo(() => {
+        return pending_actions_data_products?.map((action) => {
+            return {
+                key: action.id,
+                label: (
+                    <Flex>
+                        <Typography.Text style={{ marginRight: '4px' }}>
+                            {t('{{name}} would like to join the ', {name:action.user.first_name})}
+                        </Typography.Text>
+                        <Link
+                            onClick={(e) => {
+                                e.stopPropagation();
+                            }}
+                            to={createDataProductIdPath(action.data_product_id)}
+                        >
+                            {t('data product {{name}}', {name: action.data_product.name})}
+                        </Link>
+                        <Typography.Text style={{ marginLeft: '4px', marginRight: '4px' }}>
+                            {t('team')}
+                        </Typography.Text>
+                    </Flex>
+                ),
+                extra: <ExportOutlined/>,
+                onClick: () => {
+                    navigate(createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team));
+                },
+            };
+        });
+    }, [pending_actions_data_products]);
+
     const total_items = useMemo(() => {
-        return pending_datasets?.concat(pending_data_outputs ?? []);
-    }, [pending_datasets, pending_data_outputs]);
+        return pending_datasets?.concat(pending_data_outputs ?? []).concat(pending_data_products ?? []);
+    }, [pending_datasets, pending_data_outputs, pending_data_products]);
     const items: MenuProps['items'] = [
         {
             type: 'group',

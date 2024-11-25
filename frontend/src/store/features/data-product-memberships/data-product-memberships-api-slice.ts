@@ -3,6 +3,7 @@ import { dataProductsApiSlice, dataProductTags } from '@/store/features/data-pro
 import {
     DataProductMembershipApprovalRequest,
     DataProductMembershipApprovalResponse,
+    DataProductMembershipContract,
     DataProductMembershipRequestAccessRequest,
     DataProductMembershipRequestAccessResponse,
     DataProductMembershipRoleUpdateRequest,
@@ -108,6 +109,16 @@ export const dataProductMembershipsApiSlice = baseApiSlice
                     queryFulfilled.catch(patchResult.undo);
                 },
             }),
+            getDataProductMembershipPendingActions: builder.query<DataProductMembershipContract[], void>({
+                query: () => ({
+                    url: buildUrl(ApiUrl.DataProductMembershipPendingActions, { }),
+                    method: 'GET',
+                }),
+                providesTags: (_, __) => [
+                    { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                ],
+            }),
         }),
         overrideExisting: false,
     });
@@ -119,4 +130,5 @@ export const {
     useDenyMembershipAccessMutation,
     useRemoveMembershipAccessMutation,
     useUpdateMembershipRoleMutation,
+    useGetDataProductMembershipPendingActionsQuery
 } = dataProductMembershipsApiSlice;

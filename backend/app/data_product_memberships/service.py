@@ -3,7 +3,8 @@ from uuid import UUID
 
 import pytz
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy import asc
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_product_memberships.enums import (
@@ -12,6 +13,8 @@ from app.data_product_memberships.enums import (
 )
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_memberships.schema import DataProductMembershipCreate
+from app.data_product_memberships.schema_get import DataProductMembershipGet
+from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.users.model import ensure_user_exists
 from app.users.schema import User
@@ -178,3 +181,26 @@ class DataProductMembershipService:
         db.refresh(data_product_membership)
         RefreshInfrastructureLambda().trigger()
         return {"id": data_product_membership.id}
+
+    def get_user_pending_actions(
+        self, db: Session, authenticated_user: User
+    ) -> list[DataProductMembershipGet]:
+        return (
+            db.query(DataProductMembership)
+            .options(
+                joinedload(DataProductMembership.data_product),
+                joinedload(DataProductMembership.user),
+                joinedload(DataProductMembership.requested_by),
+            )
+            .filter(
+                DataProductMembership.status
+                == DataProductMembershipStatus.PENDING_APPROVAL
+            )
+            .filter(
+                DataProductModel.memberships.any(
+                    user_id=authenticated_user.id, role=DataProductUserRole.OWNER
+                )
+            )
+            .order_by(asc(DataProductMembership.requested_on))
+            .all()
+        )
