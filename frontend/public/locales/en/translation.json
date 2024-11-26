@@ -335,5 +335,13 @@
     "If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.": "If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.",
     "Alignment": "Alignment",
     "Notifications": "Notifications",
-    "Requested action on dataproduct {{product}}": "Requested action on dataproduct {{product}}"
+    "{{name}}, on behalf of ": "{{name}}, on behalf of ",
+    "data product {{name}}": "data product {{name}}",
+    "dataset {{name}}": "dataset {{name}}",
+    "data output {{name}}": "data output {{name}}",
+    "requests read access to": "requests read access to",
+    "requests a link to": "requests a link to",
+    "Pending actions": "Pending actions",
+    "{{name}} would like to join the ": "{{name}} would like to join the ",
+    "team": "team"
 }

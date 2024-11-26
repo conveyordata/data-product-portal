@@ -17,4 +17,3 @@ class DataOutputBaseGet(ORMModel):
     service_id: UUID
     configuration: DataOutputConfiguration
     status: DataOutputStatus
-    # dataset_links: list[DatasetLink]
