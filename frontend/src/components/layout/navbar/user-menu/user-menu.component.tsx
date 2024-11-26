@@ -1,7 +1,7 @@
 import { Avatar, Badge, Flex, theme, Typography } from 'antd';
 import headerStyles from '@/components/layout/navbar/navbar.module.scss';
 import styles from './user-menu.module.scss';
-import { LogoutOutlined, UserOutlined, BellOutlined } from '@ant-design/icons';
+import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { useAuth } from 'react-oidc-context';

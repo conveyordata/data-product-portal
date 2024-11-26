@@ -124,7 +124,7 @@ export function Notifications() {
     const items: MenuProps['items'] = [
         {
             type: 'group',
-            label: t('Pending actions'),
+            label: pendingItems?.length > 0 ? t('Pending actions') : t('No pending actions'),
             children: pendingItems,
         },
     ];

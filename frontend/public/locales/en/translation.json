@@ -343,5 +343,6 @@
     "requests a link to": "requests a link to",
     "Pending actions": "Pending actions",
     "{{name}} would like to join the ": "{{name}} would like to join the ",
-    "team": "team"
+    "team": "team",
+    "No pending actions": "No pending actions"
 }
