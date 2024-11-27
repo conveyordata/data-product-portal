@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
+from app.core.auth.api_key import secured_api_key
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_product_memberships.enums import DataProductUserRole
@@ -130,6 +131,7 @@ class OnlyWithProductAccess:
         id: Optional[UUID] = None,
         authenticated_user: User = Depends(get_authenticated_user),
         db: Session = Depends(get_db_session),
+        api_key: Session = Depends(secured_api_key),
     ) -> None:
         if data_product_id:
             id = data_product_id
@@ -143,6 +145,7 @@ class OnlyWithProductAccess:
                 data_product = db.scalars(
                     select(DataProductModel).filter_by(external_id=data_product_name)
                 ).one()
+                id = data_product.id
             else:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -160,6 +163,7 @@ class OnlyWithProductAccess:
                 if membership.role in self.allowed_roles
             ]
             and not authenticated_user.is_admin
+            and not api_key.project.id == id
         ):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,

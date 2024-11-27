@@ -69,6 +69,8 @@ if settings.OIDC_ENABLED:
         if not api_key:
             return secured_call(jwt_token)
         else:
+            if api_key.project:
+                return JWTToken(sub="projectaccount_bot", token="")
             return JWTToken(sub="systemaccount_bot", token="")
 
     def get_authenticated_user(

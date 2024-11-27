@@ -47,6 +47,7 @@ class DataProduct(Base, BaseORM):
         "DataProductMembership.requested_on, "
         "DataProductMembership.role",
     )
+    api_key = Column(UUID(as_uuid=True), default=uuid.uuid4)
     status: DataProductStatus = Column(
         Enum(DataProductStatus), default=DataProductStatus.ACTIVE
     )
