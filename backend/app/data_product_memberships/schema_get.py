@@ -19,6 +19,7 @@ class DataProductMembershipGet(ORMModel):
     role: DataProductUserRole
     status: DataProductMembershipStatus
     user: User
+    data_product: DataProduct
 
 
 class DataProductMembershipsGet(DataProductMembershipGet):

@@ -70,6 +70,7 @@
     "Settings": "Settings",
     "User": "User",
     "Hello, {{name}}": "Hello, {{name}}",
+    "{{first_name}} {{last_name}}": "{{first_name}} {{last_name}}",
     "Logout": "Logout",
     "Configure": "Configure",
     "Add User": "Add User",
@@ -332,5 +333,16 @@
     "Data Output name": "Data Output name",
     "Product aligned": "Product aligned",
     "If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.": "If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.",
-    "Alignment": "Alignment"
+    "Alignment": "Alignment",
+    "Notifications": "Notifications",
+    "{{name}}, on behalf of ": "{{name}}, on behalf of ",
+    "data product {{name}}": "data product {{name}}",
+    "dataset {{name}}": "dataset {{name}}",
+    "data output {{name}}": "data output {{name}}",
+    "requests read access to": "requests read access to",
+    "requests a link to": "requests a link to",
+    "Pending actions": "Pending actions",
+    "{{name}} would like to join the ": "{{name}} would like to join the ",
+    "team": "team",
+    "No pending actions": "No pending actions"
 }
