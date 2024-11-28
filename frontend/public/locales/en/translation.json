@@ -338,7 +338,6 @@
     "{{name}}, on behalf of data output": "{{name}}, on behalf of data output",
     "{{name}}, on behalf of data product": "{{name}}, on behalf of data product",
     "{{name}}": "{{name}}",
-    "data output {{name}}": "data output {{name}}",
     "requests read access to dataset": "requests read access to dataset",
     "requests a link to dataset": "requests a link to dataset",
     "Pending actions": "Pending actions",
