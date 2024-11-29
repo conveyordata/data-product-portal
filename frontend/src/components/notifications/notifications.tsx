@@ -40,16 +40,16 @@ export function Notifications() {
                 description = (
                     <>
                         <Typography.Text style={{marginRight: '4px'}}>
-                        {t('{{name}}, on behalf of ', { name: action.requested_by?.first_name })}
+                        {t('{{name}}, on behalf of data product', { name: action.requested_by?.first_name })}
                         </Typography.Text>
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {t('data product {{name}}', { name: action.data_product.name })}
+                            {t('{{name}}', { name: action.data_product.name })}
                         </Link>
                         <Typography.Text style={{marginRight: '4px', marginLeft: '4px'}}>
-                        {t('requests read access to')}
+                        {t('requests read access to dataset')}
                         </Typography.Text>
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                            {t('dataset {{name}}', { name: action.dataset.name })}
+                            {t('{{name}}', { name: action.dataset.name })}
                         </Link>
                     </>
                 );
@@ -61,16 +61,16 @@ export function Notifications() {
                 description = (
                     <>
                         <Typography.Text style={{marginRight: '4px'}}>
-                        {t('{{name}}, on behalf of ', { name: action.requested_by?.first_name })}
+                        {t('{{name}}, on behalf of data output', { name: action.requested_by?.first_name })}
                         </Typography.Text>
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {t('data output {{name}}', { name: action.data_output.name })}
+                            {t('{{name}}', { name: action.data_output.name })}
                         </Link>
                         <Typography.Text style={{marginRight: '4px', marginLeft: '4px'}}>
-                        {t('requests a link to')}
+                        {t('requests a link to dataset ')}
                         </Typography.Text>
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                            {t('dataset {{name}}', { name: action.dataset.name })}
+                            {t('{{name}}', { name: action.dataset.name })}
                         </Link>
                     </>
                 );
@@ -82,10 +82,10 @@ export function Notifications() {
                 description = (
                     <>
                         <Typography.Text style={{marginRight: '4px'}}>
-                        {t('{{name}} would like to join the ', { name: action.user?.first_name })}
+                        {t('{{name}} would like to join the data product', { name: action.user?.first_name })}
                         </Typography.Text>
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {t('data product {{name}}', { name: action.data_product.name })}
+                            {t('{{name}}', { name: action.data_product.name })}
                         </Link>
                         <Typography.Text style={{marginLeft: '4px'}}>
                         {t('team')}
