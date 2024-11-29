@@ -1,7 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
+import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 
 export const dataProductsDatasetsTags: string[] = [
     TagTypes.DataProduct,
@@ -62,6 +62,16 @@ export const dataProductsDatasetsApiSlice = baseApiSlice
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
+            getDataProductDatasetPendingActions: builder.query<DataProductDatasetContract[], void>({
+                query: () => ({
+                    url: buildUrl(ApiUrl.DataProductDatasetPendingActions, { }),
+                    method: 'GET',
+                }),
+                providesTags: (_, __) => [
+                    { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                ],
+            }),
         }),
         overrideExisting: false,
     });
@@ -72,4 +82,5 @@ export const {
     useApproveDataProductLinkMutation,
     useRejectDataProductLinkMutation,
     useRemoveDataProductDatasetLinkMutation,
+    useGetDataProductDatasetPendingActionsQuery
 } = dataProductsDatasetsApiSlice;
