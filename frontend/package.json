@@ -34,7 +34,7 @@
     "@tiptap/pm": "^2.10.3",
     "@tiptap/react": "^2.10.3",
     "@tiptap/starter-kit": "^2.10.3",
-    "@types/node": "^22.10.0",
+    "@types/node": "^22.10.1",
     "antd": "^5.22.2",
     "axios": "^1.7.8",
     "clsx": "^2.1.1",
