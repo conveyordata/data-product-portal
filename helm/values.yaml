@@ -2,6 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+custom_translation_file_path: ""
 global:
   postgresql:
     auth:
@@ -38,12 +39,12 @@ replicaCount: 1
 image:
   repository: public.ecr.aws/conveyordata/data-product-portal/backend
   pullPolicy: Always
-  tag: 0.2.0
+  tag: 0.2.2
 
 frontendimage:
   repository: public.ecr.aws/conveyordata/data-product-portal/frontend
   pullPolicy: Always
-  tag: 0.2.0
+  tag: 0.2.2
 
 imagePullSecrets: []
 nameOverride: ""

@@ -13,6 +13,19 @@
     }
 }
 
+.iconWrapper {
+    height: globals.$navbar-height;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: globals.$column-gap-xs;
+}
+
+.logoContainer {
+    align-items: center;
+    justify-content: center;
+}
+
 .logoWrapper {
     height: globals.$navbar-height;
     display: flex;

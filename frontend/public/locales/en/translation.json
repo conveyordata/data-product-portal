@@ -3,6 +3,7 @@
     "Logo": "Data Product Portal",
     "Nodes": "Nodes",
     "Environments": "Environments",
+    "Input Datasets": "Input Datasets",
     "Data product created successfully": "Data product created successfully",
     "You are not allowed to edit this data product": "You are not allowed to edit this data product",
     "Data product updated successfully": "Data product updated successfully",
@@ -100,7 +101,6 @@
     "Tableau": "Tableau",
     "Failed to get sign in url": "Failed to get sign in url",
     "Failed to get Conveyor url": "Failed to get Conveyor url",
-    "Failed to get Conveyor Notebook url": "Failed to get Jupyter Notebook url",
     "Status": "Status",
     "Request sent successfully": "Request sent successfully",
     "Failed to request access to data product": "Failed to request access to data product",
@@ -158,6 +158,7 @@
     "{{count}} data outputs_other": "{{count}} data outputs",
     "{{count}} users_one": "{{count}} user",
     "{{count}} users_other": "{{count}} users",
+    "Search existing input datasets by name": "Search existing input datasets by name",
     "Consumes": "Consumes",
     "{{count}} datasets_one": "{{count}} dataset",
     "{{count}} datasets_other": "{{count}} datasets",
@@ -323,5 +324,9 @@
     "Resulting path": "Resulting path",
     "Path": "Path",
     "S3 path": "S3 path",
-    "Databricks schema": "Databricks schema"
+    "Databricks schema": "Databricks schema",
+    "Consuming Data Products": "Consuming Data Products",
+    "Producing Data Products": "Producing Data Products",
+    "Produced by Data Product": "Produced by Data Product",
+    "Data Output name": "Data Output name"
 }

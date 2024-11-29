@@ -36,35 +36,7 @@ export const getDatasetDataProductsColumns = ({
             hidden: true,
         },
         {
-            title: t('Name'),
-            dataIndex: 'name',
-            render: (_, { data_output, status }) => {
-                return (
-                    <TableCellAvatar
-                        popover={{ title: data_output.name, content: data_output.description }}
-                        linkTo={createDataOutputIdPath(data_output.id, data_output.owner.id)}
-                        icon={
-                            <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(data_output.configuration.configuration_type)!}
-                                hasRoundBorder
-                                size={'default'}
-                            />
-                        }
-                        title={data_output.name}
-                        subtitle={
-                            <Badge
-                                status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(status)}
-                                className={styles.noSelect}
-                            />
-                        }
-                    />
-                );
-            },
-            width: '50%',
-        },
-        {
-            title: t('Data Product'),
+            title: t('Produced by Data Product'),
             dataIndex: 'dataproduct',
             render: (_, { data_output, status }) => {
                 return (
@@ -78,6 +50,33 @@ export const getDatasetDataProductsColumns = ({
                             />
                         }
                         title={data_output.owner.name}
+                        subtitle={
+                            <Badge
+                                status={getDataOutputDatasetLinkBadgeStatus(status)}
+                                text={getDataOutputDatasetLinkStatusLabel(status)}
+                                className={styles.noSelect}
+                            />
+                        }
+                    />
+                );
+            },
+            width: '50%',
+        },
+        {
+            title: t('Data Output name'),
+            dataIndex: 'name',
+            render: (_, { data_output, status }) => {
+                return (
+                    <TableCellAvatar
+                        popover={{ title: data_output.name, content: data_output.description }}
+                        linkTo={createDataOutputIdPath(data_output.id, data_output.owner.id)}
+                        icon={
+                            <CustomSvgIconLoader
+                                iconComponent={getDataOutputIcon(data_output.configuration.configuration_type)!}
+                                size={'default'}
+                            />
+                        }
+                        title={data_output.name}
                         subtitle={
                             <Badge
                                 status={getDataOutputDatasetLinkBadgeStatus(status)}
