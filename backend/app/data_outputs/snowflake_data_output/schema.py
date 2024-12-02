@@ -11,12 +11,12 @@ from app.data_products.schema_base import BaseDataProduct
 
 
 class SnowflakeDataOutput(BaseDataOutputConfiguration):
-    schema: str
-    schema_suffix: str = ""
+    database: str
+    schema: str = ""
     configuration_type: Literal[DataOutputTypes.SnowflakeDataOutput]
     table: str = "*"
     bucket_identifier: str = ""
-    schema_path: str = ""
+    database_path: str = ""
     table_path: str = ""
 
     class Meta:
@@ -24,15 +24,15 @@ class SnowflakeDataOutput(BaseDataOutputConfiguration):
 
     @model_validator(mode="after")
     def validate_paths(self) -> Self:
-        if not self.schema_path:
-            self.schema_path = self.schema
+        if not self.database_path:
+            self.database_path = self.database
         if not self.table_path:
             self.table_path = self.table
         return self
 
     def validate_configuration(self, data_product: BaseDataProduct):
-        # TODO Force defaul t bucket identifier if bucket = ''
-        if not self.schema.startswith(data_product.external_id):
+        # If product aligned
+        if not self.database.startswith(data_product.external_id):
             raise ValueError("Invalid database specified")
 
     def on_create(self):
