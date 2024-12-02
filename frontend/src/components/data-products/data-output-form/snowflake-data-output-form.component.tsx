@@ -12,18 +12,18 @@ type Props = {
 
 export function SnowflakeDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
-    const entireSchema = Form.useWatch('entire_schema', form);
+    const entireDatabase = Form.useWatch('entire_database', form);
     let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
-    const databaseValue = Form.useWatch('schema', form);
-    const suffixValue = Form.useWatch('schema_suffix', form);
+    const databaseValue = Form.useWatch('database', form);
+    const schemaValue = Form.useWatch('schema', form);
     const tableValue = Form.useWatch('table', form);
     useEffect(() => {
         let databaseOptionsList = identifiers //TODO
         if (!sourceAligned) {
             databaseOptionsList = [external_id]
-            form.setFieldsValue({ schema: external_id});
+            form.setFieldsValue({ database: external_id});
         } else {
-            form.setFieldsValue({schema: undefined})
+            form.setFieldsValue({database: undefined})
         }
         databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
     }, [sourceAligned]);
@@ -32,10 +32,10 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
     useEffect(() => {
         let result = databaseValue;
         if (databaseValue){
-            if (suffixValue) {
-                result += `__${suffixValue}`;
+            if (schemaValue) {
+                result += `__${schemaValue}`;
             }
-            if (entireSchema) {
+            if (entireDatabase) {
                 result += '.*'
             }
             else if (tableValue) {
@@ -46,12 +46,12 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
         }
 
         form.setFieldsValue({ result: result });
-    }, [databaseValue, sourceAligned, suffixValue, tableValue, entireSchema]);
+    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireDatabase]);
 
     return (
         <div>
             <Form.Item<SnowflakeDataOutput>
-                name={'schema'}
+                name={'database'}
                 label={t('Schema')}
                 tooltip={t('The name of the Snowflake schema to link the data output to')}
                 rules={[
@@ -68,7 +68,7 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
                     disabled={!sourceAligned}
                     onChange={value => {
                         if (value.length > 0) {
-                            form.setFieldsValue({ schema: value[0] });
+                            form.setFieldsValue({ database: value[0] });
                         }
                     }}
                     maxCount={1}
@@ -76,26 +76,26 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
                 />
             </Form.Item>
             <Form.Item<SnowflakeDataOutput & { temp_suffix: string }>
-                name={'schema_suffix'}
+                name={'schema'}
                 label={t('Schema suffix')}
                 tooltip={t('The suffix of the Snowflake schema to link the data output to')}
             >
                 <Input/>
             </Form.Item>
             <Form.Item
-                name={'entire_schema'} valuePropName="checked" initialValue={true}
+                name={'entire_database'} valuePropName="checked" initialValue={true}
             >
-                <Checkbox defaultChecked={true}>{t('Include entire schema')}</Checkbox>
+                <Checkbox defaultChecked={true}>{t('Include entire database')}</Checkbox>
             </Form.Item>
             <Form.Item<SnowflakeDataOutput>
                 required
                 name={'table'}
-                hidden={entireSchema}
+                hidden={entireDatabase}
                 label={t('Table')}
                 tooltip={t('The table that your data output can access')}
                 rules={[
                     {
-                        required: !entireSchema,
+                        required: !entireDatabase,
                         message: t('Please input the table this data output can access'),
                     },
                 ]}

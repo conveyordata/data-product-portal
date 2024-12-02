@@ -1,8 +1,8 @@
 export interface DatabricksDataOutputContract {
-    schema: string;
-    schema_suffix: string | undefined;
+    catalog: string;
+    schema: string | undefined;
     bucket_identifier: string | undefined;
-    schema_path: string | undefined;
+    catalog_path: string | undefined;
     configuration_type: string;
     table: string | undefined;
     table_path: string | undefined;

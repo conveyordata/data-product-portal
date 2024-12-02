@@ -1,6 +1,6 @@
 export interface SnowflakeDataOutputContract {
-    schema: string;
-    schema_suffix: string | undefined;
+    database: string;
+    schema: string | undefined;
     configuration_type: string;
     schema_path: string | undefined;
     table: string | undefined;
