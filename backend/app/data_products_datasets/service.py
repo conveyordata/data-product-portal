@@ -37,7 +37,10 @@ class DataProductDatasetService:
 
     def deny_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
         current_link = db.get(DataProductDatasetAssociationModel, id)
-        if current_link.status != DataProductDatasetLinkStatus.PENDING_APPROVAL:
+        if (
+            current_link.status != DataProductDatasetLinkStatus.PENDING_APPROVAL
+            and current_link.status != DataProductDatasetLinkStatus.APPROVED
+        ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Request already approved/denied",
