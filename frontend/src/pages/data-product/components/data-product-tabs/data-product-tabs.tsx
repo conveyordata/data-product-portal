@@ -38,6 +38,17 @@ type Tab = {
 
 export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
+
+    useEffect(() => {
+        const hash = location.hash.slice(1);
+        if(hash) {
+            setActiveTab(hash);
+        }
+    }, [location])
 
     const tabs: Tab[] = useMemo(() => {
         return [
@@ -87,17 +98,6 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
     if (isLoading) {
         return <LoadingSpinner />;
     }
-
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
-
-    useEffect(() => {
-        const hash = location.hash.slice(1);
-        if(hash) {
-            setActiveTab(hash);
-        }
-    }, [location])
 
     const onTabChange = (key: string) => {
         navigate(`#${key}`);
