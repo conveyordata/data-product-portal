@@ -350,5 +350,16 @@
     "Pending actions": "Pending actions",
     "{{name}} would like to join the data product": "{{name}} would like to join the data product",
     "team": "team",
-    "No pending actions": "No pending actions"
+    "No pending actions": "No pending actions",
+    "Database": "Database",
+    "Resulting database and schema": "Resulting database and schema",
+    "The database and schema on Glue you can access through this data output": "The database and schema on Glue you can access through this data output",
+    "The name of the Snowflake schema to link the data output to": "The name of the Snowflake schema to link the data output to",
+    "Schema suffix": "Schema suffix",
+    "Include entire database": "Include entire database",
+    "Resulting schema and table": "Resulting schema and table",
+    "The schema on Snowflake you can access through this data output": "The schema on Snowflake you can access through this data output",
+    "Please input the name of the Snowflake schema for this data output": "Please input the name of the Snowflake schema for this data output",
+    "The suffix of the Snowflake schema to link the data output to": "The suffix of the Snowflake schema to link the data output to",
+    "Include entire catalog": "Include entire catalog"
 }
