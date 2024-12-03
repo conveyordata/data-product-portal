@@ -4,3 +4,9 @@
     @extend .container;
     gap: globals.$column-gap-regular;
 }
+
+.form {
+    //flex: 1;
+    overflow: auto;
+    padding: globals.$spacing-s;
+}

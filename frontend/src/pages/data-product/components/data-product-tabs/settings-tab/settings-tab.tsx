@@ -1,14 +1,11 @@
 import styles from './settings-tab.module.scss';
-import { Button, Checkbox, Flex, Form, FormProps, Input, Switch, Typography } from 'antd';
+import { Button, Flex, Form, FormProps, Input, Switch, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useCreateDataProductSettingMutation, useGetAllDataProductSettingsQuery } from '@/store/features/data-product-settings/data-product-settings-api-slice';
-import { DataProductSettings } from '@/components/data-products/data-product-settings/data-product-settings.component';
 import { useMemo } from 'react';
-import {DataProductSettingContract, DataProductSettingCreateRequest, DataProductSettingType, DataProductSettingValueContract} from '@/types/data-product-setting';
+import {DataProductSettingContract, DataProductSettingCreateRequest} from '@/types/data-product-setting';
 import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants';
-import { DataOutputCreateFormSchema } from '@/types/data-output';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
-import { aborted } from 'util';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 
 type Props = {
@@ -86,6 +83,7 @@ export function SettingsTab({ dataProductId }: Props) {
                                 message: t('Please input the value'),
                             },
                         ]}
+                        vertical={false}
                         initialValue={setting.value === "true"}
                     >
                         <Switch defaultValue={setting.value === "true"}/>
@@ -100,14 +98,15 @@ export function SettingsTab({ dataProductId }: Props) {
         return <Flex vertical>
                 <Form
                     form={form}
-                    labelCol={FORM_GRID_WRAPPER_COLS}
+                    //labelCol={FORM_GRID_WRAPPER_COLS}
                     wrapperCol={FORM_GRID_WRAPPER_COLS}
-                    layout="vertical"
+                    layout="horizontal"
                     onFinish={onSubmit}
                     onFinishFailed={onSubmitFailed}
                     autoComplete={'off'}
                     requiredMark={'optional'}
                     labelWrap
+                    labelAlign={'left'}
                     disabled={isFetching || isFetchingDP}
                     className={styles.form}
                 > {formContent}
