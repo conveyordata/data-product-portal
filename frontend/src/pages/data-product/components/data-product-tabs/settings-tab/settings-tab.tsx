@@ -1,112 +1,135 @@
 import styles from './settings-tab.module.scss';
-import { Button, Flex, Form } from 'antd';
+import { Button, Checkbox, Flex, Form, FormProps, Input, Switch, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useCallback, useMemo } from 'react';
-import { useModal } from '@/hooks/use-modal.tsx';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { SearchForm } from '@/types/shared';
-import { Searchbar } from '@/components/form';
-import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
-import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
-import { UserContract } from '@/types/users';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useAddDataProductMembershipMutation } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
+import { useCreateDataProductSettingMutation, useGetAllDataProductSettingsQuery } from '@/store/features/data-product-settings/data-product-settings-api-slice';
+import { DataProductSettings } from '@/components/data-products/data-product-settings/data-product-settings.component';
+import { useMemo } from 'react';
+import {DataProductSettingContract, DataProductSettingCreateRequest, DataProductSettingType, DataProductSettingValueContract} from '@/types/data-product-setting';
+import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants';
+import { DataOutputCreateFormSchema } from '@/types/data-output';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
+import { aborted } from 'util';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 
 type Props = {
     dataProductId: string;
 };
 
-function filterUsers(users: DataProductUserMembership[], searchTerm: string) {
-    if (!searchTerm) return users;
-    if (!users) return [];
-
-    return (
-        users.filter(
-            (membership) =>
-                membership?.user?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                membership?.user?.first_name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                membership?.user?.last_name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
-        ) ?? []
-    );
-}
-
 export function SettingsTab({ dataProductId }: Props) {
-    const { isVisible, handleOpen, handleClose } = useModal();
-    const user = useSelector(selectCurrentUser);
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching } = useGetDataProductByIdQuery(dataProductId);
-    const [addUserToDataProduct, { isLoading: isAddingUser }] = useAddDataProductMembershipMutation();
-    const [searchForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchForm);
+    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(dataProductId);
+    const {data: settings, isFetching} = useGetAllDataProductSettingsQuery()
+    const [updateSetting] = useCreateDataProductSettingMutation();
+    const [form] = Form.useForm();
 
-    const filteredUsers = useMemo(() => {
-        return filterUsers(dataProduct?.memberships ?? [], searchTerm);
-    }, [dataProduct?.memberships, searchTerm]);
-    const dataProductUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
-
-    const isDataProductOwner = useMemo(() => {
-        if (!dataProduct || !user) return false;
-
-        return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct?.id, user?.id]);
-
-    const handleGrantAccessToDataProduct = useCallback(
-        async (user: UserContract) => {
-            try {
-                await addUserToDataProduct({
-                    dataProductId: dataProductId,
-                    user_id: user.id,
-                    role: DataProductMembershipRole.Member,
-                }).unwrap();
-                dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
-            } catch (_error) {
-                dispatchMessage({ content: t('Failed to grant access to the data product'), type: 'error' });
+    const onSubmit: FormProps<DataProductSettingCreateRequest>['onFinish'] = async (values) => {
+        try {
+            if (dataProduct) {
+                const request: DataProductSettingCreateRequest = {
+                    data_product_id: dataProduct.id,
+                    data_product_settings_id: values.data_product_settings_id,
+                    value: values.value.toString()
+                };
+                await updateSetting(request).unwrap();
+                dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
+                // modalCallbackOnSubmit();
+                // navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
+                // form.resetFields();
             }
-        },
-        [addUserToDataProduct, dataProductId, t],
-    );
+        } catch (_e) {
+            const errorMessage = 'Failed to update setting';
+            dispatchMessage({ content: errorMessage, type: 'error' });
+        }
+    };
 
-    if (!dataProduct || !user) return null;
+    const onSubmitFailed: FormProps<DataProductSettingCreateRequest>['onFinishFailed'] = () => {
+        dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
+    };
+
+
+    const settingsRender = useMemo(() => {
+        console.log(settings)
+        console.log(dataProduct?.data_product_settings)
+        let updatedSettings: (DataProductSettingContract&{value: string})[] = [];
+        if (settings && dataProduct) {
+            updatedSettings = settings.map(setting => {
+                const match = dataProduct?.data_product_settings?.find(dps => dps.data_product_setting_id === setting.id);
+                return match ? { ...setting, value: match.value } : {...setting, value: setting.default}; // Merge if match found, otherwise retain the original
+              });
+            console.log(updatedSettings[0])
+        }
+
+        // TODO Somehow do a grouping per divider
+        // TODO Allow update api calls of values per value change? Tiny form per setting?
+        // TODO Fix frontend issues
+
+        const formContent = updatedSettings.map(setting => {
+            let renderedSetting;
+            switch (setting.type) {
+                case "checkbox":
+                    renderedSetting =
+                    <Flex vertical>
+                        <Typography.Title>{setting.divider}</Typography.Title>
+                        <Form.Item<DataProductSettingCreateRequest>
+                        name={'data_product_settings_id'}
+                        hidden
+                        initialValue={setting.id}
+                    >
+                    </Form.Item>
+                    <Form.Item<DataProductSettingCreateRequest>
+                        name={'value'}
+                        label={t(setting.name)}
+                        tooltip={t(setting.tooltip)}
+                        rules={[
+                            {
+                                required: true,
+                                message: t('Please input the value'),
+                            },
+                        ]}
+                        initialValue={setting.value === "true"}
+                    >
+                        <Switch defaultValue={setting.value === "true"}/>
+                    </Form.Item>
+                    </Flex>
+                    break;
+                default:
+                    break;
+            }
+            return renderedSetting
+        })
+        return <Flex vertical>
+                <Form
+                    form={form}
+                    labelCol={FORM_GRID_WRAPPER_COLS}
+                    wrapperCol={FORM_GRID_WRAPPER_COLS}
+                    layout="vertical"
+                    onFinish={onSubmit}
+                    onFinishFailed={onSubmitFailed}
+                    autoComplete={'off'}
+                    requiredMark={'optional'}
+                    labelWrap
+                    disabled={isFetching || isFetchingDP}
+                    className={styles.form}
+                > {formContent}
+                <Button
+                        className={styles.formButton}
+                        type="primary"
+                        htmlType={'submit'}
+                        loading={isFetching || isFetchingDP}
+                        disabled={isFetching || isFetchingDP}
+                    >
+                        {t('Update settings')}
+                    </Button>
+                </Form>
+
+                </Flex>
+    }, [settings, dataProduct])
 
     return (
         <>
             <Flex vertical className={styles.container}>
-                <Searchbar
-                    form={searchForm}
-                    formItemProps={{ initialValue: '' }}
-                    placeholder={t('Search users by email or name')}
-                    actionButton={
-                        <Button
-                            disabled={!isDataProductOwner}
-                            type={'primary'}
-                            className={styles.formButton}
-                            onClick={handleOpen}
-                        >
-                            {t('Add User')}
-                        </Button>
-                    }
-                />
-                {/* <TeamTable
-                    isCurrentUserDataProductOwner={isDataProductOwner}
-                    dataProductId={dataProductId}
-                    dataProductUsers={filteredUsers}
-                /> */}
+                {settingsRender}
             </Flex>
-            {isVisible && (
-                <UserPopup
-                    isOpen={isVisible}
-                    onClose={handleClose}
-                    isLoading={isFetching || isAddingUser}
-                    userIdsToHide={dataProductUserIds}
-                    item={{
-                        action: handleGrantAccessToDataProduct,
-                        label: t('Grant Access'),
-                    }}
-                />
-            )}
         </>
     );
 }
