@@ -3,7 +3,7 @@ import { DataProductContract } from "../data-product";
 export type DataProductSettingType =
     | 'checkbox'
 
-    export interface DataProductSettingContract {
+export interface DataProductSettingContract {
     id: string;
     name: string;
     tooltip: string;
@@ -21,4 +21,8 @@ export interface DataProductSettingValueContract {
     data_product_setting: DataProductSettingContract;
     data_product_setting_id: string;
     value: string;
+}
+
+export interface DataProductSettingValueForm {
+    [id: string]: string;
 }

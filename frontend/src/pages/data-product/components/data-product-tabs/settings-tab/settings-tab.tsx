@@ -2,8 +2,8 @@ import styles from './settings-tab.module.scss';
 import { Button, Flex, Form, FormProps, Input, Switch, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useCreateDataProductSettingMutation, useGetAllDataProductSettingsQuery } from '@/store/features/data-product-settings/data-product-settings-api-slice';
-import { useMemo } from 'react';
-import {DataProductSettingContract, DataProductSettingCreateRequest} from '@/types/data-product-setting';
+import { useEffect, useMemo } from 'react';
+import {DataProductSettingContract, DataProductSettingCreateRequest, DataProductSettingValueForm} from '@/types/data-product-setting';
 import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
@@ -19,16 +19,16 @@ export function SettingsTab({ dataProductId }: Props) {
     const [updateSetting] = useCreateDataProductSettingMutation();
     const [form] = Form.useForm();
 
-    const onSubmit: FormProps<DataProductSettingCreateRequest>['onFinish'] = async (values) => {
+    const onSubmit: FormProps<DataProductSettingValueForm>['onFinish'] = async (values) => {
         try {
             if (dataProduct) {
                 updatedSettings?.map(async (setting) => {
                     const key = `data_product_settings_id_${setting.id}`;
-                    if (values[setting.id].toString() !== setting.value) {
+                    if (values[`value_${setting.id}`].toString() !== setting.value) {
                         const request: DataProductSettingCreateRequest = {
                             data_product_id: dataProduct.id,
                             data_product_settings_id: values[key],
-                            value: values[setting.id].toString()
+                            value: values[`value_${setting.id}`].toString()
                         };
                         await updateSetting(request).unwrap();
                         dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
@@ -45,7 +45,7 @@ export function SettingsTab({ dataProductId }: Props) {
         }
     };
 
-    const onSubmitFailed: FormProps<DataProductSettingCreateRequest>['onFinishFailed'] = () => {
+    const onSubmitFailed: FormProps<DataProductSettingValueForm>['onFinishFailed'] = () => {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
@@ -59,6 +59,17 @@ export function SettingsTab({ dataProductId }: Props) {
         return [];
     }
 }, [settings, dataProduct])
+    useEffect(() => {
+        updatedSettings.map((setting) => {
+            switch (setting.type) {
+                case "checkbox":
+                    form.setFieldsValue({[`value_${setting.id}`]: setting.value === "true"});
+                    break;
+                default:
+                    break;
+            }
+        })
+    }, [updatedSettings])
 
 
     const settingsRender = useMemo(() => {
@@ -75,16 +86,14 @@ export function SettingsTab({ dataProductId }: Props) {
                         <Typography.Title>{setting.divider}</Typography.Title>
                     )}
                     {/* Hidden Input for ID */}
-                    <Form.Item<DataProductSettingCreateRequest>
+                    <Form.Item<DataProductSettingValueForm>
                         name={`data_product_settings_id_${setting.id}`}
                         initialValue={setting.id}
                         hidden
                     >
-                        <></>
                     </Form.Item>
-                    <Form.Item<DataProductSettingCreateRequest>
-                        //name={'value'}
-                        name={setting.id}
+                    <Form.Item<DataProductSettingValueForm>
+                        name={`value_${setting.id}`}
                         label={t(setting.name)}
                         tooltip={t(setting.tooltip)}
                         rules={[
@@ -93,9 +102,8 @@ export function SettingsTab({ dataProductId }: Props) {
                                 message: t('Please input the value'),
                             },
                         ]}
-                        initialValue={setting.value === "true"}
                     >
-                        <Switch defaultValue={setting.value === "true"}/>
+                        <Switch/>
                     </Form.Item>
                     </Flex>
                     break;
