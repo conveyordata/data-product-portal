@@ -22,16 +22,22 @@ export function SettingsTab({ dataProductId }: Props) {
     const onSubmit: FormProps<DataProductSettingCreateRequest>['onFinish'] = async (values) => {
         try {
             if (dataProduct) {
-                const request: DataProductSettingCreateRequest = {
-                    data_product_id: dataProduct.id,
-                    data_product_settings_id: values.data_product_settings_id,
-                    value: values.value.toString()
-                };
-                await updateSetting(request).unwrap();
-                dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
-                // modalCallbackOnSubmit();
-                // navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
-                // form.resetFields();
+                updatedSettings?.map(async (setting) => {
+                    const key = `data_product_settings_id_${setting.id}`;
+                    if (values[setting.id].toString() !== setting.value) {
+                        const request: DataProductSettingCreateRequest = {
+                            data_product_id: dataProduct.id,
+                            data_product_settings_id: values[key],
+                            value: values[setting.id].toString()
+                        };
+                        await updateSetting(request).unwrap();
+                        dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
+                    }
+                    // modalCallbackOnSubmit();
+                    // navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
+                    // form.resetFields();
+                })
+
             }
         } catch (_e) {
             const errorMessage = 'Failed to update setting';
@@ -43,38 +49,42 @@ export function SettingsTab({ dataProductId }: Props) {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
+    const updatedSettings: (DataProductSettingContract&{value: string})[] = useMemo(() => {
+    if (settings && dataProduct) {
+        return settings.map(setting => {
+            const match = dataProduct?.data_product_settings?.find(dps => dps.data_product_setting_id === setting.id);
+            return match ? { ...setting, value: match.value } : {...setting, value: setting.default};
+          });
+    } else {
+        return [];
+    }
+}, [settings, dataProduct])
+
 
     const settingsRender = useMemo(() => {
-        console.log(settings)
-        console.log(dataProduct?.data_product_settings)
-        let updatedSettings: (DataProductSettingContract&{value: string})[] = [];
-        if (settings && dataProduct) {
-            updatedSettings = settings.map(setting => {
-                const match = dataProduct?.data_product_settings?.find(dps => dps.data_product_setting_id === setting.id);
-                return match ? { ...setting, value: match.value } : {...setting, value: setting.default}; // Merge if match found, otherwise retain the original
-              });
-            console.log(updatedSettings[0])
-        }
 
         // TODO Somehow do a grouping per divider
-        // TODO Allow update api calls of values per value change? Tiny form per setting?
-        // TODO Fix frontend issues
 
         const formContent = updatedSettings.map(setting => {
             let renderedSetting;
             switch (setting.type) {
                 case "checkbox":
                     renderedSetting =
-                    <Flex vertical>
+                    <Flex key={setting.id} vertical>
+                    {setting.divider && (
                         <Typography.Title>{setting.divider}</Typography.Title>
-                        <Form.Item<DataProductSettingCreateRequest>
-                        name={'data_product_settings_id'}
-                        hidden
+                    )}
+                    {/* Hidden Input for ID */}
+                    <Form.Item<DataProductSettingCreateRequest>
+                        name={`data_product_settings_id_${setting.id}`}
                         initialValue={setting.id}
+                        hidden
                     >
+                        <></>
                     </Form.Item>
                     <Form.Item<DataProductSettingCreateRequest>
-                        name={'value'}
+                        //name={'value'}
+                        name={setting.id}
                         label={t(setting.name)}
                         tooltip={t(setting.tooltip)}
                         rules={[
@@ -83,7 +93,6 @@ export function SettingsTab({ dataProductId }: Props) {
                                 message: t('Please input the value'),
                             },
                         ]}
-                        vertical={false}
                         initialValue={setting.value === "true"}
                     >
                         <Switch defaultValue={setting.value === "true"}/>
@@ -109,7 +118,8 @@ export function SettingsTab({ dataProductId }: Props) {
                     labelAlign={'left'}
                     disabled={isFetching || isFetchingDP}
                     className={styles.form}
-                > {formContent}
+                >
+                {formContent}
                 <Button
                         className={styles.formButton}
                         type="primary"
