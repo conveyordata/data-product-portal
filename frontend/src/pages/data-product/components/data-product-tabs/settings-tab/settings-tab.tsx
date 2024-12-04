@@ -6,6 +6,7 @@ import {
     useGetAllDataProductSettingsQuery,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { useEffect, useMemo } from 'react';
+import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 import {
     DataProductSettingContract,
     DataProductSettingCreateRequest,
@@ -14,6 +15,8 @@ import {
 import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 
 type Props = {
     dataProductId: string;
@@ -25,6 +28,13 @@ export function SettingsTab({ dataProductId }: Props) {
     const { data: settings, isFetching } = useGetAllDataProductSettingsQuery();
     const [updateSetting] = useCreateDataProductSettingMutation();
     const [form] = Form.useForm();
+    const user = useSelector(selectCurrentUser);
+
+    const isDataProductOwner = useMemo(() => {
+        if (!dataProduct || !user) return false;
+
+        return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
+    }, [dataProduct?.id, user?.id]);
 
     const onSubmit: FormProps<DataProductSettingValueForm>['onFinish'] = async (values) => {
         try {
@@ -147,7 +157,7 @@ export function SettingsTab({ dataProductId }: Props) {
                     requiredMark={'optional'}
                     labelWrap
                     labelAlign={'left'}
-                    disabled={isFetching || isFetchingDP}
+                    disabled={isFetching || isFetchingDP || !isDataProductOwner}
                     className={styles.form}
                 >
                     {formContent}
