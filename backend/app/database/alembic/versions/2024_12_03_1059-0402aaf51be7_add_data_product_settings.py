@@ -52,22 +52,6 @@ def upgrade() -> None:
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
     )
-    # op.create_foreign_key(
-    #     "data_products_settings_values_product_id_fkey",
-    #     "data_products_settings_values",
-    #     "data_products",
-    #     ["data_product_id"],
-    #     ["id"],
-    #     ondelete="CASCADE",
-    # )
-    # op.create_foreign_key(
-    #     "data_products_settings_values_setting_id_fkey",
-    #     "data_product_settings",
-    #     "data_products_settings_values",
-    #     ["id"],
-    #     ["data_product_setting_id"],
-    #     ondelete="CASCADE",
-    # )
 
 
 def downgrade() -> None:
