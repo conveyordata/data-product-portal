@@ -1,9 +1,16 @@
 import styles from './settings-tab.module.scss';
 import { Button, Flex, Form, FormProps, Input, Switch, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useCreateDataProductSettingMutation, useGetAllDataProductSettingsQuery } from '@/store/features/data-product-settings/data-product-settings-api-slice';
+import {
+    useCreateDataProductSettingMutation,
+    useGetAllDataProductSettingsQuery,
+} from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { useEffect, useMemo } from 'react';
-import {DataProductSettingContract, DataProductSettingCreateRequest, DataProductSettingValueForm} from '@/types/data-product-setting';
+import {
+    DataProductSettingContract,
+    DataProductSettingCreateRequest,
+    DataProductSettingValueForm,
+} from '@/types/data-product-setting';
 import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
@@ -15,7 +22,7 @@ type Props = {
 export function SettingsTab({ dataProductId }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(dataProductId);
-    const {data: settings, isFetching} = useGetAllDataProductSettingsQuery()
+    const { data: settings, isFetching } = useGetAllDataProductSettingsQuery();
     const [updateSetting] = useCreateDataProductSettingMutation();
     const [form] = Form.useForm();
 
@@ -28,7 +35,7 @@ export function SettingsTab({ dataProductId }: Props) {
                         const request: DataProductSettingCreateRequest = {
                             data_product_id: dataProduct.id,
                             data_product_settings_id: values[key],
-                            value: values[`value_${setting.id}`].toString()
+                            value: values[`value_${setting.id}`].toString(),
                         };
                         await updateSetting(request).unwrap();
                         dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
@@ -36,8 +43,7 @@ export function SettingsTab({ dataProductId }: Props) {
                     // modalCallbackOnSubmit();
                     // navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
                     // form.resetFields();
-                })
-
+                });
             }
         } catch (_e) {
             const errorMessage = 'Failed to update setting';
@@ -49,70 +55,87 @@ export function SettingsTab({ dataProductId }: Props) {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
-    const updatedSettings: (DataProductSettingContract&{value: string})[] = useMemo(() => {
-    if (settings && dataProduct) {
-        return settings.map(setting => {
-            const match = dataProduct?.data_product_settings?.find(dps => dps.data_product_setting_id === setting.id);
-            return match ? { ...setting, value: match.value } : {...setting, value: setting.default};
-          });
-    } else {
-        return [];
-    }
-}, [settings, dataProduct])
+    const updatedSettings: (DataProductSettingContract & { value: string })[] = useMemo(() => {
+        if (settings && dataProduct) {
+            return settings.map((setting) => {
+                const match = dataProduct?.data_product_settings?.find(
+                    (dps) => dps.data_product_setting_id === setting.id,
+                );
+                return match ? { ...setting, value: match.value } : { ...setting, value: setting.default };
+            });
+        } else {
+            return [];
+        }
+    }, [settings, dataProduct]);
     useEffect(() => {
         updatedSettings.map((setting) => {
             switch (setting.type) {
-                case "checkbox":
-                    form.setFieldsValue({[`value_${setting.id}`]: setting.value === "true"});
+                case 'checkbox':
+                    form.setFieldsValue({ [`value_${setting.id}`]: setting.value === 'true' });
                     break;
                 default:
                     break;
             }
-        })
-    }, [updatedSettings])
-
+        });
+    }, [updatedSettings]);
 
     const settingsRender = useMemo(() => {
+        // Group settings by divider
+        const groupedSettings = updatedSettings.reduce(
+            (groups, setting) => {
+                const divider = setting.divider; // Use 'Default' for settings without a divider
+                if (!groups[divider]) {
+                    groups[divider] = [];
+                }
+                groups[divider].push(setting);
+                return groups;
+            },
+            {} as Record<string, typeof updatedSettings>,
+        );
 
-        // TODO Somehow do a grouping per divider
-
-        const formContent = updatedSettings.map(setting => {
-            let renderedSetting;
-            switch (setting.type) {
-                case "checkbox":
-                    renderedSetting =
-                    <Flex key={setting.id} vertical>
-                    {setting.divider && (
-                        <Typography.Title>{setting.divider}</Typography.Title>
-                    )}
-                    {/* Hidden Input for ID */}
-                    <Form.Item<DataProductSettingValueForm>
-                        name={`data_product_settings_id_${setting.id}`}
-                        initialValue={setting.id}
-                        hidden
-                    >
-                    </Form.Item>
-                    <Form.Item<DataProductSettingValueForm>
-                        name={`value_${setting.id}`}
-                        label={t(setting.name)}
-                        tooltip={t(setting.tooltip)}
-                        rules={[
-                            {
-                                required: true,
-                                message: t('Please input the value'),
-                            },
-                        ]}
-                    >
-                        <Switch/>
-                    </Form.Item>
-                    </Flex>
-                    break;
-                default:
-                    break;
-            }
-            return renderedSetting
-        })
-        return <Flex vertical>
+        // Render grouped settings
+        const formContent = Object.entries(groupedSettings).map(([divider, settings]) => (
+            <Flex key={divider} vertical>
+                <Typography.Title>{divider}</Typography.Title>
+                {settings.map((setting) => {
+                    let renderedSetting;
+                    switch (setting.type) {
+                        case 'checkbox':
+                            renderedSetting = (
+                                <Form.Item<DataProductSettingValueForm>
+                                    name={`value_${setting.id}`}
+                                    label={t(setting.name)}
+                                    tooltip={t(setting.tooltip)}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: t('Please input the value'),
+                                        },
+                                    ]}
+                                >
+                                    <Switch />
+                                </Form.Item>
+                            );
+                            break;
+                        default:
+                            break;
+                    }
+                    return (
+                        <Flex key={setting.id} vertical>
+                            {/* Hidden Input for ID */}
+                            <Form.Item<DataProductSettingValueForm>
+                                name={`data_product_settings_id_${setting.id}`}
+                                initialValue={setting.id}
+                                hidden
+                            />
+                            {renderedSetting}
+                        </Flex>
+                    );
+                })}
+            </Flex>
+        ));
+        return (
+            <Flex vertical>
                 <Form
                     form={form}
                     //labelCol={FORM_GRID_WRAPPER_COLS}
@@ -127,8 +150,8 @@ export function SettingsTab({ dataProductId }: Props) {
                     disabled={isFetching || isFetchingDP}
                     className={styles.form}
                 >
-                {formContent}
-                <Button
+                    {formContent}
+                    <Button
                         className={styles.formButton}
                         type="primary"
                         htmlType={'submit'}
@@ -138,9 +161,9 @@ export function SettingsTab({ dataProductId }: Props) {
                         {t('Update settings')}
                     </Button>
                 </Form>
-
-                </Flex>
-    }, [settings, dataProduct])
+            </Flex>
+        );
+    }, [updatedSettings, dataProduct]);
 
     return (
         <>
