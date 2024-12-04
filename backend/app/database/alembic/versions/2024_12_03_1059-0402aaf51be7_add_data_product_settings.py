@@ -38,20 +38,38 @@ def upgrade() -> None:
         "data_products_settings_values",
         sa.Column("id", sa.UUID, primary_key=True),
         sa.Column(
-            "data_product_id", sa.UUID(as_uuid=True), sa.ForeignKey("data_products.id")
+            "data_product_id",
+            sa.UUID(as_uuid=True),
+            sa.ForeignKey("data_products.id", ondelete="CASCADE"),
         ),
         sa.Column(
             "data_product_setting_id",
             sa.UUID(as_uuid=True),
-            sa.ForeignKey("data_product_settings.id"),
+            sa.ForeignKey("data_product_settings.id", ondelete="CASCADE"),
         ),
         sa.Column("value", sa.String),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
     )
+    # op.create_foreign_key(
+    #     "data_products_settings_values_product_id_fkey",
+    #     "data_products_settings_values",
+    #     "data_products",
+    #     ["data_product_id"],
+    #     ["id"],
+    #     ondelete="CASCADE",
+    # )
+    # op.create_foreign_key(
+    #     "data_products_settings_values_setting_id_fkey",
+    #     "data_product_settings",
+    #     "data_products_settings_values",
+    #     ["id"],
+    #     ["data_product_setting_id"],
+    #     ondelete="CASCADE",
+    # )
 
 
 def downgrade() -> None:
-    op.drop_table("data_product_settings")
     op.drop_table("data_products_settings_values")
+    op.drop_table("data_product_settings")

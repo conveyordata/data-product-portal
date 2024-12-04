@@ -48,5 +48,6 @@ class DataProductSetting(Base, BaseORM):
     data_products: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
         back_populates="data_product_setting",
+        cascade="all, delete-orphan",
         order_by="DataProductSettingValue.data_product_id",
     )
