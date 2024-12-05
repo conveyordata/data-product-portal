@@ -2,6 +2,7 @@ import { DataProductContract } from "../data-product";
 
 export type DataProductSettingType =
     | 'checkbox'
+    | 'tags'
 
 export interface DataProductSettingContract {
     id: string;

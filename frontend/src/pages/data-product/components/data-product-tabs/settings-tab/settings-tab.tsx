@@ -1,5 +1,5 @@
 import styles from './settings-tab.module.scss';
-import { Button, Flex, Form, FormProps, Input, Switch, Typography } from 'antd';
+import { Button, Flex, Form, FormProps, Input, Select, Switch, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
     useCreateDataProductSettingMutation,
@@ -127,6 +127,23 @@ export function SettingsTab({ dataProductId }: Props) {
                                 </Form.Item>
                             );
                             break;
+                        case 'tags':
+                            const value = setting.value !== '' ? setting.value.split(',').map((option) => {return {label: option, value: option}}) : []
+                            renderedSetting = (
+                                <Form.Item<DataProductSettingValueForm>
+                                    name={`value_${setting.id}`}
+                                    label={t(setting.name)}
+                                    tooltip={t(setting.tooltip)}
+                                >
+                                    <Select
+                                        allowClear={false}
+                                        defaultActiveFirstOption
+                                        mode='tags'
+                                        defaultValue={value}
+                                    />
+                                </Form.Item>
+                            );
+                            break;
                         default:
                             break;
                     }
@@ -166,7 +183,7 @@ export function SettingsTab({ dataProductId }: Props) {
                         type="primary"
                         htmlType={'submit'}
                         loading={isFetching || isFetchingDP}
-                        disabled={isFetching || isFetchingDP}
+                        disabled={isFetching || isFetchingDP || !isDataProductOwner}
                     >
                         {t('Update settings')}
                     </Button>
