@@ -2,9 +2,15 @@ import uuid
 
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Session
 
-from app.database.database import Base
+from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
+from app.tags.schema import Tag as TagSchema
+
+
+def ensure_tag_exists(tag_id: UUID, db: Session) -> TagSchema:
+    return ensure_exists(tag_id, db, Tag)
 
 
 class Tag(Base, BaseORM):

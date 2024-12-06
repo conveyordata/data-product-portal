@@ -16,6 +16,7 @@ from app.tags.schema import Tag
 class DataProductCreate(BaseDataProduct):
     memberships: list[DataProductMembershipCreate]
     business_area_id: UUID
+    tag_ids: list[UUID]
 
 
 class DataProductUpdate(DataProductCreate):

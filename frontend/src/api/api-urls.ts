@@ -27,6 +27,7 @@ export enum ApiUrl {
     UserDataProducts = '/api/data_products/user/:userId',
     UserDatasets = '/api/datasets/user/:userId',
     Authorize = '/api/auth/user',
+    Tags = '/api/tags',
     Environments = '/api/envs',
     EnvironmentGet = '/api/envs/:environmentId',
     EnvPlatformServiceConfigs = '/api/envs/:environmentId/configs',

@@ -49,6 +49,7 @@ from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
 from app.tags.model import Tag as TagModel
+from app.tags.model import ensure_tag_exists
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 
@@ -134,11 +135,20 @@ class DataProductService:
             )
         return data_product
 
+    def _fetch_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
+        tags = []
+        for tag_id in tag_ids:
+            tag = ensure_tag_exists(tag_id, db)
+            tags.append(tag)
+        return tags
+
     def create_data_product(
         self, data_product: DataProductCreate, db: Session, authenticated_user: User
     ) -> dict[str, UUID]:
         data_product = self._update_users(data_product, db)
-        data_product = DataProductModel(**data_product.parse_pydantic_schema())
+        data_product = data_product.parse_pydantic_schema()
+        tags = self._fetch_tags(db, data_product.pop("tag_ids", []))
+        data_product = DataProductModel(**data_product, tags=tags)
         for membership in data_product.memberships:
             membership.status = DataProductMembershipStatus.APPROVED
             membership.requested_by_id = authenticated_user.id
@@ -240,11 +250,9 @@ class DataProductService:
                         denied_on=dataset.denied_on,
                     )
                     current_data_product.dataset_links.append(dataset)
-            elif k == "tags":
-                current_data_product.tags = []
-                for tag_data in v:
-                    tag = TagModel(**tag_data)
-                    current_data_product.tags.append(tag)
+            elif k == "tag_ids":
+                new_tags = self._fetch_tags(db, v)
+                current_data_product.tags = new_tags
             else:
                 setattr(current_data_product, k, v) if v else None
 

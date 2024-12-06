@@ -5,6 +5,7 @@ from tests.factories import (
     BusinessAreaFactory,
     DataProductFactory,
     DataProductTypeFactory,
+    TagFactory,
     UserFactory,
 )
 from tests.factories.data_output import DataOutputFactory
@@ -20,12 +21,13 @@ def payload():
     business_area = BusinessAreaFactory()
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
+    tag = TagFactory()
     return {
         "name": "Data Product Name",
         "description": "Updated Data Product Description",
         "external_id": "Updated Data Product External ID",
-        "tags": [
-            {"value": "Updated tag"},
+        "tag_ids": [
+            str(tag.id),
         ],
         "type_id": str(data_product_type.id),
         "memberships": [

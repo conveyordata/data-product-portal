@@ -20,6 +20,7 @@ export interface DataProductContract {
     type_id: string;
     status: DataProductStatus;
     dataset_links: DatasetLink[];
+    tag_ids: string[];
     tags: TagContract[];
     memberships: DataProductMembershipContract[];
     business_area: BusinessAreaContract;
