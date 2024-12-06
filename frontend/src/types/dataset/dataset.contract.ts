@@ -23,6 +23,7 @@ export interface DatasetContract {
     owners: UserContract[];
     status: DatasetStatus;
     tags: TagContract[];
+    tag_ids: string[];
     data_product_links: DataProductLink[];
     data_output_links: DataOutputLink[];
     access_type: DatasetAccess;

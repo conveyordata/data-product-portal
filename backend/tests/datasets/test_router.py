@@ -16,7 +16,7 @@ def dataset_payload():
         "name": "Test Dataset",
         "description": "Test Description",
         "external_id": "test-dataset",
-        "tags": [],
+        "tag_ids": [],
         "owners": [
             str(user.id),
         ],
@@ -77,7 +77,7 @@ class TestDatasetsRouter:
             "name": "new_name",
             "external_id": "new_external_id",
             "description": "new_description",
-            "tags": [],
+            "tag_ids": [],
             "access_type": "public",
             "owners": [str(ds.owners[0].id)],
             "business_area_id": str(ds.business_area_id),
