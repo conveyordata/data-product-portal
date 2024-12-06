@@ -1,4 +1,4 @@
-import { Form, FormInstance, Input, Select } from 'antd';
+import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataOutputConfiguration, DataOutputCreateFormSchema, DatabricksDataOutput } from '@/types/data-output';
 import { useEffect } from 'react';
@@ -12,29 +12,52 @@ type Props = {
 
 export function DatabricksDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
-    let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
+    const entireCatalog = Form.useWatch('entire_catalog', form);
+    let catalogOptions = (identifiers ?? []).map((catalog) => ({ label: catalog, value: catalog }));
+    const catalogValue = Form.useWatch('catalog', form);
+    const schemaValue = Form.useWatch('schema', form);
+    const tableValue = Form.useWatch('table', form);
+    useEffect(() => {
+        let catalogOptionsList = identifiers //TODO
+        if (!sourceAligned) {
+            catalogOptionsList = [external_id]
+            form.setFieldsValue({ catalog: external_id});
+        } else {
+            form.setFieldsValue({catalog: undefined})
+        }
+        catalogOptions = (catalogOptionsList ?? []).map((catalog) => ({ label: catalog, value: catalog }));
+    }, [sourceAligned]);
+
 
     useEffect(() => {
-        let databaseOptionsList = identifiers //TODO
-        if (!sourceAligned) {
-            databaseOptionsList = [external_id]
-            form.setFieldsValue({ database: external_id});
+        let result = catalogValue;
+        if (catalogValue){
+            if (schemaValue) {
+                result += `.${schemaValue}`;
+            }
+            if (entireCatalog) {
+                result += '.*'
+            }
+            else if (tableValue) {
+                result += `.${tableValue}`;
+            }
         } else {
-            form.setFieldsValue({database: undefined})
+            result = ""
         }
-        databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
-    }, [sourceAligned]);
+
+        form.setFieldsValue({ result: result });
+    }, [catalogValue, sourceAligned, schemaValue, tableValue, entireCatalog]);
 
     return (
         <div>
             <Form.Item<DatabricksDataOutput>
-                name={'schema'}
-                label={t('Databricks schema')}
-                tooltip={t('The name of the Databricks schema to link the data output to')}
+                name={'catalog'}
+                label={t('Catalog')}
+                tooltip={t('The name of the Databricks catalog to link the data output to')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the Databricks schema for this data output'),
+                        message: t('Please input the name of the Databricks catalog for this data output'),
                     },
                 ]}
             >
@@ -45,36 +68,45 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                     disabled={!sourceAligned}
                     onChange={value => {
                         if (value.length > 0) {
-                            form.setFieldsValue({ database: value[0] });
+                            form.setFieldsValue({ catalog: value[0] });
                         }
                     }}
                     maxCount={1}
-                    options={databaseOptions}
+                    options={catalogOptions}
                 />
             </Form.Item>
             <Form.Item<DatabricksDataOutput & { temp_suffix: string }>
-                name={'schema_suffix'}
-                label={t('Schema suffix')}
-                tooltip={t('The suffix of the Databricks schema to link the data output to')}
+                name={'schema'}
+                label={t('Schema')}
+                tooltip={t('The schema to link the data output to')}
             >
-                <Select
-                    allowClear
-                    maxCount={1}
-                    showSearch
-                    mode='tags'
-                    options={[]} // TODO
-                    onChange={value => {
-                        if (value.length > 0) {
-                            form.setFieldsValue({ database_suffix: value[0] });
-                        }
-                    }}
-                />
+                <Input/>
+            </Form.Item>
+            <Form.Item
+                name={'entire_catalog'} valuePropName="checked" initialValue={true}
+            >
+                <Checkbox defaultChecked={true}>{t('Include entire catalog')}</Checkbox>
             </Form.Item>
             <Form.Item<DatabricksDataOutput>
                 required
-                hidden={true}
-                name={'configuration_type'}
-                initialValue={"DatabricksDataOutput"}
+                name={'table'}
+                hidden={entireCatalog}
+                label={t('Table')}
+                tooltip={t('The table that your data output can access')}
+                rules={[
+                    {
+                        required: !entireCatalog,
+                        message: t('Please input the table this data output can access'),
+                    }
+                ]}
+            >
+                <Input/>
+            </Form.Item>
+            <Form.Item<DatabricksDataOutput & {result: string}>
+                required
+                name={'result'}
+                label={t('Resulting catalog and schema')}
+                tooltip={t('The schema on Databricks you can access through this data output')}
             >
                 <Input disabled />
             </Form.Item>

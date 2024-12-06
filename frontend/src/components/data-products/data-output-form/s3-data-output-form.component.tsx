@@ -22,6 +22,7 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
 
     const bucketOptions = identifiers?.map((bucket) => ({ label: bucket, value: bucket }));
     const dataProductNameValue: string = Form.useWatch('temp_path', form);
+    const bucketValue: string = Form.useWatch('bucket', form);
     useEffect(() => {
         let path = external_id + "/"
         if (sourceAligned) {
@@ -29,10 +30,12 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
         }
         if (dataProductNameValue) {
             form.setFieldsValue({ path: path + generateExternalIdFromName(dataProductNameValue) });
+            form.setFieldsValue({ result: bucketValue + "/" + path + generateExternalIdFromName(dataProductNameValue) });
         } else {
             form.setFieldsValue({ path: path });
+            form.setFieldsValue({ result: bucketValue + "/" + path });
         }
-    }, [dataProductNameValue, sourceAligned]);
+    }, [dataProductNameValue, sourceAligned, bucketValue]);
 
     return (
         <div>
@@ -67,8 +70,14 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
             </Form.Item>
             <Form.Item<S3DataOutput>
                 required
-                hidden={sourceAligned}
+                hidden={true}
                 name={'path'}
+            >
+                <Input disabled />
+            </Form.Item>
+            <Form.Item<S3DataOutput & {result: string}>
+                required
+                name={'result'}
                 label={t('Resulting path')}
                 tooltip={t('The path on s3 you can access through this data output')}
             >
