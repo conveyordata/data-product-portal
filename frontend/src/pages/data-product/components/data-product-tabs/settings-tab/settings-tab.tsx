@@ -165,7 +165,7 @@ export function SettingsTab({ dataProductId }: Props) {
             <Flex vertical>
                 <Form
                     form={form}
-                    //labelCol={FORM_GRID_WRAPPER_COLS}
+                    labelCol={FORM_GRID_WRAPPER_COLS}
                     wrapperCol={FORM_GRID_WRAPPER_COLS}
                     layout="horizontal"
                     onFinish={onSubmit}
