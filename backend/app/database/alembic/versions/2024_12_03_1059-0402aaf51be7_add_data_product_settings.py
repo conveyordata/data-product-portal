@@ -30,6 +30,7 @@ def upgrade() -> None:
         sa.Column("type", sa.String),
         sa.Column("divider", sa.String),
         sa.Column("default", sa.String),
+        sa.Column("order", sa.Integer),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),

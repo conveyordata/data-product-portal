@@ -17,7 +17,7 @@ class DataProductSettingCreate(ORMModel):
     external_id: str
     name: str
     default: str
-    # value: str = default
+    order: int = 100
 
     class Meta:
         orm_model = DataProductSettingModel

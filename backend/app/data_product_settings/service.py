@@ -19,7 +19,7 @@ class DataProductSettingService:
     def get_data_product_settings(self, db: Session) -> list[DataProductSetting]:
         return (
             db.query(DataProductSettingModel)
-            .order_by(DataProductSettingModel.name)
+            .order_by(DataProductSettingModel.order, DataProductSettingModel.name)
             .all()
         )
 

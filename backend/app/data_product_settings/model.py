@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy import Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -44,6 +44,7 @@ class DataProductSetting(Base, BaseORM):
     type = Column(Enum(DataProductSettingType))
     divider = Column(String)
     default = Column(String)
+    order = Column(Integer)
 
     data_products: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",

@@ -1,5 +1,5 @@
 import styles from './settings-tab.module.scss';
-import { Button, Flex, Form, FormProps, Input, Select, Switch, Typography } from 'antd';
+import { Button, Flex, Form, FormProps, Select, Switch, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
     useCreateDataProductSettingMutation,
