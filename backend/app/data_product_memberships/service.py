@@ -197,8 +197,10 @@ class DataProductMembershipService:
                 == DataProductMembershipStatus.PENDING_APPROVAL
             )
             .filter(
-                DataProductModel.memberships.any(
-                    user_id=authenticated_user.id, role=DataProductUserRole.OWNER
+                DataProductMembership.data_product.has(
+                    DataProductModel.memberships.any(
+                        user_id=authenticated_user.id, role=DataProductUserRole.OWNER
+                    )
                 )
             )
             .order_by(asc(DataProductMembership.requested_on))
