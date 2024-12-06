@@ -176,17 +176,9 @@ export function SettingsTab({ dataProductId }: Props) {
                     labelAlign={'left'}
                     disabled={isFetching || isFetchingDP || !isDataProductOwner}
                     className={styles.form}
+                    onValuesChange={(_, allValues) => {onSubmit(allValues)}}
                 >
                     {formContent}
-                    <Button
-                        className={styles.formButton}
-                        type="primary"
-                        htmlType={'submit'}
-                        loading={isFetching || isFetchingDP}
-                        disabled={isFetching || isFetchingDP || !isDataProductOwner}
-                    >
-                        {t('Update settings')}
-                    </Button>
                 </Form>
             </Flex>
         );
