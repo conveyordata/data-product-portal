@@ -1,5 +1,5 @@
 import styles from './settings-tab.module.scss';
-import { Button, Flex, Form, FormProps, Select, Switch, Typography } from 'antd';
+import { Button, Flex, Form, FormProps, Input, Select, Switch, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
     useCreateDataProductSettingMutation,
@@ -83,6 +83,12 @@ export function SettingsTab({ dataProductId }: Props) {
                 case 'checkbox':
                     form.setFieldsValue({ [`value_${setting.id}`]: setting.value === 'true' });
                     break;
+                case 'tags':
+                    form.setFieldsValue({[`value_${setting.id}`]: setting.value !== '' ? setting.value.split(',').map((option) => {return {label: option, value: option}}) : []});
+                    break;
+                case 'input':
+                    form.setFieldsValue({[`value_${setting.id}`]: setting.value});
+                    break;
                 default:
                     break;
             }
@@ -128,7 +134,6 @@ export function SettingsTab({ dataProductId }: Props) {
                             );
                             break;
                         case 'tags':
-                            const value = setting.value !== '' ? setting.value.split(',').map((option) => {return {label: option, value: option}}) : []
                             renderedSetting = (
                                 <Form.Item<DataProductSettingValueForm>
                                     name={`value_${setting.id}`}
@@ -139,8 +144,18 @@ export function SettingsTab({ dataProductId }: Props) {
                                         allowClear={false}
                                         defaultActiveFirstOption
                                         mode='tags'
-                                        defaultValue={value}
                                     />
+                                </Form.Item>
+                            );
+                            break;
+                        case 'input':
+                            renderedSetting = (
+                                <Form.Item<DataProductSettingValueForm>
+                                    name={`value_${setting.id}`}
+                                    label={t(setting.name)}
+                                    tooltip={t(setting.tooltip)}
+                                >
+                                    <Input/>
                                 </Form.Item>
                             );
                             break;
