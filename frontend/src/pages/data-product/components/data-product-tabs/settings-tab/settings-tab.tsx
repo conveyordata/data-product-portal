@@ -53,9 +53,6 @@ export function SettingsTab({ dataProductId }: Props) {
                         await updateSetting(request).unwrap();
                         dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
                     }
-                    // modalCallbackOnSubmit();
-                    // navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
-                    // form.resetFields();
                 });
             }
         } catch (_e) {
@@ -88,12 +85,7 @@ export function SettingsTab({ dataProductId }: Props) {
                     break;
                 case 'tags':
                     form.setFieldsValue({
-                        [`value_${setting.id}`]:
-                            setting.value !== ''
-                                ? setting.value.split(',').map((option) => {
-                                      return { label: option, value: option };
-                                  })
-                                : [],
+                        [`value_${setting.id}`]: setting.value !== '' ? setting.value.split(',') : [],
                     });
                     break;
                 case 'input':
@@ -200,12 +192,13 @@ export function SettingsTab({ dataProductId }: Props) {
                     onValuesChange={(_, allValues) => {
                         if (timeoutRef.current) {
                             clearTimeout(timeoutRef.current);
-                          }
+                        }
 
-                          // Set a new timeout to call onSubmit after 3 seconds
-                          timeoutRef.current = setTimeout(() => {
+                        // Set a new timeout to call onSubmit after 3 seconds
+                        timeoutRef.current = setTimeout(() => {
                             onSubmit(allValues); // Trigger the onSubmit function
-                          }, 1500);                    }}
+                        }, 1500);
+                    }}
                 >
                     {formContent}
                 </Form>
