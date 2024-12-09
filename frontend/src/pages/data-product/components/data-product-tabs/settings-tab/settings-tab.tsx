@@ -5,19 +5,21 @@ import {
     useCreateDataProductSettingMutation,
     useGetAllDataProductSettingsQuery,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 import {
     DataProductSettingContract,
     DataProductSettingCreateRequest,
     DataProductSettingValueForm,
 } from '@/types/data-product-setting';
-import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants';
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import TextArea from 'antd/es/input/TextArea';
 
+type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
 type Props = {
     dataProductId: string;
 };
@@ -29,6 +31,7 @@ export function SettingsTab({ dataProductId }: Props) {
     const [updateSetting] = useCreateDataProductSettingMutation();
     const [form] = Form.useForm();
     const user = useSelector(selectCurrentUser);
+    const timeoutRef = useRef<Timeout | null>(null);
 
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;
@@ -84,10 +87,17 @@ export function SettingsTab({ dataProductId }: Props) {
                     form.setFieldsValue({ [`value_${setting.id}`]: setting.value === 'true' });
                     break;
                 case 'tags':
-                    form.setFieldsValue({[`value_${setting.id}`]: setting.value !== '' ? setting.value.split(',').map((option) => {return {label: option, value: option}}) : []});
+                    form.setFieldsValue({
+                        [`value_${setting.id}`]:
+                            setting.value !== ''
+                                ? setting.value.split(',').map((option) => {
+                                      return { label: option, value: option };
+                                  })
+                                : [],
+                    });
                     break;
                 case 'input':
-                    form.setFieldsValue({[`value_${setting.id}`]: setting.value});
+                    form.setFieldsValue({ [`value_${setting.id}`]: setting.value });
                     break;
                 default:
                     break;
@@ -140,11 +150,7 @@ export function SettingsTab({ dataProductId }: Props) {
                                     label={t(setting.name)}
                                     tooltip={t(setting.tooltip)}
                                 >
-                                    <Select
-                                        allowClear={false}
-                                        defaultActiveFirstOption
-                                        mode='tags'
-                                    />
+                                    <Select allowClear={false} defaultActiveFirstOption mode="tags" />
                                 </Form.Item>
                             );
                             break;
@@ -155,7 +161,7 @@ export function SettingsTab({ dataProductId }: Props) {
                                     label={t(setting.name)}
                                     tooltip={t(setting.tooltip)}
                                 >
-                                    <Input/>
+                                    <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
                                 </Form.Item>
                             );
                             break;
@@ -191,7 +197,15 @@ export function SettingsTab({ dataProductId }: Props) {
                     labelAlign={'left'}
                     disabled={isFetching || isFetchingDP || !isDataProductOwner}
                     className={styles.form}
-                    onValuesChange={(_, allValues) => {onSubmit(allValues)}}
+                    onValuesChange={(_, allValues) => {
+                        if (timeoutRef.current) {
+                            clearTimeout(timeoutRef.current);
+                          }
+
+                          // Set a new timeout to call onSubmit after 3 seconds
+                          timeoutRef.current = setTimeout(() => {
+                            onSubmit(allValues); // Trigger the onSubmit function
+                          }, 1500);                    }}
                 >
                     {formContent}
                 </Form>
