@@ -39,17 +39,17 @@
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "i18next": "^24.0.5",
+    "i18next": "^24.1.0",
     "i18next-http-backend": "^3.0.1",
     "oidc-client-ts": "^3.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-i18next": "^15.1.4",
+    "react-i18next": "^15.2.0",
     "react-oidc-context": "^3.2.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.0.2",
     "reactflow": "^11.11.4",
-    "sass": "^1.82.0"
+    "sass": "^1.83.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.1",
