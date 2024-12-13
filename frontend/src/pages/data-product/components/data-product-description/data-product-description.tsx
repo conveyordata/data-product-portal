@@ -3,15 +3,17 @@ import { Badge, Flex, Space, Tag, Typography } from 'antd';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { useTranslation } from 'react-i18next';
 import { DataProductStatus } from '@/types/data-product';
+import { TagModel } from '@/types/tag';
 
 type Props = {
     status: DataProductStatus;
     type: string;
     description: string;
     businessArea: string;
+    tags: TagModel[];
 };
 
-export function DataProductDescription({ status, type, description, businessArea }: Props) {
+export function DataProductDescription({ status, type, description, businessArea, tags }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -36,10 +38,11 @@ export function DataProductDescription({ status, type, description, businessArea
                     </Flex>
                 </Space>
                 <Flex>
-                    <Tag color="success">PII</Tag>
-                    <Tag color="success">Sensitive</Tag>
-                    <Tag color="success">GDPR</Tag>
-                    <Tag color="success" className={styles.muted}>PII</Tag>
+                    {tags.map( tag => (
+                        <Tag color='success'>
+                            {tag.value}
+                        </Tag>
+                    ))}
                 </Flex>
                 <Space>
                     <Typography.Paragraph italic>{description}</Typography.Paragraph>
