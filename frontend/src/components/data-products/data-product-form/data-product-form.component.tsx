@@ -77,7 +77,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 role: DataProductMembershipRole.Owner,
             }));
 
-            console.log(values)
             if (mode === 'create') {
                 const request: DataProductCreate = {
                     name: values.name,

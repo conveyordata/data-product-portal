@@ -1,5 +1,5 @@
 import styles from './data-product-description.module.scss';
-import { Badge, Flex, Space, Typography } from 'antd';
+import { Badge, Flex, Space, Tag, Typography } from 'antd';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { useTranslation } from 'react-i18next';
 import { DataProductStatus } from '@/types/data-product';
@@ -35,6 +35,12 @@ export function DataProductDescription({ status, type, description, businessArea
                         <Typography.Text>{type}</Typography.Text>
                     </Flex>
                 </Space>
+                <Flex>
+                    <Tag color="success">PII</Tag>
+                    <Tag color="success">Sensitive</Tag>
+                    <Tag color="success">GDPR</Tag>
+                    <Tag color="success" className={styles.muted}>PII</Tag>
+                </Flex>
                 <Space>
                     <Typography.Paragraph italic>{description}</Typography.Paragraph>
                 </Space>
