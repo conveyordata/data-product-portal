@@ -26,9 +26,7 @@ def payload():
         "name": "Data Product Name",
         "description": "Updated Data Product Description",
         "external_id": "Updated Data Product External ID",
-        "tag_ids": [
-            str(tag.id),
-        ],
+        "tag_ids": [str(tag.id)],
         "type_id": str(data_product_type.id),
         "memberships": [
             {

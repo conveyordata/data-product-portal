@@ -135,7 +135,7 @@ class DataProductService:
             )
         return data_product
 
-    def _fetch_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
+    def _get_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
         tags = []
         for tag_id in tag_ids:
             tag = ensure_tag_exists(tag_id, db)
@@ -147,7 +147,7 @@ class DataProductService:
     ) -> dict[str, UUID]:
         data_product = self._update_users(data_product, db)
         data_product = data_product.parse_pydantic_schema()
-        tags = self._fetch_tags(db, data_product.pop("tag_ids", []))
+        tags = self._get_tags(db, data_product.pop("tag_ids", []))
         data_product = DataProductModel(**data_product, tags=tags)
         for membership in data_product.memberships:
             membership.status = DataProductMembershipStatus.APPROVED
@@ -251,7 +251,7 @@ class DataProductService:
                     )
                     current_data_product.dataset_links.append(dataset)
             elif k == "tag_ids":
-                new_tags = self._fetch_tags(db, v)
+                new_tags = self._get_tags(db, v)
                 current_data_product.tags = new_tags
             else:
                 setattr(current_data_product, k, v) if v else None
