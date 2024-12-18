@@ -65,7 +65,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "i18next-parser": "^9.0.2",
-    "msw": "^2.6.9",
+    "msw": "^2.7.0",
     "prettier": "3.4.2",
     "typescript": "^5.7.2",
     "vite": "^6.0.3",
