@@ -59,7 +59,10 @@ variable "data_outputs" {
       schema            = string
       suffix            = string
       bucket_identifier = string
-      schema_path       = string
+      catalog_path       = string
+      catalog            = string
+      table              = string
+      table_path         = string
     }))
     owner = string
   }))
