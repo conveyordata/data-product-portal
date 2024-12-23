@@ -70,17 +70,17 @@ celery = ["celery"]
 
 [[package]]
 name = "boto3"
-version = "1.35.83"
+version = "1.35.87"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.35.83-py3-none-any.whl", hash = "sha256:a4828d67b12892cb11fe9e6d86f40975a06db470676e61194968e3a32ec4c536"},
-    {file = "boto3-1.35.83.tar.gz", hash = "sha256:df2e0d57241de0f9c31b62e73093c2126e4fd73b87b1897ecf280a1b87a2b825"},
+    {file = "boto3-1.35.87-py3-none-any.whl", hash = "sha256:588ab05e2771c50fca5c242be14e7a25200ffd3dd95c45950ce40993473864c7"},
+    {file = "boto3-1.35.87.tar.gz", hash = "sha256:341c58602889078a4a25dc4331b832b5b600a33acd73471d2532c6f01b16fbb4"},
 ]
 
 [package.dependencies]
-botocore = ">=1.35.83,<1.36.0"
+botocore = ">=1.35.87,<1.36.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -89,13 +89,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.35.83"
+version = "1.35.87"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.35.83-py3-none-any.whl", hash = "sha256:ba363183e4df79fbcfd5f3600fd473bd45a1de03d0d0b5e78abd59f276971d27"},
-    {file = "botocore-1.35.83.tar.gz", hash = "sha256:df5e4384838e50bbafd47e9b5fefb995e83cbb9412e7cd7c0db9555174d91bba"},
+    {file = "botocore-1.35.87-py3-none-any.whl", hash = "sha256:81cf84f12030d9ab3829484b04765d5641697ec53c2ac2b3987a99eefe501692"},
+    {file = "botocore-1.35.87.tar.gz", hash = "sha256:3062d073ce4170a994099270f469864169dc1a1b8b3d4a21c14ce0ae995e0f89"},
 ]
 
 [package.dependencies]
@@ -1622,4 +1622,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "109edd5ae327f95a95e94d7079be2e963a87dbcdd4109ddaba0bc5e203475d67"
+content-hash = "f6c66fc86a121ddbaf0fb31c0972d2d5d4f8f48c4999c2459afee31c956052d9"
