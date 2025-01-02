@@ -37,12 +37,12 @@ infrastructure_lambda_arn: ""
 replicaCount: 1
 
 image:
-  repository: public.ecr.aws/conveyordata/data-product-portal/backend
+  repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/backend
   pullPolicy: Always
   tag: 0.2.5
 
 frontendimage:
-  repository: public.ecr.aws/conveyordata/data-product-portal/frontend
+  repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/frontend
   pullPolicy: Always
   tag: 0.2.5
 
