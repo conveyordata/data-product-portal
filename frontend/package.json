@@ -17,7 +17,7 @@
   "dependencies": {
     "@ant-design/colors": "^7.1.0",
     "@dagrejs/dagre": "^1.1.4",
-    "@fontsource/inter": "^5.1.0",
+    "@fontsource/inter": "^5.1.1",
     "@reduxjs/toolkit": "^2.5.0",
     "@tiptap/extension-bubble-menu": "^2.10.3",
     "@tiptap/extension-document": "^2.10.3",
@@ -39,12 +39,12 @@
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "i18next": "^24.1.2",
+    "i18next": "^24.2.0",
     "i18next-http-backend": "^3.0.1",
     "oidc-client-ts": "^3.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-i18next": "^15.2.0",
+    "react-i18next": "^15.4.0",
     "react-oidc-context": "^3.2.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.1",
@@ -73,5 +73,9 @@
   },
   "volta": {
     "node": "20.12.2"
-  }
+  },
+  "engines": {
+    "node": ">= 20.9",
+    "npm": ">= 10.1"
+}
 }
