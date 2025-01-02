@@ -3,8 +3,8 @@ module portal
 go 1.22.4
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.32.6
-	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.48.1
+	github.com/aws/aws-sdk-go-v2 v1.32.7
+	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.48.3
 	github.com/briandowns/spinner v1.23.1
 	github.com/deepmap/oapi-codegen v1.16.3
 	github.com/fatih/color v1.18.0
@@ -21,8 +21,8 @@ require (
 
 require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.25 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.25 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.26 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.26 // indirect
 	github.com/aws/smithy-go v1.22.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
