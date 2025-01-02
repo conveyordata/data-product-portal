@@ -14,12 +14,18 @@ def backend_analytics():
     try:
         # If either environment variable is set, do not collect metrics and exit.
         if not settings.SCARF_NO_ANALYTICS and not settings.DO_NOT_TRACK:
-            requests.get(
-                f"https://dataminded.gateway.scarf.sh/telemetry?version=\
-                    {API_VERSION}&platform={platform.system()}&python=\
-                        {platform.python_version()}&arch=\
-                            {platform.machine()}sandbox={settings.SANDBOX}"
+            result = requests.get(
+                "https://dataminded.gateway.scarf.sh/telemetry",
+                params={
+                    "version": API_VERSION,
+                    "platform": platform.system(),
+                    "python": platform.python_version(),
+                    "arch": platform.machine(),
+                    "sandbox": settings.SANDBOX,
+                },
             )
+            logger.info(result.status_code)
+            logger.info(result.content)
     except Exception as e:
         logger.warning("SOMETHING WENT WRONG WITH ANALYTICS")
         logger.warning(e)
