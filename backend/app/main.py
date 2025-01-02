@@ -48,6 +48,7 @@ async def log_middleware(request: Request, call_next):
     return response
 
 
+backend_analytics()
 app = FastAPI(
     title=TITLE,
     summary="Backend API implementation for Data product portal",
@@ -62,7 +63,6 @@ app.include_router(router, prefix="/api")
 app.include_router(auth, prefix="/api")
 
 add_exception_handlers(app)
-backend_analytics()
 
 app.add_middleware(
     CORSMiddleware,
