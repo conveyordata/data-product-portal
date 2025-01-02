@@ -9,6 +9,7 @@ from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging.logger import logger
+from app.core.logging.scarf_analytics import backend_analytics
 from app.settings import settings
 from app.shared.router import router
 
@@ -61,6 +62,7 @@ app.include_router(router, prefix="/api")
 app.include_router(auth, prefix="/api")
 
 add_exception_handlers(app)
+backend_analytics()
 
 app.add_middleware(
     CORSMiddleware,
