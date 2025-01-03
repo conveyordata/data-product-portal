@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
 import { useEffect } from 'react';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
@@ -13,12 +13,15 @@ const oidcCognitoParams = AppConfig.getOidcCognitoLogoutParams();
 export const AuthLayout = () => {
     const [authorizeUser] = useAuthorizeMutation();
     const navigate = useNavigate();
+    const location = useLocation();
     const isOidcEnabled = AppConfig.isOidcEnabled();
     const dispatch = useAppDispatch();
     const { isAuthenticated, isLoading, signinRedirect, events, activeNavigator, signoutRedirect, signinSilent } =
         useAuth();
     const { isLoading: isSettingUserCredentialsInStore, user } = useSelector(selectAuthState);
     const redirectToSignIn = async () => {
+        const originalPath = location.pathname + location.search + location.hash;
+        sessionStorage.setItem('redirectAfterLogin', originalPath);
         await signinRedirect();
     };
 
@@ -41,7 +44,9 @@ export const AuthLayout = () => {
             if (!isLoading) {
                 if (isAuthenticated) {
                     handleAuthorizeUser().then(() => {
-                        navigate({ search: '' });
+                        const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
+                        sessionStorage.removeItem('redirectAfterLogin');
+                        navigate(redirectPath);
                     });
                 } else {
                     redirectToSignIn().catch((e) => {
