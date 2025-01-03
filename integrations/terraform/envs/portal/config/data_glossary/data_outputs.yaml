@@ -37,8 +37,8 @@ master_test_table2:
 
 dbx_output_schema:
   databricks:
-    schema: schema
-    schema_suffix: suffix
+    catalog: schema
+    schema: suffix
     bucket_identifier: datalake
-    schema_path: data_product/test-project-2/schema/suffix
+    catalog_path: data_product/test-project-2/schema/suffix
   owner: test-project-2

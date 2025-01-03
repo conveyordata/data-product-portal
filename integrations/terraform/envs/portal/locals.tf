@@ -34,10 +34,12 @@ locals {
         table_path        = v["glue"]["table_path"]
       }], [])
       dbx = try([{
+        catalog            = v["databricks"]["catalog"]
         schema            = v["databricks"]["schema"]
-        suffix            = v["databricks"]["schema_suffix"]
         bucket_identifier = v["databricks"]["bucket_identifier"]
-        schema_path       = v["databricks"]["schema_path"]
+        catalog_path       = v["databricks"]["catalog_path"]
+        table              = v["databricks"]["table"]
+        table_path         = v["databricks"]["table_path"]
       }], [])
       owner = try(v["owner"], "")
     }
