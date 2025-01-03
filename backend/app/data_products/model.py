@@ -64,9 +64,7 @@ class DataProduct(Base, BaseORM):
     )
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
     type: Mapped["DataProductType"] = relationship(back_populates="data_products")
-    lifecycle_id: Mapped[UUID] = (
-        mapped_column(ForeignKey("data_product_lifecycles.id")),
-    )
+    lifecycle_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_lifecycles.id"))
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="data_products"
     )
