@@ -3,8 +3,9 @@ import { initReactI18next } from 'react-i18next';
 import I18NextHttpBackend from 'i18next-http-backend';
 
 export const languageEn = 'en';
+export const languageEnOverride = 'en-override';
 
-const supportedLanguages = [languageEn]; // Add more languages here
+const supportedLanguages = [languageEn, languageEnOverride]; // Add more languages here
 
 export const defaultLanguage = languageEn;
 
@@ -17,7 +18,7 @@ i18n
     // init i18next
     // for all options read: https://www.i18next.com/overview/configuration-options
     .init({
-        lng: defaultLanguage,
+        lng: languageEnOverride,
         fallbackLng: defaultLanguage,
         supportedLngs: supportedLanguages,
         debug: isDevMode,
