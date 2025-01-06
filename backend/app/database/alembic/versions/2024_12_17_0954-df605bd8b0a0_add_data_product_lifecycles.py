@@ -27,6 +27,8 @@ def upgrade() -> None:
         sa.Column("id", UUID, primary_key=True, nullable=False),
         sa.Column("name", sa.String(), nullable=True),
         sa.Column("value", sa.Integer(), nullable=True),
+        sa.Column("color", sa.String(), nullable=True),
+        sa.Column("is_default", sa.Boolean(), nullable=True, server_default="false"),
         sa.PrimaryKeyConstraint("id"),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),

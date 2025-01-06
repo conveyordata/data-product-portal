@@ -9,6 +9,8 @@ from app.shared.schema import ORMModel
 class DataProductLifeCycleCreate(ORMModel):
     value: int
     name: str
+    color: str
+    is_default: bool = False
 
     class Meta:
         orm_model = DataProductLifeCycleModel

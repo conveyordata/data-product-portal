@@ -5,6 +5,7 @@ from pydantic import Field, computed_field
 
 from app.business_areas.schema import BusinessArea
 from app.data_outputs.schema_get import DataOutputGet
+from app.data_product_lifecycles.schema import DataProductLifeCycle
 from app.data_product_memberships.enums import DataProductMembershipStatus
 from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_product_types.schema import DataProductType
@@ -28,6 +29,7 @@ class DataProductGet(ORMModel):
     external_id: str
     tags: list[Tag]
     status: DataProductStatus
+    lifecycle: Optional[DataProductLifeCycle]
     dataset_links: list[DatasetLink]
     memberships: list[DataProductMembershipGet]
     type: DataProductType
@@ -37,7 +39,6 @@ class DataProductGet(ORMModel):
 
 class DataProductsGet(DataProductGet):
     id: UUID
-    status: DataProductStatus
     about: Optional[Annotated[str, Field(exclude=True)]]
     dataset_links: Annotated[list[DatasetLink], Field(exclude=True)]
     memberships: Annotated[list[DataProductMembershipGet], Field(exclude=True)]

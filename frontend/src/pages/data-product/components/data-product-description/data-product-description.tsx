@@ -1,17 +1,16 @@
 import styles from './data-product-description.module.scss';
-import { Badge, Flex, Space, Typography } from 'antd';
-import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
+import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DataProductStatus } from '@/types/data-product';
+import { DataProductLifeCycle } from '@/types/data-product/data-product-contract';
 
 type Props = {
-    status: DataProductStatus;
+    lifecycle: DataProductLifeCycle;
     type: string;
     description: string;
     businessArea: string;
 };
 
-export function DataProductDescription({ status, type, description, businessArea }: Props) {
+export function DataProductDescription({ lifecycle, type, description, businessArea }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -20,11 +19,7 @@ export function DataProductDescription({ status, type, description, businessArea
                 <Space className={styles.contentSubtitle}>
                     <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Status')}</Typography.Text>
-                        <Badge
-                            status={getBadgeStatus(status)}
-                            text={getStatusLabel(status)}
-                            className={styles.noSelect}
-                        />
+                        <Tag color={lifecycle.color}>{lifecycle.name}</Tag>
                     </Flex>
                     <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Business Area')}</Typography.Text>

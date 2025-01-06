@@ -11,6 +11,14 @@ export enum DataProductStatus {
     Archived = 'archived',
 }
 
+export interface DataProductLifeCycle {
+    id: string;
+    value: string;
+    name: string;
+    color: string;
+    is_default: boolean;
+}
+
 export interface DataProductContract {
     id: string;
     name: string;
@@ -19,6 +27,8 @@ export interface DataProductContract {
     type: DataProductTypeContract;
     type_id: string;
     status: DataProductStatus;
+    lifecycle: DataProductLifeCycle;
+    lifecycle_id: string;
     dataset_links: DatasetLink[];
     tags: TagContract[];
     memberships: DataProductMembershipContract[];

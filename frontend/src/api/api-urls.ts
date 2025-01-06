@@ -12,6 +12,7 @@ export enum ApiUrl {
     DataProductsDataOutput = '/api/data_products/:dataProductId/data_outputs',
     DataProductGet = '/api/data_products/:dataProductId',
     DataProductType = '/api/data_product_types',
+    DataProductLifecycle = '/api/data_product_lifecycles',
     DataProductSignInUrl = '/api/data_products/:dataProductId/signin_url',
     DataProductConveyorIdeUrl = '/api/data_products/:dataProductId/conveyor_ide_url',
     DataProductDatabricksWorkspaceUrl = '/api/data_products/:dataProductId/databricks_workspace_url',

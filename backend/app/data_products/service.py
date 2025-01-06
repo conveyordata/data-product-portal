@@ -18,6 +18,9 @@ from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.data_product_lifecycles.model import (
+    DataProductLifecycle as DataProductLifeCycleModel,
+)
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
     DataProductUserRole,
@@ -64,14 +67,27 @@ class DataProductService:
             .first()
         )
 
+        default_lifecycle = (
+            db.query(DataProductLifeCycleModel)
+            .filter(DataProductLifeCycleModel.is_default)
+            .first()
+        )
+
         if not data_product:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
             )
+        if not data_product.lifecycle:
+            data_product.lifecycle = default_lifecycle
         return data_product
 
     def get_data_products(self, db: Session) -> list[DataProductsGet]:
-        return (
+        default_lifecycle = (
+            db.query(DataProductLifeCycleModel)
+            .filter(DataProductLifeCycleModel.is_default)
+            .first()
+        )
+        dps = (
             db.query(DataProductModel)
             .options(
                 joinedload(DataProductModel.dataset_links),
@@ -79,6 +95,10 @@ class DataProductService:
             .order_by(asc(DataProductModel.name))
             .all()
         )
+        for dp in dps:
+            if not dp.lifecycle:
+                dp.lifecycle = default_lifecycle
+        return dps
 
     def get_user_data_products(
         self, user_id: UUID, db: Session

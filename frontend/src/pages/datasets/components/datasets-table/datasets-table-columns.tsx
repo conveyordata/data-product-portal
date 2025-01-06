@@ -3,7 +3,7 @@ import { TFunction } from 'i18next';
 import { Popover, TableColumnsType } from 'antd';
 import i18n from '@/i18n.ts';
 import { getStatusLabel } from '@/utils/status.helper.ts';
-import { TableStatusTag } from '@/components/list/table-status-tag/table-status-tag.component.tsx';
+// import { TableStatusTag } from '@/components/list/table-status-tag/table-status-tag.component.tsx';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { BusinessAreaContract } from '@/types/business-area';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
@@ -49,16 +49,17 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             sorter: sorter.stringSorter(ds => ds.name),
             width: "20%"
         },
-        {
-            title: t('Status'),
-            dataIndex: 'status',
-            render: (status) => {
-                return <TableStatusTag status={status} />;
-            },
-            ...new FilterSettings(datasets, ds => getStatusLabel(ds.status)),
-            sorter: sorter.stringSorter(ds => getStatusLabel(ds.status)),
-            width: "12%"
-        },
+        // TODO Fix
+        // {
+        //     title: t('Status'),
+        //     dataIndex: 'status',
+        //     render: (status) => {
+        //         return <TableStatusTag status={status} />;
+        //     },
+        //     ...new FilterSettings(datasets, ds => getStatusLabel(ds.status)),
+        //     sorter: sorter.stringSorter(ds => getStatusLabel(ds.status)),
+        //     width: "12%"
+        // },
         {
             title: t('Business Area'),
             dataIndex: 'business_area',
