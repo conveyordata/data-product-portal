@@ -49,6 +49,7 @@ from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
 from app.tags.model import Tag as TagModel
+from app.users.model import User as UserModel
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 
@@ -79,6 +80,15 @@ class DataProductService:
             .order_by(asc(DataProductModel.name))
             .all()
         )
+
+    def get_owners(self, id: UUID, db: Session) -> List[User]:
+        data_product = ensure_data_product_exists(id, db)
+        user_ids = [
+            membership.user_id
+            for membership in data_product.memberships
+            if membership.role == DataProductUserRole.OWNER
+        ]
+        return db.query(UserModel).filter(UserModel.id.in_(user_ids)).all()
 
     def get_user_data_products(
         self, user_id: UUID, db: Session

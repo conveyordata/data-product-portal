@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_SERVER: str
 
+    HOST: str
+
     # Other
     CORS_ALLOWED_ORIGINS: str = ""
     AWS_DEFAULT_REGION: str = "eu-west-1"
@@ -34,6 +36,13 @@ class Settings(BaseSettings):
     # Infrastructure
     INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
+
+    # SMTP
+    SMTP_HOST: str = "localhost"
+    SMTP_PORT: int = 1025
+    SMTP_USERNAME: str = "admin"
+    SMTP_PASSWORD: str = "not-set"
+    FROM_MAIL_ADDRESS: str = "noreply@dataproductportal.com"
 
 
 class LogLevel(str, Enum):

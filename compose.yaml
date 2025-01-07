@@ -1,9 +1,16 @@
 services:
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 8025:8025
+      - 1025:1025
   backend:
     build: ./backend
     env_file:
       - .env.docker
     depends_on:
+      mailhog:
+        condition: service_healthy
       postgresql:
         condition: service_healthy
     command: >

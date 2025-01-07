@@ -7,6 +7,7 @@ from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.email.send_mail import send_mail
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
     DataProductUserRole,
@@ -16,6 +17,8 @@ from app.data_product_memberships.schema import DataProductMembershipCreate
 from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
+from app.data_products.service import DataProductService
+from app.settings import settings
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 
@@ -46,6 +49,24 @@ class DataProductMembershipService:
         db.commit()
         db.refresh(data_product_membership)
 
+        url = (
+            settings.HOST.strip("/")
+            + "/data-products/"
+            + str(data_product_id)
+            + "#team"
+        )
+        owner_emails = [
+            user.email for user in DataProductService().get_owners(data_product_id, db)
+        ]
+        send_mail(
+            settings.FROM_MAIL_ADDRESS,
+            owner_emails,
+            f"{user.first_name} {user.last_name} "
+            f"wants to join project {data_product.name}\n"
+            f"Please approve or deny the request in the portal {url}",
+            f"{user.first_name} {user.last_name} wants "
+            f"to join project {data_product.name}",
+        )
         return {"id": data_product_membership.id}
 
     def approve_membership_request(
