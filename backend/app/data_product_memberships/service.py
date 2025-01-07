@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 import pytz
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
 
@@ -30,6 +30,7 @@ class DataProductMembershipService:
         data_product_id: UUID,
         authenticated_user: User,
         db: Session,
+        background_tasks: BackgroundTasks,
     ):
         user = ensure_user_exists(user_id, db)
         data_product = ensure_data_product_exists(data_product_id, db)
@@ -58,7 +59,8 @@ class DataProductMembershipService:
         owner_emails = [
             user.email for user in DataProductService().get_owners(data_product_id, db)
         ]
-        send_mail(
+        background_tasks.add_task(
+            send_mail,
             settings.FROM_MAIL_ADDRESS,
             owner_emails,
             f"{user.first_name} {user.last_name} "
