@@ -22,6 +22,11 @@ data:
   PORTAL_API_KEY: {{ .Values.api_key.key }}
   {{- end}}
   INFRASTRUCTURE_LAMBDA_ARN: {{ .Values.infrastructure_lambda_arn }}
+  SMTP_HOST:  {{ .Values.smtp.host }}
+  SMTP_PORT: {{ .Values.smtp.port }}
+  SMTP_USERNAME: {{ .Values.smtp.username }}
+  SMTP_PASSWORD: {{ .Values.smtp.password }}
+  HOST: {{ .Values.host }}
 kind: ConfigMap
 metadata:
   name: {{ include "data-product-portal.fullname" . }}
