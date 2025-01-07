@@ -13,9 +13,10 @@ global:
       username: postgres
 smtp:
   host: localhost
-  port: 1025
+  port: "!!string 1025"
   username: user
-  password: not-ser
+  password: not-set
+from_mail_address: ""
 postgres_enabled: false
 cloudwatch_enabled: false
 api_key:
