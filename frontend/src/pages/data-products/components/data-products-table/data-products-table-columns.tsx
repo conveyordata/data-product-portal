@@ -43,6 +43,7 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             },
             sorter: sorter.stringSorter(dp => dp.name),
             defaultSortOrder: 'ascend',
+            width: "25%"
         },
         {
             title: t('Status'),
@@ -56,6 +57,7 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             },
             ...new FilterSettings(data, dp => dp.lifecycle !== null ? dp.lifecycle.name : ''),
             sorter: sorter.stringSorter(dp => dp.lifecycle !== null ? dp.lifecycle.name : ''),
+            width: "10%",
         },
         {
             title: t('Business Area'),
