@@ -11,6 +11,12 @@ global:
       port: "!!string 5432"
       server: data-product-portal-postgresql
       username: postgres
+smtp:
+  host: localhost
+  port: "!!string 1025"
+  username: user
+  password: not-set
+from_mail_address: ""
 postgres_enabled: false
 cloudwatch_enabled: false
 api_key:
