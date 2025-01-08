@@ -64,8 +64,8 @@ class DataProductMembershipService:
             settings.FROM_MAIL_ADDRESS,
             owner_emails,
             f"{user.first_name} {user.last_name} "
-            f"wants to join project {data_product.name}\n"
-            f"Please approve or deny the request in the portal {url}",
+            f"wants to join product {data_product.name}\n"
+            f"Please approve or deny the request in the portal\n{url}",
             f"{user.first_name} {user.last_name} wants "
             f"to join project {data_product.name}",
         )

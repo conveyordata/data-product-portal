@@ -2,10 +2,11 @@ from datetime import datetime
 from uuid import UUID
 
 import pytz
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.email.send_mail import send_mail
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
@@ -19,6 +20,7 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
 from app.graph.graph import Graph
+from app.settings import settings
 from app.users.schema import User
 
 
@@ -114,7 +116,12 @@ class DataOutputService:
         RefreshInfrastructureLambda().trigger()
 
     def link_dataset_to_data_output(
-        self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
+        self,
+        id: UUID,
+        dataset_id: UUID,
+        authenticated_user: User,
+        db: Session,
+        background_tasks: BackgroundTasks,
     ):
         dataset = ensure_dataset_exists(dataset_id, db)
         data_output = ensure_data_output_exists(id, db)
@@ -142,6 +149,19 @@ class DataOutputService:
         db.commit()
         db.refresh(data_output)
         RefreshInfrastructureLambda().trigger()
+        owner_emails = [owner.email for owner in dataset.owners]
+        url = settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-output"
+        background_tasks.add_task(
+            send_mail,
+            settings.FROM_MAIL_ADDRESS,
+            owner_emails,
+            f"{authenticated_user.first_name} {authenticated_user.last_name} "
+            f"wants to provide data to your dataset {dataset.name}, of which you "
+            f"are an owner, from their product {data_output.owner.name}\n"
+            f"They specifically want to link their data output {data_output.name}\n"
+            f"Please approve or deny the request in the portal\n{url}",
+            f"{data_output.owner.name} wants " f"to provide data to {dataset.name}",
+        )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_output(
