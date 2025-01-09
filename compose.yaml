@@ -10,7 +10,7 @@ services:
       - .env.docker
     depends_on:
       mailhog:
-        condition: service_healthy
+         condition: service_started
       postgresql:
         condition: service_healthy
     command: >
