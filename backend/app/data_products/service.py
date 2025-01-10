@@ -4,6 +4,7 @@ from typing import List
 from urllib import parse
 from uuid import UUID
 
+import emailgen
 import httpx
 import pytz
 from botocore.exceptions import ClientError
@@ -308,21 +309,34 @@ class DataProductService:
         db.refresh(data_product)
         RefreshInfrastructureLambda().trigger()
 
-        owner_emails = [owner.email for owner in dataset.owners]
         url = (
             settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-product"
         )
+        action = emailgen.Table(
+            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
+        )
+        action.add_row(
+            [
+                data_product.name,
+                "Access to consume data from ",
+                dataset.name,
+                ", ".join(
+                    [
+                        f"{owner.first_name} {owner.last_name}"
+                        for owner in dataset.owners
+                    ]
+                ),
+                f"{authenticated_user.first_name} {authenticated_user.last_name}",
+            ]
+        )
         background_tasks.add_task(
             send_mail,
-            settings.FROM_MAIL_ADDRESS,
-            owner_emails,
-            f"{authenticated_user.first_name} {authenticated_user.last_name} "
-            f"wants to consume dataset {dataset.name}, of which you are an owner,"
-            f" with their product {data_product.name}\n"
-            f"Please approve or deny the request in the portal\n{url}",
-            f"{data_product.name} wants " f"to consume data from {dataset.name}",
+            [User.model_validate(owner) for owner in dataset.owners],
+            action,
+            url,
+            f"Action Required: {data_product.name} wants "
+            f"to consume data from {dataset.name}",
         )
-
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID, db: Session):

@@ -1,6 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
+import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import asc
@@ -56,18 +57,28 @@ class DataProductMembershipService:
             + str(data_product_id)
             + "#team"
         )
-        owner_emails = [
-            user.email for user in DataProductService().get_owners(data_product_id, db)
+        owners = [
+            User.model_validate(owner)
+            for owner in DataProductService().get_owners(data_product_id, db)
         ]
+        action = emailgen.Table(["User", "Request", "Dataset", "Owned By"])
+        action.add_row(
+            [
+                f"{user.first_name} {user.last_name}",
+                "Wants to join ",
+                data_product.name,
+                ", ".join(
+                    [f"{owner.first_name} {owner.last_name}" for owner in owners]
+                ),
+            ]
+        )
         background_tasks.add_task(
             send_mail,
-            settings.FROM_MAIL_ADDRESS,
-            owner_emails,
-            f"{user.first_name} {user.last_name} "
-            f"wants to join product {data_product.name}\n"
-            f"Please approve or deny the request in the portal\n{url}",
-            f"{user.first_name} {user.last_name} wants "
-            f"to join project {data_product.name}",
+            owners,
+            action,
+            url,
+            f"Action Required: {user.first_name} {user.last_name} wants "
+            f"to join {data_product.name}",
         )
         return {"id": data_product_membership.id}
 

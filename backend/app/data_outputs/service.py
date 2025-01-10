@@ -1,6 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
+import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy.orm import Session
@@ -149,18 +150,31 @@ class DataOutputService:
         db.commit()
         db.refresh(data_output)
         RefreshInfrastructureLambda().trigger()
-        owner_emails = [owner.email for owner in dataset.owners]
         url = settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-output"
+        action = emailgen.Table(
+            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
+        )
+        action.add_row(
+            [
+                data_output.owner.name,
+                "Wants to provide data to ",
+                dataset.name,
+                ", ".join(
+                    [
+                        f"{owner.first_name} {owner.last_name}"
+                        for owner in dataset.owners
+                    ]
+                ),
+                f"{authenticated_user.first_name} {authenticated_user.last_name}",
+            ]
+        )
         background_tasks.add_task(
             send_mail,
-            settings.FROM_MAIL_ADDRESS,
-            owner_emails,
-            f"{authenticated_user.first_name} {authenticated_user.last_name} "
-            f"wants to provide data to your dataset {dataset.name}, of which you "
-            f"are an owner, from their product {data_output.owner.name}\n"
-            f"They specifically want to link their data output {data_output.name}\n"
-            f"Please approve or deny the request in the portal\n{url}",
-            f"{data_output.owner.name} wants " f"to provide data to {dataset.name}",
+            [User.model_validate(owner) for owner in dataset.owners],
+            action,
+            url,
+            f"Action Required: {data_output.owner.name} wants "
+            f"to provide data to {dataset.name}",
         )
         return {"id": dataset_link.id}
 

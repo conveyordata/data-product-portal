@@ -30,6 +30,7 @@ pydantic-settings = "^2.7.1"
 asgi-correlation-id = "^4.3.4"
 pytest-cov = "^6.0.0"
 cryptography = "^44.0.0"
+emailgen = "^0.1.1"
 
 [tool.poetry.group.test]
 optional = true
