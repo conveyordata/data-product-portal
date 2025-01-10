@@ -16,6 +16,7 @@ smtp:
   port: "!!string 1025"
   username: user
   password: not-set
+  no_login: false
 from_mail_address: ""
 postgres_enabled: false
 cloudwatch_enabled: false

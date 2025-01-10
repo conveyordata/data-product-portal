@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     PORTAL_NAME: str = "Data Product Portal"
     SMTP_HOST: str = "localhost"
     SMTP_PORT: int = 1025
+    SMTP_NO_LOGIN: bool = False
     SMTP_USERNAME: str = "admin"
     SMTP_PASSWORD: str = "not-set"
     FROM_MAIL_ADDRESS: str = "noreply@dataproductportal.com"

@@ -46,7 +46,7 @@ def send_mail(recipients: list[User], action: emailgen.Table, url: str, subject:
             msg["From"] = settings.FROM_MAIL_ADDRESS
             msg["To"] = recipient.email
             with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-                if settings.SMTP_HOST != "localhost":
+                if not settings.SMTP_NO_LOGIN and settings.SMTP_HOST != "localhost":
                     server.starttls()
                     server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
                 server.sendmail(
