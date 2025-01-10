@@ -26,6 +26,7 @@ data:
   SMTP_PORT: {{ .Values.smtp.port }}
   SMTP_USERNAME: {{ .Values.smtp.username }}
   SMTP_PASSWORD: {{ .Values.smtp.password }}
+  SMTP_NO_LOGIN: {{ .Values.smtp.no_login}}
   HOST: {{ .Values.host }}
   {{- if .Values.from_mail_address }}
   FROM_MAIL_ADDRESS: {{ .Values.from_mail_address }}
