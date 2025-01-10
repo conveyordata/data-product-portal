@@ -61,7 +61,7 @@ class DataProductMembershipService:
             User.model_validate(owner)
             for owner in DataProductService().get_owners(data_product_id, db)
         ]
-        action = emailgen.Table(["User", "Request", "Dataset", "Owned By"])
+        action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
         action.add_row(
             [
                 f"{user.first_name} {user.last_name}",
