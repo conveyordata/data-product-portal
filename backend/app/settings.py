@@ -37,12 +37,14 @@ class Settings(BaseSettings):
     INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
 
-    # SMTP
+    # Email templating and SMTP settings
+    PORTAL_NAME: str = "Data Product Portal"
     SMTP_HOST: str = "localhost"
     SMTP_PORT: int = 1025
     SMTP_USERNAME: str = "admin"
     SMTP_PASSWORD: str = "not-set"
     FROM_MAIL_ADDRESS: str = "noreply@dataproductportal.com"
+    CORPORATION: str = "Dataminded"
 
 
 class LogLevel(str, Enum):
