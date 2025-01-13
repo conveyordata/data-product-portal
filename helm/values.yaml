@@ -11,6 +11,13 @@ global:
       port: "!!string 5432"
       server: data-product-portal-postgresql
       username: postgres
+smtp:
+  host: localhost
+  port: "!!string 1025"
+  username: user
+  password: not-set
+  no_login: false
+from_mail_address: ""
 postgres_enabled: false
 cloudwatch_enabled: false
 api_key:
@@ -37,14 +44,14 @@ infrastructure_lambda_arn: ""
 replicaCount: 1
 
 image:
-  repository: public.ecr.aws/conveyordata/data-product-portal/backend
+  repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/backend
   pullPolicy: Always
-  tag: 0.2.4
+  tag: 0.2.7
 
 frontendimage:
-  repository: public.ecr.aws/conveyordata/data-product-portal/frontend
+  repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/frontend
   pullPolicy: Always
-  tag: 0.2.4
+  tag: 0.2.7
 
 imagePullSecrets: []
 nameOverride: ""
