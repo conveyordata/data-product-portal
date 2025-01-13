@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -36,11 +36,12 @@ def create_data_product_membership(
 def request_data_product_membership(
     user_id: UUID,
     data_product_id: UUID,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductMembershipService().request_user_access_to_data_product(
-        user_id, data_product_id, authenticated_user, db
+        user_id, data_product_id, authenticated_user, db, background_tasks
     )
 
 

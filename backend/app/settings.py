@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_SERVER: str
 
+    HOST: str
+
     # Other
     CORS_ALLOWED_ORIGINS: str = ""
     AWS_DEFAULT_REGION: str = "eu-west-1"
@@ -35,6 +37,16 @@ class Settings(BaseSettings):
     INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
 
+    # Email templating and SMTP settings
+    PORTAL_NAME: str = "Data Product Portal"
+    SMTP_HOST: str = "localhost"
+    SMTP_PORT: int = 1025
+    SMTP_NO_LOGIN: bool = False
+    SMTP_USERNAME: str = "admin"
+    SMTP_PASSWORD: str = "not-set"
+    FROM_MAIL_ADDRESS: str = "noreply@dataproductportal.com"
+    CORPORATION: str = "Dataminded"
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"
@@ -50,6 +62,9 @@ class LoggerConfig(BaseSettings):
     LOG_LEVEL: LogLevel = LogLevel.INFO
     LOG_CONFIG_FILE: str = "log_config.json"
     LOGGING_DIRECTORY: str = "/var/logs"
+    SCARF_NO_ANALYTICS: bool = False
+    DO_NOT_TRACK: bool = False
+    SANDBOX: bool = False
 
 
 @lru_cache
