@@ -138,7 +138,6 @@ class OnlyWithProductAccess:
                 data_product = db.scalars(
                     select(DataProductModel).filter_by(id=id)
                 ).one()
-
             elif data_product_name:
                 data_product = db.scalars(
                     select(DataProductModel).filter_by(external_id=data_product_name)

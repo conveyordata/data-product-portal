@@ -7,6 +7,7 @@ from app.business_areas.schema import BusinessArea
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.enums import DataProductMembershipStatus
 from app.data_product_memberships.schema_get import DataProductMembershipGet
+from app.data_product_settings.schema import DataProductSettingValue
 from app.data_product_types.schema import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
@@ -33,6 +34,7 @@ class DataProductGet(ORMModel):
     type: DataProductType
     business_area: BusinessArea
     data_outputs: list[DataOutputGet]
+    data_product_settings: list[DataProductSettingValue]
 
 
 class DataProductsGet(DataProductGet):
