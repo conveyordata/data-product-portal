@@ -295,9 +295,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             >
                 <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            {/* If mode is create -> no autosave, but save only after the product id is known? */}
-            {/* Editing seemed to work fine, even with autosave? */}
-            <DataProductSettings dataProductId={dataProductId}/>
+            {/* <DataProductSettings dataProductId={dataProductId}/> */}
             <Form.Item>
                 <Space>
                     <Button
