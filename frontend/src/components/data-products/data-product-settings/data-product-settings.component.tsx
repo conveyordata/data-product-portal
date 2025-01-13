@@ -2,7 +2,7 @@ import styles from './data-product-settings.module.scss';
 import { Flex, Form, FormProps, Select, Switch, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
-    useCreateDataProductSettingMutation,
+    useCreateDataProductSettingValueMutation,
     useGetAllDataProductSettingsQuery,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { useEffect, useMemo, useRef } from 'react';
@@ -29,7 +29,7 @@ export function DataProductSettings({ dataProductId }: Props) {
     const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(dataProductId || '', {skip:
         !dataProductId});
     const { data: settings, isFetching } = useGetAllDataProductSettingsQuery();
-    const [updateSetting] = useCreateDataProductSettingMutation();
+    const [updateSetting] = useCreateDataProductSettingValueMutation();
     const [form] = Form.useForm();
     const user = useSelector(selectCurrentUser);
     const timeoutRef = useRef<Timeout | null>(null);

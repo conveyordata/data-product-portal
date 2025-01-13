@@ -25,7 +25,7 @@ export const dataProductSettingsApiSlice = baseApiSlice
                           ]
                         : [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
             }),
-            createDataProductSetting: builder.mutation<DataProductSettingCreateResponse, DataProductSettingCreateRequest>({
+            createDataProductSettingValue: builder.mutation<DataProductSettingCreateResponse, DataProductSettingCreateRequest>({
                 query: (request) => ({
                     url: ApiUrl.DataProductSetting,
                     method: 'POST',
@@ -43,10 +43,40 @@ export const dataProductSettingsApiSlice = baseApiSlice
                 ]
                 ,
             }),
+            removeDataProductSetting: builder.mutation<void, string>({
+                query: (id) => ({
+                    url: ApiUrl.DataProductSetting,
+                    method: 'DELETE',
+                    params: { setting_id: id },
+                }),
+                invalidatesTags: [
+                    { type: TagTypes.DataProductSetting as const, id: STATIC_TAG_ID.LIST },
+                ],
+            }),
+            createDataProductSetting: builder.mutation<{"id": string}, Omit<DataProductSettingContract, "id">>({
+                query: (dataProductSetting) => ({
+                    url: ApiUrl.DataProductSetting,
+                    method: 'POST',
+                    data: dataProductSetting,
+                }),
+                invalidatesTags: [
+                    { type: TagTypes.DataProductSetting as const, id: STATIC_TAG_ID.LIST },
+                ],
+            }),
+            updateDataProductSetting: builder.mutation<{"id": string}, DataProductSettingContract>({
+                query: (dataProductSetting) => ({
+                    url: ApiUrl.DataProductSetting,
+                    method: 'PUT',
+                    data: dataProductSetting,
+                }),
+                invalidatesTags: [
+                    { type: TagTypes.DataProductSetting as const, id: STATIC_TAG_ID.LIST },
+                ],
+            }),
         }),
         overrideExisting: false,
     });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useCreateDataProductSettingMutation, useGetAllDataProductSettingsQuery } = dataProductSettingsApiSlice;
+export const { useCreateDataProductSettingValueMutation, useRemoveDataProductSettingMutation, useUpdateDataProductSettingMutation, useCreateDataProductSettingMutation, useGetAllDataProductSettingsQuery } = dataProductSettingsApiSlice;

@@ -6,6 +6,7 @@ export type DataProductSettingType =
     | 'input'
 
 export interface DataProductSettingContract {
+    order: number;
     id: string;
     name: string;
     tooltip: string;
