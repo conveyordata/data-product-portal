@@ -1,46 +1,26 @@
-import type { RadioChangeEvent, TableProps } from 'antd';
-import { Button, Flex, Form, Input, Space, Table, Typography } from 'antd';
+import type { TableProps } from 'antd';
+import { Button, Flex, Form, Input, Space, Table, Typography, InputRef } from 'antd';
 import styles from './data-product-settings-table.module.scss';
-import { Link, useNavigate } from 'react-router-dom';
-import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
-import {
-    useGetAllDataProductsQuery,
-    useGetUserDataProductsQuery,
-} from '@/store/features/data-products/data-products-api-slice.ts';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getDataProductTableColumns } from './data-product-settings-table-columns.tsx';
-import { DataProductsGetContract } from '@/types/data-product';
-import { SearchForm } from '@/types/shared';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter.tsx';
-import { useQuickFilter } from '@/hooks/use-quick-filter.tsx';
-import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
+import type { FormInstance } from 'antd';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import { useCreateDataProductSettingMutation, useCreateDataProductSettingValueMutation, useGetAllDataProductSettingsQuery, useRemoveDataProductSettingMutation, useUpdateDataProductSettingMutation } from '@/store/features/data-product-settings/data-product-settings-api-slice';
+import { useGetAllDataProductSettingsQuery, useRemoveDataProductSettingMutation, useUpdateDataProductSettingMutation } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { DataProductSettingContract } from '@/types/data-product-setting';
 import React from 'react';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { CreateSettingModal } from '../new-data-product-setting-modal.component.tsx';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
 
 export function DataProductSettingsTable() {
-    const currentUser = useSelector(selectCurrentUser);
     const { t } = useTranslation();
-    const { quickFilter, onQuickFilterChange, quickFilterOptions } = useQuickFilter({});
-    const navigate = useNavigate();
     const { data: dataProductSettings = [], isFetching } = useGetAllDataProductSettingsQuery();
     const [editDataProductSetting, { isLoading: isEditing }] = useUpdateDataProductSettingMutation();
-    const [createDataProductSetting, {isLoading: isCreating}] = useCreateDataProductSettingMutation();
-    const { data: userDataProducts = [], isFetching: isFetchingUserDataProducts } = useGetUserDataProductsQuery(
-        currentUser?.id || '',
-        { skip: !currentUser },
-    );
-    const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
-    const [searchForm] = Form.useForm<SearchForm>();
+    const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
     const [onRemoveDataProductSetting, {isLoading: isRemoving}] = useRemoveDataProductSettingMutation();
-    const searchTerm = Form.useWatch('search', searchForm);
 
     const columns = useMemo(() => getDataProductTableColumns({ t, handleOpen, onRemoveDataProductSetting}), [t, dataProductSettings]);
 
@@ -48,26 +28,8 @@ export function DataProductSettingsTable() {
         handlePaginationChange(pagination);
     };
 
-    function navigateToDataProduct(dataProductId: string) {
-        navigate(createDataProductIdPath(dataProductId));
-    }
-
-    const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
-        onQuickFilterChange(value);
-        resetPagination();
-    };
-
-    useEffect(() => {
-        if (!isFetching && !isFetchingUserDataProducts) {
-            if (quickFilter === QuickFilterParticipation.All) {
-                handleTotalChange(dataProductSettings.length);
-            } else {
-                handleTotalChange(userDataProducts.length);
-            }
-        }
-    }, [quickFilter, isFetching, isFetchingUserDataProducts]);
-    const EditableContext = React.createContext(null);
-    const EditableRow = ({ index, ...props }) => {
+    const EditableContext = React.createContext<FormInstance<any> | null>(null);
+    const EditableRow = ({ ...props }) => {
       const [form] = Form.useForm();
       return (
         <Form form={form} component={false}>
@@ -78,22 +40,26 @@ export function DataProductSettingsTable() {
       );
     };
     const handleAdd = () => {
-        // TODO Modal
         handleOpen()
     };
-      const handleSave = (row) => {
-        console.log(row);
-        editDataProductSetting(row)
-        // const newData = [...dataSource];
-        // const index = newData.findIndex((item) => row.key === item.key);
-        // const item = newData[index];
-        // newData.splice(index, 1, {
-        //   ...item,
-        //   ...row,
-        // });
-        // setDataSource(newData);
+      const handleSave = async (row: DataProductSettingContract) => {
+        try {
+          await editDataProductSetting(row)
+          dispatchMessage({ content: t('Data product setting updated successfully'), type: 'success' });
+        } catch (error) {
+          dispatchMessage({ content: t('Could not update data product setting'), type: 'error' });
+        }
       };
-    const EditableCell = ({
+    interface EditableCellProps {
+        title: React.ReactNode;
+        editable: boolean;
+        children: React.ReactNode;
+        dataIndex: string;
+        record: DataProductSettingContract;
+        handleSave: (record: DataProductSettingContract) => void;
+    }
+
+    const EditableCell: React.FC<EditableCellProps> = ({
         title,
         editable,
         children,
@@ -103,8 +69,10 @@ export function DataProductSettingsTable() {
         ...restProps
       }) => {
         const [editing, setEditing] = useState(false);
-        const inputRef = useRef(null);
+
+        const inputRef = useRef<InputRef>(null);
         const form = useContext(EditableContext);
+
         useEffect(() => {
           if (editing) {
             inputRef.current?.focus();
@@ -112,18 +80,22 @@ export function DataProductSettingsTable() {
         }, [editing]);
         const toggleEdit = () => {
           setEditing(!editing);
-          form.setFieldsValue({
-            [dataIndex]: record[dataIndex],
-          });
+          if (form) {
+            form.setFieldsValue({
+              [dataIndex]: record[dataIndex as keyof DataProductSettingContract],
+            });
+          }
         };
         const save = async () => {
           try {
-            const values = await form.validateFields();
-            toggleEdit();
-            handleSave({
-              ...record,
-              ...values,
-            });
+            if (form) {
+              const values = await form.validateFields();
+              toggleEdit();
+              handleSave({
+                ...record,
+                ...values,
+              });
+            }
           } catch (errInfo) {
             console.log('Save failed:', errInfo);
           }
@@ -165,17 +137,17 @@ export function DataProductSettingsTable() {
           cell: EditableCell,
         },
       };
-      const editableColumns = columns.map((col) => {
+      const editableColumns = columns.map((col: ColumnGroupType<DataProductSettingContract>&{editable?: boolean}&{dataIndex: number} | ColumnType<DataProductSettingContract>&{editable?: boolean}) => {
         if (!col.editable) {
           return col;
         }
         return {
           ...col,
-          onCell: (record) => ({
+          onCell: (record: DataProductSettingContract) => ({
             record,
             editable: col.editable,
             dataIndex: col.dataIndex,
-            title: col.title,
+            title: col.title as string,
             handleSave,
           }),
         };
@@ -184,11 +156,6 @@ export function DataProductSettingsTable() {
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.searchContainer}>
                 <Typography.Title level={3}>{t('Data Product Settings')}</Typography.Title>
-                {/* <Form<SearchForm> form={searchForm} className={styles.searchForm}>
-                    <Form.Item<SearchForm> name={'search'} initialValue={''} className={styles.formItem}>
-                        <Input.Search placeholder={t('Search data products by name')} allowClear />
-                    </Form.Item>
-                </Form> */}
                 <Space>
                     <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
                         {t('Create Data Product Setting')}
@@ -196,17 +163,7 @@ export function DataProductSettingsTable() {
                 </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                {/* <TableQuickFilter
-                    value={quickFilter}
-                    onFilterChange={handleQuickFilterChange}
-                    quickFilterOptions={quickFilterOptions}
-                /> */}
                 <Table<DataProductSettingContract>
-                    // onRow={(record) => {
-                    //     return {
-                    //         onClick: () => navigateToDataProduct(record.id),
-                    //     };
-                    // }}
                     components={components}
                     className={styles.table}
                     columns={editableColumns}
@@ -216,12 +173,11 @@ export function DataProductSettingsTable() {
                     rowKey={(record) => record.id}
                     loading={isFetching}
                     rowHoverable
-//                    rowClassName={styles.row}
                     rowClassName={() => 'editable-row'}
                     size={'small'}
                 />
             </Flex>
-            {isVisible && <CreateSettingModal onClose={handleClose} isOpen={isVisible} />}
+            {isVisible && <CreateSettingModal onClose={handleClose} t={t} isOpen={isVisible} />}
         </Flex>
     );
 }

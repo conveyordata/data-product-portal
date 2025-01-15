@@ -42,7 +42,8 @@ def update_data_product_setting(
 
 
 @router.post(
-    "", dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))]
+    "/{data_product_id}/{setting_id}",
+    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
 )
 def set_value_for_data_product(
     data_product_id: UUID,

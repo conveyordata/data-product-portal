@@ -1,4 +1,4 @@
-import { ApiUrl } from '@/api/api-urls.ts';
+import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import {
     DataProductSettingContract,
@@ -6,6 +6,7 @@ import {
     DataProductSettingCreateResponse,
 } from '@/types/data-product-setting';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
+import { DataProductSettingValueCreateRequest, DataProductSettingValueCreateResponse } from '@/types/data-product-setting/data-product-setting-create';
 
 export const dataProductSettingTags: string[] = [TagTypes.DataProductSetting];
 export const dataProductSettingsApiSlice = baseApiSlice
@@ -25,16 +26,15 @@ export const dataProductSettingsApiSlice = baseApiSlice
                           ]
                         : [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
             }),
-            createDataProductSettingValue: builder.mutation<DataProductSettingCreateResponse, DataProductSettingCreateRequest>({
+            createDataProductSettingValue: builder.mutation<DataProductSettingValueCreateResponse, DataProductSettingValueCreateRequest>({
                 query: (request) => ({
-                    url: ApiUrl.DataProductSetting,
+                    url: buildUrl(buildUrl(ApiUrl.DataProductSettingValue, { dataProductId: request.data_product_id }), { dataProductSettingId: request.data_product_settings_id }),
                     method: 'POST',
                     params: {
                         data_product_id: request.data_product_id,
                         setting_id: request.data_product_settings_id,
                         value: request.value
                     },
-                    //params: { data_product_id: request.data_product_id},
                 }),
                 invalidatesTags: (_, _error, arg) => [
                     { type: TagTypes.DataProduct as const, id: arg.data_product_id },
@@ -53,7 +53,7 @@ export const dataProductSettingsApiSlice = baseApiSlice
                     { type: TagTypes.DataProductSetting as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
-            createDataProductSetting: builder.mutation<{"id": string}, Omit<DataProductSettingContract, "id">>({
+            createDataProductSetting: builder.mutation<DataProductSettingCreateResponse, DataProductSettingCreateRequest>({
                 query: (dataProductSetting) => ({
                     url: ApiUrl.DataProductSetting,
                     method: 'POST',
@@ -63,7 +63,7 @@ export const dataProductSettingsApiSlice = baseApiSlice
                     { type: TagTypes.DataProductSetting as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
-            updateDataProductSetting: builder.mutation<{"id": string}, DataProductSettingContract>({
+            updateDataProductSetting: builder.mutation<DataProductSettingCreateResponse, DataProductSettingContract>({
                 query: (dataProductSetting) => ({
                     url: ApiUrl.DataProductSetting,
                     method: 'PUT',

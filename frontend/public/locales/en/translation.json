@@ -361,5 +361,22 @@
     "The schema on Snowflake you can access through this data output": "The schema on Snowflake you can access through this data output",
     "Please input the name of the Snowflake schema for this data output": "Please input the name of the Snowflake schema for this data output",
     "The suffix of the Snowflake schema to link the data output to": "The suffix of the Snowflake schema to link the data output to",
-    "Include entire catalog": "Include entire catalog"
+    "Include entire catalog": "Include entire catalog",
+    "Are you sure you want to delete the data product setting? This will remove the setting from all the data products": "Are you sure you want to delete the data product setting? This will remove the setting from all the data products",
+    "Create Data Product Setting": "Create Data Product Setting",
+    "Data Product Settings": "Data Product Settings",
+    "Tooltip": "Tooltip",
+    "Divider": "Divider",
+    "Order": "Order",
+    "Please input the name!": "Please input the name!",
+    "Please input the tooltip!": "Please input the tooltip!",
+    "Please input the order!": "Please input the order!",
+    "Please select a type!": "Please select a type!",
+    "Please input the default value!": "Please input the default value!",
+    "Please input the divider!": "Please input the divider!",
+    "Checkbox": "Checkbox",
+    "Input": "Input",
+    "Order must be a number!": "Order must be a number!",
+    "Default Value": "Default Value",
+    "Create New Data Product Setting": "Create New Data Product Setting"
 }
