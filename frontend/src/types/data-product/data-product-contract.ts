@@ -4,6 +4,7 @@ import { DataProductMembershipContract } from '@/types/data-product-membership';
 import { BusinessAreaContract } from '@/types/business-area';
 import { DatasetLink } from '@/types/data-product/dataset-link.contract.ts';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
+import { DataProductSettingCreateRequest, DataProductSettingValueContract } from '../data-product-setting';
 
 export enum DataProductStatus {
     Pending = 'pending',
@@ -26,6 +27,7 @@ export interface DataProductContract {
     business_area_id: string;
     external_id: string;
     data_outputs: DataOutputsGetContract;
+    data_product_settings: DataProductSettingValueContract[];
 }
 
 export interface DataProductModel extends DataProductContract {}

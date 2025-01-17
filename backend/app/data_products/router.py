@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -147,11 +147,12 @@ def update_data_product_about(
 def link_dataset_to_data_product(
     id: UUID,
     dataset_id: UUID,
+    background_tasks: BackgroundTasks,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
     return DataProductService().link_dataset_to_data_product(
-        id, dataset_id, authenticated_user, db
+        id, dataset_id, authenticated_user, db, background_tasks
     )
 
 
