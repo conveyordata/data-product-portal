@@ -1,4 +1,4 @@
-import { Button, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
+import { Button, Flex, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-product-form.module.scss';
 import {
@@ -28,6 +28,7 @@ import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
 import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
+import { DataProductSettings } from '@/components/data-products/data-product-settings/data-product-settings.component.tsx';
 
 type Props = {
     mode: 'create' | 'edit';
@@ -184,7 +185,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             });
         }
     }, [currentDataProduct, mode]);
-
     return (
         <Form
             form={form}
@@ -319,6 +319,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             >
                 <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
+            {/* <DataProductSettings dataProductId={dataProductId}/> */}
             <Form.Item>
                 <Space>
                     <Button

@@ -4,10 +4,11 @@ from typing import List
 from urllib import parse
 from uuid import UUID
 
+import emailgen
 import httpx
 import pytz
 from botocore.exceptions import ClientError
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
@@ -15,6 +16,7 @@ from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
+from app.core.email.send_mail import send_mail
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
@@ -51,7 +53,9 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
+from app.settings import settings
 from app.tags.model import Tag as TagModel
+from app.users.model import User as UserModel
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 
@@ -99,6 +103,15 @@ class DataProductService:
             if not dp.lifecycle:
                 dp.lifecycle = default_lifecycle
         return dps
+
+    def get_owners(self, id: UUID, db: Session) -> List[User]:
+        data_product = ensure_data_product_exists(id, db)
+        user_ids = [
+            membership.user_id
+            for membership in data_product.memberships
+            if membership.role == DataProductUserRole.OWNER
+        ]
+        return db.query(UserModel).filter(UserModel.id.in_(user_ids)).all()
 
     def get_user_data_products(
         self, user_id: UUID, db: Session
@@ -280,7 +293,12 @@ class DataProductService:
         db.commit()
 
     def link_dataset_to_data_product(
-        self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
+        self,
+        id: UUID,
+        dataset_id: UUID,
+        authenticated_user: User,
+        db: Session,
+        background_tasks: BackgroundTasks,
     ):
         dataset = ensure_dataset_exists(dataset_id, db)
         data_product = ensure_data_product_exists(id, db)
@@ -310,6 +328,35 @@ class DataProductService:
         db.commit()
         db.refresh(data_product)
         RefreshInfrastructureLambda().trigger()
+
+        url = (
+            settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-product"
+        )
+        action = emailgen.Table(
+            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
+        )
+        action.add_row(
+            [
+                data_product.name,
+                "Access to consume data from ",
+                dataset.name,
+                ", ".join(
+                    [
+                        f"{owner.first_name} {owner.last_name}"
+                        for owner in dataset.owners
+                    ]
+                ),
+                f"{authenticated_user.first_name} {authenticated_user.last_name}",
+            ]
+        )
+        background_tasks.add_task(
+            send_mail,
+            [User.model_validate(owner) for owner in dataset.owners],
+            action,
+            url,
+            f"Action Required: {data_product.name} wants "
+            f"to consume data from {dataset.name}",
+        )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID, db: Session):

@@ -1,11 +1,13 @@
 from datetime import datetime
 from uuid import UUID
 
+import emailgen
 import pytz
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.email.send_mail import send_mail
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
@@ -19,6 +21,7 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
 from app.graph.graph import Graph
+from app.settings import settings
 from app.users.schema import User
 
 
@@ -114,7 +117,12 @@ class DataOutputService:
         RefreshInfrastructureLambda().trigger()
 
     def link_dataset_to_data_output(
-        self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
+        self,
+        id: UUID,
+        dataset_id: UUID,
+        authenticated_user: User,
+        db: Session,
+        background_tasks: BackgroundTasks,
     ):
         dataset = ensure_dataset_exists(dataset_id, db)
         data_output = ensure_data_output_exists(id, db)
@@ -142,6 +150,32 @@ class DataOutputService:
         db.commit()
         db.refresh(data_output)
         RefreshInfrastructureLambda().trigger()
+        url = settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-output"
+        action = emailgen.Table(
+            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
+        )
+        action.add_row(
+            [
+                data_output.owner.name,
+                "Wants to provide data to ",
+                dataset.name,
+                ", ".join(
+                    [
+                        f"{owner.first_name} {owner.last_name}"
+                        for owner in dataset.owners
+                    ]
+                ),
+                f"{authenticated_user.first_name} {authenticated_user.last_name}",
+            ]
+        )
+        background_tasks.add_task(
+            send_mail,
+            [User.model_validate(owner) for owner in dataset.owners],
+            action,
+            url,
+            f"Action Required: {data_output.owner.name} wants "
+            f"to provide data to {dataset.name}",
+        )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_output(

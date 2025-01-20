@@ -20,8 +20,21 @@ data:
   CONVEYOR_SECRET: {{ .Values.conveyor.secret }}
   {{- if .Values.api_key.enabled }}
   PORTAL_API_KEY: {{ .Values.api_key.key }}
-  {{- end}}
+  {{- end }}
   INFRASTRUCTURE_LAMBDA_ARN: {{ .Values.infrastructure_lambda_arn }}
+  SMTP_HOST:  {{ .Values.smtp.host }}
+  SMTP_PORT: {{ .Values.smtp.port }}
+  SMTP_USERNAME: {{ .Values.smtp.username }}
+  SMTP_PASSWORD: {{ .Values.smtp.password }}
+  {{- if .Values.smtp.no_login}}
+  SMTP_NO_LOGIN: "true"
+  {{- else }}
+  SMTP_NO_LOGIN: "false"
+  {{- end }}
+  HOST: {{ .Values.host }}
+  {{- if .Values.from_mail_address }}
+  FROM_MAIL_ADDRESS: {{ .Values.from_mail_address }}
+  {{- end }}
 kind: ConfigMap
 metadata:
   name: {{ include "data-product-portal.fullname" . }}

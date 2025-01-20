@@ -7,6 +7,7 @@ from app.data_outputs.router import router as data_outputs
 from app.data_outputs_datasets.router import router as data_output_dataset
 from app.data_product_lifecycles.router import router as data_product_lifecycle
 from app.data_product_memberships.router import router as data_product_membership
+from app.data_product_settings.router import router as data_product_setting
 from app.data_product_types.router import router as data_product_type
 from app.data_products.router import router as data_product
 from app.data_products_datasets.router import router as data_product_dataset
@@ -32,3 +33,4 @@ router.include_router(data_output_dataset)
 router.include_router(data_product_membership)
 router.include_router(data_outputs)
 router.include_router(platform)
+router.include_router(data_product_setting)

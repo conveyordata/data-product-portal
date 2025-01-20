@@ -3,7 +3,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { HistoryTab } from '@/pages/data-product/components/data-product-tabs/history-tab/history-tab.tsx';
 import styles from './data-product-tabs.module.scss';
-import Icon, { HistoryOutlined, InfoCircleOutlined, PartitionOutlined, TeamOutlined } from '@ant-design/icons';
+import Icon, { HistoryOutlined, InfoCircleOutlined, PartitionOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
@@ -14,6 +14,7 @@ import { AboutTab } from '@/pages/data-product/components/data-product-tabs/abou
 import { ReactFlowProvider } from 'reactflow';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Explorer } from '@/components/explorer/explorer';
+import { SettingsTab } from './settings-tab/settings-tab';
 
 type Props = {
     dataProductId: string;
@@ -26,6 +27,7 @@ export enum TabKeys {
     Datasets = 'datasets',
     Explorer = 'explorer',
     Team = 'team',
+    Settings = 'settings',
     History = 'history',
 }
 
@@ -83,6 +85,16 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 children: (
                     <ReactFlowProvider>
                         <Explorer id={dataProductId} type={"dataproduct"}/>
+                    </ReactFlowProvider>
+                ),
+            },
+            {
+                label: t('Settings'),
+                key: TabKeys.Settings,
+                icon: <SettingOutlined />,
+                children: (
+                    <ReactFlowProvider>
+                        <SettingsTab dataProductId={dataProductId}/>
                     </ReactFlowProvider>
                 ),
             },

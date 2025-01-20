@@ -5,6 +5,7 @@ export enum TagTypes {
     UserDataOutputs = 'UserDataOutputs',
     DataProductType = 'DataProductType',
     DataProductLifecycle = 'DataProductLifecycle',
+    DataProductSetting = 'DataProductSetting',
     User = 'User',
     Auth = 'Auth',
     Environment = 'Environment',
