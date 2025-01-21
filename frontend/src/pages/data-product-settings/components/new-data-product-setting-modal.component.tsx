@@ -70,14 +70,14 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                     type: 'checkbox',
                 }}
             >
-                <Form.Item name="name" label={t("Name")} rules={[{ required: true, message: t("Please input the name!") }]}>
+                <Form.Item name="name" label={t("Name")} rules={[{ required: true, message: t("Please provide a name") }]}>
                     <Input />
                 </Form.Item>
 
                 <Form.Item
                     name="tooltip"
                     label={t("Tooltip")}
-                    rules={[{ required: true, message: t("Please input the tooltip!") }]}
+                    rules={[{ required: true, message: t("Please provide a tooltip") }]}
                 >
                     <Input />
                 </Form.Item>
@@ -85,12 +85,12 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 <Form.Item
                     name="default"
                     label={t("Default Value")}
-                    rules={[{ required: true, message: t("Please input the default value!") }]}
+                    rules={[{ required: true, message: t("Please provide a default value") }]}
                 >
                     <Input />
                 </Form.Item>
 
-                <Form.Item name="type" label={t("Type")} rules={[{ required: true, message: t("Please select a type!") }]}>
+                <Form.Item name="type" label={t("Type")} rules={[{ required: true, message: t("Please select a type") }]}>
                     <Select>
                         <Option value="checkbox">{t("Checkbox")}</Option>
                         <Option value="tags">{t("Tags")}</Option>
@@ -101,7 +101,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 <Form.Item
                     name="divider"
                     label={t("Divider")}
-                    rules={[{ required: true, message: t("Please input the divider!") }]}
+                    rules={[{ required: true, message: t("Please provide a divider") }]}
                 >
                     <Input />
                 </Form.Item>
@@ -110,8 +110,8 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                     name="order"
                     label={t("Order")}
                     rules={[
-                        { required: true, message: t("Please input the order!") },
-                        { pattern: /^\d+$/, message: t("Order must be a number!") },
+                        { required: true, message: t("Please provide an order") },
+                        { pattern: /^\d+$/, message: t("Order must be a number") },
                     ]}
                 >
                     <Input />
