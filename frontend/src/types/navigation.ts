@@ -17,7 +17,6 @@ export enum ApplicationPaths {
     DataOutputNew = '/data-outputs/new',
     DataOutputEdit = '/data-products/:dataProductId/:dataOutputId/edit',
     AuditLogs = '/audit-logs',
-    // Settings = '/settings',
     Logout = '/logout',
     PlatformsConfigs = '/platforms-configs',
     PlatformServiceConfigNew = '/platforms-configs/new',
@@ -27,6 +26,7 @@ export enum ApplicationPaths {
     EnvironmentConfig = '/environments/configs/:envConfigId',
     EnvironmentConfigNew = '/environments/:environmentId/new',
     EnvironmentNew = '/environments/new',
+    DataProductSettings = '/data-product-settings',
 }
 
 export const authenticatedPaths: string[] = [

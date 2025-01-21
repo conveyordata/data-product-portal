@@ -54,22 +54,27 @@ export const Sidebar = () => {
                 icon: React.createElement(SettingOutlined),
                 key: 'Configure',
                 children: [
+                    // {
+                    //     key: ApplicationPaths.PlatformsConfigs,
+                    //     label: (
+                    //         <span className={styles.subMenuTitle}>
+                    //             <Link to={ApplicationPaths.PlatformsConfigs}>{t('Platforms Configurations')}</Link>
+                    //         </span>
+                    //     ),
+                    // },
+                    // {
+                    //     key: ApplicationPaths.Environments,
+                    //     label: (
+                    //         <span className={styles.subMenuTitle}>
+                    //             <Link to={ApplicationPaths.Environments}>{t('Environments')}</Link>
+                    //         </span>
+                    //     ),
+                    // },
                     {
-                        key: ApplicationPaths.PlatformsConfigs,
-                        label: (
-                            <span className={styles.subMenuTitle}>
-                                <Link to={ApplicationPaths.PlatformsConfigs}>{t('Platforms Configurations')}</Link>
-                            </span>
-                        ),
-                    },
-                    {
-                        key: ApplicationPaths.Environments,
-                        label: (
-                            <span className={styles.subMenuTitle}>
-                                <Link to={ApplicationPaths.Environments}>{t('Environments')}</Link>
-                            </span>
-                        ),
-                    },
+                        key: ApplicationPaths.DataProductSettings,
+                        label: <Link to={ApplicationPaths.DataProductSettings}>{t('Data Product Settings')}</Link>,
+                        icon: React.createElement(SettingOutlined),
+                    }
                 ],
             },
         ];
