@@ -53,9 +53,20 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- if .Values.custom_translation_file_path }}
+            - name: translation
+              mountPath: /app/dist/locales/en/translation.json
+              subPath: translation.json
+          {{- end }}
       {{- with .Values.frontendvolumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.custom_translation_file_path }}
+        - name: translation
+          configMap:
+            name: translation
+            optional: True
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

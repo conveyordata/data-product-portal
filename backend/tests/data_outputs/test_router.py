@@ -3,6 +3,7 @@ from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_product import DataProductFactory
 from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.platform_service import PlatformServiceFactory
+from tests.factories.tags import TagFactory
 from tests.factories.user import UserFactory
 
 ENDPOINT = "/api/data_outputs"
@@ -14,6 +15,7 @@ def data_output_payload():
         user=UserFactory(external_id="sub")
     ).data_product
     service = PlatformServiceFactory()
+    tag = TagFactory()
 
     return {
         "name": "Data Output Name",
@@ -29,6 +31,7 @@ def data_output_payload():
         "platform_id": str(service.platform.id),
         "service_id": str(service.id),
         "status": "pending",
+        "tag_ids": [str(tag.id)],
     }
 
 
@@ -36,6 +39,7 @@ def data_output_payload():
 def data_output_payload_not_owner():
     data_product = DataProductFactory()
     service = PlatformServiceFactory()
+    tag = TagFactory()
 
     return {
         "name": "Data Output Name",
@@ -51,6 +55,7 @@ def data_output_payload_not_owner():
         "platform_id": str(service.platform.id),
         "service_id": str(service.id),
         "status": "pending",
+        "tag_ids": [str(tag.id)],
     }
 
 
@@ -89,8 +94,13 @@ class TestDataOutputsRouter:
         data_product = DataProductMembershipFactory(
             user=UserFactory(external_id="sub")
         ).data_product
+        tag = TagFactory()
         data_output = DataOutputFactory(owner=data_product)
-        update_payload = {"name": "update", "description": "update"}
+        update_payload = {
+            "name": "update",
+            "description": "update",
+            "tag_ids": [str(tag.id)],
+        }
         response = self.update_data_output(client, update_payload, data_output.id)
 
         assert response.status_code == 200

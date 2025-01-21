@@ -1,4 +1,4 @@
-import { Checkbox, Form, FormInstance, FormProps, Input, Space } from 'antd';
+import { Checkbox, Form, FormInstance, FormProps, Input, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -21,6 +21,7 @@ import { DataOutputStatus } from '@/types/data-output/data-output.contract';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
+import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 
 type Props = {
     mode: 'create';
@@ -41,17 +42,19 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const [identifiers, setIdentifiers] = useState<string[]>([]);
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
+    const { data: availableTags, isFetching: isFetchingTags} = useGetAllTagsQuery();
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const [form] = Form.useForm();
     const sourceAligned = Form.useWatch('is_source_aligned', form);
     const dataProductNameValue = Form.useWatch('name', form);
-    const isLoading = isCreating || isCreating || isFetchingInitialValues;
+    const isLoading = isCreating || isCreating || isFetchingInitialValues || isFetchingTags;
 
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery()
 
     const dataPlatforms = useMemo(() => getDataPlatforms(t).filter((platform) => {
         return platformConfig?.map(config => config.service.name).includes(platform.label) || platformConfig?.map(config => config.platform.name).includes(platform.label)
     }), [t, platformConfig, platformsLoading]);
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id})) ?? [];
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
@@ -79,7 +82,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     service_id: platformConfig!.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase())[0].service.id,
                     owner_id: dataProductId,
                     sourceAligned: sourceAligned === undefined ? false : sourceAligned,
-                    status: DataOutputStatus.Active
+                    status: DataOutputStatus.Active,
+                    tag_ids: values.tag_ids ?? []
                 };
                 await createDataOutput(request).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
@@ -182,6 +186,14 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 ]}
             >
                 <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+            </Form.Item>
+            <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+                <Select
+                    tokenSeparators={[',']}
+                    placeholder={t('Select data output tags')}
+                    mode={'tags'}
+                    options={tagSelectOptions}
+                />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>
                 name={'is_source_aligned'} valuePropName="checked"

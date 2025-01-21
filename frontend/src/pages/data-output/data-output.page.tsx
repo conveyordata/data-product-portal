@@ -6,8 +6,7 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { DataOutputDescription } from '@/pages/data-output/components/data-output-description/data-output-description.tsx';
 import { useMemo } from 'react';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
-import Icon, { SettingOutlined } from '@ant-design/icons';
-import clsx from 'clsx';
+import { SettingOutlined } from '@ant-design/icons';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { useTranslation } from 'react-i18next';
@@ -88,6 +87,7 @@ export function DataOutput() {
                             status={dataOutput!.status}
                             type={dataOutput!.configuration.configuration_type!}
                             description={dataOutput!.description}
+                            tags={dataOutput!.tags}
                         />
                         {/*  Tabs  */}
                         <DataOutputTabs dataOutputId={dataOutput!.id} isLoading={isLoading} />

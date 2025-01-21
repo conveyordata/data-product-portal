@@ -3,13 +3,13 @@ module portal
 go 1.22.4
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.32.3
-	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.46.3
+	github.com/aws/aws-sdk-go-v2 v1.32.5
+	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.46.6
 	github.com/briandowns/spinner v1.23.1
 	github.com/deepmap/oapi-codegen v1.16.3
 	github.com/fatih/color v1.18.0
 	github.com/getkin/kin-openapi v0.128.0
-	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/oapi-codegen/runtime v1.1.1
@@ -21,9 +21,9 @@ require (
 
 require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.22 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.22 // indirect
-	github.com/aws/smithy-go v1.22.0 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.24 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.24 // indirect
+	github.com/aws/smithy-go v1.22.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect

@@ -5,6 +5,7 @@ from app.data_outputs.schema_union import DataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
 from app.data_products.schema_base_get import BaseDataProductGet
 from app.shared.schema import ORMModel
+from app.tags.schema import Tag
 
 
 class DataOutputCreate(ORMModel):
@@ -17,11 +18,13 @@ class DataOutputCreate(ORMModel):
     status: DataOutputStatus
     configuration: DataOutputConfiguration
     sourceAligned: bool
+    tag_ids: list[UUID]
 
 
 class DataOutputUpdate(ORMModel):
     name: str
     description: str
+    tag_ids: list[UUID]
 
 
 class DataOutput(ORMModel):
@@ -35,3 +38,4 @@ class DataOutput(ORMModel):
     status: DataOutputStatus
     configuration: DataOutputConfiguration
     dataset_links: list[DatasetLink]
+    tags: list[Tag]

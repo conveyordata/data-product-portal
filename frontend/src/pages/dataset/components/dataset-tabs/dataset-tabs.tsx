@@ -3,7 +3,6 @@ import { ReactNode, useEffect, useMemo, useState } from 'react';
 import styles from './dataset-tabs.module.scss';
 import Icon, { HistoryOutlined, InfoCircleOutlined, PartitionOutlined, TeamOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { ExplorerTab } from './explorer-tab/explorer-tab';
 import { HistoryTab } from './history-tab/history-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
@@ -14,6 +13,7 @@ import { AboutTab } from './about-tab/about-tab.tsx';
 import { TeamTab } from './team-tab/team-tab.tsx';
 import { ReactFlowProvider } from 'reactflow';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Explorer } from '@/components/explorer/explorer.tsx';
 
 type Props = {
     datasetId: string;
@@ -48,22 +48,22 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 children: <AboutTab datasetId={datasetId} />,
             },
             {
-                label: t('Data Products'),
-                key: TabKeys.DataProduct,
-                icon: <Icon component={dataProductOutlineIcon} />,
-                children: <DataProductTab datasetId={datasetId} />,
-            },
-            {
-                label: t('Data Outputs'),
+                label: t('Producing Data Products'),
                 key: TabKeys.DataOutput,
                 icon: <Icon component={dataOutputOutlineIcon} />,
                 children: <DataOutputTab datasetId={datasetId} />,
             },
             {
-                label: t('Team'),
+                label: t('Dataset Owners'),
                 key: TabKeys.Team,
                 icon: <TeamOutlined />,
                 children: <TeamTab datasetId={datasetId} />,
+            },
+            {
+                label: t('Consuming Data Products'),
+                key: TabKeys.DataProduct,
+                icon: <Icon component={dataProductOutlineIcon} />,
+                children: <DataProductTab datasetId={datasetId} />,
             },
             {
                 label: t('Explorer'),
@@ -71,7 +71,7 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 icon: <PartitionOutlined />,
                 children: (
                     <ReactFlowProvider>
-                        <ExplorerTab datasetId={datasetId} />
+                        <Explorer id={datasetId} type={"dataset"}/>
                     </ReactFlowProvider>
                 ),
             },

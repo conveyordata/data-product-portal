@@ -1,17 +1,19 @@
 import styles from './data-product-description.module.scss';
-import { Badge, Flex, Space, Typography } from 'antd';
+import { Badge, Flex, Space, Tag, Typography } from 'antd';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { useTranslation } from 'react-i18next';
 import { DataProductStatus } from '@/types/data-product';
+import { TagModel } from '@/types/tag';
 
 type Props = {
     status: DataProductStatus;
     type: string;
     description: string;
     businessArea: string;
+    tags: TagModel[];
 };
 
-export function DataProductDescription({ status, type, description, businessArea }: Props) {
+export function DataProductDescription({ status, type, description, businessArea, tags }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -35,6 +37,13 @@ export function DataProductDescription({ status, type, description, businessArea
                         <Typography.Text>{type}</Typography.Text>
                     </Flex>
                 </Space>
+                <Flex>
+                    {tags.map( tag => (
+                        <Tag color='success'>
+                            {tag.value}
+                        </Tag>
+                    ))}
+                </Flex>
                 <Space>
                     <Typography.Paragraph italic>{description}</Typography.Paragraph>
                 </Space>

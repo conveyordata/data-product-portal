@@ -1,4 +1,4 @@
-import { Button, Form, FormProps, Input, Popconfirm, Space } from 'antd';
+import { Button, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
 import { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
-import { ApiUrl, buildUrl } from '@/api/api-urls';
+import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 
 type Props = {
     mode: 'edit';
@@ -31,6 +31,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
         },
     );
     const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? "", {skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId});
+    const { data: availableTags, isFetching: isFetchingTags} = useGetAllTagsQuery();
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
     const [archiveDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
@@ -41,7 +42,8 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
     );
     const canFillInForm = canEditForm;
-    const isLoading = isFetchingInitialValues;
+    const isLoading = isFetchingInitialValues || isFetchingTags;
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id})) ?? [];
 
     const handleArchiveDataProduct = async () => {
         if (canEditForm && currentDataOutput) {
@@ -69,8 +71,9 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 const request: DataOutputUpdateRequest = {
                     name: values.name,
                     description: values.description,
+                    tag_ids: values.tag_ids ?? [],
                 };
-                console.log(buildUrl(ApiUrl.DataOutputGet, { dataOutputId: dataOutputId }),)
+
                 const response = await updateDataOutput({
                     dataOutput: request,
                     dataOutputId: dataOutputId,
@@ -104,6 +107,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 owner_id: currentDataOutput.owner_id,
                 name: currentDataOutput.name,
                 description: currentDataOutput.description,
+                tag_ids: currentDataOutput.tags.map((tag) => tag.id),
             });
         }
     }, [currentDataOutput, mode]);
@@ -150,6 +154,14 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 ]}
             >
                 <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+            </Form.Item>
+            <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+                <Select
+                    tokenSeparators={[',']}
+                    placeholder={t('Select data output tags')}
+                    mode={'tags'}
+                    options={tagSelectOptions}
+                />
             </Form.Item>
             <Form.Item>
                 <Space>

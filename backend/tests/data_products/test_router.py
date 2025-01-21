@@ -5,6 +5,7 @@ from tests.factories import (
     BusinessAreaFactory,
     DataProductFactory,
     DataProductTypeFactory,
+    TagFactory,
     UserFactory,
 )
 from tests.factories.data_output import DataOutputFactory
@@ -20,13 +21,12 @@ def payload():
     business_area = BusinessAreaFactory()
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
+    tag = TagFactory()
     return {
         "name": "Data Product Name",
         "description": "Updated Data Product Description",
         "external_id": "Updated Data Product External ID",
-        "tags": [
-            {"value": "Updated tag"},
-        ],
+        "tag_ids": [str(tag.id)],
         "type_id": str(data_product_type.id),
         "memberships": [
             {
@@ -60,13 +60,6 @@ class TestDataProductsRouter:
         response = self.get_data_product_by_id(client, data_product.id)
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
-
-    def test_get_conveyor_notebook_url(self, client):
-        user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
-
-        response = self.get_conveyor_url(client, data_product.id)
-        assert response.status_code == 501
 
     def test_get_conveyor_ide_url(self, client):
         user = UserFactory(external_id="sub")
@@ -176,10 +169,6 @@ class TestDataProductsRouter:
     @staticmethod
     def get_data_product_by_user_id(client, user_id):
         return client.get(f"{ENDPOINT}/user/{user_id}")
-
-    @staticmethod
-    def get_conveyor_url(client, data_product_id):
-        return client.get(f"{ENDPOINT}/{data_product_id}/conveyor_notebook_url")
 
     @staticmethod
     def get_conveyor_ide_url(client, data_product_id):

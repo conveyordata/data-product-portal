@@ -56,15 +56,13 @@ class DataProduct(Base, BaseORM):
         cascade="all, delete-orphan",
         order_by="DataProductDatasetAssociation.status.desc()",
     )
-    tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_product_table,
-        cascade="all, delete-orphan",
-        single_parent=True,
-    )
+    tags: Mapped[list[Tag]] = relationship(secondary=tag_data_product_table)
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
     type: Mapped["DataProductType"] = relationship(back_populates="data_products")
     business_area_id: Mapped[UUID] = Column(ForeignKey("business_areas.id"))
     business_area: Mapped["BusinessArea"] = relationship(back_populates="data_products")
     data_outputs: Mapped[list["DataOutput"]] = relationship(
-        "DataOutput", back_populates="owner"
+        "DataOutput",
+        back_populates="owner",
+        cascade="all, delete-orphan",
     )

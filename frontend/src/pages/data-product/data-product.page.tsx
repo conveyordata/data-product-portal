@@ -90,6 +90,7 @@ export function DataProduct() {
                             type={dataProduct.type.name}
                             description={dataProduct.description}
                             businessArea={dataProduct.business_area.name}
+                            tags={dataProduct.tags}
                         />
                         {/*  Tabs  */}
                         <DataProductTabs dataProductId={dataProduct.id} isLoading={isLoading} />

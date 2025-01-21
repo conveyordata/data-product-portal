@@ -22,6 +22,7 @@ import { getDatasetOwnerIds, getIsDatasetOwner } from '@/utils/dataset-user.help
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 
 type Props = {
     mode: 'create' | 'edit';
@@ -50,6 +51,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
     });
     const { data: businessAreas = [], isFetching: isFetchingBusinessAreas } = useGetAllBusinessAreasQuery();
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
+    const { data: availableTags, isFetching: isFetchingTags} = useGetAllTagsQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
     const [archiveDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
@@ -64,24 +66,22 @@ export function DatasetForm({ mode, datasetId }: Props) {
     );
     const canFillInForm = mode === 'create' || canEditForm;
 
-    const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues;
+    const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingTags;
 
     const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(), []);
     const businessAreaSelectOptions = businessAreas.map((area) => ({ label: area.name, value: area.id }));
     const userSelectOptions = users.map((user) => ({ label: user.email, value: user.id }));
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id})) ?? [];
 
     const onFinish: FormProps<DatasetCreateFormSchema>['onFinish'] = async (values) => {
         try {
-            // Right now we are only creating tags and not reusing yet existing ones
-            const tags: TagCreate[] = values.tags?.map((tag: string) => ({ value: tag })) ?? [];
-
             if (mode === 'create') {
                 const request: DatasetCreateRequest = {
                     name: values.name,
                     external_id: values.external_id,
                     description: values.description,
                     owners: values.owners,
-                    tags: tags,
+                    tag_ids: values.tag_ids ?? [],
                     business_area_id: values.business_area_id,
                     access_type: values.access_type,
                 };
@@ -100,7 +100,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     external_id: values.external_id,
                     description: values.description,
                     owners: values.owners,
-                    tags: tags,
+                    tag_ids: values.tag_ids,
                     business_area_id: values.business_area_id,
                     access_type: values.access_type,
                 };
@@ -160,7 +160,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 description: currentDataset.description,
                 access_type: currentDataset.access_type,
                 business_area_id: currentDataset.business_area.id,
-                tags: currentDataset.tags.map((tag) => tag.value),
+                tag_ids: currentDataset.tags.map((tag) => tag.id),
                 owners: getDatasetOwnerIds(currentDataset),
             });
         }
@@ -253,8 +253,13 @@ export function DatasetForm({ mode, datasetId }: Props) {
             >
                 <Radio.Group options={accessTypeOptions} />
             </Form.Item>
-            <Form.Item<DatasetCreateFormSchema> name={'tags'} label={t('Tags')}>
-                <Select tokenSeparators={[',']} placeholder={t('Select dataset tags')} mode={'tags'} options={[]} />
+            <Form.Item<DatasetCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+                <Select
+                    tokenSeparators={[',']}
+                    placeholder={t('Select dataset tags')}
+                    mode={'tags'}
+                    options={tagSelectOptions}
+                />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>
                 name={'description'}

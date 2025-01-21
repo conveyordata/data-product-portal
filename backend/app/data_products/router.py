@@ -15,6 +15,7 @@ from app.data_products.schema_get import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.dependencies import OnlyWithProductAccess
+from app.graph.graph import Graph
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_products", tags=["data_products"])
@@ -201,14 +202,6 @@ def get_signin_url(
 
 
 @router.get(
-    "/{id}/conveyor_notebook_url",
-    dependencies=[Depends(OnlyWithProductAccess())],
-)
-def get_conveyor_notebook_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
-    return DataProductService().get_conveyor_notebook_url(id, db)
-
-
-@router.get(
     "/{id}/conveyor_ide_url",
     dependencies=[Depends(OnlyWithProductAccess())],
 )
@@ -233,3 +226,10 @@ def get_data_outputs(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> list[DataOutputGet]:
     return DataProductService().get_data_outputs(id, db)
+
+
+@router.get("/{id}/graph")
+def get_graph_data(
+    id: UUID, db: Session = Depends(get_db_session), level: int = 3
+) -> Graph:
+    return DataProductService().get_graph_data(id, level, db)

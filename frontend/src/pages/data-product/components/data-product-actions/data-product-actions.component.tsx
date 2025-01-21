@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux';
 import {
     useGetDataProductByIdQuery,
     useGetDataProductConveyorIDEUrlMutation,
-    useGetDataProductConveyorNotebookUrlMutation,
     useGetDataProductSignInUrlMutation,
     useGetDataProductDatabricksWorkspaceUrlMutation
 } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -21,7 +20,6 @@ import s3Logo from '@/assets/icons/s3-logo.svg?react';
 import glueLogo from '@/assets/icons/glue-logo.svg?react';
 import conveyorLogo from '@/assets/icons/conveyor-logo.svg?react';
 import databricksLogo from '@/assets/icons/databricks-logo.svg?react';
-import jupyerLogo from '@/assets/icons/jupyter-logo.svg?react';
 import tableauLogo from '@/assets/icons/tableau-logo.svg?react';
 import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
 import { useMemo } from 'react';
@@ -69,14 +67,6 @@ export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlat
         children: [],
     },
     {
-        label: t('Jupyter'),
-        value: DataPlatforms.ConveyorNotebook,
-        icon: jupyerLogo,
-        hasMenu: false,
-        hasConfig: false,
-        children: [],
-    },
-    {
         label: t('Snowflake'),
         value: DataPlatforms.Snowflake,
         icon: snowflakeLogo,
@@ -109,8 +99,6 @@ export function DataProductActions({ dataProductId }: Props) {
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
     const [getDataProductSignInUrl, { isLoading }] = useGetDataProductSignInUrlMutation();
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
-    const [getConveyorNotebookUrl, { isLoading: isConveyorNotebookLoading }] =
-        useGetDataProductConveyorNotebookUrlMutation();
     const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading}] = useGetDataProductDatabricksWorkspaceUrlMutation();
 
     if (!dataProduct || !user) return null;
@@ -172,24 +160,6 @@ export function DataProductActions({ dataProductId }: Props) {
                     });
                 }
                 break;
-            case DataPlatforms.ConveyorNotebook:
-                try {
-                    const url = await getConveyorNotebookUrl({ id: dataProductId }).unwrap();
-                    if (url) {
-                        window.open(url, '_blank');
-                    } else {
-                        dispatchMessage({
-                            type: 'error',
-                            content: t('Failed to get Conveyor Notebook url'),
-                        });
-                    }
-                } catch (_error) {
-                    dispatchMessage({
-                        type: 'error',
-                        content: t('Failed to get Conveyor Notebook url'),
-                    });
-                }
-                break;
             default:
                 break;
         }
@@ -208,7 +178,7 @@ export function DataProductActions({ dataProductId }: Props) {
                         onDataPlatformClick={handleAccessToData}
                         onTileClick={handleTileClick}
                         isDisabled={isLoading || !canAccessDataProductData}
-                        isLoading={isLoading || isConveyorLoading || isConveyorNotebookLoading || isDatabricksLoading}
+                        isLoading={isLoading || isConveyorLoading || isDatabricksLoading}
                     />
                 </Flex>
             </Flex>

@@ -8,6 +8,7 @@ from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpda
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.dependencies import only_data_output_owners
+from app.graph.graph import Graph
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
@@ -138,3 +139,10 @@ def unlink_dataset_from_data_output(
     return DataOutputService().unlink_dataset_from_data_output(
         id, dataset_id, authenticated_user, db
     )
+
+
+@router.get("/{id}/graph")
+def get_graph_data(
+    id: UUID, db: Session = Depends(get_db_session), level: int = 3
+) -> Graph:
+    return DataOutputService().get_graph_data(id, level, db)
