@@ -1,5 +1,5 @@
 import { Button, Flex, Popconfirm } from 'antd';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { Sorter } from '@/utils/table-sorter.helper';
 import { DataProductSettingContract } from '@/types/data-product-setting';
