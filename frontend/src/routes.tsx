@@ -27,6 +27,7 @@ import { EnvironmentConfig } from './pages/environment-config/environment-config
 import { DataOutput } from './pages/data-output/data-output.page.tsx';
 import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
 import { DataProductSettings } from './pages/data-product-settings/data-product-settings.page.tsx';
+import { DataProductLifecycles } from './pages/data-product-lifecycles/data-product-lifecycles.page.tsx';
 
 const router = createBrowserRouter([
     {
@@ -104,6 +105,16 @@ const router = createBrowserRouter([
                             {
                                 index: true,
                                 element: <DataProductSettings />,
+                            },
+                        ]
+                    },
+                    {
+                        path: ApplicationPaths.DataProductLifecycles,
+                        element: <ProtectedRoute/>,
+                        children: [
+                            {
+                                index: true,
+                                element: <DataProductLifecycles />,
                             },
                         ]
                     },

@@ -1,18 +1,14 @@
 import { ApiUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
-import {
-    DataProductTypeCreateRequest,
-    DataProductTypeCreateResponse,
-} from '@/types/data-product-type';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DataProductLifeCycle } from '@/types/data-product/data-product-contract';
+import { DataProductLifecycleCreateRequest, DataProductLifecycleCreateResponse, DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 
 export const dataProductLifecycleTags: string[] = [TagTypes.DataProductLifecycle];
 export const dataProductLifecyclesApiSlice = baseApiSlice
     .enhanceEndpoints({ addTagTypes: dataProductLifecycleTags })
     .injectEndpoints({
         endpoints: (builder) => ({
-            getAllDataProductLifecycles: builder.query<DataProductLifeCycle[], void>({
+            getAllDataProductLifecycles: builder.query<DataProductLifeCycleContract[], void>({
                 query: () => ({
                     url: ApiUrl.DataProductLifecycle,
                     method: 'GET',
@@ -26,7 +22,7 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
                         : [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
             }),
             // TODO Fix proper typing
-            createDataProductLifecycle: builder.mutation<DataProductTypeCreateResponse, DataProductTypeCreateRequest>({
+            createDataProductLifecycle: builder.mutation<DataProductLifecycleCreateResponse, DataProductLifecycleCreateRequest>({
                 query: (request) => ({
                     url: ApiUrl.DataProductLifecycle,
                     method: 'POST',
@@ -34,10 +30,20 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
                 }),
                 invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
             }),
+            updateDataProductLifecycle: builder.mutation<DataProductLifecycleCreateResponse, DataProductLifeCycleContract>({
+                query: (request) => ({
+                    url: ApiUrl.DataProductLifecycle,
+                    method: 'PUT',
+                    data: request,
+                }),
+                invalidatesTags: [
+                    { type: TagTypes.DataProductLifecycle as const, id: STATIC_TAG_ID.LIST },
+                ],
+            }),
         }),
         overrideExisting: false,
     });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useCreateDataProductLifecycleMutation, useGetAllDataProductLifecyclesQuery } = dataProductLifecyclesApiSlice;
+export const { useCreateDataProductLifecycleMutation, useGetAllDataProductLifecyclesQuery, useUpdateDataProductLifecycleMutation } = dataProductLifecyclesApiSlice;

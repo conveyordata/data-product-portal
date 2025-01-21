@@ -42,6 +42,10 @@ def upgrade() -> None:
             sa.ForeignKey("data_product_lifecycles.id"),
         ),
     )
+    op.execute(
+        "INSERT INTO data_product_lifecycles (id, name, value, color, is_default) "
+        "VALUES ('00000000-0000-0000-0000-000000000001', 'Draft', 0, 'grey', true)"
+    )
 
 
 def downgrade() -> None:

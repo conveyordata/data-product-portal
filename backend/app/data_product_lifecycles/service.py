@@ -28,3 +28,14 @@ class DataProductLifeCycleService:
         db.add(data_product_lifecycle)
         db.commit()
         return {"id": data_product_lifecycle.id}
+
+    def update_data_product_lifecycle(
+        self, data_product_lifecycle: DataProductLifeCycle, db: Session
+    ) -> dict[str, UUID]:
+        lifecycle = db.get(DataProductLifeCycleModel, data_product_lifecycle.id)
+        lifecycle.color = data_product_lifecycle.color
+        lifecycle.is_default = data_product_lifecycle.is_default
+        lifecycle.name = data_product_lifecycle.name
+        lifecycle.value = data_product_lifecycle.value
+        db.commit()
+        return {"id": data_product_lifecycle.id}

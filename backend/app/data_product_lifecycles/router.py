@@ -48,3 +48,33 @@ def create_data_product_lifecycle(
     return DataProductLifeCycleService().create_data_product_lifecycle(
         data_product_lifecycle, db
     )
+
+
+@router.put(
+    "",
+    responses={
+        200: {
+            "description": "Data Product lifecycle updated",
+            "content": {
+                "application/json": {
+                    "example": {"id": "random id of the updated data product lifecycle"}
+                }
+            },
+        },
+        404: {
+            "description": "Owner not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "User id for owner not found"}
+                }
+            },
+        },
+    },
+)
+def update_data_product_lifecycle(
+    data_product_lifecycle: DataProductLifeCycle,
+    db: Session = Depends(get_db_session),
+) -> dict[str, UUID]:
+    return DataProductLifeCycleService().update_data_product_lifecycle(
+        data_product_lifecycle, db
+    )
