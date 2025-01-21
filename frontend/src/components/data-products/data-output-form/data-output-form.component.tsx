@@ -1,4 +1,3 @@
-import { Checkbox, Form, FormInstance, FormProps, Input, Select, Space } from 'antd';
 import { Form, FormInstance, FormProps, Input, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
