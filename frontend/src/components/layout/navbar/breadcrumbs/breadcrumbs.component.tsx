@@ -204,6 +204,19 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
+                        case ApplicationPaths.DataProductSettings:
+                            Object.assign(breadcrumbItem, {
+                                title: (
+                                    <Space
+                                        classNames={{
+                                            item: styles.breadcrumbItem,
+                                        }}
+                                    >
+                                        {t('Data Product Settings')}
+                                    </Space>
+                                ),
+                            });
+                            break;
                         case ApplicationPaths.PlatformServiceConfigNew:
                             Object.assign(breadcrumbItem, {
                                 title: (

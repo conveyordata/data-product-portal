@@ -41,3 +41,24 @@ class DataProductSettingService:
             )
             db.add(DataProductSettingValueModel(**new_setting.parse_pydantic_schema()))
         db.commit()
+
+    def create_data_product_setting(
+        self, setting: DataProductSetting, db: Session
+    ) -> dict[str, UUID]:
+        setting = DataProductSettingModel(**setting.parse_pydantic_schema())
+        db.add(setting)
+        db.commit()
+        return {"id": setting.id}
+
+    def update_data_product_setting(
+        self, setting: DataProductSetting, db: Session
+    ) -> dict[str, UUID]:
+        db.query(DataProductSettingModel).filter_by(id=setting.id).update(
+            setting.parse_pydantic_schema()
+        )
+        db.commit()
+        return {"id": setting.id}
+
+    def delete_data_product_setting(self, setting_id: UUID, db: Session):
+        db.query(DataProductSettingModel).filter_by(id=setting_id).delete()
+        db.commit()
