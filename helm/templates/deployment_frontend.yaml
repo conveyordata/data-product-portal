@@ -55,7 +55,7 @@ spec:
           {{- end }}
           {{- if .Values.custom_translation_file_path }}
             - name: translation
-              mountPath: /app/dist/locales/en/translation.json
+              mountPath: /app/dist/locales/en-override/translation.json
               subPath: translation.json
           {{- end }}
       {{- with .Values.frontendvolumes }}
