@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.data_product_memberships.model import DataProductMembership
+from app.data_product_settings.model import DataProductSettingValue
 from app.data_products.schema import DataProduct as DataProductSchema
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
@@ -57,6 +58,12 @@ class DataProduct(Base, BaseORM):
         order_by="DataProductDatasetAssociation.status.desc()",
     )
     tags: Mapped[list[Tag]] = relationship(secondary=tag_data_product_table)
+    data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
+        "DataProductSettingValue",
+        back_populates="data_product",
+        cascade="all, delete-orphan",
+        order_by="DataProductSettingValue.data_product_id",
+    )
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
     type: Mapped["DataProductType"] = relationship(back_populates="data_products")
     business_area_id: Mapped[UUID] = Column(ForeignKey("business_areas.id"))

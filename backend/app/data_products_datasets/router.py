@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.data_products_datasets.service import DataProductDatasetService
 from app.database.database import get_db_session
 from app.dependencies import only_dataproduct_dataset_link_owners
@@ -49,3 +50,11 @@ def remove_data_product_link(
     return DataProductDatasetService().remove_data_product_link(
         id, db, authenticated_user
     )
+
+
+@router.get("/actions")
+def get_user_pending_actions(
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> list[DataProductDatasetAssociation]:
+    return DataProductDatasetService().get_user_pending_actions(db, authenticated_user)

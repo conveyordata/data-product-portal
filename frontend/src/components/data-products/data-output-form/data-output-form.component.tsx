@@ -1,4 +1,5 @@
 import { Checkbox, Form, FormInstance, FormProps, Input, Select, Space } from 'antd';
+import { Form, FormInstance, FormProps, Input, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -22,6 +23,7 @@ import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-servic
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
+import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
 
 type Props = {
     mode: 'create';
@@ -88,7 +90,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 await createDataOutput(request).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
-                navigate(createDataProductIdPath(dataProductId));
+                navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
 
                 form.resetFields();
             }
@@ -142,6 +144,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             });
         }
     }, [dataProductNameValue]);
+    const options = [{label: t('Product aligned'), value: false}, {label: t('Source aligned'), value: true}]
 
     return (
         <Form
@@ -156,6 +159,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             requiredMark={'optional'}
             labelWrap
             disabled={isLoading}
+            className={styles.form}
         >
             <Form.Item<DataOutputCreateFormSchema>
                 name={'name'}
@@ -197,8 +201,16 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>
                 name={'is_source_aligned'} valuePropName="checked"
+                label={t('Alignment')}
+                required
+                tooltip={t('If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.')}
             >
-                <Checkbox>{t('Source aligned')}</Checkbox>
+                <Select
+                    allowClear={false}
+                    defaultActiveFirstOption
+                    defaultValue={false}
+                    options={options}
+                />
             </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>

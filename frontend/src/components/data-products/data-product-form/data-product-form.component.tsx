@@ -1,4 +1,4 @@
-import { Button, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
+import { Button, Flex, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-product-form.module.scss';
 import {
@@ -178,7 +178,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             });
         }
     }, [currentDataProduct, mode]);
-
     return (
         <Form
             form={form}
@@ -295,6 +294,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             >
                 <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
+            {/* <DataProductSettings dataProductId={dataProductId}/> */}
             <Form.Item>
                 <Space>
                     <Button

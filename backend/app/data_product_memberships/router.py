@@ -1,11 +1,12 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.schema import DataProductMembershipCreate
+from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_product_memberships.service import DataProductMembershipService
 from app.database.database import get_db_session
 from app.dependencies import OnlyWithProductAccess, only_product_membership_owners
@@ -35,11 +36,12 @@ def create_data_product_membership(
 def request_data_product_membership(
     user_id: UUID,
     data_product_id: UUID,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductMembershipService().request_user_access_to_data_product(
-        user_id, data_product_id, authenticated_user, db
+        user_id, data_product_id, authenticated_user, db, background_tasks
     )
 
 
@@ -97,4 +99,14 @@ def update_data_product_role(
 ):
     return DataProductMembershipService().update_data_product_membership_role(
         id, membership_role, db
+    )
+
+
+@router.get("/actions")
+def get_user_pending_actions(
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> list[DataProductMembershipGet]:
+    return DataProductMembershipService().get_user_pending_actions(
+        db, authenticated_user
     )

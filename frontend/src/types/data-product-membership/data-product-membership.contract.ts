@@ -1,5 +1,6 @@
 import { UserContract } from '@/types/users';
 import { DataProductMembershipRoleType, DataProductMembershipStatus } from '@/types/data-product-membership';
+import { DataProductContract } from '../data-product';
 
 export interface DataProductMembershipContract {
     id: string;
@@ -8,6 +9,7 @@ export interface DataProductMembershipContract {
     role: DataProductMembershipRoleType;
     status: DataProductMembershipStatus;
     user: UserContract;
+    data_product: DataProductContract;
 }
 
 export interface DataProductMembershipModel extends DataProductMembershipContract {}
