@@ -1,6 +1,6 @@
 import { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
 import { TFunction } from 'i18next';
-import { Popover, TableColumnsType, Tag } from 'antd';
+import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import i18n from '@/i18n.ts';
 import styles from './datasets-table.module.scss';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
@@ -11,6 +11,8 @@ import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { DatasetStatus } from '@/types/dataset/dataset.contract';
+import { getBadgeStatus } from '@/utils/status.helper';
 
 const iconColumnWidth = 30;
 export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets: DatasetsGetContract }): TableColumnsType<DatasetsGetContract[0]> => {
@@ -20,6 +22,14 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             title: t('Id'),
             dataIndex: 'id',
             hidden: true,
+        },
+        {
+            title: undefined,
+            width: iconColumnWidth,
+            dataIndex: 'status',
+            render: (status: DatasetStatus) => {
+                return <TableCellItem icon={<Badge status={getBadgeStatus(status)}/>} />
+            },
         },
         {
             title: undefined,
