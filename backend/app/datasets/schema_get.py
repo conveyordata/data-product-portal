@@ -6,6 +6,7 @@ from pydantic import Field, computed_field
 from app.business_areas.schema import BusinessArea
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
+from app.data_product_lifecycles.schema import DataProductLifeCycle
 from app.data_products.schema_get import DataProductsGet
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
@@ -31,6 +32,7 @@ class DatasetGet(ORMModel):
     description: str
     owners: list[User]
     data_product_links: list[DataProductLink]
+    lifecycle: Optional[DataProductLifeCycle]
     status: DatasetStatus
     about: Optional[str] = None
     tags: list[Tag]

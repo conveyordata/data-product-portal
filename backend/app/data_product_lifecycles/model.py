@@ -10,6 +10,7 @@ from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
+    from app.datasets.model import Dataset
 
 
 class DataProductLifecycle(Base, BaseORM):
@@ -20,3 +21,4 @@ class DataProductLifecycle(Base, BaseORM):
     color = Column(String)
     is_default = Column(Boolean, server_default="false")
     data_products: Mapped[list["DataProduct"]] = relationship(lazy="noload")
+    datasets: Mapped[list["Dataset"]] = relationship(lazy="noload")
