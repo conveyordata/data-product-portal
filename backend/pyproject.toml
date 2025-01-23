@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "0.115.6"
+fastapi = "0.115.7"
 uvicorn = "^0.34.0"
 requests = "^2.31.0"
 gunicorn = "^23.0.0"
