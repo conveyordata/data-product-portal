@@ -12,7 +12,7 @@ import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item
 import { BusinessAreaGetResponse } from '@/types/business-area';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
-import { DataProductLifeCycle } from '@/types/data-product/data-product-contract';
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 
 const iconColumnWidth = 30;
 export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunction, dataProducts: DataProductsGetContract }): TableColumnsType<DataProductsGetContract[0]> => {
@@ -48,7 +48,7 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
         {
             title: t('Status'),
             dataIndex: 'lifecycle',
-            render: (lifecycle: DataProductLifeCycle) => {
+            render: (lifecycle: DataProductLifeCycleContract) => {
                 if (lifecycle !== null) {
                     return <Tag color={lifecycle.color || "default"} className={styles.tag}>{lifecycle.name}</Tag>
                 } else {
