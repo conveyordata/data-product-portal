@@ -9,6 +9,7 @@ from tests.factories import (
 )
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_product_membership import DataProductMembershipFactory
+from tests.factories.lifecycle import LifecycleFactory
 
 from app.data_product_memberships.enums import DataProductUserRole
 
@@ -18,6 +19,7 @@ ENDPOINT = "/api/data_products"
 @pytest.fixture
 def payload():
     business_area = BusinessAreaFactory()
+    lifecycle = LifecycleFactory()
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
     return {
@@ -34,6 +36,7 @@ def payload():
                 "role": DataProductUserRole.OWNER.value,
             }
         ],
+        "lifecycle_id": str(lifecycle.id),
         "business_area_id": str(business_area.id),
     }
 

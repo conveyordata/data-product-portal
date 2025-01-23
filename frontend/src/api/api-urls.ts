@@ -12,6 +12,7 @@ export enum ApiUrl {
     DataProductsDataOutput = '/api/data_products/:dataProductId/data_outputs',
     DataProductGet = '/api/data_products/:dataProductId',
     DataProductType = '/api/data_product_types',
+    DataProductLifecycle = '/api/data_product_lifecycles',
     DataProductSetting = '/api/data_product_settings',
     DataProductSettingValue = '/api/data_product_settings/:dataProductId/:dataProductSettingId',
     DataProductSignInUrl = '/api/data_products/:dataProductId/signin_url',

@@ -3,7 +3,7 @@ import styles from './sidebar.module.scss';
 import React from 'react';
 import { Link, useMatches } from 'react-router-dom';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import Icon, { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import Icon, { HomeOutlined, SettingOutlined, UnorderedListOutlined, BranchesOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
@@ -74,6 +74,11 @@ export const Sidebar = () => {
                         key: ApplicationPaths.DataProductSettings,
                         label: <Link to={ApplicationPaths.DataProductSettings}>{t('Data Product Settings')}</Link>,
                         icon: React.createElement(SettingOutlined),
+                    },
+                    {
+                        key: ApplicationPaths.DataProductLifecycles,
+                        label: <Link to={ApplicationPaths.DataProductLifecycles}>{t('Data Product Lifecycles')}</Link>,
+                        icon: React.createElement(BranchesOutlined),
                     }
                 ],
             },

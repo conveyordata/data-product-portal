@@ -27,6 +27,7 @@ import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constant
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
 import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
+import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { DataProductSettings } from '@/components/data-products/data-product-settings/data-product-settings.component.tsx';
 
 type Props = {
@@ -46,6 +47,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             skip: mode === 'create' || !dataProductId,
         },
     );
+
+    const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
     const { data: businessAreas = [], isFetching: isFetchingBusinessAreas } = useGetAllBusinessAreasQuery();
     const { data: dataProductTypes = [], isFetching: isFetchingDataProductTypes } = useGetAllDataProductTypesQuery();
     const { data: dataProductOwners = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
@@ -63,7 +66,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     );
     const canFillInForm = mode === 'create' || canEditForm;
 
-    const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues;
+    const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingLifecycles;
 
     const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
     const businessAreaSelectOptions = businessAreas.map((area) => ({ label: area.name, value: area.id }));
@@ -84,6 +87,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     external_id: values.external_id,
                     description: values.description,
                     memberships: owners,
+                    lifecycle_id: values.lifecycle_id,
                     type_id: values.type_id,
                     tags: tags,
                     business_area_id: values.business_area_id,
@@ -111,6 +115,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     external_id: values.external_id,
                     description: values.description,
                     type_id: values.type_id,
+                    lifecycle_id: values.lifecycle_id,
                     business_area_id: values.business_area_id,
                     tags: tags,
                     memberships,
@@ -173,6 +178,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 name: currentDataProduct.name,
                 description: currentDataProduct.description,
                 type_id: currentDataProduct.type.id,
+                lifecycle_id: currentDataProduct.lifecycle.id,
                 business_area_id: currentDataProduct.business_area.id,
                 tags: currentDataProduct.tags.map((tag) => tag.value),
                 owners: getDataProductOwnerIds(currentDataProduct),
@@ -249,6 +255,24 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     allowClear
                     showSearch
                     options={dataProductTypeSelectOptions}
+                    filterOption={selectFilterOptionByLabelAndValue}
+                />
+            </Form.Item>
+            <Form.Item<DataProductCreateFormSchema>
+                name={'lifecycle_id'}
+                label={t('Status')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please select the status of the data product'),
+                    },
+                ]}
+            >
+                <Select
+                    loading={isFetchingLifecycles}
+                    allowClear
+                    showSearch
+                    options={lifecycles.map((lifecycle) => ({value: lifecycle.id, label: lifecycle.name}))}
                     filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
