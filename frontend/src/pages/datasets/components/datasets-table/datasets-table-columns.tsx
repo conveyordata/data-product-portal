@@ -59,7 +59,6 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             sorter: sorter.stringSorter(ds => ds.name),
             width: "20%"
         },
-        //TODO Fix
         {
             title: t('Status'),
             dataIndex: 'lifecycle',
