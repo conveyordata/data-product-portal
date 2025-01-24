@@ -3,9 +3,10 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Table
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, relationship
+from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
+from app.data_product_lifecycles.model import DataProductLifecycle
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import DatasetAccessType
@@ -63,6 +64,8 @@ class Dataset(Base, BaseORM):
         back_populates="dataset",
         order_by="DataOutputDatasetAssociation.status.desc()",
     )
+    lifecycle_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_lifecycles.id"))
+    lifecycle: Mapped["DataProductLifecycle"] = relationship(back_populates="datasets")
     tags: Mapped[list[Tag]] = relationship(
         secondary=tag_dataset_table, cascade="all, delete-orphan", single_parent=True
     )

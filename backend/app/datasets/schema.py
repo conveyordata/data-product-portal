@@ -15,6 +15,7 @@ class BaseDataset(ORMModel):
     tags: list[TagCreate]
     access_type: DatasetAccessType
     about: Optional[str] = None
+    lifecycle_id: Optional[UUID] = None
 
 
 class DatasetAboutUpdate(ORMModel):

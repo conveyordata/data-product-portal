@@ -1,9 +1,8 @@
 import { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
 import { TFunction } from 'i18next';
-import { Popover, TableColumnsType } from 'antd';
+import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import i18n from '@/i18n.ts';
-import { getStatusLabel } from '@/utils/status.helper.ts';
-// import { TableStatusTag } from '@/components/list/table-status-tag/table-status-tag.component.tsx';
+import styles from './datasets-table.module.scss';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { BusinessAreaContract } from '@/types/business-area';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
@@ -11,6 +10,9 @@ import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { DatasetStatus } from '@/types/dataset/dataset.contract';
+import { getBadgeStatus } from '@/utils/status.helper';
 
 const iconColumnWidth = 30;
 export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets: DatasetsGetContract }): TableColumnsType<DatasetsGetContract[0]> => {
@@ -20,6 +22,14 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             title: t('Id'),
             dataIndex: 'id',
             hidden: true,
+        },
+        {
+            title: undefined,
+            width: iconColumnWidth,
+            dataIndex: 'status',
+            render: (status: DatasetStatus) => {
+                return <TableCellItem icon={<Badge status={getBadgeStatus(status)}/>} />
+            },
         },
         {
             title: undefined,
@@ -49,17 +59,20 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             sorter: sorter.stringSorter(ds => ds.name),
             width: "20%"
         },
-        // TODO Fix
-        // {
-        //     title: t('Status'),
-        //     dataIndex: 'status',
-        //     render: (status) => {
-        //         return <TableStatusTag status={status} />;
-        //     },
-        //     ...new FilterSettings(datasets, ds => getStatusLabel(ds.status)),
-        //     sorter: sorter.stringSorter(ds => getStatusLabel(ds.status)),
-        //     width: "12%"
-        // },
+        {
+            title: t('Status'),
+            dataIndex: 'lifecycle',
+            render: (lifecycle: DataProductLifeCycleContract) => {
+                if (lifecycle !== null) {
+                    return <Tag color={lifecycle.color || "default"} className={styles.tag}>{lifecycle.name}</Tag>
+                } else {
+                    return
+                }
+            },
+            ...new FilterSettings(datasets, dp => dp.lifecycle !== null ? dp.lifecycle.name : ''),
+            sorter: sorter.stringSorter(dp => dp.lifecycle !== null ? dp.lifecycle.name : ''),
+            width: "10%",
+        },
         {
             title: t('Business Area'),
             dataIndex: 'business_area',

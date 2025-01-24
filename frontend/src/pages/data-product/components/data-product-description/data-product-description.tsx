@@ -1,10 +1,10 @@
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import styles from './data-product-description.module.scss';
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DataProductLifeCycle } from '@/types/data-product/data-product-contract';
 
 type Props = {
-    lifecycle: DataProductLifeCycle;
+    lifecycle: DataProductLifeCycleContract;
     type: string;
     description: string;
     businessArea: string;

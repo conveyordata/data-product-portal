@@ -22,6 +22,7 @@ import { getDatasetOwnerIds, getIsDatasetOwner } from '@/utils/dataset-user.help
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 
 type Props = {
     mode: 'create' | 'edit';
@@ -49,6 +50,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
         skip: mode === 'create' || !datasetId,
     });
     const { data: businessAreas = [], isFetching: isFetchingBusinessAreas } = useGetAllBusinessAreasQuery();
+    const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
@@ -83,6 +85,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     owners: values.owners,
                     tags: tags,
                     business_area_id: values.business_area_id,
+                    lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
                 const response = await createDataset(request).unwrap();
@@ -102,6 +105,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     owners: values.owners,
                     tags: tags,
                     business_area_id: values.business_area_id,
+                    lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
 
@@ -161,6 +165,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 access_type: currentDataset.access_type,
                 business_area_id: currentDataset.business_area.id,
                 tags: currentDataset.tags.map((tag) => tag.value),
+                lifecycle_id: currentDataset.lifecycle.id,
                 owners: getDatasetOwnerIds(currentDataset),
             });
         }
@@ -237,6 +242,24 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     filterOption={selectFilterOptionByLabelAndValue}
                     allowClear
                     showSearch
+                />
+            </Form.Item>
+            <Form.Item<DatasetCreateFormSchema>
+                name={'lifecycle_id'}
+                label={t('Status')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please select the status of the dataset'),
+                    },
+                ]}
+            >
+                <Select
+                    loading={isFetchingLifecycles}
+                    allowClear
+                    showSearch
+                    options={lifecycles.map((lifecycle) => ({value: lifecycle.id, label: lifecycle.name}))}
+                    filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>

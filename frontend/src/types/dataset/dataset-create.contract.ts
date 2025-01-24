@@ -1,7 +1,7 @@
 import { DatasetContract } from '@/types/dataset';
 import { TagCreate } from '@/types/tag';
 
-export type DatasetCreateRequest = Pick<DatasetContract, 'description' | 'name' | 'access_type' | 'external_id'> & {
+export type DatasetCreateRequest = Pick<DatasetContract, 'lifecycle_id' | 'description' | 'name' | 'access_type' | 'external_id'> & {
     owners: string[];
     tags: TagCreate[];
     business_area_id: string;
