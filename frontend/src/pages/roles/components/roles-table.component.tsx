@@ -178,6 +178,7 @@ export function RolesTable() {
                 </Button>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
+                {/* TODO: rowKey is not guaranteed to be unique anymore - need to come up with something */}
                 <Table columns={columns} dataSource={data} pagination={false} rowKey={'permission'} />
             </Flex>
         </Flex>
