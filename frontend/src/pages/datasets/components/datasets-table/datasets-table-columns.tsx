@@ -34,7 +34,7 @@ export const getDatasetTableColumns = ({
             width: iconColumnWidth,
             dataIndex: 'status',
             render: (status: DatasetStatus) => {
-                return <TableCellItem icon={<Badge status={getBadgeStatus(status)}/>} />
+                return <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />;
             },
         },
         {
@@ -70,14 +70,18 @@ export const getDatasetTableColumns = ({
             dataIndex: 'lifecycle',
             render: (lifecycle: DataProductLifeCycleContract) => {
                 if (lifecycle !== null) {
-                    return <Tag color={lifecycle.color || "default"} className={styles.tag}>{lifecycle.name}</Tag>
+                    return (
+                        <Tag color={lifecycle.color || 'default'} className={styles.tag}>
+                            {lifecycle.name}
+                        </Tag>
+                    );
                 } else {
-                    return
+                    return;
                 }
             },
-            ...new FilterSettings(datasets, dp => dp.lifecycle !== null ? dp.lifecycle.name : ''),
-            sorter: sorter.stringSorter(dp => dp.lifecycle !== null ? dp.lifecycle.name : ''),
-            width: "10%",
+            ...new FilterSettings(datasets, (dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
+            sorter: sorter.stringSorter((dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
+            width: '10%',
         },
         {
             title: t('Business Area'),

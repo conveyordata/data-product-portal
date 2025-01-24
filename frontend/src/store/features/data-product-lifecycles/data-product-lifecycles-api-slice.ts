@@ -1,7 +1,11 @@
 import { ApiUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DataProductLifecycleCreateRequest, DataProductLifecycleCreateResponse, DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import {
+    DataProductLifecycleCreateRequest,
+    DataProductLifecycleCreateResponse,
+    DataProductLifeCycleContract,
+} from '@/types/data-product-lifecycle';
 import { request } from 'http';
 
 export const dataProductLifecycleTags: string[] = [TagTypes.DataProductLifecycle];
@@ -23,7 +27,10 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
                         : [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
             }),
             // TODO Fix proper typing
-            createDataProductLifecycle: builder.mutation<DataProductLifecycleCreateResponse, DataProductLifecycleCreateRequest>({
+            createDataProductLifecycle: builder.mutation<
+                DataProductLifecycleCreateResponse,
+                DataProductLifecycleCreateRequest
+            >({
                 query: (request) => ({
                     url: ApiUrl.DataProductLifecycle,
                     method: 'POST',
@@ -31,17 +38,20 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
                 }),
                 invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
             }),
-            updateDataProductLifecycle: builder.mutation<DataProductLifecycleCreateResponse, DataProductLifeCycleContract>({
+            updateDataProductLifecycle: builder.mutation<
+                DataProductLifecycleCreateResponse,
+                DataProductLifeCycleContract
+            >({
                 query: (request) => ({
                     url: ApiUrl.DataProductLifecycle,
                     method: 'PUT',
                     data: request,
                 }),
-                invalidatesTags: (_, _error, arg)  => [
+                invalidatesTags: (_, _error, arg) => [
                     { type: TagTypes.DataProductLifecycle as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.DataProductLifecycle as const, id: arg.id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST }
+                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
         }),
@@ -50,4 +60,8 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useCreateDataProductLifecycleMutation, useGetAllDataProductLifecyclesQuery, useUpdateDataProductLifecycleMutation } = dataProductLifecyclesApiSlice;
+export const {
+    useCreateDataProductLifecycleMutation,
+    useGetAllDataProductLifecyclesQuery,
+    useUpdateDataProductLifecycleMutation,
+} = dataProductLifecyclesApiSlice;

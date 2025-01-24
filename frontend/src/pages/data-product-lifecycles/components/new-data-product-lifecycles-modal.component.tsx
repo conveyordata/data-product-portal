@@ -5,6 +5,7 @@ import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import { generateExternalIdFromName } from '@/utils/external-id.helper';
 import { Button, Checkbox, ColorPicker, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
+
 const { Option } = Select;
 
 interface CreateLifecycleModalProps {

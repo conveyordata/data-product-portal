@@ -5,6 +5,7 @@ import { DataProductSettingContract } from '@/types/data-product-setting';
 import { generateExternalIdFromName } from '@/utils/external-id.helper';
 import { Button, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
+
 const { Option } = Select;
 
 interface CreateSettingModalProps {
