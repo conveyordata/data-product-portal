@@ -1,11 +1,10 @@
-import { Badge, TableColumnsType, Tag } from 'antd';
+import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import { DataProductsGetContract, DataProductStatus } from '@/types/data-product';
 import { TeamOutlined } from '@ant-design/icons';
 import i18n from '@/i18n';
 import { TFunction } from 'i18next';
 import styles from './data-products-table.module.scss';
-import { getBadgeStatus } from '@/utils/status.helper.ts';
-// import { TableStatusTag } from '@/components/list/table-status-tag/table-status-tag.component.tsx';
+import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { DataProductTypeContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
@@ -29,7 +28,11 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             dataIndex: 'status',
             width: iconColumnWidth,
             render: (status: DataProductStatus) => {
-                return <TableCellItem icon={<Badge status={getBadgeStatus(status)}/>} />
+                return <Popover content={getStatusLabel(status)} placement={'top'}>
+                <>
+                <TableCellItem icon={<Badge status={getBadgeStatus(status)}/>} />
+                </>
+            </Popover>
             },
         },
         {

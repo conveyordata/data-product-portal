@@ -4,6 +4,7 @@ import * as React from 'react';
 import { ComponentType, ReactNode } from 'react';
 import Icon from '@ant-design/icons';
 import { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
+import { TooltipPlacement } from 'antd/es/tooltip';
 
 type Props = {
     icon?: ReactNode;
@@ -17,6 +18,7 @@ type Props = {
     tooltip?: {
         title?: ReactNode;
         content?: ReactNode;
+        placement?: TooltipPlacement;
     };
 };
 
@@ -48,7 +50,7 @@ export function TableCellItem({ icon, text, textProps, textComponent, children, 
     );
 
     return hasEllipsis ? (
-        <Popover placement={'topLeft'} {...tooltip}>
+        <Popover placement={tooltip?.placement || "topLeft"} {...tooltip}>
             {tableCellItem}
         </Popover>
     ) : (
