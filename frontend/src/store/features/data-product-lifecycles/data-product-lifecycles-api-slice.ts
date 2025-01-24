@@ -39,7 +39,9 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
                 }),
                 invalidatesTags: (_, _error, arg)  => [
                     { type: TagTypes.DataProductLifecycle as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProductLifecycle as const, id: arg.id }
+                    { type: TagTypes.DataProductLifecycle as const, id: arg.id },
+                    { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST }
                 ],
             }),
         }),
