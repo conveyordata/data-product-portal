@@ -34,7 +34,7 @@
     "@tiptap/pm": "^2.11.3",
     "@tiptap/react": "^2.11.3",
     "@tiptap/starter-kit": "^2.11.3",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.10.10",
     "antd": "^5.23.2",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
@@ -52,7 +52,7 @@
     "sass": "^1.83.4"
   },
   "devDependencies": {
-    "@types/react": "^19.0.7",
+    "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@typescript-eslint/eslint-plugin": "^8.21.0",
     "@typescript-eslint/parser": "^8.21.0",
