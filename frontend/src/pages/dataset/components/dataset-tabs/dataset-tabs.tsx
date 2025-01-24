@@ -45,11 +45,10 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
 
     useEffect(() => {
         const hash = location.hash.slice(1);
-        if(hash) {
+        if (hash) {
             setActiveTab(hash);
         }
-    }, [location])
-
+    }, [location]);
 
     const tabs: Tab[] = useMemo(() => {
         return [
@@ -83,7 +82,7 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 icon: <PartitionOutlined />,
                 children: (
                     <ReactFlowProvider>
-                        <Explorer id={datasetId} type={"dataset"}/>
+                        <Explorer id={datasetId} type={'dataset'} />
                     </ReactFlowProvider>
                 ),
             },

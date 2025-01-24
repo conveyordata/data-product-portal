@@ -23,10 +23,10 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 export function DataOutput() {
     const { t } = useTranslation();
     const currentUser = useSelector(selectCurrentUser);
-    const { dataOutputId = '', dataProductId = ''} = useParams();
+    const { dataOutputId = '', dataProductId = '' } = useParams();
     const { data: dataOutput, isLoading } = useGetDataOutputByIdQuery(dataOutputId, { skip: !dataOutputId });
     const navigate = useNavigate();
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId, {skip: !dataProductId});
+    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
     const dataOutputTypeIcon = useMemo(() => {
         return getDataOutputIcon(dataOutput?.configuration.configuration_type);
     }, [dataOutput?.id, dataOutput?.configuration.configuration_type]);
@@ -39,7 +39,11 @@ export function DataOutput() {
     function navigateToEditPage() {
         if (isCurrentDataOutputOwner && dataOutputId && dataOutput && !isLoading) {
             navigate(
-                getDynamicRoutePath(ApplicationPaths.DataOutputEdit, DynamicPathParams.DataOutputId, dataOutputId).replace(":" + DynamicPathParams.DataProductId, dataOutput.owner.id),
+                getDynamicRoutePath(
+                    ApplicationPaths.DataOutputEdit,
+                    DynamicPathParams.DataOutputId,
+                    dataOutputId,
+                ).replace(':' + DynamicPathParams.DataProductId, dataOutput.owner.id),
             );
         }
     }
@@ -68,8 +72,7 @@ export function DataOutput() {
                             {dataOutput?.name}
                         </Typography.Title>
                     </Space>
-                    {isCurrentDataOutputOwner &&
-                    (
+                    {isCurrentDataOutputOwner && (
                         <Space className={styles.editIcon}>
                             <CircleIconButton
                                 icon={<SettingOutlined />}

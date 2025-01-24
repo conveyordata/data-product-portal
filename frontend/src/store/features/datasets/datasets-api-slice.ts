@@ -127,7 +127,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
             query: (id) => ({
                 url: buildUrl(ApiUrl.DatasetGraph, { datasetId: id }),
                 method: 'GET',
-            })
+            }),
         }),
         removeUserFromDataset: builder.mutation<
             void,

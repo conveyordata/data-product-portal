@@ -6,7 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { getDataProductTableColumns } from './data-product-settings-table-columns.tsx';
 import type { FormInstance } from 'antd';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import { useGetAllDataProductSettingsQuery, useRemoveDataProductSettingMutation, useUpdateDataProductSettingMutation } from '@/store/features/data-product-settings/data-product-settings-api-slice';
+import {
+    useGetAllDataProductSettingsQuery,
+    useRemoveDataProductSettingMutation,
+    useUpdateDataProductSettingMutation,
+} from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { DataProductSettingContract } from '@/types/data-product-setting';
 import React from 'react';
 import { useModal } from '@/hooks/use-modal.tsx';
@@ -20,9 +24,12 @@ export function DataProductSettingsTable() {
     const [editDataProductSetting, { isLoading: isEditing }] = useUpdateDataProductSettingMutation();
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
-    const [onRemoveDataProductSetting, {isLoading: isRemoving}] = useRemoveDataProductSettingMutation();
+    const [onRemoveDataProductSetting, { isLoading: isRemoving }] = useRemoveDataProductSettingMutation();
 
-    const columns = useMemo(() => getDataProductTableColumns({ t, handleOpen, onRemoveDataProductSetting}), [t, dataProductSettings]);
+    const columns = useMemo(
+        () => getDataProductTableColumns({ t, handleOpen, onRemoveDataProductSetting }),
+        [t, dataProductSettings],
+    );
 
     const onChange: TableProps<DataProductSettingContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
@@ -30,26 +37,26 @@ export function DataProductSettingsTable() {
 
     const EditableContext = React.createContext<FormInstance<any> | null>(null);
     const EditableRow = ({ ...props }) => {
-      const [form] = Form.useForm();
-      return (
-        <Form form={form} component={false}>
-          <EditableContext.Provider value={form}>
-            <tr {...props} />
-          </EditableContext.Provider>
-        </Form>
-      );
+        const [form] = Form.useForm();
+        return (
+            <Form form={form} component={false}>
+                <EditableContext.Provider value={form}>
+                    <tr {...props} />
+                </EditableContext.Provider>
+            </Form>
+        );
     };
     const handleAdd = () => {
-        handleOpen()
+        handleOpen();
     };
-      const handleSave = async (row: DataProductSettingContract) => {
+    const handleSave = async (row: DataProductSettingContract) => {
         try {
-          await editDataProductSetting(row)
-          dispatchMessage({ content: t('Data product setting updated successfully'), type: 'success' });
+            await editDataProductSetting(row);
+            dispatchMessage({ content: t('Data product setting updated successfully'), type: 'success' });
         } catch (error) {
-          dispatchMessage({ content: t('Could not update data product setting'), type: 'error' });
+            dispatchMessage({ content: t('Could not update data product setting'), type: 'error' });
         }
-      };
+    };
     interface EditableCellProps {
         title: React.ReactNode;
         editable: boolean;
@@ -67,91 +74,97 @@ export function DataProductSettingsTable() {
         record,
         handleSave,
         ...restProps
-      }) => {
+    }) => {
         const [editing, setEditing] = useState(false);
 
         const inputRef = useRef<InputRef>(null);
         const form = useContext(EditableContext);
 
         useEffect(() => {
-          if (editing) {
-            inputRef.current?.focus();
-          }
+            if (editing) {
+                inputRef.current?.focus();
+            }
         }, [editing]);
         const toggleEdit = () => {
-          setEditing(!editing);
-          if (form) {
-            form.setFieldsValue({
-              [dataIndex]: record[dataIndex as keyof DataProductSettingContract],
-            });
-          }
+            setEditing(!editing);
+            if (form) {
+                form.setFieldsValue({
+                    [dataIndex]: record[dataIndex as keyof DataProductSettingContract],
+                });
+            }
         };
         const save = async () => {
-          try {
-            if (form) {
-              const values = await form.validateFields();
-              toggleEdit();
-              handleSave({
-                ...record,
-                ...values,
-              });
+            try {
+                if (form) {
+                    const values = await form.validateFields();
+                    toggleEdit();
+                    handleSave({
+                        ...record,
+                        ...values,
+                    });
+                }
+            } catch (errInfo) {
+                console.log('Save failed:', errInfo);
             }
-          } catch (errInfo) {
-            console.log('Save failed:', errInfo);
-          }
         };
         let childNode = children;
         if (editable) {
-          childNode = editing ? (
-            <Form.Item
-              style={{
-                margin: 0,
-              }}
-              name={dataIndex}
-              rules={[
-                {
-                  required: true,
-                  message: `${title} is required.`,
-                },
-              ]}
-            >
-              <Input ref={inputRef} onPressEnter={save} onBlur={save} />
-            </Form.Item>
-          ) : (
-            <div
-              className="editable-cell-value-wrap"
-              style={{
-                paddingInlineEnd: 24,
-              }}
-              onClick={toggleEdit}
-            >
-              {children}
-            </div>
-          );
+            childNode = editing ? (
+                <Form.Item
+                    style={{
+                        margin: 0,
+                    }}
+                    name={dataIndex}
+                    rules={[
+                        {
+                            required: true,
+                            message: `${title} is required.`,
+                        },
+                    ]}
+                >
+                    <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+                </Form.Item>
+            ) : (
+                <div
+                    className="editable-cell-value-wrap"
+                    style={{
+                        paddingInlineEnd: 24,
+                    }}
+                    onClick={toggleEdit}
+                >
+                    {children}
+                </div>
+            );
         }
         return <td {...restProps}>{childNode}</td>;
-      };
+    };
     const components = {
         body: {
-          row: EditableRow,
-          cell: EditableCell,
+            row: EditableRow,
+            cell: EditableCell,
         },
-      };
-      const editableColumns = columns.map((col: ColumnGroupType<DataProductSettingContract>&{editable?: boolean}&{dataIndex: number} | ColumnType<DataProductSettingContract>&{editable?: boolean}) => {
-        if (!col.editable) {
-          return col;
-        }
-        return {
-          ...col,
-          onCell: (record: DataProductSettingContract) => ({
-            record,
-            editable: col.editable,
-            dataIndex: col.dataIndex,
-            title: col.title as string,
-            handleSave,
-          }),
-        };
-      });
+    };
+    const editableColumns = columns.map(
+        (
+            col:
+                | (ColumnGroupType<DataProductSettingContract> & { editable?: boolean } & { dataIndex: number })
+                | (ColumnType<DataProductSettingContract> & { editable?: boolean }),
+        ) => {
+            if (!col.editable) {
+                return col;
+            }
+            return {
+                ...col,
+                onCell: (record: DataProductSettingContract) => ({
+                    record,
+                    editable: col.editable,
+                    dataIndex: col.dataIndex,
+                    title: col.title as string,
+                    handleSave,
+                }),
+            };
+        },
+    );
     return (
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.searchContainer}>

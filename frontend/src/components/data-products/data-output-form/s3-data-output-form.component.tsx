@@ -1,10 +1,6 @@
 import { Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
-import {
-    DataOutputConfiguration,
-    DataOutputCreateFormSchema,
-    S3DataOutput,
-} from '@/types/data-output';
+import { DataOutputConfiguration, DataOutputCreateFormSchema, S3DataOutput } from '@/types/data-output';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { useEffect } from 'react';
 
@@ -24,16 +20,18 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
     const dataProductNameValue: string = Form.useWatch('temp_path', form);
     const bucketValue: string = Form.useWatch('bucket', form);
     useEffect(() => {
-        let path = external_id + "/"
+        let path = external_id + '/';
         if (sourceAligned) {
-            path = ""
+            path = '';
         }
         if (dataProductNameValue) {
             form.setFieldsValue({ path: path + generateExternalIdFromName(dataProductNameValue) });
-            form.setFieldsValue({ result: bucketValue + "/" + path + generateExternalIdFromName(dataProductNameValue) });
+            form.setFieldsValue({
+                result: bucketValue + '/' + path + generateExternalIdFromName(dataProductNameValue),
+            });
         } else {
             form.setFieldsValue({ path: path });
-            form.setFieldsValue({ result: bucketValue + "/" + path });
+            form.setFieldsValue({ result: bucketValue + '/' + path });
         }
     }, [dataProductNameValue, sourceAligned, bucketValue]);
 
@@ -49,11 +47,7 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
                     },
                 ]}
             >
-                <Select
-                    allowClear
-                    showSearch
-                    options={bucketOptions}
-                />
+                <Select allowClear showSearch options={bucketOptions} />
             </Form.Item>
             <Form.Item<S3DataOutput & { temp_path: string }>
                 name={'temp_path'}
@@ -68,14 +62,10 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
             >
                 <Input />
             </Form.Item>
-            <Form.Item<S3DataOutput>
-                required
-                hidden={true}
-                name={'path'}
-            >
+            <Form.Item<S3DataOutput> required hidden={true} name={'path'}>
                 <Input disabled />
             </Form.Item>
-            <Form.Item<S3DataOutput & {result: string}>
+            <Form.Item<S3DataOutput & { result: string }>
                 required
                 name={'result'}
                 label={t('Resulting path')}

@@ -21,7 +21,7 @@ export function UserMenu() {
     const {
         token: { colorErrorBorder, colorPrimary },
     } = theme.useToken();
-    const userInitials = user?.first_name?.charAt(0) + (user?.last_name ? user.last_name.charAt(0) : "");
+    const userInitials = user?.first_name?.charAt(0) + (user?.last_name ? user.last_name.charAt(0) : '');
 
     const handleLogout = async () => {
         if (isAuthDisabled) {
@@ -43,17 +43,26 @@ export function UserMenu() {
     return (
         <Flex className={styles.userMenuContainer}>
             <Flex>
-                <Notifications/>
+                <Notifications />
             </Flex>
             <Flex className={styles.avatarWrapper}>
-                <Badge count={user?.is_admin ? t('admin') : 0} showZero={false} color={colorPrimary} style={{fontSize: 10}} size="small">
+                <Badge
+                    count={user?.is_admin ? t('admin') : 0}
+                    showZero={false}
+                    color={colorPrimary}
+                    style={{ fontSize: 10 }}
+                    size="small"
+                >
                     <Avatar style={{ backgroundColor: colorErrorBorder }} className={styles.avatar}>
                         {userInitials || <UserOutlined />}
                     </Avatar>
                 </Badge>
 
                 <Typography.Text strong className={styles.userGreeting}>
-                    {t('{{first_name}} {{last_name}}', { first_name: user?.first_name || usernameFallback, last_name: user?.last_name || usernameFallback })}
+                    {t('{{first_name}} {{last_name}}', {
+                        first_name: user?.first_name || usernameFallback,
+                        last_name: user?.last_name || usernameFallback,
+                    })}
                 </Typography.Text>
             </Flex>
             <Flex className={headerStyles.headerActionsWrapper}>

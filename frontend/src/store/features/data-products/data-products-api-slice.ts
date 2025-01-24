@@ -71,7 +71,7 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductGraph, { dataProductId: id }),
                 method: 'GET',
-            })
+            }),
         }),
         createDataProduct: builder.mutation<DataProductCreateResponse, DataProductCreate>({
             query: (dataProduct) => ({
@@ -136,7 +136,7 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             query: ({ id, environment }) => ({
                 url: buildUrl(ApiUrl.DataProductDatabricksWorkspaceUrl, { dataProductId: id }),
                 method: 'GET',
-                params: {environment}
+                params: { environment },
             }),
         }),
         requestDatasetAccessForDataProduct: builder.mutation<

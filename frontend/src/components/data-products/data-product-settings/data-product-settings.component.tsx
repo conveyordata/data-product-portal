@@ -26,8 +26,9 @@ type Props = {
 
 export function DataProductSettings({ dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(dataProductId || '', {skip:
-        !dataProductId});
+    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(dataProductId || '', {
+        skip: !dataProductId,
+    });
     const { data: settings, isFetching } = useGetAllDataProductSettingsQuery();
     const [updateSetting] = useCreateDataProductSettingValueMutation();
     const [form] = Form.useForm();

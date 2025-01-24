@@ -5,6 +5,7 @@ import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import { generateExternalIdFromName } from '@/utils/external-id.helper';
 import { Button, Checkbox, ColorPicker, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
+
 const { Option } = Select;
 
 interface CreateLifecycleModalProps {
@@ -15,19 +16,19 @@ interface CreateLifecycleModalProps {
 
 export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOpen, t, onClose }) => {
     const [form] = Form.useForm();
-    const [createDataProductLifecycle, {isLoading: isCreating}] = useCreateDataProductLifecycleMutation();
+    const [createDataProductLifecycle, { isLoading: isCreating }] = useCreateDataProductLifecycleMutation();
 
     const handleFinish = async (values: any) => {
         try {
             const newLifecycle: DataProductLifeCycleContract = {
-                ...values, color: values.color.toHexString()
+                ...values,
+                color: values.color.toHexString(),
             };
             await createDataProductLifecycle(newLifecycle);
             dispatchMessage({ content: t('Data product lifecycle created successfully'), type: 'success' });
             form.resetFields();
             onClose();
-        }
-        catch (_e) {
+        } catch (_e) {
             const errorMessage = t('Failed to create data product lifecycle');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
@@ -36,7 +37,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
     return (
         <FormModal
             isOpen={isOpen}
-            title={t("Create New Data Product Lifecycle")}
+            title={t('Create New Data Product Lifecycle')}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -47,7 +48,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
             }}
             footer={[
                 <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {t("Create")}
+                    {t('Create')}
                 </Button>,
                 <Button
                     key="cancel"
@@ -56,7 +57,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                         onClose();
                     }}
                 >
-                    {t("Cancel")}
+                    {t('Cancel')}
                 </Button>,
             ]}
         >
@@ -68,33 +69,37 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                     type: 'checkbox',
                 }}
             >
-                <Form.Item name="name" label={t("Name")} rules={[{ required: true, message: t("Please input the name!") }]}>
+                <Form.Item
+                    name="name"
+                    label={t('Name')}
+                    rules={[{ required: true, message: t('Please input the name!') }]}
+                >
                     <Input />
                 </Form.Item>
 
                 <Form.Item
                     name="value"
-                    label={t("Value")}
-                    rules={[{ required: true, message: t("Please input the value") }]}
+                    label={t('Value')}
+                    rules={[{ required: true, message: t('Please input the value') }]}
                 >
                     <Input />
                 </Form.Item>
 
                 <Form.Item
                     name="color"
-                    label={t("Color")}
-                    rules={[{ required: true, message: t("Please pick a color") }]}
+                    label={t('Color')}
+                    rules={[{ required: true, message: t('Please pick a color') }]}
                 >
                     <ColorPicker />
                 </Form.Item>
                 <Form.Item
                     name="is_default"
-                    label={t("Is Default")}
-                    tooltip={t("You can only have one default lifecycle")}
-                    rules={[{ required: true, message: t("You can only have one default lifecycle") }]}
+                    label={t('Is Default')}
+                    tooltip={t('You can only have one default lifecycle')}
+                    rules={[{ required: true, message: t('You can only have one default lifecycle') }]}
                     initialValue={false}
                 >
-                    <Checkbox checked={false} disabled={true}/>
+                    <Checkbox checked={false} disabled={true} />
                 </Form.Item>
             </Form>
         </FormModal>
