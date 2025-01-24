@@ -11,7 +11,7 @@ fastapi = "0.115.7"
 uvicorn = "^0.34.0"
 requests = "^2.31.0"
 gunicorn = "^23.0.0"
-pydantic = { version = "^2.10.5", extras = ['email'] }
+pydantic = { version = "^2.10.6", extras = ['email'] }
 python-dotenv = "^1.0.1"
 sqlalchemy = "^2.0.37"
 psycopg2-binary = "^2.9.10"
