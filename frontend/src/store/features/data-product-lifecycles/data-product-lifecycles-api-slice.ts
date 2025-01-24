@@ -6,7 +6,6 @@ import {
     DataProductLifecycleCreateResponse,
     DataProductLifeCycleContract,
 } from '@/types/data-product-lifecycle';
-import { request } from 'http';
 
 export const dataProductLifecycleTags: string[] = [TagTypes.DataProductLifecycle];
 export const dataProductLifecyclesApiSlice = baseApiSlice
@@ -55,12 +54,7 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
                     method: 'PUT',
                     data: request,
                 }),
-                invalidatesTags: (_, _error, arg) => [
-                    { type: TagTypes.DataProductLifecycle as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProductLifecycle as const, id: arg.id },
-                    { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                ],
+                invalidatesTags: [{ type: TagTypes.DataProductLifecycle as const, id: STATIC_TAG_ID.LIST }],
             }),
         }),
         overrideExisting: false,
