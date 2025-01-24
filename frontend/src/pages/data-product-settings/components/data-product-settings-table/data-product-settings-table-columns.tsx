@@ -12,12 +12,11 @@ type Props = {
     isDisabled?: boolean;
     handleOpen: (id: string) => void;
     onRemoveDataProductSetting: (id: string) => void;
-}
+};
 
-export type EditableColumn =
-    DataProductSettingContract & {
-        editable: boolean
-    }
+export type EditableColumn = DataProductSettingContract & {
+    editable: boolean;
+};
 
 interface EditableColumnType<T> extends ColumnType<T> {
     editable?: boolean;
@@ -27,8 +26,8 @@ export const getDataProductTableColumns = ({
     isDisabled,
     isLoading,
     onRemoveDataProductSetting,
-}: Props): EditableColumnType<DataProductSettingContract>[]  => {
-    const sorter = new Sorter<DataProductSettingContract>;
+}: Props): EditableColumnType<DataProductSettingContract>[] => {
+    const sorter = new Sorter<DataProductSettingContract>();
     return [
         {
             title: t('Id'),
@@ -44,10 +43,10 @@ export const getDataProductTableColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             ellipsis: {
-            showTitle: false,
+                showTitle: false,
             },
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
-            sorter: sorter.stringSorter(dp => dp.name),
+            sorter: sorter.stringSorter((dp) => dp.name),
             defaultSortOrder: 'ascend',
             editable: true,
         },
@@ -55,20 +54,20 @@ export const getDataProductTableColumns = ({
             title: t('Type'),
             dataIndex: 'type',
             ellipsis: {
-            showTitle: false,
+                showTitle: false,
             },
             render: (type: string) => <TableCellItem text={type} />,
-            sorter: sorter.stringSorter(dp => dp.type),
+            sorter: sorter.stringSorter((dp) => dp.type),
             defaultSortOrder: 'ascend',
         },
         {
             title: t('Tooltip'),
             dataIndex: 'tooltip',
             ellipsis: {
-            showTitle: false,
+                showTitle: false,
             },
-            render: (tooltip: string) => <TableCellItem text={tooltip} tooltip={{content: tooltip}}/>,
-            sorter: sorter.stringSorter(dp => dp.tooltip),
+            render: (tooltip: string) => <TableCellItem text={tooltip} tooltip={{ content: tooltip }} />,
+            sorter: sorter.stringSorter((dp) => dp.tooltip),
             defaultSortOrder: 'ascend',
             editable: true,
         },
@@ -76,10 +75,10 @@ export const getDataProductTableColumns = ({
             title: t('Divider'),
             dataIndex: 'divider',
             ellipsis: {
-            showTitle: false,
+                showTitle: false,
             },
             render: (divider: string) => <TableCellItem text={divider} />,
-            sorter: sorter.stringSorter(dp => dp.divider),
+            sorter: sorter.stringSorter((dp) => dp.divider),
             defaultSortOrder: 'ascend',
             editable: true,
         },
@@ -87,10 +86,10 @@ export const getDataProductTableColumns = ({
             title: t('Default'),
             dataIndex: 'default',
             ellipsis: {
-            showTitle: false,
+                showTitle: false,
             },
             render: (defaultVal: string) => <TableCellItem text={defaultVal} />,
-            sorter: sorter.stringSorter(dp => dp.default),
+            sorter: sorter.stringSorter((dp) => dp.default),
             defaultSortOrder: 'ascend',
             editable: true,
         },
@@ -98,10 +97,10 @@ export const getDataProductTableColumns = ({
             title: t('Order'),
             dataIndex: 'order',
             ellipsis: {
-            showTitle: false,
+                showTitle: false,
             },
             render: (order: number) => <TableCellItem text={order.toString()} />,
-            sorter: sorter.numberSorter(dp => dp.order),
+            sorter: sorter.numberSorter((dp) => dp.order),
             defaultSortOrder: 'ascend',
             editable: true,
         },
@@ -112,27 +111,25 @@ export const getDataProductTableColumns = ({
             render: (_, { id }) => {
                 return (
                     <Flex vertical>
-                    <Popconfirm
-                        title={t('Remove')}
-                        description={t('Are you sure you want to delete the data product setting? This will remove the setting from all the data products')}
-                        onConfirm={() => onRemoveDataProductSetting(id)}
-                        placement={'leftTop'}
-                        okText={t('Confirm')}
-                        cancelText={t('Cancel')}
-                        okButtonProps={{ loading: isLoading }}
-                        autoAdjustOverflow={true}
-                    >
-                    <Button
-                        loading={isLoading}
-                        disabled={isLoading || isDisabled}
-                        type={'link'}
-                    >
-                        {t('Remove')}
-                    </Button>
-                    </Popconfirm>
+                        <Popconfirm
+                            title={t('Remove')}
+                            description={t(
+                                'Are you sure you want to delete the data product setting? This will remove the setting from all the data products',
+                            )}
+                            onConfirm={() => onRemoveDataProductSetting(id)}
+                            placement={'leftTop'}
+                            okText={t('Confirm')}
+                            cancelText={t('Cancel')}
+                            okButtonProps={{ loading: isLoading }}
+                            autoAdjustOverflow={true}
+                        >
+                            <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                {t('Remove')}
+                            </Button>
+                        </Popconfirm>
                     </Flex>
                 );
             },
-          },
+        },
     ];
 };

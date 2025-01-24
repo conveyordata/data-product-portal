@@ -1,15 +1,15 @@
-import { CustomNodeTypes } from "@/components/charts/node-editor/node-types"
+import { CustomNodeTypes } from '@/components/charts/node-editor/node-types';
 
 export interface NodeContract {
-    id: string
+    id: string;
     data: {
-        id: string,
-        name: string
-        icon_key: string | undefined
-        link_to_id: string | undefined
-    }
-    isMain: boolean
-    type: CustomNodeTypes
+        id: string;
+        name: string;
+        icon_key: string | undefined;
+        link_to_id: string | undefined;
+    };
+    isMain: boolean;
+    type: CustomNodeTypes;
 }
 
 export interface EdgeContract {

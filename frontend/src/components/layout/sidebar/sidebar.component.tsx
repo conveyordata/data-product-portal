@@ -79,7 +79,7 @@ export const Sidebar = () => {
                         key: ApplicationPaths.DataProductLifecycles,
                         label: <Link to={ApplicationPaths.DataProductLifecycles}>{t('Data Product Lifecycles')}</Link>,
                         icon: React.createElement(BranchesOutlined),
-                    }
+                    },
                 ],
             },
         ];
@@ -99,7 +99,7 @@ export const Sidebar = () => {
                     <Space className={styles.logoWrapper}>
                         <Link to={ApplicationPaths.Home}>
                             <SidebarLogo />
-                            {version ? version.version : ""}
+                            {version ? version.version : ''}
                         </Link>
                     </Space>
                 </Flex>

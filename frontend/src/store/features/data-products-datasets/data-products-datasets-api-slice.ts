@@ -64,7 +64,7 @@ export const dataProductsDatasetsApiSlice = baseApiSlice
             }),
             getDataProductDatasetPendingActions: builder.query<DataProductDatasetContract[], void>({
                 query: () => ({
-                    url: buildUrl(ApiUrl.DataProductDatasetPendingActions, { }),
+                    url: buildUrl(ApiUrl.DataProductDatasetPendingActions, {}),
                     method: 'GET',
                 }),
                 providesTags: (_, __) => [
@@ -82,5 +82,5 @@ export const {
     useApproveDataProductLinkMutation,
     useRejectDataProductLinkMutation,
     useRemoveDataProductDatasetLinkMutation,
-    useGetDataProductDatasetPendingActionsQuery
+    useGetDataProductDatasetPendingActionsQuery,
 } = dataProductsDatasetsApiSlice;

@@ -66,8 +66,8 @@ export const getDatasetDataProductsColumns = ({
                 );
             },
             width: '100%',
-            ... new FilterSettings(dataProductLinks, dpl => getDataProductDatasetLinkStatusLabel(dpl.status)),
-            sorter: sorter.stringSorter(dpl => dpl.data_product.name),
+            ...new FilterSettings(dataProductLinks, (dpl) => getDataProductDatasetLinkStatusLabel(dpl.status)),
+            sorter: sorter.stringSorter((dpl) => dpl.data_product.name),
             defaultSortOrder: 'ascend',
         },
         {

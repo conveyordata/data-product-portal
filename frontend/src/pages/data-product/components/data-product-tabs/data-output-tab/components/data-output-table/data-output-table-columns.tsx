@@ -41,15 +41,17 @@ export const getDataProductDataOutputsColumns = ({
                     <TableCellAvatar
                         popover={{ title: name, content: description }}
                         linkTo={createDataOutputIdPath(id, owner_id)}
-                        icon={<CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration.configuration_type)!} />}
+                        icon={
+                            <CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration.configuration_type)!} />
+                        }
                         title={name}
                         subtitle={
                             <Flex vertical>
-                             <Badge
-                                     status={getBadgeStatus(status)}
-                               text={getStatusLabel(status)}
-                                 className={styles.noSelect}
-                             />
+                                <Badge
+                                    status={getBadgeStatus(status)}
+                                    text={getStatusLabel(status)}
+                                    className={styles.noSelect}
+                                />
                             </Flex>
                         }
                     />
@@ -60,16 +62,21 @@ export const getDataProductDataOutputsColumns = ({
         {
             title: t('Datasets'),
             render: (_, { dataset_links }) => {
-                return <TableCellItem icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />} text={i18n.t('linked to {{count}} datasets', { count: dataset_links.length })} />;
+                return (
+                    <TableCellItem
+                        icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
+                        text={i18n.t('linked to {{count}} datasets', { count: dataset_links.length })}
+                    />
+                );
             },
-            width: '30%'
+            width: '30%',
         },
         {
             title: t('Technical information'),
-            render: (_, {id}) => {
-                return <DataOutputSubtitle data_output_id={id} />
+            render: (_, { id }) => {
+                return <DataOutputSubtitle data_output_id={id} />;
             },
-            width: '30%'
+            width: '30%',
         },
         {
             title: t('Actions'),
@@ -78,24 +85,22 @@ export const getDataProductDataOutputsColumns = ({
             render: (_, { id, name }) => {
                 return (
                     <Flex vertical>
-                    <Popconfirm
-                        title={t('Remove')}
-                        description={t('Are you sure you want to delete the data output? This can have impact on downstream dependencies')}
-                        onConfirm={() => onRemoveDataOutput(id, name)}
-                        placement={'leftTop'}
-                        okText={t('Confirm')}
-                        cancelText={t('Cancel')}
-                        okButtonProps={{ loading: isLoading }}
-                        autoAdjustOverflow={true}
-                    >
-                    <Button
-                        loading={isLoading}
-                        disabled={isLoading || isDisabled}
-                        type={'link'}
-                    >
-                        {t('Remove')}
-                    </Button>
-                    </Popconfirm>
+                        <Popconfirm
+                            title={t('Remove')}
+                            description={t(
+                                'Are you sure you want to delete the data output? This can have impact on downstream dependencies',
+                            )}
+                            onConfirm={() => onRemoveDataOutput(id, name)}
+                            placement={'leftTop'}
+                            okText={t('Confirm')}
+                            cancelText={t('Cancel')}
+                            okButtonProps={{ loading: isLoading }}
+                            autoAdjustOverflow={true}
+                        >
+                            <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                {t('Remove')}
+                            </Button>
+                        </Popconfirm>
                     </Flex>
                 );
             },

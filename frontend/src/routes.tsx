@@ -100,23 +100,23 @@ const router = createBrowserRouter([
                     },
                     {
                         path: ApplicationPaths.DataProductSettings,
-                        element: <ProtectedRoute/>,
+                        element: <ProtectedRoute />,
                         children: [
                             {
                                 index: true,
                                 element: <DataProductSettings />,
                             },
-                        ]
+                        ],
                     },
                     {
                         path: ApplicationPaths.DataProductLifecycles,
-                        element: <ProtectedRoute/>,
+                        element: <ProtectedRoute />,
                         children: [
                             {
                                 index: true,
                                 element: <DataProductLifecycles />,
                             },
-                        ]
+                        ],
                     },
                     {
                         path: ApplicationPaths.PlatformsConfigs,

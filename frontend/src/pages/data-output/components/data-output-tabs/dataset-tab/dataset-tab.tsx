@@ -9,7 +9,7 @@ import { SearchForm } from '@/types/shared';
 import styles from './dataset-tab.module.scss';
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
-import { AddDatasetPopup } from '../../../../data-product/components/data-product-tabs/data-output-tab/components/add-dataset-popup/add-dataset-popup.tsx'
+import { AddDatasetPopup } from '../../../../data-product/components/data-product-tabs/data-output-tab/components/add-dataset-popup/add-dataset-popup.tsx';
 import { DataOutputDatasetLink } from '@/types/data-output';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
@@ -32,13 +32,12 @@ export function DatasetTab({ dataOutputId }: Props) {
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
     const { t } = useTranslation();
-    const { data: dataOutput, isFetching: isFetchingInitialValues } = useGetDataOutputByIdQuery(
-        dataOutputId || '',
-        {
-            skip: !dataOutputId,
-        },
-    );
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataOutput?.owner.id ?? "", {skip: !dataOutput?.owner.id || isFetchingInitialValues || !dataOutputId});
+    const { data: dataOutput, isFetching: isFetchingInitialValues } = useGetDataOutputByIdQuery(dataOutputId || '', {
+        skip: !dataOutputId,
+    });
+    const { data: dataProduct } = useGetDataProductByIdQuery(dataOutput?.owner.id ?? '', {
+        skip: !dataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
+    });
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 

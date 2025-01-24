@@ -4,7 +4,7 @@ import databricksBorderIcon from '@/assets/icons/databricks-border-icon.svg?reac
 import snowflakeBorderIcon from '@/assets/icons/snowflake-border-icon.svg?react';
 import { TFunction } from 'i18next';
 
-export function getDataOutputIcon(configuration_type: string|undefined) {
+export function getDataOutputIcon(configuration_type: string | undefined) {
     switch (configuration_type) {
         case 'GlueDataOutput':
             return glueBorderIcon;
@@ -17,7 +17,7 @@ export function getDataOutputIcon(configuration_type: string|undefined) {
     }
 }
 
-export function getDataOutputType(configuration_type: string|undefined, t: TFunction) {
+export function getDataOutputType(configuration_type: string | undefined, t: TFunction) {
     switch (configuration_type) {
         case 'GlueDataOutput':
             return t('Glue');

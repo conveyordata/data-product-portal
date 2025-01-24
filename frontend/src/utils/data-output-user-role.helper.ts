@@ -1,13 +1,7 @@
 import { DataOutputContract } from '@/types/data-output';
-import {
-    DataProductMembershipRole,
-    DataProductMembershipRoleType,
-} from '@/types/data-product-membership';
+import { DataProductMembershipRole, DataProductMembershipRoleType } from '@/types/data-product-membership';
 
-export function getDataOutputUserRole(
-    dataOutput: DataOutputContract,
-    userId: string,
-): DataProductMembershipRoleType {
+export function getDataOutputUserRole(dataOutput: DataOutputContract, userId: string): DataProductMembershipRoleType {
     return (
         dataOutput?.owner.memberships?.find((membership) => membership?.user_id === userId)?.role ||
         DataProductMembershipRole.NonMember

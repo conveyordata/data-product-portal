@@ -15,7 +15,7 @@ interface CreateSettingModalProps {
 
 export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose }) => {
     const [form] = Form.useForm();
-    const [createDataProductSetting, {isLoading: isCreating}] = useCreateDataProductSettingMutation();
+    const [createDataProductSetting, { isLoading: isCreating }] = useCreateDataProductSettingMutation();
 
     const handleFinish = async (values: any) => {
         try {
@@ -28,8 +28,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
             dispatchMessage({ content: t('Data product setting created successfully'), type: 'success' });
             form.resetFields();
             onClose();
-        }
-        catch (_e) {
+        } catch (_e) {
             const errorMessage = t('Failed to create data product setting');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
@@ -38,7 +37,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
     return (
         <FormModal
             isOpen={isOpen}
-            title={t("Create New Data Product Setting")}
+            title={t('Create New Data Product Setting')}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -49,7 +48,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
             }}
             footer={[
                 <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {t("Create")}
+                    {t('Create')}
                 </Button>,
                 <Button
                     key="cancel"
@@ -58,7 +57,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                         onClose();
                     }}
                 >
-                    {t("Cancel")}
+                    {t('Cancel')}
                 </Button>,
             ]}
         >
@@ -70,48 +69,56 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                     type: 'checkbox',
                 }}
             >
-                <Form.Item name="name" label={t("Name")} rules={[{ required: true, message: t("Please provide a name") }]}>
+                <Form.Item
+                    name="name"
+                    label={t('Name')}
+                    rules={[{ required: true, message: t('Please provide a name') }]}
+                >
                     <Input />
                 </Form.Item>
 
                 <Form.Item
                     name="tooltip"
-                    label={t("Tooltip")}
-                    rules={[{ required: true, message: t("Please provide a tooltip") }]}
+                    label={t('Tooltip')}
+                    rules={[{ required: true, message: t('Please provide a tooltip') }]}
                 >
                     <Input />
                 </Form.Item>
 
                 <Form.Item
                     name="default"
-                    label={t("Default Value")}
-                    rules={[{ required: true, message: t("Please provide a default value") }]}
+                    label={t('Default Value')}
+                    rules={[{ required: true, message: t('Please provide a default value') }]}
                 >
                     <Input />
                 </Form.Item>
 
-                <Form.Item name="type" label={t("Type")} rules={[{ required: true, message: t("Please select a type") }]}>
+                <Form.Item
+                    name="type"
+                    label={t('Type')}
+                    rules={[{ required: true, message: t('Please select a type') }]}
+                >
                     <Select>
-                        <Option value="checkbox">{t("Checkbox")}</Option>
-                        <Option value="tags">{t("Tags")}</Option>
-                        <Option value="input">{t("Input")}</Option>
+                        <Option value="checkbox">{t('Checkbox')}</Option>
+                        <Option value="tags">{t('Tags')}</Option>
+                        <Option value="input">{t('Input')}</Option>
                     </Select>
                 </Form.Item>
 
                 <Form.Item
                     name="divider"
-                    label={t("Divider")}
-                    rules={[{ required: true, message: t("Please provide a divider") }]}
+                    label={t('Divider')}
+                    rules={[{ required: true, message: t('Please provide a divider') }]}
                 >
                     <Input />
                 </Form.Item>
 
                 <Form.Item
                     name="order"
-                    label={t("Order")}
+                    label={t('Order')}
                     rules={[
-                        { required: true, message: t("Please provide an order") },
-                        { pattern: /^\d+$/, message: t("Order must be a number") },
+                        { required: true, message: t('Please provide an order') },
+                        { pattern: /^\d+$/, message: t('Order must be a number') },
                     ]}
                 >
                     <Input />

@@ -1,9 +1,6 @@
-import { DataProductContract } from "../data-product";
+import { DataProductContract } from '../data-product';
 
-export type DataProductSettingType =
-    | 'checkbox'
-    | 'tags'
-    | 'input'
+export type DataProductSettingType = 'checkbox' | 'tags' | 'input';
 
 export interface DataProductSettingContract {
     order: number;
