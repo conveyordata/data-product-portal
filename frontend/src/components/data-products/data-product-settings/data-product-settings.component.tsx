@@ -192,11 +192,11 @@ export function DataProductSettings({ dataProductId }: Props) {
                     disabled={isFetching || isFetchingDP || !isDataProductOwner}
                     className={styles.form}
                     onValuesChange={(_, allValues) => {
+                        // Trigger form submission after 0.5 seconds of unchanged input values
                         if (timeoutRef.current) {
                             clearTimeout(timeoutRef.current);
                         }
 
-                        // Set a new timeout to call onSubmit after 3 seconds
                         timeoutRef.current = setTimeout(() => {
                             onSubmit(allValues); // Trigger the onSubmit function
                         }, 500);
