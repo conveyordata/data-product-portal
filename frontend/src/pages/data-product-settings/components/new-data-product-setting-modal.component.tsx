@@ -6,6 +6,7 @@ import { generateExternalIdFromName } from '@/utils/external-id.helper';
 import { Button, Checkbox, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
 import { useEffect } from 'react';
+import styles from '@/components/data-products/data-output-form/data-output-form.module.scss';
 const { Option } = Select;
 
 interface CreateSettingModalProps {
@@ -17,7 +18,6 @@ interface CreateSettingModalProps {
 export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose }) => {
     const [form] = Form.useForm();
     const [createDataProductSetting, {isLoading: isCreating}] = useCreateDataProductSettingMutation();
-
     const typeValue = Form.useWatch('type', form);
 
     const handleFinish = async (values: any) => {
@@ -71,6 +71,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
             ]}
         >
             <Form
+                className={styles.form}
                 form={form}
                 layout="vertical"
                 onFinish={handleFinish}
