@@ -26,7 +26,6 @@ export enum ApplicationPaths {
     EnvironmentConfigNew = '/environments/:environmentId/new',
     EnvironmentNew = '/environments/new',
     DataProductSettings = '/data-product-settings',
-    DataProductLifecycles = '/data-product-lifecycles',
 }
 
 export const authenticatedPaths: string[] = [
@@ -35,6 +34,7 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.DataProduct,
     ApplicationPaths.DataProductNew,
     ApplicationPaths.DataProductEdit,
+    ApplicationPaths.DataProductSettings,
     ApplicationPaths.Datasets,
     ApplicationPaths.Dataset,
     ApplicationPaths.AuditLogs,

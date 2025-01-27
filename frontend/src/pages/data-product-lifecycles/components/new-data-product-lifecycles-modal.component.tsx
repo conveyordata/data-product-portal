@@ -2,11 +2,8 @@ import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { useCreateDataProductLifecycleMutation } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { generateExternalIdFromName } from '@/utils/external-id.helper';
-import { Button, Checkbox, ColorPicker, Form, Input, Select } from 'antd';
+import { Button, Checkbox, ColorPicker, Form, Input } from 'antd';
 import { TFunction } from 'i18next';
-
-const { Option } = Select;
 
 interface CreateLifecycleModalProps {
     onClose: () => void;
@@ -72,7 +69,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                 <Form.Item
                     name="name"
                     label={t('Name')}
-                    rules={[{ required: true, message: t('Please input the name!') }]}
+                    rules={[{ required: true, message: t('Please provide a name') }]}
                 >
                     <Input />
                 </Form.Item>
@@ -80,7 +77,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                 <Form.Item
                     name="value"
                     label={t('Value')}
-                    rules={[{ required: true, message: t('Please input the value') }]}
+                    rules={[{ required: true, message: t('Please provide a value') }]}
                 >
                     <Input />
                 </Form.Item>

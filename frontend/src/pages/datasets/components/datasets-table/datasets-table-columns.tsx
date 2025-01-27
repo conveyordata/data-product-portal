@@ -12,7 +12,7 @@ import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import { DatasetStatus } from '@/types/dataset/dataset.contract';
-import { getBadgeStatus } from '@/utils/status.helper';
+import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
 
 const iconColumnWidth = 30;
 export const getDatasetTableColumns = ({
@@ -34,7 +34,13 @@ export const getDatasetTableColumns = ({
             width: iconColumnWidth,
             dataIndex: 'status',
             render: (status: DatasetStatus) => {
-                return <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />;
+                return (
+                    <Popover content={getStatusLabel(status)} placement={'top'}>
+                        <>
+                            <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
+                        </>
+                    </Popover>
+                );
             },
         },
         {

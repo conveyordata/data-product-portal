@@ -217,19 +217,6 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
-                        case ApplicationPaths.DataProductLifecycles:
-                            Object.assign(breadcrumbItem, {
-                                title: (
-                                    <Space
-                                        classNames={{
-                                            item: styles.breadcrumbItem,
-                                        }}
-                                    >
-                                        {t('Data Product Lifecycles')}
-                                    </Space>
-                                ),
-                            });
-                            break;
                         case ApplicationPaths.PlatformServiceConfigNew:
                             Object.assign(breadcrumbItem, {
                                 title: (

@@ -75,11 +75,6 @@ export const Sidebar = () => {
                         label: <Link to={ApplicationPaths.DataProductSettings}>{t('Data Product Settings')}</Link>,
                         icon: React.createElement(SettingOutlined),
                     },
-                    {
-                        key: ApplicationPaths.DataProductLifecycles,
-                        label: <Link to={ApplicationPaths.DataProductLifecycles}>{t('Data Product Lifecycles')}</Link>,
-                        icon: React.createElement(BranchesOutlined),
-                    },
                 ],
             },
         ];

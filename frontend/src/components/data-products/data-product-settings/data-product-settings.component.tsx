@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 import {
     DataProductSettingContract,
-    DataProductSettingCreateRequest,
+    DataProductSettingValueCreateRequest,
     DataProductSettingValueForm,
 } from '@/types/data-product-setting';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
@@ -47,13 +47,13 @@ export function DataProductSettings({ dataProductId }: Props) {
                 updatedSettings?.map(async (setting) => {
                     const key = `data_product_settings_id_${setting.id}`;
                     if (values[`value_${setting.id}`].toString() !== setting.value) {
-                        const request: DataProductSettingCreateRequest = {
+                        const request: DataProductSettingValueCreateRequest = {
                             data_product_id: dataProduct.id,
                             data_product_settings_id: values[key],
                             value: values[`value_${setting.id}`].toString(),
                         };
                         await updateSetting(request).unwrap();
-                        dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
+                        // dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
                     }
                 });
             }
@@ -192,14 +192,14 @@ export function DataProductSettings({ dataProductId }: Props) {
                     disabled={isFetching || isFetchingDP || !isDataProductOwner}
                     className={styles.form}
                     onValuesChange={(_, allValues) => {
+                        // Trigger form submission after 0.5 seconds of unchanged input values
                         if (timeoutRef.current) {
                             clearTimeout(timeoutRef.current);
                         }
 
-                        // Set a new timeout to call onSubmit after 3 seconds
                         timeoutRef.current = setTimeout(() => {
                             onSubmit(allValues); // Trigger the onSubmit function
-                        }, 1500);
+                        }, 500);
                     }}
                 >
                     {formContent}
