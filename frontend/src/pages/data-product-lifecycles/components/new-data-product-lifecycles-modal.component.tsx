@@ -68,14 +68,14 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                     type: 'checkbox',
                 }}
             >
-                <Form.Item name="name" label={t("Name")} rules={[{ required: true, message: t("Please input the name!") }]}>
+                <Form.Item name="name" label={t("Name")} rules={[{ required: true, message: t("Please provide a name") }]}>
                     <Input />
                 </Form.Item>
 
                 <Form.Item
                     name="value"
                     label={t("Value")}
-                    rules={[{ required: true, message: t("Please input the value") }]}
+                    rules={[{ required: true, message: t("Please provide a value") }]}
                 >
                     <Input />
                 </Form.Item>
