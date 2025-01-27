@@ -230,6 +230,19 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
+                        case ApplicationPaths.RoleConfiguration:
+                            Object.assign(breadcrumbItem, {
+                                title: (
+                                    <Space
+                                        classNames={{
+                                            item: styles.breadcrumbItem,
+                                        }}
+                                    >
+                                        {t('Role Management')}
+                                    </Space>
+                                ),
+                            });
+                            break;
                         default:
                             Object.assign(breadcrumbItem, {
                                 title: '',
@@ -376,8 +389,30 @@ export const Breadcrumbs = () => {
                     return breadcrumbItem;
                 }),
             ].filter(Boolean) as Partial<BreadcrumbItemType & BreadcrumbSeparatorType>[],
-        [pathnames, dataProductId, datasetId, dataOutputId],
+        [
+            pathnames,
+            t,
+            dataProductId,
+            dataProduct,
+            isFetchingDataProduct,
+            datasetId,
+            dataset,
+            isFetchingDataset,
+            platformServiceConfigId,
+            platformServiceConfig,
+            isFetchingPlatformServiceConfig,
+            environmentId,
+            environment,
+            isFetchingEnvironment,
+            envConfigId,
+            envConfig,
+            isFetchingEnvConfig,
+            dataOutputId,
+            dataOutput,
+            isFetchingDataOutput,
+        ],
     );
+
     return (
         <Breadcrumb
             itemRender={(route, _params, routes) => {

@@ -11,6 +11,7 @@ type PermissionType = 'Group' | 'Instance';
 
 type PermissionInstance = {
     type: PermissionType;
+    order: number;
     permission: string;
     description: string;
     access: Map<string, string>;
@@ -18,6 +19,7 @@ type PermissionInstance = {
 
 type PermissionGroup = {
     type: PermissionType;
+    order: number;
     name: string;
 };
 
@@ -28,10 +30,12 @@ export function RolesTable() {
 
     const [data, setData] = useState<Permission[]>([
         {
+            order: 1,
             type: 'Group',
             name: 'User Management',
         },
         {
+            order: 2,
             type: 'Instance',
             permission: 'View User Management Table',
             description: 'Interesting info on user management',
@@ -43,6 +47,7 @@ export function RolesTable() {
             },
         },
         {
+            order: 3,
             type: 'Instance',
             permission: 'Bulk Edit',
             description: 'Interesting info on bulking',
@@ -54,6 +59,7 @@ export function RolesTable() {
             },
         },
         {
+            order: 4,
             type: 'Instance',
             permission: 'Log In As',
             description: 'Interesting info on logging in',
@@ -65,10 +71,12 @@ export function RolesTable() {
             },
         },
         {
+            order: 5,
             type: 'Group',
             name: 'Role Management',
         },
         {
+            order: 6,
             type: 'Instance',
             permission: 'Role Management',
             description: 'Interesting info on managing roles',
@@ -165,6 +173,10 @@ export function RolesTable() {
             fixed: 'left',
             className: styles.permissionsColumn,
             render: renderPermission,
+            ellipsis: false,
+            onCell: () => ({
+                style: { whiteSpace: 'nowrap' },
+            }),
         },
         ...roleColumns,
     ];
@@ -178,8 +190,13 @@ export function RolesTable() {
                 </Button>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                {/* TODO: rowKey is not guaranteed to be unique anymore - need to come up with something */}
-                <Table columns={columns} dataSource={data} pagination={false} rowKey={'permission'} />
+                <Table
+                    columns={columns}
+                    dataSource={data}
+                    pagination={false}
+                    rowKey={'order'}
+                    scroll={{ x: 'max-content' }}
+                />
             </Flex>
         </Flex>
     );
