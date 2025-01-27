@@ -50,7 +50,7 @@ export function TableCellItem({ icon, text, textProps, textComponent, children, 
     );
 
     return hasEllipsis ? (
-        <Popover placement={tooltip?.placement || "topLeft"} {...tooltip}>
+        <Popover placement={tooltip?.placement || 'topLeft'} {...tooltip}>
             {tableCellItem}
         </Popover>
     ) : (

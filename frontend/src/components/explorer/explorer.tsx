@@ -25,9 +25,8 @@ const token = getDesignToken(greenThemeConfig);
 
 type Props = {
     id: string;
-    type: "dataset" | "dataproduct" | "dataoutput";
+    type: 'dataset' | 'dataproduct' | 'dataoutput';
 };
-
 
 function LinkToDataProductNode({ id }: { id: string }) {
     const { t } = useTranslation();
@@ -47,17 +46,17 @@ function LinkToDatasetNode({ id }: { id: string }) {
     );
 }
 
-function LinkToDataOutputNode({ id, product_id }: {id: string, product_id: string}) {
+function LinkToDataOutputNode({ id, product_id }: { id: string; product_id: string }) {
     const { t } = useTranslation();
     return (
         <Link to={createDataOutputIdPath(id, product_id, DataOutputTabKeys.Explorer)} className={styles.link}>
             <Button type="default">{t('View data output')}</Button>
         </Link>
-    )
+    );
 }
 
 function parseEdges(edges: EdgeContract[]): Edge[] {
-    return edges.map(edge => {
+    return edges.map((edge) => {
         return {
             id: edge.id,
             source: edge.source,
@@ -70,38 +69,42 @@ function parseEdges(edges: EdgeContract[]): Edge[] {
                 strokeDasharray: '5 5',
                 stroke: edge.animated ? token.colorPrimary : token.colorPrimaryBorder,
             },
-        }
+        };
     });
 }
 
 function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Node[] {
-    return nodes.map(node => {
-        let extra_attributes = {}
+    return nodes.map((node) => {
+        let extra_attributes = {};
         switch (node.type) {
             case CustomNodeTypes.DataOutputNode:
                 extra_attributes = {
-                    nodeToolbarActions: node.isMain ? "" : <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id!} />,
+                    nodeToolbarActions: node.isMain ? (
+                        ''
+                    ) : (
+                        <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id!} />
+                    ),
                     sourceHandlePosition: Position.Left,
                     isActive: true,
                     targetHandlePosition: Position.Right,
                     targetHandleId: 'left_t',
-                }
-                break
+                };
+                break;
             case CustomNodeTypes.DatasetNode:
                 extra_attributes = {
-                    nodeToolbarActions: node.isMain ? "" : <LinkToDatasetNode id={node.data.id} />,
+                    nodeToolbarActions: node.isMain ? '' : <LinkToDatasetNode id={node.data.id} />,
                     targetHandlePosition: Position.Right,
                     targetHandleId: 'left_t',
-                }
-                break
+                };
+                break;
             case CustomNodeTypes.DataProductNode:
                 extra_attributes = {
                     targetHandlePosition: Position.Left,
-                    nodeToolbarActions: node.isMain ? "" : <LinkToDataProductNode id={node.data.id} />,
-                }
-                break
+                    nodeToolbarActions: node.isMain ? '' : <LinkToDataProductNode id={node.data.id} />,
+                };
+                break;
             default:
-                break
+                break;
         }
         return {
             id: node.id,
@@ -114,29 +117,29 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
                 id: node.data.id,
                 icon_key: node.data.icon_key,
                 isMainNode: node.isMain,
-                ...extra_attributes
+                ...extra_attributes,
             },
-        }
-    })
+        };
+    });
 }
 export function Explorer({ id, type }: Props) {
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
-    const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== "dataproduct" || !id });
-    const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== "dataset" || !id });
-    const dataOutputQuery = useGetDataOutputGraphDataQuery(id, { skip: type !== "dataoutput" || !id });
+    const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== 'dataproduct' || !id });
+    const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== 'dataset' || !id });
+    const dataOutputQuery = useGetDataOutputGraphDataQuery(id, { skip: type !== 'dataoutput' || !id });
 
     let graphDataQuery;
 
     switch (type) {
-        case "dataproduct":
+        case 'dataproduct':
             graphDataQuery = dataProductQuery;
             break;
-        case "dataset":
+        case 'dataset':
             graphDataQuery = datasetQuery;
             break;
-        case "dataoutput":
+        case 'dataoutput':
             graphDataQuery = dataOutputQuery;
             break;
     }
@@ -144,15 +147,15 @@ export function Explorer({ id, type }: Props) {
     const { data: graph, isFetching } = graphDataQuery;
     const generateGraph = () => {
         if (graph) {
-            const nodes = parseNodes(graph.nodes, defaultNodePosition)
-            const edges = parseEdges(graph.edges)
+            const nodes = parseNodes(graph.nodes, defaultNodePosition);
+            const edges = parseEdges(graph.edges);
             setNodesAndEdges(nodes, edges);
         }
-    }
+    };
 
     useEffect(() => {
         generateGraph();
-    }, [graph])
+    }, [graph]);
 
     if (isFetching) {
         return <LoadingSpinner />;

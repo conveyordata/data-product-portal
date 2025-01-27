@@ -14,8 +14,14 @@ import { Sorter } from '@/utils/table-sorter.helper';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 
 const iconColumnWidth = 30;
-export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunction, dataProducts: DataProductsGetContract }): TableColumnsType<DataProductsGetContract[0]> => {
-    const sorter = new Sorter<DataProductsGetContract[0]>;
+export const getDataProductTableColumns = ({
+    t,
+    dataProducts: data,
+}: {
+    t: TFunction;
+    dataProducts: DataProductsGetContract;
+}): TableColumnsType<DataProductsGetContract[0]> => {
+    const sorter = new Sorter<DataProductsGetContract[0]>();
     return [
         {
             title: t('Id'),
@@ -28,11 +34,13 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             dataIndex: 'status',
             width: iconColumnWidth,
             render: (status: DataProductStatus) => {
-                return <Popover content={getStatusLabel(status)} placement={'top'}>
-                <>
-                <TableCellItem icon={<Badge status={getBadgeStatus(status)}/>} />
-                </>
-            </Popover>
+                return (
+                    <Popover content={getStatusLabel(status)} placement={'top'}>
+                        <>
+                            <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
+                        </>
+                    </Popover>
+                );
             },
         },
         {
@@ -42,25 +50,29 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
                 showTitle: false,
             },
             render: (name) => {
-                return <TableCellItem text={name} tooltip={{ content: name }} />
+                return <TableCellItem text={name} tooltip={{ content: name }} />;
             },
-            sorter: sorter.stringSorter(dp => dp.name),
+            sorter: sorter.stringSorter((dp) => dp.name),
             defaultSortOrder: 'ascend',
-            width: "25%"
+            width: '25%',
         },
         {
             title: t('Status'),
             dataIndex: 'lifecycle',
             render: (lifecycle: DataProductLifeCycleContract) => {
                 if (lifecycle !== null) {
-                    return <Tag color={lifecycle.color || "default"} className={styles.tag}>{lifecycle.name}</Tag>
+                    return (
+                        <Tag color={lifecycle.color || 'default'} className={styles.tag}>
+                            {lifecycle.name}
+                        </Tag>
+                    );
                 } else {
-                    return
+                    return;
                 }
             },
-            ...new FilterSettings(data, dp => dp.lifecycle !== null ? dp.lifecycle.name : ''),
-            sorter: sorter.stringSorter(dp => dp.lifecycle !== null ? dp.lifecycle.name : ''),
-            width: "10%",
+            ...new FilterSettings(data, (dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
+            sorter: sorter.stringSorter((dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
+            width: '10%',
         },
         {
             title: t('Business Area'),
@@ -68,8 +80,8 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             render: (businessArea: BusinessAreaGetResponse) => {
                 return <TableCellItem text={businessArea.name} />;
             },
-            ...new FilterSettings(data, dp => dp.business_area.name),
-            sorter: sorter.stringSorter(dp => dp.business_area.name),
+            ...new FilterSettings(data, (dp) => dp.business_area.name),
+            sorter: sorter.stringSorter((dp) => dp.business_area.name),
         },
         {
             title: t('Type'),
@@ -79,8 +91,8 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
                 return <TableCellItem reactSVGComponent={icon} text={type.name} />;
             },
             ellipsis: true,
-            ...new FilterSettings(data, dp => dp.type.name),
-            sorter: sorter.stringSorter(dp => dp.type.name),
+            ...new FilterSettings(data, (dp) => dp.type.name),
+            sorter: sorter.stringSorter((dp) => dp.type.name),
         },
         {
             title: t('Access'),
@@ -88,7 +100,7 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             render: (userCount: number) => {
                 return <TableCellItem icon={<TeamOutlined />} text={i18n.t('{{count}} users', { count: userCount })} />;
             },
-            sorter: sorter.numberSorter(dp => dp.user_count),
+            sorter: sorter.numberSorter((dp) => dp.user_count),
         },
         {
             title: t('Consumes'),
@@ -96,7 +108,7 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             render: (datasetCount: number) => {
                 return <TableCellItem text={i18n.t('{{count}} datasets', { count: datasetCount })} />;
             },
-            sorter: sorter.numberSorter(dp => dp.dataset_count),
+            sorter: sorter.numberSorter((dp) => dp.dataset_count),
         },
         {
             title: t('Produces'),

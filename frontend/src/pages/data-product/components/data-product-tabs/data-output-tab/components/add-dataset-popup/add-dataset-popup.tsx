@@ -37,7 +37,6 @@ const handleDatasetListFilter = (datasets: DatasetsGetContract, searchTerm: stri
     });
 };
 
-
 const getActionButtonText = (t: TFunction) => {
     return t('Request Link');
 };
@@ -63,7 +62,7 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
             try {
                 await requestDatasetAccessForDataOutput({ dataOutputId: dataOutputId, datasetId }).unwrap();
 
-                const content = t('Dataset link has been requested')
+                const content = t('Dataset link has been requested');
                 dispatchMessage({ content, type: 'success' });
                 onClose();
             } catch (_error) {

@@ -258,7 +258,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     loading={isFetchingLifecycles}
                     allowClear
                     showSearch
-                    options={lifecycles.map((lifecycle) => ({value: lifecycle.id, label: lifecycle.name}))}
+                    options={lifecycles.map((lifecycle) => ({ value: lifecycle.id, label: lifecycle.name }))}
                     filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>

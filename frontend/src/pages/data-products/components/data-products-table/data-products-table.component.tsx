@@ -45,7 +45,10 @@ export function DataProductsTable() {
         return filterDataProducts(data, searchTerm);
     }, [quickFilter, userDataProducts, dataProducts, searchTerm]);
 
-    const columns = useMemo(() => getDataProductTableColumns({ t, dataProducts: filteredDataProducts }), [t, filteredDataProducts]);
+    const columns = useMemo(
+        () => getDataProductTableColumns({ t, dataProducts: filteredDataProducts }),
+        [t, filteredDataProducts],
+    );
 
     const onChange: TableProps<DataProductsGetContract[0]>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);

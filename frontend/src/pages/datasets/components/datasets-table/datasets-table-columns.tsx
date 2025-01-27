@@ -15,8 +15,14 @@ import { DatasetStatus } from '@/types/dataset/dataset.contract';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
 
 const iconColumnWidth = 30;
-export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets: DatasetsGetContract }): TableColumnsType<DatasetsGetContract[0]> => {
-    const sorter = new Sorter<DatasetsGetContract[0]>;
+export const getDatasetTableColumns = ({
+    t,
+    datasets,
+}: {
+    t: TFunction;
+    datasets: DatasetsGetContract;
+}): TableColumnsType<DatasetsGetContract[0]> => {
+    const sorter = new Sorter<DatasetsGetContract[0]>();
     return [
         {
             title: t('Id'),
@@ -28,11 +34,13 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             width: iconColumnWidth,
             dataIndex: 'status',
             render: (status: DatasetStatus) => {
-                return <Popover content={getStatusLabel(status)} placement={'top'}>
+                return (
+                    <Popover content={getStatusLabel(status)} placement={'top'}>
                         <>
-                        <TableCellItem icon={<Badge status={getBadgeStatus(status)}/>} />
+                            <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
                         </>
                     </Popover>
+                );
             },
         },
         {
@@ -60,22 +68,26 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             render: (name: string) => {
                 return <TableCellItem text={name} tooltip={{ content: name }} />;
             },
-            sorter: sorter.stringSorter(ds => ds.name),
-            width: "20%"
+            sorter: sorter.stringSorter((ds) => ds.name),
+            width: '20%',
         },
         {
             title: t('Status'),
             dataIndex: 'lifecycle',
             render: (lifecycle: DataProductLifeCycleContract) => {
                 if (lifecycle !== null) {
-                    return <Tag color={lifecycle.color || "default"} className={styles.tag}>{lifecycle.name}</Tag>
+                    return (
+                        <Tag color={lifecycle.color || 'default'} className={styles.tag}>
+                            {lifecycle.name}
+                        </Tag>
+                    );
                 } else {
-                    return
+                    return;
                 }
             },
-            ...new FilterSettings(datasets, dp => dp.lifecycle !== null ? dp.lifecycle.name : ''),
-            sorter: sorter.stringSorter(dp => dp.lifecycle !== null ? dp.lifecycle.name : ''),
-            width: "10%",
+            ...new FilterSettings(datasets, (dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
+            sorter: sorter.stringSorter((dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
+            width: '10%',
         },
         {
             title: t('Business Area'),
@@ -84,9 +96,9 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
                 return <TableCellItem text={businessArea.name} />;
             },
             ellipsis: true,
-            ...new FilterSettings(datasets, ds => ds.business_area.name),
-            sorter: sorter.stringSorter(ds => ds.business_area.name),
-            width: "13%"
+            ...new FilterSettings(datasets, (ds) => ds.business_area.name),
+            sorter: sorter.stringSorter((ds) => ds.business_area.name),
+            width: '13%',
         },
         {
             title: t('Access Type'),
@@ -95,22 +107,30 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
                 return <TableCellItem text={getDatasetAccessTypeLabel(accessType)} />;
             },
             ellipsis: true,
-            ...new FilterSettings(datasets, ds => getDatasetAccessTypeLabel(ds.access_type)),
-            sorter: sorter.stringSorter(ds => getDatasetAccessTypeLabel(ds.access_type)),
-            width: "15%"
+            ...new FilterSettings(datasets, (ds) => getDatasetAccessTypeLabel(ds.access_type)),
+            sorter: sorter.stringSorter((ds) => getDatasetAccessTypeLabel(ds.access_type)),
+            width: '15%',
         },
         {
             title: t('Produced by Data Product'),
             dataIndex: 'data_output_links',
             render: (data_output_links: DataOutputLink[]) => {
-                console.log(data_output_links)
+                console.log(data_output_links);
                 if (data_output_links !== undefined) {
-                    return <TableCellItem text={[... new Set(data_output_links.map(data_output_link =>
-                        data_output_link.data_output.owner.name
-                    ))].join(',')}/>;
+                    return (
+                        <TableCellItem
+                            text={[
+                                ...new Set(
+                                    data_output_links.map(
+                                        (data_output_link) => data_output_link.data_output.owner.name,
+                                    ),
+                                ),
+                            ].join(',')}
+                        />
+                    );
                 }
             },
-            width: "25%"
+            width: '25%',
             // ...new FilterSettings(datasets, ds => ds.business_area.name),
             // sorter: sorter.stringSorter(ds => ds.data_output_links.data_output.owner.name),
         },
@@ -120,8 +140,8 @@ export const getDatasetTableColumns = ({ t, datasets }: { t: TFunction, datasets
             render: (count: number) => {
                 return <TableCellItem text={i18n.t('{{count}} data products', { count })} />;
             },
-            sorter: sorter.numberSorter(ds => ds.data_product_count),
-            width: "15%"
+            sorter: sorter.numberSorter((ds) => ds.data_product_count),
+            width: '15%',
         },
-    ]
+    ];
 };

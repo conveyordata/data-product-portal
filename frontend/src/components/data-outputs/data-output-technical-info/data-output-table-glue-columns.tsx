@@ -7,9 +7,7 @@ type Props = {
     t: TFunction;
 };
 
-export const getGlueTechnicalInformationColumns = ({
-    t,
-}: Props): TableColumnsType<TechnicalInfoContract> => {
+export const getGlueTechnicalInformationColumns = ({ t }: Props): TableColumnsType<TechnicalInfoContract> => {
     return [
         {
             title: t('Id'),
@@ -20,7 +18,7 @@ export const getGlueTechnicalInformationColumns = ({
             title: t('Environment'),
             dataIndex: 'environment',
             render: (_, { environmentConfig }) => {
-                return environmentConfig.environment.name
+                return environmentConfig.environment.name;
             },
             width: '30%',
         },
@@ -28,9 +26,9 @@ export const getGlueTechnicalInformationColumns = ({
             title: t('Database'),
             dataIndex: 'database',
             render: (_, { data_output }) => {
-                const configuration: GlueDataOutputContract = data_output.configuration as GlueDataOutputContract
+                const configuration: GlueDataOutputContract = data_output.configuration as GlueDataOutputContract;
                 // TODO figure out how to use product aligned databases here and get their ARN?
-                return configuration.database
+                return configuration.database;
             },
             width: '30%',
         },

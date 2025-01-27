@@ -29,7 +29,7 @@ export const getDataProductDatasetsColumns = ({
     isDisabled,
     isLoading,
 }: Props): TableColumnsType<DatasetLink> => {
-    const sorter = new Sorter<DatasetLink>()
+    const sorter = new Sorter<DatasetLink>();
     return [
         {
             title: t('Id'),
@@ -65,8 +65,10 @@ export const getDataProductDatasetsColumns = ({
                 );
             },
             width: '100%',
-            ...new FilterSettings(datasetLinks, datasetLink => getDataProductDatasetLinkStatusLabel(datasetLink.status)),
-            sorter: sorter.stringSorter(datasetLink => datasetLink.dataset.name),
+            ...new FilterSettings(datasetLinks, (datasetLink) =>
+                getDataProductDatasetLinkStatusLabel(datasetLink.status),
+            ),
+            sorter: sorter.stringSorter((datasetLink) => datasetLink.dataset.name),
             defaultSortOrder: 'ascend',
         },
         {

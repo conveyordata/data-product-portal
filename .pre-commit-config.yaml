@@ -46,12 +46,6 @@ repos:
   rev: 24.3.0
   hooks:
     - id: black
-- repo: local
-  hooks:
-    - id: add-helm-version
-      name: add-helm-version
-      entry: ./add_helm_version.sh
-      language: script
 - repo: https://github.com/pycqa/isort
   rev: 5.12.0
   hooks:
@@ -61,3 +55,13 @@ repos:
   rev: v8.16.3
   hooks:
     - id: gitleaks
+- repo: local
+  hooks:
+    - id: add-helm-version
+      name: add-helm-version
+      entry: ./add_helm_version.sh
+      language: script
+    - id: prettier
+      name: prettier
+      entry: bash -c "cd frontend && npm run format"
+      language: node

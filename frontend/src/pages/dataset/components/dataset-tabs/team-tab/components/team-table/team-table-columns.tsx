@@ -31,7 +31,7 @@ export const getDatasetTeamColumns = ({
                 return <UserAvatar name={`${user.first_name} ${user.last_name}`} email={user.email} />;
             },
             width: '70%',
-            sorter: sorter.stringSorter(user => user.last_name),
+            sorter: sorter.stringSorter((user) => user.last_name),
             defaultSortOrder: 'ascend',
         },
         {

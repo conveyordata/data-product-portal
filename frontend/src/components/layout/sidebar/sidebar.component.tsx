@@ -94,7 +94,7 @@ export const Sidebar = () => {
                     <Space className={styles.logoWrapper}>
                         <Link to={ApplicationPaths.Home}>
                             <SidebarLogo />
-                            {version ? version.version : ""}
+                            {version ? version.version : ''}
                         </Link>
                     </Space>
                 </Flex>

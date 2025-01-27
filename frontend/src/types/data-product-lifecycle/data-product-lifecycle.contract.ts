@@ -1,4 +1,3 @@
-
 export interface DataProductLifeCycleContract {
     id: string;
     value: string;

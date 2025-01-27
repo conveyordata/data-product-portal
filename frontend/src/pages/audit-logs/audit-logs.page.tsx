@@ -6,11 +6,7 @@ export function AuditLogs() {
     return (
         <div>
             {/* <Typography.Title level={3}>{t('Audit Logs')}</Typography.Title> */}
-            <Empty description={
-                <Typography.Text>
-                    {t("Under construction")}
-                </Typography.Text>
-            }/>
+            <Empty description={<Typography.Text>{t('Under construction')}</Typography.Text>} />
         </div>
     );
 }

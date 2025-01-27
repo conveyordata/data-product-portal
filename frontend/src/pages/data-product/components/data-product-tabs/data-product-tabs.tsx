@@ -3,7 +3,13 @@ import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { HistoryTab } from '@/pages/data-product/components/data-product-tabs/history-tab/history-tab.tsx';
 import styles from './data-product-tabs.module.scss';
-import Icon, { HistoryOutlined, InfoCircleOutlined, PartitionOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
+import Icon, {
+    HistoryOutlined,
+    InfoCircleOutlined,
+    PartitionOutlined,
+    SettingOutlined,
+    TeamOutlined,
+} from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
@@ -47,10 +53,10 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
 
     useEffect(() => {
         const hash = location.hash.slice(1);
-        if(hash) {
+        if (hash) {
             setActiveTab(hash);
         }
-    }, [location])
+    }, [location]);
 
     const tabs: Tab[] = useMemo(() => {
         return [
@@ -84,7 +90,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 icon: <PartitionOutlined />,
                 children: (
                     <ReactFlowProvider>
-                        <Explorer id={dataProductId} type={"dataproduct"}/>
+                        <Explorer id={dataProductId} type={'dataproduct'} />
                     </ReactFlowProvider>
                 ),
             },
@@ -94,7 +100,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 icon: <SettingOutlined />,
                 children: (
                     <ReactFlowProvider>
-                        <SettingsTab dataProductId={dataProductId}/>
+                        <SettingsTab dataProductId={dataProductId} />
                     </ReactFlowProvider>
                 ),
             },

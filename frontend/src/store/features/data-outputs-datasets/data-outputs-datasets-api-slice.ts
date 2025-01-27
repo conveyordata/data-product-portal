@@ -78,7 +78,7 @@ export const dataOutputsDatasetsApiSlice = baseApiSlice
             }),
             getDataOutputDatasetPendingActions: builder.query<DataOutputDatasetContract[], void>({
                 query: () => ({
-                    url: buildUrl(ApiUrl.DataOutputDatasetPendingActions, { }),
+                    url: buildUrl(ApiUrl.DataOutputDatasetPendingActions, {}),
                     method: 'GET',
                 }),
                 providesTags: (_, __) => [

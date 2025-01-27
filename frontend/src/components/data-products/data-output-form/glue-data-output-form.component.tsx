@@ -18,30 +18,29 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
     const suffixValue = Form.useWatch('database_suffix', form);
     const tableValue = Form.useWatch('table', form);
     useEffect(() => {
-        let databaseOptionsList = identifiers
+        let databaseOptionsList = identifiers;
         if (!sourceAligned) {
-            databaseOptionsList = [external_id]
-            form.setFieldsValue({ database: external_id});
+            databaseOptionsList = [external_id];
+            form.setFieldsValue({ database: external_id });
         } else {
-            form.setFieldsValue({database: undefined})
+            form.setFieldsValue({ database: undefined });
         }
         databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
     }, [sourceAligned]);
 
     useEffect(() => {
         let result = databaseValue;
-        if (databaseValue){
+        if (databaseValue) {
             if (suffixValue) {
                 result += `__${suffixValue}`;
             }
             if (entireSchema) {
-                result += '.*'
-            }
-            else if (tableValue) {
+                result += '.*';
+            } else if (tableValue) {
                 result += `.${tableValue}`;
             }
         } else {
-            result = ""
+            result = '';
         }
 
         form.setFieldsValue({ result: result });
@@ -63,8 +62,8 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
                 <Select
                     allowClear
                     showSearch
-                    mode='tags'
-                    onChange={value => {
+                    mode="tags"
+                    onChange={(value) => {
                         if (value.length > 0) {
                             form.setFieldsValue({ database: value[0] });
                         }
@@ -72,7 +71,6 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
                     disabled={!sourceAligned}
                     maxCount={1}
                     options={databaseOptions}
-
                 />
             </Form.Item>
             <Form.Item<GlueDataOutput & { temp_suffix: string }>
@@ -92,11 +90,9 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
                         }
                     }}
                 /> */}
-                <Input/>
+                <Input />
             </Form.Item>
-            <Form.Item
-                name={'entire_schema'} valuePropName="checked" initialValue={true}
-            >
+            <Form.Item name={'entire_schema'} valuePropName="checked" initialValue={true}>
                 <Checkbox defaultChecked={true}>{t('Include entire schema')}</Checkbox>
             </Form.Item>
             <Form.Item<GlueDataOutput>
@@ -116,16 +112,12 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
                     },
                 ]}
             >
-                <Input/>
+                <Input />
             </Form.Item>
-            <Form.Item<GlueDataOutput>
-                required
-                hidden={true}
-                name={'database_suffix'}
-            >
+            <Form.Item<GlueDataOutput> required hidden={true} name={'database_suffix'}>
                 <Input disabled />
             </Form.Item>
-            <Form.Item<GlueDataOutput & {result: string}>
+            <Form.Item<GlueDataOutput & { result: string }>
                 required
                 name={'result'}
                 label={t('Resulting database and schema')}

@@ -18,31 +18,29 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
     const schemaValue = Form.useWatch('schema', form);
     const tableValue = Form.useWatch('table', form);
     useEffect(() => {
-        let catalogOptionsList = identifiers //TODO
+        let catalogOptionsList = identifiers; //TODO
         if (!sourceAligned) {
-            catalogOptionsList = [external_id]
-            form.setFieldsValue({ catalog: external_id});
+            catalogOptionsList = [external_id];
+            form.setFieldsValue({ catalog: external_id });
         } else {
-            form.setFieldsValue({catalog: undefined})
+            form.setFieldsValue({ catalog: undefined });
         }
         catalogOptions = (catalogOptionsList ?? []).map((catalog) => ({ label: catalog, value: catalog }));
     }, [sourceAligned]);
 
-
     useEffect(() => {
         let result = catalogValue;
-        if (catalogValue){
+        if (catalogValue) {
             if (schemaValue) {
                 result += `.${schemaValue}`;
             }
             if (entireCatalog) {
-                result += '.*'
-            }
-            else if (tableValue) {
+                result += '.*';
+            } else if (tableValue) {
                 result += `.${tableValue}`;
             }
         } else {
-            result = ""
+            result = '';
         }
 
         form.setFieldsValue({ result: result });
@@ -64,9 +62,9 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                 <Select
                     allowClear
                     showSearch
-                    mode='tags'
+                    mode="tags"
                     disabled={!sourceAligned}
-                    onChange={value => {
+                    onChange={(value) => {
                         if (value.length > 0) {
                             form.setFieldsValue({ catalog: value[0] });
                         }
@@ -80,11 +78,9 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                 label={t('Schema')}
                 tooltip={t('The schema to link the data output to')}
             >
-                <Input/>
+                <Input />
             </Form.Item>
-            <Form.Item
-                name={'entire_catalog'} valuePropName="checked" initialValue={true}
-            >
+            <Form.Item name={'entire_catalog'} valuePropName="checked" initialValue={true}>
                 <Checkbox defaultChecked={true}>{t('Include entire catalog')}</Checkbox>
             </Form.Item>
             <Form.Item<DatabricksDataOutput>
@@ -97,12 +93,12 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                     {
                         required: !entireCatalog,
                         message: t('Please input the table this data output can access'),
-                    }
+                    },
                 ]}
             >
-                <Input/>
+                <Input />
             </Form.Item>
-            <Form.Item<DatabricksDataOutput & {result: string}>
+            <Form.Item<DatabricksDataOutput & { result: string }>
                 required
                 name={'result'}
                 label={t('Resulting catalog and schema')}

@@ -66,7 +66,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     );
     const canFillInForm = mode === 'create' || canEditForm;
 
-    const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingLifecycles;
+    const isLoading =
+        isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingLifecycles;
 
     const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
     const businessAreaSelectOptions = businessAreas.map((area) => ({ label: area.name, value: area.id }));
@@ -272,7 +273,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     loading={isFetchingLifecycles}
                     allowClear
                     showSearch
-                    options={lifecycles.map((lifecycle) => ({value: lifecycle.id, label: lifecycle.name}))}
+                    options={lifecycles.map((lifecycle) => ({ value: lifecycle.id, label: lifecycle.name }))}
                     filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>

@@ -21,7 +21,7 @@ export function DataOutputEdit() {
                 {dataOutput?.name}
             </Typography.Title>
             <Space direction={'vertical'} size={'large'} className={styles.container}>
-                <DataOutputForm dataOutputId={dataOutputId} mode="edit"/>
+                <DataOutputForm dataOutputId={dataOutputId} mode="edit" />
             </Space>
         </Flex>
     );
