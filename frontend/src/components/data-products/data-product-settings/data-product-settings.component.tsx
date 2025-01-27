@@ -52,7 +52,7 @@ export function DataProductSettings({ dataProductId }: Props) {
                             value: values[`value_${setting.id}`].toString(),
                         };
                         await updateSetting(request).unwrap();
-                        dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
+                        // dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
                     }
                 });
             }
@@ -198,7 +198,7 @@ export function DataProductSettings({ dataProductId }: Props) {
                         // Set a new timeout to call onSubmit after 3 seconds
                         timeoutRef.current = setTimeout(() => {
                             onSubmit(allValues); // Trigger the onSubmit function
-                        }, 1500);
+                        }, 500);
                     }}
                 >
                     {formContent}
