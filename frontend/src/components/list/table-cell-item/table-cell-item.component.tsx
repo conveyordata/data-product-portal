@@ -4,7 +4,7 @@ import * as React from 'react';
 import { ComponentType, ReactNode } from 'react';
 import Icon from '@ant-design/icons';
 import { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
-import { TooltipPlacement } from 'antd/es/tooltip';
+import type { TooltipPlacement } from 'antd/es/tooltip';
 
 type Props = {
     icon?: ReactNode;
