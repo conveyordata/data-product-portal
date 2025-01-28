@@ -121,7 +121,6 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 <Form.Item
                     name="default"
                     label={t('Default Value')}
-                    rules={[{ required: true, message: t('Please provide a default value') }]}
                     valuePropName={typeValue === 'checkbox' ? 'checked' : 'value'}
                 >
                     {(() => {
