@@ -41,5 +41,5 @@ class DataProductDatasetAssociation(BaseDataProductDatasetAssociation):
     approved_on: datetime | None
 
 
-class DatasetLink(DataProductDatasetAssociation):
+class DatasetDataProductLink(DataProductDatasetAssociation):
     dataset: Dataset
