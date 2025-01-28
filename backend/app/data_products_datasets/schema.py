@@ -39,3 +39,7 @@ class DataProductDatasetAssociation(BaseDataProductDatasetAssociation):
     requested_on: datetime
     denied_on: datetime | None
     approved_on: datetime | None
+
+
+class DatasetLink(DataProductDatasetAssociation):
+    dataset: Dataset

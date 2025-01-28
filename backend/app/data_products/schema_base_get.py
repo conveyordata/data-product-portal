@@ -10,7 +10,7 @@ class BaseDataProductGet(ORMModel):
     id: UUID
     name: str
     description: str
-    about: Optional[str]
+    about: Optional[str] = ""
     external_id: str
     status: DataProductStatus
     type: DataProductTypeCreate
