@@ -8,6 +8,7 @@ import type { FormInstance } from 'antd';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     useGetAllDataProductLifecyclesQuery,
+    useRemoveDataProductLifecycleMutation,
     useUpdateDataProductLifecycleMutation,
 } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
@@ -23,13 +24,17 @@ export function DataProductLifecyclesTable() {
     const [editDataProductLifecycle, { isLoading: isEditing }] = useUpdateDataProductLifecycleMutation();
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
+    const [onRemoveDataProductLifecycle, { isLoading: isRemoving }] = useRemoveDataProductLifecycleMutation();
 
     const editColor = (record: DataProductLifeCycleContract, color: string) => {
         const new_record = { ...record, color: color };
         editDataProductLifecycle(new_record);
     };
 
-    const columns = useMemo(() => getDataProductTableColumns({ t, handleOpen, editColor }), [t, dataProductLifecycles]);
+    const columns = useMemo(
+        () => getDataProductTableColumns({ t, handleOpen, editColor, onRemoveDataProductLifecycle }),
+        [t, dataProductLifecycles],
+    );
 
     const onChange: TableProps<DataProductLifeCycleContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);

@@ -20,5 +20,9 @@ class DataProductLifecycle(Base, BaseORM):
     value = Column(Integer)
     color = Column(String)
     is_default = Column(Boolean, server_default="false")
-    data_products: Mapped[list["DataProduct"]] = relationship(lazy="noload")
-    datasets: Mapped[list["Dataset"]] = relationship(lazy="noload")
+    data_products: Mapped[list["DataProduct"]] = relationship(
+        lazy="noload", back_populates="lifecycle", cascade="all, delete-orphan"
+    )
+    datasets: Mapped[list["Dataset"]] = relationship(
+        lazy="noload", back_populates="lifecycle", cascade="all, delete-orphan"
+    )
