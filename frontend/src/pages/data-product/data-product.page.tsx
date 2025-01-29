@@ -86,7 +86,7 @@ export function DataProduct() {
                     {/* Data product description */}
                     <Flex vertical className={styles.overview}>
                         <DataProductDescription
-                            status={dataProduct.status}
+                            lifecycle={dataProduct.lifecycle}
                             type={dataProduct.type.name}
                             description={dataProduct.description}
                             businessArea={dataProduct.business_area.name}

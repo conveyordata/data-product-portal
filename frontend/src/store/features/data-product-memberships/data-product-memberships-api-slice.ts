@@ -111,7 +111,7 @@ export const dataProductMembershipsApiSlice = baseApiSlice
             }),
             getDataProductMembershipPendingActions: builder.query<DataProductMembershipContract[], void>({
                 query: () => ({
-                    url: buildUrl(ApiUrl.DataProductMembershipPendingActions, { }),
+                    url: buildUrl(ApiUrl.DataProductMembershipPendingActions, {}),
                     method: 'GET',
                 }),
                 providesTags: (_, __) => [
@@ -130,5 +130,5 @@ export const {
     useDenyMembershipAccessMutation,
     useRemoveMembershipAccessMutation,
     useUpdateMembershipRoleMutation,
-    useGetDataProductMembershipPendingActionsQuery
+    useGetDataProductMembershipPendingActionsQuery,
 } = dataProductMembershipsApiSlice;

@@ -2,6 +2,7 @@ import { TagContract } from '@/types/tag';
 import { UserContract } from '@/types/users';
 import { DataOutputLink, DataProductLink } from '@/types/dataset';
 import { BusinessAreaContract } from '@/types/business-area';
+import { DataProductLifeCycleContract } from '../data-product-lifecycle';
 
 export enum DatasetStatus {
     Pending = 'pending',
@@ -25,6 +26,8 @@ export interface DatasetContract {
     tags: TagContract[];
     tag_ids: string[];
     data_product_links: DataProductLink[];
+    lifecycle: DataProductLifeCycleContract;
+    lifecycle_id: string;
     data_output_links: DataOutputLink[];
     access_type: DatasetAccess;
     business_area: BusinessAreaContract;

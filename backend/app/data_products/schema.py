@@ -17,6 +17,7 @@ class DataProductCreate(BaseDataProduct):
     memberships: list[DataProductMembershipCreate]
     business_area_id: UUID
     tag_ids: list[UUID]
+    lifecycle_id: UUID
 
 
 class DataProductUpdate(DataProductCreate):

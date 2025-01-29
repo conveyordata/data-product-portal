@@ -38,10 +38,10 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
 
     useEffect(() => {
         const hash = location.hash.slice(1);
-        if(hash) {
+        if (hash) {
             setActiveTab(hash);
         }
-    }, [location])
+    }, [location]);
 
     const onTabChange = (key: string) => {
         navigate(`#${key}`);
@@ -59,7 +59,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 label: t('Technical information'),
                 key: TabKeys.Technologies,
                 icon: <CodeOutlined />,
-                children: <TechnologiesTab dataOutputId={dataOutputId} />
+                children: <TechnologiesTab dataOutputId={dataOutputId} />,
             },
             {
                 label: t('Explorer'),
@@ -67,11 +67,10 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 icon: <PartitionOutlined />,
                 children: (
                     <ReactFlowProvider>
-                        <Explorer id={dataOutputId} type={"dataoutput"}/>
+                        <Explorer id={dataOutputId} type={'dataoutput'} />
                     </ReactFlowProvider>
                 ),
             },
-
         ];
     }, [dataOutputId, t]);
 

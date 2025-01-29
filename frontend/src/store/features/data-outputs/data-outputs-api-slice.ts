@@ -20,7 +20,7 @@ export const dataOutputTags: string[] = [
     TagTypes.UserDataProducts,
     TagTypes.DataProduct,
     TagTypes.UserDatasets,
-    TagTypes.UserDataOutputs
+    TagTypes.UserDataOutputs,
 ];
 
 export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dataOutputTags }).injectEndpoints({
@@ -67,7 +67,7 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataOutputGraph, { dataOutputId: id }),
                 method: 'GET',
-            })
+            }),
         }),
         updateDataOutput: builder.mutation<
             DataOutputUpdateResponse,
@@ -114,9 +114,7 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 url: buildUrl(ApiUrl.DataOutputGet, { dataOutputId: id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: [
-                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
-            ],
+            invalidatesTags: [{ type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST }],
         }),
         removeDatasetFromDataOutput: builder.mutation<DataOutputDatasetRemoveResponse, DataOutputDatasetRemoveRequest>({
             query: ({ dataOutputId, datasetId }) => ({

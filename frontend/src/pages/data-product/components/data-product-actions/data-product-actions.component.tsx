@@ -7,7 +7,7 @@ import {
     useGetDataProductByIdQuery,
     useGetDataProductConveyorIDEUrlMutation,
     useGetDataProductSignInUrlMutation,
-    useGetDataProductDatabricksWorkspaceUrlMutation
+    useGetDataProductDatabricksWorkspaceUrlMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import {
     getCanUserAccessDataProductData,
@@ -99,7 +99,8 @@ export function DataProductActions({ dataProductId }: Props) {
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
     const [getDataProductSignInUrl, { isLoading }] = useGetDataProductSignInUrlMutation();
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
-    const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading}] = useGetDataProductDatabricksWorkspaceUrlMutation();
+    const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
+        useGetDataProductDatabricksWorkspaceUrlMutation();
 
     if (!dataProduct || !user) return null;
 

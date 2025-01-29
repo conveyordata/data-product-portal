@@ -1,5 +1,6 @@
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
+from tests.factories.lifecycle import LifecycleFactory
 from tests.factories.s3_data_output import S3DataOutputFactory
 
 from .. import test_session
@@ -36,6 +37,7 @@ factories = [
     EnvPlatformConfigFactory,
     S3DataOutputFactory,
     TagFactory,
+    LifecycleFactory,
 ]
 
 for factory_model in factories:

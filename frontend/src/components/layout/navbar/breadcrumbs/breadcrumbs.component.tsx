@@ -204,6 +204,19 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
+                        case ApplicationPaths.DataProductSettings:
+                            Object.assign(breadcrumbItem, {
+                                title: (
+                                    <Space
+                                        classNames={{
+                                            item: styles.breadcrumbItem,
+                                        }}
+                                    >
+                                        {t('Data Product Settings')}
+                                    </Space>
+                                ),
+                            });
+                            break;
                         case ApplicationPaths.PlatformServiceConfigNew:
                             Object.assign(breadcrumbItem, {
                                 title: (
@@ -224,7 +237,10 @@ export const Breadcrumbs = () => {
 
                             // Case for data product and dataset
                             if (dataProductId && dataProduct && !isFetchingDataProduct) {
-                                if (isDataProductEditPage(path, dataProductId) || isDataOutputEditPage(path, dataOutputId, dataProductId)) {
+                                if (
+                                    isDataProductEditPage(path, dataProductId) ||
+                                    isDataOutputEditPage(path, dataOutputId, dataProductId)
+                                ) {
                                     Object.assign(breadcrumbItem, {
                                         title: (
                                             <Space
@@ -237,7 +253,12 @@ export const Breadcrumbs = () => {
                                         ),
                                     });
                                 } else {
-                                    if (dataOutputId && dataOutput && !isFetchingDataOutput && path.split('/').length == 4) {
+                                    if (
+                                        dataOutputId &&
+                                        dataOutput &&
+                                        !isFetchingDataOutput &&
+                                        path.split('/').length == 4
+                                    ) {
                                         Object.assign(breadcrumbItem, {
                                             title: (
                                                 <Typography.Text

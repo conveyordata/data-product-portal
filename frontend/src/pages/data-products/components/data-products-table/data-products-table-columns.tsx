@@ -1,20 +1,27 @@
-import { TableColumnsType } from 'antd';
+import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import { DataProductsGetContract, DataProductStatus } from '@/types/data-product';
 import { TeamOutlined } from '@ant-design/icons';
 import i18n from '@/i18n';
 import { TFunction } from 'i18next';
-import { getStatusLabel } from '@/utils/status.helper.ts';
-import { TableStatusTag } from '@/components/list/table-status-tag/table-status-tag.component.tsx';
+import styles from './data-products-table.module.scss';
+import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { DataProductTypeContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { BusinessAreaGetResponse } from '@/types/business-area';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 
 const iconColumnWidth = 30;
-export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunction, dataProducts: DataProductsGetContract }): TableColumnsType<DataProductsGetContract[0]> => {
-    const sorter = new Sorter<DataProductsGetContract[0]>;
+export const getDataProductTableColumns = ({
+    t,
+    dataProducts: data,
+}: {
+    t: TFunction;
+    dataProducts: DataProductsGetContract;
+}): TableColumnsType<DataProductsGetContract[0]> => {
+    const sorter = new Sorter<DataProductsGetContract[0]>();
     return [
         {
             title: t('Id'),
@@ -24,7 +31,17 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
         // This is an empty column to match to give a small indentation to the table and match the datasets table icon column
         {
             title: undefined,
+            dataIndex: 'status',
             width: iconColumnWidth,
+            render: (status: DataProductStatus) => {
+                return (
+                    <Popover content={getStatusLabel(status)} placement={'top'}>
+                        <>
+                            <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
+                        </>
+                    </Popover>
+                );
+            },
         },
         {
             title: t('Name'),
@@ -32,18 +49,30 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             ellipsis: {
                 showTitle: false,
             },
-            render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
-            sorter: sorter.stringSorter(dp => dp.name),
+            render: (name) => {
+                return <TableCellItem text={name} tooltip={{ content: name }} />;
+            },
+            sorter: sorter.stringSorter((dp) => dp.name),
             defaultSortOrder: 'ascend',
+            width: '25%',
         },
         {
             title: t('Status'),
-            dataIndex: 'status',
-            render: (status: DataProductStatus) => {
-                return <TableStatusTag status={status} />;
+            dataIndex: 'lifecycle',
+            render: (lifecycle: DataProductLifeCycleContract) => {
+                if (lifecycle !== null) {
+                    return (
+                        <Tag color={lifecycle.color || 'default'} className={styles.tag}>
+                            {lifecycle.name}
+                        </Tag>
+                    );
+                } else {
+                    return;
+                }
             },
-            ...new FilterSettings(data, dp => getStatusLabel(dp.status)),
-            sorter: sorter.stringSorter(dp => getStatusLabel(dp.status)),
+            ...new FilterSettings(data, (dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
+            sorter: sorter.stringSorter((dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
+            width: '10%',
         },
         {
             title: t('Business Area'),
@@ -51,8 +80,8 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             render: (businessArea: BusinessAreaGetResponse) => {
                 return <TableCellItem text={businessArea.name} />;
             },
-            ...new FilterSettings(data, dp => dp.business_area.name),
-            sorter: sorter.stringSorter(dp => dp.business_area.name),
+            ...new FilterSettings(data, (dp) => dp.business_area.name),
+            sorter: sorter.stringSorter((dp) => dp.business_area.name),
         },
         {
             title: t('Type'),
@@ -62,8 +91,8 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
                 return <TableCellItem reactSVGComponent={icon} text={type.name} />;
             },
             ellipsis: true,
-            ...new FilterSettings(data, dp => dp.type.name),
-            sorter: sorter.stringSorter(dp => dp.type.name),
+            ...new FilterSettings(data, (dp) => dp.type.name),
+            sorter: sorter.stringSorter((dp) => dp.type.name),
         },
         {
             title: t('Access'),
@@ -71,7 +100,7 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             render: (userCount: number) => {
                 return <TableCellItem icon={<TeamOutlined />} text={i18n.t('{{count}} users', { count: userCount })} />;
             },
-            sorter: sorter.numberSorter(dp => dp.user_count),
+            sorter: sorter.numberSorter((dp) => dp.user_count),
         },
         {
             title: t('Consumes'),
@@ -79,7 +108,7 @@ export const getDataProductTableColumns = ({ t, dataProducts: data }: { t: TFunc
             render: (datasetCount: number) => {
                 return <TableCellItem text={i18n.t('{{count}} datasets', { count: datasetCount })} />;
             },
-            sorter: sorter.numberSorter(dp => dp.dataset_count),
+            sorter: sorter.numberSorter((dp) => dp.dataset_count),
         },
         {
             title: t('Produces'),

@@ -58,7 +58,7 @@ export const getDataProductUsersTableColumns = ({
                 );
             },
             width: '50%',
-            sorter: sorter.stringSorter(membership => membership.user.last_name),
+            sorter: sorter.stringSorter((membership) => membership.user.last_name),
         },
         {
             title: t('Role'),
@@ -76,8 +76,8 @@ export const getDataProductUsersTableColumns = ({
                 );
             },
             width: '25%',
-            ...new FilterSettings(dataProductUsers, membership => membership.role),
-            sorter: sorter.stringSorter(membership => membership.role),
+            ...new FilterSettings(dataProductUsers, (membership) => membership.role),
+            sorter: sorter.stringSorter((membership) => membership.role),
         },
         {
             title: t('Status'),
@@ -91,8 +91,10 @@ export const getDataProductUsersTableColumns = ({
                 );
             },
             width: '20%',
-            ...new FilterSettings(dataProductUsers, membership => getDataProductMembershipStatusLabel(membership.status)),
-            sorter: sorter.stringSorter(membership => getDataProductMembershipStatusLabel(membership.status)),
+            ...new FilterSettings(dataProductUsers, (membership) =>
+                getDataProductMembershipStatusLabel(membership.status),
+            ),
+            sorter: sorter.stringSorter((membership) => getDataProductMembershipStatusLabel(membership.status)),
         },
         {
             title: t('Actions'),

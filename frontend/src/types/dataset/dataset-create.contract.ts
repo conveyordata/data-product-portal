@@ -1,6 +1,9 @@
 import { DatasetContract } from '@/types/dataset';
 
-export type DatasetCreateRequest = Pick<DatasetContract, 'description' | 'name' | 'access_type' | 'external_id' | 'tag_ids'> & {
+export type DatasetCreateRequest = Pick<
+    DatasetContract,
+    'lifecycle_id' | 'description' | 'name' | 'access_type' | 'external_id' | 'tag_ids'
+> & {
     owners: string[];
     business_area_id: string;
 };
@@ -9,4 +12,4 @@ export type DatasetCreateResponse = {
     id: string;
 };
 
-export type DatasetCreateFormSchema = DatasetCreateRequest
+export type DatasetCreateFormSchema = DatasetCreateRequest;

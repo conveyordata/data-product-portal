@@ -11,7 +11,10 @@ import { getDataProductDataOutputsColumns } from './data-output-table-columns.ts
 import { DataOutputsGetContract } from '@/types/data-output';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { AddDatasetPopup } from '../add-dataset-popup/add-dataset-popup.tsx';
-import { useRemoveDataOutputMutation, useRemoveDatasetFromDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
+import {
+    useRemoveDataOutputMutation,
+    useRemoveDatasetFromDataOutputMutation,
+} from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 
 type Props = {
@@ -33,13 +36,13 @@ export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, data
         try {
             await removeDataOutput(dataOutputId).unwrap();
             dispatchMessage({
-                content: t("Data Output {{name}} has been successfully removed", { name }),
+                content: t('Data Output {{name}} has been successfully removed', { name }),
                 type: 'success',
-            })
+            });
         } catch (error) {
-            console.error("Failed to remove data output", error);
+            console.error('Failed to remove data output', error);
         }
-    }
+    };
     const handleRemoveDatasetFromDataOutput = async (datasetId: string, dataOutputId: string, name: string) => {
         try {
             await removeDatasetFromDataOutput({ datasetId, dataOutputId: dataOutputId }).unwrap();

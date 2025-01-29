@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.data_product_lifecycles.model import (
+    DataProductLifecycle as DataProductLifeCycleModel,
+)
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
@@ -29,14 +32,33 @@ class DatasetService:
             ],
         )
 
+        default_lifecycle = (
+            db.query(DataProductLifeCycleModel)
+            .filter(DataProductLifeCycleModel.is_default)
+            .first()
+        )
+
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
             )
+
+        if not dataset.lifecycle:
+            dataset.lifecycle = default_lifecycle
+
         return dataset
 
     def get_datasets(self, db: Session) -> list[DatasetsGet]:
-        return db.query(DatasetModel).order_by(asc(DatasetModel.name)).all()
+        default_lifecycle = (
+            db.query(DataProductLifeCycleModel)
+            .filter(DataProductLifeCycleModel.is_default)
+            .first()
+        )
+        datasets = db.query(DatasetModel).order_by(asc(DatasetModel.name)).all()
+        for dataset in datasets:
+            if not dataset.lifecycle:
+                dataset.lifecycle = default_lifecycle
+        return datasets
 
     def get_user_datasets(self, user_id: UUID, db: Session) -> list[DatasetsGet]:
         return (

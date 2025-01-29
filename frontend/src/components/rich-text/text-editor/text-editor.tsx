@@ -10,11 +10,10 @@ import { CheckOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { TextStyleCustomExtension } from '@/components/rich-text/extensions/text-style/text-style-custom-extension.tsx';
-import Table from '@tiptap/extension-table'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
-
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
 
 type Props = {
     initialContent?: string;
@@ -36,7 +35,7 @@ const extensions = [
     Table,
     TableCell,
     TableHeader,
-    TableRow
+    TableRow,
 ];
 
 export const TextEditor = ({

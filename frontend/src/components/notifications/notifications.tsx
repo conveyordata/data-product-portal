@@ -27,26 +27,26 @@ export function Notifications() {
     const { data: pending_actions_data_products } = useGetDataProductMembershipPendingActionsQuery();
 
     type PendingAction =
-    | { type: "data_product"} & DataProductDatasetContract
-    | { type: "data_output"} & DataOutputDatasetContract
-    | { type: "team"} & DataProductMembershipContract
+        | ({ type: 'data_product' } & DataProductDatasetContract)
+        | ({ type: 'data_output' } & DataOutputDatasetContract)
+        | ({ type: 'team' } & DataProductMembershipContract);
 
     const createPendingItem = (action: PendingAction, navigate: Function, t: TFunction) => {
         let link, description, navigatePath;
 
         switch (action.type) {
-            case "data_product":
+            case 'data_product':
                 link = createDataProductIdPath(action.data_product_id);
                 description = (
                     <>
-                        <Typography.Text style={{marginRight: '4px'}}>
-                        {t('{{name}}, on behalf of data product', { name: action.requested_by?.first_name })}
+                        <Typography.Text style={{ marginRight: '4px' }}>
+                            {t('{{name}}, on behalf of data product', { name: action.requested_by?.first_name })}
                         </Typography.Text>
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
                             {t('{{name}}', { name: action.data_product.name })}
                         </Link>
-                        <Typography.Text style={{marginRight: '4px', marginLeft: '4px'}}>
-                        {t('requests read access to dataset')}
+                        <Typography.Text style={{ marginRight: '4px', marginLeft: '4px' }}>
+                            {t('requests read access to dataset')}
                         </Typography.Text>
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                             {t('{{name}}', { name: action.dataset.name })}
@@ -56,18 +56,18 @@ export function Notifications() {
                 navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
                 break;
 
-            case "data_output":
+            case 'data_output':
                 link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
                 description = (
                     <>
-                        <Typography.Text style={{marginRight: '4px'}}>
-                        {t('{{name}}, on behalf of data output', { name: action.requested_by?.first_name })}
+                        <Typography.Text style={{ marginRight: '4px' }}>
+                            {t('{{name}}, on behalf of data output', { name: action.requested_by?.first_name })}
                         </Typography.Text>
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
                             {t('{{name}}', { name: action.data_output.name })}
                         </Link>
-                        <Typography.Text style={{marginRight: '4px', marginLeft: '4px'}}>
-                        {t('requests a link to dataset ')}
+                        <Typography.Text style={{ marginRight: '4px', marginLeft: '4px' }}>
+                            {t('requests a link to dataset ')}
                         </Typography.Text>
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                             {t('{{name}}', { name: action.dataset.name })}
@@ -77,19 +77,17 @@ export function Notifications() {
                 navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
                 break;
 
-            case "team":
+            case 'team':
                 link = createDataProductIdPath(action.data_product_id);
                 description = (
                     <>
-                        <Typography.Text style={{marginRight: '4px'}}>
-                        {t('{{name}} would like to join the data product', { name: action.user?.first_name })}
+                        <Typography.Text style={{ marginRight: '4px' }}>
+                            {t('{{name}} would like to join the data product', { name: action.user?.first_name })}
                         </Typography.Text>
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
                             {t('{{name}}', { name: action.data_product.name })}
                         </Link>
-                        <Typography.Text style={{marginLeft: '4px'}}>
-                        {t('team')}
-                        </Typography.Text>
+                        <Typography.Text style={{ marginLeft: '4px' }}>{t('team')}</Typography.Text>
                     </>
                 );
                 navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
@@ -109,13 +107,13 @@ export function Notifications() {
 
     const pendingItems = useMemo(() => {
         const datasets = pending_actions_datasets?.map((action) =>
-            createPendingItem({...action, type: "data_product"}, navigate, t)
+            createPendingItem({ ...action, type: 'data_product' }, navigate, t),
         );
         const dataOutputs = pending_actions_dataoutputs?.map((action) =>
-            createPendingItem({...action, type: "data_output"}, navigate, t)
+            createPendingItem({ ...action, type: 'data_output' }, navigate, t),
         );
         const dataProducts = pending_actions_data_products?.map((action) =>
-            createPendingItem({...action, type: "team"}, navigate, t)
+            createPendingItem({ ...action, type: 'team' }, navigate, t),
         );
 
         return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])];
@@ -146,11 +144,7 @@ export function Notifications() {
                     trigger={['click']}
                 >
                     <Space>
-                        <Button
-                            shape={'circle'}
-                            className={styles.iconButton}
-                            icon={<BellOutlined />}
-                        />
+                        <Button shape={'circle'} className={styles.iconButton} icon={<BellOutlined />} />
                     </Space>
                 </Dropdown>
             </Badge>

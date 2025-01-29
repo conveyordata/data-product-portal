@@ -43,19 +43,26 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const [identifiers, setIdentifiers] = useState<string[]>([]);
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
-    const { data: availableTags, isFetching: isFetchingTags} = useGetAllTagsQuery();
+    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const [form] = Form.useForm();
     const sourceAligned = Form.useWatch('is_source_aligned', form);
     const dataProductNameValue = Form.useWatch('name', form);
     const isLoading = isCreating || isCreating || isFetchingInitialValues || isFetchingTags;
 
-    const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery()
+    const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
 
-    const dataPlatforms = useMemo(() => getDataPlatforms(t).filter((platform) => {
-        return platformConfig?.map(config => config.service.name).includes(platform.label) || platformConfig?.map(config => config.platform.name).includes(platform.label)
-    }), [t, platformConfig, platformsLoading]);
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id})) ?? [];
+    const dataPlatforms = useMemo(
+        () =>
+            getDataPlatforms(t).filter((platform) => {
+                return (
+                    platformConfig?.map((config) => config.service.name).includes(platform.label) ||
+                    platformConfig?.map((config) => config.platform.name).includes(platform.label)
+                );
+            }),
+        [t, platformConfig, platformsLoading],
+    );
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
@@ -63,28 +70,34 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
                 switch (selectedConfiguration?.value) {
                     case DataPlatforms.S3:
-                        config["configuration_type"] = "S3DataOutput"
-                        break
+                        config['configuration_type'] = 'S3DataOutput';
+                        break;
                     case DataPlatforms.Glue:
-                        config["configuration_type"] = "GlueDataOutput"
-                        break
+                        config['configuration_type'] = 'GlueDataOutput';
+                        break;
                     case DataPlatforms.Databricks:
-                        config["configuration_type"] = "DatabricksDataOutput"
-                        break
+                        config['configuration_type'] = 'DatabricksDataOutput';
+                        break;
                     case DataPlatforms.Snowflake:
-                        config["configuration_type"] = "SnowflakeDataOutput"
+                        config['configuration_type'] = 'SnowflakeDataOutput';
                 }
                 const request: DataOutputCreate = {
                     name: values.name,
                     external_id: generateExternalIdFromName(values.name ?? ''),
                     description: values.description,
                     configuration: config,
-                    platform_id: platformConfig!.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase())[0].platform.id,
-                    service_id: platformConfig!.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase())[0].service.id,
+                    platform_id: platformConfig!.filter(
+                        (config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase(),
+                    )[0].platform.id,
+                    service_id: platformConfig!.filter(
+                        (config) =>
+                            config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
+                            config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase(),
+                    )[0].service.id,
                     owner_id: dataProductId,
                     sourceAligned: sourceAligned === undefined ? false : sourceAligned,
                     status: DataOutputStatus.Active,
-                    tag_ids: values.tag_ids ?? []
+                    tag_ids: values.tag_ids ?? [],
                 };
                 await createDataOutput(request).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
@@ -113,7 +126,13 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             setSelectedDataPlatform(dropdown);
             if (dropdown!.children?.length === 0) {
                 setSelectedConfiguration(dropdown);
-                setIdentifiers(platformConfig!.filter((config) => config.platform.name.toLowerCase() === dropdown?.value.toLowerCase() && config.service.name.toLowerCase() === dropdown?.value.toLowerCase())[0].config);
+                setIdentifiers(
+                    platformConfig!.filter(
+                        (config) =>
+                            config.platform.name.toLowerCase() === dropdown?.value.toLowerCase() &&
+                            config.service.name.toLowerCase() === dropdown?.value.toLowerCase(),
+                    )[0].config,
+                );
             } else {
                 setSelectedConfiguration(undefined);
                 setIdentifiers([]);
@@ -123,14 +142,22 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const onConfigurationClick = (dataPlatform: DataPlatform) => {
         if (!platformsLoading) {
-            const dropdown = selectedDataPlatform?.children?.filter((platform) => platform.value === dataPlatform).at(0);
+            const dropdown = selectedDataPlatform?.children
+                ?.filter((platform) => platform.value === dataPlatform)
+                .at(0);
             if (selectedConfiguration !== undefined && selectedConfiguration === dropdown) {
                 setSelectedConfiguration(undefined);
                 setIdentifiers([]);
             } else {
                 setIdentifiers([]);
                 setSelectedConfiguration(dropdown);
-                setIdentifiers(platformConfig!.filter((config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() && config.service.name.toLowerCase() === dropdown?.value.toLowerCase())[0].config);
+                setIdentifiers(
+                    platformConfig!.filter(
+                        (config) =>
+                            config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
+                            config.service.name.toLowerCase() === dropdown?.value.toLowerCase(),
+                    )[0].config,
+                );
             }
         }
     };
@@ -143,7 +170,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             });
         }
     }, [dataProductNameValue]);
-    const options = [{label: t('Product aligned'), value: false}, {label: t('Source aligned'), value: true}]
+    const options = [
+        { label: t('Product aligned'), value: false },
+        { label: t('Source aligned'), value: true },
+    ];
 
     return (
         <Form
@@ -199,17 +229,15 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>
-                name={'is_source_aligned'} valuePropName="checked"
+                name={'is_source_aligned'}
+                valuePropName="checked"
                 label={t('Alignment')}
                 required
-                tooltip={t('If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.')}
+                tooltip={t(
+                    'If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.',
+                )}
             >
-                <Select
-                    allowClear={false}
-                    defaultActiveFirstOption
-                    defaultValue={false}
-                    options={options}
-                />
+                <Select allowClear={false} defaultActiveFirstOption defaultValue={false} options={options} />
             </Form.Item>
             <Form.Item>
                 <Space wrap className={styles.radioButtonContainer}>
@@ -257,11 +285,32 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             />
                         );
                     case DataPlatforms.Glue:
-                        return <GlueDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct!.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
+                        return (
+                            <GlueDataOutputForm
+                                identifiers={identifiers}
+                                form={form}
+                                external_id={currentDataProduct!.external_id}
+                                sourceAligned={sourceAligned}
+                            />
+                        ); //mode={mode} dataProductId={dataProductId} />;
                     case DataPlatforms.Databricks:
-                        return <DatabricksDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct!.external_id} sourceAligned={sourceAligned}/>; //mode={mode} dataProductId={dataProductId} />;
+                        return (
+                            <DatabricksDataOutputForm
+                                identifiers={identifiers}
+                                form={form}
+                                external_id={currentDataProduct!.external_id}
+                                sourceAligned={sourceAligned}
+                            />
+                        ); //mode={mode} dataProductId={dataProductId} />;
                     case DataPlatforms.Snowflake:
-                        return <SnowflakeDataOutputForm identifiers={identifiers} form={form} external_id={currentDataProduct!.external_id} sourceAligned={sourceAligned}/>;
+                        return (
+                            <SnowflakeDataOutputForm
+                                identifiers={identifiers}
+                                form={form}
+                                external_id={currentDataProduct!.external_id}
+                                sourceAligned={sourceAligned}
+                            />
+                        );
                     default:
                         return null;
                 }

@@ -39,10 +39,8 @@ export function DataOutputDescription({ status, type, description, tags }: Props
                     </Flex>
                 </Space>
                 <Flex>
-                    {tags.map( tag => (
-                        <Tag color='success'>
-                            {tag.value}
-                        </Tag>
+                    {tags.map((tag) => (
+                        <Tag color="success">{tag.value}</Tag>
                     ))}
                 </Flex>
                 <Space>

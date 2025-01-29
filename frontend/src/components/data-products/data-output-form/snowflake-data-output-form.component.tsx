@@ -18,31 +18,29 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
     const schemaValue = Form.useWatch('schema', form);
     const tableValue = Form.useWatch('table', form);
     useEffect(() => {
-        let databaseOptionsList = identifiers //TODO
+        let databaseOptionsList = identifiers; //TODO
         if (!sourceAligned) {
-            databaseOptionsList = [external_id]
-            form.setFieldsValue({ database: external_id});
+            databaseOptionsList = [external_id];
+            form.setFieldsValue({ database: external_id });
         } else {
-            form.setFieldsValue({database: undefined})
+            form.setFieldsValue({ database: undefined });
         }
         databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
     }, [sourceAligned]);
 
-
     useEffect(() => {
         let result = databaseValue;
-        if (databaseValue){
+        if (databaseValue) {
             if (schemaValue) {
                 result += `__${schemaValue}`;
             }
             if (entireDatabase) {
-                result += '.*'
-            }
-            else if (tableValue) {
+                result += '.*';
+            } else if (tableValue) {
                 result += `.${tableValue}`;
             }
         } else {
-            result = ""
+            result = '';
         }
 
         form.setFieldsValue({ result: result });
@@ -64,9 +62,9 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
                 <Select
                     allowClear
                     showSearch
-                    mode='tags'
+                    mode="tags"
                     disabled={!sourceAligned}
-                    onChange={value => {
+                    onChange={(value) => {
                         if (value.length > 0) {
                             form.setFieldsValue({ database: value[0] });
                         }
@@ -80,11 +78,9 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
                 label={t('Schema suffix')}
                 tooltip={t('The suffix of the Snowflake schema to link the data output to')}
             >
-                <Input/>
+                <Input />
             </Form.Item>
-            <Form.Item
-                name={'entire_database'} valuePropName="checked" initialValue={true}
-            >
+            <Form.Item name={'entire_database'} valuePropName="checked" initialValue={true}>
                 <Checkbox defaultChecked={true}>{t('Include entire database')}</Checkbox>
             </Form.Item>
             <Form.Item<SnowflakeDataOutput>
@@ -100,9 +96,9 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
                     },
                 ]}
             >
-                <Input/>
+                <Input />
             </Form.Item>
-            <Form.Item<SnowflakeDataOutput & {result: string}>
+            <Form.Item<SnowflakeDataOutput & { result: string }>
                 required
                 name={'result'}
                 label={t('Resulting schema and table')}

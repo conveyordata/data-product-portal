@@ -79,7 +79,7 @@ export function Dataset() {
                     {/* Dataset description */}
                     <Flex vertical className={styles.datasetOverview}>
                         <DatasetDescription
-                            status={dataset.status}
+                            lifecycle={dataset.lifecycle}
                             description={dataset.description}
                             businessArea={dataset.business_area.name}
                             accessType={getDatasetAccessTypeLabel(dataset.access_type)}

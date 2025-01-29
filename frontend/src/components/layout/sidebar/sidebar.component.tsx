@@ -3,7 +3,7 @@ import styles from './sidebar.module.scss';
 import React from 'react';
 import { Link, useMatches } from 'react-router-dom';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import Icon, { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import Icon, { HomeOutlined, SettingOutlined, UnorderedListOutlined, BranchesOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
@@ -54,21 +54,26 @@ export const Sidebar = () => {
                 icon: React.createElement(SettingOutlined),
                 key: 'Configure',
                 children: [
+                    // {
+                    //     key: ApplicationPaths.PlatformsConfigs,
+                    //     label: (
+                    //         <span className={styles.subMenuTitle}>
+                    //             <Link to={ApplicationPaths.PlatformsConfigs}>{t('Platforms Configurations')}</Link>
+                    //         </span>
+                    //     ),
+                    // },
+                    // {
+                    //     key: ApplicationPaths.Environments,
+                    //     label: (
+                    //         <span className={styles.subMenuTitle}>
+                    //             <Link to={ApplicationPaths.Environments}>{t('Environments')}</Link>
+                    //         </span>
+                    //     ),
+                    // },
                     {
-                        key: ApplicationPaths.PlatformsConfigs,
-                        label: (
-                            <span className={styles.subMenuTitle}>
-                                <Link to={ApplicationPaths.PlatformsConfigs}>{t('Platforms Configurations')}</Link>
-                            </span>
-                        ),
-                    },
-                    {
-                        key: ApplicationPaths.Environments,
-                        label: (
-                            <span className={styles.subMenuTitle}>
-                                <Link to={ApplicationPaths.Environments}>{t('Environments')}</Link>
-                            </span>
-                        ),
+                        key: ApplicationPaths.DataProductSettings,
+                        label: <Link to={ApplicationPaths.DataProductSettings}>{t('Data Product Settings')}</Link>,
+                        icon: React.createElement(SettingOutlined),
                     },
                 ],
             },
@@ -89,7 +94,7 @@ export const Sidebar = () => {
                     <Space className={styles.logoWrapper}>
                         <Link to={ApplicationPaths.Home}>
                             <SidebarLogo />
-                            {version ? version.version : ""}
+                            {version ? version.version : ''}
                         </Link>
                     </Space>
                 </Flex>

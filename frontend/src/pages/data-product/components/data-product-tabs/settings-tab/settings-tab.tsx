@@ -8,8 +8,8 @@ type Props = {
 
 export function SettingsTab({ dataProductId }: Props) {
     return (
-            <Flex vertical className={styles.container}>
-                <DataProductSettings dataProductId={dataProductId} />
-            </Flex>
+        <Flex vertical className={styles.container}>
+            <DataProductSettings dataProductId={dataProductId} />
+        </Flex>
     );
 }

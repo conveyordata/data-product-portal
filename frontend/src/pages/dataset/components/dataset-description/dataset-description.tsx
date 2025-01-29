@@ -1,19 +1,18 @@
 import styles from './dataset-description.module.scss';
-import { Badge, Flex, Space, Tag, Typography } from 'antd';
-import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
+import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DatasetStatus } from '@/types/dataset/dataset.contract.ts';
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import { TagModel } from '@/types/tag';
 
 type Props = {
-    status: DatasetStatus;
+    lifecycle: DataProductLifeCycleContract;
     accessType?: string;
     description: string;
     businessArea: string;
     tags: TagModel[];
 };
 
-export function DatasetDescription({ status, accessType, description, businessArea, tags }: Props) {
+export function DatasetDescription({ lifecycle, accessType, description, businessArea, tags }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -21,7 +20,7 @@ export function DatasetDescription({ status, accessType, description, businessAr
             <Space className={styles.contentSubtitle}>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Status')}</Typography.Text>
-                    <Badge status={getBadgeStatus(status)} text={getStatusLabel(status)} className={styles.noSelect} />
+                    <Tag color={lifecycle.color}>{lifecycle.name}</Tag>
                 </Flex>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Business Area')}</Typography.Text>
@@ -33,10 +32,8 @@ export function DatasetDescription({ status, accessType, description, businessAr
                 </Flex>
             </Space>
             <Flex>
-                {tags.map( tag => (
-                        <Tag color='success'>
-                            {tag.value}
-                        </Tag>
+                {tags.map((tag) => (
+                    <Tag color="success">{tag.value}</Tag>
                 ))}
             </Flex>
             <Space>

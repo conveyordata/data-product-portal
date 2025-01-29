@@ -8,7 +8,11 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { useGetDataOutputByIdQuery, useRemoveDataOutputMutation, useUpdateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
+import {
+    useGetDataOutputByIdQuery,
+    useRemoveDataOutputMutation,
+    useUpdateDataOutputMutation,
+} from '@/store/features/data-outputs/data-outputs-api-slice';
 import TextArea from 'antd/es/input/TextArea';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
@@ -18,7 +22,7 @@ import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 
 type Props = {
     mode: 'edit';
-    dataOutputId: string
+    dataOutputId: string;
 };
 
 export function DataOutputForm({ mode, dataOutputId }: Props) {
@@ -30,20 +34,22 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             skip: !dataOutputId,
         },
     );
-    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? "", {skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId});
-    const { data: availableTags, isFetching: isFetchingTags} = useGetAllTagsQuery();
+    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? '', {
+        skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
+    });
+    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
     const [archiveDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
     const canEditForm = Boolean(
-            dataProduct &&
+        dataProduct &&
             currentUser?.id &&
             (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
     );
     const canFillInForm = canEditForm;
     const isLoading = isFetchingInitialValues || isFetchingTags;
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id})) ?? [];
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
     const handleArchiveDataProduct = async () => {
         if (canEditForm && currentDataOutput) {
@@ -65,7 +71,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 if (!canEditForm) {
                     dispatchMessage({ content: t('You are not allowed to edit this data output'), type: 'error' });
                     return;
-                };
+                }
 
                 // TODO Figure out what fields are updateable and which are not
                 const request: DataOutputUpdateRequest = {
@@ -73,7 +79,6 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     description: values.description,
                     tag_ids: values.tag_ids ?? [],
                 };
-
                 const response = await updateDataOutput({
                     dataOutput: request,
                     dataOutputId: dataOutputId,
