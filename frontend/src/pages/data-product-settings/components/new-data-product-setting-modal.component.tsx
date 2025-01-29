@@ -105,7 +105,16 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 >
                     <Input />
                 </Form.Item>
-
+                <Form.Item
+                    name="scope"
+                    label={t('Scope')}
+                    rules={[{ required: true, message: t('Please select a scope') }]}
+                >
+                    <Select>
+                        <Option value="dataproduct">{t('Data product')}</Option>
+                        <Option value="dataset">{t('Dataset')}</Option>
+                    </Select>
+                </Form.Item>
                 <Form.Item
                     name="type"
                     label={t('Type')}

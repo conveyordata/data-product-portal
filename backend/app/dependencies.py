@@ -29,7 +29,7 @@ async def only_for_admin(authenticated_user: User = Depends(get_authenticated_us
         )
 
 
-async def only_dataset_owners(
+def only_dataset_owners(
     id: UUID,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),

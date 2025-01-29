@@ -47,6 +47,7 @@ export const dataProductSettingsApiSlice = baseApiSlice
                 }),
                 invalidatesTags: (_, _error, arg) => [
                     { type: TagTypes.DataProduct as const, id: arg.data_product_id },
+                    { type: TagTypes.Dataset as const, id: arg.data_product_id },
                     { type: TagTypes.DataProductSetting, id: arg.data_product_settings_id },
                     { type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST },
                 ],

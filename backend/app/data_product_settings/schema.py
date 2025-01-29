@@ -1,6 +1,10 @@
+from typing import Optional
 from uuid import UUID
 
-from app.data_product_settings.enums import DataProductSettingType
+from app.data_product_settings.enums import (
+    DataProductSettingScope,
+    DataProductSettingType,
+)
 from app.data_product_settings.model import (
     DataProductSetting as DataProductSettingModel,
 )
@@ -18,6 +22,7 @@ class DataProductSettingCreate(ORMModel):
     name: str
     default: str
     order: int = 100
+    scope: DataProductSettingScope
 
     class Meta:
         orm_model = DataProductSettingModel
@@ -28,7 +33,8 @@ class DataProductSetting(DataProductSettingCreate):
 
 
 class DataProductSettingValueCreate(ORMModel):
-    data_product_id: UUID
+    data_product_id: Optional[UUID] = None
+    dataset_id: Optional[UUID] = None
     data_product_setting_id: UUID
     value: str
 

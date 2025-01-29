@@ -10,6 +10,7 @@ export interface DataProductSettingContract {
     default: string;
     type: DataProductSettingType;
     divider: string;
+    scope: 'dataproduct' | 'dataset';
 }
 
 export interface DataProductSettingModel extends DataProductSettingContract {}
