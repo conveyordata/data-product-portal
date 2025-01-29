@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 
 from app.data_product_types.schema_create import DataProductTypeCreate
@@ -10,7 +9,7 @@ class BaseDataProductGet(ORMModel):
     id: UUID
     name: str
     description: str
-    about: Optional[str] = ""
+    about: str = ""
     external_id: str
     status: DataProductStatus
     type: DataProductTypeCreate
