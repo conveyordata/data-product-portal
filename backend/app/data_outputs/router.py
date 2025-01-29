@@ -4,7 +4,12 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
+from app.data_outputs.schema import (
+    DataOutput,
+    DataOutputCreate,
+    DataOutputStatusUpdate,
+    DataOutputUpdate,
+)
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.dependencies import only_data_output_owners
@@ -81,6 +86,26 @@ def update_data_product(
     id: UUID, data_output: DataOutputUpdate, db: Session = Depends(get_db_session)
 ):
     return DataOutputService().update_data_output(id, data_output, db)
+
+
+@router.put(
+    "/{id}/status",
+    responses={
+        404: {
+            "description": "Data Output not found",
+            "content": {
+                "application/json": {"example": {"detail": "Data Output id not found"}}
+            },
+        }
+    },
+    dependencies=[Depends(only_data_output_owners)],
+)
+def update_data_product_status(
+    id: UUID,
+    data_output: DataOutputStatusUpdate,
+    db: Session = Depends(get_db_session),
+):
+    return DataOutputService().update_data_output_status(id, data_output, db)
 
 
 @router.post(

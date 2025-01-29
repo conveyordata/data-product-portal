@@ -4,7 +4,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db_session
-from app.datasets.schema import DatasetAboutUpdate, DatasetCreateUpdate
+from app.datasets.schema import (
+    DatasetAboutUpdate,
+    DatasetCreateUpdate,
+    DatasetStatusUpdate,
+)
 from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
 from app.dependencies import only_dataset_owners
@@ -105,6 +109,24 @@ def update_dataset_about(
     id: UUID, dataset: DatasetAboutUpdate, db: Session = Depends(get_db_session)
 ):
     return DatasetService().update_dataset_about(id, dataset, db)
+
+
+@router.put(
+    "/{id}/status",
+    responses={
+        404: {
+            "description": "Dataset not found",
+            "content": {
+                "application/json": {"example": {"detail": "Dataset id not found"}}
+            },
+        }
+    },
+    dependencies=[Depends(only_dataset_owners)],
+)
+def update_dataset_status(
+    id: UUID, dataset: DatasetStatusUpdate, db: Session = Depends(get_db_session)
+):
+    return DatasetService().update_dataset_status(id, dataset, db)
 
 
 @router.post(

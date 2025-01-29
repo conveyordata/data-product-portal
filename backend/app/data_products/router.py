@@ -9,6 +9,7 @@ from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.schema import (
     DataProductAboutUpdate,
     DataProductCreate,
+    DataProductStatusUpdate,
     DataProductUpdate,
 )
 from app.data_products.schema_get import DataProductGet, DataProductsGet
@@ -124,6 +125,26 @@ def update_data_product_about(
     db: Session = Depends(get_db_session),
 ):
     return DataProductService().update_data_product_about(id, data_product, db)
+
+
+@router.put(
+    "/{id}/status",
+    responses={
+        404: {
+            "description": "Data Product not found",
+            "content": {
+                "application/json": {"example": {"detail": "Data Product id not found"}}
+            },
+        }
+    },
+    dependencies=[Depends(OnlyWithProductAccess())],
+)
+def update_data_product_status(
+    id: UUID,
+    data_product: DataProductStatusUpdate,
+    db: Session = Depends(get_db_session),
+):
+    return DataProductService().update_data_product_status(id, data_product, db)
 
 
 @router.post(

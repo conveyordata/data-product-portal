@@ -24,6 +24,10 @@ class DataOutputUpdate(ORMModel):
     description: str
 
 
+class DataOutputStatusUpdate(ORMModel):
+    status: DataOutputStatus
+
+
 class DataOutput(ORMModel):
     id: UUID
     name: str
