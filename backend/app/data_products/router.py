@@ -137,7 +137,7 @@ def update_data_product_about(
             },
         }
     },
-    dependencies=[Depends(OnlyWithProductAccess())],
+    dependencies=[Depends(OnlyWithProductAccessID())],
 )
 def update_data_product_status(
     id: UUID,
