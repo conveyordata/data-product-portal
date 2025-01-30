@@ -1,19 +1,15 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
 
 # The lines below are called `modelines`. See `:help modeline`
-# Feel free to remove those if you don't want/need to use them.
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
 
-version: 1
+version: 2
 
 before:
   hooks:
-    # You may remove this if you don't use go modules.
-    - sh -c "cd cli && go mod tidy"
-    # you may remove this if you don't need go generate
-    - sh -c "cd cli && go generate ./..."
+    - go mod tidy
+    - go generate ./...
 
 builds:
   - env:
