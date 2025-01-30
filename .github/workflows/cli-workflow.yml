@@ -52,7 +52,8 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: 'cli/go.mod'
+          go-version-file: cli/go.mod
+          cache-dependency-path: cli/go.sum
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
