@@ -1,19 +1,22 @@
-import styles from './roles.module.scss';
 import { RolesTable } from '@/pages/roles/components/roles-table.component.tsx';
-import { Typography } from 'antd';
+import { Flex, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 import { useState } from 'react';
+import { RolesButton } from '@/pages/roles/components/roles-button.component.tsx';
+import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 
 const { Paragraph } = Typography;
 
 type MenuItem = Required<MenuProps>['items'][number];
 
+export type RoleScope = 'global' | 'data_products' | 'datasets';
+
 export function RoleConfiguration() {
     const { t } = useTranslation();
-    const [current, setCurrent] = useState('global');
+    const [current, setCurrent] = useState<RoleScope>('global');
 
     const items: MenuItem[] = [
         {
@@ -24,26 +27,29 @@ export function RoleConfiguration() {
         {
             label: t('Data Products'),
             key: 'data_products',
-            icon: <GlobalOutlined />,
+            icon: <DataProductOutlined />,
         },
         {
             label: t('Datasets'),
             key: 'datasets',
-            icon: <GlobalOutlined />,
+            icon: <DatasetOutlined />,
         },
     ];
 
     const onClick: MenuProps['onClick'] = (e) => {
-        setCurrent(e.key);
+        setCurrent(e.key as RoleScope);
     };
 
     return (
-        <div className={styles.container}>
-            <Typography.Title level={2}>{t('Manage Roles')}</Typography.Title>
+        <div>
+            <Flex justify="space-between">
+                <Typography.Title level={2}>{t('Manage Roles')}</Typography.Title>
+                <RolesButton scope={current} />
+            </Flex>
             <Paragraph>{t('Roles are reusable sets of permissions.')}</Paragraph>
 
             <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />
-            <RolesTable />
+            <RolesTable scope={current} />
         </div>
     );
 }

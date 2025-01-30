@@ -1,9 +1,10 @@
 import styles from './roles-table.module.scss';
-import { Flex, Table, Typography, Checkbox, type CheckboxChangeEvent, Button, Space, Tooltip } from 'antd';
+import { Flex, Table, Typography, Checkbox, type CheckboxChangeEvent, Space, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useCallback, useState } from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import type { ColumnType } from 'antd/es/table/interface';
+import type { RoleScope } from '@/pages/roles/roles.page.tsx';
 
 const { Text } = Typography;
 
@@ -25,7 +26,10 @@ type PermissionGroup = {
 
 type Permission = PermissionInstance | PermissionGroup;
 
-export function RolesTable() {
+type RolesTableProps = {
+    scope: RoleScope;
+};
+export function RolesTable({ scope }: RolesTableProps) {
     const { t } = useTranslation();
 
     const [data, setData] = useState<Permission[]>([
@@ -183,12 +187,6 @@ export function RolesTable() {
 
     return (
         <Flex vertical className={styles.tableContainer}>
-            <Flex className={styles.searchContainer}>
-                <Typography.Title level={3}>{t('Global roles')}</Typography.Title>
-                <Button className={styles.formButton} type={'primary'}>
-                    {t('Create new global role')}
-                </Button>
-            </Flex>
             <Flex vertical className={styles.tableFilters}>
                 <Table
                     columns={columns}
