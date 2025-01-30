@@ -1,6 +1,7 @@
 module portal
 
-go 1.22.4
+go 1.23.4
+
 require (
 	github.com/aws/aws-sdk-go-v2 v1.34.0
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.49.1
