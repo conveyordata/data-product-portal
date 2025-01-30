@@ -7,6 +7,7 @@ from app.business_areas.schema import BusinessArea
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_product_lifecycles.schema import DataProductLifeCycle
+from app.data_product_settings.schema import DataProductSettingValue
 from app.data_products.schema_get import DataProductsGet
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
@@ -39,6 +40,7 @@ class DatasetGet(ORMModel):
     business_area: BusinessArea
     access_type: DatasetAccessType
     data_output_links: list[DataOutputLink]
+    data_product_settings: list[DataProductSettingValue]
 
 
 class DatasetsGet(DatasetGet):

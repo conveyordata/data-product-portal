@@ -38,6 +38,14 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
                 }),
                 invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
             }),
+            removeDataProductLifecycle: builder.mutation<void, string>({
+                query: (id) => ({
+                    url: ApiUrl.DataProductLifecycle,
+                    method: 'DELETE',
+                    params: { lifecycle_id: id },
+                }),
+                invalidatesTags: [{ type: TagTypes.DataProductLifecycle as const, id: STATIC_TAG_ID.LIST }],
+            }),
             updateDataProductLifecycle: builder.mutation<
                 DataProductLifecycleCreateResponse,
                 DataProductLifeCycleContract
@@ -63,5 +71,6 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
 export const {
     useCreateDataProductLifecycleMutation,
     useGetAllDataProductLifecyclesQuery,
+    useRemoveDataProductLifecycleMutation,
     useUpdateDataProductLifecycleMutation,
 } = dataProductLifecyclesApiSlice;
