@@ -26,7 +26,7 @@ basic_auth = HTTPBasic()
 
 
 def verify_auth_header(
-    credentials: Annotated[HTTPBasicCredentials, Depends(basic_auth)]
+    credentials: Annotated[HTTPBasicCredentials, Depends(basic_auth)],
 ) -> bool:
     if (
         credentials.username != oidc.client_id

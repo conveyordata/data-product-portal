@@ -12,7 +12,11 @@ from app.data_product_lifecycles.model import (
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.datasets.schema import DatasetAboutUpdate, DatasetCreateUpdate
+from app.datasets.schema import (
+    DatasetAboutUpdate,
+    DatasetCreateUpdate,
+    DatasetStatusUpdate,
+)
 from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
@@ -130,6 +134,13 @@ class DatasetService:
     def update_dataset_about(self, id: UUID, dataset: DatasetAboutUpdate, db: Session):
         current_dataset = ensure_dataset_exists(id, db)
         current_dataset.about = dataset.about
+        db.commit()
+
+    def update_dataset_status(
+        self, id: UUID, dataset: DatasetStatusUpdate, db: Session
+    ):
+        current_dataset = ensure_dataset_exists(id, db)
+        current_dataset.status = dataset.status
         db.commit()
 
     def add_user_to_dataset(self, dataset_id: UUID, user_id: UUID, db: Session):

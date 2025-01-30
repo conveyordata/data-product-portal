@@ -27,6 +27,10 @@ class DataProductAboutUpdate(ORMModel):
     about: str
 
 
+class DataProductStatusUpdate(ORMModel):
+    status: DataProductStatus
+
+
 class DataProduct(BaseDataProduct):
     id: UUID
     status: DataProductStatus

@@ -3,6 +3,7 @@ from uuid import UUID
 
 from app.business_areas.schema import BusinessArea
 from app.datasets.enums import DatasetAccessType
+from app.datasets.status import DatasetStatus
 from app.shared.schema import ORMModel
 from app.tags.schema import TagCreate
 from app.users.schema import User
@@ -22,6 +23,10 @@ class DatasetAboutUpdate(ORMModel):
     about: str
 
 
+class DatasetStatusUpdate(ORMModel):
+    status: DatasetStatus
+
+
 class DatasetCreateUpdate(BaseDataset):
     owners: list[UUID]
     business_area_id: UUID
@@ -30,4 +35,5 @@ class DatasetCreateUpdate(BaseDataset):
 class Dataset(BaseDataset):
     id: UUID
     owners: list[User]
+    status: DatasetStatus
     business_area: BusinessArea

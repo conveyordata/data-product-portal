@@ -35,6 +35,7 @@ from app.data_products.schema import (
     DataProduct,
     DataProductAboutUpdate,
     DataProductCreate,
+    DataProductStatusUpdate,
     DataProductUpdate,
 )
 from app.data_products.schema_get import DataProductGet, DataProductsGet
@@ -290,6 +291,13 @@ class DataProductService:
     ):
         current_data_product = ensure_data_product_exists(id, db)
         current_data_product.about = data_product.about
+        db.commit()
+
+    def update_data_product_status(
+        self, id: UUID, data_product: DataProductStatusUpdate, db: Session
+    ):
+        current_data_product = ensure_data_product_exists(id, db)
+        current_data_product.status = data_product.status
         db.commit()
 
     def link_dataset_to_data_product(
