@@ -3,6 +3,7 @@ import { UserContract } from '@/types/users';
 import { DataOutputLink, DataProductLink } from '@/types/dataset';
 import { BusinessAreaContract } from '@/types/business-area';
 import { DataProductLifeCycleContract } from '../data-product-lifecycle';
+import { DataProductSettingValueContract } from '../data-product-setting';
 
 export enum DatasetStatus {
     Pending = 'pending',
@@ -31,6 +32,7 @@ export interface DatasetContract {
     access_type: DatasetAccess;
     business_area: BusinessAreaContract;
     external_id: string;
+    data_product_settings: DataProductSettingValueContract[];
 }
 
 export interface DatasetModel extends DatasetContract {}

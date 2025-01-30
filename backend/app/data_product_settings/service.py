@@ -3,6 +3,8 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.data_product_memberships.enums import DataProductUserRole
+from app.data_product_settings.enums import DataProductSettingScope
 from app.data_product_settings.model import (
     DataProductSetting as DataProductSettingModel,
 )
@@ -13,6 +15,11 @@ from app.data_product_settings.schema import (
     DataProductSetting,
     DataProductSettingValueCreate,
 )
+from app.dependencies import (
+    OnlyWithProductAccessDataProductID,
+    only_dataset_owners,
+)
+from app.users.schema import User
 
 
 class DataProductSettingService:
@@ -24,21 +31,47 @@ class DataProductSettingService:
         )
 
     def set_value_for_product(
-        self, setting_id: UUID, product_id: UUID, value: str, db: Session
+        self,
+        setting_id: UUID,
+        product_id: UUID,
+        value: str,
+        authenticated_user: User,
+        db: Session,
     ):
-        setting = db.scalars(
-            select(DataProductSettingValueModel).filter_by(
-                data_product_id=product_id, data_product_setting_id=setting_id
+        scope = db.get(DataProductSettingModel, setting_id).scope
+        if scope == DataProductSettingScope.DATAPRODUCT:
+            OnlyWithProductAccessDataProductID([DataProductUserRole.OWNER])(
+                data_product_id=product_id, authenticated_user=authenticated_user, db=db
             )
-        ).first()
+            setting = db.scalars(
+                select(DataProductSettingValueModel).filter_by(
+                    data_product_id=product_id, data_product_setting_id=setting_id
+                )
+            ).first()
+        elif scope == DataProductSettingScope.DATASET:
+            only_dataset_owners(
+                id=product_id, authenticated_user=authenticated_user, db=db
+            )
+            setting = db.scalars(
+                select(DataProductSettingValueModel).filter_by(
+                    dataset_id=product_id, data_product_setting_id=setting_id
+                )
+            ).first()
         if setting:
             setting.value = value
         else:
-            new_setting = DataProductSettingValueCreate(
-                data_product_id=product_id,
-                data_product_setting_id=setting_id,
-                value=value,
-            )
+            if scope == DataProductSettingScope.DATAPRODUCT:
+                new_setting = DataProductSettingValueCreate(
+                    data_product_id=product_id,
+                    data_product_setting_id=setting_id,
+                    value=value,
+                )
+            elif scope == DataProductSettingScope.DATASET:
+                new_setting = DataProductSettingValueCreate(
+                    dataset_id=product_id,
+                    data_product_setting_id=setting_id,
+                    value=value,
+                )
             db.add(DataProductSettingValueModel(**new_setting.parse_pydantic_schema()))
         db.commit()
 

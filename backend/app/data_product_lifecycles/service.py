@@ -39,3 +39,8 @@ class DataProductLifeCycleService:
         lifecycle.value = data_product_lifecycle.value
         db.commit()
         return {"id": data_product_lifecycle.id}
+
+    def delete_data_product_lifecycle(self, lifecycle_id: UUID, db: Session) -> None:
+        db.query(DataProductLifeCycleModel).filter_by(id=lifecycle_id).delete()
+        db.commit()
+        return

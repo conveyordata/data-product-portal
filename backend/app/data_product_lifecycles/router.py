@@ -9,6 +9,7 @@ from app.data_product_lifecycles.schema import (
 )
 from app.data_product_lifecycles.service import DataProductLifeCycleService
 from app.database.database import get_db_session
+from app.dependencies import only_for_admin
 
 router = APIRouter(prefix="/data_product_lifecycles", tags=["data_product_lifecycles"])
 
@@ -40,6 +41,7 @@ def get_data_products_lifecycles(
             },
         },
     },
+    dependencies=[Depends(only_for_admin)],
 )
 def create_data_product_lifecycle(
     data_product_lifecycle: DataProductLifeCycleCreate,
@@ -70,6 +72,7 @@ def create_data_product_lifecycle(
             },
         },
     },
+    dependencies=[Depends(only_for_admin)],
 )
 def update_data_product_lifecycle(
     data_product_lifecycle: DataProductLifeCycle,
@@ -78,3 +81,11 @@ def update_data_product_lifecycle(
     return DataProductLifeCycleService().update_data_product_lifecycle(
         data_product_lifecycle, db
     )
+
+
+@router.delete("", dependencies=[Depends(only_for_admin)])
+def delete_data_product_setting(
+    lifecycle_id: UUID,
+    db: Session = Depends(get_db_session),
+):
+    return DataProductLifeCycleService().delete_data_product_lifecycle(lifecycle_id, db)

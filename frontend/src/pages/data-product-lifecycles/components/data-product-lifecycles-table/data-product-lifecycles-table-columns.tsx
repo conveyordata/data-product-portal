@@ -13,6 +13,7 @@ type Props = {
     isDisabled?: boolean;
     handleOpen: (id: string) => void;
     editColor: (record: DataProductLifeCycleContract, color: string) => void;
+    onRemoveDataProductLifecycle: (id: string) => void;
 };
 
 export type EditableColumn = DataProductLifeCycleContract & {
@@ -27,6 +28,7 @@ export const getDataProductTableColumns = ({
     isDisabled,
     isLoading,
     editColor,
+    onRemoveDataProductLifecycle,
 }: Props): EditableColumnType<DataProductLifeCycleContract>[] => {
     const sorter = new Sorter<DataProductLifeCycleContract>();
     return [
@@ -83,6 +85,35 @@ export const getDataProductTableColumns = ({
             render: (is_default: boolean) => <Checkbox checked={is_default} />,
             sorter: sorter.stringSorter((dp) => dp.is_default.toString()),
             defaultSortOrder: 'ascend',
+        },
+        {
+            title: t('Actions'),
+            key: 'action',
+            width: '10%',
+            render: (_, { id, is_default }) => {
+                return (
+                    <Flex vertical>
+                        {!is_default && (
+                            <Popconfirm
+                                title={t('Remove')}
+                                description={t(
+                                    'Are you sure you want to delete the data product lifecycle? This will remove the lifecycle from all the data products and return them to default',
+                                )}
+                                onConfirm={() => onRemoveDataProductLifecycle(id)}
+                                placement={'leftTop'}
+                                okText={t('Confirm')}
+                                cancelText={t('Cancel')}
+                                okButtonProps={{ loading: isLoading }}
+                                autoAdjustOverflow={true}
+                            >
+                                <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                    {t('Remove')}
+                                </Button>
+                            </Popconfirm>
+                        )}
+                    </Flex>
+                );
+            },
         },
     ];
 };
