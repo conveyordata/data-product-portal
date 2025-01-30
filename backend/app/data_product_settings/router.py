@@ -4,13 +4,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.schema import (
     DataProductSetting,
     DataProductSettingCreate,
 )
 from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
+from app.dependencies import OnlyWithProductAccessDataProductID, only_for_admin
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_product_settings", tags=["data_product_settings"])
@@ -44,6 +45,9 @@ def update_data_product_setting(
 
 @router.post(
     "/{data_product_id}/{setting_id}",
+    dependencies=[
+        Depends(OnlyWithProductAccessDataProductID([DataProductUserRole.OWNER]))
+    ],
 )
 def set_value_for_data_product(
     data_product_id: UUID,

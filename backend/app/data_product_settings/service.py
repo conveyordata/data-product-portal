@@ -15,7 +15,10 @@ from app.data_product_settings.schema import (
     DataProductSetting,
     DataProductSettingValueCreate,
 )
-from app.dependencies import OnlyWithProductAccess, only_dataset_owners
+from app.dependencies import (
+    OnlyWithProductAccessDataProductID,
+    only_dataset_owners,
+)
 from app.users.schema import User
 
 
@@ -37,7 +40,7 @@ class DataProductSettingService:
     ):
         scope = db.get(DataProductSettingModel, setting_id).scope
         if scope == DataProductSettingScope.DATAPRODUCT:
-            OnlyWithProductAccess([DataProductUserRole.OWNER])(
+            OnlyWithProductAccessDataProductID([DataProductUserRole.OWNER])(
                 data_product_id=product_id, authenticated_user=authenticated_user, db=db
             )
             setting = db.scalars(

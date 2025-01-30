@@ -12,14 +12,9 @@ from app.data_product_settings.schema import DataProductSettingValue
 from app.data_product_types.schema import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
-from app.data_products_datasets.schema import DataProductDatasetAssociation
-from app.datasets.schema import Dataset
+from app.data_products_datasets.schema import DatasetDataProductLink
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
-
-
-class DatasetLink(DataProductDatasetAssociation):
-    dataset: Dataset
 
 
 class DataProductGet(ORMModel):
@@ -31,7 +26,7 @@ class DataProductGet(ORMModel):
     tags: list[Tag]
     status: DataProductStatus
     lifecycle: Optional[DataProductLifeCycle]
-    dataset_links: list[DatasetLink]
+    dataset_links: list[DatasetDataProductLink]
     memberships: list[DataProductMembershipGet]
     type: DataProductType
     business_area: BusinessArea
@@ -42,7 +37,7 @@ class DataProductGet(ORMModel):
 class DataProductsGet(DataProductGet):
     id: UUID
     about: Optional[Annotated[str, Field(exclude=True)]]
-    dataset_links: Annotated[list[DatasetLink], Field(exclude=True)]
+    dataset_links: Annotated[list[DatasetDataProductLink], Field(exclude=True)]
     memberships: Annotated[list[DataProductMembershipGet], Field(exclude=True)]
     data_outputs: Annotated[list[DataOutputGet], Field(exclude=True)]
 
