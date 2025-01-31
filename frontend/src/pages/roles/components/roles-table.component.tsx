@@ -2,7 +2,7 @@ import styles from './roles-table.module.scss';
 import { Flex, Table, Typography, Checkbox, type CheckboxChangeEvent, Space, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useCallback, useState } from 'react';
-import { InfoCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import type { ColumnType } from 'antd/es/table/interface';
 import type { RoleScope } from '@/pages/roles/roles.page.tsx';
 
@@ -120,7 +120,7 @@ export function RolesTable({ scope }: RolesTableProps) {
                 <Space className={styles.permissionInstance}>
                     <Text>{record.permission}</Text>
                     <Tooltip title={record.description}>
-                        <InfoCircleOutlined />
+                        <QuestionCircleOutlined />
                     </Tooltip>
                 </Space>
             );
@@ -155,7 +155,7 @@ export function RolesTable({ scope }: RolesTableProps) {
                 <Space>
                     <Text>{title}</Text>
                     <Tooltip title={description}>
-                        <InfoCircleOutlined />
+                        <QuestionCircleOutlined />
                     </Tooltip>
                 </Space>
             ),
