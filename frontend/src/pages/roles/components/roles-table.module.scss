@@ -47,7 +47,7 @@
 .permissions-column {
     background-color: colors.$info-color-bg !important;
 
-    &:has(> div.permission-group) {
+    &:has(> .permission-group) {
         padding-top: 12px !important;
         padding-bottom: 12px !important;
     }
@@ -71,4 +71,14 @@
         height: globals.$icon-size-table-cell;
         width: globals.$icon-size-table-cell;
     }
+}
+
+// Remove column separator for first row
+.table-container table > thead > tr > th:first-child::before {
+    display: none;
+}
+
+// Add border radius for bottom left cell as well
+.table-container table > tbody > tr:last-child > :first-child {
+    border-end-start-radius: var(--ant-table-header-border-radius);
 }

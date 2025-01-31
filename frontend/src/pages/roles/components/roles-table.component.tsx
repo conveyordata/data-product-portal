@@ -1,10 +1,10 @@
 import styles from './roles-table.module.scss';
-import { Flex, Table, Typography, Checkbox, type CheckboxChangeEvent, Space, Tooltip } from 'antd';
+import { Flex, Table, Typography, Checkbox, type CheckboxChangeEvent } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useCallback, useState } from 'react';
-import { QuestionCircleOutlined } from '@ant-design/icons';
 import type { ColumnType } from 'antd/es/table/interface';
 import type { RoleScope } from '@/pages/roles/roles.page.tsx';
+import QuestionTooltip from '@/components/tooltip/question-tooltip.tsx';
 
 const { Text } = Typography;
 
@@ -117,19 +117,16 @@ export function RolesTable({ scope }: RolesTableProps) {
         if (record.type === 'Instance') {
             record = record as PermissionInstance;
             return (
-                <Space className={styles.permissionInstance}>
-                    <Text>{record.permission}</Text>
-                    <Tooltip title={record.description}>
-                        <QuestionCircleOutlined />
-                    </Tooltip>
-                </Space>
+                <QuestionTooltip title={record.description}>
+                    <Text className={styles.permissionInstance}>{record.permission}</Text>
+                </QuestionTooltip>
             );
         } else if (record.type === 'Group') {
             record = record as PermissionGroup;
             return (
-                <Space className={styles.permissionGroup}>
-                    <Text strong>{record.name}</Text>
-                </Space>
+                <Text className={styles.permissionGroup} strong>
+                    {record.name}
+                </Text>
             );
         }
     };
@@ -152,12 +149,9 @@ export function RolesTable({ scope }: RolesTableProps) {
     const createColumn = (title: string, description: string): ColumnType<Permission> => {
         return {
             title: (
-                <Space>
+                <QuestionTooltip title={description}>
                     <Text>{title}</Text>
-                    <Tooltip title={description}>
-                        <QuestionCircleOutlined />
-                    </Tooltip>
-                </Space>
+                </QuestionTooltip>
             ),
             dataIndex: ['access', title],
             render: renderCheckbox(title),

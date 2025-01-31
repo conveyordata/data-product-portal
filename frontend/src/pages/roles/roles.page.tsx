@@ -1,8 +1,7 @@
 import { RolesTable } from '@/pages/roles/components/roles-table.component.tsx';
-import { Flex, Typography } from 'antd';
+import { Flex, Tabs, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import type { MenuProps } from 'antd';
-import { Menu } from 'antd';
+import type { TabsProps } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { RolesButton } from '@/pages/roles/components/roles-button.component.tsx';
@@ -10,7 +9,7 @@ import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 
 const { Paragraph } = Typography;
 
-type MenuItem = Required<MenuProps>['items'][number];
+type TabItem = Required<TabsProps>['items'][number];
 
 export type RoleScope = 'global' | 'data_products' | 'datasets';
 
@@ -18,7 +17,7 @@ export function RoleConfiguration() {
     const { t } = useTranslation();
     const [current, setCurrent] = useState<RoleScope>('global');
 
-    const items: MenuItem[] = [
+    const items: TabItem[] = [
         {
             label: t('Global'),
             key: 'global',
@@ -36,8 +35,8 @@ export function RoleConfiguration() {
         },
     ];
 
-    const onClick: MenuProps['onClick'] = (e) => {
-        setCurrent(e.key as RoleScope);
+    const onChange: TabsProps['onChange'] = (key) => {
+        setCurrent(key as RoleScope);
     };
 
     return (
@@ -48,7 +47,7 @@ export function RoleConfiguration() {
             </Flex>
             <Paragraph>{t('Roles are reusable sets of permissions.')}</Paragraph>
 
-            <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />
+            <Tabs onChange={onChange} activeKey={current} items={items} />
             <RolesTable scope={current} />
         </div>
     );
