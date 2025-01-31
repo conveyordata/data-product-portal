@@ -25,7 +25,7 @@ data sources, and sharing concepts, ensuring control and oversight for business 
 Our goal is to bridge the gap between data governance, data platforms and data catalogs and provide a 360 view of all
 ongoing data initiatives that is easy to understand by everybody.
 
-To read more about it, please checkout our [announcement blogpost](https://conveyordata.com/portal-introducing-new-open-source-data-product-portal?utm_source=github-portal-readme&utm_medium=referral)
+To read more about it, please check out our [announcement blogpost](https://conveyordata.com/portal-introducing-new-open-source-data-product-portal?utm_source=github-portal-readme&utm_medium=referral)
 
 ## Who is it for?
 

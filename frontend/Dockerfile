@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:23-alpine as build-stage
+FROM --platform=linux/amd64 node:23-alpine AS build-stage
 
 WORKDIR /app
 COPY . .

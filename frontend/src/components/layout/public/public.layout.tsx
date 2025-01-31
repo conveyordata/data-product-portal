@@ -21,19 +21,17 @@ const PublicLayout: React.FC = () => {
 
     return (
         <Layout className={styles.layoutWrapper} hasSider>
-            <Layout>
-                <Layout.Content className={styles.layoutContent}>
-                    <div
-                        className={styles.childrenWrapper}
-                        style={{
-                            background: colorBgContainer,
-                            borderRadius: borderRadiusLG,
-                        }}
-                    >
-                        <Outlet />
-                    </div>
-                </Layout.Content>
-            </Layout>
+            <Layout.Content className={styles.layoutContent}>
+                <div
+                    className={styles.childrenWrapper}
+                    style={{
+                        background: colorBgContainer,
+                        borderRadius: borderRadiusLG,
+                    }}
+                >
+                    <Outlet />
+                </div>
+            </Layout.Content>
         </Layout>
     );
 };
