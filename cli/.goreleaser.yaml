@@ -18,7 +18,6 @@ builds:
       - linux
       - windows
       - darwin
-    dir: cli
 
 archives:
   - format: tar.gz
