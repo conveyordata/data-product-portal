@@ -390,5 +390,9 @@
     "Is Default": "Is Default",
     "You can only have one default lifecycle": "You can only have one default lifecycle",
     "Please pick a color": "Please pick a color",
-    "Create New Data Product Lifecycle": "Create New Data Product Lifecycle"
+    "Create New Data Product Lifecycle": "Create New Data Product Lifecycle",
+    "dataproduct": "dataproduct",
+    "dataset": "dataset",
+    "Scope": "Scope",
+    "Please select a scope": "Please select a scope"
 }

@@ -18,37 +18,58 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import TextArea from 'antd/es/input/TextArea';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
+import { getIsDatasetOwner } from '@/utils/dataset-user.helper';
 
 type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
 type Props = {
     dataProductId: string | undefined;
+    scope: 'dataproduct' | 'dataset';
 };
 
-export function DataProductSettings({ dataProductId }: Props) {
+export function DataProductSettings({ dataProductId, scope }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(dataProductId || '', {
-        skip: !dataProductId,
+        skip: !dataProductId || scope !== 'dataproduct',
+    });
+    const { data: dataset, isFetching: isFetchingDS } = useGetDatasetByIdQuery(dataProductId || '', {
+        skip: !dataProductId || scope !== 'dataset',
     });
     const { data: settings, isFetching } = useGetAllDataProductSettingsQuery();
+    const filteredSettings = useMemo(() => {
+        return settings?.filter((setting) => setting.scope === scope);
+    }, [settings]);
     const [updateSetting] = useCreateDataProductSettingValueMutation();
     const [form] = Form.useForm();
     const user = useSelector(selectCurrentUser);
     const timeoutRef = useRef<Timeout | null>(null);
 
     const isDataProductOwner = useMemo(() => {
+        if (dataset) return true;
         if (!dataProduct || !user) return false;
-
         return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
     }, [dataProduct?.id, user?.id]);
+    const isDatasetOwner = useMemo(() => {
+        if (dataProduct) return true;
+        if (!dataset || !user) return false;
+        return getIsDatasetOwner(dataset, user.id) || user.is_admin;
+    }, [dataset?.id, user?.id]);
 
     const onSubmit: FormProps<DataProductSettingValueForm>['onFinish'] = async (values) => {
         try {
+            let id: string = '';
             if (dataProduct) {
+                id = dataProduct.id;
+            }
+            if (dataset) {
+                id = dataset.id;
+            }
+            if (id != '') {
                 updatedSettings?.map(async (setting) => {
                     const key = `data_product_settings_id_${setting.id}`;
                     if (values[`value_${setting.id}`].toString() !== setting.value) {
                         const request: DataProductSettingValueCreateRequest = {
-                            data_product_id: dataProduct.id,
+                            data_product_id: id,
                             data_product_settings_id: values[key],
                             value: values[`value_${setting.id}`].toString(),
                         };
@@ -68,17 +89,28 @@ export function DataProductSettings({ dataProductId }: Props) {
     };
 
     const updatedSettings: (DataProductSettingContract & { value: string })[] = useMemo(() => {
-        if (settings) {
-            return settings.map((setting) => {
-                const match = dataProduct?.data_product_settings?.find(
-                    (dps) => dps.data_product_setting_id === setting.id,
-                );
-                return match ? { ...setting, value: match.value } : { ...setting, value: setting.default };
-            });
+        if (filteredSettings) {
+            if (scope == 'dataproduct') {
+                return filteredSettings.map((setting) => {
+                    const match = dataProduct?.data_product_settings?.find(
+                        (dps) => dps.data_product_setting_id === setting.id,
+                    );
+                    return match ? { ...setting, value: match.value } : { ...setting, value: setting.default };
+                });
+            } else if (scope == 'dataset') {
+                return filteredSettings.map((setting) => {
+                    const match = dataset?.data_product_settings?.find(
+                        (ds) => ds.data_product_setting_id === setting.id,
+                    );
+                    return match ? { ...setting, value: match.value } : { ...setting, value: setting.default };
+                });
+            } else {
+                return [];
+            }
         } else {
             return [];
         }
-    }, [settings, dataProduct]);
+    }, [filteredSettings, dataProduct, dataset]);
     useEffect(() => {
         updatedSettings.map((setting) => {
             switch (setting.type) {
@@ -124,8 +156,8 @@ export function DataProductSettings({ dataProductId }: Props) {
                             renderedSetting = (
                                 <Form.Item<DataProductSettingValueForm>
                                     name={`value_${setting.id}`}
-                                    label={t(setting.name)}
-                                    tooltip={t(setting.tooltip)}
+                                    label={setting.name}
+                                    tooltip={setting.tooltip}
                                     rules={[
                                         {
                                             required: true,
@@ -141,8 +173,8 @@ export function DataProductSettings({ dataProductId }: Props) {
                             renderedSetting = (
                                 <Form.Item<DataProductSettingValueForm>
                                     name={`value_${setting.id}`}
-                                    label={t(setting.name)}
-                                    tooltip={t(setting.tooltip)}
+                                    label={setting.name}
+                                    tooltip={setting.tooltip}
                                 >
                                     <Select allowClear={false} defaultActiveFirstOption mode="tags" />
                                 </Form.Item>
@@ -152,8 +184,8 @@ export function DataProductSettings({ dataProductId }: Props) {
                             renderedSetting = (
                                 <Form.Item<DataProductSettingValueForm>
                                     name={`value_${setting.id}`}
-                                    label={t(setting.name)}
-                                    tooltip={t(setting.tooltip)}
+                                    label={setting.name}
+                                    tooltip={setting.tooltip}
                                 >
                                     <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
                                 </Form.Item>
@@ -189,7 +221,7 @@ export function DataProductSettings({ dataProductId }: Props) {
                     requiredMark={'optional'}
                     labelWrap
                     labelAlign={'left'}
-                    disabled={isFetching || isFetchingDP || !isDataProductOwner}
+                    disabled={isFetching || isFetchingDP || isFetchingDS || !isDataProductOwner || !isDatasetOwner}
                     className={styles.form}
                     onValuesChange={(_, allValues) => {
                         // Trigger form submission after 0.5 seconds of unchanged input values
@@ -206,6 +238,6 @@ export function DataProductSettings({ dataProductId }: Props) {
                 </Form>
             </Flex>
         );
-    }, [updatedSettings, dataProduct]);
+    }, [updatedSettings, dataProduct, dataset]);
     return settingsRender;
 }

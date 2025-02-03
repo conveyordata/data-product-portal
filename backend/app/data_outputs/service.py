@@ -10,7 +10,12 @@ from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLamb
 from app.core.email.send_mail import send_mail
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
-from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
+from app.data_outputs.schema import (
+    DataOutput,
+    DataOutputCreate,
+    DataOutputStatusUpdate,
+    DataOutputUpdate,
+)
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
@@ -127,6 +132,13 @@ class DataOutputService:
         data_output.delete()
         db.commit()
         RefreshInfrastructureLambda().trigger()
+
+    def update_data_output_status(
+        self, id: UUID, data_output: DataOutputStatusUpdate, db: Session
+    ):
+        current_data_output = ensure_data_output_exists(id, db)
+        current_data_output.status = data_output.status
+        db.commit()
 
     def link_dataset_to_data_output(
         self,

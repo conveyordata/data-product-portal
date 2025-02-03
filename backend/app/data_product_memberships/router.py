@@ -9,7 +9,10 @@ from app.data_product_memberships.schema import DataProductMembershipCreate
 from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_product_memberships.service import DataProductMembershipService
 from app.database.database import get_db_session
-from app.dependencies import OnlyWithProductAccess, only_product_membership_owners
+from app.dependencies import (
+    OnlyWithProductAccessDataProductID,
+    only_product_membership_owners,
+)
 from app.users.schema import User
 
 router = APIRouter(
@@ -19,7 +22,9 @@ router = APIRouter(
 
 @router.post(
     "/create",
-    dependencies=[Depends(OnlyWithProductAccess([DataProductUserRole.OWNER]))],
+    dependencies=[
+        Depends(OnlyWithProductAccessDataProductID([DataProductUserRole.OWNER]))
+    ],
 )
 def create_data_product_membership(
     data_product_id: UUID,

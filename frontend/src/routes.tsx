@@ -27,6 +27,7 @@ import { EnvironmentConfig } from './pages/environment-config/environment-config
 import { DataOutput } from './pages/data-output/data-output.page.tsx';
 import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
 import { DataProductSettings } from './pages/data-product-settings/data-product-settings.page.tsx';
+import { RoleConfiguration } from '@/pages/roles/roles.page.tsx';
 
 const router = createBrowserRouter([
     {
@@ -149,6 +150,16 @@ const router = createBrowserRouter([
                             {
                                 path: ApplicationPaths.EnvironmentConfig,
                                 element: <EnvironmentConfig />,
+                            },
+                        ],
+                    },
+                    {
+                        path: ApplicationPaths.RoleConfiguration,
+                        element: <ProtectedRoute />,
+                        children: [
+                            {
+                                index: true,
+                                element: <RoleConfiguration />,
                             },
                         ],
                     },

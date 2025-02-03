@@ -1,7 +1,13 @@
 import { Tabs } from 'antd';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import styles from './dataset-tabs.module.scss';
-import Icon, { HistoryOutlined, InfoCircleOutlined, PartitionOutlined, TeamOutlined } from '@ant-design/icons';
+import Icon, {
+    HistoryOutlined,
+    InfoCircleOutlined,
+    PartitionOutlined,
+    SettingOutlined,
+    TeamOutlined,
+} from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { HistoryTab } from './history-tab/history-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab.tsx';
@@ -14,6 +20,7 @@ import { TeamTab } from './team-tab/team-tab.tsx';
 import { ReactFlowProvider } from 'reactflow';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Explorer } from '@/components/explorer/explorer.tsx';
+import { SettingsTab } from './settings-tab/settings-tab.tsx';
 
 type Props = {
     datasetId: string;
@@ -26,6 +33,7 @@ export enum TabKeys {
     DataOutput = 'data-output',
     Team = 'team',
     Explorer = 'explorer',
+    Settings = 'settings',
     History = 'history',
 }
 
@@ -83,6 +91,16 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 children: (
                     <ReactFlowProvider>
                         <Explorer id={datasetId} type={'dataset'} />
+                    </ReactFlowProvider>
+                ),
+            },
+            {
+                label: t('Settings'),
+                key: TabKeys.Settings,
+                icon: <SettingOutlined />,
+                children: (
+                    <ReactFlowProvider>
+                        <SettingsTab datasetId={datasetId} />
                     </ReactFlowProvider>
                 ),
             },

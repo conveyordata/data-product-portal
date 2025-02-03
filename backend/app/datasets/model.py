@@ -17,6 +17,7 @@ from app.tags.model import Tag
 
 if TYPE_CHECKING:
     from app.business_areas.model import BusinessArea
+    from app.data_product_settings.model import DataProductSettingValue
     from app.users.model import User
 
 
@@ -65,7 +66,15 @@ class Dataset(Base, BaseORM):
         order_by="DataOutputDatasetAssociation.status.desc()",
     )
     tags: Mapped[list[Tag]] = relationship(secondary=tag_dataset_table)
-    lifecycle_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_lifecycles.id"))
+    data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
+        "DataProductSettingValue",
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        order_by="DataProductSettingValue.dataset_id",
+    )
+    lifecycle_id: Mapped[UUID] = mapped_column(
+        ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
+    )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(back_populates="datasets")
     business_area_id: Mapped[UUID] = Column(ForeignKey("business_areas.id"))
     business_area: Mapped["BusinessArea"] = relationship(back_populates="datasets")

@@ -27,6 +27,10 @@ class DataOutputUpdate(ORMModel):
     tag_ids: list[UUID]
 
 
+class DataOutputStatusUpdate(ORMModel):
+    status: DataOutputStatus
+
+
 class DataOutput(ORMModel):
     id: UUID
     name: str

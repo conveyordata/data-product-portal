@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.12-slim-bookworm as build-stage
+FROM --platform=linux/amd64 python:3.12-slim-bookworm AS build-stage
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \

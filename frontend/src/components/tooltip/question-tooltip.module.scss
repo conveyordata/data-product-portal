@@ -1,0 +1,7 @@
+// Based on the style of the AntDesign Form.Item tooltip
+.question-tooltip {
+    color: var(--ant-color-text-description);
+    cursor: help;
+    writing-mode: horizontal-tb;
+    margin-inline-start: var(--ant-margin-xxs);
+}

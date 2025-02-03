@@ -29,7 +29,7 @@ async def only_for_admin(authenticated_user: User = Depends(get_authenticated_us
         )
 
 
-async def only_dataset_owners(
+def only_dataset_owners(
     id: UUID,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
@@ -79,7 +79,7 @@ async def only_data_output_owners(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Data Output {id} not found",
         )
-    return OnlyWithProductAccess()(
+    return OnlyWithProductAccessID()(
         id=data_output.owner_id, authenticated_user=authenticated_user, db=db
     )
 
@@ -123,7 +123,7 @@ class OnlyWithProductAccess:
             allowed_roles = [DataProductUserRole.OWNER, DataProductUserRole.MEMBER]
         self.allowed_roles = allowed_roles
 
-    def __call__(
+    def call(
         self,
         data_product_name: Optional[str] = None,
         data_product_id: Optional[UUID] = None,
@@ -164,3 +164,41 @@ class OnlyWithProductAccess:
                 status.HTTP_403_FORBIDDEN,
                 detail="You are not allowed to execute this operation",
             )
+
+
+class OnlyWithProductAccessID(OnlyWithProductAccess):
+    def __call__(
+        self,
+        id: UUID,
+        authenticated_user: User = Depends(get_authenticated_user),
+        db: Session = Depends(get_db_session),
+    ) -> None:
+        super().call(id=id, authenticated_user=authenticated_user, db=db)
+
+
+class OnlyWithProductAccessDataProductID(OnlyWithProductAccess):
+    def __call__(
+        self,
+        data_product_id: UUID,
+        authenticated_user: User = Depends(get_authenticated_user),
+        db: Session = Depends(get_db_session),
+    ) -> None:
+        super().call(
+            data_product_id=data_product_id,
+            authenticated_user=authenticated_user,
+            db=db,
+        )
+
+
+class OnlyWithProductAccessName(OnlyWithProductAccess):
+    def __call__(
+        self,
+        data_product_name: str,
+        authenticated_user: User = Depends(get_authenticated_user),
+        db: Session = Depends(get_db_session),
+    ) -> None:
+        super().call(
+            data_product_name=data_product_name,
+            authenticated_user=authenticated_user,
+            db=db,
+        )

@@ -26,6 +26,8 @@ export enum ApplicationPaths {
     EnvironmentConfigNew = '/environments/:environmentId/new',
     EnvironmentNew = '/environments/new',
     DataProductSettings = '/data-product-settings',
+    DataProductLifecycles = '/data-product-lifecycles',
+    RoleConfiguration = '/configuration/roles',
 }
 
 export const authenticatedPaths: string[] = [
