@@ -23,7 +23,7 @@ import {
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useSelector } from 'react-redux';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
 import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
@@ -305,8 +305,9 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select data product tags')}
-                    mode={'tags'}
+                    mode={'multiple'}
                     options={tagSelectOptions}
+                    filterOption={selectFilterOptionByLabel}
                 />
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema>

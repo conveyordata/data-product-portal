@@ -19,6 +19,7 @@ import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
 import { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
+import { selectFilterOptionByLabel } from '@/utils/form.helper';
 
 type Props = {
     mode: 'edit';
@@ -164,8 +165,9 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select data output tags')}
-                    mode={'tags'}
+                    mode={'multiple'}
                     options={tagSelectOptions}
+                    filterOption={selectFilterOptionByLabel}
                 />
             </Form.Item>
             <Form.Item>

@@ -21,7 +21,7 @@ import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { getDatasetOwnerIds, getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 
@@ -280,8 +280,9 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select dataset tags')}
-                    mode={'tags'}
+                    mode={'multiple'}
                     options={tagSelectOptions}
+                    filterOption={selectFilterOptionByLabel}
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>

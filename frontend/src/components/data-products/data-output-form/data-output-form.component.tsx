@@ -23,6 +23,7 @@ import { DatabricksDataOutputForm } from './databricks-data-output-form.componen
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
+import { selectFilterOptionByLabel } from '@/utils/form.helper';
 
 type Props = {
     mode: 'create';
@@ -224,8 +225,9 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select data output tags')}
-                    mode={'tags'}
+                    mode={'multiple'}
                     options={tagSelectOptions}
+                    filterOption={selectFilterOptionByLabel}
                 />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>
