@@ -12,7 +12,7 @@ on:
   schedule:
     - cron: '21 10 * * 2'
   push:
-    branches: [ "main", "fix/scorecard" ]
+    branches: [ "main" ]
 
 # Declare default permissions as read only.
 permissions: read-all
