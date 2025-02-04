@@ -16,11 +16,6 @@ type Props = {
 export function DataOutputDescription({ status, type, description, tags }: Props) {
     const { t } = useTranslation();
 
-    // const data_output_tags = tags.map((tag) => Tag({
-    //     children: tag.value,
-    //     color: "success"
-    // }))
-
     return (
         <>
             <Flex vertical className={styles.statusInfo}>
