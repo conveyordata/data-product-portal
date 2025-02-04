@@ -86,7 +86,9 @@ app.add_middleware(
 async def send_response_to_webhook(request: Request, call_next):
     response = await call_next(request)
     # Gets are not logged
-    if request.method in ["POST", "PUT", "DELETE"]:
+    if request.method in ["POST", "PUT", "DELETE"] and not request.url.path.startswith(
+        "/api/auth/"
+    ):
         response_body = [chunk async for chunk in response.body_iterator]
         response.body_iterator = iterate_in_threadpool(iter(response_body))
         body = (b"".join(response_body)).decode()
