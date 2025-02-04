@@ -31,6 +31,8 @@ asgi-correlation-id = "^4.3.4"
 pytest-cov = "^6.0.0"
 cryptography = "^44.0.0"
 emailgen = "^0.1.1"
+casbin = "^1.38.0"
+casbin-async-sqlalchemy-adapter = "^1.7.0"
 
 [tool.poetry.group.test]
 optional = true

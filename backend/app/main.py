@@ -1,5 +1,6 @@
 import asyncio
 import time
+from contextlib import asynccontextmanager
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
@@ -7,6 +8,7 @@ from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.authz.authorization import Authorization
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.errors.error_handling import add_exception_handlers
@@ -51,6 +53,13 @@ async def log_middleware(request: Request, call_next):
     return response
 
 
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Initialize Authz
+    Authorization()
+    yield
+
+
 backend_analytics()
 app = FastAPI(
     title=TITLE,
@@ -59,6 +68,7 @@ app = FastAPI(
     contact={"name": "Stijn Janssens", "email": "stijn.janssens@dataminded.com"},
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
+    lifespan=lifespan,
     **oidc_kwargs
 )
 
