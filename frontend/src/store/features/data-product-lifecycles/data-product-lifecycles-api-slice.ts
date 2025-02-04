@@ -1,4 +1,4 @@
-import { ApiUrl } from '@/api/api-urls.ts';
+import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import {
@@ -39,9 +39,8 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
             }),
             removeDataProductLifecycle: builder.mutation<void, string>({
                 query: (id) => ({
-                    url: ApiUrl.DataProductLifecycle,
+                    url: buildUrl(ApiUrl.DataProductLifecycleGet, { lifecycleId: id }),
                     method: 'DELETE',
-                    params: { lifecycle_id: id },
                 }),
                 invalidatesTags: [{ type: TagTypes.DataProductLifecycle as const, id: STATIC_TAG_ID.LIST }],
             }),
@@ -50,7 +49,7 @@ export const dataProductLifecyclesApiSlice = baseApiSlice
                 DataProductLifeCycleContract
             >({
                 query: (request) => ({
-                    url: ApiUrl.DataProductLifecycle,
+                    url: buildUrl(ApiUrl.DataProductLifecycleGet, { lifecycleId: request.id }),
                     method: 'PUT',
                     data: request,
                 }),

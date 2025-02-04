@@ -8,6 +8,7 @@ from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.schema import (
     DataProductSetting,
     DataProductSettingCreate,
+    DataProductSettingUpdate,
 )
 from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
@@ -33,14 +34,15 @@ def create_data_product_setting(
 
 
 @router.put(
-    "",
+    "/{id}",
     dependencies=[Depends(only_for_admin)],
 )
 def update_data_product_setting(
-    setting: DataProductSetting,
+    id: UUID,
+    setting: DataProductSettingUpdate,
     db: Session = Depends(get_db_session),
 ):
-    return DataProductSettingService().update_data_product_setting(setting, db)
+    return DataProductSettingService().update_data_product_setting(id, setting, db)
 
 
 @router.post(
@@ -61,9 +63,9 @@ def set_value_for_data_product(
     )
 
 
-@router.delete("", dependencies=[Depends(only_for_admin)])
+@router.delete("/{id}", dependencies=[Depends(only_for_admin)])
 def delete_data_product_setting(
-    setting_id: UUID,
+    id: UUID,
     db: Session = Depends(get_db_session),
 ):
-    return DataProductSettingService().delete_data_product_setting(setting_id, db)
+    return DataProductSettingService().delete_data_product_setting(id, db)

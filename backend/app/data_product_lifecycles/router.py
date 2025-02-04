@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.data_product_lifecycles.schema import (
     DataProductLifeCycle,
     DataProductLifeCycleCreate,
+    DataProductLifeCycleUpdate,
 )
 from app.data_product_lifecycles.service import DataProductLifeCycleService
 from app.database.database import get_db_session
@@ -53,7 +54,7 @@ def create_data_product_lifecycle(
 
 
 @router.put(
-    "",
+    "/{id}",
     responses={
         200: {
             "description": "Data Product lifecycle updated",
@@ -75,17 +76,18 @@ def create_data_product_lifecycle(
     dependencies=[Depends(only_for_admin)],
 )
 def update_data_product_lifecycle(
-    data_product_lifecycle: DataProductLifeCycle,
+    id: UUID,
+    data_product_lifecycle: DataProductLifeCycleUpdate,
     db: Session = Depends(get_db_session),
 ) -> dict[str, UUID]:
     return DataProductLifeCycleService().update_data_product_lifecycle(
-        data_product_lifecycle, db
+        id, data_product_lifecycle, db
     )
 
 
-@router.delete("", dependencies=[Depends(only_for_admin)])
+@router.delete("/{id}", dependencies=[Depends(only_for_admin)])
 def delete_data_product_setting(
-    lifecycle_id: UUID,
+    id: UUID,
     db: Session = Depends(get_db_session),
 ):
-    return DataProductLifeCycleService().delete_data_product_lifecycle(lifecycle_id, db)
+    return DataProductLifeCycleService().delete_data_product_lifecycle(id, db)

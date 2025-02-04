@@ -16,5 +16,9 @@ class DataProductLifeCycleCreate(ORMModel):
         orm_model = DataProductLifeCycleModel
 
 
+class DataProductLifeCycleUpdate(DataProductLifeCycleCreate):
+    pass
+
+
 class DataProductLifeCycle(DataProductLifeCycleCreate):
     id: UUID

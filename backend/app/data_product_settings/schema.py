@@ -28,6 +28,10 @@ class DataProductSettingCreate(ORMModel):
         orm_model = DataProductSettingModel
 
 
+class DataProductSettingUpdate(DataProductSettingCreate):
+    pass
+
+
 class DataProductSetting(DataProductSettingCreate):
     id: UUID
 
