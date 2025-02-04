@@ -1,7 +1,9 @@
+import asyncio
 import time
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
+from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -10,6 +12,7 @@ from app.core.auth.router import router as auth
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging.logger import logger
 from app.core.logging.scarf_analytics import backend_analytics
+from app.core.webhooks.webhook import call_webhook
 from app.settings import settings
 from app.shared.router import router
 
@@ -79,6 +82,25 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def send_response_to_webhook(request: Request, call_next):
+    response = await call_next(request)
+    # Gets are not logged
+    if request.method in ["POST", "PUT", "DELETE"]:
+        response_body = [chunk async for chunk in response.body_iterator]
+        response.body_iterator = iterate_in_threadpool(iter(response_body))
+        body = (b"".join(response_body)).decode()
+        asyncio.create_task(
+            call_webhook(
+                content=body,
+                method=request.method,
+                url=request.url.path,
+                query=request.url.query,
+            )
+        )
+    return response
+
+
 # K8S health and liveness check
 @app.get("/")
 def root():
@@ -88,3 +110,12 @@ def root():
 @app.get("/api/version")
 def get_version():
     return {"version": app.version}
+
+
+@app.webhooks.post("generic")
+def new_data_product():
+    """
+    Whenever something changes in the Portal state,
+    this webhook will be triggered.
+    All POST, PUT and DELETE calls are forwarded
+    """

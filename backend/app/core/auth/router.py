@@ -14,7 +14,9 @@ router.include_router(device)
 
 
 @router.get("/user")
-def authorize(authorized_user: User = Depends(authorize_user)) -> User:
+def authorize(
+    authorized_user: User = Depends(authorize_user),
+) -> User:
     return authorized_user
 
 
