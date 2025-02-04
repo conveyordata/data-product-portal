@@ -92,10 +92,11 @@ async def send_response_to_webhook(request: Request, call_next):
         body = (b"".join(response_body)).decode()
         asyncio.create_task(
             call_webhook(
-                content=body,
+                content=body if request.method == "POST" else {},
                 method=request.method,
                 url=request.url.path,
                 query=request.url.query,
+                status_code=response.status_code,
             )
         )
     return response
