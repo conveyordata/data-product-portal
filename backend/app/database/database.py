@@ -20,9 +20,9 @@ def ensure_exists(id: UUID, db: Session, type: type[BaseORM]) -> ORMModel:
     return item
 
 
-def get_url():
+def get_url(async_: bool = False) -> str:
     return (
-        f"postgresql://{settings.POSTGRES_USER}:"
+        f"postgresql{'+asyncpg' if async_ else ''}://{settings.POSTGRES_USER}:"
         f"{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}:"
         f"{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
     )

@@ -3,6 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
+from app.authz.actions import AuthorizationAction
+from app.authz.authorization import Authorization
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.enums import DataProductUserRole
@@ -60,6 +62,9 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
             },
         },
     },
+    dependencies=[
+        Depends(Authorization.enforce(AuthorizationAction.DATAPRODUCT__CREATE))
+    ],
 )
 def create_data_product(
     data_product: DataProductCreate,

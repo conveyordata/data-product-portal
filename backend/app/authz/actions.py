@@ -2,7 +2,7 @@ from enum import UNIQUE, StrEnum, auto, verify
 
 
 @verify(UNIQUE)
-class AuthorizedAction(StrEnum):
+class AuthorizationAction(StrEnum):
     DATAPRODUCT__CREATE = auto()
     DATAPRODUCT__DELETE = auto()
     DATAPRODUCT__UPDATE_DETAILS = auto()
