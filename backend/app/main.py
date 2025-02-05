@@ -86,15 +86,19 @@ app.add_middleware(
 async def send_response_to_webhook(request: Request, call_next):
     response = await call_next(request)
     # Gets are not logged
-    if request.method in ["POST", "PUT", "DELETE"] and not request.url.path.startswith(
-        "/api/auth/"
+    if (
+        settings.WEBHOOK_URL
+        and request.method in ["POST", "PUT", "DELETE"]
+        and not request.url.path.startswith("/api/auth/")
     ):
-        response_body = [chunk async for chunk in response.body_iterator]
-        response.body_iterator = iterate_in_threadpool(iter(response_body))
-        body = (b"".join(response_body)).decode()
+        body = ""
+        if request.method == "POST":
+            response_body = [chunk async for chunk in response.body_iterator]
+            response.body_iterator = iterate_in_threadpool(iter(response_body))
+            body = (b"".join(response_body)).decode()
         asyncio.create_task(
             call_webhook(
-                content=body if request.method == "POST" else {},
+                content=body,
                 method=request.method,
                 url=request.url.path,
                 query=request.url.query,
