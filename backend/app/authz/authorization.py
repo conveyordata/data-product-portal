@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-import functools
 from collections.abc import Callable
 from pathlib import Path
 from typing import cast
@@ -9,7 +6,7 @@ import casbin_async_sqlalchemy_adapter as sqlalchemy_adapter
 from casbin import AsyncEnforcer
 from fastapi import Depends, HTTPException, status
 
-from app.core.auth import get_authenticated_user
+from app.core.auth.auth import get_authenticated_user
 from app.database import database
 from app.users.schema import User
 
@@ -28,11 +25,11 @@ class Singleton(type):
 
 class Authorization(metaclass=Singleton):
 
-    def __init__(self, enforcer: AsyncEnforcer) -> None:
-        self.enforcer = enforcer
+    def __init__(self, enforcer: AsyncEnforcer = None) -> None:
+        self.enforcer: AsyncEnforcer = cast(AsyncEnforcer, enforcer)
 
     @classmethod
-    async def initialize(cls) -> Authorization:
+    async def initialize(cls) -> "Authorization":
         model_location = Path(__file__).parent / "rbac_model.conf"
         enforcer = await cls._construct_enforcer(str(model_location))
         return cls(enforcer)
@@ -47,20 +44,22 @@ class Authorization(metaclass=Singleton):
     def enforce(
         cls, action: AuthorizationAction
     ) -> Callable[[AuthorizationDep, User], None]:
-        return functools.partial(cls._enforce, action=action)
+        def inner(
+            params: AuthorizationDep,
+            user: User = Depends(get_authenticated_user),
+        ) -> None:
+            return cls()._enforce(
+                sub=str(user.id),
+                dom=params.domain,
+                obj=params.object_id,
+                act=action,
+            )
 
-    @classmethod
-    def _enforce(
-        cls,
-        action: AuthorizationAction,
-        params: AuthorizationDep,
-        user: User = Depends(get_authenticated_user),
-    ):
-        sub = str(user.id)
-        dom = params.domain
-        obj = str(params.object_id)
-        act = action
-        if not cls(cast(AsyncEnforcer, None)).enforcer.enforce(sub, dom, obj, act):
+        return inner
+
+    def _enforce(self, *, sub: str, dom: str, obj: str, act: str) -> None:
+        enforcer: AsyncEnforcer = self.enforcer
+        if not enforcer.enforce(sub, dom, obj, act):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You don't have permission to perform this action",
