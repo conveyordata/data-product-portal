@@ -29,21 +29,19 @@ def get_environments(db: Session = Depends(get_db_session)) -> Sequence[Environm
     return EnvironmentService(db).get_environments()
 
 
-@router.get("/{environment_id}")
-def get_environment(
-    environment_id: UUID, db: Session = Depends(get_db_session)
-) -> Environment:
-    return EnvironmentService(db).get_environment(environment_id)
+@router.get("/{id}")
+def get_environment(id: UUID, db: Session = Depends(get_db_session)) -> Environment:
+    return EnvironmentService(db).get_environment(id)
 
 
-@router.get("/{environment_id}/configs")
+@router.get("/{id}/configs")
 def get_environment_configs(
-    environment_id: UUID,
+    id: UUID,
     db: Session = Depends(get_db_session),
 ) -> Sequence[EnvironmentPlatformServiceConfiguration]:
     return EnvironmentPlatformServiceConfigurationService(
         db
-    ).get_environment_platform_service_configs(environment_id)
+    ).get_environment_platform_service_configs(id)
 
 
 @router.get("/configs/{config_id}", dependencies=[Depends(only_for_admin)])
@@ -57,18 +55,18 @@ def get_environment_configs_by_id(
 
 
 @router.get(
-    "/{environment_id}/platforms/{platform_id}/services/{service_id}/config",
+    "/{id}/platforms/{platform_id}/services/{service_id}/config",
     dependencies=[Depends(only_for_admin)],
 )
 def get_environment_platform_service_config(
-    environment_id: UUID,
+    id: UUID,
     platform_id: UUID,
     service_id: UUID,
     db: Session = Depends(get_db_session),
 ) -> EnvironmentPlatformServiceConfiguration:
     return EnvironmentPlatformServiceConfigurationService(
         db
-    ).get_environment_platform_service_config(environment_id, platform_id, service_id)
+    ).get_environment_platform_service_config(id, platform_id, service_id)
 
 
 @router.get(
@@ -85,14 +83,14 @@ def get_environment_platform_service_config_for_all_envs(
 
 
 @router.get(
-    "/{environment_id}/platforms/{platform_id}/config",
+    "/{id}/platforms/{platform_id}/config",
     dependencies=[Depends(only_for_admin)],
 )
 def get_environment_platform_config(
-    environment_id: UUID,
+    id: UUID,
     platform_id: UUID,
     db: Session = Depends(get_db_session),
 ) -> EnvironmentPlatformConfiguration:
     return EnvironmentPlatformConfigurationService(db).get_environment_platform_config(
-        environment_id, platform_id
+        id, platform_id
     )

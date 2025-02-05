@@ -40,8 +40,6 @@ export const dataProductSettingsApiSlice = baseApiSlice
                     ),
                     method: 'POST',
                     params: {
-                        data_product_id: request.data_product_id,
-                        setting_id: request.data_product_settings_id,
                         value: request.value,
                     },
                 }),
