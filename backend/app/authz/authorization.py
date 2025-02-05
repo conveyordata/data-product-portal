@@ -39,7 +39,7 @@ class Authorization(metaclass=Singleton):
 
     @staticmethod
     async def _construct_enforcer(model: str) -> AsyncEnforcer:
-        adapter = sqlalchemy_adapter.Adapter(database.get_url())
+        adapter = sqlalchemy_adapter.Adapter(database.get_url(async_=True))
         await adapter.create_table()
         return AsyncEnforcer(model, adapter)
 
