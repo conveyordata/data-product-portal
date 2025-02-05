@@ -13,6 +13,7 @@ from app.data_product_settings.model import (
 )
 from app.data_product_settings.schema import (
     DataProductSetting,
+    DataProductSettingUpdate,
     DataProductSettingValueCreate,
 )
 from app.dependencies import (
@@ -84,13 +85,13 @@ class DataProductSettingService:
         return {"id": setting.id}
 
     def update_data_product_setting(
-        self, setting: DataProductSetting, db: Session
+        self, id: UUID, setting: DataProductSettingUpdate, db: Session
     ) -> dict[str, UUID]:
-        db.query(DataProductSettingModel).filter_by(id=setting.id).update(
+        db.query(DataProductSettingModel).filter_by(id=id).update(
             setting.parse_pydantic_schema()
         )
         db.commit()
-        return {"id": setting.id}
+        return {"id": id}
 
     def delete_data_product_setting(self, setting_id: UUID, db: Session):
         db.query(DataProductSettingModel).filter_by(id=setting_id).delete()

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.enums import DataProductUserRole
+from app.data_product_settings.service import DataProductSettingService
 from app.data_products.schema import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -255,3 +256,19 @@ def get_graph_data(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
     return DataProductService().get_graph_data(id, level, db)
+
+
+@router.post(
+    "/{id}/settings/{setting_id}",
+    dependencies=[Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER]))],
+)
+def set_value_for_data_product(
+    id: UUID,
+    setting_id: UUID,
+    value: str,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+):
+    return DataProductSettingService().set_value_for_product(
+        setting_id, id, value, authenticated_user, db
+    )

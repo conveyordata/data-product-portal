@@ -40,8 +40,6 @@ export const dataProductSettingsApiSlice = baseApiSlice
                     ),
                     method: 'POST',
                     params: {
-                        data_product_id: request.data_product_id,
-                        setting_id: request.data_product_settings_id,
                         value: request.value,
                     },
                 }),
@@ -54,9 +52,8 @@ export const dataProductSettingsApiSlice = baseApiSlice
             }),
             removeDataProductSetting: builder.mutation<void, string>({
                 query: (id) => ({
-                    url: ApiUrl.DataProductSetting,
+                    url: buildUrl(ApiUrl.DataProductSettingGet, { settingId: id }),
                     method: 'DELETE',
-                    params: { setting_id: id },
                 }),
                 invalidatesTags: [{ type: TagTypes.DataProductSetting as const, id: STATIC_TAG_ID.LIST }],
             }),
@@ -73,7 +70,7 @@ export const dataProductSettingsApiSlice = baseApiSlice
             }),
             updateDataProductSetting: builder.mutation<DataProductSettingCreateResponse, DataProductSettingContract>({
                 query: (dataProductSetting) => ({
-                    url: ApiUrl.DataProductSetting,
+                    url: buildUrl(ApiUrl.DataProductSettingGet, { settingId: dataProductSetting.id }),
                     method: 'PUT',
                     data: dataProductSetting,
                 }),
