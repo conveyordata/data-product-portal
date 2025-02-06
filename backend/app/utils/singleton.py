@@ -1,5 +1,8 @@
+from __future__ import annotations
+
+
 class Singleton(type):
-    _instances = {}
+    _instances: dict[Singleton, Singleton] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:

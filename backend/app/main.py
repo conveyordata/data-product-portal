@@ -8,9 +8,9 @@ from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.authz.authorization import Authorization
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
+from app.core.authz.authorization import Authorization
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging.logger import logger
 from app.core.logging.scarf_analytics import backend_analytics
