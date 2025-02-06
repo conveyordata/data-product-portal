@@ -135,11 +135,11 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
         // Group settings by divider
         const groupedSettings = updatedSettings.reduce(
             (groups, setting) => {
-                const divider = setting.divider; // Use 'Default' for settings without a divider
-                if (!groups[divider]) {
-                    groups[divider] = [];
+                const category = setting.category; // Use 'Default' for settings without a divider
+                if (!groups[category]) {
+                    groups[category] = [];
                 }
-                groups[divider].push(setting);
+                groups[category].push(setting);
                 return groups;
             },
             {} as Record<string, typeof updatedSettings>,

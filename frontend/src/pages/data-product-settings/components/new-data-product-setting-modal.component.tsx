@@ -146,10 +146,10 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                     })()}
                 </Form.Item>
                 <Form.Item
-                    name="divider"
-                    label={t('Divider')}
-                    rules={[{ required: true, message: t('Please provide a divider') }]}
-                    tooltip={t('The divider breaks up the settings into sections')}
+                    name="category"
+                    label={t('Category')}
+                    rules={[{ required: true, message: t('Please provide a category') }]}
+                    tooltip={t('The category breaks up the settings into sections')}
                 >
                     <Input />
                 </Form.Item>
