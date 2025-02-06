@@ -35,6 +35,7 @@ class Settings(BaseSettings):
 
     # Infrastructure
     INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
+    WEBHOOK_URL: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
 
     # Email templating and SMTP settings
