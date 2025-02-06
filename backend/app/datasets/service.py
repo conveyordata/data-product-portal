@@ -22,6 +22,7 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.tags.model import Tag as TagModel
+from app.tags.model import ensure_tag_exists
 from app.users.model import ensure_user_exists
 
 
@@ -84,11 +85,20 @@ class DatasetService:
             dataset.owners.append(user)
         return dataset
 
+    def _fetch_tags(self, db: Session, tag_ids: list[UUID] = []) -> list[TagModel]:
+        tags = []
+        for tag_id in tag_ids:
+            tag = ensure_tag_exists(tag_id, db)
+            tags.append(tag)
+        return tags
+
     def create_dataset(
         self, dataset: DatasetCreateUpdate, db: Session
     ) -> dict[str, UUID]:
         dataset = self._update_owners(dataset, db)
-        dataset = DatasetModel(**dataset.parse_pydantic_schema())
+        dataset = dataset.parse_pydantic_schema()
+        tags = self._fetch_tags(db, dataset.pop("tag_ids", []))
+        dataset = DatasetModel(**dataset, tags=tags)
         db.add(dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()
@@ -120,11 +130,9 @@ class DatasetService:
         for k, v in updated_dataset.items():
             if k == "owners":
                 current_dataset = self._update_owners(current_dataset, db, v)
-            elif k == "tags":
-                current_dataset.tags = []
-                for tag_data in v:
-                    tag = TagModel(**tag_data)
-                    current_dataset.tags.append(tag)
+            elif k == "tag_ids":
+                new_tags = self._fetch_tags(db, v)
+                current_dataset.tags = new_tags
             else:
                 setattr(current_dataset, k, v) if v else None
         db.commit()

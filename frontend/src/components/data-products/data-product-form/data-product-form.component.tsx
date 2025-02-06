@@ -9,7 +9,6 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
-import { TagCreate } from '@/types/tag';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { useEffect } from 'react';
@@ -24,9 +23,10 @@ import {
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useSelector } from 'react-redux';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
 import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
+import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { DataProductSettings } from '@/components/data-products/data-product-settings/data-product-settings.component.tsx';
 
@@ -52,6 +52,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const { data: businessAreas = [], isFetching: isFetchingBusinessAreas } = useGetAllBusinessAreasQuery();
     const { data: dataProductTypes = [], isFetching: isFetchingDataProductTypes } = useGetAllDataProductTypesQuery();
     const { data: dataProductOwners = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
+    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
     const [archiveDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
@@ -67,16 +68,21 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const canFillInForm = mode === 'create' || canEditForm;
 
     const isLoading =
-        isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingLifecycles;
+        isCreating ||
+        isUpdating ||
+        isCreating ||
+        isUpdating ||
+        isFetchingInitialValues ||
+        isFetchingTags ||
+        isFetchingLifecycles;
 
     const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
     const businessAreaSelectOptions = businessAreas.map((area) => ({ label: area.name, value: area.id }));
     const userSelectOptions = dataProductOwners.map((owner) => ({ label: owner.email, value: owner.id }));
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
     const onSubmit: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
         try {
-            // Right now we are only creating tags and not reusing yet existing ones
-            const tags: TagCreate[] = values.tags?.map((tag: string) => ({ value: tag })) ?? [];
             const owners: DataProductUserMembershipCreateContract[] = values.owners.map((owner_id) => ({
                 user_id: owner_id,
                 role: DataProductMembershipRole.Owner,
@@ -90,7 +96,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     memberships: owners,
                     lifecycle_id: values.lifecycle_id,
                     type_id: values.type_id,
-                    tags: tags,
+                    tag_ids: values.tag_ids ?? [],
                     business_area_id: values.business_area_id,
                 };
                 const response = await createDataProduct(request).unwrap();
@@ -118,7 +124,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     type_id: values.type_id,
                     lifecycle_id: values.lifecycle_id,
                     business_area_id: values.business_area_id,
-                    tags: tags,
+                    tag_ids: values.tag_ids,
                     memberships,
                 };
                 const response = await updateDataProduct({
@@ -181,7 +187,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 type_id: currentDataProduct.type.id,
                 lifecycle_id: currentDataProduct.lifecycle.id,
                 business_area_id: currentDataProduct.business_area.id,
-                tags: currentDataProduct.tags.map((tag) => tag.value),
+                tag_ids: currentDataProduct.tags.map((tag) => tag.id),
                 owners: getDataProductOwnerIds(currentDataProduct),
             });
         }
@@ -295,12 +301,13 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     showSearch
                 />
             </Form.Item>
-            <Form.Item<DataProductCreateFormSchema> name={'tags'} label={t('Tags')}>
+            <Form.Item<DataProductCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select data product tags')}
-                    mode={'tags'}
-                    options={[]}
+                    mode={'multiple'}
+                    options={tagSelectOptions}
+                    filterOption={selectFilterOptionByLabel}
                 />
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema>

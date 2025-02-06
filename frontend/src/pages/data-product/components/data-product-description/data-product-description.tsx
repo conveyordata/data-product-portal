@@ -2,15 +2,17 @@ import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import styles from './data-product-description.module.scss';
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { TagModel } from '@/types/tag';
 
 type Props = {
     lifecycle: DataProductLifeCycleContract;
     type: string;
     description: string;
     businessArea: string;
+    tags: TagModel[];
 };
 
-export function DataProductDescription({ lifecycle, type, description, businessArea }: Props) {
+export function DataProductDescription({ lifecycle, type, description, businessArea, tags }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -30,6 +32,11 @@ export function DataProductDescription({ lifecycle, type, description, businessA
                         <Typography.Text>{type}</Typography.Text>
                     </Flex>
                 </Space>
+                <Flex>
+                    {tags.map((tag) => (
+                        <Tag color="success">{tag.value}</Tag>
+                    ))}
+                </Flex>
                 <Space>
                     <Typography.Paragraph italic>{description}</Typography.Paragraph>
                 </Space>

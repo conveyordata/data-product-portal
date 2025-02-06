@@ -27,6 +27,8 @@ from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
 from app.graph.graph import Graph
 from app.settings import settings
+from app.tags.model import Tag as TagModel
+from app.tags.model import ensure_tag_exists
 from app.users.schema import User
 
 
@@ -76,6 +78,13 @@ class DataOutputService:
                 detail="Only owners can execute this operation",
             )
 
+    def _get_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
+        tags = []
+        for tag_id in tag_ids:
+            tag = ensure_tag_exists(tag_id, db)
+            tags.append(tag)
+        return tags
+
     def get_data_outputs(self, db: Session) -> list[DataOutput]:
         data_outputs = db.query(DataOutputModel).all()
         return data_outputs
@@ -96,7 +105,10 @@ class DataOutputService:
             # TODO Figure out if this validation needs to happen either way
             # somehow and let sourcealigned be handled internally there?
             data_output.configuration.validate_configuration(data_product)
-        data_output = DataOutputModel(**data_output.parse_pydantic_schema())
+
+        data_output = data_output.parse_pydantic_schema()
+        tags = self._get_tags(db, data_output.pop("tag_ids", []))
+        data_output = DataOutputModel(**data_output, tags=tags)
 
         db.add(data_output)
         db.commit()
@@ -218,7 +230,12 @@ class DataOutputService:
         update_data_output = data_output.model_dump(exclude_unset=True)
 
         for k, v in update_data_output.items():
-            setattr(current_data_output, k, v) if v else None
+            if k == "tag_ids":
+                new_tags = self._get_tags(db, v)
+                current_data_output.tags = new_tags
+            else:
+                setattr(current_data_output, k, v) if v else None
+
         db.commit()
         RefreshInfrastructureLambda().trigger()
         return {"id": current_data_output.id}

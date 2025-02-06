@@ -90,6 +90,7 @@ export function DataOutput() {
                             status={dataOutput!.status}
                             type={dataOutput!.configuration.configuration_type!}
                             description={dataOutput!.description}
+                            tags={dataOutput!.tags}
                         />
                         {/*  Tabs  */}
                         <DataOutputTabs dataOutputId={dataOutput!.id} isLoading={isLoading} />

@@ -16,6 +16,7 @@ from .environment import EnvironmentFactory
 from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
 from .platform_service_config import PlatformServiceConfigFactory
+from .tags import TagFactory
 from .user import UserFactory
 
 factories = [
@@ -35,6 +36,7 @@ factories = [
     DataProductDatasetAssociationFactory,
     EnvPlatformConfigFactory,
     S3DataOutputFactory,
+    TagFactory,
     LifecycleFactory,
 ]
 

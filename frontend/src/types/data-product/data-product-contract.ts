@@ -24,6 +24,7 @@ export interface DataProductContract {
     lifecycle: DataProductLifeCycleContract;
     lifecycle_id: string;
     dataset_links: DatasetLink[];
+    tag_ids: string[];
     tags: TagContract[];
     memberships: DataProductMembershipContract[];
     business_area: BusinessAreaContract;

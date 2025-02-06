@@ -21,7 +21,9 @@ import { DataOutputStatus } from '@/types/data-output/data-output.contract';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
+import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
+import { selectFilterOptionByLabel } from '@/utils/form.helper';
 
 type Props = {
     mode: 'create';
@@ -42,11 +44,12 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const [identifiers, setIdentifiers] = useState<string[]>([]);
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
+    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const [form] = Form.useForm();
     const sourceAligned = Form.useWatch('is_source_aligned', form);
     const dataProductNameValue = Form.useWatch('name', form);
-    const isLoading = isCreating || isCreating || isFetchingInitialValues;
+    const isLoading = isCreating || isCreating || isFetchingInitialValues || isFetchingTags;
 
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
 
@@ -60,6 +63,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             }),
         [t, platformConfig, platformsLoading],
     );
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
@@ -94,6 +98,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     owner_id: dataProductId,
                     sourceAligned: sourceAligned === undefined ? false : sourceAligned,
                     status: DataOutputStatus.Active,
+                    tag_ids: values.tag_ids ?? [],
                 };
                 await createDataOutput(request).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
@@ -215,6 +220,15 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 ]}
             >
                 <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+            </Form.Item>
+            <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+                <Select
+                    tokenSeparators={[',']}
+                    placeholder={t('Select data output tags')}
+                    mode={'multiple'}
+                    options={tagSelectOptions}
+                    filterOption={selectFilterOptionByLabel}
+                />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>
                 name={'is_source_aligned'}

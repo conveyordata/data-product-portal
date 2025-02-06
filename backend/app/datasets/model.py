@@ -65,6 +65,7 @@ class Dataset(Base, BaseORM):
         back_populates="dataset",
         order_by="DataOutputDatasetAssociation.status.desc()",
     )
+    tags: Mapped[list[Tag]] = relationship(secondary=tag_dataset_table)
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
         back_populates="dataset",
@@ -75,8 +76,5 @@ class Dataset(Base, BaseORM):
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(back_populates="datasets")
-    tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_dataset_table, cascade="all, delete-orphan", single_parent=True
-    )
     business_area_id: Mapped[UUID] = Column(ForeignKey("business_areas.id"))
     business_area: Mapped["BusinessArea"] = relationship(back_populates="datasets")

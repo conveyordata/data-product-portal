@@ -1,17 +1,18 @@
 import styles from './dataset-description.module.scss';
-import { Badge, Flex, Space, Tag, Typography } from 'antd';
-import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
+import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { TagModel } from '@/types/tag';
 
 type Props = {
     lifecycle: DataProductLifeCycleContract;
     accessType?: string;
     description: string;
     businessArea: string;
+    tags: TagModel[];
 };
 
-export function DatasetDescription({ lifecycle, accessType, description, businessArea }: Props) {
+export function DatasetDescription({ lifecycle, accessType, description, businessArea, tags }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -30,6 +31,11 @@ export function DatasetDescription({ lifecycle, accessType, description, busines
                     <Typography.Text>{accessType}</Typography.Text>
                 </Flex>
             </Space>
+            <Flex>
+                {tags.map((tag) => (
+                    <Tag color="success">{tag.value}</Tag>
+                ))}
+            </Flex>
             <Space>
                 <Typography.Text italic>{description}</Typography.Text>
             </Space>

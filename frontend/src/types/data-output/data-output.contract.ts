@@ -1,6 +1,7 @@
 import { DataOutputConfiguration } from '.';
 import { DataProductContract } from '../data-product/data-product-contract';
 import { DataOutputDatasetLink } from './dataset-link.contract';
+import { TagContract } from '@/types/tag';
 
 export enum DataOutputConfigurationTypes {
     S3DataOutput = 'S3DataOutput',
@@ -26,6 +27,8 @@ export interface DataOutputContract {
     platform_id: string;
     service_id: string;
     dataset_links: DataOutputDatasetLink[];
+    tag_ids: string[];
+    tags: TagContract[];
 }
 
 export interface DataOutputModel extends DataOutputContract {}
