@@ -13,7 +13,7 @@ requests = "^2.31.0"
 gunicorn = "^23.0.0"
 pydantic = { version = "^2.10.6", extras = ['email'] }
 python-dotenv = "^1.0.1"
-sqlalchemy = "^2.0.37"
+sqlalchemy = "^2.0.38"
 psycopg2-binary = "^2.9.10"
 alembic = "^1.14.1"
 pyyaml = "^6.0.2"
