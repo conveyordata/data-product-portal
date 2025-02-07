@@ -13,9 +13,10 @@ interface CreateSettingModalProps {
     onClose: () => void;
     t: TFunction;
     isOpen: boolean;
+    scope: 'dataproduct' | 'dataset';
 }
 
-export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose }) => {
+export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose, scope }) => {
     const [form] = Form.useForm();
     const [createDataProductSetting, { isLoading: isCreating }] = useCreateDataProductSettingMutation();
     const typeValue = Form.useWatch('type', form);
@@ -25,15 +26,25 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
             const newSetting: DataProductSettingContract = {
                 ...values,
                 default: values.default.toString(),
+                scope: scope,
                 external_id: generateExternalIdFromName(values.name),
                 order: parseInt(values.order, 10),
             };
             await createDataProductSetting(newSetting);
-            dispatchMessage({ content: t('Data product setting created successfully'), type: 'success' });
+            dispatchMessage({
+                content:
+                    scope === 'dataproduct'
+                        ? t('Data product setting created successfully')
+                        : t('Dataset setting created successfully'),
+                type: 'success',
+            });
             form.resetFields();
             onClose();
         } catch (_e) {
-            const errorMessage = t('Failed to create data product setting');
+            const errorMessage =
+                scope === 'dataproduct'
+                    ? t('Failed to create data product setting')
+                    : t('Failed to create dataset setting');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -45,7 +56,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
     return (
         <FormModal
             isOpen={isOpen}
-            title={t('Create New Data Product Setting')}
+            title={scope === 'dataproduct' ? t('Create New Data Product Setting') : t('Create New Dataset Setting')}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -104,16 +115,6 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                     rules={[{ required: true, message: t('Please provide a tooltip') }]}
                 >
                     <Input />
-                </Form.Item>
-                <Form.Item
-                    name="scope"
-                    label={t('Scope')}
-                    rules={[{ required: true, message: t('Please select a scope') }]}
-                >
-                    <Select>
-                        <Option value="dataproduct">{t('Data product')}</Option>
-                        <Option value="dataset">{t('Dataset')}</Option>
-                    </Select>
                 </Form.Item>
                 <Form.Item
                     name="type"

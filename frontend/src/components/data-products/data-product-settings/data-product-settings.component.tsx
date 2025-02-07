@@ -3,6 +3,7 @@ import { Flex, Form, FormProps, Select, Switch, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
     useCreateDataProductSettingValueMutation,
+    useCreateDatasetSettingValueMutation,
     useGetAllDataProductSettingsQuery,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { useEffect, useMemo, useRef } from 'react';
@@ -39,7 +40,8 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
     const filteredSettings = useMemo(() => {
         return settings?.filter((setting) => setting.scope === scope);
     }, [settings]);
-    const [updateSetting] = useCreateDataProductSettingValueMutation();
+    const [updateSetting] =
+        scope === 'dataproduct' ? useCreateDataProductSettingValueMutation() : useCreateDatasetSettingValueMutation();
     const [form] = Form.useForm();
     const user = useSelector(selectCurrentUser);
     const timeoutRef = useRef<Timeout | null>(null);

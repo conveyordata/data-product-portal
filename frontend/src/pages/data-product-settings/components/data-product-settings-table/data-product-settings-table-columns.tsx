@@ -105,16 +105,6 @@ export const getDataProductTableColumns = ({
             editable: true,
         },
         {
-            title: t('Scope'),
-            dataIndex: 'scope',
-            ellipsis: {
-                showTitle: false,
-            },
-            render: (scope: string) => <TableCellItem text={t(scope)} />,
-            sorter: sorter.stringSorter((dp) => dp.scope),
-            defaultSortOrder: 'ascend',
-        },
-        {
             title: t('Actions'),
             key: 'action',
             width: '10%',

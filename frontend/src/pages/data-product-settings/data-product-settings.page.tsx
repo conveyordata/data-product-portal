@@ -5,7 +5,8 @@ import { DataProductLifecyclesTable } from '../data-product-lifecycles/component
 export function DataProductSettings() {
     return (
         <div className={styles.container}>
-            <DataProductSettingsTable />
+            <DataProductSettingsTable scope={'dataproduct'} />
+            <DataProductSettingsTable scope={'dataset'} />
             <DataProductLifecyclesTable />
         </div>
     );
