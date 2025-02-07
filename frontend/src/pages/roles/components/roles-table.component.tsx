@@ -181,15 +181,13 @@ export function RolesTable({ scope }: RolesTableProps) {
 
     return (
         <Flex vertical className={styles.tableContainer}>
-            <Flex vertical className={styles.tableFilters}>
-                <Table
-                    columns={columns}
-                    dataSource={data}
-                    pagination={false}
-                    rowKey={'order'}
-                    scroll={{ x: 'max-content' }}
-                />
-            </Flex>
+            <Table
+                columns={columns}
+                dataSource={data}
+                pagination={false}
+                rowKey={'order'}
+                scroll={{ x: 'max-content' }}
+            />
         </Flex>
     );
 }

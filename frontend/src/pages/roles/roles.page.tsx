@@ -11,7 +11,7 @@ const { Paragraph } = Typography;
 
 type TabItem = Required<TabsProps>['items'][number];
 
-export type RoleScope = 'global' | 'data_products' | 'datasets';
+export type RoleScope = 'global' | 'data_product' | 'dataset';
 
 export function RoleConfiguration() {
     const { t } = useTranslation();
@@ -24,13 +24,13 @@ export function RoleConfiguration() {
             icon: <GlobalOutlined />,
         },
         {
-            label: t('Data Products'),
-            key: 'data_products',
+            label: t('Data Product'),
+            key: 'data_product',
             icon: <DataProductOutlined />,
         },
         {
-            label: t('Datasets'),
-            key: 'datasets',
+            label: t('Dataset'),
+            key: 'dataset',
             icon: <DatasetOutlined />,
         },
     ];
