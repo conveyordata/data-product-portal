@@ -36,6 +36,17 @@ class DatasetService:
             ],
         )
 
+        rolled_up_tags = []
+        unique_tag_values = set()
+
+        for output_link in dataset.data_output_links:
+            for tag in output_link.data_output.tags:
+                if tag.value not in unique_tag_values:
+                    unique_tag_values.add(tag.value)
+                    rolled_up_tags.append(tag)
+
+        dataset.rolled_up_tags = rolled_up_tags
+
         default_lifecycle = (
             db.query(DataProductLifeCycleModel)
             .filter(DataProductLifeCycleModel.is_default)
@@ -90,6 +101,7 @@ class DatasetService:
         for tag_id in tag_ids:
             tag = ensure_tag_exists(tag_id, db)
             tags.append(tag)
+
         return tags
 
     def create_dataset(

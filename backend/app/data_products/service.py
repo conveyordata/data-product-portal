@@ -64,7 +64,7 @@ from app.users.schema import User
 
 class DataProductService:
     def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
-        data_product = (
+        data_product: DataProductGet = (
             db.query(DataProductModel)
             .options(
                 joinedload(DataProductModel.dataset_links),
@@ -78,6 +78,22 @@ class DataProductService:
             .filter(DataProductLifeCycleModel.is_default)
             .first()
         )
+
+        rolled_up_tags = []
+        unique_tag_values = set()
+
+        for link in data_product.dataset_links:
+            for tag in link.dataset.tags:
+                if tag.value not in unique_tag_values:
+                    unique_tag_values.add(tag.value)
+                    rolled_up_tags.append(tag)
+            for output_link in link.dataset.data_output_links:
+                for tag in output_link.data_output.tags:
+                    if tag.value not in unique_tag_values:
+                        unique_tag_values.add(tag.value)
+                        rolled_up_tags.append(tag)
+
+        data_product.rolled_up_tags = rolled_up_tags
 
         if not data_product:
             raise HTTPException(

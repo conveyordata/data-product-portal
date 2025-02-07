@@ -32,6 +32,7 @@ class DataProductGet(ORMModel):
     business_area: BusinessArea
     data_outputs: list[DataOutputGet]
     data_product_settings: list[DataProductSettingValue]
+    rolled_up_tags: list[Tag]
 
 
 class DataProductsGet(DataProductGet):
@@ -40,6 +41,7 @@ class DataProductsGet(DataProductGet):
     dataset_links: Annotated[list[DatasetDataProductLink], Field(exclude=True)]
     memberships: Annotated[list[DataProductMembershipGet], Field(exclude=True)]
     data_outputs: Annotated[list[DataOutputGet], Field(exclude=True)]
+    rolled_up_tags: Annotated[list[Tag], Field(exclude=True)] = []
 
     @computed_field
     def user_count(self) -> int:

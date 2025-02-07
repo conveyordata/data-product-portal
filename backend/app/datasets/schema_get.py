@@ -41,10 +41,12 @@ class DatasetGet(ORMModel):
     access_type: DatasetAccessType
     data_output_links: list[DataOutputLink]
     data_product_settings: list[DataProductSettingValue]
+    rolled_up_tags: list[Tag]
 
 
 class DatasetsGet(DatasetGet):
     data_product_links: Annotated[list[DataProductLink], Field(exclude=True)]
+    rolled_up_tags: Annotated[list[Tag], Field(exclude=True)] = []
     about: Optional[str] = Field(None, exclude=True)
 
     @computed_field
