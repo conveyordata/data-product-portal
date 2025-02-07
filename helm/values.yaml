@@ -18,6 +18,7 @@ smtp:
   password: not-set
   no_login: false
 from_mail_address: ""
+webhook_url: ""
 postgres_enabled: false
 cloudwatch_enabled: false
 api_key:
