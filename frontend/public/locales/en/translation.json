@@ -264,6 +264,7 @@
     "Search data outputs by name": "Search data outputs by name",
     "S3": "S3",
     "Glue": "Glue",
+    "Redshift": "Redshift",
     "Table": "Table",
     "The table that your data output can access": "The table that your data output can access",
     "The name of the S3 bucket to link the data output to": "The name of the S3 bucket to link the data output to",

@@ -72,5 +72,25 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
                 </Flex>
             );
         }
+        case 'RedshiftDataOutput': {
+            const s3_configuration = data_output.configuration as S3DataOutputContract;
+            const configuration: S3DataOutputContract = data_output.configuration as S3DataOutputContract;
+            let suffix = '/' + configuration.suffix + '/';
+            if (configuration.suffix === '') {
+                suffix = '/';
+            }
+            return (
+                <Flex vertical>
+                    <div>
+                        <Typography.Text strong>{t('S3 path')}: </Typography.Text>
+                        <Typography.Text>
+                            {s3_configuration.bucket}
+                            {suffix}
+                            {s3_configuration.path}/*
+                        </Typography.Text>
+                    </div>
+                </Flex>
+            );
+        }
     }
 }

@@ -24,6 +24,7 @@ import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component'
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
+import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
 
 type Props = {
     mode: 'create';
@@ -278,6 +279,17 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     case DataPlatforms.S3:
                         return (
                             <S3DataOutputForm
+                                form={form}
+                                identifiers={identifiers}
+                                sourceAligned={sourceAligned}
+                                external_id={currentDataProduct!.external_id}
+                                mode={mode}
+                                dataProductId={dataProductId}
+                            />
+                        );
+                    case DataPlatforms.Redshift:
+                        return (
+                            <RedshiftDataOutputForm
                                 form={form}
                                 identifiers={identifiers}
                                 sourceAligned={sourceAligned}

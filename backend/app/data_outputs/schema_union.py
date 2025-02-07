@@ -5,11 +5,16 @@ from pydantic import Field
 from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.databricks_data_output.schema import DatabricksDataOutput
 from app.data_outputs.glue_data_output.schema import GlueDataOutput
+from app.data_outputs.redshift_data_output.schema import RedshiftDataOutput
 from app.data_outputs.s3_data_output.schema import S3DataOutput
 from app.data_outputs.snowflake_data_output.schema import SnowflakeDataOutput
 
 DataOutputs = Union[
-    S3DataOutput, GlueDataOutput, DatabricksDataOutput, SnowflakeDataOutput
+    S3DataOutput,
+    GlueDataOutput,
+    DatabricksDataOutput,
+    SnowflakeDataOutput,
+    RedshiftDataOutput,
 ]
 
 DataOutputMap = {
@@ -17,6 +22,7 @@ DataOutputMap = {
     DataOutputTypes.GlueDataOutput: GlueDataOutput,
     DataOutputTypes.DatabricksDataOutput: DatabricksDataOutput,
     DataOutputTypes.SnowflakeDataOutput: SnowflakeDataOutput,
+    DataOutputTypes.RedshiftDataOutput: RedshiftDataOutput,
 }
 
 DataOutputConfiguration = Annotated[
