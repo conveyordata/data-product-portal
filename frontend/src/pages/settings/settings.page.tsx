@@ -1,8 +1,8 @@
-import { DataProductSettingsTable } from '@/pages/data-product-settings/components/data-product-settings-table/data-product-settings-table.component.tsx';
-import styles from './data-product-settings.module.scss';
+import { DataProductSettingsTable } from '@/pages/settings/components/data-product-settings-table/data-product-settings-table.component';
+import styles from './settings.module.scss';
 import { DataProductLifecyclesTable } from '../data-product-lifecycles/components/data-product-lifecycles-table/data-product-lifecycles-table.component';
 
-export function DataProductSettings() {
+export function AdditionalSettings() {
     return (
         <div className={styles.container}>
             <DataProductSettingsTable scope={'dataproduct'} />

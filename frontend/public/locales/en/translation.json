@@ -404,5 +404,6 @@
     "Data product setting created successfully": "Data product setting created successfully",
     "Dataset setting created successfully": "Dataset setting created successfully",
     "Failed to create data product setting": "Failed to create data product setting",
-    "Failed to create dataset setting": "Failed to create dataset setting"
+    "Failed to create dataset setting": "Failed to create dataset setting",
+    "Additional Settings": "Additional Settings"
 }
