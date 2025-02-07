@@ -35,6 +35,9 @@ data:
   {{- if .Values.from_mail_address }}
   FROM_MAIL_ADDRESS: {{ .Values.from_mail_address }}
   {{- end }}
+  {{- if .Values.webhook_url }}
+  WEBHOOK_URL: {{ .Values.webhook_url }}
+  {{- end }}
 kind: ConfigMap
 metadata:
   name: {{ include "data-product-portal.fullname" . }}
