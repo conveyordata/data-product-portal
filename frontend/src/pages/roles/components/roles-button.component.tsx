@@ -14,9 +14,9 @@ export function RolesButton({ scope }: RolesButtonProps) {
         switch (scope) {
             case 'global':
                 return t('Create new global role');
-            case 'data_products':
+            case 'data_product':
                 return t('Create new data product role');
-            case 'datasets':
+            case 'dataset':
                 return t('Create new dataset role');
         }
     }, [scope, t]);
