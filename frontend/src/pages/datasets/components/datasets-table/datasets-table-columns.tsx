@@ -115,7 +115,6 @@ export const getDatasetTableColumns = ({
             title: t('Produced by Data Product'),
             dataIndex: 'data_output_links',
             render: (data_output_links: DataOutputLink[]) => {
-                console.log(data_output_links);
                 if (data_output_links !== undefined) {
                     return (
                         <TableCellItem

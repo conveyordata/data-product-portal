@@ -30,7 +30,6 @@ export function DataOutputActions({ dataOutputId, isCurrentDataOutputOwner }: Pr
     async function handleAccessToData(environment: string, dataPlatform: string) {
         // Todo - implement endpoints to allow for dataset data access
         // All tiles are currently disabled
-        console.log(dataPlatform, environment, dataOutputId);
     }
 
     return (

@@ -44,7 +44,6 @@ export const getEnvironmentTableColumns = ({ t }: { t: TFunction }): TableColumn
         align: 'center',
         render: (_, record) => {
             const handleDelete = (id: string) => {
-                console.log(`Deleting ${id}`);
                 dispatchMessage({ content: t('Environment deleted successfully'), type: 'success' });
             };
             return (

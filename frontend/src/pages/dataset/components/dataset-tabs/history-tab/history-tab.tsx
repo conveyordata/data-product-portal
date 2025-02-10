@@ -17,13 +17,9 @@ export function HistoryTab({ datasetId }: Props) {
     const { data: dataset } = useGetDatasetByIdQuery(datasetId);
     const [searchForm] = Form.useForm<SearchForm>();
 
-    const handleSearch = (values: SearchForm) => {
-        console.log(values);
-    };
-
     return (
         <Flex vertical className={styles.container}>
-            <Form form={searchForm} onFinish={handleSearch}>
+            <Form form={searchForm}>
                 <Form.Item<SearchForm> name={'search'}>
                     <Input.Search placeholder={t('Search history by description, type or name')} allowClear />
                 </Form.Item>

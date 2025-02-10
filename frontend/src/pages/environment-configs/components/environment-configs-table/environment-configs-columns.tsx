@@ -49,7 +49,6 @@ export const getEnvironmentConfigTableColumns = ({
         align: 'center',
         render: (_, record) => {
             const handleDelete = (id: string) => {
-                console.log(`Deleting ${id}`);
                 dispatchMessage({ content: t('Environment configuration deleted successfully'), type: 'success' });
             };
             return (

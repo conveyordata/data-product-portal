@@ -49,7 +49,6 @@ export const getPlatformConfigTableColumns = ({
         align: 'center',
         render: (_, record) => {
             const handleDelete = (id: string) => {
-                console.log(`Deleting ${id}`);
                 dispatchMessage({ content: t('Platform Service Configuration deleted successfully'), type: 'success' });
             };
             return (
