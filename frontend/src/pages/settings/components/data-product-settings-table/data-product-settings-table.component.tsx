@@ -18,9 +18,16 @@ import { CreateSettingModal } from '../new-data-product-setting-modal.component.
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
 
-export function DataProductSettingsTable() {
+type Props = {
+    scope: 'dataproduct' | 'dataset';
+};
+
+export function DataProductSettingsTable({ scope }: Props) {
     const { t } = useTranslation();
     const { data: dataProductSettings = [], isFetching } = useGetAllDataProductSettingsQuery();
+    const filteredSettings = useMemo(() => {
+        return dataProductSettings.filter((setting) => setting.scope === scope);
+    }, [dataProductSettings]);
     const [editDataProductSetting, { isLoading: isEditing }] = useUpdateDataProductSettingMutation();
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
@@ -28,7 +35,7 @@ export function DataProductSettingsTable() {
 
     const columns = useMemo(
         () => getDataProductTableColumns({ t, handleOpen, onRemoveDataProductSetting }),
-        [t, dataProductSettings],
+        [t, filteredSettings],
     );
 
     const onChange: TableProps<DataProductSettingContract>['onChange'] = (pagination) => {
@@ -117,7 +124,7 @@ export function DataProductSettingsTable() {
                     name={dataIndex}
                     rules={[
                         {
-                            required: true,
+                            required: dataIndex !== 'default',
                             message: `${title} is required.`,
                         },
                     ]}
@@ -168,10 +175,12 @@ export function DataProductSettingsTable() {
     return (
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.searchContainer}>
-                <Typography.Title level={3}>{t('Data Product Settings')}</Typography.Title>
+                <Typography.Title level={3}>
+                    {scope === 'dataproduct' ? t('Data Product Settings') : t('Dataset Settings')}
+                </Typography.Title>
                 <Space>
                     <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
-                        {t('Create Data Product Setting')}
+                        {scope === 'dataproduct' ? t('Add Data Product Setting') : t('Add Dataset Setting')}
                     </Button>
                 </Space>
             </Flex>
@@ -180,7 +189,7 @@ export function DataProductSettingsTable() {
                     components={components}
                     className={styles.table}
                     columns={editableColumns}
-                    dataSource={dataProductSettings}
+                    dataSource={filteredSettings}
                     onChange={onChange}
                     pagination={pagination}
                     rowKey={(record) => record.id}
@@ -190,7 +199,7 @@ export function DataProductSettingsTable() {
                     size={'small'}
                 />
             </Flex>
-            {isVisible && <CreateSettingModal onClose={handleClose} t={t} isOpen={isVisible} />}
+            {isVisible && <CreateSettingModal scope={scope} onClose={handleClose} t={t} isOpen={isVisible} />}
         </Flex>
     );
 }

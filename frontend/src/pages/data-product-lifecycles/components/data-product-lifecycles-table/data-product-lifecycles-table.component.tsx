@@ -176,7 +176,7 @@ export function DataProductLifecyclesTable() {
                 <Typography.Title level={3}>{t('Data Product Lifecycles')}</Typography.Title>
                 <Space>
                     <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
-                        {t('Create Data Product Lifecycle')}
+                        {t('Add Data Product Lifecycle')}
                     </Button>
                 </Space>
             </Flex>

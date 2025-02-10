@@ -54,7 +54,7 @@ class DataProductSetting(Base, BaseORM):
     name = Column(String)
     tooltip = Column(String)
     type = Column(Enum(DataProductSettingType))
-    divider = Column(String)
+    category = Column(String)
     default = Column(String)
     order = Column(Integer)
     scope = Column(Enum(DataProductSettingScope))
