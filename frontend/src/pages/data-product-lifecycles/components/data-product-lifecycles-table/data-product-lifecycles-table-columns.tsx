@@ -37,11 +37,6 @@ export const getDataProductTableColumns = ({
             dataIndex: 'id',
             hidden: true,
         },
-        // This is an empty column to match to give a small indentation to the table and match the datasets table icon column
-        {
-            title: undefined,
-            width: iconColumnWidth,
-        },
         {
             title: t('Name'),
             dataIndex: 'name',

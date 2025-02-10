@@ -8,7 +8,10 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.model import DataOutput as DataOutputModel
-from app.data_product_memberships.enums import DataProductUserRole
+from app.data_product_memberships.enums import (
+    DataProductMembershipStatus,
+    DataProductUserRole,
+)
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
 )
@@ -157,6 +160,7 @@ class OnlyWithProductAccess:
                 membership.user_id
                 for membership in data_product.memberships
                 if membership.role in self.allowed_roles
+                and membership.status == DataProductMembershipStatus.APPROVED
             ]
             and not authenticated_user.is_admin
         ):

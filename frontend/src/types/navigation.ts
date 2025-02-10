@@ -25,7 +25,7 @@ export enum ApplicationPaths {
     EnvironmentConfig = '/environments/configs/:envConfigId',
     EnvironmentConfigNew = '/environments/:environmentId/new',
     EnvironmentNew = '/environments/new',
-    DataProductSettings = '/data-product-settings',
+    AdditionalSettings = '/additional-settings',
     DataProductLifecycles = '/data-product-lifecycles',
     RoleConfiguration = '/configuration/roles',
 }
@@ -36,7 +36,7 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.DataProduct,
     ApplicationPaths.DataProductNew,
     ApplicationPaths.DataProductEdit,
-    ApplicationPaths.DataProductSettings,
+    ApplicationPaths.AdditionalSettings,
     ApplicationPaths.Datasets,
     ApplicationPaths.Dataset,
     ApplicationPaths.AuditLogs,
@@ -107,5 +107,6 @@ export enum ApplicationPageTitles {
     Datasets = 'Datasets',
     Dataset = 'Dataset',
     AuditLogs = 'Audit Logs',
+    AdditionalSettings = 'Additional Settings',
     // Settings = 'Settings',
 }

@@ -15,7 +15,7 @@ from app.shared.schema import ORMModel
 
 
 class DataProductSettingCreate(ORMModel):
-    divider: str
+    category: str
     type: DataProductSettingType
     tooltip: str
     external_id: str

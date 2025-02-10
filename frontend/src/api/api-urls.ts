@@ -44,6 +44,7 @@ export enum ApiUrl {
     Datasets = '/api/datasets',
     DatasetUser = '/api/datasets/:datasetId/user/:userId',
     DatasetGet = '/api/datasets/:datasetId',
+    DatasetSettingValue = '/api/datasets/:datasetId/settings/:dataProductSettingId',
     DatasetAbout = '/api/datasets/:datasetId/about',
     DatasetGraph = '/api/datasets/:datasetId/graph',
     BusinessAreas = '/api/business_areas',

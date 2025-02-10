@@ -3,6 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.auth.auth import get_authenticated_user
+from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
 from app.datasets.schema import (
     DatasetAboutUpdate,
@@ -13,6 +15,7 @@ from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
 from app.dependencies import only_dataset_owners
 from app.graph.graph import Graph
+from app.users.model import User
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
@@ -186,3 +189,19 @@ def get_graph_data(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
     return DatasetService().get_graph_data(id, level, db)
+
+
+@router.post(
+    "/{id}/settings/{setting_id}",
+    dependencies=[Depends(only_dataset_owners)],
+)
+def set_value_for_dataset(
+    id: UUID,
+    setting_id: UUID,
+    value: str,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+):
+    return DataProductSettingService().set_value_for_product(
+        setting_id, id, value, authenticated_user, db
+    )

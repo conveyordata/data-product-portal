@@ -48,25 +48,9 @@ export const Sidebar = () => {
                 icon: <SettingOutlined />,
                 key: 'Configure',
                 children: [
-                    // {
-                    //     key: ApplicationPaths.PlatformsConfigs,
-                    //     label: (
-                    //         <span className={styles.subMenuTitle}>
-                    //             <Link to={ApplicationPaths.PlatformsConfigs}>{t('Platforms Configurations')}</Link>
-                    //         </span>
-                    //     ),
-                    // },
-                    // {
-                    //     key: ApplicationPaths.Environments,
-                    //     label: (
-                    //         <span className={styles.subMenuTitle}>
-                    //             <Link to={ApplicationPaths.Environments}>{t('Environments')}</Link>
-                    //         </span>
-                    //     ),
-                    // },
                     {
-                        key: ApplicationPaths.DataProductSettings,
-                        label: <Link to={ApplicationPaths.DataProductSettings}>{t('Data Product Settings')}</Link>,
+                        key: ApplicationPaths.AdditionalSettings,
+                        label: <Link to={ApplicationPaths.AdditionalSettings}>{t('Additional Settings')}</Link>,
                         icon: <SettingOutlined />,
                     },
                 ],

@@ -9,7 +9,7 @@ export interface DataProductSettingContract {
     tooltip: string;
     default: string;
     type: DataProductSettingType;
-    divider: string;
+    category: string;
     scope: 'dataproduct' | 'dataset';
 }
 
