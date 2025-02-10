@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.12-slim-bookworm AS build-stage
+FROM --platform=linux/amd64 python:3.12.2-slim-bookworm@sha256:5dc6f84b5e97bfb0c90abfb7c55f3cacc2cb6687c8f920b64a833a2219875997 AS build-stage
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -11,15 +11,14 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
   POETRY_HOME='/usr/local' \
-  POETRY_VERSION=1.8.2
+  POETRY_VERSION=2.0.1
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
-RUN curl -sSL https://install.python-poetry.org | python - && poetry --version
-
+RUN pip install poetry==2.0.1
 COPY poetry.lock pyproject.toml alembic.ini sample_data.sql /
 
-RUN poetry install
+RUN poetry install --no-root
 
-FROM --platform=linux/amd64 python:3.12-slim-bookworm
+FROM --platform=linux/amd64 python:3.12.2-slim-bookworm@sha256:5dc6f84b5e97bfb0c90abfb7c55f3cacc2cb6687c8f920b64a833a2219875997
 
 COPY --from=build-stage /usr/local /usr/local
 COPY --from=build-stage alembic.ini .
