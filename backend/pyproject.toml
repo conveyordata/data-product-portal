@@ -17,7 +17,7 @@ typer = "^0.15.1"
 requests = "^2.31.0"
 httpx = "^0.28.1"
 alembic = "^1.14.1"
-sqlalchemy = "^2.0.38"
+sqlalchemy = { version = "^2.0.38", extras = ['asyncio'] }
 sqlalchemy-utils = "^0.41.2"
 sqlalchemy-easy-softdelete = "^0.8.3"
 psycopg2-binary = "^2.9.10"
