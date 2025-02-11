@@ -13,7 +13,7 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_HOME='/usr/local' \
   POETRY_VERSION=2.0.1
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
-RUN pip install poetry==2.0.1
+RUN pip install poetry==${POETRY_VERSION}
 COPY poetry.lock pyproject.toml alembic.ini sample_data.sql /
 
 RUN poetry install --no-root
