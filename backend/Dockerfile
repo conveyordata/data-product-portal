@@ -19,7 +19,7 @@ COPY poetry.lock pyproject.toml alembic.ini sample_data.sql /
 
 RUN poetry install --no-root
 
-FROM --platform=linux/amd64 python:3.12.2-slim-bookworm@sha256:5dc6f84b5e97bfb0c90abfb7c55f3cacc2cb6687c8f920b64a833a2219875997
+FROM --platform=linux/amd64 ${PYTHON_IMAGE}
 
 COPY --from=build-stage /usr/local /usr/local
 COPY --from=build-stage alembic.ini .
