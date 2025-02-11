@@ -1,4 +1,5 @@
-FROM --platform=linux/amd64 python:3.12.2-slim-bookworm@sha256:5dc6f84b5e97bfb0c90abfb7c55f3cacc2cb6687c8f920b64a833a2219875997 AS build-stage
+ARG PYTHON_IMAGE=python:3.12.2-slim-bookworm@sha256:5dc6f84b5e97bfb0c90abfb7c55f3cacc2cb6687c8f920b64a833a2219875997
+FROM --platform=linux/amd64 ${PYTHON_IMAGE} AS build-stage
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
