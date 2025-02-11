@@ -9,3 +9,7 @@ class TagCreate(ORMModel):
 
 class Tag(TagCreate):
     id: UUID
+
+
+class TagUpdate(TagCreate):
+    pass

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db_session
 from app.tags.schema import Tag as TagGet
-from app.tags.schema import TagCreate
+from app.tags.schema import TagCreate, TagUpdate
 from app.tags.service import TagService
 
 router = APIRouter(prefix="/tags", tags=["tags"])
@@ -21,6 +21,11 @@ def create_tag(
     tag: TagCreate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
     return TagService().create_tag(tag, db)
+
+
+@router.put("/{id}")
+def update_tag(id: UUID, tag: TagUpdate, db: Session = Depends(get_db_session)):
+    return TagService().update_tag(id, tag, db)
 
 
 @router.delete("/{id}")
