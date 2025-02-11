@@ -28,7 +28,7 @@ def get_users(db: Session = Depends(get_db_session)) -> list[User]:
     },
     dependencies=[Depends(only_for_admin)],
 )
-def remove_user(id: UUID, db: Session = Depends(get_db_session)):
+def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
     return UserService().remove_user(id, db)
 
 
