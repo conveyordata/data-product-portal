@@ -139,7 +139,11 @@ class DataProductService:
             .options(
                 joinedload(DataProductModel.memberships),
             )
-            .filter(DataProductModel.memberships.any(user_id=user_id))
+            .filter(
+                DataProductModel.memberships.any(
+                    user_id=user_id, status=DataProductMembershipStatus.APPROVED
+                )
+            )
             .order_by(asc(DataProductModel.name))
             .all()
         )
