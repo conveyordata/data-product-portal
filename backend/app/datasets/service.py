@@ -39,14 +39,6 @@ class DatasetService:
         rolled_up_tags = []
         unique_tag_values = set()
 
-        for output_link in dataset.data_output_links:
-            for tag in output_link.data_output.tags:
-                if tag.value not in unique_tag_values:
-                    unique_tag_values.add(tag.value)
-                    rolled_up_tags.append(tag)
-
-        dataset.rolled_up_tags = rolled_up_tags
-
         default_lifecycle = (
             db.query(DataProductLifeCycleModel)
             .filter(DataProductLifeCycleModel.is_default)
@@ -57,6 +49,14 @@ class DatasetService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
             )
+
+        for output_link in dataset.data_output_links:
+            for tag in output_link.data_output.tags:
+                if tag.value not in unique_tag_values:
+                    unique_tag_values.add(tag.value)
+                    rolled_up_tags.append(tag)
+
+        dataset.rolled_up_tags = rolled_up_tags
 
         if not dataset.lifecycle:
             dataset.lifecycle = default_lifecycle

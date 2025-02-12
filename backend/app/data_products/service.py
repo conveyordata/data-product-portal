@@ -82,6 +82,11 @@ class DataProductService:
         rolled_up_tags = []
         unique_tag_values = set()
 
+        if not data_product:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
+            )
+
         for link in data_product.dataset_links:
             for tag in link.dataset.tags:
                 if tag.value not in unique_tag_values:
@@ -95,10 +100,6 @@ class DataProductService:
 
         data_product.rolled_up_tags = rolled_up_tags
 
-        if not data_product:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
-            )
         if not data_product.lifecycle:
             data_product.lifecycle = default_lifecycle
         return data_product
