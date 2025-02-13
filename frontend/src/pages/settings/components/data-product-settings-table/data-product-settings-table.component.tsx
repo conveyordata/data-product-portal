@@ -111,7 +111,7 @@ export function DataProductSettingsTable({ scope }: Props) {
                     });
                 }
             } catch (errInfo) {
-                console.log('Save failed:', errInfo);
+                console.error('Save failed:', errInfo);
             }
         };
         let childNode = children;

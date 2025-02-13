@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { AppConfig } from '@/config/app-config.ts';
 import { useAuthorizeMutation } from '@/store/features/auth/auth-api-slice.ts';
@@ -19,13 +19,14 @@ export const AuthLayout = () => {
     const { isAuthenticated, isLoading, signinRedirect, events, activeNavigator, signoutRedirect, signinSilent } =
         useAuth();
     const { isLoading: isSettingUserCredentialsInStore, user } = useSelector(selectAuthState);
-    const redirectToSignIn = async () => {
+
+    const redirectToSignIn = useCallback(async () => {
         const originalPath = location.pathname + location.search + location.hash;
         sessionStorage.setItem('redirectAfterLogin', originalPath);
         await signinRedirect();
-    };
+    }, [location, signinRedirect]);
 
-    const handleAuthorizeUser = async () => {
+    const handleAuthorizeUser = useCallback(async () => {
         try {
             const authorizedUser = await authorizeUser().unwrap();
             if (authorizedUser) {
@@ -38,7 +39,8 @@ export const AuthLayout = () => {
         } catch (e) {
             console.error('Failed to authorize user', e);
         }
-    };
+    }, [authorizeUser, dispatch]);
+
     useEffect(() => {
         if (isOidcEnabled) {
             if (!isLoading) {
@@ -63,7 +65,7 @@ export const AuthLayout = () => {
                 });
             }
         }
-    }, [isAuthenticated, isLoading]);
+    }, [handleAuthorizeUser, isAuthenticated, isLoading, isOidcEnabled, navigate, redirectToSignIn, user]);
 
     useEffect(() => {
         // This gets called when the user is authenticated
@@ -94,7 +96,7 @@ export const AuthLayout = () => {
                 },
             });
         });
-    }, [events]);
+    }, [events, handleAuthorizeUser, signinSilent, signoutRedirect]);
 
     if (activeNavigator) {
         switch (activeNavigator) {
