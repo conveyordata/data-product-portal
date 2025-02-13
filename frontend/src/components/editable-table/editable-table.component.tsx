@@ -5,6 +5,7 @@ import type { FormInstance } from 'antd';
 import React from 'react';
 import { ColumnType } from 'antd/es/table/interface';
 import { TableProps } from 'antd/lib';
+import { Rule } from 'antd/es/form';
 
 type Props<T> = Exclude<TableProps<T>, 'columns' | 'dataSource' | 'components'> & {
     data: T[];
@@ -12,7 +13,11 @@ type Props<T> = Exclude<TableProps<T>, 'columns' | 'dataSource' | 'components'> 
     handleSave: (record: T) => void;
 };
 
-export type EditableColumn<T> = ColumnType<T> & { editable?: boolean };
+export type EditableColumn<T> = ColumnType<T> & {
+    editable?: boolean;
+    rules?: Rule[];
+    formRender?: (ref: React.RefObject<InputRef>, save: () => Promise<void>) => React.ReactNode;
+};
 
 export function EditableTable<TableData>({ data, columns, handleSave, ...tableProps }: Props<TableData>) {
     const EditableContext = React.createContext<FormInstance<any> | null>(null);
@@ -35,6 +40,8 @@ export function EditableTable<TableData>({ data, columns, handleSave, ...tablePr
         dataIndex: string;
         record: TableData;
         handleSave: (record: TableData) => void;
+        rules?: Rule[];
+        formRender?: (ref: React.RefObject<InputRef>, save: () => Promise<void>) => React.ReactNode;
     }
 
     const EditableCell: React.FC<EditableCellProps> = ({
@@ -44,6 +51,13 @@ export function EditableTable<TableData>({ data, columns, handleSave, ...tablePr
         dataIndex,
         record,
         handleSave,
+        rules = [
+            {
+                required: true,
+                message: `${title} is required.`,
+            },
+        ],
+        formRender = (ref, save) => <Input ref={ref} onPressEnter={save} onBlur={save} />,
         ...restProps
     }) => {
         const [editing, setEditing] = useState(false);
@@ -84,17 +98,8 @@ export function EditableTable<TableData>({ data, columns, handleSave, ...tablePr
 
         if (editable) {
             childNode = editing ? (
-                <Form.Item
-                    style={{ margin: 0 }}
-                    name={dataIndex}
-                    rules={[
-                        {
-                            required: dataIndex !== 'default',
-                            message: `${title} is required.`,
-                        },
-                    ]}
-                >
-                    <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+                <Form.Item style={{ margin: 0 }} name={dataIndex} rules={rules}>
+                    {formRender(inputRef, save)}
                 </Form.Item>
             ) : (
                 <div className="editable-cell-value-wrap" onClick={toggleEdit}>
@@ -124,6 +129,8 @@ export function EditableTable<TableData>({ data, columns, handleSave, ...tablePr
                 dataIndex: col.dataIndex,
                 title: col.title as string,
                 handleSave,
+                rules: col.rules,
+                formRender: col.formRender,
             }),
         };
     });
