@@ -3,16 +3,22 @@ import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item
 import { EditableColumn } from '@/components/editable-table/editable-table.component';
 import { DataProductIcon, DataProductTypeContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
-import { Button, Flex, Popconfirm } from 'antd';
+import { Button, Flex, Popconfirm, Select } from 'antd';
+import Icon from '@ant-design/icons';
+import styles from './data-product-type-table.module.scss';
+import { dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
+const { Option } = Select;
 
 type Props = {
     t: TFunction;
     onRemoveDataProductType: (id: string) => void;
+    handleEdit: (type: DataProductTypeContract) => () => void;
 };
 
 export const getDataProductTypeTableColumns = ({
     t,
     onRemoveDataProductType,
+    handleEdit,
 }: Props): EditableColumn<DataProductTypeContract>[] => {
     return [
         {
@@ -40,14 +46,28 @@ export const getDataProductTypeTableColumns = ({
                 return <TableCellItem reactSVGComponent={icon} />;
             },
             editable: true,
+            formRender: (_, save) => {
+                return (
+                    <Select onSelect={save} onBlur={save}>
+                        {dataProductIcons.map((icon) => (
+                            <Option value={icon}>
+                                <Icon component={getDataProductTypeIcon(icon)} className={styles.customIcon} />
+                            </Option>
+                        ))}
+                    </Select>
+                );
+            },
         },
         {
             title: t('Actions'),
             key: 'action',
             width: '10%',
-            render: (_, { id }) => {
+            render: (record, { id }) => {
                 return (
-                    <Flex vertical>
+                    <Flex>
+                        <Button type={'link'} onClick={handleEdit(record)}>
+                            {t('Edit')}
+                        </Button>
                         <Popconfirm
                             title={t('Remove')}
                             description={t('Are you sure you want to delete the data product type?')}

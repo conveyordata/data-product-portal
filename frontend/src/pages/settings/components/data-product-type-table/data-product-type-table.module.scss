@@ -41,3 +41,15 @@
         }
     }
 }
+
+.custom-icon {
+    margin: auto 0;
+    height: globals.$icon-size-table-cell;
+    width: globals.$icon-size-table-cell;
+    color: globals.$primary-color;
+
+    svg {
+        height: globals.$icon-size-table-cell;
+        width: globals.$icon-size-table-cell;
+    }
+}
