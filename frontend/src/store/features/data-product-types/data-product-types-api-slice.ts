@@ -1,4 +1,4 @@
-import { ApiUrl } from '@/api/api-urls.ts';
+import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import {
     DataProductTypeContract,
@@ -33,10 +33,33 @@ export const dataProductTypesApiSlice = baseApiSlice
                 }),
                 invalidatesTags: [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
             }),
+            updateDataProductType: builder.mutation<
+                DataProductTypeCreateResponse,
+                { dataProductType: DataProductTypeCreateRequest; dataProductTypeId: string }
+            >({
+                query: ({ dataProductType, dataProductTypeId }) => ({
+                    url: buildUrl(ApiUrl.DataProductTypeId, { dataProductTypeId }),
+                    method: 'PUT',
+                    data: dataProductType,
+                }),
+                invalidatesTags: [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
+            }),
+            removeDataProductType: builder.mutation<void, string>({
+                query: (dataProductTypeId) => ({
+                    url: buildUrl(ApiUrl.DataProductTypeId, { dataProductTypeId }),
+                    method: 'DELETE',
+                }),
+                invalidatesTags: [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
+            }),
         }),
         overrideExisting: false,
     });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useCreateDataProductTypeMutation, useGetAllDataProductTypesQuery } = dataProductTypesApiSlice;
+export const {
+    useCreateDataProductTypeMutation,
+    useGetAllDataProductTypesQuery,
+    useUpdateDataProductTypeMutation,
+    useRemoveDataProductTypeMutation,
+} = dataProductTypesApiSlice;

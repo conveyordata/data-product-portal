@@ -2,7 +2,11 @@ import { Flex, TableProps } from 'antd';
 import styles from './data-product-type-table.module.scss';
 import { useTranslation } from 'react-i18next';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice';
+import {
+    useGetAllDataProductTypesQuery,
+    useRemoveDataProductTypeMutation,
+    useUpdateDataProductTypeMutation,
+} from '@/store/features/data-product-types/data-product-types-api-slice';
 import { DataProductTypeContract } from '@/types/data-product-type';
 import { getDataProductTypeTableColumns } from './data-product-type-table-columns';
 import { EditableTable } from '@/components/editable-table/editable-table.component';
@@ -12,7 +16,8 @@ export function DataProductTypeTable() {
     const { t } = useTranslation();
     const { data = [], isFetching } = useGetAllDataProductTypesQuery();
     const { pagination, handlePaginationChange } = useTablePagination({});
-    const onRemoveDataProductType = () => {};
+    const [editDataProductType, { isLoading: isEditing }] = useUpdateDataProductTypeMutation();
+    const [onRemoveDataProductType, { isLoading: isRemoving }] = useRemoveDataProductTypeMutation();
 
     const columns = getDataProductTypeTableColumns({ t, onRemoveDataProductType });
 
@@ -22,6 +27,7 @@ export function DataProductTypeTable() {
 
     const handleSave = async (row: DataProductTypeContract) => {
         try {
+            await editDataProductType({ dataProductType: row, dataProductTypeId: row.id });
             dispatchMessage({ content: t('Data Product Type updated successfully'), type: 'success' });
         } catch (error) {
             dispatchMessage({ content: t('Could not update Data Product Type'), type: 'error' });

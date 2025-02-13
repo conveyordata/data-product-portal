@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.data_product_types.model import DataProductType as DataProductTypeModel
 from app.data_product_types.schema import DataProductType, DataProductTypeCreate
+from app.data_product_types.schema_create import DataProductTypeUpdate
 
 
 class DataProductTypeService:
@@ -19,3 +20,20 @@ class DataProductTypeService:
         db.add(data_product_type)
         db.commit()
         return {"id": data_product_type.id}
+
+    def update_data_product_type(
+        self, id: UUID, data_product_type: DataProductTypeUpdate, db: Session
+    ) -> dict[str, UUID]:
+        current_data_product_type = db.get(DataProductTypeModel, id)
+        updated_data_product_type = data_product_type.parse_pydantic_schema()
+
+        for attr, value in updated_data_product_type.items():
+            setattr(current_data_product_type, attr, value)
+
+        db.commit()
+        return {"id": id}
+
+    def remove_data_product_type(self, id: UUID, db: Session):
+        data_product_type = db.get(DataProductTypeModel, id)
+        db.delete(data_product_type)
+        db.commit()

@@ -10,3 +10,7 @@ class DataProductTypeCreate(ORMModel):
 
     class Meta:
         orm_model = DataProductTypeModel
+
+
+class DataProductTypeUpdate(DataProductTypeCreate):
+    pass

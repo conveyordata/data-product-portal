@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.data_product_types.schema import DataProductType, DataProductTypeCreate
+from app.data_product_types.schema_create import DataProductTypeUpdate
 from app.data_product_types.service import DataProductTypeService
 from app.database.database import get_db_session
 
@@ -42,3 +43,17 @@ def create_data_product_type(
     data_product_type: DataProductTypeCreate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
     return DataProductTypeService().create_data_product_type(data_product_type, db)
+
+
+@router.put("/{id}")
+def update_data_product_type(
+    id: UUID,
+    data_product_type: DataProductTypeUpdate,
+    db: Session = Depends(get_db_session),
+):
+    return DataProductTypeService().update_data_product_type(id, data_product_type, db)
+
+
+@router.delete("/{id}")
+def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)):
+    return DataProductTypeService().remove_data_product_type(id, db)
