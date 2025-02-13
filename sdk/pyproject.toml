@@ -1,0 +1,19 @@
+[project]
+name = "data-product-portal-sdk"
+version = "0.0.1"
+description = "A Python SDK for the Data Product Portal"
+authors = [
+    {name = "Stijn Janssens",email = "stijn.janssens@dataminded.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+openapi-python-client = "^0.23.1"
