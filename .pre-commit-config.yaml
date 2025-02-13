@@ -37,7 +37,14 @@ repos:
       - types-PyYAML
       - types-requests
       - types-pytz
-      exclude: ^sdk/data_product_portal_sdk/
+      files: ^backend/
+    - id: mypy
+      additional_dependencies:
+      - types-PyYAML
+      - types-requests
+      - types-pytz
+      files: ^sdk/
+      exclude: ^sdk/data_product_portal_sdk/ # Todo fix the typing issues in the generated code and the auth wrapper
 - repo: https://github.com/pycqa/flake8
   rev: 7.1.1
   hooks:
