@@ -12,7 +12,7 @@ from httpx import HTTPStatusError
 
 
 def basic_auth(username, password):
-    token = b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+    token = b64encode(f"{username}:{password}".encode()).decode("ascii")
     return f"Basic {token}"
 
 
