@@ -7,9 +7,10 @@ import { Button, Flex, Popconfirm } from 'antd';
 type Props = {
     t: TFunction;
     onRemoveTag: (id: string) => void;
+    handleEdit: (tag: TagContract) => () => void;
 };
 
-export const getTagsTableColums = ({ t, onRemoveTag }: Props): EditableColumn<TagContract>[] => {
+export const getTagsTableColums = ({ t, onRemoveTag, handleEdit }: Props): EditableColumn<TagContract>[] => {
     return [
         {
             title: t('Id'),
@@ -26,14 +27,15 @@ export const getTagsTableColums = ({ t, onRemoveTag }: Props): EditableColumn<Ta
             title: t('Actions'),
             key: 'action',
             width: '10%',
-            render: (_, { id }) => {
+            render: (record, { id }) => {
                 return (
-                    <Flex vertical>
+                    <Flex>
+                        <Button type={'link'} onClick={handleEdit(record)}>
+                            {t('Edit')}
+                        </Button>
                         <Popconfirm
                             title={t('Remove')}
-                            description={t(
-                                'Are you sure you want to delete the data product setting? This will remove the setting from all the data products',
-                            )}
+                            description={t('Are you sure you want to delete the tag?')}
                             onConfirm={() => onRemoveTag(id)}
                             placement={'leftTop'}
                             okText={t('Confirm')}
