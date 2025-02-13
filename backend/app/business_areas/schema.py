@@ -14,3 +14,7 @@ class BusinessAreaCreate(ORMModel):
 
 class BusinessArea(BusinessAreaCreate):
     id: UUID
+
+
+class BusinessAreaUpdate(BusinessAreaCreate):
+    pass

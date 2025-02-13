@@ -3,7 +3,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.business_areas.schema import BusinessArea, BusinessAreaCreate
+from app.business_areas.schema import (
+    BusinessArea,
+    BusinessAreaCreate,
+    BusinessAreaUpdate,
+)
 from app.business_areas.service import BusinessAreaService
 from app.database.database import get_db_session
 
@@ -32,3 +36,15 @@ def create_business_area(
     business_area: BusinessAreaCreate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
     return BusinessAreaService().create_business_area(business_area, db)
+
+
+@router.put("/{id}")
+def update_business_area(
+    id: UUID, business_area: BusinessAreaUpdate, db: Session = Depends(get_db_session)
+):
+    return BusinessAreaService().update_business_area(id, business_area, db)
+
+
+@router.delete("/{id}")
+def remove_business_area(id: UUID, db: Session = Depends(get_db_session)):
+    return BusinessAreaService().remove_business_area(id, db)

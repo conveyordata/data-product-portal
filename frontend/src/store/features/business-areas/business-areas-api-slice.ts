@@ -1,4 +1,4 @@
-import { ApiUrl } from '@/api/api-urls.ts';
+import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import { BusinessAreaCreateRequest, BusinessAreaCreateResponse, BusinessAreaGetResponse } from '@/types/business-area';
@@ -27,10 +27,33 @@ export const businessAreasApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
             }),
             invalidatesTags: [{ type: TagTypes.BusinessArea, id: STATIC_TAG_ID.LIST }],
         }),
+        updateBusinessArea: builder.mutation<
+            BusinessAreaCreateResponse,
+            { businessArea: BusinessAreaCreateRequest; businessAreaId: string }
+        >({
+            query: ({ businessArea, businessAreaId }) => ({
+                url: buildUrl(ApiUrl.BusinessAreasId, { businessAreaId }),
+                method: 'PUT',
+                data: businessArea,
+            }),
+            invalidatesTags: [{ type: TagTypes.BusinessArea, id: STATIC_TAG_ID.LIST }],
+        }),
+        removeBusinessArea: builder.mutation<void, string>({
+            query: (businessAreaId) => ({
+                url: buildUrl(ApiUrl.BusinessAreasId, { businessAreaId }),
+                method: 'DELETE',
+            }),
+            invalidatesTags: [{ type: TagTypes.BusinessArea, id: STATIC_TAG_ID.LIST }],
+        }),
     }),
     overrideExisting: false,
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useCreateBusinessAreaMutation, useGetAllBusinessAreasQuery } = businessAreasApiSlice;
+export const {
+    useCreateBusinessAreaMutation,
+    useGetAllBusinessAreasQuery,
+    useUpdateBusinessAreaMutation,
+    useRemoveBusinessAreaMutation,
+} = businessAreasApiSlice;
