@@ -24,7 +24,7 @@ class BusinessAreaService:
 
     def update_business_area(
         self, id: UUID, business_area: BusinessAreaUpdate, db: Session
-    ):
+    ) -> dict[str, UUID]:
         current_business_area = db.get(BusinessAreaModel, id)
         updated_business_area = business_area.parse_pydantic_schema()
 
