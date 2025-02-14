@@ -3,8 +3,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.data_product_types.schema import DataProductType, DataProductTypeCreate
-from app.data_product_types.schema_create import DataProductTypeUpdate
+from app.data_product_types.schema_create import (
+    DataProductTypeCreate,
+    DataProductTypeUpdate,
+)
+from app.data_product_types.schema_get import DataProductTypeGet, DataProductTypesGet
 from app.data_product_types.service import DataProductTypeService
 from app.database.database import get_db_session
 
@@ -14,8 +17,15 @@ router = APIRouter(prefix="/data_product_types", tags=["data_product_types"])
 @router.get("")
 def get_data_products_types(
     db: Session = Depends(get_db_session),
-) -> list[DataProductType]:
+) -> list[DataProductTypesGet]:
     return DataProductTypeService().get_data_product_types(db)
+
+
+@router.get("/{id}")
+def get_data_product_type(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> DataProductTypeGet:
+    return DataProductTypeService().get_data_product_type(id, db)
 
 
 @router.post(
@@ -57,3 +67,10 @@ def update_data_product_type(
 @router.delete("/{id}")
 def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)):
     return DataProductTypeService().remove_data_product_type(id, db)
+
+
+@router.put("/migrate/{from_id}/{to_id}")
+def migrate_data_product_type(
+    from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)
+):
+    return DataProductTypeService().migrate_data_product_type(from_id, to_id, db)
