@@ -60,9 +60,7 @@ export function Dataset() {
                         <Typography.Title level={3}>{dataset?.name}</Typography.Title>
                         {dataset.access_type === 'restricted' && (
                             <Popover content={t('Restricted access')} trigger="hover">
-                                <Flex>
-                                    <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
-                                </Flex>
+                                <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
                             </Popover>
                         )}
                     </Flex>

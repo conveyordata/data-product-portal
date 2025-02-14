@@ -24,7 +24,7 @@ import tableauLogo from '@/assets/icons/tableau-logo.svg?react';
 import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
 import redshiftLogo from '@/assets/icons/aws-redshift-logo.svg?react';
 import { useMemo } from 'react';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { DataPlatforms, DataPlatform } from '@/types/data-platform';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';

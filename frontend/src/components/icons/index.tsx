@@ -21,5 +21,5 @@ export function DatasetOutlined(props: IconProps) {
 }
 
 export function DataOutputOutlined(props: IconProps) {
-    return <Icon component={DataOutputOutlinedIcon} {...props} />
+    return <Icon component={DataOutputOutlinedIcon} {...props} />;
 }
