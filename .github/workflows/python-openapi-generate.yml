@@ -17,7 +17,7 @@ jobs:
         python-version: "3.12"
     - run: pip install openapi-python-client
     - run: |
-        docker compose up -d postgresql backend
-        openapi-python-client generate --url http://localhost:5050/openapi.json --overwrite --output-path ./sdk/data_product_portal_sdk
+        docker compose up -d
+        openapi-python-client generate --url http://localhost:8080/api/openapi.json --overwrite --output-path ./sdk/data_product_portal_sdk
     - run: scripts/check-dirty.sh
     - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
