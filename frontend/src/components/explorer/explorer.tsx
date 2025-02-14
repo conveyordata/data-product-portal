@@ -156,7 +156,7 @@ export function Explorer({ id, type }: Props) {
 
     useEffect(() => {
         generateGraph();
-    }, [generateGraph, graph]);
+    }, [generateGraph]);
 
     if (isFetching) {
         return <LoadingSpinner />;
