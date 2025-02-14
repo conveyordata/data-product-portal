@@ -1,5 +1,5 @@
 import { Tabs } from 'antd';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import styles from './dataset-tabs.module.scss';
 import Icon, {
     HistoryOutlined,
@@ -21,21 +21,12 @@ import { ReactFlowProvider } from 'reactflow';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { SettingsTab } from './settings-tab/settings-tab.tsx';
+import type { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys.ts';
 
 type Props = {
     datasetId: string;
     isLoading: boolean;
 };
-
-export enum TabKeys {
-    About = 'about',
-    DataProduct = 'data-product',
-    DataOutput = 'data-output',
-    Team = 'team',
-    Explorer = 'explorer',
-    Settings = 'settings',
-    History = 'history',
-}
 
 type Tab = {
     label: string;

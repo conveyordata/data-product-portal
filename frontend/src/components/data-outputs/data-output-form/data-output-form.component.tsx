@@ -31,9 +31,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const navigate = useNavigate();
     const { data: currentDataOutput, isFetching: isFetchingInitialValues } = useGetDataOutputByIdQuery(
         dataOutputId || '',
-        {
-            skip: !dataOutputId,
-        },
+        { skip: !dataOutputId },
     );
     const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? '', {
         skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
@@ -116,7 +114,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 tag_ids: currentDataOutput.tags.map((tag) => tag.id),
             });
         }
-    }, [currentDataOutput, mode]);
+    }, [currentDataOutput, form, mode]);
 
     return (
         <Form

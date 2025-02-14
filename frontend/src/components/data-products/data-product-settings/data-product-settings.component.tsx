@@ -6,7 +6,7 @@ import {
     useCreateDatasetSettingValueMutation,
     useGetAllDataProductSettingsQuery,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 import {
     DataProductSettingContract,
@@ -39,9 +39,12 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
     const { data: settings, isFetching } = useGetAllDataProductSettingsQuery();
     const filteredSettings = useMemo(() => {
         return settings?.filter((setting) => setting.scope === scope);
-    }, [settings]);
-    const [updateSetting] =
-        scope === 'dataproduct' ? useCreateDataProductSettingValueMutation() : useCreateDatasetSettingValueMutation();
+    }, [scope, settings]);
+
+    const [updateDataProductSetting] = useCreateDataProductSettingValueMutation();
+    const [updateDatasetSetting] = useCreateDatasetSettingValueMutation();
+    const updateSetting = scope === 'dataproduct' ? updateDataProductSetting : updateDatasetSetting;
+
     const [form] = Form.useForm();
     const user = useSelector(selectCurrentUser);
     const timeoutRef = useRef<Timeout | null>(null);
@@ -50,45 +53,13 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
         if (dataset) return true;
         if (!dataProduct || !user) return false;
         return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct?.id, user?.id]);
+    }, [dataProduct, dataset, user]);
+
     const isDatasetOwner = useMemo(() => {
         if (dataProduct) return true;
         if (!dataset || !user) return false;
         return getIsDatasetOwner(dataset, user.id) || user.is_admin;
-    }, [dataset?.id, user?.id]);
-
-    const onSubmit: FormProps<DataProductSettingValueForm>['onFinish'] = async (values) => {
-        try {
-            let id: string = '';
-            if (dataProduct) {
-                id = dataProduct.id;
-            }
-            if (dataset) {
-                id = dataset.id;
-            }
-            if (id != '') {
-                updatedSettings?.map(async (setting) => {
-                    const key = `data_product_settings_id_${setting.id}`;
-                    if (values[`value_${setting.id}`].toString() !== setting.value) {
-                        const request: DataProductSettingValueCreateRequest = {
-                            data_product_id: id,
-                            data_product_settings_id: values[key],
-                            value: values[`value_${setting.id}`].toString(),
-                        };
-                        await updateSetting(request).unwrap();
-                        // dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
-                    }
-                });
-            }
-        } catch (_e) {
-            const errorMessage = 'Failed to update setting';
-            dispatchMessage({ content: errorMessage, type: 'error' });
-        }
-    };
-
-    const onSubmitFailed: FormProps<DataProductSettingValueForm>['onFinishFailed'] = () => {
-        dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
-    };
+    }, [dataProduct, dataset, user]);
 
     const updatedSettings: (DataProductSettingContract & { value: string })[] = useMemo(() => {
         if (filteredSettings) {
@@ -112,7 +83,44 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
         } else {
             return [];
         }
-    }, [filteredSettings, dataProduct, dataset]);
+    }, [filteredSettings, scope, dataProduct?.data_product_settings, dataset?.data_product_settings]);
+
+    const onSubmit: FormProps<DataProductSettingValueForm>['onFinish'] = useCallback(
+        async (values: any) => {
+            try {
+                let id: string = '';
+                if (dataProduct) {
+                    id = dataProduct.id;
+                }
+                if (dataset) {
+                    id = dataset.id;
+                }
+                if (id != '') {
+                    updatedSettings?.map(async (setting) => {
+                        const key = `data_product_settings_id_${setting.id}`;
+                        if (values[`value_${setting.id}`].toString() !== setting.value) {
+                            const request: DataProductSettingValueCreateRequest = {
+                                data_product_id: id,
+                                data_product_settings_id: values[key],
+                                value: values[`value_${setting.id}`].toString(),
+                            };
+                            await updateSetting(request).unwrap();
+                            // dispatchMessage({ content: t('Setting updated successfully'), type: 'success' });
+                        }
+                    });
+                }
+            } catch (_e) {
+                const errorMessage = 'Failed to update setting';
+                dispatchMessage({ content: errorMessage, type: 'error' });
+            }
+        },
+        [dataProduct, dataset, updateSetting, updatedSettings],
+    );
+
+    const onSubmitFailed: FormProps<DataProductSettingValueForm>['onFinishFailed'] = useCallback(() => {
+        dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
+    }, [t]);
+
     useEffect(() => {
         updatedSettings.map((setting) => {
             switch (setting.type) {
@@ -131,7 +139,7 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
                     break;
             }
         });
-    }, [updatedSettings]);
+    }, [form, updatedSettings]);
 
     const settingsRender = useMemo(() => {
         // Group settings by divider
@@ -240,6 +248,17 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
                 </Form>
             </Flex>
         );
-    }, [updatedSettings, dataProduct, dataset]);
+    }, [
+        updatedSettings,
+        form,
+        onSubmit,
+        onSubmitFailed,
+        isFetching,
+        isFetchingDP,
+        isFetchingDS,
+        isDataProductOwner,
+        isDatasetOwner,
+        t,
+    ]);
     return settingsRender;
 }

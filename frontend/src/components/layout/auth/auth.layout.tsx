@@ -30,11 +30,7 @@ export const AuthLayout = () => {
         try {
             const authorizedUser = await authorizeUser().unwrap();
             if (authorizedUser) {
-                dispatch(
-                    setCredentials({
-                        user: authorizedUser,
-                    }),
-                );
+                dispatch(setCredentials({ user: authorizedUser }));
             }
         } catch (e) {
             console.error('Failed to authorize user', e);
@@ -108,11 +104,9 @@ export const AuthLayout = () => {
 
     if (isLoading || isSettingUserCredentialsInStore) {
         return <LoadingSpinner />;
+    } else if (!isOidcEnabled || isAuthenticated) {
+        return <Outlet />;
     } else {
-        if (!isOidcEnabled || isAuthenticated) {
-            return <Outlet />;
-        }
-
         return null;
     }
 };

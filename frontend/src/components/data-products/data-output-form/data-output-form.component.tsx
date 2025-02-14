@@ -1,11 +1,11 @@
-import { Form, FormInstance, FormProps, Input, Select, Space } from 'antd';
+import { Form, type FormInstance, type FormProps, Input, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
+import type { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-import { RefObject, useEffect, useMemo, useState } from 'react';
+import { type RefObject, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
@@ -13,16 +13,16 @@ import { useCreateDataOutputMutation } from '@/store/features/data-outputs/data-
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { getDataPlatforms } from '@/pages/data-product/components/data-product-actions/data-product-actions.component';
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
-import { CustomDropdownItemProps } from '@/types/shared';
+import type { CustomDropdownItemProps } from '@/types/shared';
 import { S3DataOutputForm } from './s3-data-output-form.component';
 import { GlueDataOutputForm } from './glue-data-output-form.component';
 import TextArea from 'antd/es/input/TextArea';
-import { DataOutputStatus } from '@/types/data-output/data-output.contract';
+import type { DataOutputStatus } from '@/types/data-output/data-output.contract';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
-import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
+import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
 
@@ -62,7 +62,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     platformConfig?.map((config) => config.platform.name).includes(platform.label)
                 );
             }),
-        [t, platformConfig, platformsLoading],
+        [t, platformConfig],
     );
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
@@ -178,7 +178,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 owner: currentDataProduct?.name,
             });
         }
-    }, [dataProductNameValue]);
+    }, [currentDataProduct?.name, dataProductNameValue, form, mode]);
+
     const options = [
         { label: t('Product aligned'), value: false },
         { label: t('Source aligned'), value: true },

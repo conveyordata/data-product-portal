@@ -56,7 +56,7 @@ export function DatasetsInbox({ userId }: Props) {
                 />
             ),
         }),
-        [datasets, lastVisitedDatasets],
+        [filteredLastVisitedDatasets, isFetching, lastVisitedDatasets, t],
     );
 
     const owned: DatasetInboxTab = useMemo(
@@ -72,7 +72,7 @@ export function DatasetsInbox({ userId }: Props) {
             ),
             icon: <TeamOutlined />,
         }),
-        [sortedOwnedDatasets, userDatasets],
+        [isFetchingOwnedDatasets, lastVisitedDatasets, sortedOwnedDatasets, t],
     );
 
     const items: DatasetInboxTab[] = useMemo(() => [lastViewed, owned], [lastViewed, owned]);
