@@ -18,5 +18,5 @@ class BusinessArea(Base, BaseORM):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
     description = Column(String)
-    datasets: Mapped[list["Dataset"]] = relationship(lazy="noload")
-    data_products: Mapped[list["DataProduct"]] = relationship(lazy="noload")
+    datasets: Mapped[list["Dataset"]] = relationship(lazy="select")
+    data_products: Mapped[list["DataProduct"]] = relationship(lazy="select")

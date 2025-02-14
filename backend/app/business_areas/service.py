@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.business_areas.model import BusinessArea as BusinessAreaModel
@@ -36,5 +37,15 @@ class BusinessAreaService:
 
     def remove_business_area(self, id: UUID, db: Session):
         business_area = db.get(BusinessAreaModel, id)
+
+        if business_area.data_products or business_area.datasets:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Cannot delete a business area assigned to one or multiple "
+                    "data products or datasets"
+                ),
+            )
+
         db.delete(business_area)
         db.commit()
