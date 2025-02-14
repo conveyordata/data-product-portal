@@ -1,5 +1,7 @@
 name: Python OpenAPI Generate client
 on:
+  push:
+    branches: ['feature/python-sdk']
   pull_request:
     branches: ['*', 'feature/python-sdk']
 permissions:
