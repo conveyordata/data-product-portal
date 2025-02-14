@@ -1,20 +1,7 @@
 from uuid import UUID
 
-from app.business_areas.model import BusinessArea as BusinessAreaModel
-from app.shared.schema import ORMModel
-
-
-class BusinessAreaCreate(ORMModel):
-    name: str
-    description: str
-
-    class Meta:
-        orm_model = BusinessAreaModel
+from app.business_areas.schema_create import BusinessAreaCreate
 
 
 class BusinessArea(BusinessAreaCreate):
     id: UUID
-
-
-class BusinessAreaUpdate(BusinessAreaCreate):
-    pass

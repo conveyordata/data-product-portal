@@ -3,11 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.business_areas.schema import (
-    BusinessArea,
-    BusinessAreaCreate,
-    BusinessAreaUpdate,
-)
+from app.business_areas.schema_create import BusinessAreaCreate, BusinessAreaUpdate
+from app.business_areas.schema_get import BusinessAreaGet, BusinessAreasGet
 from app.business_areas.service import BusinessAreaService
 from app.database.database import get_db_session
 
@@ -15,8 +12,15 @@ router = APIRouter(prefix="/business_areas", tags=["business areas"])
 
 
 @router.get("")
-def get_business_areas(db: Session = Depends(get_db_session)) -> list[BusinessArea]:
+def get_business_areas(db: Session = Depends(get_db_session)) -> list[BusinessAreasGet]:
     return BusinessAreaService().get_business_areas(db)
+
+
+@router.get("/{id}")
+def get_business_area(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> BusinessAreaGet:
+    return BusinessAreaService().get_business_area(id, db)
 
 
 @router.post(
@@ -48,3 +52,10 @@ def update_business_area(
 @router.delete("/{id}")
 def remove_business_area(id: UUID, db: Session = Depends(get_db_session)):
     return BusinessAreaService().remove_business_area(id, db)
+
+
+@router.put("/migrate/{from_id}/{to_id}")
+def migrate_business_area(
+    from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)
+):
+    return BusinessAreaService().migrate_business_area(from_id, to_id, db)
