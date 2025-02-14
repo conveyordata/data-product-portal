@@ -3,7 +3,7 @@ import { useCreateDataProductLifecycleMutation } from '@/store/features/data-pro
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import { Button, Checkbox, ColorPicker, Form, Input } from 'antd';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import React from 'react';
 
 interface CreateLifecycleModalProps {

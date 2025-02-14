@@ -36,9 +36,7 @@ export const getDataProductTableColumns = ({
             render: (status: DataProductStatus) => {
                 return (
                     <Popover content={getStatusLabel(status)} placement={'top'}>
-                        <>
-                            <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
-                        </>
+                        <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
                     </Popover>
                 );
             },
