@@ -37,9 +37,9 @@ jobs:
       working-directory: ./backend
       run: poetry install
 
-    - name: Run the automated tests
+    - name: Fetch openapi json
       working-directory: ./backend
-      run: poetry run python -m app.local_startup
-    - run: openapi-python-client generate --url http://localhost:5050/api/openapi.json --overwrite --output-path ./sdk/data_product_portal_sdk
+      run: ../scripts/get-openapi-def.sh
+    - run: openapi-python-client generate --url ./backend/openapi.json --overwrite --output-path ./sdk/data_product_portal_sdk
     - run: scripts/check-dirty.sh
     - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
