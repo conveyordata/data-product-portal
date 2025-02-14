@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Start the FastAPI app in the background
-python -m app.local_startup &
+poetry run python -m app.local_startup &
 PID=$!  # Store the process ID
 
 # Wait for the server to be ready
