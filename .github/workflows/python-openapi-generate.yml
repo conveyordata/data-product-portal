@@ -16,30 +16,10 @@ jobs:
       with:
         python-version: "3.12"
     - run: pip install openapi-python-client
-
-    - name: Run image
-      uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
-      with:
-        poetry-version: "1.8.2"
-
-    - name: Setup a local virtual environment (if no poetry.toml file)
-      run: |
-        poetry config virtualenvs.create true --local
-        poetry config virtualenvs.in-project true --local
-
-    - uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
-      name: Define a cache for the virtual environment based on the dependencies lock file
-      with:
-        path: ./.venv
-        key: venv-${{ hashFiles('poetry.lock') }}
-
-    - name: Install dependencies
-      working-directory: ./backend
-      run: poetry install
-
-    - name: Fetch openapi json
-      working-directory: ./backend
-      run: ../scripts/get-openapi-def.sh
-    - run: openapi-python-client generate --url ./backend/openapi.json --overwrite --output-path ./sdk/data_product_portal_sdk
+    - run: |
+        docker compose up -d postgresql backend
+        docker compose ps
+        sleep 30
+    - run: openapi-python-client generate --url http://localhost:5050/openapi.json --overwrite --output-path ./sdk/data_product_portal_sdk
     - run: scripts/check-dirty.sh
     - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
