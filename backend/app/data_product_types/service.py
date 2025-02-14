@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.data_product_types.model import DataProductType as DataProductTypeModel
@@ -35,5 +36,15 @@ class DataProductTypeService:
 
     def remove_data_product_type(self, id: UUID, db: Session):
         data_product_type = db.get(DataProductTypeModel, id)
+
+        if data_product_type.data_products:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Cannot delete a data product type assigned to one or "
+                    "multiple data products"
+                ),
+            )
+
         db.delete(data_product_type)
         db.commit()

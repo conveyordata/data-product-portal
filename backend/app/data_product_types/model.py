@@ -19,4 +19,4 @@ class DataProductType(Base, BaseORM):
     name = Column(String)
     description = Column(String)
     icon_key = Column(Enum(DataProductIconKey), default=DataProductIconKey.DEFAULT)
-    data_products: Mapped[list["DataProduct"]] = relationship(lazy="noload")
+    data_products: Mapped[list["DataProduct"]] = relationship(lazy="select")
