@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Home } from '@/pages/home/home.page.tsx';
 import { DataProducts } from '@/pages/data-products/data-products.page.tsx';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
@@ -37,11 +37,7 @@ const router = createBrowserRouter([
         children: [
             {
                 path: ApplicationPaths.Home,
-                element: (
-                    <RootLayout>
-                        <Outlet />
-                    </RootLayout>
-                ),
+                element: <RootLayout />,
                 children: [
                     {
                         path: ApplicationPaths.Home,
@@ -173,11 +169,7 @@ const router = createBrowserRouter([
     },
     {
         path: ApplicationPaths.Home,
-        element: (
-            <PublicLayout>
-                <Outlet />
-            </PublicLayout>
-        ),
+        element: <PublicLayout />,
         children: [
             {
                 index: true,
