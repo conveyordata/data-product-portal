@@ -55,7 +55,7 @@ export function PlatformsConfigsTable() {
         if (!isFetching) {
             handleTotalChange(platformsConfigs.length);
         }
-    }, [isFetching]);
+    }, [handleTotalChange, isFetching, platformsConfigs.length]);
 
     return (
         <Flex vertical className={styles.tableContainer}>

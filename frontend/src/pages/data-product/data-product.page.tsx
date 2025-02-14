@@ -29,7 +29,7 @@ export function DataProduct() {
 
     const dataProductTypeIcon = useMemo(() => {
         return getDataProductTypeIcon(dataProduct?.type?.icon_key);
-    }, [dataProduct?.id, dataProduct?.type.icon_key]);
+    }, [dataProduct?.type?.icon_key]);
 
     const dataProductOwners = dataProduct ? getDataProductOwners(dataProduct) : [];
     const isCurrentDataProductOwner = Boolean(
@@ -49,7 +49,7 @@ export function DataProduct() {
             id: dataProductId,
             timestamp: Date.now(),
         });
-    }, []);
+    }, [dataProductId]);
 
     if (isLoading) return <LoadingSpinner />;
 

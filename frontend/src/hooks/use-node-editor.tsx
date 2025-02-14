@@ -41,7 +41,7 @@ export function useNodeEditor() {
         window.requestAnimationFrame(() => {
             fitView(defaultFitViewOptions);
         });
-    }, [nodes, edges]);
+    }, [nodes, edges, fitView]);
 
     return {
         setNodesAndEdges,

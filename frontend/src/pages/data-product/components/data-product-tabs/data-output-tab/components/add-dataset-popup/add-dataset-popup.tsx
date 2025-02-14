@@ -69,8 +69,9 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                 dispatchMessage({ content: t('Failed to link dataset to data output'), type: 'error' });
             }
         },
-        [dataOutputId, t, requestDatasetAccessForDataOutput],
+        [requestDatasetAccessForDataOutput, dataOutputId, t, onClose],
     );
+
     return (
         <DataProductDatasetLinkPopup
             onClose={onClose}

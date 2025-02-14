@@ -91,7 +91,7 @@ export function EnvironmentConfigCreateForm() {
             form.setFieldValue('identifiers', identifiers.join(', '));
             form.setFieldValue('config', JSON.stringify(configTemplate, null, 4));
         }
-    }, [platformServiceConfig]);
+    }, [form, platformServiceConfig]);
 
     return (
         <Form<EnvironmentConfigCreateFormSchema>

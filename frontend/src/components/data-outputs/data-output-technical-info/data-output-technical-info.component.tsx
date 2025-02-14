@@ -51,7 +51,7 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
             default:
                 return [];
         }
-    }, [t, technicalInfo, data_output]);
+    }, [t, data_output]);
 
     return (
         <Table<TechnicalInfoContract>

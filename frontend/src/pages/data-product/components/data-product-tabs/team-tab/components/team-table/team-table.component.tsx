@@ -1,6 +1,6 @@
 import { Flex, Table, TableColumnsType } from 'antd';
 import { UserContract } from '@/types/users';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useTranslation } from 'react-i18next';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -37,44 +37,56 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     const [grantMembershipAccess] = useGrantMembershipAccessMutation();
     const [denyMembershipAccess] = useDenyMembershipAccessMutation();
 
-    const handleRemoveUserAccess = async (membershipId: string) => {
-        try {
+    const handleRemoveUserAccess = useCallback(
+        async (membershipId: string) => {
+            try {
+                if (!dataProduct) return;
+
+                await removeUserFromDataProduct({ membershipId }).unwrap();
+                dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
+            }
+        },
+        [dataProduct, removeUserFromDataProduct, t],
+    );
+
+    const handleGrantAccessToDataProduct = useCallback(
+        async (membershipId: string) => {
+            try {
+                await grantMembershipAccess({ membershipId }).unwrap();
+                dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
+            }
+        },
+        [grantMembershipAccess, t],
+    );
+
+    const handleDenyAccessToDataProduct = useCallback(
+        async (membershipId: string) => {
+            try {
+                await denyMembershipAccess({ membershipId }).unwrap();
+                dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
+            }
+        },
+        [denyMembershipAccess, t],
+    );
+
+    const handleRoleChange = useCallback(
+        async (role: DataProductMembershipRole, membershipId: string) => {
             if (!dataProduct) return;
-
-            await removeUserFromDataProduct({ membershipId }).unwrap();
-            dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
-        } catch (_error) {
-            dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
-        }
-    };
-
-    const handleGrantAccessToDataProduct = async (membershipId: string) => {
-        try {
-            await grantMembershipAccess({ membershipId }).unwrap();
-            dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
-        } catch (_error) {
-            dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
-        }
-    };
-
-    const handleDenyAccessToDataProduct = async (membershipId: string) => {
-        try {
-            await denyMembershipAccess({ membershipId }).unwrap();
-            dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
-        } catch (_error) {
-            dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
-        }
-    };
-
-    const handleRoleChange = async (role: DataProductMembershipRole, membershipId: string) => {
-        if (!dataProduct) return;
-        try {
-            await updateMembershipRole({ dataProductId: dataProduct.id, membershipId, role }).unwrap();
-            dispatchMessage({ content: t('User role has been updated'), type: 'success' });
-        } catch (_error) {
-            dispatchMessage({ content: t('Failed to update user role'), type: 'error' });
-        }
-    };
+            try {
+                await updateMembershipRole({ dataProductId: dataProduct.id, membershipId, role }).unwrap();
+                dispatchMessage({ content: t('User role has been updated'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to update user role'), type: 'error' });
+            }
+        },
+        [dataProduct, t, updateMembershipRole],
+    );
 
     const columns: TableColumnsType<DataProductUserMembership> = useMemo(() => {
         return getDataProductUsersTableColumns({
@@ -90,7 +102,19 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
             onRejectMembershipRequest: handleDenyAccessToDataProduct,
             onAcceptMembershipRequest: handleGrantAccessToDataProduct,
         });
-    }, [t, isCurrentUserDataProductOwner, currentUser.id, dataProductUsers]);
+    }, [
+        t,
+        handleRemoveUserAccess,
+        handleRoleChange,
+        isRemovingUserFromDataProduct,
+        dataProductUsers,
+        isLoadingDataProduct,
+        isUpdatingMembershipRole,
+        currentUser.id,
+        handleDenyAccessToDataProduct,
+        handleGrantAccessToDataProduct,
+        isCurrentUserDataProductOwner,
+    ]);
 
     if (!dataProduct) return null;
 

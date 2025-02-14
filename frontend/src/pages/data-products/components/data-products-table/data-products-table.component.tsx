@@ -71,7 +71,14 @@ export function DataProductsTable() {
                 handleTotalChange(userDataProducts.length);
             }
         }
-    }, [quickFilter, isFetching, isFetchingUserDataProducts]);
+    }, [
+        quickFilter,
+        isFetching,
+        isFetchingUserDataProducts,
+        handleTotalChange,
+        dataProducts.length,
+        userDataProducts.length,
+    ]);
 
     return (
         <Flex vertical className={styles.tableContainer}>
