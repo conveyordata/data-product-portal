@@ -1,7 +1,7 @@
 import { Badge, Button, Popconfirm, TableColumnsType } from 'antd';
 import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
 import styles from './dataset-table.module.scss';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
