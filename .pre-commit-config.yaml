@@ -68,7 +68,7 @@ repos:
   hooks:
     - id: add-helm-version
       name: add-helm-version
-      entry: ./add_helm_version.sh
+      entry: ./scripts/add_helm_version.sh
       language: script
     - id: prettier
       name: prettier
