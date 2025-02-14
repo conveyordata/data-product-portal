@@ -17,7 +17,7 @@ import type { CustomDropdownItemProps } from '@/types/shared';
 import { S3DataOutputForm } from './s3-data-output-form.component';
 import { GlueDataOutputForm } from './glue-data-output-form.component';
 import TextArea from 'antd/es/input/TextArea';
-import type { DataOutputStatus } from '@/types/data-output/data-output.contract';
+import { DataOutputStatus } from '@/types/data-output/data-output.contract';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';

@@ -21,7 +21,7 @@ import { ReactFlowProvider } from 'reactflow';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Explorer } from '@/components/explorer/explorer.tsx';
 import { SettingsTab } from './settings-tab/settings-tab.tsx';
-import type { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys.ts';
+import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys.ts';
 
 type Props = {
     datasetId: string;

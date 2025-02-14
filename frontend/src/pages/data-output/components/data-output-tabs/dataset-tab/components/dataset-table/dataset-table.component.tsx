@@ -8,12 +8,12 @@ import {
 } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import styles from './dataset-table.module.scss';
 import { getDataOutputDatasetsColumns } from './dataset-table-columns.tsx';
-import type { DatasetLink } from '@/types/data-product';
+import type { DataOutputDatasetLink } from '@/types/data-output';
 
 type Props = {
     isCurrentDataOutputOwner: boolean;
     dataOutputId: string;
-    datasets: DatasetLink[];
+    datasets: DataOutputDatasetLink[];
 };
 
 export function DatasetTable({ isCurrentDataOutputOwner, dataOutputId, datasets }: Props) {
@@ -52,7 +52,7 @@ export function DatasetTable({ isCurrentDataOutputOwner, dataOutputId, datasets 
         [dataOutputId, removeDatasetFromDataOutput, t],
     );
 
-    const columns: TableColumnsType<DatasetLink> = useMemo(() => {
+    const columns: TableColumnsType<DataOutputDatasetLink> = useMemo(() => {
         return getDataOutputDatasetsColumns({
             onRemoveDataOutputDatasetLink: handleRemoveDatasetFromDataOutput,
             onCancelDataOutputDatasetLinkRequest: handleCancelDatasetLinkRequest,
@@ -72,7 +72,7 @@ export function DatasetTable({ isCurrentDataOutputOwner, dataOutputId, datasets 
 
     return (
         <Flex className={styles.datasetListContainer}>
-            <Table<DatasetLink>
+            <Table<DataOutputDatasetLink>
                 loading={isLoadingDataOutput}
                 className={styles.datasetListTable}
                 columns={columns}

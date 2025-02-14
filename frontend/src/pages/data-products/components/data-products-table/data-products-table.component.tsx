@@ -13,11 +13,11 @@ import { getDataProductTableColumns } from '@/pages/data-products/components/dat
 import { DataProductsGetContract } from '@/types/data-product';
 import { SearchForm } from '@/types/shared';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter.tsx';
-import { useQuickFilter } from '@/hooks/use-quick-filter.tsx';
-import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
-import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter';
+import { useQuickFilter } from '@/hooks/use-quick-filter';
+import { QuickFilterParticipation } from '@/types/shared/table-filters';
+import { useTablePagination } from '@/hooks/use-table-pagination';
 
 function filterDataProducts(dataProducts: DataProductsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -54,9 +54,9 @@ export function DataProductsTable() {
         handlePaginationChange(pagination);
     };
 
-    function navigateToDataProduct(dataProductId: string) {
+    const navigateToDataProduct = (dataProductId: string) => {
         navigate(createDataProductIdPath(dataProductId));
-    }
+    };
 
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
         onQuickFilterChange(value);
@@ -104,11 +104,9 @@ export function DataProductsTable() {
                     quickFilterOptions={quickFilterOptions}
                 />
                 <Table<DataProductsGetContract[0]>
-                    onRow={(record) => {
-                        return {
-                            onClick: () => navigateToDataProduct(record.id),
-                        };
-                    }}
+                    onRow={(record) => ({
+                        onClick: () => navigateToDataProduct(record.id),
+                    })}
                     className={styles.table}
                     columns={columns}
                     dataSource={filteredDataProducts}

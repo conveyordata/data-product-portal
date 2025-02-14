@@ -6,9 +6,9 @@ import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { createDatasetIdPath } from '@/types/navigation.ts';
-import { DatasetLink } from '@/types/data-output';
 import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title.tsx';
 import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title.tsx';
+import type { DataOutputDatasetLink } from '@/types/data-output';
 
 type Props = {
     t: TFunction;
@@ -24,7 +24,7 @@ export const getDataOutputDatasetsColumns = ({
     t,
     isDisabled,
     isLoading,
-}: Props): TableColumnsType<DatasetLink> => {
+}: Props): TableColumnsType<DataOutputDatasetLink> => {
     return [
         {
             title: t('Id'),
