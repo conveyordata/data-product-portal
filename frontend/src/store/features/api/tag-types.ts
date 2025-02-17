@@ -18,6 +18,7 @@ export enum TagTypes {
     PlatformServiceConfig = 'PlatformServiceConfig',
     EnvironmentConfigs = 'EnvironmentConfigs',
     Version = 'Version',
+    AI = 'AI',
 }
 
 export const STATIC_TAG_ID = {

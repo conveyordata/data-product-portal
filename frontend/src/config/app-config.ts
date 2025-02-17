@@ -3,6 +3,11 @@ import { LogoutCognitoExtraParams } from '@/types/auth/oidc.ts';
 
 interface Config {
     /**
+     * The AI base URL of your API.
+     * @description This is where your frontend will send API requests to the agentic system.
+     */
+    AI_API_BASE_URL: string;
+    /**
      * The base URL of your API.
      * @description This is where your frontend will send API requests.
      */
@@ -45,6 +50,13 @@ declare global {
 
 export class AppConfig {
     public static getApiBaseURL(): string {
+        return config.API_BASE_URL;
+    }
+
+    public static getAIApiBaseURL(): string {
+        if (config.AI_API_BASE_URL) {
+            return config.AI_API_BASE_URL;
+        }
         return config.API_BASE_URL;
     }
 

@@ -6,6 +6,7 @@ import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { Searchbar } from '@/components/form';
 import { DataProductsInbox } from '@/pages/home/components/data-products-inbox/data-products-inbox.tsx';
 import { DatasetsInbox } from '@/pages/home/components/datasets-inbox/datasets-inbox.tsx';
+import { AgenticSystem } from '@/components/agentic-system/agentic-system.component';
 
 const ROW_GUTTER = 96;
 const COL_SPAN = 12;
@@ -26,6 +27,9 @@ export function Home() {
                 <div className={styles.searchBar}>
                     <Searchbar form={searchForm} placeholder={t('Search for data products and datasets by name')} />
                 </div>
+            </Flex>
+            <Flex>
+                <AgenticSystem />
             </Flex>
             <div className={styles.content}>
                 <Row gutter={ROW_GUTTER}>

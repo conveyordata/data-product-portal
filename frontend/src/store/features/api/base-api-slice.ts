@@ -7,3 +7,9 @@ export const baseApiSlice = createApi({
     baseQuery: axiosBaseQuery({ baseUrl: AppConfig.getApiBaseURL() }),
     endpoints: () => ({}),
 });
+
+export const baseAIApiSlice = createApi({
+    baseQuery: axiosBaseQuery({ baseUrl: AppConfig.getAIApiBaseURL() }),
+    endpoints: () => ({}),
+    reducerPath: 'ai',
+});

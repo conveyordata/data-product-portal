@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import feedbackSlice from '@/store/features/feedback/feedback-slice.ts';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { isDevMode } from '@/utils/env-mode.helper.ts';
-import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
+import { baseAIApiSlice, baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import authSlice from '@/store/features/auth/auth-slice.ts';
 
 const store = configureStore({
@@ -11,8 +11,10 @@ const store = configureStore({
         feedback: feedbackSlice,
         auth: authSlice,
         [baseApiSlice.reducerPath]: baseApiSlice.reducer,
+        [baseAIApiSlice.reducerPath]: baseAIApiSlice.reducer,
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApiSlice.middleware),
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(baseApiSlice.middleware).concat(baseAIApiSlice.middleware),
     devTools: isDevMode,
 });
 

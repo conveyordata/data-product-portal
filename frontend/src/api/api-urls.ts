@@ -1,3 +1,7 @@
+export enum AIApiUrl {
+    HelloWorld = '/ai/api',
+}
+
 export enum ApiUrl {
     DataOutputs = '/api/data_outputs',
     DataOutputGet = '/api/data_outputs/:dataOutputId',

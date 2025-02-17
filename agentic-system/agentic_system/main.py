@@ -1,5 +1,7 @@
 from agentic_system.router import router
+from agentic_system.settings import settings
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 with open("./VERSION", "r") as f:
     API_VERSION = f.read().strip()
@@ -16,6 +18,14 @@ app = FastAPI(
 )
 
 app.include_router(router, prefix="/ai/api")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ALLOWED_ORIGINS.split(","),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # K8S health and liveness check

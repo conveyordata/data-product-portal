@@ -16,10 +16,16 @@ services:
     command: >
       bash -c "python -m app.db_tool init --force sample_data.sql
       && uvicorn app.main:app --host 0.0.0.0 --port 5050"
-    # volumes:
-    #   - type: bind
-    #     source: ${PWD}/backend/custom_sample_data.sql
-    #     target: /sample_data.sql
+  agentic-system:
+    build: ./agentic-system
+    env_file:
+      - .env.docker
+    depends_on:
+      mailhog:
+         condition: service_started
+      postgresql:
+        condition: service_healthy
+    command: "uvicorn agentic_system.main:app --host 0.0.0.0 --port 5051"
   frontend:
     build: ./frontend
     volumes:
@@ -44,3 +50,4 @@ services:
     depends_on:
       - backend
       - frontend
+      - agentic-system
