@@ -28,7 +28,7 @@ export const getGlueTechnicalInformationColumns = ({ t }: Props): TableColumnsTy
             render: (_, { data_output }) => {
                 const configuration: GlueDataOutputContract = data_output.configuration as GlueDataOutputContract;
                 // TODO figure out how to use product aligned databases here and get their ARN?
-                return configuration.database + '__' + configuration.database_suffix;
+                return `${configuration.database}__${configuration.database_suffix}`;
             },
             width: '30%',
         },
