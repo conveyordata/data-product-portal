@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "data-product-portal.fullname" . }}
+  name: {{ include "data-product-portal.agenticfullname" . }}
   labels:
-    {{- include "data-product-portal.labels" . | nindent 4 }}
+    {{- include "data-product-portal.agenticlabels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "data-product-portal.selectorLabels" . | nindent 6 }}
+      {{- include "data-product-portal.agenticselectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "data-product-portal.labels" . | nindent 8 }}
+        {{- include "data-product-portal.agenticlabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -30,39 +30,7 @@ spec:
       serviceAccountName: {{ include "data-product-portal.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      initContainers:
-        - name: migrate-database
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          command: ["python", "-m", "app.db_tool", "migrate"]
-          envFrom:
-            - configMapRef:
-                name: {{ include "data-product-portal.fullname" . }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          imagePullPolicy: {{ .Values.agenticimage.pullPolicy }}
-          {{- with .Values.volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
       containers:
-        {{- if .Values.cloudwatch_enabled }}
-        - name: cloudwatch-agent
-          image: amazon/cloudwatch-agent
-          imagePullPolicy: Always
-          resources:
-            limits:
-              cpu:  200m
-              memory: 100Mi
-            requests:
-              cpu: 200m
-              memory: 100Mi
-          volumeMounts:
-            - name: cwagentconfig
-              mountPath: /etc/cwagentconfig
-          {{- with .Values.volumeMounts }}
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-        {{- end }}
         - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
@@ -70,10 +38,10 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.agenticimage.repository }}:{{ .Values.agenticimage.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.agenticimage.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.agenticservice.port }}
               protocol: TCP
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
@@ -81,19 +49,13 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
+          {{- with .Values.agenticvolumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-
-      {{- with .Values.volumes }}
+      {{- with .Values.agenticvolumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.cloudwatch_enabled }}
-        - name: cwagentconfig
-          configMap:
-            name: cwagentstatsdconfig
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

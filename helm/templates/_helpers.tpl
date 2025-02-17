@@ -13,6 +13,11 @@ Expand the name of the chart.
 {{- default $name .Values.frontendnameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{- define "data-product-portal.agenticname" -}}
+{{- $name := printf "%s-%s" .Chart.Name "agentic-system" }}
+{{- default $name .Values.agenticnameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
 
 {{/*
 Create a default fully qualified app name.
@@ -51,6 +56,20 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
+{{- define "data-product-portal.agenticfullname" -}}
+{{- if .Values.agenticfullnameOverride }}
+{{- .Values.agenticfullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $fname := "agentic-system" }}
+{{- $name := default $fname .Values.agenticnameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{/*
 Create chart name and version as used by the chart label.
 */}}
@@ -79,6 +98,14 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
+{{- define "data-product-portal.agenticlabels" -}}
+helm.sh/chart: {{ include "data-product-portal.chart" . }}
+{{ include "data-product-portal.agenticselectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
 {{/*
 Selector labels
 */}}
@@ -95,6 +122,10 @@ app.kubernetes.io/name: {{ include "data-product-portal.frontendname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{- define "data-product-portal.agenticselectorLabels" -}}
+app.kubernetes.io/name: {{ include "data-product-portal.agenticname" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
 {{/*
 Create the name of the service account to use
 */}}

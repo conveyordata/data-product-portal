@@ -64,8 +64,10 @@ agenticimage:
 imagePullSecrets: []
 nameOverride: ""
 frontendnameOverride: ""
+agenticnameOverride: ""
 fullnameOverride: ""
 frontendfullnameOverride: ""
+agenticfullnameOverride: ""
 
 serviceAccount:
   create: true
@@ -90,6 +92,10 @@ frontendservice:
   type: NodePort
   port: 8080
 
+agenticservice:
+  type: NodePort
+  port: 5051
+
 service:
   type: NodePort
   port: 5050
@@ -111,7 +117,7 @@ ingress:
         number: 8080
       - path: /ai
         pathType: Prefix
-        name: ai-agent
+        name: agentic-system
         number: 5051
   tls: []
 
@@ -148,6 +154,9 @@ frontendvolumeMounts:
   - name: config
     mountPath: /app/dist/config.js
     subPath: config.js
+
+agenticvolumeMounts: []
+agenticvolumes: []
 
 volumes:
   - name: varlog

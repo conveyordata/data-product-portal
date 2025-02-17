@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "data-product-portal.agenticfullname" . }}
+  labels:
+    {{- include "data-product-portal.agenticlabels" . | nindent 4 }}
+spec:
+  type: {{ .Values.agenticservice.type }}
+  ports:
+    - port: {{ .Values.agenticservice.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "data-product-portal.agenticselectorLabels" . | nindent 4 }}
