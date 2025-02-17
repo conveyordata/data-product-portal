@@ -79,8 +79,7 @@ class DataProductService:
             .first()
         )
 
-        rolled_up_tags = []
-        unique_tag_values = set()
+        rolled_up_tags = set()
 
         if not data_product:
             raise HTTPException(
@@ -88,15 +87,9 @@ class DataProductService:
             )
 
         for link in data_product.dataset_links:
-            for tag in link.dataset.tags:
-                if tag.value not in unique_tag_values:
-                    unique_tag_values.add(tag.value)
-                    rolled_up_tags.append(tag)
+            rolled_up_tags.update(link.dataset.tags)
             for output_link in link.dataset.data_output_links:
-                for tag in output_link.data_output.tags:
-                    if tag.value not in unique_tag_values:
-                        unique_tag_values.add(tag.value)
-                        rolled_up_tags.append(tag)
+                rolled_up_tags.update(output_link.data_output.tags)
 
         data_product.rolled_up_tags = rolled_up_tags
 
