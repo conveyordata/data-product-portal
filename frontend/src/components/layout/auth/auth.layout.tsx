@@ -44,9 +44,11 @@ export const AuthLayout = () => {
             if (!isLoading) {
                 if (isAuthenticated) {
                     handleAuthorizeUser().then(() => {
-                        const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
+                        const redirectPath = sessionStorage.getItem('redirectAfterLogin');
                         sessionStorage.removeItem('redirectAfterLogin');
-                        navigate(redirectPath);
+                        if (redirectPath) {
+                            navigate(redirectPath);
+                        }
                     });
                 } else {
                     redirectToSignIn().catch((e) => {
