@@ -37,6 +37,13 @@ repos:
       - types-PyYAML
       - types-requests
       - types-pytz
+      files: ^backend/
+    - id: mypy
+      additional_dependencies:
+      - types-PyYAML
+      - types-requests
+      - types-pytz
+      files: ^agentic-system/
 - repo: https://github.com/pycqa/flake8
   rev: 7.1.1
   hooks:
