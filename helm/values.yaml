@@ -56,6 +56,11 @@ frontendimage:
   pullPolicy: Always
   tag: 0.2.11
 
+agenticimage:
+  repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/agentic-system
+  pullPolicy: Always
+  tag: 0.2.11
+
 imagePullSecrets: []
 nameOverride: ""
 frontendnameOverride: ""
@@ -104,6 +109,10 @@ ingress:
         pathType: Prefix
         name: frontend
         number: 8080
+      - path: /ai
+        pathType: Prefix
+        name: ai-agent
+        number: 5051
   tls: []
 
 resources: {}
