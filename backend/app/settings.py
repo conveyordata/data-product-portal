@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
     WEBHOOK_URL: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
+    WEBHOOK_SECRET: Optional[str] = None
 
     # Email templating and SMTP settings
     PORTAL_NAME: str = "Data Product Portal"
