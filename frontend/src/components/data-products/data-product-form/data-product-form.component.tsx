@@ -55,7 +55,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
-    const [archiveDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
+    const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
     const [form] = Form.useForm<DataProductCreateFormSchema>();
     const dataProductNameValue = Form.useWatch('name', form);
 
@@ -157,15 +157,15 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
-    const handleArchiveDataProduct = async () => {
+    const handleDeleteDataProduct = async () => {
         if (canEditForm && currentDataProduct) {
             try {
-                await archiveDataProduct(currentDataProduct?.id).unwrap();
-                dispatchMessage({ content: t('Data product archived successfully'), type: 'success' });
+                await deleteDataProduct(currentDataProduct?.id).unwrap();
+                dispatchMessage({ content: t('Data product deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.DataProducts);
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to archive data product, please try again later'),
+                    content: t('Failed to delete data product, please try again later'),
                     type: 'error',
                 });
             }
@@ -350,8 +350,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     </Button>
                     {canEditForm && (
                         <Popconfirm
-                            title={t('Are you sure you want to archive this data product?')}
-                            onConfirm={handleArchiveDataProduct}
+                            title={t('Are you sure you want to delete this data product?')}
+                            onConfirm={handleDeleteDataProduct}
                             okText={t('Yes')}
                             cancelText={t('No')}
                         >
@@ -362,7 +362,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                                 loading={isArchiving}
                                 disabled={isLoading}
                             >
-                                {t('Archive')}
+                                {t('Delete')}
                             </Button>
                         </Popconfirm>
                     )}

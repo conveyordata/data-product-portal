@@ -21,5 +21,5 @@ class TagService:
 
     def remove_tag(self, id: UUID, db: Session):
         tag = db.get(TagModel, id)
-        tag.delete()
+        db.delete(tag)
         db.commit()

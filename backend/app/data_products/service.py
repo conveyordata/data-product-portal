@@ -215,8 +215,8 @@ class DataProductService:
         data_product.dataset_links = []
         for output in data_product.data_outputs:
             output.dataset_links = []
-            output.delete()
-        data_product.delete()
+            db.delete(output)
+        db.delete(data_product)
         db.commit()
 
     def _create_new_membership(

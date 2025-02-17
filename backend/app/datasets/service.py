@@ -118,7 +118,7 @@ class DatasetService:
         dataset.owners = []
         dataset.data_product_links = []
         dataset.tags = []
-        dataset.delete()
+        db.delete(dataset)
 
         db.commit()
         RefreshInfrastructureLambda().trigger()
