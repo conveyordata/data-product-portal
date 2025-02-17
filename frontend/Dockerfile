@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:23-alpine@sha256:70eca392e3d52cb7d133b52d52e8600d8c410a5eaee6105c11324b28868f9ac9 AS build-stage
+FROM --platform=linux/amd64 node:23-alpine@sha256:aa32c362b7352e83702876e443949cc65b8e2c67a67d10d361cfe117f444b0ed AS build-stage
 
 WORKDIR /app
 COPY . .
