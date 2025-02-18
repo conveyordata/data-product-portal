@@ -45,7 +45,7 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
     return (
         <FormModal
             isOpen={isOpen}
-            title={t('Migrate Data Product Type')}
+            title={t('Delete Data Product Type')}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -55,11 +55,12 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
                 onClose();
             }}
             footer={[
-                <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {t('Submit')}
+                <Button key="submit" type="primary" danger onClick={() => form.submit()}>
+                    {t('Delete')}
                 </Button>,
                 <Button
                     key="cancel"
+                    danger
                     onClick={() => {
                         form.resetFields();
                         onClose();
@@ -70,13 +71,13 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
             ]}
         >
             <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={migrateFrom}>
-                <Form.Item name="name" label={t('Migrate from')}>
+                <Form.Item name="name" label={t('Name')}>
                     <Input defaultValue={migrateFrom?.name} disabled />
                 </Form.Item>
 
                 <Form.Item
                     name="toId"
-                    label={t('Migrate to')}
+                    label={t('Migrate existing data products')}
                     rules={[{ required: true, message: t('Please provide a value') }]}
                 >
                     <Select>

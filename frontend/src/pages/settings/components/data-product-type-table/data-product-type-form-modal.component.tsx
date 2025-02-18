@@ -7,7 +7,7 @@ import {
     useCreateDataProductTypeMutation,
     useUpdateDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
-import { dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
+import { DataProductIcon, dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import Icon from '@ant-design/icons';
 import styles from './data-product-type-table.module.scss';
@@ -29,16 +29,16 @@ interface DataProductTypeFormText {
 }
 
 const createText: DataProductTypeFormText = {
-    title: 'Create New Business Area',
-    successMessage: 'Business Area created successfully',
-    errorMessage: 'Failed to create Business Area',
+    title: 'Create New Data Product Type',
+    successMessage: 'Data Product Type created successfully',
+    errorMessage: 'Failed to create Data Product Type',
     submitButtonText: 'Create',
 };
 
 const updateText: DataProductTypeFormText = {
-    title: 'Update Business Area',
-    successMessage: 'Business Area updated successfully',
-    errorMessage: 'Failed to update Business Area',
+    title: 'Update New Data Product Type',
+    successMessage: 'Data Product Type updated successfully',
+    errorMessage: 'Failed to update Data Product Type',
     submitButtonText: 'Update',
 };
 
@@ -121,11 +121,13 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
                     rules={[{ required: true, message: t('Please provide an icon') }]}
                 >
                     <Select>
-                        {dataProductIcons.map((icon) => (
-                            <Option value={icon}>
-                                <Icon component={getDataProductTypeIcon(icon)} className={styles.customIcon} />
-                            </Option>
-                        ))}
+                        {dataProductIcons
+                            .filter((icon) => icon !== DataProductIcon.Default)
+                            .map((icon) => (
+                                <Option value={icon}>
+                                    <Icon component={getDataProductTypeIcon(icon)} className={styles.customIcon} />
+                                </Option>
+                            ))}
                     </Select>
                 </Form.Item>
             </Form>

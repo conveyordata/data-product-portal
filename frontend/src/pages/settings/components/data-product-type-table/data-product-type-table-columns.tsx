@@ -2,7 +2,10 @@ import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { DataProductIcon, DataProductTypesGetContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
-import { Button, Flex, Popconfirm, Select, TableColumnsType } from 'antd';
+import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
+import { Sorter } from '@/utils/table-sorter.helper';
+import { FilterSettings } from '@/utils/table-filter.helper';
+import { dataOutputTags } from '@/store/features/data-outputs/data-outputs-api-slice';
 
 const iconColumnWidth = 30;
 
@@ -17,6 +20,7 @@ export const getDataProductTypeTableColumns = ({
     handleRemove,
     handleEdit,
 }: Props): TableColumnsType<DataProductTypesGetContract> => {
+    const sorter = new Sorter<DataProductTypesGetContract>();
     return [
         {
             title: t('Id'),
@@ -36,11 +40,14 @@ export const getDataProductTypeTableColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
+            sorter: sorter.stringSorter((type) => type.name),
+            defaultSortOrder: 'ascend',
         },
         {
             title: t('Description'),
             dataIndex: 'description',
             render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,
+            sorter: sorter.stringSorter((type) => type.description),
         },
         {
             title: t('Actions'),
@@ -54,7 +61,7 @@ export const getDataProductTypeTableColumns = ({
                         </Button>
                         <Popconfirm
                             title={t('Remove')}
-                            description={t('Are you sure you want to delete the data product type?')}
+                            description={t('Are you sure you want to delete the Data Product Type?')}
                             onConfirm={() => handleRemove(record)}
                             placement={'leftTop'}
                             okText={t('Confirm')}
