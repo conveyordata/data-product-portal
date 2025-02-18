@@ -1,12 +1,17 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { BusinessAreaCreateRequest, BusinessAreaCreateResponse, BusinessAreaGetResponse } from '@/types/business-area';
+import {
+    BusinessAreaCreateRequest,
+    BusinessAreaCreateResponse,
+    BusinessAreasGetResponse,
+    BusinessAreaGetResponse,
+} from '@/types/business-area';
 
 export const businessAreaTags: string[] = [TagTypes.BusinessArea];
 export const businessAreasApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: businessAreaTags }).injectEndpoints({
     endpoints: (builder) => ({
-        getAllBusinessAreas: builder.query<BusinessAreaGetResponse[], void>({
+        getAllBusinessAreas: builder.query<BusinessAreasGetResponse[], void>({
             query: () => ({
                 url: ApiUrl.BusinessAreas,
                 method: 'GET',
@@ -18,6 +23,13 @@ export const businessAreasApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
                           ...result.map(({ id }) => ({ type: TagTypes.BusinessArea as const, id })),
                       ]
                     : [{ type: TagTypes.BusinessArea, id: STATIC_TAG_ID.LIST }],
+        }),
+        getBusinessArea: builder.query<BusinessAreaGetResponse, string>({
+            query: (businessAreaId) => ({
+                url: buildUrl(ApiUrl.BusinessAreasId, { businessAreaId }),
+                method: 'GET',
+            }),
+            providesTags: (_, __, id) => [{ type: TagTypes.BusinessArea as const, id }],
         }),
         createBusinessArea: builder.mutation<BusinessAreaCreateResponse, BusinessAreaCreateRequest>({
             query: (request) => ({
@@ -45,6 +57,16 @@ export const businessAreasApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
             }),
             invalidatesTags: [{ type: TagTypes.BusinessArea, id: STATIC_TAG_ID.LIST }],
         }),
+        migrateBusinessArea: builder.mutation<void, { fromId: string; toId: string }>({
+            query: ({ fromId, toId }) => ({
+                url: buildUrl(ApiUrl.BusinessAreasMigrate, { fromId, toId }),
+                method: 'PUT',
+            }),
+            invalidatesTags: (_, __, { fromId, toId }) => [
+                { type: TagTypes.BusinessArea, id: fromId },
+                { type: TagTypes.BusinessArea, id: toId },
+            ],
+        }),
     }),
     overrideExisting: false,
 });
@@ -56,4 +78,6 @@ export const {
     useGetAllBusinessAreasQuery,
     useUpdateBusinessAreaMutation,
     useRemoveBusinessAreaMutation,
+    useGetBusinessAreaQuery,
+    useMigrateBusinessAreaMutation,
 } = businessAreasApiSlice;

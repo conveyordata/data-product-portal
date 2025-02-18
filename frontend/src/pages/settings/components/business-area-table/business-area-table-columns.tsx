@@ -6,13 +6,13 @@ import { Button, Flex, Popconfirm } from 'antd';
 
 type Props = {
     t: TFunction;
-    onRemoveBusinessArea: (id: string) => void;
-    handleEdit: (tag: BusinessAreaContract) => () => void;
+    handleRemove: (businessArea: BusinessAreaContract) => void;
+    handleEdit: (businessArea: BusinessAreaContract) => () => void;
 };
 
 export const getBusinessAreaTableColumns = ({
     t,
-    onRemoveBusinessArea,
+    handleRemove,
     handleEdit,
 }: Props): EditableColumn<BusinessAreaContract>[] => {
     return [
@@ -37,7 +37,7 @@ export const getBusinessAreaTableColumns = ({
             title: t('Actions'),
             key: 'action',
             width: '10%',
-            render: (record, { id }) => {
+            render: (record) => {
                 return (
                     <Flex>
                         <Button type={'link'} onClick={handleEdit(record)}>
@@ -46,7 +46,7 @@ export const getBusinessAreaTableColumns = ({
                         <Popconfirm
                             title={t('Remove')}
                             description={t('Are you sure you want to delete the Business Area?')}
-                            onConfirm={() => onRemoveBusinessArea(id)}
+                            onConfirm={() => handleRemove(record)}
                             placement={'leftTop'}
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}

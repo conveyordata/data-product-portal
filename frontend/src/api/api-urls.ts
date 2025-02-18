@@ -51,6 +51,7 @@ export enum ApiUrl {
     DatasetGraph = '/api/datasets/:datasetId/graph',
     BusinessAreas = '/api/business_areas',
     BusinessAreasId = '/api/business_areas/:businessAreaId',
+    BusinessAreasMigrate = '/api/business_areas/migrate/:fromId/:toId',
     DataProductsDatasets = '/api/data_product_dataset_links',
     DataProductDatasetLinkApprove = '/api/data_product_dataset_links/approve/:datasetLinkId',
     DataProductDatasetLinkReject = '/api/data_product_dataset_links/deny/:datasetLinkId',

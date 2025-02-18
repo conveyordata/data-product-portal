@@ -14,16 +14,23 @@ import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useModal } from '@/hooks/use-modal';
 import { useState } from 'react';
 import { CreateBusinessAreaModal } from './business-area-form-modal.component';
+import { CreateBusinessAreaMigrateModal } from './business-area-migrate-modal.component';
 
 export function BussinesAreaTable() {
     const { t } = useTranslation();
     const { data = [], isFetching } = useGetAllBusinessAreasQuery();
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
+    const {
+        isVisible: migrateModalVisible,
+        handleOpen: handleOpenMigrate,
+        handleClose: handleCloseMigrate,
+    } = useModal();
     const [editBusinessArea, { isLoading: isEditing }] = useUpdateBusinessAreaMutation();
     const [onRemoveBusinessArea, { isLoading: isRemoving }] = useRemoveBusinessAreaMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<BusinessAreaContract | undefined>(undefined);
+    const [migrateFrom, setMigrateFrom] = useState<BusinessAreaContract | undefined>(undefined);
 
     const onChange: TableProps<BusinessAreaContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
@@ -50,7 +57,16 @@ export function BussinesAreaTable() {
         }
     };
 
-    const columns = getBusinessAreaTableColumns({ t, onRemoveBusinessArea, handleEdit });
+    const handleRemove = async (row: BusinessAreaContract) => {
+        try {
+            setMigrateFrom(row);
+            handleOpenMigrate();
+        } catch (error) {
+            dispatchMessage({ content: t('Could not remove Business Area'), type: 'error' });
+        }
+    };
+
+    const columns = getBusinessAreaTableColumns({ t, handleRemove, handleEdit });
 
     return (
         <Flex vertical className={styles.tableContainer}>
@@ -78,6 +94,14 @@ export function BussinesAreaTable() {
             </Flex>
             {isVisible && (
                 <CreateBusinessAreaModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />
+            )}
+            {migrateModalVisible && (
+                <CreateBusinessAreaMigrateModal
+                    isOpen={migrateModalVisible}
+                    t={t}
+                    onClose={handleCloseMigrate}
+                    migrateFrom={migrateFrom}
+                />
             )}
         </Flex>
     );
