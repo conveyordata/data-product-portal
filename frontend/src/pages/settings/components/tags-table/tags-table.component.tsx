@@ -39,7 +39,7 @@ export function TagsTable() {
 
     return (
         <Flex vertical className={styles.tableContainer}>
-            <Flex className={styles.searchContainer}>
+            <Flex className={styles.addContainer}>
                 <Typography.Title level={3}>{t('Tags')}</Typography.Title>
                 <Space>
                     <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
@@ -47,19 +47,17 @@ export function TagsTable() {
                     </Button>
                 </Space>
             </Flex>
-            <Flex vertical className={styles.tableFilters}>
-                <Table<TagContract>
-                    dataSource={tags}
-                    columns={columns}
-                    onChange={onChange}
-                    pagination={pagination}
-                    rowKey={(record) => record.id}
-                    loading={isFetching}
-                    rowHoverable
-                    rowClassName={() => 'editable-row'}
-                    size={'small'}
-                />
-            </Flex>
+            <Table<TagContract>
+                dataSource={tags}
+                columns={columns}
+                onChange={onChange}
+                pagination={pagination}
+                rowKey={(record) => record.id}
+                loading={isFetching}
+                rowHoverable
+                rowClassName={() => 'editable-row'}
+                size={'small'}
+            />
             {isVisible && (
                 <CreateTagsModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />
             )}

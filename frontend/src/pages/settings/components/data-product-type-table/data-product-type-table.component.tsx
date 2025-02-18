@@ -63,7 +63,7 @@ export function DataProductTypeTable() {
 
     return (
         <Flex vertical className={styles.tableContainer}>
-            <Flex className={styles.searchContainer}>
+            <Flex className={styles.addContainer}>
                 <Typography.Title level={3}>{t('Data Product Types')}</Typography.Title>
                 <Space>
                     <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
@@ -71,19 +71,17 @@ export function DataProductTypeTable() {
                     </Button>
                 </Space>
             </Flex>
-            <Flex vertical className={styles.tableFilters}>
-                <Table<DataProductTypesGetContract>
-                    dataSource={data}
-                    columns={columns}
-                    onChange={onChange}
-                    pagination={pagination}
-                    rowKey={(record) => record.id}
-                    loading={isFetching}
-                    rowHoverable
-                    rowClassName={() => 'editable-row'}
-                    size={'small'}
-                />
-            </Flex>
+            <Table<DataProductTypesGetContract>
+                dataSource={data}
+                columns={columns}
+                onChange={onChange}
+                pagination={pagination}
+                rowKey={(record) => record.id}
+                loading={isFetching}
+                rowHoverable
+                rowClassName={() => 'editable-row'}
+                size={'small'}
+            />
             {isVisible && (
                 <CreateDataProductTypeModal
                     onClose={handleClose}

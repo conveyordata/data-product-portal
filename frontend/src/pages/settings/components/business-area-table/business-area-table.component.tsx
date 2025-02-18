@@ -64,7 +64,7 @@ export function BussinesAreaTable() {
 
     return (
         <Flex vertical className={styles.tableContainer}>
-            <Flex className={styles.searchContainer}>
+            <Flex className={styles.addContainer}>
                 <Typography.Title level={3}>{t('Business Areas')}</Typography.Title>
                 <Space>
                     <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
