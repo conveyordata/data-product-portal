@@ -11,6 +11,8 @@ global:
       port: "!!string 5432"
       server: data-product-portal-postgresql
       username: postgres
+ai_agent:
+  api_key: ""
 smtp:
   host: localhost
   port: "!!string 1025"

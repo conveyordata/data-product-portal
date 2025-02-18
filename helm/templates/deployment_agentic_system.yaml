@@ -34,7 +34,7 @@ spec:
         - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
-                name: {{ include "data-product-portal.fullname" . }}
+                name: {{ include "data-product-portal.agenticfullname" . }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.agenticimage.repository }}:{{ .Values.agenticimage.tag | default .Chart.AppVersion }}"

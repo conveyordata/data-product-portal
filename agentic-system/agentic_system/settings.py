@@ -8,6 +8,7 @@ class Settings(BaseSettings):
 
     # Other
     CORS_ALLOWED_ORIGINS: str = ""
+    AGENT_API_KEY: str = ""
 
 
 @lru_cache

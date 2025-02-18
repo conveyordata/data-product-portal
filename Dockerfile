@@ -15,17 +15,18 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_VERSION=2.0.1
 RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 RUN pip install poetry==${POETRY_VERSION}
-COPY poetry.lock pyproject.toml /
-
+COPY agentic-system/poetry.lock agentic-system/pyproject.toml /
+COPY ./backend ./backend
+WORKDIR /agentic-system
 RUN poetry install --no-root
 
 FROM --platform=linux/amd64 ${PYTHON_IMAGE}
 
 COPY --from=build-stage /usr/local /usr/local
 
-COPY ./agentic_system ./agentic_system
-COPY ./VERSION ./VERSION
+COPY ./agentic-system/agentic_system ./agentic-system/agentic_system
+COPY ./agentic-system/VERSION ./agentic-system/VERSION
 
 EXPOSE 5050
-
+WORKDIR /agentic-system
 CMD ["uvicorn", "agentic_system.main:app", "--host", "0.0.0.0", "--port", "5051"]
