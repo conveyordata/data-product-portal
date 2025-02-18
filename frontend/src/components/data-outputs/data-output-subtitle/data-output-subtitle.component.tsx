@@ -82,7 +82,8 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
                     <div>
                         <Typography.Text strong>{t('Redshift schema')}: </Typography.Text>
                         <Typography.Text>
-                            {redshift_configuration.database}__{redshift_configuration.schema}
+                            {redshift_configuration.database}__{redshift_configuration.schema}.
+                            {redshift_configuration.table}
                         </Typography.Text>
                     </div>
                 </Flex>

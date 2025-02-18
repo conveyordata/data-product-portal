@@ -29,7 +29,7 @@ export const getRedshiftTechnicalInformationColumns = ({ t }: Props): TableColum
                 const configuration: RedshiftDataOutputContract =
                     data_output.configuration as RedshiftDataOutputContract;
                 // TODO figure out how to use product aligned databases here and get their ARN?
-                return `${configuration.database}__${configuration.schema}`;
+                return `${configuration.database}__${configuration.schema}.${configuration.table}`;
             },
             width: '30%',
         },
