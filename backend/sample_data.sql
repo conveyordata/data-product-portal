@@ -43,6 +43,7 @@ declare
     databricks_service_id uuid;
     snowflake_id uuid;
     snowflake_service_id uuid;
+    redshift_service_id uuid;
 
     -- DATA OUTPUTS
     glue_configuration_id uuid;
@@ -68,7 +69,9 @@ begin
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('fa026b3a-7a17-4c32-b279-995af021f6c2', returned_platform_id, glue_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platforms (id, "name") VALUES ('9be7613c-42fb-4b93-952d-1874ed1ddf77', 'Snowflake') returning id INTO snowflake_id;
     INSERT INTO public.platform_services (id, "name", platform_id) VALUES ('a75189c1-fa42-4980-9497-4bea4c968a5b', 'Snowflake', '9be7613c-42fb-4b93-952d-1874ed1ddf77') returning id INTO snowflake_service_id;
+    INSERT INTO public.platform_services (id, "name", platform_id) VALUES ('de328223-fd90-4170-a7a1-376e4ebe0594', 'Redshift', returned_platform_id) returning id INTO redshift_service_id;
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('e5f82cba-28fd-4895-b8b2-4b31cba06cde', '9be7613c-42fb-4b93-952d-1874ed1ddf77', 'a75189c1-fa42-4980-9497-4bea4c968a5b', '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('9ff4c542-c3fb-43cd-982e-f6bd20d24f7f', returned_platform_id, 'de328223-fd90-4170-a7a1-376e4ebe0594', '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platforms (id, "name") VALUES ('baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'Databricks') returning id INTO databricks_id;
     INSERT INTO public.platform_services (id, "name", platform_id) VALUES ('ce208413-b629-44d2-9f98-e5b47a315a56', 'Databricks', databricks_id) returning id INTO databricks_service_id;
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('0b9a0e7f-8fee-4fd3-97e0-830e1612b77a', databricks_id, databricks_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
@@ -86,6 +89,8 @@ begin
 
     INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('1c52b0e5-961f-412a-995e-0c1efae19f41', returned_environment_id_dev, returned_platform_id, glue_service_id, '[{"identifier":"clean_test","database_name":"clean_test_dev","bucket_identifier":"datalake","s3_path":"clean/test"},{"identifier":"master_test","database_name":"master_test_dev","bucket_identifier":"datalake","s3_path":"master/test"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('ba42ca59-ab5d-498e-8cd0-cdd680f80bb0', returned_environment_id_prd, returned_platform_id, glue_service_id, '[{"identifier":"clean_test","database_name":"clean_test_prd","bucket_identifier":"datalake","s3_path":"clean/test"},{"identifier":"master_test","database_name":"master_test_prd","bucket_identifier":"datalake","s3_path":"master/test"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('c45661de-29a1-4562-9183-e7162cfa3503', returned_environment_id_dev, returned_platform_id, redshift_service_id, '[{"identifier":"clean","database_name":"clean_dev","bucket_identifier":"datalake","s3_path":"clean/"},{"identifier":"master","database_name":"master_dev","bucket_identifier":"datalake","s3_path":"master"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('5d0506f4-5e7a-45df-a1e8-108fda00d194', returned_environment_id_prd, returned_platform_id, redshift_service_id, '[{"identifier":"clean","database_name":"clean_prd","bucket_identifier":"datalake","s3_path":"clean/"},{"identifier":"master","database_name":"master_prd","bucket_identifier":"datalake","s3_path":"master"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('f8d7e6c5-b4a3-492d-8c1b-9a0b8c7d6e5f', returned_environment_id_dev, databricks_id, databricks_service_id, '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('a9b8c7d6-e5f4-483e-9d2c-1b3a4c5d6e7f', returned_environment_id_prd, databricks_id, databricks_service_id, '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 

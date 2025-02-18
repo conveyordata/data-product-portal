@@ -82,7 +82,22 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         break;
                     case DataPlatforms.Snowflake:
                         config['configuration_type'] = 'SnowflakeDataOutput';
+                        break;
+                    case DataPlatforms.Redshift:
+                        config['configuration_type'] = 'RedshiftDataOutput';
+                        break;
+                    default:
+                        const errorMessage = 'Data output not configured correctly';
+                        dispatchMessage({ content: errorMessage, type: 'error' });
                 }
+                console.log(platformConfig);
+                console.log(
+                    platformConfig!.filter(
+                        (config) =>
+                            config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
+                            config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase(),
+                    ),
+                );
                 const request: DataOutputCreate = {
                     name: values.name,
                     external_id: generateExternalIdFromName(values.name ?? ''),
@@ -101,6 +116,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     status: DataOutputStatus.Active,
                     tag_ids: values.tag_ids ?? [],
                 };
+                console.log(request);
                 await createDataOutput(request).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
@@ -109,6 +125,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 form.resetFields();
             }
         } catch (_e) {
+            console.log(_e);
             const errorMessage = 'Failed to create data output';
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
@@ -290,12 +307,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     case DataPlatforms.Redshift:
                         return (
                             <RedshiftDataOutputForm
-                                form={form}
                                 identifiers={identifiers}
-                                sourceAligned={sourceAligned}
+                                form={form}
                                 external_id={currentDataProduct!.external_id}
-                                mode={mode}
-                                dataProductId={dataProductId}
+                                sourceAligned={sourceAligned}
                             />
                         );
                     case DataPlatforms.Glue:

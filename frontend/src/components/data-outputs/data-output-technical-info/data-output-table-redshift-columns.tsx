@@ -1,7 +1,7 @@
 import { TableColumnsType } from 'antd';
 import { TFunction } from 'i18next';
 import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
-import { S3DataOutputContract } from '@/types/data-output';
+import { RedshiftDataOutputContract } from '@/types/data-output';
 
 type Props = {
     t: TFunction;
@@ -23,19 +23,13 @@ export const getRedshiftTechnicalInformationColumns = ({ t }: Props): TableColum
             width: '30%',
         },
         {
-            title: t('Path'),
-            dataIndex: 'path',
-            render: (_, { environmentConfig, data_output }) => {
-                const configuration: S3DataOutputContract = data_output.configuration as S3DataOutputContract;
-                const bucket_arn = environmentConfig.config.filter(
-                    ({ identifier }) => identifier == configuration.bucket,
-                )[0].bucket_arn;
-                let suffix = '/' + configuration.suffix + '/';
-                if (configuration.suffix === '') {
-                    suffix = '/';
-                }
-
-                return bucket_arn + suffix + configuration.path + '/*';
+            title: t('Schema'),
+            dataIndex: 'schema',
+            render: (_, { data_output }) => {
+                const configuration: RedshiftDataOutputContract =
+                    data_output.configuration as RedshiftDataOutputContract;
+                // TODO figure out how to use product aligned databases here and get their ARN?
+                return `${configuration.database}__${configuration.schema}`;
             },
             width: '30%',
         },

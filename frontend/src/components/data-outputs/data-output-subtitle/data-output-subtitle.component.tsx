@@ -4,6 +4,7 @@ import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-ou
 import {
     DatabricksDataOutputContract,
     GlueDataOutputContract,
+    RedshiftDataOutputContract,
     S3DataOutputContract,
     SnowflakeDataOutputContract,
 } from '@/types/data-output';
@@ -75,20 +76,13 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
             );
         }
         case 'RedshiftDataOutput': {
-            const s3_configuration = data_output.configuration as S3DataOutputContract;
-            const configuration: S3DataOutputContract = data_output.configuration as S3DataOutputContract;
-            let suffix = '/' + configuration.suffix + '/';
-            if (configuration.suffix === '') {
-                suffix = '/';
-            }
+            const redshift_configuration = data_output.configuration as RedshiftDataOutputContract;
             return (
                 <Flex vertical>
                     <div>
-                        <Typography.Text strong>{t('S3 path')}: </Typography.Text>
+                        <Typography.Text strong>{t('Redshift schema')}: </Typography.Text>
                         <Typography.Text>
-                            {s3_configuration.bucket}
-                            {suffix}
-                            {s3_configuration.path}/*
+                            {redshift_configuration.database}__{redshift_configuration.schema}
                         </Typography.Text>
                     </div>
                 </Flex>

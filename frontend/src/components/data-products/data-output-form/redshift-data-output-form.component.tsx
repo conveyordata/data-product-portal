@@ -1,75 +1,108 @@
-import { Form, FormInstance, Input, Select } from 'antd';
+import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DataOutputConfiguration, DataOutputCreateFormSchema, S3DataOutput } from '@/types/data-output';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
+import { DataOutputConfiguration, DataOutputCreateFormSchema, RedshiftDataOutput } from '@/types/data-output';
 import { useEffect } from 'react';
 
 type Props = {
-    mode: 'create';
-    dataProductId: string;
     sourceAligned: boolean;
     identifiers: string[] | undefined;
     external_id: string;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
-export function RedshiftDataOutputForm({ form, external_id, identifiers, sourceAligned }: Props) {
+export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
-
-    const bucketOptions = identifiers?.map((bucket) => ({ label: bucket, value: bucket }));
-    const dataProductNameValue: string = Form.useWatch('temp_path', form);
-    const bucketValue: string = 'datalake'; // TODO
+    const entireDatabase = Form.useWatch('entire_database', form);
+    let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
+    const databaseValue = Form.useWatch('database', form);
+    const schemaValue = Form.useWatch('schema', form);
+    const tableValue = Form.useWatch('table', form);
     useEffect(() => {
-        let path = external_id + '/';
-        if (sourceAligned) {
-            path = '';
-        }
-        if (dataProductNameValue) {
-            form.setFieldsValue({ path: path + generateExternalIdFromName(dataProductNameValue) });
-            form.setFieldsValue({
-                result: bucketValue + '/' + path + generateExternalIdFromName(dataProductNameValue),
-            });
+        let databaseOptionsList = identifiers; //TODO
+        if (!sourceAligned) {
+            databaseOptionsList = [external_id];
+            form.setFieldsValue({ database: external_id });
         } else {
-            form.setFieldsValue({ path: path });
-            form.setFieldsValue({ result: bucketValue + '/' + path });
+            form.setFieldsValue({ database: undefined });
         }
-    }, [dataProductNameValue, sourceAligned, bucketValue]);
+        databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
+    }, [sourceAligned]);
+
+    useEffect(() => {
+        let result = databaseValue;
+        if (databaseValue) {
+            if (schemaValue) {
+                result += `__${schemaValue}`;
+            }
+            if (entireDatabase) {
+                result += '.*';
+            } else if (tableValue) {
+                result += `.${tableValue}`;
+            }
+        } else {
+            result = '';
+        }
+
+        form.setFieldsValue({ result: result });
+    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireDatabase]);
 
     return (
         <div>
-            {/* <Form.Item<S3DataOutput>
-                name={'bucket'}
-                label={t('Bucket')}
+            <Form.Item<RedshiftDataOutput>
+                name={'database'}
+                label={t('Schema')}
+                tooltip={t('The name of the Redshift schema to link the data output to')}
                 rules={[
                     {
                         required: true,
-                        message: t('The name of the S3 bucket to link the data output to'),
+                        message: t('Please input the name of the Redshift schema for this data output'),
                     },
                 ]}
             >
-                <Select allowClear showSearch options={bucketOptions} />
-            </Form.Item> */}
-            <Form.Item<S3DataOutput & { temp_path: string }>
-                name={'temp_path'}
-                label={t('Path')}
-                tooltip={t('The name of the path to give write access to')}
+                <Select
+                    allowClear
+                    showSearch
+                    mode="tags"
+                    disabled={!sourceAligned}
+                    onChange={(value) => {
+                        if (value.length > 0) {
+                            form.setFieldsValue({ database: value[0] });
+                        }
+                    }}
+                    maxCount={1}
+                    options={databaseOptions}
+                />
+            </Form.Item>
+            <Form.Item<RedshiftDataOutput & { temp_suffix: string }>
+                name={'schema'}
+                label={t('Schema suffix')}
+                tooltip={t('The suffix of the Redshift schema to link the data output to')}
+            >
+                <Input />
+            </Form.Item>
+            <Form.Item name={'entire_database'} valuePropName="checked" initialValue={true}>
+                <Checkbox defaultChecked={true}>{t('Include entire database')}</Checkbox>
+            </Form.Item>
+            <Form.Item<RedshiftDataOutput>
+                required
+                name={'table'}
+                hidden={entireDatabase}
+                label={t('Table')}
+                tooltip={t('The table that your data output can access')}
                 rules={[
                     {
-                        required: true,
-                        message: t('Please input the path of this data output'),
+                        required: !entireDatabase,
+                        message: t('Please input the table this data output can access'),
                     },
                 ]}
             >
                 <Input />
             </Form.Item>
-            <Form.Item<S3DataOutput> required hidden={true} name={'path'}>
-                <Input disabled />
-            </Form.Item>
-            <Form.Item<S3DataOutput & { result: string }>
+            <Form.Item<RedshiftDataOutput & { result: string }>
                 required
                 name={'result'}
-                label={t('Resulting path')}
-                tooltip={t('The path on s3 you can access through this data output')}
+                label={t('Resulting schema and table')}
+                tooltip={t('The schema on Redshift you can access through this data output')}
             >
                 <Input disabled />
             </Form.Item>
