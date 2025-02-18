@@ -7,7 +7,7 @@ import {
     useRemoveBusinessAreaMutation,
     useUpdateBusinessAreaMutation,
 } from '@/store/features/business-areas/business-areas-api-slice';
-import { BusinessAreaContract } from '@/types/business-area';
+import { BusinessAreasGetContract } from '@/types/business-area';
 import { getBusinessAreaTableColumns } from './business-area-table-columns';
 import { EditableTable } from '@/components/editable-table/editable-table.component';
 import { useTablePagination } from '@/hooks/use-table-pagination';
@@ -29,10 +29,10 @@ export function BussinesAreaTable() {
     const [editBusinessArea, { isLoading: isEditing }] = useUpdateBusinessAreaMutation();
     const [onRemoveBusinessArea, { isLoading: isRemoving }] = useRemoveBusinessAreaMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
-    const [initial, setInitial] = useState<BusinessAreaContract | undefined>(undefined);
-    const [migrateFrom, setMigrateFrom] = useState<BusinessAreaContract | undefined>(undefined);
+    const [initial, setInitial] = useState<BusinessAreasGetContract | undefined>(undefined);
+    const [migrateFrom, setMigrateFrom] = useState<BusinessAreasGetContract | undefined>(undefined);
 
-    const onChange: TableProps<BusinessAreaContract>['onChange'] = (pagination) => {
+    const onChange: TableProps<BusinessAreasGetContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
@@ -42,13 +42,13 @@ export function BussinesAreaTable() {
         handleOpen();
     };
 
-    const handleEdit = (tag: BusinessAreaContract) => () => {
+    const handleEdit = (tag: BusinessAreasGetContract) => () => {
         setMode('edit');
         setInitial(tag);
         handleOpen();
     };
 
-    const handleSave = async (row: BusinessAreaContract) => {
+    const handleSave = async (row: BusinessAreasGetContract) => {
         try {
             await editBusinessArea({ businessArea: row, businessAreaId: row.id });
             dispatchMessage({ content: t('Business Area updated successfully'), type: 'success' });
@@ -57,10 +57,16 @@ export function BussinesAreaTable() {
         }
     };
 
-    const handleRemove = async (row: BusinessAreaContract) => {
+    const handleRemove = async (businessArea: BusinessAreasGetContract) => {
         try {
-            setMigrateFrom(row);
-            handleOpenMigrate();
+            console.log(businessArea);
+            if (businessArea.dataset_count > 0 || businessArea.data_product_count > 0) {
+                setMigrateFrom(businessArea);
+                handleOpenMigrate();
+            } else {
+                await onRemoveBusinessArea(businessArea.id);
+                dispatchMessage({ content: t('Business Area removed successfully'), type: 'success' });
+            }
         } catch (error) {
             dispatchMessage({ content: t('Could not remove Business Area'), type: 'error' });
         }
@@ -79,7 +85,7 @@ export function BussinesAreaTable() {
                 </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                <EditableTable<BusinessAreaContract>
+                <EditableTable<BusinessAreasGetContract>
                     data={data}
                     columns={columns}
                     handleSave={handleSave}

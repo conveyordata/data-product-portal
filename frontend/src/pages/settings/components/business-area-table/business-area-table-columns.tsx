@@ -1,20 +1,20 @@
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { BusinessAreaContract } from '@/types/business-area';
+import { BusinessAreasGetContract } from '@/types/business-area';
 import { EditableColumn } from '@/components/editable-table/editable-table.component';
 import { Button, Flex, Popconfirm } from 'antd';
 
 type Props = {
     t: TFunction;
-    handleRemove: (businessArea: BusinessAreaContract) => void;
-    handleEdit: (businessArea: BusinessAreaContract) => () => void;
+    handleRemove: (businessArea: BusinessAreasGetContract) => void;
+    handleEdit: (businessArea: BusinessAreasGetContract) => () => void;
 };
 
 export const getBusinessAreaTableColumns = ({
     t,
     handleRemove,
     handleEdit,
-}: Props): EditableColumn<BusinessAreaContract>[] => {
+}: Props): EditableColumn<BusinessAreasGetContract>[] => {
     return [
         {
             title: t('Id'),

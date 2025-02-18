@@ -5,6 +5,7 @@ import { TFunction } from 'i18next';
 import {
     useGetAllBusinessAreasQuery,
     useMigrateBusinessAreaMutation,
+    useRemoveBusinessAreaMutation,
 } from '@/store/features/business-areas/business-areas-api-slice';
 import { BusinessAreaContract } from '@/types/business-area';
 const { Option } = Select;
@@ -25,10 +26,12 @@ export const CreateBusinessAreaMigrateModal: React.FC<CreateBusinessAreaMigrateM
     const [form] = Form.useForm();
     const { data: businessAreas = [], isFetching } = useGetAllBusinessAreasQuery();
     const [migrateBusinessArea, { isLoading: isCreating }] = useMigrateBusinessAreaMutation();
+    const [onRemoveBusinessArea, { isLoading: isRemoving }] = useRemoveBusinessAreaMutation();
 
     const handleFinish = async (values: any) => {
         try {
-            migrateBusinessArea({ fromId: migrateFrom!.id, toId: values.toId });
+            await migrateBusinessArea({ fromId: migrateFrom!.id, toId: values.toId });
+            await onRemoveBusinessArea(migrateFrom!.id);
             dispatchMessage({ content: t('Business Area migrated and deleted successfully'), type: 'success' });
             form.resetFields();
             onClose();

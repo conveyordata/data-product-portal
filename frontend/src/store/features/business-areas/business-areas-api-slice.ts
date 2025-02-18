@@ -4,14 +4,14 @@ import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import {
     BusinessAreaCreateRequest,
     BusinessAreaCreateResponse,
-    BusinessAreasGetResponse,
-    BusinessAreaGetResponse,
+    BusinessAreasGetContract,
+    BusinessAreaGetContract,
 } from '@/types/business-area';
 
 export const businessAreaTags: string[] = [TagTypes.BusinessArea];
 export const businessAreasApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: businessAreaTags }).injectEndpoints({
     endpoints: (builder) => ({
-        getAllBusinessAreas: builder.query<BusinessAreasGetResponse[], void>({
+        getAllBusinessAreas: builder.query<BusinessAreasGetContract[], void>({
             query: () => ({
                 url: ApiUrl.BusinessAreas,
                 method: 'GET',
@@ -24,7 +24,7 @@ export const businessAreasApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
                       ]
                     : [{ type: TagTypes.BusinessArea, id: STATIC_TAG_ID.LIST }],
         }),
-        getBusinessArea: builder.query<BusinessAreaGetResponse, string>({
+        getBusinessArea: builder.query<BusinessAreaGetContract, string>({
             query: (businessAreaId) => ({
                 url: buildUrl(ApiUrl.BusinessAreasId, { businessAreaId }),
                 method: 'GET',
