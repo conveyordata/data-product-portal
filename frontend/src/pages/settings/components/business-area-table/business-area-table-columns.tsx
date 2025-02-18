@@ -1,8 +1,7 @@
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { BusinessAreasGetContract } from '@/types/business-area';
-import { EditableColumn } from '@/components/editable-table/editable-table.component';
-import { Button, Flex, Popconfirm } from 'antd';
+import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
 
 type Props = {
     t: TFunction;
@@ -14,7 +13,7 @@ export const getBusinessAreaTableColumns = ({
     t,
     handleRemove,
     handleEdit,
-}: Props): EditableColumn<BusinessAreasGetContract>[] => {
+}: Props): TableColumnsType<BusinessAreasGetContract> => {
     return [
         {
             title: t('Id'),
@@ -25,13 +24,11 @@ export const getBusinessAreaTableColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
-            editable: true,
         },
         {
             title: t('Description'),
             dataIndex: 'description',
             render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,
-            editable: true,
         },
         {
             title: t('Actions'),

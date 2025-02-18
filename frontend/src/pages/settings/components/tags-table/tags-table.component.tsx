@@ -1,16 +1,10 @@
-import { Button, Flex, Space, Typography } from 'antd';
+import { Button, Flex, Space, Table, Typography } from 'antd';
 import styles from './tags-table.module.scss';
 import { useTranslation } from 'react-i18next';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { TagContract } from '@/types/tag/tag.ts';
-import {
-    useGetAllTagsQuery,
-    useRemoveTagMutation,
-    useUpdateTagMutation,
-} from '@/store/features/tags/tags-api-slice.tsx';
+import { useGetAllTagsQuery, useRemoveTagMutation } from '@/store/features/tags/tags-api-slice.tsx';
 import { TableProps } from 'antd/lib';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import { EditableTable } from '@/components/editable-table/editable-table.component';
 import { getTagsTableColums } from './tags-table-columns';
 import { useModal } from '@/hooks/use-modal';
 import { CreateTagsModal } from './tags-form-modal.component';
@@ -21,7 +15,6 @@ export function TagsTable() {
     const { data: tags = [], isFetching } = useGetAllTagsQuery();
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
-    const [editTag, { isLoading: isEditing }] = useUpdateTagMutation();
     const [onRemoveTag, { isLoading: isRemoving }] = useRemoveTagMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<TagContract | undefined>(undefined);
@@ -42,15 +35,6 @@ export function TagsTable() {
         handleOpen();
     };
 
-    const handleSave = async (tag: TagContract) => {
-        try {
-            await editTag({ tag, tagId: tag.id });
-            dispatchMessage({ content: t('Tag updated successfully'), type: 'success' });
-        } catch (error) {
-            dispatchMessage({ content: t('Could not update tag'), type: 'error' });
-        }
-    };
-
     const columns = getTagsTableColums({ t, onRemoveTag, handleEdit });
 
     return (
@@ -64,10 +48,9 @@ export function TagsTable() {
                 </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                <EditableTable<TagContract>
-                    data={tags}
+                <Table<TagContract>
+                    dataSource={tags}
                     columns={columns}
-                    handleSave={handleSave}
                     onChange={onChange}
                     pagination={pagination}
                     rowKey={(record) => record.id}

@@ -1,15 +1,13 @@
-import { Button, Flex, Space, TableProps, Typography } from 'antd';
+import { Button, Flex, Space, Table, TableProps, Typography } from 'antd';
 import styles from './data-product-type-table.module.scss';
 import { useTranslation } from 'react-i18next';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
     useGetAllDataProductTypesQuery,
     useRemoveDataProductTypeMutation,
-    useUpdateDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
 import { DataProductTypesGetContract } from '@/types/data-product-type';
 import { getDataProductTypeTableColumns } from './data-product-type-table-columns';
-import { EditableTable } from '@/components/editable-table/editable-table.component';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useModal } from '@/hooks/use-modal';
 import { useState } from 'react';
@@ -26,7 +24,6 @@ export function DataProductTypeTable() {
         handleOpen: handleOpenMigrate,
         handleClose: handleCloseMigrate,
     } = useModal();
-    const [editDataProductType, { isLoading: isEditing }] = useUpdateDataProductTypeMutation();
     const [onRemoveDataProductType, { isLoading: isRemoving }] = useRemoveDataProductTypeMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductTypesGetContract | undefined>(undefined);
@@ -46,15 +43,6 @@ export function DataProductTypeTable() {
         setMode('edit');
         setInitial(tag);
         handleOpen();
-    };
-
-    const handleSave = async (row: DataProductTypesGetContract) => {
-        try {
-            await editDataProductType({ dataProductType: row, dataProductTypeId: row.id });
-            dispatchMessage({ content: t('Data Product Type updated successfully'), type: 'success' });
-        } catch (error) {
-            dispatchMessage({ content: t('Could not update Data Product Type'), type: 'error' });
-        }
     };
 
     const handleRemove = async (type: DataProductTypesGetContract) => {
@@ -84,10 +72,9 @@ export function DataProductTypeTable() {
                 </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                <EditableTable<DataProductTypesGetContract>
-                    data={data}
+                <Table<DataProductTypesGetContract>
+                    dataSource={data}
                     columns={columns}
-                    handleSave={handleSave}
                     onChange={onChange}
                     pagination={pagination}
                     rowKey={(record) => record.id}

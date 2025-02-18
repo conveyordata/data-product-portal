@@ -1,13 +1,10 @@
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { EditableColumn } from '@/components/editable-table/editable-table.component';
 import { DataProductIcon, DataProductTypesGetContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
-import { Button, Flex, Popconfirm, Select } from 'antd';
-import Icon from '@ant-design/icons';
-import styles from './data-product-type-table.module.scss';
-import { dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
-const { Option } = Select;
+import { Button, Flex, Popconfirm, Select, TableColumnsType } from 'antd';
+
+const iconColumnWidth = 30;
 
 type Props = {
     t: TFunction;
@@ -19,7 +16,7 @@ export const getDataProductTypeTableColumns = ({
     t,
     handleRemove,
     handleEdit,
-}: Props): EditableColumn<DataProductTypesGetContract>[] => {
+}: Props): TableColumnsType<DataProductTypesGetContract> => {
     return [
         {
             title: t('Id'),
@@ -27,36 +24,23 @@ export const getDataProductTypeTableColumns = ({
             hidden: true,
         },
         {
+            title: t('Icon'),
+            dataIndex: 'icon_key',
+            width: iconColumnWidth,
+            render: (icon_key: DataProductIcon) => {
+                const icon = getDataProductTypeIcon(icon_key);
+                return <TableCellItem reactSVGComponent={icon} />;
+            },
+        },
+        {
             title: t('Name'),
             dataIndex: 'name',
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
-            editable: true,
         },
         {
             title: t('Description'),
             dataIndex: 'description',
             render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,
-            editable: true,
-        },
-        {
-            title: t('Icon'),
-            dataIndex: 'icon_key',
-            render: (icon_key: DataProductIcon) => {
-                const icon = getDataProductTypeIcon(icon_key);
-                return <TableCellItem reactSVGComponent={icon} />;
-            },
-            editable: true,
-            formRender: (_, save) => {
-                return (
-                    <Select onSelect={save} onBlur={save}>
-                        {dataProductIcons.map((icon) => (
-                            <Option value={icon}>
-                                <Icon component={getDataProductTypeIcon(icon)} className={styles.customIcon} />
-                            </Option>
-                        ))}
-                    </Select>
-                );
-            },
         },
         {
             title: t('Actions'),

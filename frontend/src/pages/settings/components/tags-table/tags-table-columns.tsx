@@ -1,8 +1,7 @@
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { TagContract } from '@/types/tag';
-import { EditableColumn } from '@/components/editable-table/editable-table.component';
-import { Button, Flex, Popconfirm } from 'antd';
+import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
 
 type Props = {
     t: TFunction;
@@ -10,7 +9,7 @@ type Props = {
     handleEdit: (tag: TagContract) => () => void;
 };
 
-export const getTagsTableColums = ({ t, onRemoveTag, handleEdit }: Props): EditableColumn<TagContract>[] => {
+export const getTagsTableColums = ({ t, onRemoveTag, handleEdit }: Props): TableColumnsType<TagContract> => {
     return [
         {
             title: t('Id'),
@@ -21,7 +20,6 @@ export const getTagsTableColums = ({ t, onRemoveTag, handleEdit }: Props): Edita
             title: t('Value'),
             dataIndex: 'value',
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
-            editable: true,
         },
         {
             title: t('Actions'),

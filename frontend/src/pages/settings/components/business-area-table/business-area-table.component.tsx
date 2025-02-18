@@ -1,15 +1,13 @@
-import { Button, Flex, Space, TableProps, Typography } from 'antd';
+import { Button, Flex, Space, Table, TableProps, Typography } from 'antd';
 import styles from './business-area-table.module.scss';
 import { useTranslation } from 'react-i18next';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
     useGetAllBusinessAreasQuery,
     useRemoveBusinessAreaMutation,
-    useUpdateBusinessAreaMutation,
 } from '@/store/features/business-areas/business-areas-api-slice';
 import { BusinessAreasGetContract } from '@/types/business-area';
 import { getBusinessAreaTableColumns } from './business-area-table-columns';
-import { EditableTable } from '@/components/editable-table/editable-table.component';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useModal } from '@/hooks/use-modal';
 import { useState } from 'react';
@@ -26,7 +24,6 @@ export function BussinesAreaTable() {
         handleOpen: handleOpenMigrate,
         handleClose: handleCloseMigrate,
     } = useModal();
-    const [editBusinessArea, { isLoading: isEditing }] = useUpdateBusinessAreaMutation();
     const [onRemoveBusinessArea, { isLoading: isRemoving }] = useRemoveBusinessAreaMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<BusinessAreasGetContract | undefined>(undefined);
@@ -46,15 +43,6 @@ export function BussinesAreaTable() {
         setMode('edit');
         setInitial(tag);
         handleOpen();
-    };
-
-    const handleSave = async (row: BusinessAreasGetContract) => {
-        try {
-            await editBusinessArea({ businessArea: row, businessAreaId: row.id });
-            dispatchMessage({ content: t('Business Area updated successfully'), type: 'success' });
-        } catch (error) {
-            dispatchMessage({ content: t('Could not update Business Area'), type: 'error' });
-        }
     };
 
     const handleRemove = async (businessArea: BusinessAreasGetContract) => {
@@ -85,10 +73,9 @@ export function BussinesAreaTable() {
                 </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                <EditableTable<BusinessAreasGetContract>
-                    data={data}
+                <Table<BusinessAreasGetContract>
+                    dataSource={data}
                     columns={columns}
-                    handleSave={handleSave}
                     onChange={onChange}
                     pagination={pagination}
                     rowKey={(record) => record.id}
