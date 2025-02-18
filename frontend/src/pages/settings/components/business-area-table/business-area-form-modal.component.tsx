@@ -23,20 +23,6 @@ interface BusinessAreaFormText {
     submitButtonText: string;
 }
 
-const createText: BusinessAreaFormText = {
-    title: 'Create New Business Area',
-    successMessage: 'Business Area created successfully',
-    errorMessage: 'Failed to create Business Area',
-    submitButtonText: 'Create',
-};
-
-const updateText: BusinessAreaFormText = {
-    title: 'Update Business Area',
-    successMessage: 'Business Area updated successfully',
-    errorMessage: 'Failed to update Business Area',
-    submitButtonText: 'Update',
-};
-
 export const CreateBusinessAreaModal: React.FC<CreateBusinessAreaModalProps> = ({
     isOpen,
     t,
@@ -47,6 +33,21 @@ export const CreateBusinessAreaModal: React.FC<CreateBusinessAreaModalProps> = (
     const [form] = Form.useForm();
     const [createBusinessArea, { isLoading: isCreating }] = useCreateBusinessAreaMutation();
     const [editBusinessArea, { isLoading: isEditing }] = useUpdateBusinessAreaMutation();
+
+    const createText: BusinessAreaFormText = {
+        title: t('Create New Business Area'),
+        successMessage: t('Business Area created successfully'),
+        errorMessage: t('Failed to create Business Area'),
+        submitButtonText: t('Create'),
+    };
+
+    const updateText: BusinessAreaFormText = {
+        title: t('Update Business Area'),
+        successMessage: t('Business Area updated successfully'),
+        errorMessage: t('Failed to update Business Area'),
+        submitButtonText: t('Update'),
+    };
+
     const variableText = mode === 'create' ? createText : updateText;
 
     const handleFinish = async (values: any) => {
@@ -57,11 +58,11 @@ export const CreateBusinessAreaModal: React.FC<CreateBusinessAreaModalProps> = (
                 await editBusinessArea({ businessArea: values, businessAreaId: initial!.id });
             }
 
-            dispatchMessage({ content: t(variableText.successMessage), type: 'success' });
+            dispatchMessage({ content: variableText.successMessage, type: 'success' });
             form.resetFields();
             onClose();
         } catch (_e) {
-            const errorMessage = t(variableText.errorMessage);
+            const errorMessage = variableText.errorMessage;
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -69,7 +70,7 @@ export const CreateBusinessAreaModal: React.FC<CreateBusinessAreaModalProps> = (
     return (
         <FormModal
             isOpen={isOpen}
-            title={t(variableText.title)}
+            title={variableText.title}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -80,7 +81,7 @@ export const CreateBusinessAreaModal: React.FC<CreateBusinessAreaModalProps> = (
             }}
             footer={[
                 <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {t(variableText.submitButtonText)}
+                    {variableText.submitButtonText}
                 </Button>,
                 <Button
                     key="cancel"

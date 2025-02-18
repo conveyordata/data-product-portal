@@ -28,20 +28,6 @@ interface DataProductTypeFormText {
     submitButtonText: string;
 }
 
-const createText: DataProductTypeFormText = {
-    title: 'Create New Data Product Type',
-    successMessage: 'Data Product Type created successfully',
-    errorMessage: 'Failed to create Data Product Type',
-    submitButtonText: 'Create',
-};
-
-const updateText: DataProductTypeFormText = {
-    title: 'Update New Data Product Type',
-    successMessage: 'Data Product Type updated successfully',
-    errorMessage: 'Failed to update Data Product Type',
-    submitButtonText: 'Update',
-};
-
 export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProps> = ({
     isOpen,
     t,
@@ -52,6 +38,21 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
     const [form] = Form.useForm();
     const [createDataProductType, { isLoading: isCreating }] = useCreateDataProductTypeMutation();
     const [editDataProductType, { isLoading: isEditing }] = useUpdateDataProductTypeMutation();
+
+    const createText: DataProductTypeFormText = {
+        title: t('Create New Data Product Type'),
+        successMessage: t('Data Product Type created successfully'),
+        errorMessage: t('Failed to create Data Product Type'),
+        submitButtonText: t('Create'),
+    };
+
+    const updateText: DataProductTypeFormText = {
+        title: t('Update New Data Product Type'),
+        successMessage: t('Data Product Type updated successfully'),
+        errorMessage: t('Failed to update Data Product Type'),
+        submitButtonText: t('Update'),
+    };
+
     const variableText = mode === 'create' ? createText : updateText;
 
     const handleFinish = async (values: any) => {
@@ -62,11 +63,11 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
                 await editDataProductType({ dataProductType: values, dataProductTypeId: initial!.id });
             }
 
-            dispatchMessage({ content: t(variableText.successMessage), type: 'success' });
+            dispatchMessage({ content: variableText.successMessage, type: 'success' });
             form.resetFields();
             onClose();
         } catch (_e) {
-            const errorMessage = t(variableText.errorMessage);
+            const errorMessage = variableText.errorMessage;
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -74,7 +75,7 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
     return (
         <FormModal
             isOpen={isOpen}
-            title={t(variableText.title)}
+            title={variableText.title}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -85,7 +86,7 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
             }}
             footer={[
                 <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {t(variableText.submitButtonText)}
+                    {variableText.submitButtonText}
                 </Button>,
                 <Button
                     key="cancel"

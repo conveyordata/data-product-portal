@@ -2,6 +2,7 @@ import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { TagContract } from '@/types/tag';
 import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
+import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export const getTagsTableColums = ({ t, onRemoveTag, handleEdit }: Props): TableColumnsType<TagContract> => {
+    const sorter = new Sorter<TagContract>();
     return [
         {
             title: t('Id'),
@@ -20,6 +22,8 @@ export const getTagsTableColums = ({ t, onRemoveTag, handleEdit }: Props): Table
             title: t('Value'),
             dataIndex: 'value',
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
+            sorter: sorter.stringSorter((tag) => tag.value),
+            defaultSortOrder: 'ascend',
         },
         {
             title: t('Actions'),

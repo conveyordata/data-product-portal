@@ -4,8 +4,6 @@ import { DataProductIcon, DataProductTypesGetContract } from '@/types/data-produ
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
 import { Sorter } from '@/utils/table-sorter.helper';
-import { FilterSettings } from '@/utils/table-filter.helper';
-import { dataOutputTags } from '@/store/features/data-outputs/data-outputs-api-slice';
 
 const iconColumnWidth = 30;
 

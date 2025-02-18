@@ -2,6 +2,7 @@ import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { BusinessAreasGetContract } from '@/types/business-area';
 import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
+import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
@@ -14,6 +15,7 @@ export const getBusinessAreaTableColumns = ({
     handleRemove,
     handleEdit,
 }: Props): TableColumnsType<BusinessAreasGetContract> => {
+    const sorter = new Sorter<BusinessAreasGetContract>();
     return [
         {
             title: t('Id'),
@@ -24,11 +26,14 @@ export const getBusinessAreaTableColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
+            sorter: sorter.stringSorter((ba) => ba.name),
+            defaultSortOrder: 'ascend',
         },
         {
             title: t('Description'),
             dataIndex: 'description',
             render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,
+            sorter: sorter.stringSorter((ba) => ba.description),
         },
         {
             title: t('Actions'),

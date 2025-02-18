@@ -20,24 +20,25 @@ interface TagsFormText {
     submitButtonText: string;
 }
 
-const createText: TagsFormText = {
-    title: 'Create New Tag',
-    successMessage: 'Tag created successfully',
-    errorMessage: 'Failed to create tag',
-    submitButtonText: 'Create',
-};
-
-const updateText: TagsFormText = {
-    title: 'Update Tag',
-    successMessage: 'Tag updated successfully',
-    errorMessage: 'Failed to update tag',
-    submitButtonText: 'Update',
-};
-
 export const CreateTagsModal: React.FC<CreateTagsModalProps> = ({ isOpen, t, onClose, mode, initial }) => {
     const [form] = Form.useForm();
     const [createTag, { isLoading: isCreating }] = useCreateTagMutation();
     const [editTag, { isLoading: isEditing }] = useUpdateTagMutation();
+
+    const createText: TagsFormText = {
+        title: t('Create New Tag'),
+        successMessage: t('Tag created successfully'),
+        errorMessage: t('Failed to create tag'),
+        submitButtonText: t('Create'),
+    };
+
+    const updateText: TagsFormText = {
+        title: t('Update Tag'),
+        successMessage: t('Tag updated successfully'),
+        errorMessage: t('Failed to update tag'),
+        submitButtonText: t('Update'),
+    };
+
     const variableText = mode === 'create' ? createText : updateText;
 
     const handleFinish = async (values: any) => {
@@ -48,11 +49,11 @@ export const CreateTagsModal: React.FC<CreateTagsModalProps> = ({ isOpen, t, onC
                 await editTag({ tag: values, tagId: initial!.id });
             }
 
-            dispatchMessage({ content: t(variableText.successMessage), type: 'success' });
+            dispatchMessage({ content: variableText.successMessage, type: 'success' });
             form.resetFields();
             onClose();
         } catch (_e) {
-            const errorMessage = t(variableText.errorMessage);
+            const errorMessage = variableText.errorMessage;
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -60,7 +61,7 @@ export const CreateTagsModal: React.FC<CreateTagsModalProps> = ({ isOpen, t, onC
     return (
         <FormModal
             isOpen={isOpen}
-            title={t(variableText.title)}
+            title={variableText.title}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -71,7 +72,7 @@ export const CreateTagsModal: React.FC<CreateTagsModalProps> = ({ isOpen, t, onC
             }}
             footer={[
                 <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {t(variableText.submitButtonText)}
+                    {variableText.submitButtonText}
                 </Button>,
                 <Button
                     key="cancel"
