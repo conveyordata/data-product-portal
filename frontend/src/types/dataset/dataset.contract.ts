@@ -25,6 +25,7 @@ export interface DatasetContract {
     owners: UserContract[];
     status: DatasetStatus;
     tags: TagContract[];
+    rolled_up_tags: TagContract[];
     tag_ids: string[];
     data_product_links: DataProductLink[];
     lifecycle: DataProductLifeCycleContract;
