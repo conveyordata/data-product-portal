@@ -54,11 +54,12 @@ export const CreateBusinessAreaMigrateModal: React.FC<CreateBusinessAreaMigrateM
                 onClose();
             }}
             footer={[
-                <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {t('Submit')}
+                <Button key="submit" type="primary" danger onClick={() => form.submit()}>
+                    {t('Delete')}
                 </Button>,
                 <Button
                     key="cancel"
+                    danger
                     onClick={() => {
                         form.resetFields();
                         onClose();
@@ -69,14 +70,14 @@ export const CreateBusinessAreaMigrateModal: React.FC<CreateBusinessAreaMigrateM
             ]}
         >
             <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={migrateFrom}>
-                <Form.Item name="name" label={t('Migrate from')}>
+                <Form.Item name="name" label={t('Name')}>
                     <Input defaultValue={migrateFrom?.name} disabled />
                 </Form.Item>
 
                 <Form.Item
                     name="toId"
-                    label={t('Migrate to')}
-                    rules={[{ required: true, message: t('Please provide a description') }]}
+                    label={t('Migrate existing data products & datasets')}
+                    rules={[{ required: true, message: t('Please provide a value') }]}
                 >
                     <Select>
                         {businessAreas
