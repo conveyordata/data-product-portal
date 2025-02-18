@@ -72,7 +72,7 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
         >
             <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={migrateFrom}>
                 <Form.Item name="name" label={t('Name')}>
-                    <Input defaultValue={migrateFrom?.name} disabled />
+                    <Input disabled />
                 </Form.Item>
 
                 <Form.Item

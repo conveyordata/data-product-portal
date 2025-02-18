@@ -125,7 +125,7 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
                         {dataProductIcons
                             .filter((icon) => icon !== DataProductIcon.Default)
                             .map((icon) => (
-                                <Option value={icon}>
+                                <Option key={icon} value={icon}>
                                     <Icon component={getDataProductTypeIcon(icon)} className={styles.customIcon} />
                                 </Option>
                             ))}

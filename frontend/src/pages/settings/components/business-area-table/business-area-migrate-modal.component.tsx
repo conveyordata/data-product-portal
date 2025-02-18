@@ -44,7 +44,7 @@ export const CreateBusinessAreaMigrateModal: React.FC<CreateBusinessAreaMigrateM
     return (
         <FormModal
             isOpen={isOpen}
-            title={t('Migrate Business Area')}
+            title={t('Delete Business Area')}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -71,7 +71,7 @@ export const CreateBusinessAreaMigrateModal: React.FC<CreateBusinessAreaMigrateM
         >
             <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={migrateFrom}>
                 <Form.Item name="name" label={t('Name')}>
-                    <Input defaultValue={migrateFrom?.name} disabled />
+                    <Input disabled />
                 </Form.Item>
 
                 <Form.Item

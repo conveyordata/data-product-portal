@@ -415,7 +415,7 @@
     "Please provide a description": "Please provide a description",
     "Business Area migrated and deleted successfully": "Business Area migrated and deleted successfully",
     "Could not migrate or delete Business Area": "Could not migrate or delete Business Area",
-    "Migrate Business Area": "Migrate Business Area",
+    "Delete Business Area": "Delete Business Area",
     "Delete": "Delete",
     "Migrate existing data products & datasets": "Migrate existing data products & datasets",
     "Are you sure you want to delete the Business Area?": "Are you sure you want to delete the Business Area?",
