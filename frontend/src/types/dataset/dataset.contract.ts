@@ -8,14 +8,14 @@ import { DataProductSettingValueContract } from '../data-product-setting';
 export enum DatasetStatus {
     Pending = 'pending',
     Active = 'active',
-    Archived = 'archived',
+    Deleted = 'deleted',
 }
 
 export enum DatasetAccess {
     Public = 'public',
     Restricted = 'restricted',
 }
-export const datasetStatusList = [DatasetStatus.Pending, DatasetStatus.Active, DatasetStatus.Archived];
+export const datasetStatusList = [DatasetStatus.Pending, DatasetStatus.Active, DatasetStatus.Deleted];
 
 export interface DatasetContract {
     id: string;

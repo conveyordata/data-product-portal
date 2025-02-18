@@ -13,8 +13,8 @@ export function getStatusLabel(status: Status): string {
             return i18n.t('Pending');
         case DataProductStatus.Active || DataOutputStatus.Active:
             return i18n.t('Active');
-        case DataProductStatus.Archived || DataOutputStatus.Archived:
-            return i18n.t('Archived');
+        case DataProductStatus.Deleted || DataOutputStatus.Deleted:
+            return i18n.t('Deleted');
         default:
             return i18n.t('Unknown');
     }
@@ -26,7 +26,7 @@ export function getBadgeStatus(status: Status): BadgeProps['status'] {
             return 'processing';
         case DataProductStatus.Active || DataOutputStatus.Active:
             return 'success';
-        case DataProductStatus.Archived || DataOutputStatus.Archived:
+        case DataProductStatus.Deleted || DataOutputStatus.Deleted:
             return 'error';
         default:
             return 'default';

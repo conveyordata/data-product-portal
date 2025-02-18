@@ -10,7 +10,7 @@ import { DataProductLifeCycleContract } from '../data-product-lifecycle/data-pro
 export enum DataProductStatus {
     Pending = 'pending',
     Active = 'active',
-    Archived = 'archived',
+    Deleted = 'deleted',
 }
 
 export interface DataProductContract {
