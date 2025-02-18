@@ -34,11 +34,6 @@ export const getDataProductTableColumns = ({
             dataIndex: 'id',
             hidden: true,
         },
-        // This is an empty column to match to give a small indentation to the table and match the datasets table icon column
-        {
-            title: undefined,
-            width: iconColumnWidth,
-        },
         {
             title: t('Name'),
             dataIndex: 'name',
@@ -72,13 +67,13 @@ export const getDataProductTableColumns = ({
             editable: true,
         },
         {
-            title: t('Divider'),
-            dataIndex: 'divider',
+            title: t('Category'),
+            dataIndex: 'category',
             ellipsis: {
                 showTitle: false,
             },
-            render: (divider: string) => <TableCellItem text={divider} />,
-            sorter: sorter.stringSorter((dp) => dp.divider),
+            render: (category: string) => <TableCellItem text={category} />,
+            sorter: sorter.stringSorter((dp) => dp.category),
             defaultSortOrder: 'ascend',
             editable: true,
         },
@@ -103,16 +98,6 @@ export const getDataProductTableColumns = ({
             sorter: sorter.numberSorter((dp) => dp.order),
             defaultSortOrder: 'ascend',
             editable: true,
-        },
-        {
-            title: t('Scope'),
-            dataIndex: 'scope',
-            ellipsis: {
-                showTitle: false,
-            },
-            render: (scope: string) => <TableCellItem text={t(scope)} />,
-            sorter: sorter.stringSorter((dp) => dp.scope),
-            defaultSortOrder: 'ascend',
         },
         {
             title: t('Actions'),

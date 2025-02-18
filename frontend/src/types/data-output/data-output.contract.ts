@@ -11,7 +11,7 @@ export enum DataOutputConfigurationTypes {
 export enum DataOutputStatus {
     Pending = 'pending',
     Active = 'active',
-    Archived = 'archived',
+    Deleted = 'deleted',
 }
 
 export interface DataOutputContract {

@@ -46,6 +46,7 @@ def migrate():
         print("Migration finished successfully")
     except Exception as e:
         print("Something went wrong when migrating", e)
+        exit(1)
 
 
 @app.command()

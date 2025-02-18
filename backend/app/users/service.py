@@ -21,7 +21,7 @@ class UserService:
         user = ensure_user_exists(id, db)
         user.data_products = []
         user.owned_datasets = []
-        user.delete()
+        db.delete(user)
         db.commit()
 
     def create_user(self, user: UserCreate, db: Session) -> dict[str, UUID]:

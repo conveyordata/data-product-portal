@@ -45,6 +45,24 @@ export const dataProductSettingsApiSlice = baseApiSlice
                 }),
                 invalidatesTags: (_, _error, arg) => [
                     { type: TagTypes.DataProduct as const, id: arg.data_product_id },
+                    { type: TagTypes.DataProductSetting, id: arg.data_product_settings_id },
+                    { type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST },
+                ],
+            }),
+            createDatasetSettingValue: builder.mutation<
+                DataProductSettingValueCreateResponse,
+                DataProductSettingValueCreateRequest
+            >({
+                query: (request) => ({
+                    url: buildUrl(buildUrl(ApiUrl.DatasetSettingValue, { datasetId: request.data_product_id }), {
+                        dataProductSettingId: request.data_product_settings_id,
+                    }),
+                    method: 'POST',
+                    params: {
+                        value: request.value,
+                    },
+                }),
+                invalidatesTags: (_, _error, arg) => [
                     { type: TagTypes.Dataset as const, id: arg.data_product_id },
                     { type: TagTypes.DataProductSetting, id: arg.data_product_settings_id },
                     { type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST },
@@ -84,6 +102,7 @@ export const dataProductSettingsApiSlice = baseApiSlice
 // auto-generated based on the defined endpoints
 export const {
     useCreateDataProductSettingValueMutation,
+    useCreateDatasetSettingValueMutation,
     useRemoveDataProductSettingMutation,
     useUpdateDataProductSettingMutation,
     useCreateDataProductSettingMutation,

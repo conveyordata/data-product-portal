@@ -64,7 +64,7 @@ from app.users.schema import User
 
 class DataProductService:
     def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
-        data_product = (
+        data_product: DataProductGet = (
             db.query(DataProductModel)
             .options(
                 joinedload(DataProductModel.dataset_links),
@@ -79,10 +79,20 @@ class DataProductService:
             .first()
         )
 
+        rolled_up_tags = set()
+
         if not data_product:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
             )
+
+        for link in data_product.dataset_links:
+            rolled_up_tags.update(link.dataset.tags)
+            for output_link in link.dataset.data_output_links:
+                rolled_up_tags.update(output_link.data_output.tags)
+
+        data_product.rolled_up_tags = rolled_up_tags
+
         if not data_product.lifecycle:
             data_product.lifecycle = default_lifecycle
         return data_product
@@ -123,7 +133,11 @@ class DataProductService:
             .options(
                 joinedload(DataProductModel.memberships),
             )
-            .filter(DataProductModel.memberships.any(user_id=user_id))
+            .filter(
+                DataProductModel.memberships.any(
+                    user_id=user_id, status=DataProductMembershipStatus.APPROVED
+                )
+            )
             .order_by(asc(DataProductModel.name))
             .all()
         )
@@ -211,8 +225,8 @@ class DataProductService:
         data_product.dataset_links = []
         for output in data_product.data_outputs:
             output.dataset_links = []
-            output.delete()
-        data_product.delete()
+            db.delete(output)
+        db.delete(data_product)
         db.commit()
 
     def _create_new_membership(
