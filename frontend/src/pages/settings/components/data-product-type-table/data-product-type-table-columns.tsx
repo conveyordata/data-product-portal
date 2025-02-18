@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { EditableColumn } from '@/components/editable-table/editable-table.component';
-import { DataProductIcon, DataProductTypeContract } from '@/types/data-product-type';
+import { DataProductIcon, DataProductTypesGetContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import { Button, Flex, Popconfirm, Select } from 'antd';
 import Icon from '@ant-design/icons';
@@ -11,15 +11,15 @@ const { Option } = Select;
 
 type Props = {
     t: TFunction;
-    onRemoveDataProductType: (id: string) => void;
-    handleEdit: (type: DataProductTypeContract) => () => void;
+    handleRemove: (type: DataProductTypesGetContract) => void;
+    handleEdit: (type: DataProductTypesGetContract) => () => void;
 };
 
 export const getDataProductTypeTableColumns = ({
     t,
-    onRemoveDataProductType,
+    handleRemove,
     handleEdit,
-}: Props): EditableColumn<DataProductTypeContract>[] => {
+}: Props): EditableColumn<DataProductTypesGetContract>[] => {
     return [
         {
             title: t('Id'),
@@ -62,7 +62,7 @@ export const getDataProductTypeTableColumns = ({
             title: t('Actions'),
             key: 'action',
             width: '10%',
-            render: (record, { id }) => {
+            render: (record) => {
                 return (
                     <Flex>
                         <Button type={'link'} onClick={handleEdit(record)}>
@@ -71,7 +71,7 @@ export const getDataProductTypeTableColumns = ({
                         <Popconfirm
                             title={t('Remove')}
                             description={t('Are you sure you want to delete the data product type?')}
-                            onConfirm={() => onRemoveDataProductType(id)}
+                            onConfirm={() => handleRemove(record)}
                             placement={'leftTop'}
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}

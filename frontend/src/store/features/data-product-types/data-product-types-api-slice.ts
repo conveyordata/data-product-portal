@@ -1,9 +1,10 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import {
-    DataProductTypeContract,
+    DataProductTypesGetContract,
     DataProductTypeCreateRequest,
     DataProductTypeCreateResponse,
+    DataProductTypeGetContract,
 } from '@/types/data-product-type';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 
@@ -12,7 +13,7 @@ export const dataProductTypesApiSlice = baseApiSlice
     .enhanceEndpoints({ addTagTypes: dataProductTypeTags })
     .injectEndpoints({
         endpoints: (builder) => ({
-            getAllDataProductTypes: builder.query<DataProductTypeContract[], void>({
+            getAllDataProductTypes: builder.query<DataProductTypesGetContract[], void>({
                 query: () => ({
                     url: ApiUrl.DataProductType,
                     method: 'GET',
@@ -23,7 +24,14 @@ export const dataProductTypesApiSlice = baseApiSlice
                               { type: TagTypes.DataProductType as const, id: STATIC_TAG_ID.LIST },
                               ...result.map(({ id }) => ({ type: TagTypes.DataProductType as const, id })),
                           ]
-                        : [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
+                        : [{ type: TagTypes.DataProductType as const, id: STATIC_TAG_ID.LIST }],
+            }),
+            getDataProductType: builder.query<DataProductTypeGetContract, string>({
+                query: (dataProductTypeId) => ({
+                    url: buildUrl(ApiUrl.DataProductTypeId, { dataProductTypeId }),
+                    method: 'GET',
+                }),
+                providesTags: (_, __, id) => [{ type: TagTypes.DataProductType as const, id }],
             }),
             createDataProductType: builder.mutation<DataProductTypeCreateResponse, DataProductTypeCreateRequest>({
                 query: (request) => ({
@@ -31,7 +39,7 @@ export const dataProductTypesApiSlice = baseApiSlice
                     method: 'POST',
                     data: request,
                 }),
-                invalidatesTags: [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
+                invalidatesTags: [{ type: TagTypes.DataProductType as const, id: STATIC_TAG_ID.LIST }],
             }),
             updateDataProductType: builder.mutation<
                 DataProductTypeCreateResponse,
@@ -42,14 +50,24 @@ export const dataProductTypesApiSlice = baseApiSlice
                     method: 'PUT',
                     data: dataProductType,
                 }),
-                invalidatesTags: [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
+                invalidatesTags: [{ type: TagTypes.DataProductType as const, id: STATIC_TAG_ID.LIST }],
             }),
             removeDataProductType: builder.mutation<void, string>({
                 query: (dataProductTypeId) => ({
                     url: buildUrl(ApiUrl.DataProductTypeId, { dataProductTypeId }),
                     method: 'DELETE',
                 }),
-                invalidatesTags: [{ type: TagTypes.DataProductType, id: STATIC_TAG_ID.LIST }],
+                invalidatesTags: [{ type: TagTypes.DataProductType as const, id: STATIC_TAG_ID.LIST }],
+            }),
+            migrateDataProductType: builder.mutation<void, { fromId: string; toId: string }>({
+                query: ({ fromId, toId }) => ({
+                    url: buildUrl(ApiUrl.DataProductTypeMigrate, { fromId, toId }),
+                    method: 'PUT',
+                }),
+                invalidatesTags: (_, __, { fromId, toId }) => [
+                    { type: TagTypes.DataProductType as const, id: fromId },
+                    { type: TagTypes.DataProductType as const, id: toId },
+                ],
             }),
         }),
         overrideExisting: false,
@@ -62,4 +80,6 @@ export const {
     useGetAllDataProductTypesQuery,
     useUpdateDataProductTypeMutation,
     useRemoveDataProductTypeMutation,
+    useGetDataProductTypeQuery,
+    useMigrateDataProductTypeMutation,
 } = dataProductTypesApiSlice;

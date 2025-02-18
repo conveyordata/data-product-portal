@@ -7,26 +7,32 @@ import {
     useRemoveDataProductTypeMutation,
     useUpdateDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
-import { DataProductTypeContract } from '@/types/data-product-type';
+import { DataProductTypesGetContract } from '@/types/data-product-type';
 import { getDataProductTypeTableColumns } from './data-product-type-table-columns';
 import { EditableTable } from '@/components/editable-table/editable-table.component';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import { CreateBusinessAreaModal } from '../business-area-table/business-area-form-modal.component';
 import { useModal } from '@/hooks/use-modal';
 import { useState } from 'react';
 import { CreateDataProductTypeModal } from './data-product-type-form-modal.component';
+import { CreateDataProductTypeMigrateModal } from './data-product-type-migrate-modal.component';
 
 export function DataProductTypeTable() {
     const { t } = useTranslation();
     const { data = [], isFetching } = useGetAllDataProductTypesQuery();
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
+    const {
+        isVisible: migrateModalVisible,
+        handleOpen: handleOpenMigrate,
+        handleClose: handleCloseMigrate,
+    } = useModal();
     const [editDataProductType, { isLoading: isEditing }] = useUpdateDataProductTypeMutation();
     const [onRemoveDataProductType, { isLoading: isRemoving }] = useRemoveDataProductTypeMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
-    const [initial, setInitial] = useState<DataProductTypeContract | undefined>(undefined);
+    const [initial, setInitial] = useState<DataProductTypesGetContract | undefined>(undefined);
+    const [migrateFrom, setMigrateFrom] = useState<DataProductTypesGetContract | undefined>(undefined);
 
-    const onChange: TableProps<DataProductTypeContract>['onChange'] = (pagination) => {
+    const onChange: TableProps<DataProductTypesGetContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
@@ -36,13 +42,13 @@ export function DataProductTypeTable() {
         handleOpen();
     };
 
-    const handleEdit = (tag: DataProductTypeContract) => () => {
+    const handleEdit = (tag: DataProductTypesGetContract) => () => {
         setMode('edit');
         setInitial(tag);
         handleOpen();
     };
 
-    const handleSave = async (row: DataProductTypeContract) => {
+    const handleSave = async (row: DataProductTypesGetContract) => {
         try {
             await editDataProductType({ dataProductType: row, dataProductTypeId: row.id });
             dispatchMessage({ content: t('Data Product Type updated successfully'), type: 'success' });
@@ -51,7 +57,21 @@ export function DataProductTypeTable() {
         }
     };
 
-    const columns = getDataProductTypeTableColumns({ t, onRemoveDataProductType, handleEdit });
+    const handleRemove = async (type: DataProductTypesGetContract) => {
+        try {
+            if (type.data_product_count > 0) {
+                setMigrateFrom(type);
+                handleOpenMigrate();
+            } else {
+                await onRemoveDataProductType(type.id);
+                dispatchMessage({ content: t('Data Product Type removed successfully'), type: 'success' });
+            }
+        } catch (error) {
+            dispatchMessage({ content: t('Could not remove Data Product Type'), type: 'error' });
+        }
+    };
+
+    const columns = getDataProductTypeTableColumns({ t, handleRemove, handleEdit });
 
     return (
         <Flex vertical className={styles.tableContainer}>
@@ -64,7 +84,7 @@ export function DataProductTypeTable() {
                 </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                <EditableTable<DataProductTypeContract>
+                <EditableTable<DataProductTypesGetContract>
                     data={data}
                     columns={columns}
                     handleSave={handleSave}
@@ -84,6 +104,14 @@ export function DataProductTypeTable() {
                     isOpen={isVisible}
                     mode={mode}
                     initial={initial}
+                />
+            )}
+            {migrateModalVisible && (
+                <CreateDataProductTypeMigrateModal
+                    isOpen={migrateModalVisible}
+                    t={t}
+                    onClose={handleCloseMigrate}
+                    migrateFrom={migrateFrom}
                 />
             )}
         </Flex>
