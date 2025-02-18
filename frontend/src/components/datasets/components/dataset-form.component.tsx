@@ -56,7 +56,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
-    const [archiveDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
+    const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
     const [form] = Form.useForm<DatasetCreateFormSchema>();
     const datasetNameValue = Form.useWatch('name', form);
 
@@ -135,15 +135,15 @@ export function DatasetForm({ mode, datasetId }: Props) {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
-    const handleArchiveDataset = async () => {
+    const handleDeleteDataset = async () => {
         if (canEditForm && currentDataset) {
             try {
-                await archiveDataset(currentDataset?.id).unwrap();
-                dispatchMessage({ content: t('Dataset archived successfully'), type: 'success' });
+                await deleteDataset(currentDataset?.id).unwrap();
+                dispatchMessage({ content: t('Dataset deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Datasets);
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to archive dataset, please try again later'),
+                    content: t('Failed to delete dataset, please try again later'),
                     type: 'error',
                 });
             }
@@ -324,8 +324,8 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     </Button>
                     {canEditForm && (
                         <Popconfirm
-                            title={t('Are you sure you want to archive this dataset?')}
-                            onConfirm={handleArchiveDataset}
+                            title={t('Are you sure you want to delete this dataset?')}
+                            onConfirm={handleDeleteDataset}
                             okText={t('Yes')}
                             cancelText={t('No')}
                         >
@@ -336,7 +336,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                                 loading={isArchiving}
                                 disabled={isLoading}
                             >
-                                {t('Archive')}
+                                {t('Delete')}
                             </Button>
                         </Popconfirm>
                     )}

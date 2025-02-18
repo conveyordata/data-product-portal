@@ -129,7 +129,7 @@ class DataOutputService:
             )
         self.ensure_owner(authenticated_user, data_output, db)
         data_output.dataset_links = []
-        data_output.delete()
+        db.delete(data_output)
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
