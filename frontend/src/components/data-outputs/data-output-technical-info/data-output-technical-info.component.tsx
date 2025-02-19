@@ -10,6 +10,7 @@ import { TechnicalInfoContract } from '@/types/data-output/data-output-technical
 import { getGlueTechnicalInformationColumns } from './data-output-table-glue-columns';
 import { getDatabricksTechnicalInformationColumns } from './data-output-table-databricks-columns';
 import { getSnowflakeTechnicalInformationColumns } from './data-output-table-snowflake-columns';
+import { getRedshiftTechnicalInformationColumns } from './data-output-table-redshift-columns';
 
 type Props = {
     data_output_id: string;
@@ -48,6 +49,8 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
                 return getDatabricksTechnicalInformationColumns({ t });
             case 'SnowflakeDataOutput':
                 return getSnowflakeTechnicalInformationColumns({ t });
+            case 'RedshiftDataOutput':
+                return getRedshiftTechnicalInformationColumns({ t });
             default:
                 return [];
         }

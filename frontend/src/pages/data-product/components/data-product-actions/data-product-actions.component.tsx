@@ -22,6 +22,7 @@ import conveyorLogo from '@/assets/icons/conveyor-logo.svg?react';
 import databricksLogo from '@/assets/icons/databricks-logo.svg?react';
 import tableauLogo from '@/assets/icons/tableau-logo.svg?react';
 import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
+import redshiftLogo from '@/assets/icons/aws-redshift-logo.svg?react';
 import { useMemo } from 'react';
 import { TFunction } from 'i18next';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
@@ -52,6 +53,14 @@ export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlat
                 label: t('Glue'),
                 value: DataPlatforms.Glue,
                 icon: glueLogo,
+                hasMenu: true,
+                hasConfig: true,
+                children: [],
+            },
+            {
+                label: t('Redshift'),
+                value: DataPlatforms.Redshift,
+                icon: redshiftLogo,
                 hasMenu: true,
                 hasConfig: true,
                 children: [],
