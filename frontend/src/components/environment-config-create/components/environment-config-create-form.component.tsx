@@ -1,4 +1,4 @@
-import { Button, Form, FormProps, Input, Select, Space } from 'antd';
+import { Button, Form, type FormProps, Input, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './environment-config-create.module.scss';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
@@ -91,7 +91,7 @@ export function EnvironmentConfigCreateForm() {
             form.setFieldValue('identifiers', identifiers.join(', '));
             form.setFieldValue('config', JSON.stringify(configTemplate, null, 4));
         }
-    }, [platformServiceConfig]);
+    }, [form, platformServiceConfig]);
 
     return (
         <Form<EnvironmentConfigCreateFormSchema>

@@ -1,7 +1,7 @@
 import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DataOutputConfiguration, DataOutputCreateFormSchema, SnowflakeDataOutput } from '@/types/data-output';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 type Props = {
     sourceAligned: boolean;
@@ -13,10 +13,12 @@ type Props = {
 export function SnowflakeDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
     const entireDatabase = Form.useWatch('entire_database', form);
-    let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
     const databaseValue = Form.useWatch('database', form);
     const schemaValue = Form.useWatch('schema', form);
     const tableValue = Form.useWatch('table', form);
+
+    const databaseOptions = useRef((identifiers ?? []).map((database) => ({ label: database, value: database })));
+
     useEffect(() => {
         let databaseOptionsList = identifiers; //TODO
         if (!sourceAligned) {
@@ -25,8 +27,8 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
         } else {
             form.setFieldsValue({ database: undefined });
         }
-        databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
-    }, [sourceAligned]);
+        databaseOptions.current = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
+    }, [external_id, form, identifiers, sourceAligned]);
 
     useEffect(() => {
         let result = databaseValue;
@@ -44,7 +46,7 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
         }
 
         form.setFieldsValue({ result: result });
-    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireDatabase]);
+    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireDatabase, form]);
 
     return (
         <div>
@@ -70,7 +72,7 @@ export function SnowflakeDataOutputForm({ form, identifiers, external_id, source
                         }
                     }}
                     maxCount={1}
-                    options={databaseOptions}
+                    options={databaseOptions.current}
                 />
             </Form.Item>
             <Form.Item<SnowflakeDataOutput & { temp_suffix: string }>

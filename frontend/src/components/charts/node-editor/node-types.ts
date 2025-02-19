@@ -1,4 +1,4 @@
-import { EdgeTypes, NodeTypes } from 'reactflow';
+import type { EdgeTypes, NodeTypes } from 'reactflow';
 import { DataProductNode } from '@/components/charts/custom-nodes/data-product-node/data-product-node.tsx';
 import { DatasetNode } from '@/components/charts/custom-nodes/dataset-node/dataset-node.tsx';
 import { DefaultEdge } from '@/components/charts/custom-edges/default-edge/default-edge.tsx';

@@ -22,11 +22,20 @@ type Props = {
     };
 };
 
-export function TableCellItem({ icon, text, textProps, textComponent, children, reactSVGComponent, tooltip }: Props) {
+export function TableCellItem({
+    icon,
+    text,
+    textProps,
+    textComponent,
+    children,
+    reactSVGComponent,
+    tooltip,
+    ...otherProps
+}: Props) {
     const [hasEllipsis, setHasEllipsis] = React.useState<boolean>(false);
 
     const tableCellItem = (
-        <Flex className={styles.tableCellWrapper}>
+        <Flex className={styles.tableCellWrapper} {...otherProps}>
             {icon && icon}
             {reactSVGComponent && <Icon component={reactSVGComponent} className={styles.customIcon} />}
             {text && (

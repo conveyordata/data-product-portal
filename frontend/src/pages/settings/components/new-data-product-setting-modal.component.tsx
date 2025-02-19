@@ -5,8 +5,9 @@ import { DataProductSettingContract } from '@/types/data-product-setting';
 import { generateExternalIdFromName } from '@/utils/external-id.helper';
 import { Button, Checkbox, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styles from '@/components/data-products/data-output-form/data-output-form.module.scss';
+
 const { Option } = Select;
 
 interface CreateSettingModalProps {
@@ -51,7 +52,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
 
     useEffect(() => {
         form.resetFields(['default']);
-    }, [typeValue]);
+    }, [form, typeValue]);
 
     return (
         <FormModal

@@ -45,7 +45,7 @@ export const EnvironmentsTable = () => {
         if (!isFetching) {
             handleTotalChange(environments.length);
         }
-    }, [isFetching]);
+    }, [environments.length, handleTotalChange, isFetching]);
 
     return (
         <Flex vertical className={styles.tableContainer}>

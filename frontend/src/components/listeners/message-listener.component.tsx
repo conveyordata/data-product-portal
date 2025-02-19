@@ -15,7 +15,7 @@ const MessageListener: React.FC = () => {
                 onClose,
             });
         }
-    }, [content, duration, type, id]);
+    }, [content, duration, type, id, messageApi, onClose]);
 
     return <>{contextHolder}</>;
 };

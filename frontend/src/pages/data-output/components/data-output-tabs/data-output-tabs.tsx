@@ -1,5 +1,5 @@
 import { Tabs } from 'antd';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import styles from './data-output-tabs.module.scss';
 import Icon, { CodeOutlined, PartitionOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -10,17 +10,12 @@ import { TechnologiesTab } from './technologies-tab/technologies-tab';
 import { ReactFlowProvider } from 'reactflow';
 import { Explorer } from '@/components/explorer/explorer';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
 
 type Props = {
     dataOutputId: string;
     isLoading: boolean;
 };
-
-export enum TabKeys {
-    Datasets = 'datasets',
-    Technologies = 'technologies',
-    Explorer = 'explorer',
-}
 
 type Tab = {
     label: string;

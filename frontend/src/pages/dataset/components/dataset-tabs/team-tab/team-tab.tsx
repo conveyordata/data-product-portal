@@ -52,7 +52,7 @@ export function TeamTab({ datasetId }: Props) {
         if (!dataset || !user) return false;
 
         return getIsDatasetOwner(dataset, user.id) || user.is_admin;
-    }, [dataset?.id, user?.id]);
+    }, [dataset, user]);
 
     const handleAddNewUser = async (user: UserContract) => {
         try {

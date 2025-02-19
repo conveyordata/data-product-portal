@@ -83,7 +83,7 @@ export function PlatformServiceConfigCreateForm() {
                 ),
             );
         }
-    }, [platformIdFormValue, serviceIdFormValue]);
+    }, [form, platformIdFormValue, platforms, serviceIdFormValue, services]);
 
     return (
         <Form<PlatformServiceConfigCreateFormSchema>

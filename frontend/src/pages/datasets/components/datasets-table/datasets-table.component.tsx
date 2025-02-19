@@ -64,7 +64,7 @@ export function DatasetsTable() {
                 handleTotalChange(userDatasets.length);
             }
         }
-    }, [quickFilter, isFetching, isFetchingUserDatasets]);
+    }, [quickFilter, isFetching, isFetchingUserDatasets, handleTotalChange, datasets.length, userDatasets.length]);
 
     return (
         <Flex vertical className={styles.tableContainer}>

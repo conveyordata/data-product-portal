@@ -1,6 +1,6 @@
 module.exports = {
     root: true,
-    env: {browser: true, es2020: true},
+    env: { browser: true, es2020: true },
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
@@ -18,11 +18,9 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     plugins: ['react-refresh', 'import'],
     rules: {
-        'react-refresh/only-export-components': [
-            'warn',
-            {allowConstantExport: true},
-        ],
-        'import/newline-after-import': ['error', {count: 1}],
-        "@typescript-eslint/no-unused-vars": ["error", { "caughtErrorsIgnorePattern": "^_" }],
+        'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+        'import/newline-after-import': ['error', { count: 1 }],
+        '@typescript-eslint/no-unused-vars': ['error', { caughtErrorsIgnorePattern: '^_' }],
+        '@typescript-eslint/no-empty-object-type': ['off'],
     },
-}
+};

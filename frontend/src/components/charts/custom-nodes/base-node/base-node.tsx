@@ -29,16 +29,14 @@ export function BaseNode<T extends BaseNodeProps>({
                 <DefaultHandle id={'left_t'} type={'target'} position={Position.Left} isConnectable={false} />
                 <DefaultHandle id={'left_s'} type={'source'} position={Position.Left} isConnectable={false} />
                 <Flex className={styles.nodeWrapper}>
-                    <Flex>
-                        <CustomSvgIconLoader
-                            iconComponent={icon}
-                            hasRoundBorder={borderType === 'round'}
-                            hasSquareBorder={borderType === 'square'}
-                            size={'large'}
-                            inverted={isMainNode}
-                            color={isActive ? 'primary' : 'light'}
-                        />
-                    </Flex>
+                    <CustomSvgIconLoader
+                        iconComponent={icon}
+                        hasRoundBorder={borderType === 'round'}
+                        hasSquareBorder={borderType === 'square'}
+                        size={'large'}
+                        inverted={isMainNode}
+                        color={isActive ? 'primary' : 'light'}
+                    />
                 </Flex>
                 <DefaultHandle id={'right_t'} type={'target'} position={Position.Right} isConnectable={false} />
                 <DefaultHandle id={'right_s'} type={'source'} position={Position.Right} isConnectable={false} />

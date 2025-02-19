@@ -18,7 +18,7 @@ const NotificationListener: React.FC = () => {
                 duration: null,
             });
         }
-    }, [message, description, type, id]);
+    }, [message, description, type, id, notificationApi]);
 
     return <>{contextHolder}</>;
 };

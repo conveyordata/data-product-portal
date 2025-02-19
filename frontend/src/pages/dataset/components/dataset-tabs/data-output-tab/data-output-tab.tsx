@@ -34,17 +34,17 @@ export function DataOutputTab({ datasetId }: Props) {
 
     const datasetDataOutputs = useMemo(() => {
         return dataset?.data_output_links || [];
-    }, [dataset?.id, dataset?.data_output_links]);
+    }, [dataset?.data_output_links]);
 
     const filteredDataOutputs = useMemo(() => {
         return filterDataOutputs(datasetDataOutputs, searchTerm);
-    }, [dataset?.data_output_links, searchTerm]);
+    }, [datasetDataOutputs, searchTerm]);
 
     const isDatasetOwner = useMemo(() => {
         if (!dataset || !user) return false;
 
         return getIsDatasetOwner(dataset, user.id) || user.is_admin;
-    }, [dataset?.id, user?.id]);
+    }, [dataset, user]);
 
     return (
         <>
