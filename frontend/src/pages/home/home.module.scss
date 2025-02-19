@@ -10,33 +10,8 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     padding: 0;
 }
 
-.content-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-}
-
-.background-image {
-    background: url('~@/assets/background/landing-background-green.svg') no-repeat center center;
-    background-size: cover;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    flex: 0.4;
-    min-height: $landing-banner-height;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    gap: globals.$spacing-regular;
-}
-
-.search-bar {
-    width: 50%;
-}
-
 .content {
     flex: 0.6;
     padding: globals.$container-padding-large;
+    padding-bottom: 0;
 }

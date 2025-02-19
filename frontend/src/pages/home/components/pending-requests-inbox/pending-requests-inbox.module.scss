@@ -1,0 +1,54 @@
+@use '@/styles/globals';
+
+$item-card-width: 360px;
+
+.requests-list-container {
+    margin-top: globals.$spacing-m;
+}
+
+.list-item {
+    width: 100%;
+    background-color: globals.$quaternary-color-fill;
+    border: 1px solid globals.$border-color-secondary;
+    border-radius: globals.$border-radius-lg;
+    padding: unset !important;
+    margin-bottom: globals.$spacing-m;
+    transition: border-color 0.3s;
+    cursor: pointer;
+
+    &:hover {
+        border-color: globals.$primary-color-border-hover;
+        transition: border-color 0.3s;
+    }
+
+    .item-card {
+        width: 100% !important;
+        display: flex;
+        align-items: center !important;
+        height: 100%;
+        padding: globals.$spacing-m globals.$spacing-l;
+        min-width: $item-card-width;
+    }
+}
+
+.section {
+    height: 100%;
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.action-container {
+    margin-left: auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.date-section {
+    display: flex;
+    flex-direction: column;
+}
