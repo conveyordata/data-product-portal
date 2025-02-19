@@ -60,7 +60,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                         {t('{{name}}', { name: action.data_output.name })}
                     </Link>
                     <Typography.Text style={{ marginRight: '4px', marginLeft: '4px' }}>
-                        {t('requests a link to dataset ')}
+                        {t('requests a link to dataset')}
                     </Typography.Text>
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         {t('{{name}}', { name: action.dataset.name })}
