@@ -23,7 +23,9 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
                 <Flex vertical>
                     <div>
                         <Typography.Text strong>{t('Glue database')}: </Typography.Text>
-                        <Typography.Text>{glue_configuration.database}</Typography.Text>
+                        <Typography.Text>
+                            {glue_configuration.database}__{glue_configuration.database_suffix}
+                        </Typography.Text>
                     </div>
                 </Flex>
             );
@@ -35,7 +37,7 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
                     <div>
                         <Typography.Text strong>{t('Snowflake schema')}: </Typography.Text>
                         <Typography.Text>
-                            {snowflake_configuration.schema}__{snowflake_configuration.schema_suffix}
+                            {snowflake_configuration.database}__{snowflake_configuration.schema}
                         </Typography.Text>
                     </div>
                 </Flex>

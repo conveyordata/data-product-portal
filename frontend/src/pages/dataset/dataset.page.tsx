@@ -83,7 +83,10 @@ export function Dataset() {
                             description={dataset.description}
                             businessArea={dataset.business_area.name}
                             accessType={getDatasetAccessTypeLabel(dataset.access_type)}
-                            tags={dataset.tags}
+                            tags={[
+                                ...dataset.tags,
+                                ...dataset.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),
+                            ]}
                         />
                         {/*  Tabs  */}
                         <DatasetTabs datasetId={dataset.id} isLoading={isLoading} />

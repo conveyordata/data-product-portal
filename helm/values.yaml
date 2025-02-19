@@ -18,7 +18,9 @@ smtp:
   password: not-set
   no_login: false
 from_mail_address: ""
-webhook_url: ""
+webhook:
+  url: ""
+  secret: ""
 postgres_enabled: false
 cloudwatch_enabled: false
 api_key:
@@ -47,12 +49,12 @@ replicaCount: 1
 image:
   repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/backend
   pullPolicy: Always
-  tag: 0.2.10
+  tag: 0.2.11
 
 frontendimage:
   repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/frontend
   pullPolicy: Always
-  tag: 0.2.10
+  tag: 0.2.11
 
 imagePullSecrets: []
 nameOverride: ""
