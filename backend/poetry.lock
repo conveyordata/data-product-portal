@@ -133,17 +133,17 @@ test = ["distro (>=1.9.0,<1.10.0)", "flake8 (>=6.1,<7.0)", "flake8-pyi (>=24.1.0
 
 [[package]]
 name = "boto3"
-version = "1.36.22"
+version = "1.36.23"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.36.22-py3-none-any.whl", hash = "sha256:39957eabdce009353d72d131046489fbbfa15891865d5f069f1e8bfa414e6b81"},
-    {file = "boto3-1.36.22.tar.gz", hash = "sha256:768c8a4d4a6227fe2258105efa086f1424cba5ca915a5eb2305b2cd979306ad1"},
+    {file = "boto3-1.36.23-py3-none-any.whl", hash = "sha256:d59642672b1f35f55f47b317693241ce53333816f47c9e72fcc8fd0e9adc6a87"},
+    {file = "boto3-1.36.23.tar.gz", hash = "sha256:006800604c34382873521b20890b758eea7109d699696ece932131259d0a4658"},
 ]
 
 [package.dependencies]
-botocore = ">=1.36.22,<1.37.0"
+botocore = ">=1.36.23,<1.37.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.11.0,<0.12.0"
 
@@ -152,13 +152,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.36.22"
+version = "1.36.23"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.36.22-py3-none-any.whl", hash = "sha256:75d6b34acb0686ee4d54ff6eb285e78ccfe318407428769d1e3e13351714d890"},
-    {file = "botocore-1.36.22.tar.gz", hash = "sha256:59520247d5a479731724f97c995d5a1c2aae3b303b324f39d99efcfad1d3019e"},
+    {file = "botocore-1.36.23-py3-none-any.whl", hash = "sha256:886730e79495a2e153842725ebdf85185c8277cdf255b3b5879cd097ddc7fcc3"},
+    {file = "botocore-1.36.23.tar.gz", hash = "sha256:9feaa2d876f487e718a5fd80a35fa401042b518c0c75117d3e1ea39a567439e7"},
 ]
 
 [package.dependencies]
@@ -1762,4 +1762,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "3f2a5f4377786bde1b9e5a0749690224d18e5a046436d6061cade812b6a978c7"
+content-hash = "6f094c69af57b4f69d116bf434f228e9090025aaa07ab491ca0489bf5bbdda1c"
