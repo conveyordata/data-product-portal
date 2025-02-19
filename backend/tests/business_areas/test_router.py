@@ -12,7 +12,7 @@ def business_area_payload():
 
 
 class TestBusinessAreasRouter:
-
+    @pytest.mark.usefixtures("admin")
     def test_create_business_area(self, business_area_payload, client):
         response = self.create_business_area(client, business_area_payload)
         assert response.status_code == 200
@@ -30,6 +30,7 @@ class TestBusinessAreasRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(business_area.id)
 
+    @pytest.mark.usefixtures("admin")
     def test_update_business_area(self, client):
         business_area = BusinessAreaFactory()
         update_payload = {"name": "update", "description": "update"}
@@ -37,23 +38,27 @@ class TestBusinessAreasRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(business_area.id)
 
+    @pytest.mark.usefixtures("admin")
     def test_remove_business_area(self, client):
         business_area = BusinessAreaFactory()
         response = self.remove_business_area(client, business_area.id)
         assert response.status_code == 200
 
+    @pytest.mark.usefixtures("admin")
     def test_remove_business_area_coupled_data_product(self, client):
         business_area = BusinessAreaFactory()
         DataProductFactory(business_area=business_area)
         response = self.remove_business_area(client, business_area.id)
         assert response.status_code == 400
 
+    @pytest.mark.usefixtures("admin")
     def test_remove_business_area_coupled_dataset(self, client):
         business_area = BusinessAreaFactory()
         DatasetFactory(business_area=business_area)
         response = self.remove_business_area(client, business_area.id)
         assert response.status_code == 400
 
+    @pytest.mark.usefixtures("admin")
     def test_migrate_business_areas(self, client):
         business_area = BusinessAreaFactory()
         new_business_area = BusinessAreaFactory()
@@ -66,9 +71,32 @@ class TestBusinessAreasRouter:
         assert data_product.business_area.id == new_business_area.id
         assert dataset.business_area.id == new_business_area.id
 
+    def test_create_business_area_admin_only(self, business_area_payload, client):
+        response = self.create_business_area(client, business_area_payload)
+        assert response.status_code == 403
+
+    def test_update_business_area_admin_only(self, client):
+        business_area = BusinessAreaFactory()
+        update_payload = {"name": "update", "description": "update"}
+        response = self.update_business_area(client, update_payload, business_area.id)
+        assert response.status_code == 403
+
+    def test_remove_business_area_admin_only(self, client):
+        business_area = BusinessAreaFactory()
+        response = self.remove_business_area(client, business_area.id)
+        assert response.status_code == 403
+
+    def test_migrate_business_areas_admin_only(self, client):
+        business_area = BusinessAreaFactory()
+        new_business_area = BusinessAreaFactory()
+        response = self.migrate_business_areas(
+            client, business_area.id, new_business_area.id
+        )
+        assert response.status_code == 403
+
     @staticmethod
-    def create_business_area(client, business_area_payload):
-        return client.post(ENDPOINT, json=business_area_payload)
+    def create_business_area(client, payload):
+        return client.post(ENDPOINT, json=payload)
 
     @staticmethod
     def get_business_area(client, business_area_id):

@@ -10,6 +10,7 @@ from app.data_product_types.schema_create import (
 from app.data_product_types.schema_get import DataProductTypeGet, DataProductTypesGet
 from app.data_product_types.service import DataProductTypeService
 from app.database.database import get_db_session
+from app.dependencies import only_for_admin
 
 router = APIRouter(prefix="/data_product_types", tags=["data_product_types"])
 
@@ -48,6 +49,7 @@ def get_data_product_type(
             },
         },
     },
+    dependencies=[Depends(only_for_admin)],
 )
 def create_data_product_type(
     data_product_type: DataProductTypeCreate, db: Session = Depends(get_db_session)
@@ -55,7 +57,7 @@ def create_data_product_type(
     return DataProductTypeService().create_data_product_type(data_product_type, db)
 
 
-@router.put("/{id}")
+@router.put("/{id}", dependencies=[Depends(only_for_admin)])
 def update_data_product_type(
     id: UUID,
     data_product_type: DataProductTypeUpdate,
@@ -64,12 +66,12 @@ def update_data_product_type(
     return DataProductTypeService().update_data_product_type(id, data_product_type, db)
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", dependencies=[Depends(only_for_admin)])
 def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)):
     return DataProductTypeService().remove_data_product_type(id, db)
 
 
-@router.put("/migrate/{from_id}/{to_id}")
+@router.put("/migrate/{from_id}/{to_id}", dependencies=[Depends(only_for_admin)])
 def migrate_data_product_type(
     from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)
 ):
