@@ -4,8 +4,9 @@ from sqlalchemy import asc
 from sqlalchemy.orm import Session
 
 from app.tags.model import Tag as TagModel
+from app.tags.model import ensure_tag_exists
 from app.tags.schema import Tag as TagGet
-from app.tags.schema import TagCreate
+from app.tags.schema import TagCreate, TagUpdate
 
 
 class TagService:
@@ -18,6 +19,16 @@ class TagService:
         db.commit()
 
         return {"id": tag.id}
+
+    def update_tag(self, id: UUID, tag: TagUpdate, db: Session):
+        current_tag = ensure_tag_exists(id, db)
+        updated_tag = tag.model_dump(exclude_unset=True)
+
+        for attr, value in updated_tag.items():
+            setattr(current_tag, attr, value)
+
+        db.commit()
+        return {"id": id}
 
     def remove_tag(self, id: UUID, db: Session):
         tag = db.get(TagModel, id)

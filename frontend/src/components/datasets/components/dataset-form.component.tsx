@@ -2,7 +2,6 @@ import { Button, CheckboxOptionType, Form, FormProps, Input, Popconfirm, Radio, 
 import { useTranslation } from 'react-i18next';
 import styles from './dataset-form.module.scss';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
-import { TagCreate } from '@/types/tag';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';

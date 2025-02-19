@@ -1,11 +1,14 @@
-export type DataProductIcon =
-    | 'reporting'
-    | 'processing'
-    | 'exploration'
-    | 'ingestion'
-    | 'machine_learning'
-    | 'analytics'
-    | 'default';
+export enum DataProductIcon {
+    Reporting = 'reporting',
+    Processing = 'processing',
+    Exploration = 'exploration',
+    Ingestion = 'ingestion',
+    MachineLearning = 'machine_learning',
+    Analytics = 'analytics',
+    Default = 'default',
+}
+
+export const dataProductIcons = Object.values(DataProductIcon);
 
 export interface DataProductTypeContract {
     id: string;

@@ -8,7 +8,7 @@ import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { DataProductTypeContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { BusinessAreaGetResponse } from '@/types/business-area';
+import { BusinessAreaContract } from '@/types/business-area';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
@@ -77,7 +77,7 @@ export const getDataProductTableColumns = ({
         {
             title: t('Business Area'),
             dataIndex: 'business_area',
-            render: (businessArea: BusinessAreaGetResponse) => {
+            render: (businessArea: BusinessAreaContract) => {
                 return <TableCellItem text={businessArea.name} />;
             },
             ...new FilterSettings(data, (dp) => dp.business_area.name),
