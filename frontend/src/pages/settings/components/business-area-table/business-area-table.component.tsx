@@ -47,7 +47,6 @@ export function BussinesAreaTable() {
 
     const handleRemove = async (businessArea: BusinessAreasGetContract) => {
         try {
-            console.log(businessArea);
             if (businessArea.dataset_count > 0 || businessArea.data_product_count > 0) {
                 setMigrateFrom(businessArea);
                 handleOpenMigrate();
