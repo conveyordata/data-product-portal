@@ -9,6 +9,7 @@ import { AppConfig } from '@/config/app-config.ts';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { Notifications } from '@/components/notifications/notifications';
+import { DownloadCLIButton } from '../cli-download/cli-download-button.component';
 
 const cognitoLogoutParams = AppConfig.getOidcCognitoLogoutParams();
 const isAuthDisabled = !AppConfig.isOidcEnabled();
@@ -44,6 +45,9 @@ export function UserMenu() {
         <Flex className={styles.userMenuContainer}>
             <Flex>
                 <Notifications />
+            </Flex>
+            <Flex>
+                <DownloadCLIButton />
             </Flex>
             <Flex className={styles.avatarWrapper}>
                 <Badge
