@@ -63,10 +63,6 @@ export const axiosBaseQuery =
                     ...(user && user.access_token && { Authorization: `${user.token_type} ${user.access_token}` }),
                 },
             });
-            if (baseUrl !== 'http://localhost:5050') {
-                console.log(result);
-            }
-
             return { data: result.data };
         } catch (axiosError: unknown) {
             const err = axiosError as CustomAxiosError;
