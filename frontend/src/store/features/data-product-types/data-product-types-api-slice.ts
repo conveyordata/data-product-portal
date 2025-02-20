@@ -8,7 +8,11 @@ import {
 } from '@/types/data-product-type';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 
-export const dataProductTypeTags: string[] = [TagTypes.DataProductType];
+export const dataProductTypeTags: string[] = [
+    TagTypes.DataProductType,
+    TagTypes.DataProduct,
+    TagTypes.UserDataProducts,
+];
 export const dataProductTypesApiSlice = baseApiSlice
     .enhanceEndpoints({ addTagTypes: dataProductTypeTags })
     .injectEndpoints({
@@ -50,7 +54,11 @@ export const dataProductTypesApiSlice = baseApiSlice
                     method: 'PUT',
                     data: dataProductType,
                 }),
-                invalidatesTags: [{ type: TagTypes.DataProductType as const, id: STATIC_TAG_ID.LIST }],
+                invalidatesTags: [
+                    { type: TagTypes.DataProductType as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProduct as const },
+                    { type: TagTypes.UserDataProducts as const },
+                ],
             }),
             removeDataProductType: builder.mutation<void, string>({
                 query: (dataProductTypeId) => ({
@@ -67,6 +75,8 @@ export const dataProductTypesApiSlice = baseApiSlice
                 invalidatesTags: (_, __, { fromId, toId }) => [
                     { type: TagTypes.DataProductType as const, id: fromId },
                     { type: TagTypes.DataProductType as const, id: toId },
+                    { type: TagTypes.DataProduct as const },
+                    { type: TagTypes.UserDataProducts as const },
                 ],
             }),
         }),

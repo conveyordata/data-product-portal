@@ -8,7 +8,13 @@ import {
     BusinessAreaGetContract,
 } from '@/types/business-area';
 
-export const businessAreaTags: string[] = [TagTypes.BusinessArea];
+export const businessAreaTags: string[] = [
+    TagTypes.BusinessArea,
+    TagTypes.DataProduct,
+    TagTypes.UserDataProducts,
+    TagTypes.Dataset,
+    TagTypes.UserDatasets,
+];
 export const businessAreasApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: businessAreaTags }).injectEndpoints({
     endpoints: (builder) => ({
         getAllBusinessAreas: builder.query<BusinessAreasGetContract[], void>({
@@ -48,7 +54,13 @@ export const businessAreasApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
                 method: 'PUT',
                 data: businessArea,
             }),
-            invalidatesTags: [{ type: TagTypes.BusinessArea, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [
+                { type: TagTypes.BusinessArea as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const },
+                { type: TagTypes.UserDataProducts as const },
+                { type: TagTypes.Dataset as const },
+                { type: TagTypes.UserDatasets as const },
+            ],
         }),
         removeBusinessArea: builder.mutation<void, string>({
             query: (businessAreaId) => ({
@@ -65,6 +77,10 @@ export const businessAreasApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
             invalidatesTags: (_, __, { fromId, toId }) => [
                 { type: TagTypes.BusinessArea, id: fromId },
                 { type: TagTypes.BusinessArea, id: toId },
+                { type: TagTypes.DataProduct as const },
+                { type: TagTypes.UserDataProducts as const },
+                { type: TagTypes.Dataset as const },
+                { type: TagTypes.UserDatasets as const },
             ],
         }),
     }),

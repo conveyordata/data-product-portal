@@ -3,7 +3,7 @@ import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import { TagContract, TagCreateRequest, TagCreateResponse } from '@/types/tag';
 
-export const tagTags: string[] = [TagTypes.Tags];
+export const tagTags: string[] = [TagTypes.Tags, TagTypes.DataProduct, TagTypes.Dataset, TagTypes.DataOutput];
 export const tagsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: tagTags }).injectEndpoints({
     endpoints: (builder) => ({
         getAllTags: builder.query<TagContract[], void>({
@@ -27,14 +27,24 @@ export const tagsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: tagTags
                 method: 'PUT',
                 data: tag,
             }),
-            invalidatesTags: [{ type: TagTypes.Tags as const, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [
+                { type: TagTypes.Tags as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const },
+                { type: TagTypes.Dataset as const },
+                { type: TagTypes.DataOutput as const },
+            ],
         }),
         removeTag: builder.mutation<void, string>({
             query: (tagId) => ({
                 url: buildUrl(ApiUrl.TagsId, { tagId }),
                 method: 'DELETE',
             }),
-            invalidatesTags: [{ type: TagTypes.Tags as const, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [
+                { type: TagTypes.Tags as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const },
+                { type: TagTypes.Dataset as const },
+                { type: TagTypes.DataOutput as const },
+            ],
         }),
     }),
     overrideExisting: false,
