@@ -1,5 +1,8 @@
 import pytest
 from tests.factories import TagFactory
+from tests.factories.data_output import DataOutputFactory
+from tests.factories.data_product import DataProductFactory
+from tests.factories.dataset import DatasetFactory
 
 ENDPOINT = "/api/tags"
 
@@ -38,6 +41,27 @@ class TestTagsRouter:
         tags = self.get_tags(client)
         assert tags.status_code == 200
         assert len(tags.json()) == 0
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_tag_coupled_with_dataset(self, client):
+        tag = TagFactory()
+        DatasetFactory(tags=[tag])
+        response = self.remove_tag(client, tag.id)
+        assert response.status_code == 200
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_tag_coupled_with_data_product(self, client):
+        tag = TagFactory()
+        DataProductFactory(tags=[tag])
+        response = self.remove_tag(client, tag.id)
+        assert response.status_code == 200
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_tag_coupled_with_data_output(self, client):
+        tag = TagFactory()
+        DataOutputFactory(tags=[tag])
+        response = self.remove_tag(client, tag.id)
+        assert response.status_code == 200
 
     def test_create_tag_admin_only(self, tags_payload, client):
         response = self.create_tag(client, tags_payload)
