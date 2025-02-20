@@ -31,7 +31,6 @@
 }
 
 .custom-icon {
-    margin: auto 0;
     height: globals.$icon-size-table-cell;
     width: globals.$icon-size-table-cell;
     color: globals.$primary-color;
@@ -40,4 +39,8 @@
         height: globals.$icon-size-table-cell;
         width: globals.$icon-size-table-cell;
     }
+}
+
+.icon-select {
+    color: globals.$primary-color;
 }
