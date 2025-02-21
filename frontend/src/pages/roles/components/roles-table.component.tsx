@@ -573,6 +573,33 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     },
                 },
                 {
+                    order: 40,
+                    type: 'Group',
+                    name: 'Manage Read Access',
+                },
+                {
+                    order: 41,
+                    type: 'Instance',
+                    permission: 'Approve Data Product Access',
+                    description: 'Allows the role to accept or reject a read access request from a data product',
+                    access: {
+                        Owner: true,
+                        'Solution Architect': false,
+                        Member: false,
+                    },
+                },
+                {
+                    order: 42,
+                    type: 'Instance',
+                    permission: 'Revoke Data Product Access',
+                    description: 'Allows the role to revoke read access from a data product again',
+                    access: {
+                        Owner: true,
+                        'Solution Architect': false,
+                        Member: false,
+                    },
+                },
+                {
                     order: 50,
                     type: 'Group',
                     name: 'Integrations',
