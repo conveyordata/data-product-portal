@@ -133,17 +133,17 @@ test = ["distro (>=1.9.0,<1.10.0)", "flake8 (>=6.1,<7.0)", "flake8-pyi (>=24.1.0
 
 [[package]]
 name = "boto3"
-version = "1.36.25"
+version = "1.36.26"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.36.25-py3-none-any.whl", hash = "sha256:41fb90a516995946563ec91b9d891e2516c58617e9556d5e86dfa62da3fdebe6"},
-    {file = "boto3-1.36.25.tar.gz", hash = "sha256:a057c19adffb48737c192bdb10f9d85e0d9dcecd21327f51520c15db9022a835"},
+    {file = "boto3-1.36.26-py3-none-any.whl", hash = "sha256:f67d014a7c5a3cd540606d64d7cb9eec3600cf42acab1ac0518df9751ae115e2"},
+    {file = "boto3-1.36.26.tar.gz", hash = "sha256:523b69457eee55ac15aa707c0e768b2a45ca1521f95b2442931090633ec72458"},
 ]
 
 [package.dependencies]
-botocore = ">=1.36.25,<1.37.0"
+botocore = ">=1.36.26,<1.37.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.11.0,<0.12.0"
 
@@ -152,13 +152,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.36.25"
+version = "1.36.26"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.36.25-py3-none-any.whl", hash = "sha256:04c8ff03531e8d92baa8c98d1850bdf01668a805467f4222b65e5325f94aa8af"},
-    {file = "botocore-1.36.25.tar.gz", hash = "sha256:3b0a857d2621c336fb82a36cb6da4b6e062d346451ac46d110b074e5e5fd7cfc"},
+    {file = "botocore-1.36.26-py3-none-any.whl", hash = "sha256:4e3f19913887a58502e71ef8d696fe7eaa54de7813ff73390cd5883f837dfa6e"},
+    {file = "botocore-1.36.26.tar.gz", hash = "sha256:4a63bcef7ecf6146fd3a61dc4f9b33b7473b49bdaf1770e9aaca6eee0c9eab62"},
 ]
 
 [package.dependencies]
@@ -1762,4 +1762,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "bd1ba735dcc874bffb67b37ab9f06ab883019b3c5ad1fdb3593f60409e56cd4d"
+content-hash = "b5d3a10380fbbe11391220429c0142ce6275ded89a0bf11c7186c230bdfd4517"
