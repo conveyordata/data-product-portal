@@ -204,7 +204,7 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
-                        case ApplicationPaths.AdditionalSettings:
+                        case ApplicationPaths.Settings:
                             Object.assign(breadcrumbItem, {
                                 title: (
                                     <Space
@@ -212,7 +212,7 @@ export const Breadcrumbs = () => {
                                             item: styles.breadcrumbItem,
                                         }}
                                     >
-                                        {t('Additional Settings')}
+                                        {t('Settings')}
                                     </Space>
                                 ),
                             });

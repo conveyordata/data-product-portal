@@ -14,7 +14,7 @@ import {
 import { DataProductSettingContract } from '@/types/data-product-setting';
 import React from 'react';
 import { useModal } from '@/hooks/use-modal.tsx';
-import { CreateSettingModal } from '../new-data-product-setting-modal.component.tsx';
+import { CreateSettingModal } from './new-data-product-setting-modal.component.tsx';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
 
