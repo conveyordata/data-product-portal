@@ -2,7 +2,11 @@ export {
     DataProductMembershipStatus,
     type DataProductMembershipStatusType,
 } from './data-product-membership-status.contract.ts';
-export type { DataProductMembershipModel, DataProductMembershipContract } from './data-product-membership.contract.ts';
+export type {
+    DataProductMembershipModel,
+    DataProductMembershipContract,
+    DataProductMembershipLink,
+} from './data-product-membership.contract.ts';
 export type { DataProductUserMembershipCreateContract } from './data-product-user-membership-create.contract.ts';
 export type { DataProductUserMembership } from './data-product-user-membership.ts';
 export type { DataProductMembershipRoleUpdateRequest } from './data-product-membership-role-update.contract.ts';

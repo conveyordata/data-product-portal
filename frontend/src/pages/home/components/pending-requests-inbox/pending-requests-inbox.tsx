@@ -9,18 +9,18 @@ import { useMemo, useState } from 'react';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
 import { DataOutputDatasetContract } from '@/types/data-output-dataset';
 import { DataProductDatasetContract } from '@/types/data-product-dataset';
-import { DataProductMembershipContract } from '@/types/data-product-membership';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
 import { TFunction } from 'i18next';
 import { Link } from 'react-router-dom';
+import { DataProductMembershipLink } from '@/types/data-product-membership';
 
 const PAGE_SIZE = 3;
 
 type PendingAction =
     | ({ type: 'data_product' } & DataProductDatasetContract)
     | ({ type: 'data_output' } & DataOutputDatasetContract)
-    | ({ type: 'team' } & DataProductMembershipContract);
+    | ({ type: 'team' } & DataProductMembershipLink);
 
 const createPendingItem = (action: PendingAction, t: TFunction) => {
     let link, description, navigatePath, date;
@@ -87,7 +87,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                 </>
             );
             navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
-            date = undefined;
+            date = action.membership.requested_on;
             break;
 
         default:

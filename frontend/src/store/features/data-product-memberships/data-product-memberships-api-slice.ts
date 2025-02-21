@@ -3,11 +3,11 @@ import { dataProductsApiSlice, dataProductTags } from '@/store/features/data-pro
 import {
     DataProductMembershipApprovalRequest,
     DataProductMembershipApprovalResponse,
-    DataProductMembershipContract,
     DataProductMembershipRequestAccessRequest,
     DataProductMembershipRequestAccessResponse,
     DataProductMembershipRoleUpdateRequest,
     DataProductUserMembershipCreateContract,
+    DataProductMembershipLink,
 } from '@/types/data-product-membership';
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
@@ -109,7 +109,7 @@ export const dataProductMembershipsApiSlice = baseApiSlice
                     queryFulfilled.catch(patchResult.undo);
                 },
             }),
-            getDataProductMembershipPendingActions: builder.query<DataProductMembershipContract[], void>({
+            getDataProductMembershipPendingActions: builder.query<DataProductMembershipLink[], void>({
                 query: () => ({
                     url: buildUrl(ApiUrl.DataProductMembershipPendingActions, {}),
                     method: 'GET',
