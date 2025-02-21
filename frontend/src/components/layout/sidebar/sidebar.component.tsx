@@ -44,10 +44,9 @@ export const Sidebar = () => {
         navigationMenuItems = [
             ...navigationMenuItems,
             {
-                // t('Configure') t('Additional Settings')
                 label: <Link to={ApplicationPaths.Settings}>{t('Settings')}</Link>,
                 icon: <SettingOutlined />,
-                key: 'Configure',
+                key: 'Settings',
             },
         ];
     }
