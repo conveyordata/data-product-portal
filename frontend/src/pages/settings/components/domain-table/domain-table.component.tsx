@@ -1,22 +1,19 @@
 import { Button, Flex, Space, Table, TableProps, Typography } from 'antd';
-import styles from './business-area-table.module.scss';
+import styles from './domain-table.module.scss';
 import { useTranslation } from 'react-i18next';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import {
-    useGetAllBusinessAreasQuery,
-    useRemoveBusinessAreaMutation,
-} from '@/store/features/business-areas/business-areas-api-slice';
-import { BusinessAreasGetContract } from '@/types/business-area';
-import { getBusinessAreaTableColumns } from './business-area-table-columns';
+import { useGetAllDomainsQuery, useRemoveDomainMutation } from '@/store/features/domains/domains-api-slice';
+import { DomainsGetContract } from '@/types/domain';
+import { getDomainTableColumns } from './domain-table-columns';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useModal } from '@/hooks/use-modal';
 import { useState } from 'react';
-import { CreateBusinessAreaModal } from './business-area-form-modal.component';
-import { CreateBusinessAreaMigrateModal } from './business-area-migrate-modal.component';
+import { CreateDomainModal } from './domain-form-modal.component';
+import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
 
-export function BussinesAreaTable() {
+export function DomainTable() {
     const { t } = useTranslation();
-    const { data = [], isFetching } = useGetAllBusinessAreasQuery();
+    const { data = [], isFetching } = useGetAllDomainsQuery();
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
     const {
@@ -24,12 +21,12 @@ export function BussinesAreaTable() {
         handleOpen: handleOpenMigrate,
         handleClose: handleCloseMigrate,
     } = useModal();
-    const [onRemoveBusinessArea, { isLoading: isRemoving }] = useRemoveBusinessAreaMutation();
+    const [onRemoveDomain, { isLoading: isRemoving }] = useRemoveDomainMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
-    const [initial, setInitial] = useState<BusinessAreasGetContract | undefined>(undefined);
-    const [migrateFrom, setMigrateFrom] = useState<BusinessAreasGetContract | undefined>(undefined);
+    const [initial, setInitial] = useState<DomainsGetContract | undefined>(undefined);
+    const [migrateFrom, setMigrateFrom] = useState<DomainsGetContract | undefined>(undefined);
 
-    const onChange: TableProps<BusinessAreasGetContract>['onChange'] = (pagination) => {
+    const onChange: TableProps<DomainsGetContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
@@ -39,40 +36,40 @@ export function BussinesAreaTable() {
         handleOpen();
     };
 
-    const handleEdit = (tag: BusinessAreasGetContract) => () => {
+    const handleEdit = (tag: DomainsGetContract) => () => {
         setMode('edit');
         setInitial(tag);
         handleOpen();
     };
 
-    const handleRemove = async (businessArea: BusinessAreasGetContract) => {
+    const handleRemove = async (domain: DomainsGetContract) => {
         try {
-            if (businessArea.dataset_count > 0 || businessArea.data_product_count > 0) {
-                setMigrateFrom(businessArea);
+            if (domain.dataset_count > 0 || domain.data_product_count > 0) {
+                setMigrateFrom(domain);
                 handleOpenMigrate();
             } else {
-                await onRemoveBusinessArea(businessArea.id);
-                dispatchMessage({ content: t('Business Area removed successfully'), type: 'success' });
+                await onRemoveDomain(domain.id);
+                dispatchMessage({ content: t('Domain removed successfully'), type: 'success' });
             }
         } catch (error) {
-            dispatchMessage({ content: t('Could not remove Business Area'), type: 'error' });
+            dispatchMessage({ content: t('Could not remove Domain'), type: 'error' });
         }
     };
 
-    const columns = getBusinessAreaTableColumns({ t, handleRemove, handleEdit });
+    const columns = getDomainTableColumns({ t, handleRemove, handleEdit });
 
     return (
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.addContainer}>
-                <Typography.Title level={3}>{t('Business Areas')}</Typography.Title>
+                <Typography.Title level={3}>{t('Domains')}</Typography.Title>
                 <Space>
                     <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
-                        {t('Add Business Area')}
+                        {t('Add Domain')}
                     </Button>
                 </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                <Table<BusinessAreasGetContract>
+                <Table<DomainsGetContract>
                     dataSource={data}
                     columns={columns}
                     onChange={onChange}
@@ -85,10 +82,10 @@ export function BussinesAreaTable() {
                 />
             </Flex>
             {isVisible && (
-                <CreateBusinessAreaModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />
+                <CreateDomainModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />
             )}
             {migrateModalVisible && (
-                <CreateBusinessAreaMigrateModal
+                <CreateDomainMigrateModal
                     isOpen={migrateModalVisible}
                     t={t}
                     onClose={handleCloseMigrate}

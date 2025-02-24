@@ -89,7 +89,7 @@ export function DataProduct() {
                             lifecycle={dataProduct.lifecycle}
                             type={dataProduct.type.name}
                             description={dataProduct.description}
-                            businessArea={dataProduct.business_area.name}
+                            domain={dataProduct.domain.name}
                             tags={[
                                 ...dataProduct.tags,
                                 ...dataProduct.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),

@@ -6,7 +6,7 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
-import { useGetAllBusinessAreasQuery } from '@/store/features/business-areas/business-areas-api-slice.ts';
+import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useSelector } from 'react-redux';
 import {
@@ -49,7 +49,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const { data: currentDataset, isFetching: isFetchingInitialValues } = useGetDatasetByIdQuery(datasetId || '', {
         skip: mode === 'create' || !datasetId,
     });
-    const { data: businessAreas = [], isFetching: isFetchingBusinessAreas } = useGetAllBusinessAreasQuery();
+    const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
     const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
@@ -70,7 +70,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingTags;
 
     const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(), []);
-    const businessAreaSelectOptions = businessAreas.map((area) => ({ label: area.name, value: area.id }));
+    const domainSelectOptions = domains.map((area) => ({ label: area.name, value: area.id }));
     const userSelectOptions = users.map((user) => ({ label: user.email, value: user.id }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
@@ -83,7 +83,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
-                    business_area_id: values.business_area_id,
+                    domain_id: values.domain_id,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
@@ -103,7 +103,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids,
-                    business_area_id: values.business_area_id,
+                    domain_id: values.domain_id,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
@@ -162,7 +162,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 name: currentDataset.name,
                 description: currentDataset.description,
                 access_type: currentDataset.access_type,
-                business_area_id: currentDataset.business_area.id,
+                domain_id: currentDataset.domain.id,
                 tag_ids: currentDataset.tags.map((tag) => tag.id),
                 lifecycle_id: currentDataset.lifecycle.id,
                 owners: getDatasetOwnerIds(currentDataset),
@@ -226,18 +226,18 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>
-                name={'business_area_id'}
-                label={t('Business Area')}
+                name={'domain_id'}
+                label={t('Domain')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the business area of the dataset'),
+                        message: t('Please select the domain of the dataset'),
                     },
                 ]}
             >
                 <Select
-                    loading={isFetchingBusinessAreas}
-                    options={businessAreaSelectOptions}
+                    loading={isFetchingDomains}
+                    options={domainSelectOptions}
                     filterOption={selectFilterOptionByLabelAndValue}
                     allowClear
                     showSearch
