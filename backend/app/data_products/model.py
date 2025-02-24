@@ -15,7 +15,7 @@ from app.shared.model import BaseORM
 from app.tags.model import Tag, tag_data_product_table
 
 if TYPE_CHECKING:
-    from app.business_areas.model import BusinessArea
+    from app.domains.model import Domain
     from app.data_outputs.model import DataOutput
     from app.data_product_lifecycles.model import DataProductLifecycle
     from app.data_product_types.model import DataProductType
@@ -64,8 +64,8 @@ class DataProduct(Base, BaseORM):
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="data_products"
     )
-    business_area_id: Mapped[UUID] = Column(ForeignKey("business_areas.id"))
-    business_area: Mapped["BusinessArea"] = relationship(back_populates="data_products")
+    domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
+    domain: Mapped["Domain"] = relationship(back_populates="data_products")
     data_outputs: Mapped[list["DataOutput"]] = relationship(
         "DataOutput",
         back_populates="owner",

@@ -4,7 +4,7 @@ from tests.factories.lifecycle import LifecycleFactory
 from tests.factories.s3_data_output import S3DataOutputFactory
 
 from .. import test_session
-from .business_area import BusinessAreaFactory
+from .domain import DomainFactory
 from .data_product import DataProductFactory
 from .data_product_membership import DataProductMembershipFactory
 from .data_product_type import DataProductTypeFactory
@@ -26,7 +26,7 @@ factories = [
     PlatformServiceConfigFactory,
     EnvPlatformServiceConfigFactory,
     UserFactory,
-    BusinessAreaFactory,
+    DomainFactory,
     DatasetFactory,
     DataOutputFactory,
     DataProductFactory,

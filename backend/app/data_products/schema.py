@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.business_areas.schema import BusinessArea
+from app.domains.schema import Domain
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.schema import (
     DataProductMembership,
@@ -15,7 +15,7 @@ from app.tags.schema import Tag
 
 class DataProductCreate(BaseDataProduct):
     memberships: list[DataProductMembershipCreate]
-    business_area_id: UUID
+    domain_id: UUID
     tag_ids: list[UUID]
     lifecycle_id: UUID
 
@@ -38,5 +38,5 @@ class DataProduct(BaseDataProduct):
     dataset_links: list[DataProductDatasetAssociation]
     tags: list[Tag]
     memberships: list[DataProductMembership]
-    business_area: BusinessArea
+    domain: Domain
     data_outputs: list[DataOutputGet]

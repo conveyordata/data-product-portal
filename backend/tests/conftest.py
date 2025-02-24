@@ -8,7 +8,7 @@ from app.datasets.enums import DatasetAccessType
 from app.main import app
 
 from . import TestingSessionLocal
-from .factories.business_area import BusinessAreaFactory
+from .factories.domain import DomainFactory
 from .factories.data_product_type import DataProductTypeFactory
 from .factories.user import UserFactory
 
@@ -48,7 +48,7 @@ def client():
 def default_data_product_payload():
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
-    business_area = BusinessAreaFactory()
+    domain = DomainFactory()
     return {
         "name": "Test Data Product",
         "description": "Test Description",
@@ -61,14 +61,14 @@ def default_data_product_payload():
                 "role": DataProductUserRole.OWNER.value,
             }
         ],
-        "business_area_id": str(business_area.id),
+        "domain_id": str(domain.id),
     }
 
 
 @pytest.fixture
 def default_dataset_payload():
     user = UserFactory()
-    business_area = BusinessAreaFactory()
+    domain = DomainFactory()
     return {
         "name": "Test Dataset",
         "description": "Test Description",
@@ -76,7 +76,7 @@ def default_dataset_payload():
         "tags": [],
         "owners": [str(user.id)],
         "access_type": DatasetAccessType.RESTRICTED,
-        "business_area_id": str(business_area.id),
+        "domain_id": str(domain.id),
     }
 
 

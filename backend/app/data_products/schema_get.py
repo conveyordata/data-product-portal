@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import Field, computed_field
 
-from app.business_areas.schema import BusinessArea
+from app.domains.schema import Domain
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_lifecycles.schema import DataProductLifeCycle
 from app.data_product_memberships.enums import DataProductMembershipStatus
@@ -29,7 +29,7 @@ class DataProductGet(ORMModel):
     dataset_links: list[DatasetDataProductLink]
     memberships: list[DataProductMembershipGet]
     type: DataProductType
-    business_area: BusinessArea
+    domain: Domain
     data_outputs: list[DataOutputGet]
     data_product_settings: list[DataProductSettingValue]
     rolled_up_tags: set[Tag]

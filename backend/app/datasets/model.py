@@ -16,7 +16,7 @@ from app.shared.model import BaseORM, utcnow
 from app.tags.model import Tag, tag_dataset_table
 
 if TYPE_CHECKING:
-    from app.business_areas.model import BusinessArea
+    from app.domains.model import Domain
     from app.data_product_settings.model import DataProductSettingValue
     from app.users.model import User
 
@@ -69,5 +69,5 @@ class Dataset(Base, BaseORM):
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(back_populates="datasets")
-    business_area_id: Mapped[UUID] = Column(ForeignKey("business_areas.id"))
-    business_area: Mapped["BusinessArea"] = relationship(back_populates="datasets")
+    domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
+    domain: Mapped["Domain"] = relationship(back_populates="datasets")

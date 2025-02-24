@@ -495,21 +495,21 @@ class DataProductService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for business"
-                    f"area {data_product.business_area.name}"
+                    "Workspace not configured for"
+                    f"domain {data_product.domain.name}"
                 ),
             )
 
         config = json.loads(config.config)["workspace_urls"]
-        if not str(data_product.business_area_id) in config:
+        if not str(data_product.domain_id) in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for business"
-                    f"area {data_product.business_area.name}"
+                    "Workspace not configured for"
+                    f"domain {data_product.domain.name}"
                 ),
             )
-        return config[str(data_product.business_area_id)]
+        return config[str(data_product.domain_id)]
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
         product = db.get(DataProductModel, id)

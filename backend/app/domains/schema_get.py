@@ -2,12 +2,12 @@ from typing import Annotated
 
 from pydantic import Field, computed_field
 
-from app.business_areas.schema import BusinessArea
+from app.domains.schema import Domain
 from app.data_products.schema import DataProduct
 from app.datasets.schema import Dataset
 
 
-class BusinessAreasGet(BusinessArea):
+class DomainsGet(Domain):
     data_products: Annotated[list[DataProduct], Field(exclude=True)]
     datasets: Annotated[list[Dataset], Field(exclude=True)]
 
@@ -20,6 +20,6 @@ class BusinessAreasGet(BusinessArea):
         return len(self.datasets)
 
 
-class BusinessAreaGet(BusinessArea):
+class DomainGet(Domain):
     data_products: list[DataProduct]
     datasets: list[Dataset]

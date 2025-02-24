@@ -13,8 +13,8 @@ if TYPE_CHECKING:
     from app.datasets.model import Dataset
 
 
-class BusinessArea(Base, BaseORM):
-    __tablename__ = "business_areas"
+class Domain(Base, BaseORM):
+    __tablename__ = "domains"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
     description = Column(String)
@@ -22,7 +22,7 @@ class BusinessArea(Base, BaseORM):
     data_products: Mapped[list["DataProduct"]] = relationship(lazy="select")
 
 
-def ensure_business_area_exists(
+def ensure_domain_exists(
     data_product_type_id: UUID, db: Session
-) -> BusinessArea:
-    return ensure_exists(data_product_type_id, db, BusinessArea)
+) -> Domain:
+    return ensure_exists(data_product_type_id, db, Domain)
