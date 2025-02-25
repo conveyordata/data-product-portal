@@ -70,7 +70,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingTags;
 
     const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(), []);
-    const domainSelectOptions = domains.map((area) => ({ label: area.name, value: area.id }));
+    const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = users.map((user) => ({ label: user.email, value: user.id }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 

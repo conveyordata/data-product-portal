@@ -22,14 +22,14 @@ export const getDomainTableColumns = ({ t, handleRemove, handleEdit }: Props): T
             title: t('Name'),
             dataIndex: 'name',
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
-            sorter: sorter.stringSorter((ba) => ba.name),
+            sorter: sorter.stringSorter((domain) => domain.name),
             defaultSortOrder: 'ascend',
         },
         {
             title: t('Description'),
             dataIndex: 'description',
             render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,
-            sorter: sorter.stringSorter((ba) => ba.description),
+            sorter: sorter.stringSorter((domain) => domain.description),
         },
         {
             title: t('Actions'),
