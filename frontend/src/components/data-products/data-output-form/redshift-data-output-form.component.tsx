@@ -12,13 +12,13 @@ type Props = {
 
 export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
-    const entireDatabase = Form.useWatch('entire_database', form);
+    const entireSchema = Form.useWatch('entire_schema', form);
     let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
     const databaseValue = Form.useWatch('database', form);
     const schemaValue = Form.useWatch('schema', form);
     const tableValue = Form.useWatch('table', form);
     useEffect(() => {
-        let databaseOptionsList = identifiers; //TODO
+        let databaseOptionsList = identifiers;
         if (!sourceAligned) {
             databaseOptionsList = [external_id];
             form.setFieldsValue({ database: external_id });
@@ -34,7 +34,7 @@ export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceA
             if (schemaValue) {
                 result += `__${schemaValue}`;
             }
-            if (entireDatabase) {
+            if (entireSchema) {
                 result += '.*';
             } else if (tableValue) {
                 result += `.${tableValue}`;
@@ -44,7 +44,7 @@ export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceA
         }
 
         form.setFieldsValue({ result: result });
-    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireDatabase]);
+    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireSchema]);
 
     return (
         <div>
@@ -80,18 +80,18 @@ export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceA
             >
                 <Input />
             </Form.Item>
-            <Form.Item name={'entire_database'} valuePropName="checked" initialValue={true}>
-                <Checkbox defaultChecked={true}>{t('Include entire database')}</Checkbox>
+            <Form.Item name={'entire_schema'} valuePropName="checked" initialValue={true}>
+                <Checkbox defaultChecked={true}>{t('Include entire schema')}</Checkbox>
             </Form.Item>
             <Form.Item<RedshiftDataOutput>
                 required
                 name={'table'}
-                hidden={entireDatabase}
+                hidden={entireSchema}
                 label={t('Table')}
                 tooltip={t('The table that your data output can access')}
                 rules={[
                     {
-                        required: !entireDatabase,
+                        required: !entireSchema,
                         message: t('Please input the table this data output can access'),
                     },
                 ]}
