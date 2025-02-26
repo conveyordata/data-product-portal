@@ -13,22 +13,13 @@ from app.datasets.enums import DatasetAccessType
 from app.datasets.schema import Dataset as DatasetSchema
 from app.datasets.status import DatasetStatus
 from app.shared.model import BaseORM, utcnow
-from app.tags.model import Tag
+from app.tags.model import Tag, tag_dataset_table
 
 if TYPE_CHECKING:
     from app.business_areas.model import BusinessArea
     from app.data_product_settings.model import DataProductSettingValue
     from app.users.model import User
 
-
-tag_dataset_table = Table(
-    "tags_datasets",
-    Base.metadata,
-    Column("dataset_id", ForeignKey("datasets.id")),
-    Column("tag_id", ForeignKey("tags.id")),
-    Column("created_on", DateTime(timezone=False), server_default=utcnow()),
-    Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
-)
 datasets_owner_table = Table(
     "datasets_owners",
     Base.metadata,
