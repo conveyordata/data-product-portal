@@ -2,7 +2,7 @@ import { DataProductSettingsTable } from '@/pages/settings/components/data-produ
 import styles from './settings.module.scss';
 import { DataProductLifecyclesTable } from '../data-product-lifecycles/components/data-product-lifecycles-table/data-product-lifecycles-table.component';
 import { TagsTable } from './components/tags-table/tags-table.component';
-import { BussinesAreaTable } from './components/business-area-table/business-area-table.component';
+import { DomainTable } from './components/domain-table/domain-table.component';
 import { DataProductTypeTable } from './components/data-product-type-table/data-product-type-table.component';
 
 export function AdditionalSettings() {
@@ -12,7 +12,7 @@ export function AdditionalSettings() {
             <DataProductSettingsTable scope={'dataset'} />
             <DataProductLifecyclesTable />
             <TagsTable />
-            <BussinesAreaTable />
+            <DomainTable />
             <DataProductTypeTable />
         </div>
     );

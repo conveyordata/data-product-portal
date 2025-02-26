@@ -2,9 +2,9 @@ from copy import deepcopy
 
 import pytest
 from tests.factories import (
-    BusinessAreaFactory,
     DataProductFactory,
     DataProductTypeFactory,
+    DomainFactory,
     TagFactory,
     UserFactory,
 )
@@ -19,7 +19,7 @@ ENDPOINT = "/api/data_products"
 
 @pytest.fixture
 def payload():
-    business_area = BusinessAreaFactory()
+    domain = DomainFactory()
     lifecycle = LifecycleFactory()
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
@@ -37,7 +37,7 @@ def payload():
             }
         ],
         "lifecycle_id": str(lifecycle.id),
-        "business_area_id": str(business_area.id),
+        "domain_id": str(domain.id),
     }
 
 
