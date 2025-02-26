@@ -61,7 +61,7 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime),
     )
     op.create_table(
-        "domains",
+        "business_areas",
         sa.Column("id", UUID, primary_key=True),
         sa.Column("name", sa.String),
         sa.Column("description", sa.String),
@@ -92,7 +92,7 @@ def upgrade() -> None:
             "status", sa.Enum(DataProductStatus), default=DataProductStatus.PENDING
         ),
         sa.Column("type_id", UUID, sa.ForeignKey("data_product_types.id")),
-        sa.Column("domain_id", UUID, sa.ForeignKey("domains.id")),
+        sa.Column("business_area_id", UUID, sa.ForeignKey("business_areas.id")),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
@@ -119,7 +119,7 @@ def upgrade() -> None:
         sa.Column(
             "access_type", sa.Enum(DatasetAccessType), default=DatasetAccessType.PUBLIC
         ),
-        sa.Column("domain_id", UUID, sa.ForeignKey("domains.id")),
+        sa.Column("business_area_id", UUID, sa.ForeignKey("business_areas.id")),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
@@ -231,4 +231,4 @@ def downgrade() -> None:
     op.drop_table("permissionsets")
     op.drop_table("datasets")
     op.drop_table("data_product_memberships")
-    op.drop_table("domains")
+    op.drop_table("business_areas")
