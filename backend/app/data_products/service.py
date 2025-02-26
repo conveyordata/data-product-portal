@@ -495,8 +495,7 @@ class DataProductService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for"
-                    f"domain {data_product.domain.name}"
+                    "Workspace not configured for" f"domain {data_product.domain.name}"
                 ),
             )
 
@@ -505,8 +504,7 @@ class DataProductService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for"
-                    f"domain {data_product.domain.name}"
+                    "Workspace not configured for" f"domain {data_product.domain.name}"
                 ),
             )
         return config[str(data_product.domain_id)]

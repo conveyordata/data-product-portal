@@ -16,8 +16,8 @@ from app.shared.model import BaseORM, utcnow
 from app.tags.model import Tag, tag_dataset_table
 
 if TYPE_CHECKING:
-    from app.domains.model import Domain
     from app.data_product_settings.model import DataProductSettingValue
+    from app.domains.model import Domain
     from app.users.model import User
 
 datasets_owner_table = Table(

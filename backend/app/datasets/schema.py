@@ -1,9 +1,9 @@
 from typing import Optional
 from uuid import UUID
 
-from app.domains.schema import Domain
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
+from app.domains.schema import Domain
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 from app.users.schema import User

@@ -8,8 +8,8 @@ from app.datasets.enums import DatasetAccessType
 from app.main import app
 
 from . import TestingSessionLocal
-from .factories.domain import DomainFactory
 from .factories.data_product_type import DataProductTypeFactory
+from .factories.domain import DomainFactory
 from .factories.user import UserFactory
 
 

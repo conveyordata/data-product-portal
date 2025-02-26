@@ -1,7 +1,7 @@
 import uuid
 
 import pytest
-from tests.factories import DomainFactory, DatasetFactory, UserFactory
+from tests.factories import DatasetFactory, DomainFactory, UserFactory
 
 from app.datasets.enums import DatasetAccessType
 

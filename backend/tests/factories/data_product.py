@@ -3,8 +3,8 @@ import factory
 from app.data_products.model import DataProduct
 from app.data_products.status import DataProductStatus
 
-from .domain import DomainFactory
 from .data_product_type import DataProductTypeFactory
+from .domain import DomainFactory
 
 
 class DataProductFactory(factory.alchemy.SQLAlchemyModelFactory):

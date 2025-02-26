@@ -2,9 +2,9 @@ from typing import Annotated
 
 from pydantic import Field, computed_field
 
-from app.domains.schema import Domain
 from app.data_products.schema import DataProduct
 from app.datasets.schema import Dataset
+from app.domains.schema import Domain
 
 
 class DomainsGet(Domain):

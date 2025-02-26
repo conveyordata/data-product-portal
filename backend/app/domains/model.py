@@ -22,7 +22,5 @@ class Domain(Base, BaseORM):
     data_products: Mapped[list["DataProduct"]] = relationship(lazy="select")
 
 
-def ensure_domain_exists(
-    data_product_type_id: UUID, db: Session
-) -> Domain:
+def ensure_domain_exists(data_product_type_id: UUID, db: Session) -> Domain:
     return ensure_exists(data_product_type_id, db, Domain)

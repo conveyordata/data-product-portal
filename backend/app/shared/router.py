@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Security
 
-from app.domains.router import router as domain
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
 from app.data_outputs.router import router as data_outputs
@@ -12,6 +11,7 @@ from app.data_product_types.router import router as data_product_type
 from app.data_products.router import router as data_product
 from app.data_products_datasets.router import router as data_product_dataset
 from app.datasets.router import router as dataset
+from app.domains.router import router as domain
 from app.environments.router import router as environment
 from app.platforms.router import router as platform
 from app.tags.router import router as tag

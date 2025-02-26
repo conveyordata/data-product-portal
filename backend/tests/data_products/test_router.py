@@ -2,9 +2,9 @@ from copy import deepcopy
 
 import pytest
 from tests.factories import (
-    DomainFactory,
     DataProductFactory,
     DataProductTypeFactory,
+    DomainFactory,
     TagFactory,
     UserFactory,
 )

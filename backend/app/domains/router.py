@@ -3,11 +3,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.database.database import get_db_session
+from app.dependencies import only_for_admin
 from app.domains.schema_create import DomainCreate, DomainUpdate
 from app.domains.schema_get import DomainGet, DomainsGet
 from app.domains.service import DomainService
-from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 
 router = APIRouter(prefix="/domains", tags=["domains"])
 
@@ -18,9 +18,7 @@ def get_domains(db: Session = Depends(get_db_session)) -> list[DomainsGet]:
 
 
 @router.get("/{id}")
-def get_domain(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> DomainGet:
+def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> DomainGet:
     return DomainService().get_domain(id, db)
 
 
@@ -30,9 +28,7 @@ def get_domain(
         200: {
             "description": "Domain successfully created",
             "content": {
-                "application/json": {
-                    "example": {"id": "random id of the new domain"}
-                }
+                "application/json": {"example": {"id": "random id of the new domain"}}
             },
         },
     },
@@ -57,7 +53,5 @@ def remove_domain(id: UUID, db: Session = Depends(get_db_session)):
 
 
 @router.put("/migrate/{from_id}/{to_id}", dependencies=[Depends(only_for_admin)])
-def migrate_domain(
-    from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)
-):
+def migrate_domain(from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)):
     return DomainService().migrate_domain(from_id, to_id, db)

@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from app.domains.schema import Domain
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.schema import (
     DataProductMembership,
@@ -9,6 +8,7 @@ from app.data_product_memberships.schema import (
 from app.data_products.schema_base import BaseDataProduct
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
+from app.domains.schema import Domain
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 

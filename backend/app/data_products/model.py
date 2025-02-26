@@ -15,10 +15,10 @@ from app.shared.model import BaseORM
 from app.tags.model import Tag, tag_data_product_table
 
 if TYPE_CHECKING:
-    from app.domains.model import Domain
     from app.data_outputs.model import DataOutput
     from app.data_product_lifecycles.model import DataProductLifecycle
     from app.data_product_types.model import DataProductType
+    from app.domains.model import Domain
 
 
 def ensure_data_product_exists(data_product_id: UUID, db: Session) -> DataProductSchema:

@@ -64,9 +64,7 @@ class TestDomainsRouter:
         new_domain = DomainFactory()
         data_product = DataProductFactory(domain=domain)
         dataset = DatasetFactory(domain=domain)
-        response = self.migrate_domains(
-            client, domain.id, new_domain.id
-        )
+        response = self.migrate_domains(client, domain.id, new_domain.id)
         assert response.status_code == 200
         assert data_product.domain.id == new_domain.id
         assert dataset.domain.id == new_domain.id
@@ -89,9 +87,7 @@ class TestDomainsRouter:
     def test_migrate_domains_admin_only(self, client):
         domain = DomainFactory()
         new_domain = DomainFactory()
-        response = self.migrate_domains(
-            client, domain.id, new_domain.id
-        )
+        response = self.migrate_domains(client, domain.id, new_domain.id)
         assert response.status_code == 403
 
     @staticmethod

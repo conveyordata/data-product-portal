@@ -3,7 +3,6 @@ from uuid import UUID
 
 from pydantic import Field, computed_field
 
-from app.domains.schema import Domain
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_product_lifecycles.schema import DataProductLifeCycle
@@ -13,6 +12,7 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
+from app.domains.schema import Domain
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 from app.users.schema import User

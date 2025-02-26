@@ -24,9 +24,7 @@ class DomainService:
 
         return domain
 
-    def create_domain(
-        self, domain: DomainCreate, db: Session
-    ) -> dict[str, UUID]:
+    def create_domain(self, domain: DomainCreate, db: Session) -> dict[str, UUID]:
         domain = DomainModel(**domain.parse_pydantic_schema())
         db.add(domain)
         db.commit()
