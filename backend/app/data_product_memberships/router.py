@@ -5,7 +5,10 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_product_memberships.enums import DataProductUserRole
-from app.data_product_memberships.schema import DataProductMembershipCreate, DataProductMembershipAssociation
+from app.data_product_memberships.schema import (
+    DataProductMembershipAssociation,
+    DataProductMembershipCreate,
+)
 from app.data_product_memberships.service import DataProductMembershipService
 from app.database.database import get_db_session
 from app.dependencies import (

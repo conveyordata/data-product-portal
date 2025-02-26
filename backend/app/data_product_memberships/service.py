@@ -4,7 +4,7 @@ from uuid import UUID
 import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy import select, asc
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
@@ -14,7 +14,10 @@ from app.data_product_memberships.enums import (
     DataProductUserRole,
 )
 from app.data_product_memberships.model import DataProductMembership
-from app.data_product_memberships.schema import DataProductMembershipCreate, DataProductMembershipAssociation
+from app.data_product_memberships.schema import (
+    DataProductMembershipAssociation,
+    DataProductMembershipCreate,
+)
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
@@ -222,22 +225,26 @@ class DataProductMembershipService:
             db.query(DataProductMembership.data_product_id)
             .filter(
                 DataProductMembership.user_id == authenticated_user.id,
-                DataProductMembership.role == DataProductUserRole.OWNER
+                DataProductMembership.role == DataProductUserRole.OWNER,
             )
             .subquery()
         )
 
         pending_memberships = (
             db.query(DataProductMembership)
-            .join(DataProductModel, DataProductMembership.data_product_id == DataProductModel.id)
+            .join(
+                DataProductModel,
+                DataProductMembership.data_product_id == DataProductModel.id,
+            )
             .filter(
-                DataProductMembership.status == DataProductMembershipStatus.PENDING_APPROVAL,
-                DataProductModel.id.in_(select(owner_subquery))
+                DataProductMembership.status
+                == DataProductMembershipStatus.PENDING_APPROVAL,
+                DataProductModel.id.in_(select(owner_subquery)),
             )
             .options(
                 joinedload(DataProductMembership.user),
                 joinedload(DataProductMembership.data_product),
-                joinedload(DataProductMembership.requested_by)
+                joinedload(DataProductMembership.requested_by),
             )
             .order_by(asc(DataProductMembership.requested_on))
             .all()

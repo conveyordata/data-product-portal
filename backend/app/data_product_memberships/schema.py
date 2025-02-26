@@ -40,6 +40,7 @@ class DataProductMembership(BaseDataProductMembership):
     denied_by: User | None
     denied_on: datetime | None
 
+
 class DataProductMembershipAssociation(ORMModel):
     id: UUID
     user_id: UUID
