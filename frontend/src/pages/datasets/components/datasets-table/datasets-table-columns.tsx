@@ -34,7 +34,7 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
             dataIndex: 'status',
             render: (status: DatasetStatus) => {
                 return (
-                    <Popover content={getStatusLabel(status)} placement={'top'}>
+                    <Popover content={getStatusLabel(t, status)} placement={'top'}>
                         <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
                     </Popover>
                 );
@@ -99,11 +99,11 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
             title: t('Access Type'),
             dataIndex: 'access_type',
             render: (accessType: DatasetAccess) => {
-                return <TableCellItem text={getDatasetAccessTypeLabel(accessType)} />;
+                return <TableCellItem text={getDatasetAccessTypeLabel(t, accessType)} />;
             },
             ellipsis: true,
-            ...new FilterSettings(datasets, (ds) => getDatasetAccessTypeLabel(ds.access_type)),
-            sorter: sorter.stringSorter((ds) => getDatasetAccessTypeLabel(ds.access_type)),
+            ...new FilterSettings(datasets, (ds) => getDatasetAccessTypeLabel(t, ds.access_type)),
+            sorter: sorter.stringSorter((ds) => getDatasetAccessTypeLabel(t, ds.access_type)),
             width: '15%',
         },
         {

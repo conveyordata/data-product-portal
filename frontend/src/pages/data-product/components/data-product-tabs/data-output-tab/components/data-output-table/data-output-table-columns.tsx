@@ -48,7 +48,7 @@ export const getDataProductDataOutputsColumns = ({
                             <Flex vertical>
                                 <Badge
                                     status={getBadgeStatus(status)}
-                                    text={getStatusLabel(status)}
+                                    text={getStatusLabel(t, status)}
                                     className={styles.noSelect}
                                 />
                             </Flex>

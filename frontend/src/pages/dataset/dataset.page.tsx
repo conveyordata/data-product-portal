@@ -80,7 +80,7 @@ export function Dataset() {
                             lifecycle={dataset.lifecycle}
                             description={dataset.description}
                             domain={dataset.domain.name}
-                            accessType={getDatasetAccessTypeLabel(dataset.access_type)}
+                            accessType={getDatasetAccessTypeLabel(t, dataset.access_type)}
                             tags={[
                                 ...dataset.tags,
                                 ...dataset.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),
