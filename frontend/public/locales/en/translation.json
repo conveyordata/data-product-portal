@@ -1,5 +1,7 @@
 {
     "by {{author}} on {{date}}": "by {{author}} on {{date}}",
+    "There are currently no pending requests.": "There are currently no pending requests.",
+    "Received on": "Received on",
     "Logo": "Data Product Portal",
     "Nodes": "Nodes",
     "Environments": "Environments",

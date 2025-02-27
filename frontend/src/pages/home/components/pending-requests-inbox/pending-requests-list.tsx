@@ -6,6 +6,7 @@ import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts
 import { useTranslation } from 'react-i18next';
 import { ReactNode } from 'react';
 import { formatDate } from '@/utils/date.helper.ts';
+import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 
 const COL_SPAN = 12;
 
@@ -25,6 +26,10 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems }: DataProd
     const { t } = useTranslation();
     const navigate = useNavigate();
 
+    if (!pendingActionItems || pendingActionItems.length === 0) {
+        return <EmptyList description={t(`There are currently no pending requests.`)} />;
+    }
+
     const handleItemClick = (navigatePath: string) => {
         navigate(navigatePath);
     };
@@ -34,7 +39,6 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems }: DataProd
             dataSource={pendingActionItems}
             loading={isFetching}
             size="small"
-            locale={{ emptyText: t('There are currently no pending requests.') }}
             renderItem={(item) => {
                 if (!item) return null;
                 const formattedDate = item.date ? formatDate(item.date) : undefined;
