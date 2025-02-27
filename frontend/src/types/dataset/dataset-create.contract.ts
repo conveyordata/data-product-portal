@@ -5,7 +5,7 @@ export type DatasetCreateRequest = Pick<
     'lifecycle_id' | 'description' | 'name' | 'access_type' | 'external_id' | 'tag_ids'
 > & {
     owners: string[];
-    business_area_id: string;
+    domain_id: string;
 };
 
 export type DatasetCreateResponse = {

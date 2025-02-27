@@ -8,10 +8,10 @@ import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { DataProductTypeContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { BusinessAreaGetResponse } from '@/types/business-area';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { DomainContract } from '@/types/domain';
 
 const iconColumnWidth = 30;
 export const getDataProductTableColumns = ({
@@ -75,13 +75,13 @@ export const getDataProductTableColumns = ({
             width: '10%',
         },
         {
-            title: t('Business Area'),
-            dataIndex: 'business_area',
-            render: (businessArea: BusinessAreaGetResponse) => {
-                return <TableCellItem text={businessArea.name} />;
+            title: t('Domain'),
+            dataIndex: 'domain',
+            render: (domain: DomainContract) => {
+                return <TableCellItem text={domain.name} />;
             },
-            ...new FilterSettings(data, (dp) => dp.business_area.name),
-            sorter: sorter.stringSorter((dp) => dp.business_area.name),
+            ...new FilterSettings(data, (dp) => dp.domain.name),
+            sorter: sorter.stringSorter((dp) => dp.domain.name),
         },
         {
             title: t('Type'),

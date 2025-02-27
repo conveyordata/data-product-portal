@@ -139,7 +139,7 @@ export const Breadcrumbs = () => {
                                         }}
                                     >
                                         <Icon component={datasetOutlineIcon} />
-                                        {t('Datasets')}
+                                        {t('Marketplace')}
                                     </Space>
                                 ),
                             });
