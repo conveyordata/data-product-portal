@@ -6,3 +6,4 @@ class DataOutputTypes(str, Enum):
     DatabricksDataOutput = "DatabricksDataOutput"
     GlueDataOutput = "GlueDataOutput"
     SnowflakeDataOutput = "SnowflakeDataOutput"
+    RedshiftDataOutput = "RedshiftDataOutput"
