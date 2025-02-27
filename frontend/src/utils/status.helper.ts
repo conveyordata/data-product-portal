@@ -1,22 +1,22 @@
 import { DataProductStatus } from '@/types/data-product';
 import { DataOutputStatus } from '@/types/data-output';
-import { BadgeProps } from 'antd';
-import i18n from '@/i18n.ts';
+import type { BadgeProps } from 'antd';
 import { Status } from '@/types/shared';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { DataProductMembershipStatus } from '@/types/data-product-membership';
 import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
+import type { TFunction } from 'i18next';
 
-export function getStatusLabel(status: Status): string {
+export function getStatusLabel(t: TFunction, status: Status): string {
     switch (status) {
         case DataProductStatus.Pending || DataOutputStatus.Pending:
-            return i18n.t('Pending');
+            return t('Pending');
         case DataProductStatus.Active || DataOutputStatus.Active:
-            return i18n.t('Active');
+            return t('Active');
         case DataProductStatus.Deleted || DataOutputStatus.Deleted:
-            return i18n.t('Deleted');
+            return t('Deleted');
         default:
-            return i18n.t('Unknown');
+            return t('Unknown');
     }
 }
 
@@ -33,29 +33,29 @@ export function getBadgeStatus(status: Status): BadgeProps['status'] {
     }
 }
 
-export function getDataProductDatasetLinkStatusLabel(status: DataProductDatasetLinkStatus): string {
+export function getDataProductDatasetLinkStatusLabel(t: TFunction, status: DataProductDatasetLinkStatus): string {
     switch (status) {
         case DataProductDatasetLinkStatus.Pending:
-            return i18n.t('Requested');
+            return t('Requested');
         case DataProductDatasetLinkStatus.Approved:
-            return i18n.t('Available');
+            return t('Available');
         case DataProductDatasetLinkStatus.Denied:
-            return i18n.t('Rejected');
+            return t('Rejected');
         default:
-            return i18n.t('Unknown');
+            return t('Unknown');
     }
 }
 
-export function getDataOutputDatasetLinkStatusLabel(status: DataOutputDatasetLinkStatus): string {
+export function getDataOutputDatasetLinkStatusLabel(t: TFunction, status: DataOutputDatasetLinkStatus): string {
     switch (status) {
         case DataOutputDatasetLinkStatus.Pending:
-            return i18n.t('Requested');
+            return t('Requested');
         case DataOutputDatasetLinkStatus.Approved:
-            return i18n.t('Available');
+            return t('Available');
         case DataOutputDatasetLinkStatus.Denied:
-            return i18n.t('Rejected');
+            return t('Rejected');
         default:
-            return i18n.t('Unknown');
+            return t('Unknown');
     }
 }
 
@@ -96,13 +96,13 @@ export function getDataProductMembershipBadgeStatus(role: DataProductMembershipS
     }
 }
 
-export function getDataProductMembershipStatusLabel(role: DataProductMembershipStatus): string {
+export function getDataProductMembershipStatusLabel(t: TFunction, role: DataProductMembershipStatus): string {
     switch (role) {
         case DataProductMembershipStatus.Approved:
-            return i18n.t('Approved');
+            return t('Approved');
         case DataProductMembershipStatus.Denied:
-            return i18n.t('Denied');
+            return t('Denied');
         default:
-            return i18n.t('Pending');
+            return t('Pending');
     }
 }

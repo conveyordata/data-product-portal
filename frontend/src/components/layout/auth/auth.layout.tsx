@@ -38,30 +38,30 @@ export const AuthLayout = () => {
     }, [authorizeUser, dispatch]);
 
     useEffect(() => {
-        if (isOidcEnabled) {
-            if (!isLoading) {
-                if (isAuthenticated) {
-                    handleAuthorizeUser().then(() => {
-                        const redirectPath = sessionStorage.getItem('redirectAfterLogin');
-                        sessionStorage.removeItem('redirectAfterLogin');
-                        if (redirectPath) {
-                            navigate(redirectPath);
-                        }
-                    });
-                } else {
-                    redirectToSignIn().catch((e) => {
-                        console.error('Failed to sign in', e);
-                    });
-                }
-            }
-        } else {
-            if (!user) {
+        if (isOidcEnabled && !isLoading) {
+            if (isAuthenticated) {
                 handleAuthorizeUser().then(() => {
-                    navigate({ search: '' });
+                    const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+                    sessionStorage.removeItem('redirectAfterLogin');
+                    if (redirectPath) {
+                        navigate(redirectPath);
+                    }
+                });
+            } else {
+                redirectToSignIn().catch((e) => {
+                    console.error('Failed to sign in', e);
                 });
             }
         }
-    }, [handleAuthorizeUser, isAuthenticated, isLoading, isOidcEnabled, navigate, redirectToSignIn, user]);
+    }, [handleAuthorizeUser, isAuthenticated, isLoading, isOidcEnabled, navigate, redirectToSignIn]);
+
+    useEffect(() => {
+        if (!isOidcEnabled && !user) {
+            handleAuthorizeUser().then(() => {
+                navigate({ search: '' });
+            });
+        }
+    }, [handleAuthorizeUser, isOidcEnabled, navigate, user]);
 
     useEffect(() => {
         // This gets called when the user is authenticated
