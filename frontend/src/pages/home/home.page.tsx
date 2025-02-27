@@ -24,7 +24,7 @@ export function Home() {
                 </Row>
             </div>
 
-            <div className={styles.content}>
+            <div className={styles.contentSecundary}>
                 <Row gutter={ROW_GUTTER}>
                     <Col span={COL_SPAN}>
                         <DataProductsInbox userId={currentUser.id} />

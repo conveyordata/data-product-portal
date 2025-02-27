@@ -15,3 +15,10 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     padding: globals.$container-padding-large;
     padding-bottom: 0;
 }
+
+.content-secundary {
+    flex: 0.6;
+    padding: globals.$container-padding-large;
+    padding-bottom: 0;
+    padding-top: globals.$spacing-ml;
+}

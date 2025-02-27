@@ -52,3 +52,11 @@ $item-card-width: 360px;
     display: flex;
     flex-direction: column;
 }
+
+.ant-list .ant-list-pagination {
+    display: none !important;
+}
+
+.requestsInfo {
+    padding-left: globals.$spacing-xs;
+}

@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { ReactNode } from 'react';
 import { formatDate } from '@/utils/date.helper.ts';
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
+import { PaginationConfig } from 'antd/es/pagination';
 
 const COL_SPAN = 12;
 
@@ -20,9 +21,10 @@ type PendingActionItem = {
 type DataProductListProps = {
     isFetching: boolean;
     pendingActionItems: PendingActionItem[];
+    pagination: PaginationConfig;
 };
 
-export const PendingRequestsList = ({ isFetching, pendingActionItems }: DataProductListProps) => {
+export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination }: DataProductListProps) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
@@ -38,7 +40,11 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems }: DataProd
         <List
             dataSource={pendingActionItems}
             loading={isFetching}
-            size="small"
+            className={styles.antList}
+            pagination={{
+                ...pagination,
+                className: styles.antListPagination,
+            }}
             renderItem={(item) => {
                 if (!item) return null;
                 const formattedDate = item.date ? formatDate(item.date) : undefined;

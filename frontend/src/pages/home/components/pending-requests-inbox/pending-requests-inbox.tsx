@@ -1,11 +1,11 @@
-import { Pagination, Typography } from 'antd';
+import { Badge, Pagination, Typography } from 'antd';
 import styles from './pending-requests-inbox.module.scss';
 import { useTranslation } from 'react-i18next';
 import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
 import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
 import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
 import { PendingRequestsList } from './pending-requests-list';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
 import { DataOutputDatasetContract } from '@/types/data-output-dataset';
 import { DataProductDatasetContract } from '@/types/data-product-dataset';
@@ -14,8 +14,7 @@ import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/d
 import { TFunction } from 'i18next';
 import { Link } from 'react-router-dom';
 import { DataProductMembershipLink } from '@/types/data-product-membership';
-
-const PAGE_SIZE = 3;
+import { useListPagination } from '@/hooks/use-list-pagination';
 
 type PendingAction =
     | ({ type: 'data_product' } & DataProductDatasetContract)
@@ -134,41 +133,33 @@ export function PendingRequestsInbox() {
         });
     }, [pendingActionsDatasets, pendingActionsDataOutputs, pendingActionsDataProducts, t]);
 
-    const [currentPage, setCurrentPage] = useState(1);
+    const { pagination, handlePaginationChange } = useListPagination({});
 
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
+    const onPaginationChange = (current: number, pageSize: number) => {
+        handlePaginationChange({ current, pageSize });
     };
-
-    const paginatedItems = useMemo(() => {
-        const startIndex = (currentPage - 1) * PAGE_SIZE;
-        return pendingItems.slice(startIndex, startIndex + PAGE_SIZE);
-    }, [currentPage, pendingItems]);
-
-    const displayedItems = paginatedItems.length + PAGE_SIZE * (currentPage - 1);
 
     return (
         <div className={styles.section}>
             <div className={styles.sectionTitle}>
                 <Typography.Title level={3}>
                     {t('Pending Requests')}{' '}
-                    <Typography.Text type="secondary">
-                        {t('({{displayed}}/{{total}})', {
-                            displayed: displayedItems,
-                            total: pendingItems.length,
-                        })}
-                    </Typography.Text>
+                    <Badge count={pendingItems.length} color="gray" className={styles.requestsInfo} />
                 </Typography.Title>
                 <Pagination
-                    current={currentPage}
-                    pageSize={PAGE_SIZE}
+                    current={pagination.current}
+                    pageSize={pagination.pageSize}
                     total={pendingItems.length}
-                    onChange={handlePageChange}
+                    onChange={onPaginationChange}
                     size="small"
                 />
             </div>
             <div className={styles.requestsListContainer}>
-                <PendingRequestsList pendingActionItems={paginatedItems} isFetching={isFetching} />
+                <PendingRequestsList
+                    pendingActionItems={pendingItems}
+                    isFetching={isFetching}
+                    pagination={pagination}
+                />
             </div>
         </div>
     );
