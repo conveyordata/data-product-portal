@@ -96,7 +96,7 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                                 title={item.name}
                                 subtitle={
                                     <Typography.Link className={styles.noCursorPointer}>
-                                        {item.business_area.name}
+                                        {item.domain.name}
                                     </Typography.Link>
                                 }
                             />

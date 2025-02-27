@@ -53,7 +53,7 @@ export const getDatasetDataProductsColumns = ({
                         subtitle={
                             <Badge
                                 status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(status)}
+                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -80,7 +80,7 @@ export const getDatasetDataProductsColumns = ({
                         subtitle={
                             <Badge
                                 status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(status)}
+                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }

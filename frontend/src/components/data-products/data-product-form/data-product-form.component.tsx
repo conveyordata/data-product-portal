@@ -14,7 +14,7 @@ import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
-import { useGetAllBusinessAreasQuery } from '@/store/features/business-areas/business-areas-api-slice.ts';
+import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
 import {
     getDataProductMemberMemberships,
     getDataProductOwnerIds,
@@ -48,13 +48,13 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     );
 
     const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
-    const { data: businessAreas = [], isFetching: isFetchingBusinessAreas } = useGetAllBusinessAreasQuery();
+    const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
     const { data: dataProductTypes = [], isFetching: isFetchingDataProductTypes } = useGetAllDataProductTypesQuery();
     const { data: dataProductOwners = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
-    const [archiveDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
+    const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
     const [form] = Form.useForm<DataProductCreateFormSchema>();
     const dataProductNameValue = Form.useWatch('name', form);
 
@@ -76,7 +76,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         isFetchingLifecycles;
 
     const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
-    const businessAreaSelectOptions = businessAreas.map((area) => ({ label: area.name, value: area.id }));
+    const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = dataProductOwners.map((owner) => ({ label: owner.email, value: owner.id }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
@@ -96,7 +96,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     lifecycle_id: values.lifecycle_id,
                     type_id: values.type_id,
                     tag_ids: values.tag_ids ?? [],
-                    business_area_id: values.business_area_id,
+                    domain_id: values.domain_id,
                 };
                 const response = await createDataProduct(request).unwrap();
                 dispatchMessage({ content: t('Data product created successfully'), type: 'success' });
@@ -122,7 +122,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     description: values.description,
                     type_id: values.type_id,
                     lifecycle_id: values.lifecycle_id,
-                    business_area_id: values.business_area_id,
+                    domain_id: values.domain_id,
                     tag_ids: values.tag_ids,
                     memberships,
                 };
@@ -156,15 +156,15 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
-    const handleArchiveDataProduct = async () => {
+    const handleDeleteDataProduct = async () => {
         if (canEditForm && currentDataProduct) {
             try {
-                await archiveDataProduct(currentDataProduct?.id).unwrap();
-                dispatchMessage({ content: t('Data product archived successfully'), type: 'success' });
+                await deleteDataProduct(currentDataProduct?.id).unwrap();
+                dispatchMessage({ content: t('Data product deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.DataProducts);
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to archive data product, please try again later'),
+                    content: t('Failed to delete data product, please try again later'),
                     type: 'error',
                 });
             }
@@ -185,7 +185,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 description: currentDataProduct.description,
                 type_id: currentDataProduct.type.id,
                 lifecycle_id: currentDataProduct.lifecycle.id,
-                business_area_id: currentDataProduct.business_area.id,
+                domain_id: currentDataProduct.domain.id,
                 tag_ids: currentDataProduct.tags.map((tag) => tag.id),
                 owners: getDataProductOwnerIds(currentDataProduct),
             });
@@ -284,18 +284,18 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 />
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema>
-                name={'business_area_id'}
-                label={t('Business Area')}
+                name={'domain_id'}
+                label={t('Domain')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the business area of the data product'),
+                        message: t('Please select the domain of the data product'),
                     },
                 ]}
             >
                 <Select
-                    loading={isFetchingBusinessAreas}
-                    options={businessAreaSelectOptions}
+                    loading={isFetchingDomains}
+                    options={domainSelectOptions}
                     filterOption={selectFilterOptionByLabelAndValue}
                     allowClear
                     showSearch
@@ -350,8 +350,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     </Button>
                     {canEditForm && (
                         <Popconfirm
-                            title={t('Are you sure you want to archive this data product?')}
-                            onConfirm={handleArchiveDataProduct}
+                            title={t('Are you sure you want to delete this data product?')}
+                            onConfirm={handleDeleteDataProduct}
                             okText={t('Yes')}
                             cancelText={t('No')}
                         >
@@ -362,7 +362,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                                 loading={isArchiving}
                                 disabled={isLoading}
                             >
-                                {t('Archive')}
+                                {t('Delete')}
                             </Button>
                         </Popconfirm>
                     )}

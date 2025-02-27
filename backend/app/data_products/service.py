@@ -64,7 +64,7 @@ from app.users.schema import User
 
 class DataProductService:
     def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
-        data_product = (
+        data_product: DataProductGet = (
             db.query(DataProductModel)
             .options(
                 joinedload(DataProductModel.dataset_links),
@@ -79,10 +79,20 @@ class DataProductService:
             .first()
         )
 
+        rolled_up_tags = set()
+
         if not data_product:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
             )
+
+        for link in data_product.dataset_links:
+            rolled_up_tags.update(link.dataset.tags)
+            for output_link in link.dataset.data_output_links:
+                rolled_up_tags.update(output_link.data_output.tags)
+
+        data_product.rolled_up_tags = rolled_up_tags
+
         if not data_product.lifecycle:
             data_product.lifecycle = default_lifecycle
         return data_product
@@ -215,8 +225,8 @@ class DataProductService:
         data_product.dataset_links = []
         for output in data_product.data_outputs:
             output.dataset_links = []
-            output.delete()
-        data_product.delete()
+            db.delete(output)
+        db.delete(data_product)
         db.commit()
 
     def _create_new_membership(
@@ -485,21 +495,19 @@ class DataProductService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for business"
-                    f"area {data_product.business_area.name}"
+                    "Workspace not configured for" f"domain {data_product.domain.name}"
                 ),
             )
 
         config = json.loads(config.config)["workspace_urls"]
-        if not str(data_product.business_area_id) in config:
+        if not str(data_product.domain_id) in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for business"
-                    f"area {data_product.business_area.name}"
+                    "Workspace not configured for" f"domain {data_product.domain.name}"
                 ),
             )
-        return config[str(data_product.business_area_id)]
+        return config[str(data_product.domain_id)]
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
         product = db.get(DataProductModel, id)

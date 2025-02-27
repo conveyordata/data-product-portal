@@ -52,7 +52,7 @@ export const getDataOutputDatasetsColumns = ({
                         subtitle={
                             <Badge
                                 status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(status)}
+                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }

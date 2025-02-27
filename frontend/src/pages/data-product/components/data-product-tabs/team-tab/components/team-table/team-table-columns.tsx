@@ -86,15 +86,15 @@ export const getDataProductUsersTableColumns = ({
                 return (
                     <Badge
                         status={getDataProductMembershipBadgeStatus(status)}
-                        text={getDataProductMembershipStatusLabel(status)}
+                        text={getDataProductMembershipStatusLabel(t, status)}
                     />
                 );
             },
             width: '20%',
             ...new FilterSettings(dataProductUsers, (membership) =>
-                getDataProductMembershipStatusLabel(membership.status),
+                getDataProductMembershipStatusLabel(t, membership.status),
             ),
-            sorter: sorter.stringSorter((membership) => getDataProductMembershipStatusLabel(membership.status)),
+            sorter: sorter.stringSorter((membership) => getDataProductMembershipStatusLabel(t, membership.status)),
         },
         {
             title: t('Actions'),

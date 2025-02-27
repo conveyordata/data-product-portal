@@ -3,7 +3,7 @@ import type { TFunction } from 'i18next';
 import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import styles from './datasets-table.module.scss';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { BusinessAreaContract } from '@/types/business-area';
+import { DomainContract } from '@/types/domain';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
@@ -34,7 +34,7 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
             dataIndex: 'status',
             render: (status: DatasetStatus) => {
                 return (
-                    <Popover content={getStatusLabel(status)} placement={'top'}>
+                    <Popover content={getStatusLabel(t, status)} placement={'top'}>
                         <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
                     </Popover>
                 );
@@ -85,25 +85,25 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
             width: '10%',
         },
         {
-            title: t('Business Area'),
-            dataIndex: 'business_area',
-            render: (businessArea: BusinessAreaContract) => {
-                return <TableCellItem text={businessArea.name} />;
+            title: t('Domain'),
+            dataIndex: 'domain',
+            render: (domain: DomainContract) => {
+                return <TableCellItem text={domain.name} />;
             },
             ellipsis: true,
-            ...new FilterSettings(datasets, (ds) => ds.business_area.name),
-            sorter: sorter.stringSorter((ds) => ds.business_area.name),
+            ...new FilterSettings(datasets, (ds) => ds.domain.name),
+            sorter: sorter.stringSorter((ds) => ds.domain.name),
             width: '13%',
         },
         {
             title: t('Access Type'),
             dataIndex: 'access_type',
             render: (accessType: DatasetAccess) => {
-                return <TableCellItem text={getDatasetAccessTypeLabel(accessType)} />;
+                return <TableCellItem text={getDatasetAccessTypeLabel(t, accessType)} />;
             },
             ellipsis: true,
-            ...new FilterSettings(datasets, (ds) => getDatasetAccessTypeLabel(ds.access_type)),
-            sorter: sorter.stringSorter((ds) => getDatasetAccessTypeLabel(ds.access_type)),
+            ...new FilterSettings(datasets, (ds) => getDatasetAccessTypeLabel(t, ds.access_type)),
+            sorter: sorter.stringSorter((ds) => getDatasetAccessTypeLabel(t, ds.access_type)),
             width: '15%',
         },
         {
@@ -126,7 +126,7 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
                 }
             },
             width: '25%',
-            // ...new FilterSettings(datasets, ds => ds.business_area.name),
+            // ...new FilterSettings(datasets, ds => ds.domain.name),
             // sorter: sorter.stringSorter(ds => ds.data_output_links.data_output.owner.name),
         },
         {

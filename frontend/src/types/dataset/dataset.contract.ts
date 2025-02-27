@@ -1,21 +1,21 @@
 import { TagContract } from '@/types/tag';
 import { UserContract } from '@/types/users';
 import { DataOutputLink, DataProductLink } from '@/types/dataset';
-import { BusinessAreaContract } from '@/types/business-area';
+import { DomainContract } from '@/types/domain';
 import { DataProductLifeCycleContract } from '../data-product-lifecycle';
 import { DataProductSettingValueContract } from '../data-product-setting';
 
 export enum DatasetStatus {
     Pending = 'pending',
     Active = 'active',
-    Archived = 'archived',
+    Deleted = 'deleted',
 }
 
 export enum DatasetAccess {
     Public = 'public',
     Restricted = 'restricted',
 }
-export const datasetStatusList = [DatasetStatus.Pending, DatasetStatus.Active, DatasetStatus.Archived];
+export const datasetStatusList = [DatasetStatus.Pending, DatasetStatus.Active, DatasetStatus.Deleted];
 
 export interface DatasetContract {
     id: string;
@@ -25,13 +25,14 @@ export interface DatasetContract {
     owners: UserContract[];
     status: DatasetStatus;
     tags: TagContract[];
+    rolled_up_tags: TagContract[];
     tag_ids: string[];
     data_product_links: DataProductLink[];
     lifecycle: DataProductLifeCycleContract;
     lifecycle_id: string;
     data_output_links: DataOutputLink[];
     access_type: DatasetAccess;
-    business_area: BusinessAreaContract;
+    domain: DomainContract;
     external_id: string;
     data_product_settings: DataProductSettingValueContract[];
 }

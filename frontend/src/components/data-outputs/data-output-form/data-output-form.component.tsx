@@ -39,7 +39,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
-    const [archiveDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
+    const [deleteDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
     const canEditForm = Boolean(
         dataProduct &&
@@ -50,15 +50,15 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const isLoading = isFetchingInitialValues || isFetchingTags;
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
-    const handleArchiveDataProduct = async () => {
+    const handleDeleteDataProduct = async () => {
         if (canEditForm && currentDataOutput) {
             try {
-                await archiveDataOutput(currentDataOutput?.id).unwrap();
-                dispatchMessage({ content: t('Data output archived successfully'), type: 'success' });
+                await deleteDataOutput(currentDataOutput?.id).unwrap();
+                dispatchMessage({ content: t('Data output deleted successfully'), type: 'success' });
                 navigate(createDataProductIdPath(dataProduct!.id));
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to archive data output, please try again later'),
+                    content: t('Failed to delete data output, please try again later'),
                     type: 'error',
                 });
             }
@@ -190,8 +190,8 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     </Button>
                     {canEditForm && (
                         <Popconfirm
-                            title={t('Are you sure you want to archive this data output?')}
-                            onConfirm={handleArchiveDataProduct}
+                            title={t('Are you sure you want to delete this data output?')}
+                            onConfirm={handleDeleteDataProduct}
                             okText={t('Yes')}
                             cancelText={t('No')}
                         >
@@ -202,7 +202,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                                 loading={isArchiving}
                                 disabled={isLoading}
                             >
-                                {t('Archive')}
+                                {t('Delete')}
                             </Button>
                         </Popconfirm>
                     )}

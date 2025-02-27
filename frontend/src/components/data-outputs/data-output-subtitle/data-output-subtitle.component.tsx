@@ -4,6 +4,7 @@ import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-ou
 import {
     DatabricksDataOutputContract,
     GlueDataOutputContract,
+    RedshiftDataOutputContract,
     S3DataOutputContract,
     SnowflakeDataOutputContract,
 } from '@/types/data-output';
@@ -23,7 +24,9 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
                 <Flex vertical>
                     <div>
                         <Typography.Text strong>{t('Glue database')}: </Typography.Text>
-                        <Typography.Text>{glue_configuration.database}</Typography.Text>
+                        <Typography.Text>
+                            {glue_configuration.database}__{glue_configuration.database_suffix}
+                        </Typography.Text>
                     </div>
                 </Flex>
             );
@@ -35,7 +38,7 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
                     <div>
                         <Typography.Text strong>{t('Snowflake schema')}: </Typography.Text>
                         <Typography.Text>
-                            {snowflake_configuration.schema}__{snowflake_configuration.schema_suffix}
+                            {snowflake_configuration.database}__{snowflake_configuration.schema}
                         </Typography.Text>
                     </div>
                 </Flex>
@@ -67,6 +70,20 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
                             {s3_configuration.bucket}
                             {suffix}
                             {s3_configuration.path}/*
+                        </Typography.Text>
+                    </div>
+                </Flex>
+            );
+        }
+        case 'RedshiftDataOutput': {
+            const redshift_configuration = data_output.configuration as RedshiftDataOutputContract;
+            return (
+                <Flex vertical>
+                    <div>
+                        <Typography.Text strong>{t('Redshift schema')}: </Typography.Text>
+                        <Typography.Text>
+                            {redshift_configuration.database}__{redshift_configuration.schema}.
+                            {redshift_configuration.table}
                         </Typography.Text>
                     </div>
                 </Flex>

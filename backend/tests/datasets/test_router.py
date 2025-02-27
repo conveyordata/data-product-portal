@@ -1,7 +1,7 @@
 import uuid
 
 import pytest
-from tests.factories import BusinessAreaFactory, DatasetFactory, UserFactory
+from tests.factories import DatasetFactory, DomainFactory, UserFactory
 
 from app.datasets.enums import DatasetAccessType
 
@@ -11,7 +11,7 @@ ENDPOINT = "/api/datasets"
 @pytest.fixture
 def dataset_payload():
     user = UserFactory()
-    business_area = BusinessAreaFactory()
+    domain = DomainFactory()
     return {
         "name": "Test Dataset",
         "description": "Test Description",
@@ -21,7 +21,7 @@ def dataset_payload():
             str(user.id),
         ],
         "access_type": DatasetAccessType.RESTRICTED.value,
-        "business_area_id": str(business_area.id),
+        "domain_id": str(domain.id),
     }
 
 
@@ -64,7 +64,7 @@ class TestDatasetsRouter:
             "tags": [],
             "access_type": "public",
             "owners": [str(ds.owners[0].id)],
-            "business_area_id": str(ds.business_area_id),
+            "domain_id": str(ds.domain_id),
         }
 
         updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
@@ -80,7 +80,7 @@ class TestDatasetsRouter:
             "tag_ids": [],
             "access_type": "public",
             "owners": [str(ds.owners[0].id)],
-            "business_area_id": str(ds.business_area_id),
+            "domain_id": str(ds.domain_id),
         }
 
         updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
@@ -160,7 +160,7 @@ class TestDatasetsRouter:
             "tags": [],
             "access_type": "public",
             "owners": [],
-            "business_area_id": str(uuid.uuid4()),
+            "domain_id": str(uuid.uuid4()),
         }
         dataset = self.update_default_dataset(client, update_payload, self.invalid_id)
         assert dataset.status_code == 404

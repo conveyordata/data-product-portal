@@ -3,7 +3,6 @@ from uuid import UUID
 
 from pydantic import Field, computed_field
 
-from app.business_areas.schema import BusinessArea
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_product_lifecycles.schema import DataProductLifeCycle
@@ -13,6 +12,7 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
+from app.domains.schema import Domain
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 from app.users.schema import User
@@ -37,14 +37,16 @@ class DatasetGet(ORMModel):
     status: DatasetStatus
     about: Optional[str] = None
     tags: list[Tag]
-    business_area: BusinessArea
+    domain: Domain
     access_type: DatasetAccessType
     data_output_links: list[DataOutputLink]
     data_product_settings: list[DataProductSettingValue]
+    rolled_up_tags: set[Tag]
 
 
 class DatasetsGet(DatasetGet):
     data_product_links: Annotated[list[DataProductLink], Field(exclude=True)]
+    rolled_up_tags: Annotated[set[Tag], Field(exclude=True)] = set()
     about: Optional[str] = Field(None, exclude=True)
 
     @computed_field

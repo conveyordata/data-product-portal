@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:23-alpine@sha256:70eca392e3d52cb7d133b52d52e8600d8c410a5eaee6105c11324b28868f9ac9 AS build-stage
+FROM --platform=linux/amd64 node:23-alpine@sha256:0a29d8a047149079bf48dab598f287815e39867d547e8f3935cfdece0a4379cc AS build-stage
 
 WORKDIR /app
 COPY . .
@@ -10,7 +10,7 @@ RUN npm ci
 RUN npm run build:prd
 
 # Use official nginx image as the base image
-FROM --platform=linux/amd64 nginx:1.27-alpine@sha256:b471bb609adc83f73c2d95148cf1bd683408739a3c09c0afc666ea2af0037aef
+FROM --platform=linux/amd64 nginx:1.27-alpine@sha256:4ff102c5d78d254a6f0da062b3cf39eaf07f01eec0927fd21e219d0af8bc0591
 
 # Copy the build output
 COPY --from=build-stage /app/dist /app/dist

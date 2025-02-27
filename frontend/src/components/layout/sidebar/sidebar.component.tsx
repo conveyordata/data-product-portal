@@ -29,7 +29,7 @@ export const Sidebar = () => {
             key: ApplicationPaths.DataProducts,
         },
         {
-            label: <Link to={ApplicationPaths.Datasets}>{t('Datasets')}</Link>,
+            label: <Link to={ApplicationPaths.Datasets}>{t('Marketplace')}</Link>,
             icon: <DatasetOutlined />,
             key: ApplicationPaths.Datasets,
         },
