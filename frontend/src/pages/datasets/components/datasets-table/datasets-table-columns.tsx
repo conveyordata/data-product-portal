@@ -4,7 +4,7 @@ import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import i18n from '@/i18n.ts';
 import styles from './datasets-table.module.scss';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { BusinessAreaContract } from '@/types/business-area';
+import { DomainContract } from '@/types/domain';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
@@ -90,14 +90,14 @@ export const getDatasetTableColumns = ({
             width: '10%',
         },
         {
-            title: t('Business Area'),
-            dataIndex: 'business_area',
-            render: (businessArea: BusinessAreaContract) => {
-                return <TableCellItem text={businessArea.name} />;
+            title: t('Domain'),
+            dataIndex: 'domain',
+            render: (domain: DomainContract) => {
+                return <TableCellItem text={domain.name} />;
             },
             ellipsis: true,
-            ...new FilterSettings(datasets, (ds) => ds.business_area.name),
-            sorter: sorter.stringSorter((ds) => ds.business_area.name),
+            ...new FilterSettings(datasets, (ds) => ds.domain.name),
+            sorter: sorter.stringSorter((ds) => ds.domain.name),
             width: '13%',
         },
         {
@@ -131,7 +131,7 @@ export const getDatasetTableColumns = ({
                 }
             },
             width: '25%',
-            // ...new FilterSettings(datasets, ds => ds.business_area.name),
+            // ...new FilterSettings(datasets, ds => ds.domain.name),
             // sorter: sorter.stringSorter(ds => ds.data_output_links.data_output.owner.name),
         },
         {

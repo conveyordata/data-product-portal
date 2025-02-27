@@ -11,7 +11,7 @@ export enum TagTypes {
     Auth = 'Auth',
     Environment = 'Environment',
     Dataset = 'Dataset',
-    BusinessArea = 'BusinessArea',
+    Domain = 'Domain',
     DataOutput = 'DataOutput',
     Platform = 'Platform',
     PlatformService = 'PlatformService',

@@ -81,7 +81,7 @@ export function Dataset() {
                         <DatasetDescription
                             lifecycle={dataset.lifecycle}
                             description={dataset.description}
-                            businessArea={dataset.business_area.name}
+                            domain={dataset.domain.name}
                             accessType={getDatasetAccessTypeLabel(dataset.access_type)}
                             tags={[
                                 ...dataset.tags,

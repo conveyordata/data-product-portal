@@ -2,49 +2,40 @@ import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { Button, Form, Input } from 'antd';
 import { TFunction } from 'i18next';
-import {
-    useCreateBusinessAreaMutation,
-    useUpdateBusinessAreaMutation,
-} from '@/store/features/business-areas/business-areas-api-slice';
-import { BusinessAreaContract } from '@/types/business-area';
+import { useCreateDomainMutation, useUpdateDomainMutation } from '@/store/features/domains/domains-api-slice';
+import { DomainContract } from '@/types/domain';
 
-interface CreateBusinessAreaModalProps {
+interface CreateDomainModalProps {
     onClose: () => void;
     t: TFunction;
     isOpen: boolean;
     mode: 'create' | 'edit';
-    initial?: BusinessAreaContract;
+    initial?: DomainContract;
 }
 
-interface BusinessAreaFormText {
+interface DomainFormText {
     title: string;
     successMessage: string;
     errorMessage: string;
     submitButtonText: string;
 }
 
-export const CreateBusinessAreaModal: React.FC<CreateBusinessAreaModalProps> = ({
-    isOpen,
-    t,
-    onClose,
-    mode,
-    initial,
-}) => {
+export const CreateDomainModal: React.FC<CreateDomainModalProps> = ({ isOpen, t, onClose, mode, initial }) => {
     const [form] = Form.useForm();
-    const [createBusinessArea, { isLoading: isCreating }] = useCreateBusinessAreaMutation();
-    const [editBusinessArea, { isLoading: isEditing }] = useUpdateBusinessAreaMutation();
+    const [createDomain, { isLoading: isCreating }] = useCreateDomainMutation();
+    const [editDomain, { isLoading: isEditing }] = useUpdateDomainMutation();
 
-    const createText: BusinessAreaFormText = {
-        title: t('Create New Business Area'),
-        successMessage: t('Business Area created successfully'),
-        errorMessage: t('Failed to create Business Area'),
+    const createText: DomainFormText = {
+        title: t('Create New Domain'),
+        successMessage: t('Domain created successfully'),
+        errorMessage: t('Failed to create Domain'),
         submitButtonText: t('Create'),
     };
 
-    const updateText: BusinessAreaFormText = {
-        title: t('Update Business Area'),
-        successMessage: t('Business Area updated successfully'),
-        errorMessage: t('Failed to update Business Area'),
+    const updateText: DomainFormText = {
+        title: t('Update Domain'),
+        successMessage: t('Domain updated successfully'),
+        errorMessage: t('Failed to update Domain'),
         submitButtonText: t('Update'),
     };
 
@@ -53,9 +44,9 @@ export const CreateBusinessAreaModal: React.FC<CreateBusinessAreaModalProps> = (
     const handleFinish = async (values: any) => {
         try {
             if (mode === 'create') {
-                await createBusinessArea(values);
+                await createDomain(values);
             } else {
-                await editBusinessArea({ businessArea: values, businessAreaId: initial!.id });
+                await editDomain({ domain: values, domainId: initial!.id });
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });
