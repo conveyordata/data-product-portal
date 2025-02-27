@@ -1,9 +1,13 @@
+import logfire
 from agentic_system.router import router
 from agentic_system.settings import settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.auth.jwt import oidc
+
+logfire.configure()
+logfire.instrument_asyncpg()
 
 with open("./VERSION", "r") as f:
     API_VERSION = f.read().strip()
