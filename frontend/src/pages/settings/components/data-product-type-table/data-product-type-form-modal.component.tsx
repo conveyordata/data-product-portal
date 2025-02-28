@@ -37,8 +37,8 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
     initial,
 }) => {
     const [form] = Form.useForm();
-    const [createDataProductType, { isLoading: isCreating }] = useCreateDataProductTypeMutation();
-    const [editDataProductType, { isLoading: isEditing }] = useUpdateDataProductTypeMutation();
+    const [createDataProductType] = useCreateDataProductTypeMutation();
+    const [editDataProductType] = useUpdateDataProductTypeMutation();
 
     const createText: DataProductTypeFormText = {
         title: t('Create New Data Product Type'),

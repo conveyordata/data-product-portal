@@ -26,9 +26,9 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
     migrateFrom,
 }) => {
     const [form] = Form.useForm();
-    const { data: dataProductTypes = [], isFetching } = useGetAllDataProductTypesQuery();
-    const [migrateDataProductType, { isLoading: isCreating }] = useMigrateDataProductTypeMutation();
-    const [onRemoveDataProductType, { isLoading: isRemoving }] = useRemoveDataProductTypeMutation();
+    const { data: dataProductTypes = [] } = useGetAllDataProductTypesQuery();
+    const [migrateDataProductType] = useMigrateDataProductTypeMutation();
+    const [onRemoveDataProductType] = useRemoveDataProductTypeMutation();
 
     const handleFinish = async (values: any) => {
         try {

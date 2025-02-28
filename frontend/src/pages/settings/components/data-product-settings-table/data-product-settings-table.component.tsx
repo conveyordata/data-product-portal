@@ -31,8 +31,8 @@ export function DataProductSettingsTable({ scope }: Props) {
     const filteredSettings = useMemo(() => {
         return dataProductSettings.filter((setting) => setting.scope === scope);
     }, [dataProductSettings, scope]);
-    const [editDataProductSetting, { isLoading: isEditing }] = useUpdateDataProductSettingMutation();
-    const [onRemoveDataProductSetting, { isLoading: isRemoving }] = useRemoveDataProductSettingMutation();
+    const [editDataProductSetting] = useUpdateDataProductSettingMutation();
+    const [onRemoveDataProductSetting] = useRemoveDataProductSettingMutation();
 
     const columns = useMemo(
         () => getDataProductTableColumns({ t, handleOpen, onRemoveDataProductSetting }),

@@ -5,7 +5,6 @@ import { Sorter } from '@/utils/table-sorter.helper';
 import { DataProductSettingContract } from '@/types/data-product-setting';
 import { ColumnType } from 'antd/es/table';
 
-const iconColumnWidth = 30;
 type Props = {
     t: TFunction;
     isLoading?: boolean;

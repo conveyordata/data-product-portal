@@ -22,8 +22,8 @@ interface DomainFormText {
 
 export const CreateDomainModal: React.FC<CreateDomainModalProps> = ({ isOpen, t, onClose, mode, initial }) => {
     const [form] = Form.useForm();
-    const [createDomain, { isLoading: isCreating }] = useCreateDomainMutation();
-    const [editDomain, { isLoading: isEditing }] = useUpdateDomainMutation();
+    const [createDomain] = useCreateDomainMutation();
+    const [editDomain] = useUpdateDomainMutation();
 
     const createText: DomainFormText = {
         title: t('Create New Domain'),

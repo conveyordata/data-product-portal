@@ -15,7 +15,7 @@ export function TagsTable() {
     const { data: tags = [], isFetching } = useGetAllTagsQuery();
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
-    const [onRemoveTag, { isLoading: isRemoving }] = useRemoveTagMutation();
+    const [onRemoveTag] = useRemoveTagMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<TagContract | undefined>(undefined);
 

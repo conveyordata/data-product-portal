@@ -19,7 +19,7 @@ interface CreateSettingModalProps {
 
 export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose, scope }) => {
     const [form] = Form.useForm();
-    const [createDataProductSetting, { isLoading: isCreating }] = useCreateDataProductSettingMutation();
+    const [createDataProductSetting] = useCreateDataProductSettingMutation();
     const typeValue = Form.useWatch('type', form);
 
     const handleFinish = async (values: any) => {

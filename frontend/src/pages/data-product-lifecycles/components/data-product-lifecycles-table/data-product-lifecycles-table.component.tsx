@@ -21,10 +21,10 @@ import type { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
 export function DataProductLifecyclesTable() {
     const { t } = useTranslation();
     const { data: dataProductLifecycles = [], isFetching } = useGetAllDataProductLifecyclesQuery();
-    const [editDataProductLifecycle, { isLoading: isEditing }] = useUpdateDataProductLifecycleMutation();
+    const [editDataProductLifecycle] = useUpdateDataProductLifecycleMutation();
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
-    const [onRemoveDataProductLifecycle, { isLoading: isRemoving }] = useRemoveDataProductLifecycleMutation();
+    const [onRemoveDataProductLifecycle] = useRemoveDataProductLifecycleMutation();
 
     const editColor = useCallback(
         (record: DataProductLifeCycleContract, color: string) => {

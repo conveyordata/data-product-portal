@@ -14,7 +14,7 @@ interface CreateLifecycleModalProps {
 
 export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOpen, t, onClose }) => {
     const [form] = Form.useForm();
-    const [createDataProductLifecycle, { isLoading: isCreating }] = useCreateDataProductLifecycleMutation();
+    const [createDataProductLifecycle] = useCreateDataProductLifecycleMutation();
 
     const handleFinish = async (values: any) => {
         try {

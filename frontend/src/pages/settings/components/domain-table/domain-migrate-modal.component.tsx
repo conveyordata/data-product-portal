@@ -25,9 +25,9 @@ export const CreateDomainMigrateModal: React.FC<CreateDomainMigrateModalProps> =
     migrateFrom,
 }) => {
     const [form] = Form.useForm();
-    const { data: domains = [], isFetching } = useGetAllDomainsQuery();
-    const [migrateDomain, { isLoading: isCreating }] = useMigrateDomainMutation();
-    const [onRemoveDomain, { isLoading: isRemoving }] = useRemoveDomainMutation();
+    const { data: domains = [] } = useGetAllDomainsQuery();
+    const [migrateDomain] = useMigrateDomainMutation();
+    const [onRemoveDomain] = useRemoveDomainMutation();
 
     const handleFinish = async (values: any) => {
         try {
