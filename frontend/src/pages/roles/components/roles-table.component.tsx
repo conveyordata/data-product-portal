@@ -4,13 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import QuestionTooltip from '@/components/tooltip/question-tooltip.tsx';
 import type { RoleScope } from '@/pages/roles/roles.page.tsx';
+import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
 
 import styles from './roles-table.module.scss';
 
 const { Text } = Typography;
 
 type Role = {
-    title: string;
+    name: string;
     description: string;
 };
 
@@ -36,7 +37,9 @@ type RolesTableProps = {
     scope: RoleScope;
 };
 export function RolesTable({ scope }: RolesTableProps) {
-    const roles: Role[] = useMemo(() => loadRolesForScope(scope), [scope]);
+    const { data: roles = [], isFetching } = useGetRolesQuery(scope);
+
+    const joinedRoles: Role[] = useMemo(() => [...loadRolesForScope(scope), ...roles], [roles, scope]);
     const [data, setData] = useState<Permission[]>(loadStateForScope(scope));
 
     useEffect(() => {
@@ -108,7 +111,7 @@ export function RolesTable({ scope }: RolesTableProps) {
         };
     };
 
-    const roleColumns = roles.map((item) => createColumn(item.title, item.description));
+    const roleColumns = joinedRoles.map((item) => createColumn(item.name, item.description));
 
     const columns: ColumnType<Permission>[] = [
         {
@@ -128,6 +131,7 @@ export function RolesTable({ scope }: RolesTableProps) {
         <Flex vertical className={styles.tableContainer}>
             <Table
                 columns={columns}
+                loading={isFetching}
                 dataSource={data}
                 pagination={false}
                 rowKey={'order'}
@@ -142,41 +146,41 @@ function loadRolesForScope(scope: RoleScope): Role[] {
         case 'global':
             return [
                 {
-                    title: 'Admin',
+                    name: 'Admin',
                     description: 'Administrators have blanket permissions',
                 },
                 {
-                    title: 'Everyone',
+                    name: 'Everyone',
                     description: "This is the role that is used as fallback for users that don't have another role",
                 },
             ];
         case 'data_product':
             return [
                 {
-                    title: 'Owner',
+                    name: 'Owner',
                     description: 'The owner of a Data Product',
                 },
                 {
-                    title: 'Solution Architect',
+                    name: 'Solution Architect',
                     description: 'The Solution Architect for a Data Product',
                 },
                 {
-                    title: 'Member',
+                    name: 'Member',
                     description: 'A regular team member of a Data Product',
                 },
             ];
         case 'dataset':
             return [
                 {
-                    title: 'Owner',
+                    name: 'Owner',
                     description: 'The owner of a Dataset',
                 },
                 {
-                    title: 'Solution Architect',
+                    name: 'Solution Architect',
                     description: 'The Solution Architect for a Dataset',
                 },
                 {
-                    title: 'Member',
+                    name: 'Member',
                     description: 'A regular team member of a Dataset',
                 },
             ];

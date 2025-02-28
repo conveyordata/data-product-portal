@@ -11,7 +11,7 @@ from app.roles.service import RoleService
 router = APIRouter(prefix="/roles", tags=["roles"])
 
 
-@router.get("")
+@router.get("/{scope}")
 def get_roles(scope: str, db: Session = Depends(get_db_session)) -> list[Role]:
     return RoleService(db).get_roles(scope)
 
