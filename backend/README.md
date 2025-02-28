@@ -34,7 +34,7 @@ POSTGRES_SERVER=localhost
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5050,http://localhost:8080
 AWS_DEFAULT_REGION=eu-west-1
 LOGGING_DIRECTORY=./tmp/logs
-HOST=localhost
+HOST=http://localhost:3000/
 ```
 
 ### Docker (only when you want to use Docker for local execution)
