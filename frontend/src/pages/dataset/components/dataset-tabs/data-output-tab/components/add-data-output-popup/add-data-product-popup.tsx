@@ -15,7 +15,6 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import styles from '@/pages/data-product/components/data-product-tabs/dataset-tab/components/add-dataset-popup/add-dataset-popup.module.scss';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
-import { DataProductIcon } from '@/types/data-product-type';
 
 type Props = {
     onClose: () => void;

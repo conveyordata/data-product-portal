@@ -15,7 +15,6 @@ import { DataProductDatasetContract } from '@/types/data-product-dataset';
 import { DataProductMembershipAssociation } from '@/types/data-product-membership';
 import { TFunction } from 'i18next';
 
-
 export function Notifications() {
     const {
         token: { colorPrimary },

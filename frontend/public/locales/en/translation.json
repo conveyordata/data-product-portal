@@ -164,6 +164,8 @@
     "No users found": "No users found",
     "{{name}}, on behalf of data product": "{{name}}, on behalf of data product",
     "{{name}}": "{{name}}",
+    "{{date}}": "{{date}}",
+    "Pending Requests": "Pending Requests",
     "requests read access to dataset": "requests read access to dataset",
     "{{name}}, on behalf of data output": "{{name}}, on behalf of data output",
     "requests a link to dataset ": "requests a link to dataset ",

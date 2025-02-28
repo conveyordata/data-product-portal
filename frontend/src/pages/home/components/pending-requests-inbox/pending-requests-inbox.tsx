@@ -6,11 +6,9 @@ import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/dat
 import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
 import { PendingRequestsList } from './pending-requests-list';
 import { useMemo } from 'react';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
 import { DataOutputDatasetContract } from '@/types/data-output-dataset';
 import { DataProductDatasetContract } from '@/types/data-product-dataset';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
 import { TFunction } from 'i18next';
 import { Link } from 'react-router-dom';
 import { DataProductMembershipAssociation } from '@/types/data-product-membership';
@@ -42,7 +40,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                     <Typography.Text>.</Typography.Text>
                 </>
             );
-            navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
+            navigatePath = createDatasetIdPath(action.dataset_id);
             date = action.requested_on;
             break;
 
@@ -63,7 +61,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                     <Typography.Text>.</Typography.Text>
                 </>
             );
-            navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
+            navigatePath = createDatasetIdPath(action.dataset_id);
             date = action.requested_on;
             break;
 
@@ -81,7 +79,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                     <Typography.Text>.</Typography.Text>
                 </>
             );
-            navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
+            navigatePath = createDataProductIdPath(action.data_product_id);
             date = action.membership.requested_on;
             break;
 
