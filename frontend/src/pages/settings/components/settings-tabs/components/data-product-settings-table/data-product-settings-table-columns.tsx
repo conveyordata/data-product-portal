@@ -17,15 +17,15 @@ const defaultItem = (setting: DataProductSettingContract) => {
     switch (setting.type) {
         case 'checkbox': {
             const checked = setting.default === 'true';
-            return <Checkbox checked={checked} />;
+            return <Checkbox disabled checked={checked} />;
         }
         case 'tags': {
-            const list = setting.default.split(',');
-            return <Select value={list} allowClear={false} defaultActiveFirstOption mode="tags" />;
+            const list = setting.default.split(',').filter((tag) => tag.length > 0);
+            return <Select disabled value={list} allowClear={false} defaultActiveFirstOption mode="tags" />;
         }
         case 'input': {
             const input = setting.default;
-            return <Input value={input} />;
+            return <Input disabled value={input} />;
         }
         default: {
             const input = setting.default;

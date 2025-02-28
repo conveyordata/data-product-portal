@@ -76,7 +76,7 @@ export function DataProductSettingsTable({ scope }: Props) {
             </Flex>
             <Flex vertical className={styles.tableFilters}>
                 <Table<DataProductSettingContract>
-                    dataSource={dataProductSettings}
+                    dataSource={filteredSettings}
                     columns={columns}
                     onChange={onChange}
                     pagination={pagination}
