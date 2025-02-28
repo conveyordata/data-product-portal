@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Extract all router files and check their coverage
-cd ./backend
+cd ./../backend
 if poetry run python -c "
 import xml.etree.ElementTree as ET
 tree = ET.parse('coverage.xml')

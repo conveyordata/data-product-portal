@@ -75,7 +75,7 @@ jobs:
         run: poetry run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
       - name: Ensure 100% coverage for router files
         working-directory: ./scripts
-        run: ./check-coverage.sh
+        run: ./check_coverage.sh
 
 
   lint-golang:
