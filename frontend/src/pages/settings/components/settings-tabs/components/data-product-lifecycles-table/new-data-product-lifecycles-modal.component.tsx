@@ -30,16 +30,16 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
     const [editDataProductLifecycle, { isLoading: isEditing }] = useUpdateDataProductLifecycleMutation();
 
     const createText: LifeCycleFormText = {
-        title: t('Create New Data Product Lifecycle'),
-        successMessage: t('Data product lifecycle created successfully'),
-        errorMessage: t('Failed to create data product lifecycle'),
+        title: t('Create New Lifecycle'),
+        successMessage: t('lifecycle created successfully'),
+        errorMessage: t('Failed to create lifecycle'),
         submitButtonText: t('Create'),
     };
 
     const updateText: LifeCycleFormText = {
-        title: t('Update Data Product Lifecycle'),
-        successMessage: t('Data product lifecycle updated successfully'),
-        errorMessage: t('Failed to update data product lifecycle'),
+        title: t('Update Lifecycle'),
+        successMessage: t('lifecycle updated successfully'),
+        errorMessage: t('Failed to update lifecycle'),
         submitButtonText: t('Update'),
     };
 
@@ -63,7 +63,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
     return (
         <FormModal
             isOpen={isOpen}
-            title={t('Create New Data Product Lifecycle')}
+            title={variableText.title}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -74,7 +74,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
             }}
             footer={[
                 <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {t('Create')}
+                    {variableText.submitButtonText}
                 </Button>,
                 <Button
                     key="cancel"
@@ -105,7 +105,10 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                 <Form.Item
                     name="value"
                     label={t('Value')}
-                    rules={[{ required: true, message: t('Please provide a value') }]}
+                    rules={[
+                        { required: true, message: t('Please provide a value') },
+                        { type: 'number', message: t('Value must be a number') },
+                    ]}
                 >
                     <InputNumber min={0} precision={0} className={styles.numberInput} />
                 </Form.Item>

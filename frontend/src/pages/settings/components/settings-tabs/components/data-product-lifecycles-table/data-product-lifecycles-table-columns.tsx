@@ -77,7 +77,7 @@ export const getDataProductTableColumns = ({
                             <Popconfirm
                                 title={t('Remove')}
                                 description={t(
-                                    'Are you sure you want to delete the data product lifecycle? This will remove the lifecycle from all the data products and return them to default',
+                                    'Are you sure you want to delete the lifecycle? This will remove the lifecycle from all the data products and datasets and return them to default',
                                 )}
                                 onConfirm={() => handleRemove(record)}
                                 placement={'leftTop'}

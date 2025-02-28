@@ -30,6 +30,7 @@ type Tab = {
     key: TabKeys;
     icon?: ReactNode;
     children: ReactNode;
+    hidden?: boolean;
 };
 
 export function SettingsTabs() {
@@ -60,18 +61,7 @@ export function SettingsTabs() {
                 key: TabKeys.DataOutput,
                 children: <DataOutputTab />,
                 icon: <Icon component={dataOutputOutlineIcon} />,
-            },
-            {
-                label: t('Platform'),
-                key: TabKeys.Platform,
-                children: <PlatformTab />,
-                icon: <Icon component={chipIcon} />,
-            },
-            {
-                label: t('Roles'),
-                key: TabKeys.Roles,
-                children: <RolesTab />,
-                icon: <TeamOutlined />,
+                hidden: true,
             },
             {
                 label: t('Metadata'),
@@ -79,21 +69,37 @@ export function SettingsTabs() {
                 children: <MetadataTab />,
                 icon: <InfoCircleOutlined />,
             },
+            {
+                label: t('Platform'),
+                key: TabKeys.Platform,
+                children: <PlatformTab />,
+                icon: <Icon component={chipIcon} />,
+                hidden: true,
+            },
+            {
+                label: t('Roles'),
+                key: TabKeys.Roles,
+                children: <RolesTab />,
+                icon: <TeamOutlined />,
+                hidden: true,
+            },
         ];
     }, [t]);
 
     return (
         <Tabs
             defaultActiveKey={TabKeys.General}
-            items={tabs.map(({ key, label, icon, children }) => {
-                return {
-                    label,
-                    key,
-                    children,
-                    icon,
-                    className: styles.tabPane,
-                };
-            })}
+            items={tabs
+                .filter((tab) => !tab.hidden)
+                .map(({ key, label, icon, children }) => {
+                    return {
+                        label,
+                        key,
+                        children,
+                        icon,
+                        className: styles.tabPane,
+                    };
+                })}
             size={'middle'}
             rootClassName={styles.tabContainer}
         />

@@ -65,12 +65,10 @@ export function DataProductSettingsTable({ scope }: Props) {
     return (
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.searchContainer}>
-                <Typography.Title level={3}>
-                    {scope === 'dataproduct' ? t('Data Product Settings') : t('Dataset Settings')}
-                </Typography.Title>
+                <Typography.Title level={3}>{t('Custom Settings')}</Typography.Title>
                 <Space>
                     <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
-                        {scope === 'dataproduct' ? t('Add Data Product Setting') : t('Add Dataset Setting')}
+                        {t('Add Custom Setting')}
                     </Button>
                 </Space>
             </Flex>

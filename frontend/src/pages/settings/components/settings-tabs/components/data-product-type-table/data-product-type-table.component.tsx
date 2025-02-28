@@ -52,10 +52,10 @@ export function DataProductTypeTable() {
                 handleOpenMigrate();
             } else {
                 await onRemoveDataProductType(type.id);
-                dispatchMessage({ content: t('Data Product Type removed successfully'), type: 'success' });
+                dispatchMessage({ content: t('Type removed successfully'), type: 'success' });
             }
-        } catch (error) {
-            dispatchMessage({ content: t('Could not remove Data Product Type'), type: 'error' });
+        } catch (_) {
+            dispatchMessage({ content: t('Could not remove Type'), type: 'error' });
         }
     };
 
@@ -64,10 +64,10 @@ export function DataProductTypeTable() {
     return (
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.addContainer}>
-                <Typography.Title level={3}>{t('Data Product Types')}</Typography.Title>
+                <Typography.Title level={3}>{t('Types')}</Typography.Title>
                 <Space>
                     <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
-                        {t('Add Data Product Type')}
+                        {t('Add Type')}
                     </Button>
                 </Space>
             </Flex>

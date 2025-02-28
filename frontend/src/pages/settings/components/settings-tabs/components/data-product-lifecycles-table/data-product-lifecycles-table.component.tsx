@@ -42,9 +42,9 @@ export function DataProductLifecyclesTable() {
     const handleRemove = async (lifeCycle: DataProductLifeCycleContract) => {
         try {
             await onRemoveDataProductLifecycle(lifeCycle.id);
-            dispatchMessage({ content: t('Data product lifecycle removed successfully'), type: 'success' });
+            dispatchMessage({ content: t('Lifecycle removed successfully'), type: 'success' });
         } catch (_) {
-            dispatchMessage({ content: t('Could not remove data product lifecycle'), type: 'error' });
+            dispatchMessage({ content: t('Could not remove lifecycle'), type: 'error' });
         }
     };
 
@@ -56,10 +56,10 @@ export function DataProductLifecyclesTable() {
     return (
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.searchContainer}>
-                <Typography.Title level={3}>{t('Data Product Lifecycles')}</Typography.Title>
+                <Typography.Title level={3}>{t('Lifecycles')}</Typography.Title>
                 <Space>
                     <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
-                        {t('Add Data Product Lifecycle')}
+                        {t('Add Lifecycle')}
                     </Button>
                 </Space>
             </Flex>
