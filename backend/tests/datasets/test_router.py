@@ -187,9 +187,27 @@ class TestDatasetsRouter:
         assert response.status_code == 400
         assert "is already an owner of dataset" in response.json()["detail"]
 
+    def test_update_status_not_owner(self, client):
+        ds = DatasetFactory()
+        response = self.update_dataset_status(client, {"status": "active"}, ds.id)
+        assert response.status_code == 403
+
+    def test_update_status(self, client):
+        ds_owner = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[ds_owner])
+        response = self.get_dataset_by_id(client, ds.id)
+        assert response.json()["status"] == "active"
+        response = self.update_dataset_status(client, {"status": "pending"}, ds.id)
+        response = self.get_dataset_by_id(client, ds.id)
+        assert response.json()["status"] == "pending"
+
     @staticmethod
     def create_default_dataset(client, default_dataset_payload):
         return client.post(ENDPOINT, json=default_dataset_payload)
+
+    @staticmethod
+    def update_dataset_status(client, status, dataset_id):
+        return client.put(f"{ENDPOINT}/{dataset_id}/status", json=status)
 
     @staticmethod
     def update_default_dataset(client, default_dataset_payload, dataset_id):
