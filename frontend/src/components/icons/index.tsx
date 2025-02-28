@@ -3,6 +3,7 @@ import type { ComponentProps } from 'react';
 
 import DataProductOutlinedIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import DatasetOutlinedIcon from '@/assets/icons/dataset-outline-icon.svg?react';
+import DataOutputOutlinedIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import ProductLogoIcon from '@/assets/icons/logo.svg?react';
 
 type IconProps = Omit<ComponentProps<typeof Icon>, 'component'>;
@@ -17,4 +18,8 @@ export function DataProductOutlined(props: IconProps) {
 
 export function DatasetOutlined(props: IconProps) {
     return <Icon component={DatasetOutlinedIcon} {...props} />;
+}
+
+export function DataOutputOutlined(props: IconProps) {
+    return <Icon component={DataOutputOutlinedIcon} {...props} />;
 }

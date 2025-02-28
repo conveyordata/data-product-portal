@@ -1,19 +1,19 @@
-import { Flex, Badge, Button, theme, Dropdown, MenuProps, Space, Typography } from 'antd';
+import { Flex, Badge, Button, theme, Dropdown, type MenuProps, Space, Typography } from 'antd';
 import { BellOutlined, ExportOutlined } from '@ant-design/icons';
 import styles from './notifications.module.scss';
 import { useTranslation } from 'react-i18next';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, type NavigateFunction, useNavigate } from 'react-router-dom';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
 import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
-import { DataOutputDatasetContract } from '@/types/data-output-dataset';
-import { DataProductDatasetContract } from '@/types/data-product-dataset';
-import { DataProductMembershipContract } from '@/types/data-product-membership';
-import { TFunction } from 'i18next';
+import type { DataOutputDatasetContract } from '@/types/data-output-dataset';
+import type { DataProductDatasetContract } from '@/types/data-product-dataset';
+import type { DataProductMembershipContract } from '@/types/data-product-membership';
+import type { TFunction } from 'i18next';
 
 export function Notifications() {
     const {
@@ -31,7 +31,7 @@ export function Notifications() {
         | ({ type: 'data_output' } & DataOutputDatasetContract)
         | ({ type: 'team' } & DataProductMembershipContract);
 
-    const createPendingItem = (action: PendingAction, navigate: Function, t: TFunction) => {
+    const createPendingItem = useCallback((action: PendingAction, navigate: NavigateFunction, t: TFunction) => {
         let link, description, navigatePath;
 
         switch (action.type) {
@@ -103,7 +103,7 @@ export function Notifications() {
             extra: <ExportOutlined />,
             onClick: () => navigate(navigatePath),
         };
-    };
+    }, []);
 
     const pendingItems = useMemo(() => {
         const datasets = pending_actions_datasets?.map((action) =>
@@ -117,7 +117,14 @@ export function Notifications() {
         );
 
         return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])];
-    }, [pending_actions_datasets, pending_actions_dataoutputs, pending_actions_data_products, navigate, t]);
+    }, [
+        pending_actions_datasets,
+        pending_actions_dataoutputs,
+        pending_actions_data_products,
+        createPendingItem,
+        navigate,
+        t,
+    ]);
 
     const items: MenuProps['items'] = [
         {

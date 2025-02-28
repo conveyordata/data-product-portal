@@ -1,13 +1,13 @@
 import { DatasetAccess } from '@/types/dataset';
-import i18n from '@/i18n.ts';
+import type { TFunction } from 'i18next';
 
-export const getDatasetAccessTypeLabel = (accessType: DatasetAccess) => {
+export const getDatasetAccessTypeLabel = (t: TFunction, accessType: DatasetAccess) => {
     switch (accessType) {
         case DatasetAccess.Public:
-            return i18n.t('Public');
+            return t('Public');
         case DatasetAccess.Restricted:
-            return i18n.t('Restricted');
+            return t('Restricted');
         default:
-            return i18n.t('Unknown');
+            return t('Unknown');
     }
 };

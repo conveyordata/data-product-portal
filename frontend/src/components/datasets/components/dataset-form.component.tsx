@@ -23,6 +23,7 @@ import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constant
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
+import type { TFunction } from 'i18next';
 
 type Props = {
     mode: 'create' | 'edit';
@@ -31,14 +32,14 @@ type Props = {
 
 const { TextArea } = Input;
 
-const getAccessTypeOptions = () => [
+const getAccessTypeOptions = (t: TFunction) => [
     {
         value: DatasetAccess.Public,
-        label: getDatasetAccessTypeLabel(DatasetAccess.Public),
+        label: getDatasetAccessTypeLabel(t, DatasetAccess.Public),
     },
     {
         value: DatasetAccess.Restricted,
-        label: getDatasetAccessTypeLabel(DatasetAccess.Restricted),
+        label: getDatasetAccessTypeLabel(t, DatasetAccess.Restricted),
     },
 ];
 
@@ -69,7 +70,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
     const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingTags;
 
-    const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(), []);
+    const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = users.map((user) => ({ label: user.email, value: user.id }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];

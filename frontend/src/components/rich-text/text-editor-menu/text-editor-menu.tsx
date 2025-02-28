@@ -31,7 +31,7 @@ export const TextEditorMenu = ({ editor, isDisabled }: Props) => {
             { label: t('Heading {{value}}', { value: 2 }), value: 'heading2' },
             { label: t('Heading {{value}}', { value: 3 }), value: 'heading3' },
         ],
-        [],
+        [t],
     );
 
     const toggleBold = useCallback(() => {

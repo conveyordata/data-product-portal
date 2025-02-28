@@ -29,7 +29,7 @@ export function DataOutput() {
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
     const dataOutputTypeIcon = useMemo(() => {
         return getDataOutputIcon(dataOutput?.configuration.configuration_type);
-    }, [dataOutput?.id, dataOutput?.configuration.configuration_type]);
+    }, [dataOutput?.configuration.configuration_type]);
 
     const dataOutputOwners = dataProduct ? getDataProductOwners(dataProduct) : [];
     const isCurrentDataOutputOwner = Boolean(

@@ -1,4 +1,4 @@
-import { Button, Flex, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
+import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-product-form.module.scss';
 import {
@@ -28,14 +28,13 @@ import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-ty
 import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
-import { DataProductSettings } from '@/components/data-products/data-product-settings/data-product-settings.component.tsx';
+
+const { TextArea } = Input;
 
 type Props = {
     mode: 'create' | 'edit';
     dataProductId?: string;
 };
-
-const { TextArea } = Input;
 
 export function DataProductForm({ mode, dataProductId }: Props) {
     const { t } = useTranslation();
@@ -176,7 +175,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         if (mode === 'create') {
             form.setFieldsValue({ external_id: generateExternalIdFromName(dataProductNameValue ?? '') });
         }
-    }, [dataProductNameValue]);
+    }, [dataProductNameValue, form, mode]);
 
     useEffect(() => {
         if (currentDataProduct && mode === 'edit') {
@@ -191,7 +190,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 owners: getDataProductOwnerIds(currentDataProduct),
             });
         }
-    }, [currentDataProduct, mode]);
+    }, [currentDataProduct, form, mode]);
+
     return (
         <Form
             form={form}

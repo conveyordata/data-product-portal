@@ -9,6 +9,7 @@ import clsx from 'clsx';
 
 const RootLayout: React.FC = () => {
     const { pathname } = useLocation();
+
     const isHome = pathname === ApplicationPaths.Home;
     const layoutChildrenWrapperClasses = clsx(styles.childrenWrapper, {
         [styles.layoutContentHome]: isHome,

@@ -58,7 +58,7 @@ export const getDatasetDataProductsColumns = ({
                         subtitle={
                             <Badge
                                 status={getDataProductDatasetLinkBadgeStatus(status)}
-                                text={getDataProductDatasetLinkStatusLabel(status)}
+                                text={getDataProductDatasetLinkStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -66,7 +66,7 @@ export const getDatasetDataProductsColumns = ({
                 );
             },
             width: '100%',
-            ...new FilterSettings(dataProductLinks, (dpl) => getDataProductDatasetLinkStatusLabel(dpl.status)),
+            ...new FilterSettings(dataProductLinks, (dpl) => getDataProductDatasetLinkStatusLabel(t, dpl.status)),
             sorter: sorter.stringSorter((dpl) => dpl.data_product.name),
             defaultSortOrder: 'ascend',
         },

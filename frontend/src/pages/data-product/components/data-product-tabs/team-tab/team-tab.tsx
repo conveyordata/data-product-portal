@@ -52,7 +52,7 @@ export function TeamTab({ dataProductId }: Props) {
         if (!dataProduct || !user) return false;
 
         return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct?.id, user?.id]);
+    }, [dataProduct, user]);
 
     const handleGrantAccessToDataProduct = useCallback(
         async (user: UserContract) => {

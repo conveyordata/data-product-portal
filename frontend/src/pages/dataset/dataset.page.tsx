@@ -31,7 +31,7 @@ export function Dataset() {
     const datasetOwners = useMemo(() => dataset?.owners || [], [dataset?.owners]);
     const isDatasetOwner = useMemo(
         () => datasetOwners.some((owner) => owner.id === currentUser?.id) || Boolean(currentUser?.is_admin),
-        [datasetOwners, currentUser?.id],
+        [datasetOwners, currentUser],
     );
 
     function navigateToDatasetEditPage() {
@@ -45,7 +45,7 @@ export function Dataset() {
             id: datasetId,
             timestamp: Date.now(),
         });
-    }, []);
+    }, [datasetId]);
 
     if (isLoading) return <LoadingSpinner />;
 
@@ -60,9 +60,7 @@ export function Dataset() {
                         <Typography.Title level={3}>{dataset?.name}</Typography.Title>
                         {dataset.access_type === 'restricted' && (
                             <Popover content={t('Restricted access')} trigger="hover">
-                                <Flex>
-                                    <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
-                                </Flex>
+                                <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
                             </Popover>
                         )}
                     </Flex>
@@ -82,7 +80,7 @@ export function Dataset() {
                             lifecycle={dataset.lifecycle}
                             description={dataset.description}
                             domain={dataset.domain.name}
-                            accessType={getDatasetAccessTypeLabel(dataset.access_type)}
+                            accessType={getDatasetAccessTypeLabel(t, dataset.access_type)}
                             tags={[
                                 ...dataset.tags,
                                 ...dataset.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),
