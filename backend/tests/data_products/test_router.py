@@ -1,3 +1,4 @@
+import json
 from copy import deepcopy
 
 import pytest
@@ -11,8 +12,10 @@ from tests.factories import (
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.data_product_setting import DataProductSettingFactory
+from tests.factories.env_platform_config import EnvPlatformConfigFactory
 from tests.factories.environment import EnvironmentFactory
 from tests.factories.lifecycle import LifecycleFactory
+from tests.factories.platform import PlatformFactory
 
 from app.data_product_memberships.enums import DataProductUserRole
 
@@ -226,11 +229,35 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json() == env.context.replace("{{}}", data_product.external_id)
 
-    def test_get_signin_url(self, client):
-        pass
+    def test_get_signin_url_not_implemented(self, client):
+        EnvironmentFactory(name="production")
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        response = client.get(
+            f"{ENDPOINT}/{data_product.id}/signin_url?environment=production"
+        )
+        assert response.status_code == 501  # TODO Add actual AWS test through mocking
 
     def test_get_databricks_url(self, client):
-        pass
+        env = EnvironmentFactory(name="production")
+        platform = PlatformFactory(name="Databricks")
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        EnvPlatformConfigFactory(
+            environment=env,
+            platform=platform,
+            config=json.dumps(
+                {"workspace_urls": {str(data_product.domain.id): "test_1.com"}}
+            ),
+        )
+        response = client.get(
+            f"{ENDPOINT}/{data_product.id}/databricks_workspace_url?"
+            "environment=production"
+        )
+        assert response.status_code == 200
+        assert response.json() == "test_1.com"
 
     @staticmethod
     def create_data_product(client, default_data_product_payload):

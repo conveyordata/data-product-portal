@@ -410,8 +410,6 @@ class DataProductService:
         RefreshInfrastructureLambda().trigger()
 
     def get_data_product_role_arn(self, id: UUID, environment: str, db: Session) -> str:
-        print(environment)
-        print(db.query(EnvironmentModel).all())
         environment_context = (
             db.query(EnvironmentModel)
             .get_one(EnvironmentModel.name, environment)
