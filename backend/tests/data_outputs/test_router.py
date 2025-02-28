@@ -126,6 +126,63 @@ class TestDataOutputsRouter:
         response = self.delete_data_output(client, data_output.id)
         assert response.status_code == 200
 
+    def test_update_status_not_owner(self, client):
+        do = DataOutputFactory()
+        response = self.update_data_output_status(client, {"status": "active"}, do.id)
+        assert response.status_code == 403
+
+    def test_update_status(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        data_output = DataOutputFactory(owner=data_product)
+        response = self.get_data_output_by_id(client, data_output.id)
+        assert response.json()["status"] == "active"
+        response = self.update_data_output_status(
+            client, {"status": "pending"}, data_output.id
+        )
+        response = self.get_data_output_by_id(client, data_output.id)
+        assert response.json()["status"] == "pending"
+
+    def test_get_graph_data(self, client):
+        data_output = DataOutputFactory()
+        response = client.get(f"{ENDPOINT}/{data_output.id}/graph")
+        assert response.json()["edges"] == [
+            {
+                "animated": True,
+                "id": f"{str(data_output.id)}-{str(data_output.owner.id)}",
+                "source": str(data_output.owner.id),
+                "target": str(data_output.id),
+                "sourceHandle": "right_s",
+                "targetHandle": "left_t",
+            }
+        ]
+        for node in response.json()["nodes"]:
+            if node["type"] == "dataOutputNode":
+                assert node == {
+                    "data": {
+                        "icon_key": "S3DataOutput",
+                        "id": str(data_output.id),
+                        "link_to_id": str(data_output.owner.id),
+                        "name": data_output.name,
+                    },
+                    "id": str(data_output.id),
+                    "isMain": True,
+                    "type": "dataOutputNode",
+                }
+            else:
+                assert node == {
+                    "data": {
+                        "icon_key": "default",
+                        "id": str(data_output.owner.id),
+                        "link_to_id": None,
+                        "name": data_output.owner.name,
+                    },
+                    "id": str(data_output.owner.id),
+                    "isMain": False,
+                    "type": "dataProductNode",
+                }
+
     @staticmethod
     def create_data_output(client, default_data_output_payload):
         return client.post(ENDPOINT, json=default_data_output_payload)
@@ -141,3 +198,7 @@ class TestDataOutputsRouter:
     @staticmethod
     def delete_data_output(client, data_output_id):
         return client.delete(f"{ENDPOINT}/{data_output_id}")
+
+    @staticmethod
+    def update_data_output_status(client, status, data_output_id):
+        return client.put(f"{ENDPOINT}/{data_output_id}/status", json=status)

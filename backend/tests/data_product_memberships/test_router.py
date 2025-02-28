@@ -95,6 +95,24 @@ class TestDataProductMembershipsRouter:
         )
         assert response.status_code == 200
 
+    def test_get_pending_actions_no_action(self, client):
+        DataProductMembershipFactory(user=UserFactory(external_id="sub"))
+        response = client.get(f"{MEMBERSHIPS_ENDPOINT}/actions")
+        assert response.json() == []
+
+    def test_get_pending_actions(self, client):
+        owner_membership = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        )
+        self.request_data_product_membership(
+            client, UserFactory().id, owner_membership.data_product.id
+        )
+        response = client.get(f"{MEMBERSHIPS_ENDPOINT}/actions")
+        assert response.json()[0]["data_product_id"] == str(
+            owner_membership.data_product.id
+        )
+        assert response.json()[0]["status"] == "pending_approval"
+
     @staticmethod
     def create_secondary_membership(client, user_id, data_product_id):
         data = {

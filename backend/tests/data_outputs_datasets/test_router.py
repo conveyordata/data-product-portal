@@ -130,6 +130,34 @@ class TestDataOutputsDatasetsRouter:
         )
         assert response.status_code == 404
 
+    def test_delete_dataset_with_data_output_link(self, client):
+        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+        link = DataOutputDatasetAssociationFactory(dataset=ds)
+        response = client.get(f"/api/data_outputs/{link.data_output_id}")
+        assert response.json()["dataset_links"][0]["dataset_id"] == str(ds.id)
+        response = client.delete(f"/api/datasets/{ds.id}")
+        assert response.status_code == 200
+        response = client.get(f"/api/data_outputs/{link.data_output_id}")
+        assert len(response.json()["dataset_links"]) == 0
+
+    def test_get_pending_actions_no_action(self, client):
+        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+        DataOutputDatasetAssociationFactory(dataset=ds)
+        response = client.get(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
+        assert response.json() == []
+
+    def test_get_pending_actions(self, client):
+        owner = UserFactory(external_id="sub")
+        membership = DataProductMembershipFactory(user=owner)
+        data_output = DataOutputFactory(owner=membership.data_product)
+        ds = DatasetFactory(owners=[owner])
+
+        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        assert response.status_code == 200
+        response = client.get(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
+        assert response.json()[0]["data_output_id"] == str(data_output.id)
+        assert response.json()[0]["status"] == "pending_approval"
+
     @staticmethod
     def request_data_output_dataset_link(client, data_output_id, dataset_id):
         return client.post(
