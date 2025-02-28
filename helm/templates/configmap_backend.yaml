@@ -35,8 +35,11 @@ data:
   {{- if .Values.from_mail_address }}
   FROM_MAIL_ADDRESS: {{ .Values.from_mail_address }}
   {{- end }}
-  {{- if .Values.webhook_url }}
-  WEBHOOK_URL: {{ .Values.webhook_url }}
+  {{- if .Values.webhook.url }}
+  WEBHOOK_URL: {{ .Values.webhook.url }}
+  {{- end }}
+  {{- if .Values.webhook.secret }}
+  WEBHOOK_SECRET: {{ .Values.webhook.secret }}
   {{- end }}
 kind: ConfigMap
 metadata:

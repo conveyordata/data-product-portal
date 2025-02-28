@@ -36,6 +36,8 @@ class DatasetService:
             ],
         )
 
+        rolled_up_tags = set()
+
         default_lifecycle = (
             db.query(DataProductLifeCycleModel)
             .filter(DataProductLifeCycleModel.is_default)
@@ -46,6 +48,11 @@ class DatasetService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
             )
+
+        for output_link in dataset.data_output_links:
+            rolled_up_tags.update(output_link.data_output.tags)
+
+        dataset.rolled_up_tags = rolled_up_tags
 
         if not dataset.lifecycle:
             dataset.lifecycle = default_lifecycle
@@ -90,6 +97,7 @@ class DatasetService:
         for tag_id in tag_ids:
             tag = ensure_tag_exists(tag_id, db)
             tags.append(tag)
+
         return tags
 
     def create_dataset(
@@ -118,7 +126,7 @@ class DatasetService:
         dataset.owners = []
         dataset.data_product_links = []
         dataset.tags = []
-        dataset.delete()
+        db.delete(dataset)
 
         db.commit()
         RefreshInfrastructureLambda().trigger()

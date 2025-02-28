@@ -10,7 +10,7 @@ import { DataProductLifeCycleContract } from '../data-product-lifecycle/data-pro
 export enum DataProductStatus {
     Pending = 'pending',
     Active = 'active',
-    Archived = 'archived',
+    Deleted = 'deleted',
 }
 
 export interface DataProductContract {
@@ -26,6 +26,7 @@ export interface DataProductContract {
     dataset_links: DatasetLink[];
     tag_ids: string[];
     tags: TagContract[];
+    rolled_up_tags: TagContract[];
     memberships: DataProductMembershipContract[];
     business_area: BusinessAreaContract;
     business_area_id: string;

@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Table
+from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
@@ -11,23 +11,14 @@ from app.data_products.schema import DataProduct as DataProductSchema
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
-from app.shared.model import BaseORM, utcnow
-from app.tags.model import Tag
+from app.shared.model import BaseORM
+from app.tags.model import Tag, tag_data_product_table
 
 if TYPE_CHECKING:
     from app.business_areas.model import BusinessArea
     from app.data_outputs.model import DataOutput
     from app.data_product_lifecycles.model import DataProductLifecycle
     from app.data_product_types.model import DataProductType
-
-tag_data_product_table = Table(
-    "tags_data_products",
-    Base.metadata,
-    Column("data_product_id", ForeignKey("data_products.id")),
-    Column("tag_id", ForeignKey("tags.id")),
-    Column("created_on", DateTime(timezone=False), server_default=utcnow()),
-    Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
-)
 
 
 def ensure_data_product_exists(data_product_id: UUID, db: Session) -> DataProductSchema:

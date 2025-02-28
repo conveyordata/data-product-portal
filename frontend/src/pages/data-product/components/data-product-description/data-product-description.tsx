@@ -34,7 +34,7 @@ export function DataProductDescription({ lifecycle, type, description, businessA
                 </Space>
                 <Flex>
                     {tags.map((tag) => (
-                        <Tag color="success">{tag.value}</Tag>
+                        <Tag color={tag.rolled_up ? 'red' : 'success'}>{tag.value}</Tag>
                     ))}
                 </Flex>
                 <Space>
