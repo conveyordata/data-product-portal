@@ -8,7 +8,6 @@ import { getLastVisitedItemDate } from '@/pages/home/helpers/last-visited-item-h
 import { UsageListItem } from '@/components/list/usage-list-item/usage-list-item.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
-import { DataProductIcon } from '@/types/data-product-type';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '@/utils/date.helper.ts';
 
@@ -53,9 +52,7 @@ export const DataProductsList = ({ dataProducts, isFetching, lastVisitedDataProd
                             }
                             icon={
                                 <CustomSvgIconLoader
-                                    iconComponent={getDataProductTypeIcon(
-                                        project?.type.icon_key ? (project.type.icon_key as DataProductIcon) : 'default',
-                                    )}
+                                    iconComponent={getDataProductTypeIcon(project?.type?.icon_key)}
                                     hasRoundBorder
                                     size={'default'}
                                 />
