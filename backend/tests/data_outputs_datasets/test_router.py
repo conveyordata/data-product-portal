@@ -130,6 +130,16 @@ class TestDataOutputsDatasetsRouter:
         )
         assert response.status_code == 404
 
+    def test_delete_dataset_with_data_output_link(self, client):
+        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+        link = DataOutputDatasetAssociationFactory(dataset=ds)
+        response = client.get(f"/api/data_outputs/{link.data_output_id}")
+        assert response.json()["dataset_links"][0]["dataset_id"] == str(ds.id)
+        response = client.delete(f"/api/datasets/{ds.id}")
+        assert response.status_code == 200
+        response = client.get(f"/api/data_outputs/{link.data_output_id}")
+        assert len(response.json()["dataset_links"]) == 0
+
     @staticmethod
     def request_data_output_dataset_link(client, data_output_id, dataset_id):
         return client.post(
