@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { TabsProps } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 import { useState } from 'react';
-import { RolesButton } from '@/pages/roles/components/roles-button.component.tsx';
+import { CreateRoleButton } from '@/pages/roles/components/roles-button.component.tsx';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 
 const { Paragraph } = Typography;
@@ -43,7 +43,7 @@ export function RoleConfiguration() {
         <div>
             <Flex justify="space-between">
                 <Typography.Title level={2}>{t('Manage Roles')}</Typography.Title>
-                <RolesButton scope={current} />
+                <CreateRoleButton scope={current} />
             </Flex>
             <Paragraph>{t('Roles are reusable sets of permissions.')}</Paragraph>
 

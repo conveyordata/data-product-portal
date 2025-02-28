@@ -1,4 +1,4 @@
-import { Button, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
+import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-form.module.scss';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -13,7 +13,6 @@ import {
     useRemoveDataOutputMutation,
     useUpdateDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
-import TextArea from 'antd/es/input/TextArea';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
@@ -157,7 +156,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     },
                 ]}
             >
-                <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <Input.TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
                 <Select
