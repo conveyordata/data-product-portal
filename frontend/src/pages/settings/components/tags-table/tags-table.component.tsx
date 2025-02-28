@@ -1,12 +1,12 @@
 import { Button, Flex, Space, Table, Typography } from 'antd';
-import { TableProps } from 'antd/lib';
+import type { TableProps } from 'antd/lib';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useGetAllTagsQuery, useRemoveTagMutation } from '@/store/features/tags/tags-api-slice.tsx';
-import { TagContract } from '@/types/tag/tag.ts';
+import type { TagContract } from '@/types/tag/tag';
 
 import { CreateTagsModal } from './tags-form-modal.component';
 import styles from './tags-table.module.scss';
@@ -55,7 +55,7 @@ export function TagsTable() {
                 onChange={onChange}
                 pagination={pagination}
                 rowKey={(record) => record.id}
-                loading={isFetching}
+                loading={isFetching || isRemoving}
                 rowHoverable
                 rowClassName={() => 'editable-row'}
                 size={'small'}

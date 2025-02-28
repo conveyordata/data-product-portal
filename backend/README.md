@@ -128,7 +128,9 @@ If you want to completely destroy and recreate the database when performing the 
   ```
 
 ### Database migrations
-Whenever you develop functionality that would include a database structure change, you will need to [create an alembic migration script](https://alembic.sqlalchemy.org/en/latest/tutorial.html#create-a-migration-script) for it.
+Whenever you develop functionality that would include a database structure change,
+you will need to [create an alembic migration script](https://alembic.sqlalchemy.org/en/latest/tutorial.html#create-a-migration-script) for it.
+This comes down to running `alembic revision -m "{your message}"` in the `/backend` directory.
 
 In order to apply this migration using the database CLI tool you need to execute the command below.
   ```sh
