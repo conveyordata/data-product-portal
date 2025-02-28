@@ -8,6 +8,7 @@ import {
     useRemoveDomainMutation,
 } from '@/store/features/domains/domains-api-slice';
 import { DomainContract } from '@/types/domain';
+
 const { Option } = Select;
 
 interface CreateDomainMigrateModalProps {

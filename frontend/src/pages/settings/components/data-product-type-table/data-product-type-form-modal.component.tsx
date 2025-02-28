@@ -11,6 +11,7 @@ import { DataProductIcon, dataProductIcons } from '@/types/data-product-type/dat
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import Icon from '@ant-design/icons';
 import styles from './data-product-type-table.module.scss';
+
 const { Option } = Select;
 
 interface CreateDataProductTypeModalProps {

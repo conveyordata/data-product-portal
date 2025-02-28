@@ -9,6 +9,7 @@ import {
     useMigrateDataProductTypeMutation,
     useRemoveDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
+
 const { Option } = Select;
 
 interface CreateDataProductTypeMigrateModalProps {
