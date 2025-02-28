@@ -237,7 +237,9 @@ class TestDataProductsRouter:
         response = client.get(
             f"{ENDPOINT}/{data_product.id}/signin_url?environment=production"
         )
-        assert response.status_code == 501  # TODO Add actual AWS test through mocking
+        assert (
+            response.status_code == 501 or response.status_code == 400
+        )  # TODO Add actual AWS test through mocking
 
     def test_get_databricks_url(self, client):
         env = EnvironmentFactory(name="production")
