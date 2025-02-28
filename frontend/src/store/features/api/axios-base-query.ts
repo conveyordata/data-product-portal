@@ -6,7 +6,6 @@ import { ApiError } from '@/types/api-result.ts';
 import { NotificationState, showNotification } from '@/store/features/feedback/feedback-slice.ts';
 import { Headers, QueryParams } from '@/types/http.ts';
 import { User } from 'oidc-client-ts';
-import i18n from '@/i18n.ts';
 
 interface CustomAxiosError extends AxiosError {
     response?: AxiosResponse<ApiError>;
@@ -46,8 +45,8 @@ export const axiosBaseQuery =
     > =>
     async ({ url, method, data, params, headers }, api) => {
         const defaultErrorMessage: NotificationState = {
-            message: i18n.t('Something went wrong'),
-            description: i18n.t('Please try again later'),
+            message: 'Something went wrong',
+            description: 'Please try again later',
             type: 'error',
         };
 

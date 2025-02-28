@@ -3,7 +3,8 @@ import { useCreateDataProductLifecycleMutation } from '@/store/features/data-pro
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import { Button, Checkbox, ColorPicker, Form, Input } from 'antd';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
+import React from 'react';
 
 interface CreateLifecycleModalProps {
     onClose: () => void;
@@ -11,11 +12,19 @@ interface CreateLifecycleModalProps {
     isOpen: boolean;
 }
 
+interface DataProductLifecycleFormValues {
+    id: string;
+    name: string;
+    value: string;
+    color: { toHexString: () => string };
+    is_default: boolean;
+}
+
 export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOpen, t, onClose }) => {
     const [form] = Form.useForm();
-    const [createDataProductLifecycle, { isLoading: isCreating }] = useCreateDataProductLifecycleMutation();
+    const [createDataProductLifecycle] = useCreateDataProductLifecycleMutation();
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DataProductLifecycleFormValues) => {
         try {
             const newLifecycle: DataProductLifeCycleContract = {
                 ...values,

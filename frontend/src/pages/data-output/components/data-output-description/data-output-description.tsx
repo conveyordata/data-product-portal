@@ -24,7 +24,7 @@ export function DataOutputDescription({ status, type, description, tags }: Props
                         <Typography.Text strong>{t('Status')}</Typography.Text>
                         <Badge
                             status={getBadgeStatus(status)}
-                            text={getStatusLabel(status)}
+                            text={getStatusLabel(t, status)}
                             className={styles.noSelect}
                         />
                     </Flex>

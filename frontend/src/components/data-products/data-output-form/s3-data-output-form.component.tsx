@@ -33,7 +33,7 @@ export function S3DataOutputForm({ form, external_id, identifiers, sourceAligned
             form.setFieldsValue({ path: path });
             form.setFieldsValue({ result: bucketValue + '/' + path });
         }
-    }, [dataProductNameValue, sourceAligned, bucketValue]);
+    }, [dataProductNameValue, sourceAligned, bucketValue, external_id, form]);
 
     return (
         <div>

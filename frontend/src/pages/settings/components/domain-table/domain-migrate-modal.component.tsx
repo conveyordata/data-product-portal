@@ -3,40 +3,45 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { Button, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
 import {
-    useGetAllBusinessAreasQuery,
-    useMigrateBusinessAreaMutation,
-    useRemoveBusinessAreaMutation,
-} from '@/store/features/business-areas/business-areas-api-slice';
-import { BusinessAreaContract } from '@/types/business-area';
+    useGetAllDomainsQuery,
+    useMigrateDomainMutation,
+    useRemoveDomainMutation,
+} from '@/store/features/domains/domains-api-slice';
+import { DomainContract } from '@/types/domain';
+
 const { Option } = Select;
 
-interface CreateBusinessAreaMigrateModalProps {
+interface CreateDomainMigrateModalProps {
     onClose: () => void;
     t: TFunction;
     isOpen: boolean;
-    migrateFrom?: BusinessAreaContract;
+    migrateFrom?: DomainContract;
 }
 
-export const CreateBusinessAreaMigrateModal: React.FC<CreateBusinessAreaMigrateModalProps> = ({
+interface DomainMigrateFormValues {
+    toId: string;
+}
+
+export const CreateDomainMigrateModal: React.FC<CreateDomainMigrateModalProps> = ({
     isOpen,
     t,
     onClose,
     migrateFrom,
 }) => {
     const [form] = Form.useForm();
-    const { data: businessAreas = [], isFetching } = useGetAllBusinessAreasQuery();
-    const [migrateBusinessArea, { isLoading: isCreating }] = useMigrateBusinessAreaMutation();
-    const [onRemoveBusinessArea, { isLoading: isRemoving }] = useRemoveBusinessAreaMutation();
+    const { data: domains = [] } = useGetAllDomainsQuery();
+    const [migrateDomain] = useMigrateDomainMutation();
+    const [onRemoveDomain] = useRemoveDomainMutation();
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DomainMigrateFormValues) => {
         try {
-            await migrateBusinessArea({ fromId: migrateFrom!.id, toId: values.toId });
-            await onRemoveBusinessArea(migrateFrom!.id);
-            dispatchMessage({ content: t('Business Area migrated and deleted successfully'), type: 'success' });
+            await migrateDomain({ fromId: migrateFrom!.id, toId: values.toId });
+            await onRemoveDomain(migrateFrom!.id);
+            dispatchMessage({ content: t('Domain migrated and deleted successfully'), type: 'success' });
             form.resetFields();
             onClose();
         } catch (_e) {
-            const errorMessage = t('Could not migrate or delete Business Area');
+            const errorMessage = t('Could not migrate or delete Domain');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -44,7 +49,7 @@ export const CreateBusinessAreaMigrateModal: React.FC<CreateBusinessAreaMigrateM
     return (
         <FormModal
             isOpen={isOpen}
-            title={t('Delete Business Area')}
+            title={t('Delete Domain')}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -80,11 +85,11 @@ export const CreateBusinessAreaMigrateModal: React.FC<CreateBusinessAreaMigrateM
                     rules={[{ required: true, message: t('Please provide a value') }]}
                 >
                     <Select>
-                        {businessAreas
-                            .filter((businessArea) => businessArea.id !== migrateFrom!.id)
-                            .map((businessArea) => (
-                                <Option key={businessArea.id} value={businessArea.id}>
-                                    {businessArea.name}
+                        {domains
+                            .filter((domain) => domain.id !== migrateFrom!.id)
+                            .map((domain) => (
+                                <Option key={domain.id} value={domain.id}>
+                                    {domain.name}
                                 </Option>
                             ))}
                     </Select>

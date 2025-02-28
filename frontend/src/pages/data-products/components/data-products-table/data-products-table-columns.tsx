@@ -1,17 +1,16 @@
 import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import { DataProductsGetContract, DataProductStatus } from '@/types/data-product';
 import { TeamOutlined } from '@ant-design/icons';
-import i18n from '@/i18n';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import styles from './data-products-table.module.scss';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { DataProductTypeContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { BusinessAreaContract } from '@/types/business-area';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { DomainContract } from '@/types/domain';
 
 const iconColumnWidth = 30;
 export const getDataProductTableColumns = ({
@@ -35,10 +34,8 @@ export const getDataProductTableColumns = ({
             width: iconColumnWidth,
             render: (status: DataProductStatus) => {
                 return (
-                    <Popover content={getStatusLabel(status)} placement={'top'}>
-                        <>
-                            <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
-                        </>
+                    <Popover content={getStatusLabel(t, status)} placement={'top'}>
+                        <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
                     </Popover>
                 );
             },
@@ -75,13 +72,13 @@ export const getDataProductTableColumns = ({
             width: '10%',
         },
         {
-            title: t('Business Area'),
-            dataIndex: 'business_area',
-            render: (businessArea: BusinessAreaContract) => {
-                return <TableCellItem text={businessArea.name} />;
+            title: t('Domain'),
+            dataIndex: 'domain',
+            render: (domain: DomainContract) => {
+                return <TableCellItem text={domain.name} />;
             },
-            ...new FilterSettings(data, (dp) => dp.business_area.name),
-            sorter: sorter.stringSorter((dp) => dp.business_area.name),
+            ...new FilterSettings(data, (dp) => dp.domain.name),
+            sorter: sorter.stringSorter((dp) => dp.domain.name),
         },
         {
             title: t('Type'),
@@ -98,7 +95,7 @@ export const getDataProductTableColumns = ({
             title: t('Access'),
             dataIndex: 'user_count',
             render: (userCount: number) => {
-                return <TableCellItem icon={<TeamOutlined />} text={i18n.t('{{count}} users', { count: userCount })} />;
+                return <TableCellItem icon={<TeamOutlined />} text={t('{{count}} users', { count: userCount })} />;
             },
             sorter: sorter.numberSorter((dp) => dp.user_count),
         },
@@ -106,7 +103,7 @@ export const getDataProductTableColumns = ({
             title: t('Consumes'),
             dataIndex: 'dataset_count',
             render: (datasetCount: number) => {
-                return <TableCellItem text={i18n.t('{{count}} datasets', { count: datasetCount })} />;
+                return <TableCellItem text={t('{{count}} datasets', { count: datasetCount })} />;
             },
             sorter: sorter.numberSorter((dp) => dp.dataset_count),
         },
@@ -114,7 +111,7 @@ export const getDataProductTableColumns = ({
             title: t('Produces'),
             dataIndex: 'data_outputs_count',
             render: (dataOutputCount: number) => {
-                return <TableCellItem text={i18n.t('{{count}} data outputs', { count: dataOutputCount })} />;
+                return <TableCellItem text={t('{{count}} data outputs', { count: dataOutputCount })} />;
             },
         },
     ];

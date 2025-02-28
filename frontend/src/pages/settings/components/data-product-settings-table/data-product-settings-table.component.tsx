@@ -16,7 +16,7 @@ import React from 'react';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { CreateSettingModal } from '../new-data-product-setting-modal.component.tsx';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
+import type { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
 
 type Props = {
     scope: 'dataproduct' | 'dataset';
@@ -24,25 +24,26 @@ type Props = {
 
 export function DataProductSettingsTable({ scope }: Props) {
     const { t } = useTranslation();
+    const { pagination, handlePaginationChange } = useTablePagination({});
+    const { isVisible, handleOpen, handleClose } = useModal();
+
     const { data: dataProductSettings = [], isFetching } = useGetAllDataProductSettingsQuery();
     const filteredSettings = useMemo(() => {
         return dataProductSettings.filter((setting) => setting.scope === scope);
-    }, [dataProductSettings]);
-    const [editDataProductSetting, { isLoading: isEditing }] = useUpdateDataProductSettingMutation();
-    const { pagination, handlePaginationChange } = useTablePagination({});
-    const { isVisible, handleOpen, handleClose } = useModal();
-    const [onRemoveDataProductSetting, { isLoading: isRemoving }] = useRemoveDataProductSettingMutation();
+    }, [dataProductSettings, scope]);
+    const [editDataProductSetting] = useUpdateDataProductSettingMutation();
+    const [onRemoveDataProductSetting] = useRemoveDataProductSettingMutation();
 
     const columns = useMemo(
         () => getDataProductTableColumns({ t, handleOpen, onRemoveDataProductSetting }),
-        [t, filteredSettings],
+        [t, handleOpen, onRemoveDataProductSetting],
     );
 
     const onChange: TableProps<DataProductSettingContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
-    const EditableContext = React.createContext<FormInstance<any> | null>(null);
+    const EditableContext = React.createContext<FormInstance<DataProductSettingContract> | null>(null);
     const EditableRow = ({ ...props }) => {
         const [form] = Form.useForm();
         return (
@@ -60,7 +61,7 @@ export function DataProductSettingsTable({ scope }: Props) {
         try {
             await editDataProductSetting(row);
             dispatchMessage({ content: t('Data product setting updated successfully'), type: 'success' });
-        } catch (error) {
+        } catch (_e) {
             dispatchMessage({ content: t('Could not update data product setting'), type: 'error' });
         }
     };
@@ -92,6 +93,7 @@ export function DataProductSettingsTable({ scope }: Props) {
                 inputRef.current?.focus();
             }
         }, [editing]);
+
         const toggleEdit = () => {
             setEditing(!editing);
             if (form) {
@@ -100,6 +102,7 @@ export function DataProductSettingsTable({ scope }: Props) {
                 });
             }
         };
+
         const save = async () => {
             try {
                 if (form) {
@@ -111,9 +114,10 @@ export function DataProductSettingsTable({ scope }: Props) {
                     });
                 }
             } catch (errInfo) {
-                console.log('Save failed:', errInfo);
+                console.error('Save failed:', errInfo);
             }
         };
+
         let childNode = children;
         if (editable) {
             childNode = editing ? (
@@ -145,12 +149,14 @@ export function DataProductSettingsTable({ scope }: Props) {
         }
         return <td {...restProps}>{childNode}</td>;
     };
+
     const components = {
         body: {
             row: EditableRow,
             cell: EditableCell,
         },
     };
+
     const editableColumns = columns.map(
         (
             col:
@@ -172,6 +178,7 @@ export function DataProductSettingsTable({ scope }: Props) {
             };
         },
     );
+
     return (
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.searchContainer}>

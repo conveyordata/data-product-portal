@@ -1,14 +1,14 @@
-import { Flex, Table, TableColumnsType } from 'antd';
-import { useMemo } from 'react';
+import { Flex, Table, type TableColumnsType } from 'antd';
+import { useCallback, useMemo } from 'react';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useTranslation } from 'react-i18next';
 import styles from './data-output-table.module.scss';
 import { getDatasetDataProductsColumns } from './data-output-table-columns.tsx';
-import { DataOutputLink } from '@/types/dataset';
+import type { DataOutputLink } from '@/types/dataset';
 import { useRemoveDataOutputDatasetLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
 import { useApproveDataOutputLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
 import { useRejectDataOutputLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
-import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset/data-output-dataset-link.contract.ts';
+import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset/data-output-dataset-link.contract.ts';
 
 type Props = {
     isCurrentDatasetOwner: boolean;
@@ -25,50 +25,59 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
     const [removeDatasetFromDataOutput, { isLoading: isRemovingDatasetFromDataProduct }] =
         useRemoveDataOutputDatasetLinkMutation();
 
-    const handleRemoveDatasetFromDataOutput = async (dataOutputId: string, name: string, datasetLinkId: string) => {
-        try {
-            await removeDatasetFromDataOutput({ datasetId, dataOutputId, datasetLinkId }).unwrap();
-            dispatchMessage({
-                content: t('Dataset {{name}} has been removed from data output', { name }),
-                type: 'success',
-            });
-        } catch (_error) {
-            dispatchMessage({
-                content: t('Failed to remove dataset from data output'),
-                type: 'error',
-            });
-        }
-    };
+    const handleRemoveDatasetFromDataOutput = useCallback(
+        async (dataOutputId: string, name: string, datasetLinkId: string) => {
+            try {
+                await removeDatasetFromDataOutput({ datasetId, dataOutputId, datasetLinkId }).unwrap();
+                dispatchMessage({
+                    content: t('Dataset {{name}} has been removed from data output', { name }),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to remove dataset from data output'),
+                    type: 'error',
+                });
+            }
+        },
+        [datasetId, removeDatasetFromDataOutput, t],
+    );
 
-    const handleAcceptDataOutputDatasetLink = async (request: DataOutputDatasetLinkRequest) => {
-        try {
-            await approveDataOutputLink(request).unwrap();
-            dispatchMessage({
-                content: t('Dataset request has been successfully approved'),
-                type: 'success',
-            });
-        } catch (_error) {
-            dispatchMessage({
-                content: t('Failed to approve data output dataset link'),
-                type: 'error',
-            });
-        }
-    };
+    const handleAcceptDataOutputDatasetLink = useCallback(
+        async (request: DataOutputDatasetLinkRequest) => {
+            try {
+                await approveDataOutputLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset request has been successfully approved'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to approve data output dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [approveDataOutputLink, t],
+    );
 
-    const handleRejectDataOutputDatasetLink = async (request: DataOutputDatasetLinkRequest) => {
-        try {
-            await rejectDataOutputLink(request).unwrap();
-            dispatchMessage({
-                content: t('Dataset access request has been successfully rejected'),
-                type: 'success',
-            });
-        } catch (_error) {
-            dispatchMessage({
-                content: t('Failed to reject data output dataset link'),
-                type: 'error',
-            });
-        }
-    };
+    const handleRejectDataOutputDatasetLink = useCallback(
+        async (request: DataOutputDatasetLinkRequest) => {
+            try {
+                await rejectDataOutputLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset access request has been successfully rejected'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to reject data output dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [rejectDataOutputLink, t],
+    );
 
     const columns: TableColumnsType<DataOutputLink> = useMemo(() => {
         return getDatasetDataProductsColumns({
@@ -80,7 +89,16 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
             onRejectDataOutputDatasetLink: handleRejectDataOutputDatasetLink,
             onAcceptDataOutputDatasetLink: handleAcceptDataOutputDatasetLink,
         });
-    }, [datasetId, t, isCurrentDatasetOwner]);
+    }, [
+        handleRemoveDatasetFromDataOutput,
+        t,
+        isCurrentDatasetOwner,
+        isRemovingDatasetFromDataProduct,
+        isRejectingLink,
+        isApprovingLink,
+        handleRejectDataOutputDatasetLink,
+        handleAcceptDataOutputDatasetLink,
+    ]);
 
     return (
         <Flex className={styles.datasetListContainer}>

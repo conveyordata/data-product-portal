@@ -1,21 +1,17 @@
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { BusinessAreasGetContract } from '@/types/business-area';
+import { DomainsGetContract } from '@/types/domain';
 import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    handleRemove: (businessArea: BusinessAreasGetContract) => void;
-    handleEdit: (businessArea: BusinessAreasGetContract) => () => void;
+    handleRemove: (domain: DomainsGetContract) => void;
+    handleEdit: (domain: DomainsGetContract) => () => void;
 };
 
-export const getBusinessAreaTableColumns = ({
-    t,
-    handleRemove,
-    handleEdit,
-}: Props): TableColumnsType<BusinessAreasGetContract> => {
-    const sorter = new Sorter<BusinessAreasGetContract>();
+export const getDomainTableColumns = ({ t, handleRemove, handleEdit }: Props): TableColumnsType<DomainsGetContract> => {
+    const sorter = new Sorter<DomainsGetContract>();
     return [
         {
             title: t('Id'),
@@ -26,14 +22,14 @@ export const getBusinessAreaTableColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
-            sorter: sorter.stringSorter((ba) => ba.name),
+            sorter: sorter.stringSorter((domain) => domain.name),
             defaultSortOrder: 'ascend',
         },
         {
             title: t('Description'),
             dataIndex: 'description',
             render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,
-            sorter: sorter.stringSorter((ba) => ba.description),
+            sorter: sorter.stringSorter((domain) => domain.description),
         },
         {
             title: t('Actions'),
@@ -47,7 +43,7 @@ export const getBusinessAreaTableColumns = ({
                         </Button>
                         <Popconfirm
                             title={t('Remove')}
-                            description={t('Are you sure you want to delete the Business Area?')}
+                            description={t('Are you sure you want to delete the Domain?')}
                             onConfirm={() => handleRemove(record)}
                             placement={'leftTop'}
                             okText={t('Confirm')}

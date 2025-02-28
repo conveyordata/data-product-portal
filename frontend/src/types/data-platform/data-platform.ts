@@ -8,6 +8,7 @@ export enum DataPlatforms {
     Snowflake = 'snowflake',
     S3 = 's3',
     Glue = 'glue',
+    Redshift = 'redshift',
 }
 
 export type DataPlatform =
@@ -19,4 +20,5 @@ export type DataPlatform =
     | DataPlatforms.Tableau
     | DataPlatforms.Snowflake
     | DataPlatforms.S3
-    | DataPlatforms.Glue;
+    | DataPlatforms.Glue
+    | DataPlatforms.Redshift;

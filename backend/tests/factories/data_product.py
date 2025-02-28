@@ -3,8 +3,8 @@ import factory
 from app.data_products.model import DataProduct
 from app.data_products.status import DataProductStatus
 
-from .business_area import BusinessAreaFactory
 from .data_product_type import DataProductTypeFactory
+from .domain import DomainFactory
 
 
 class DataProductFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -19,4 +19,4 @@ class DataProductFactory(factory.alchemy.SQLAlchemyModelFactory):
     status = DataProductStatus.PENDING.value
 
     type = factory.SubFactory(DataProductTypeFactory)
-    business_area = factory.SubFactory(BusinessAreaFactory)
+    domain = factory.SubFactory(DomainFactory)

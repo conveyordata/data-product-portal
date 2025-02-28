@@ -1,7 +1,7 @@
 import type { TableProps } from 'antd';
 import { Button, Flex, Form, Input, Space, Table, Typography, InputRef } from 'antd';
 import styles from './data-product-lifecycles-table.module.scss';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
 import type { FormInstance } from 'antd';
@@ -16,31 +16,34 @@ import React from 'react';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { CreateLifecycleModal } from '../new-data-product-lifecycles-modal.component.tsx';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
+import type { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
 
 export function DataProductLifecyclesTable() {
     const { t } = useTranslation();
     const { data: dataProductLifecycles = [], isFetching } = useGetAllDataProductLifecyclesQuery();
-    const [editDataProductLifecycle, { isLoading: isEditing }] = useUpdateDataProductLifecycleMutation();
+    const [editDataProductLifecycle] = useUpdateDataProductLifecycleMutation();
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
-    const [onRemoveDataProductLifecycle, { isLoading: isRemoving }] = useRemoveDataProductLifecycleMutation();
+    const [onRemoveDataProductLifecycle] = useRemoveDataProductLifecycleMutation();
 
-    const editColor = (record: DataProductLifeCycleContract, color: string) => {
-        const new_record = { ...record, color: color };
-        editDataProductLifecycle(new_record);
-    };
+    const editColor = useCallback(
+        (record: DataProductLifeCycleContract, color: string) => {
+            const new_record = { ...record, color: color };
+            editDataProductLifecycle(new_record);
+        },
+        [editDataProductLifecycle],
+    );
 
     const columns = useMemo(
         () => getDataProductTableColumns({ t, handleOpen, editColor, onRemoveDataProductLifecycle }),
-        [t, dataProductLifecycles],
+        [t, handleOpen, editColor, onRemoveDataProductLifecycle],
     );
 
     const onChange: TableProps<DataProductLifeCycleContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
-    const EditableContext = React.createContext<FormInstance<any> | null>(null);
+    const EditableContext = React.createContext<FormInstance<DataProductLifeCycleContract> | null>(null);
     const EditableRow = ({ ...props }) => {
         const [form] = Form.useForm();
         return (
@@ -58,7 +61,7 @@ export function DataProductLifecyclesTable() {
         try {
             await editDataProductLifecycle(row);
             dispatchMessage({ content: t('Data product lifecycle updated successfully'), type: 'success' });
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Could not update data product lifecycle'), type: 'error' });
         }
     };
@@ -109,7 +112,7 @@ export function DataProductLifecyclesTable() {
                     });
                 }
             } catch (errInfo) {
-                console.log('Save failed:', errInfo);
+                console.error('Save failed:', errInfo);
             }
         };
         let childNode = children;

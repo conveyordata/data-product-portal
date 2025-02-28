@@ -1,10 +1,10 @@
 import { TagContract } from '@/types/tag';
 import { DataProductTypeContract } from '@/types/data-product-type';
 import { DataProductMembershipContract } from '@/types/data-product-membership';
-import { BusinessAreaContract } from '@/types/business-area';
+import { DomainContract } from '@/types/domain';
 import { DatasetLink } from '@/types/data-product/dataset-link.contract.ts';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
-import { DataProductSettingCreateRequest, DataProductSettingValueContract } from '../data-product-setting';
+import { DataProductSettingValueContract } from '../data-product-setting';
 import { DataProductLifeCycleContract } from '../data-product-lifecycle/data-product-lifecycle.contract';
 
 export enum DataProductStatus {
@@ -28,8 +28,8 @@ export interface DataProductContract {
     tags: TagContract[];
     rolled_up_tags: TagContract[];
     memberships: DataProductMembershipContract[];
-    business_area: BusinessAreaContract;
-    business_area_id: string;
+    domain: DomainContract;
+    domain_id: string;
     external_id: string;
     data_outputs: DataOutputsGetContract;
     data_product_settings: DataProductSettingValueContract[];

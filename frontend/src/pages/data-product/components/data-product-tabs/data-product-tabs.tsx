@@ -1,5 +1,5 @@
 import { Tabs } from 'antd';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { HistoryTab } from '@/pages/data-product/components/data-product-tabs/history-tab/history-tab.tsx';
 import styles from './data-product-tabs.module.scss';
@@ -21,21 +21,12 @@ import { ReactFlowProvider } from 'reactflow';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Explorer } from '@/components/explorer/explorer';
 import { SettingsTab } from './settings-tab/settings-tab';
+import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 
 type Props = {
     dataProductId: string;
     isLoading: boolean;
 };
-
-export enum TabKeys {
-    About = 'about',
-    DataOutputs = 'dataoutputs',
-    Datasets = 'datasets',
-    Explorer = 'explorer',
-    Team = 'team',
-    Settings = 'settings',
-    History = 'history',
-}
 
 type Tab = {
     label: string;

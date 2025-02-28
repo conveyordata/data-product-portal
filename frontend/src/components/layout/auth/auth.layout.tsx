@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { AppConfig } from '@/config/app-config.ts';
 import { useAuthorizeMutation } from '@/store/features/auth/auth-api-slice.ts';
@@ -19,51 +19,49 @@ export const AuthLayout = () => {
     const { isAuthenticated, isLoading, signinRedirect, events, activeNavigator, signoutRedirect, signinSilent } =
         useAuth();
     const { isLoading: isSettingUserCredentialsInStore, user } = useSelector(selectAuthState);
-    const redirectToSignIn = async () => {
+
+    const redirectToSignIn = useCallback(async () => {
         const originalPath = location.pathname + location.search + location.hash;
         sessionStorage.setItem('redirectAfterLogin', originalPath);
         await signinRedirect();
-    };
+    }, [location, signinRedirect]);
 
-    const handleAuthorizeUser = async () => {
+    const handleAuthorizeUser = useCallback(async () => {
         try {
             const authorizedUser = await authorizeUser().unwrap();
             if (authorizedUser) {
-                dispatch(
-                    setCredentials({
-                        user: authorizedUser,
-                    }),
-                );
+                dispatch(setCredentials({ user: authorizedUser }));
             }
         } catch (e) {
             console.error('Failed to authorize user', e);
         }
-    };
+    }, [authorizeUser, dispatch]);
+
     useEffect(() => {
-        if (isOidcEnabled) {
-            if (!isLoading) {
-                if (isAuthenticated) {
-                    handleAuthorizeUser().then(() => {
-                        const redirectPath = sessionStorage.getItem('redirectAfterLogin');
-                        sessionStorage.removeItem('redirectAfterLogin');
-                        if (redirectPath) {
-                            navigate(redirectPath);
-                        }
-                    });
-                } else {
-                    redirectToSignIn().catch((e) => {
-                        console.error('Failed to sign in', e);
-                    });
-                }
-            }
-        } else {
-            if (!user) {
+        if (isOidcEnabled && !isLoading) {
+            if (isAuthenticated) {
                 handleAuthorizeUser().then(() => {
-                    navigate({ search: '' });
+                    const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+                    sessionStorage.removeItem('redirectAfterLogin');
+                    if (redirectPath) {
+                        navigate(redirectPath);
+                    }
+                });
+            } else {
+                redirectToSignIn().catch((e) => {
+                    console.error('Failed to sign in', e);
                 });
             }
         }
-    }, [isAuthenticated, isLoading]);
+    }, [handleAuthorizeUser, isAuthenticated, isLoading, isOidcEnabled, navigate, redirectToSignIn]);
+
+    useEffect(() => {
+        if (!isOidcEnabled && !user) {
+            handleAuthorizeUser().then(() => {
+                navigate({ search: '' });
+            });
+        }
+    }, [handleAuthorizeUser, isOidcEnabled, navigate, user]);
 
     useEffect(() => {
         // This gets called when the user is authenticated
@@ -94,7 +92,7 @@ export const AuthLayout = () => {
                 },
             });
         });
-    }, [events]);
+    }, [events, handleAuthorizeUser, signinSilent, signoutRedirect]);
 
     if (activeNavigator) {
         switch (activeNavigator) {
@@ -106,11 +104,9 @@ export const AuthLayout = () => {
 
     if (isLoading || isSettingUserCredentialsInStore) {
         return <LoadingSpinner />;
+    } else if (!isOidcEnabled || isAuthenticated) {
+        return <Outlet />;
     } else {
-        if (!isOidcEnabled || isAuthenticated) {
-            return <Outlet />;
-        }
-
         return null;
     }
 };

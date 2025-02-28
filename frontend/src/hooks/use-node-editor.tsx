@@ -22,12 +22,15 @@ export function useNodeEditor() {
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { fitView } = useReactFlow();
 
-    const setNodesAndEdges = (nodes: Node[], edges: Edge[], direction: Position = defaultDirection) => {
-        const layouted = generateDagreLayout(nodes, edges, direction, defaultNodeWidth, defaultNodeHeight);
+    const setNodesAndEdges = useCallback(
+        (nodes: Node[], edges: Edge[], direction: Position = defaultDirection) => {
+            const layouted = generateDagreLayout(nodes, edges, direction, defaultNodeWidth, defaultNodeHeight);
 
-        setNodes([...layouted.nodes]);
-        setEdges([...layouted.edges]);
-    };
+            setNodes([...layouted.nodes]);
+            setEdges([...layouted.edges]);
+        },
+        [setEdges, setNodes],
+    );
 
     const onConnect: OnConnect = useCallback(
         (params: Connection) => {
@@ -41,7 +44,7 @@ export function useNodeEditor() {
         window.requestAnimationFrame(() => {
             fitView(defaultFitViewOptions);
         });
-    }, [nodes, edges]);
+    }, [nodes, edges, fitView]);
 
     return {
         setNodesAndEdges,

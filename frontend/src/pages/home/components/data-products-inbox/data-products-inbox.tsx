@@ -57,7 +57,7 @@ export function DataProductsInbox({ userId }: Props) {
                 />
             ),
         }),
-        [filteredLastVisitedDataProducts, dataProducts],
+        [t, filteredLastVisitedDataProducts, isFetching, lastVisitedDataProducts],
     );
 
     const owned: InboxTab = useMemo(
@@ -73,7 +73,7 @@ export function DataProductsInbox({ userId }: Props) {
             ),
             icon: <TeamOutlined />,
         }),
-        [userDataProducts, sortedUserDataProducts],
+        [t, sortedUserDataProducts, isFetchingUserDataProducts, lastVisitedDataProducts],
     );
 
     const items: InboxTab[] = useMemo(() => [lastViewed, owned], [lastViewed, owned]);

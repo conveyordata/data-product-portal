@@ -9,7 +9,7 @@ import { DataProductDatasetLinkPopup } from '@/components/data-products/data-pro
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import styles from './add-dataset-popup.module.scss';
 import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
 import {
@@ -69,8 +69,9 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                 dispatchMessage({ content: t('Failed to link dataset to data output'), type: 'error' });
             }
         },
-        [dataOutputId, t, requestDatasetAccessForDataOutput],
+        [requestDatasetAccessForDataOutput, dataOutputId, t, onClose],
     );
+
     return (
         <DataProductDatasetLinkPopup
             onClose={onClose}
@@ -95,7 +96,7 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                                 title={item.name}
                                 subtitle={
                                     <Typography.Link className={styles.noCursorPointer}>
-                                        {item.business_area.name}
+                                        {item.domain.name}
                                     </Typography.Link>
                                 }
                             />

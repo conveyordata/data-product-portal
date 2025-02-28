@@ -1,11 +1,11 @@
 import factory
 
-from app.business_areas.model import BusinessArea
+from app.domains.model import Domain
 
 
-class BusinessAreaFactory(factory.alchemy.SQLAlchemyModelFactory):
+class DomainFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
-        model = BusinessArea
+        model = Domain
 
     id = factory.Faker("uuid4")
     name = factory.Faker("word")

@@ -14,83 +14,15 @@ import {
     getDoesUserHaveAnyDataProductMembership,
 } from '@/utils/data-product-user-role.helper.ts';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
-import { CustomDropdownItemProps } from '@/types/shared';
-import awsLogo from '@/assets/icons/aws-logo.svg?react';
-import s3Logo from '@/assets/icons/s3-logo.svg?react';
-import glueLogo from '@/assets/icons/glue-logo.svg?react';
-import conveyorLogo from '@/assets/icons/conveyor-logo.svg?react';
-import databricksLogo from '@/assets/icons/databricks-logo.svg?react';
-import tableauLogo from '@/assets/icons/tableau-logo.svg?react';
-import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
 import { useMemo } from 'react';
-import { TFunction } from 'i18next';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { DataPlatforms, DataPlatform } from '@/types/data-platform';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
+import { getDataPlatforms } from '@/utils/data-platforms';
 
 type Props = {
     dataProductId: string;
 };
-
-export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[] => [
-    {
-        label: t('AWS'),
-        value: DataPlatforms.AWS,
-        icon: awsLogo,
-        hasMenu: true,
-        hasConfig: true,
-        children: [
-            {
-                label: t('S3'),
-                value: DataPlatforms.S3,
-                icon: s3Logo,
-                hasMenu: true,
-                hasConfig: true,
-                children: [],
-            },
-            {
-                label: t('Glue'),
-                value: DataPlatforms.Glue,
-                icon: glueLogo,
-                hasMenu: true,
-                hasConfig: true,
-                children: [],
-            },
-        ],
-    },
-    {
-        label: t('Conveyor'),
-        value: DataPlatforms.Conveyor,
-        icon: conveyorLogo,
-        hasMenu: false,
-        hasConfig: false,
-        children: [],
-    },
-    {
-        label: t('Snowflake'),
-        value: DataPlatforms.Snowflake,
-        icon: snowflakeLogo,
-        disabled: false,
-        hasConfig: true,
-        children: [],
-    },
-    {
-        label: t('Databricks'),
-        value: DataPlatforms.Databricks,
-        icon: databricksLogo,
-        hasConfig: true,
-        hasMenu: true,
-        children: [],
-    },
-    {
-        label: t('Tableau'),
-        value: DataPlatforms.Tableau,
-        icon: tableauLogo,
-        disabled: true,
-        hasConfig: false,
-        children: [],
-    },
-];
 
 export function DataProductActions({ dataProductId }: Props) {
     const { t } = useTranslation();

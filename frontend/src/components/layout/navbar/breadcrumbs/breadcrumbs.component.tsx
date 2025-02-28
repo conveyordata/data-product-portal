@@ -31,8 +31,10 @@ export const Breadcrumbs = () => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
     const params = useParams<DynamicPathParams>();
-    const pathnames =
-        pathname === ApplicationPaths.Home ? [ApplicationPaths.Home] : pathname.split('/').filter((x) => x);
+    const pathnames = useMemo(
+        () => (pathname === ApplicationPaths.Home ? [ApplicationPaths.Home] : pathname.split('/').filter((x) => x)),
+        [pathname],
+    );
     const {
         dataProductId = '',
         datasetId = '',
@@ -139,7 +141,7 @@ export const Breadcrumbs = () => {
                                         }}
                                     >
                                         <Icon component={datasetOutlineIcon} />
-                                        {t('Datasets')}
+                                        {t('Marketplace')}
                                     </Space>
                                 ),
                             });

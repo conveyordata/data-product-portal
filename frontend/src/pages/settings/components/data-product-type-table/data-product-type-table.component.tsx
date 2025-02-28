@@ -24,7 +24,7 @@ export function DataProductTypeTable() {
         handleOpen: handleOpenMigrate,
         handleClose: handleCloseMigrate,
     } = useModal();
-    const [onRemoveDataProductType, { isLoading: isRemoving }] = useRemoveDataProductTypeMutation();
+    const [onRemoveDataProductType] = useRemoveDataProductTypeMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductTypesGetContract | undefined>(undefined);
     const [migrateFrom, setMigrateFrom] = useState<DataProductTypesGetContract | undefined>(undefined);
@@ -54,7 +54,7 @@ export function DataProductTypeTable() {
                 await onRemoveDataProductType(type.id);
                 dispatchMessage({ content: t('Data Product Type removed successfully'), type: 'success' });
             }
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Could not remove Data Product Type'), type: 'error' });
         }
     };

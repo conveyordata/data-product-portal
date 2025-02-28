@@ -9,6 +9,7 @@ import {
     useMigrateDataProductTypeMutation,
     useRemoveDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
+
 const { Option } = Select;
 
 interface CreateDataProductTypeMigrateModalProps {
@@ -18,6 +19,10 @@ interface CreateDataProductTypeMigrateModalProps {
     migrateFrom?: DataProductTypeContract;
 }
 
+interface DataProductTypeMigrateFormValues {
+    toId: string;
+}
+
 export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMigrateModalProps> = ({
     isOpen,
     t,
@@ -25,11 +30,11 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
     migrateFrom,
 }) => {
     const [form] = Form.useForm();
-    const { data: dataProductTypes = [], isFetching } = useGetAllDataProductTypesQuery();
-    const [migrateDataProductType, { isLoading: isCreating }] = useMigrateDataProductTypeMutation();
-    const [onRemoveDataProductType, { isLoading: isRemoving }] = useRemoveDataProductTypeMutation();
+    const { data: dataProductTypes = [] } = useGetAllDataProductTypesQuery();
+    const [migrateDataProductType] = useMigrateDataProductTypeMutation();
+    const [onRemoveDataProductType] = useRemoveDataProductTypeMutation();
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DataProductTypeMigrateFormValues) => {
         try {
             await migrateDataProductType({ fromId: migrateFrom!.id, toId: values.toId });
             await onRemoveDataProductType(migrateFrom!.id);

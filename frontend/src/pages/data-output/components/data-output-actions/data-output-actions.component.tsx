@@ -4,7 +4,7 @@ import collibraLogo from '@/assets/icons/collibra-logo.svg?react';
 import datahubLogo from '@/assets/icons/datahub-logo.svg?react';
 import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import styles from './data-output-actions.module.scss';
 import { Flex } from 'antd';
 import { DataPlatforms, DataPlatform } from '@/types/data-platform';

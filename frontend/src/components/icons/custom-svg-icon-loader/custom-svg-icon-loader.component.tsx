@@ -21,6 +21,7 @@ export const CustomSvgIconLoader = ({
     size = 'default',
     color = 'primary',
     inverted = false,
+    ...otherProps
 }: Props) => {
     return (
         <Icon
@@ -30,6 +31,7 @@ export const CustomSvgIconLoader = ({
                 [styles.inverted]: inverted,
                 [styles.squareBorder]: hasSquareBorder,
             })}
+            {...otherProps}
         />
     );
 };

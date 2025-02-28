@@ -34,17 +34,17 @@ export function DataProductTab({ datasetId }: Props) {
 
     const datasetDataProducts = useMemo(() => {
         return dataset?.data_product_links || [];
-    }, [dataset?.id, dataset?.data_product_links]);
+    }, [dataset?.data_product_links]);
 
     const filteredDataProducts = useMemo(() => {
         return filterDataProducts(datasetDataProducts, searchTerm);
-    }, [dataset?.data_product_links, searchTerm]);
+    }, [datasetDataProducts, searchTerm]);
 
     const isDatasetOwner = useMemo(() => {
         if (!dataset || !user) return false;
 
         return getIsDatasetOwner(dataset, user.id) || user.is_admin;
-    }, [dataset?.id, user?.id]);
+    }, [dataset, user]);
 
     return (
         <>

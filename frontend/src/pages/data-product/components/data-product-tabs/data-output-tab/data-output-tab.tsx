@@ -43,7 +43,7 @@ export function DataOutputTab({ dataProductId }: Props) {
         if (!dataProduct || !user) return false;
 
         return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct?.id, user?.id]);
+    }, [dataProduct, user]);
 
     return (
         <>
@@ -64,11 +64,7 @@ export function DataOutputTab({ dataProductId }: Props) {
                     }
                 />
 
-                <DataOutputTable
-                    isCurrentDataProductOwner={isDataProductOwner}
-                    dataProductId={dataProductId}
-                    dataOutputs={filteredDataOutputs}
-                />
+                <DataOutputTable dataProductId={dataProductId} dataOutputs={filteredDataOutputs} />
             </Flex>
             {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </>
