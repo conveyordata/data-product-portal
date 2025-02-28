@@ -69,3 +69,4 @@ repos:
       name: lint
       entry: bash -c "cd frontend && npm run lint"
       language: node
+      language_version: '22.4.1'
