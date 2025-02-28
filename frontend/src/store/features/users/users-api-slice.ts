@@ -1,7 +1,7 @@
-import { ApiUrl } from '@/api/api-urls.ts';
-import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
-import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { UserContract, UserCreateRequest } from '@/types/users';
+import { ApiUrl } from '@/api/api-urls';
+import { baseApiSlice } from '@/store/features/api/base-api-slice';
+import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
+import type { UserContract, UserCreateRequest } from '@/types/users';
 
 export const userTags: string[] = [TagTypes.User];
 
