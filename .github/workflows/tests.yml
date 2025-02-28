@@ -71,7 +71,29 @@ jobs:
 
       - name: Run the automated tests
         working-directory: ./backend
-        run: poetry run pytest -v
+        id: run-test
+        run: poetry run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
+      - name: Ensure 100% coverage for router files
+        working-directory: ./backend
+        run: |
+          # Extract all router files and check their coverage
+          if poetry run python -c "
+          import xml.etree.ElementTree as ET
+          tree = ET.parse('coverage.xml')
+          root = tree.getroot()
+          files = [f for f in root.findall(\".//class\") if 'router' in f.get('name', '')]
+          failed = [f.get('name') for f in files if float(f.get('line-rate', 0)) < 1.0]
+          if failed:
+              print(f'❌ The following router files do not have 100% coverage: {failed}')
+              exit(1)
+          else:
+              print('✅ All router files have 100% coverage!')
+          "; then
+                echo "Coverage check passed!"
+              else
+                echo "Coverage check failed!"
+                exit 1
+              fi
 
   lint-golang:
     permissions:
