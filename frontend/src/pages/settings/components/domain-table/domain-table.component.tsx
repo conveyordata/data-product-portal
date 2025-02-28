@@ -21,7 +21,7 @@ export function DomainTable() {
         handleOpen: handleOpenMigrate,
         handleClose: handleCloseMigrate,
     } = useModal();
-    const [onRemoveDomain, { isLoading: isRemoving }] = useRemoveDomainMutation();
+    const [onRemoveDomain] = useRemoveDomainMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DomainsGetContract | undefined>(undefined);
     const [migrateFrom, setMigrateFrom] = useState<DomainsGetContract | undefined>(undefined);
@@ -51,7 +51,7 @@ export function DomainTable() {
                 await onRemoveDomain(domain.id);
                 dispatchMessage({ content: t('Domain removed successfully'), type: 'success' });
             }
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Could not remove Domain'), type: 'error' });
         }
     };

@@ -8,6 +8,7 @@ import {
     useRemoveDomainMutation,
 } from '@/store/features/domains/domains-api-slice';
 import { DomainContract } from '@/types/domain';
+
 const { Option } = Select;
 
 interface CreateDomainMigrateModalProps {
@@ -17,6 +18,10 @@ interface CreateDomainMigrateModalProps {
     migrateFrom?: DomainContract;
 }
 
+interface DomainMigrateFormValues {
+    toId: string;
+}
+
 export const CreateDomainMigrateModal: React.FC<CreateDomainMigrateModalProps> = ({
     isOpen,
     t,
@@ -24,11 +29,11 @@ export const CreateDomainMigrateModal: React.FC<CreateDomainMigrateModalProps> =
     migrateFrom,
 }) => {
     const [form] = Form.useForm();
-    const { data: domains = [], isFetching } = useGetAllDomainsQuery();
-    const [migrateDomain, { isLoading: isCreating }] = useMigrateDomainMutation();
-    const [onRemoveDomain, { isLoading: isRemoving }] = useRemoveDomainMutation();
+    const { data: domains = [] } = useGetAllDomainsQuery();
+    const [migrateDomain] = useMigrateDomainMutation();
+    const [onRemoveDomain] = useRemoveDomainMutation();
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DomainMigrateFormValues) => {
         try {
             await migrateDomain({ fromId: migrateFrom!.id, toId: values.toId });
             await onRemoveDomain(migrateFrom!.id);

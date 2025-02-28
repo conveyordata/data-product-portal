@@ -5,6 +5,7 @@ export type DataProductSettingType = 'checkbox' | 'tags' | 'input';
 export interface DataProductSettingContract {
     order: number;
     id: string;
+    external_id: string;
     name: string;
     tooltip: string;
     default: string;

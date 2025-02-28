@@ -28,7 +28,7 @@ export const dataProductMembershipsApiSlice = baseApiSlice
                     data: { data_product_id: dataProductId, user_id, role },
                     params: { data_product_id: dataProductId },
                 }),
-                invalidatesTags: (_, __, { dataProductId }) => [
+                invalidatesTags: (_result, _error, { dataProductId }) => [
                     { type: TagTypes.DataProduct as const, id: dataProductId },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
@@ -42,7 +42,7 @@ export const dataProductMembershipsApiSlice = baseApiSlice
                     method: 'POST',
                     params: { data_product_id: dataProductId, user_id: userId },
                 }),
-                invalidatesTags: (_, __, { dataProductId }) => [
+                invalidatesTags: (_result, _error, { dataProductId }) => [
                     { type: TagTypes.DataProduct as const, id: dataProductId },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
@@ -114,7 +114,7 @@ export const dataProductMembershipsApiSlice = baseApiSlice
                     url: buildUrl(ApiUrl.DataProductMembershipPendingActions, {}),
                     method: 'GET',
                 }),
-                providesTags: (_, __) => [
+                providesTags: () => [
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                 ],

@@ -2,7 +2,7 @@ import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { Button, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
-import { DataProductTypeContract } from '@/types/data-product-type';
+import { DataProductTypeContract, DataProductTypeCreateRequest } from '@/types/data-product-type';
 import {
     useCreateDataProductTypeMutation,
     useUpdateDataProductTypeMutation,
@@ -11,6 +11,7 @@ import { DataProductIcon, dataProductIcons } from '@/types/data-product-type/dat
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import Icon from '@ant-design/icons';
 import styles from './data-product-type-table.module.scss';
+
 const { Option } = Select;
 
 interface CreateDataProductTypeModalProps {
@@ -36,8 +37,8 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
     initial,
 }) => {
     const [form] = Form.useForm();
-    const [createDataProductType, { isLoading: isCreating }] = useCreateDataProductTypeMutation();
-    const [editDataProductType, { isLoading: isEditing }] = useUpdateDataProductTypeMutation();
+    const [createDataProductType] = useCreateDataProductTypeMutation();
+    const [editDataProductType] = useUpdateDataProductTypeMutation();
 
     const createText: DataProductTypeFormText = {
         title: t('Create New Data Product Type'),
@@ -55,7 +56,7 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
 
     const variableText = mode === 'create' ? createText : updateText;
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DataProductTypeCreateRequest) => {
         try {
             if (mode === 'create') {
                 await createDataProductType(values);

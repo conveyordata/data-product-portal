@@ -22,8 +22,8 @@ interface TagsFormText {
 
 export const CreateTagsModal: React.FC<CreateTagsModalProps> = ({ isOpen, t, onClose, mode, initial }) => {
     const [form] = Form.useForm();
-    const [createTag, { isLoading: isCreating }] = useCreateTagMutation();
-    const [editTag, { isLoading: isEditing }] = useUpdateTagMutation();
+    const [createTag] = useCreateTagMutation();
+    const [editTag] = useUpdateTagMutation();
 
     const createText: TagsFormText = {
         title: t('Create New Tag'),
@@ -41,7 +41,7 @@ export const CreateTagsModal: React.FC<CreateTagsModalProps> = ({ isOpen, t, onC
 
     const variableText = mode === 'create' ? createText : updateText;
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: TagContract) => {
         try {
             if (mode === 'create') {
                 await createTag(values);

@@ -12,11 +12,19 @@ interface CreateLifecycleModalProps {
     isOpen: boolean;
 }
 
+interface DataProductLifecycleFormValues {
+    id: string;
+    name: string;
+    value: string;
+    color: { toHexString: () => string };
+    is_default: boolean;
+}
+
 export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOpen, t, onClose }) => {
     const [form] = Form.useForm();
-    const [createDataProductLifecycle, { isLoading: isCreating }] = useCreateDataProductLifecycleMutation();
+    const [createDataProductLifecycle] = useCreateDataProductLifecycleMutation();
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DataProductLifecycleFormValues) => {
         try {
             const newLifecycle: DataProductLifeCycleContract = {
                 ...values,

@@ -14,12 +14,11 @@ import {
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 
 type Props = {
-    isCurrentDataProductOwner: boolean;
     dataProductId: string;
     dataOutputs: DataOutputsGetContract;
 };
 
-export function DataOutputTable({ isCurrentDataProductOwner, dataProductId, dataOutputs }: Props) {
+export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 

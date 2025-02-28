@@ -2,11 +2,9 @@ import { Button, Checkbox, ColorPicker, Flex, Popconfirm } from 'antd';
 import { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { Sorter } from '@/utils/table-sorter.helper';
-import { DataProductSettingContract } from '@/types/data-product-setting';
 import { ColumnType } from 'antd/es/table';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 
-const iconColumnWidth = 30;
 type Props = {
     t: TFunction;
     isLoading?: boolean;

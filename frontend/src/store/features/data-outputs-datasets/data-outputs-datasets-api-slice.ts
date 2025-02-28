@@ -81,7 +81,7 @@ export const dataOutputsDatasetsApiSlice = baseApiSlice
                     url: buildUrl(ApiUrl.DataOutputDatasetPendingActions, {}),
                     method: 'GET',
                 }),
-                providesTags: (_, __) => [
+                providesTags: () => [
                     { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                 ],

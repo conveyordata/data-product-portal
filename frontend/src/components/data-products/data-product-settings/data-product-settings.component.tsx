@@ -86,7 +86,7 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
     }, [filteredSettings, scope, dataProduct?.data_product_settings, dataset?.data_product_settings]);
 
     const onSubmit: FormProps<DataProductSettingValueForm>['onFinish'] = useCallback(
-        async (values: any) => {
+        async (values: DataProductSettingValueForm) => {
             try {
                 let id: string = '';
                 if (dataProduct) {
