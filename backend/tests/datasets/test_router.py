@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 from tests.factories import DatasetFactory, DomainFactory, UserFactory
+from tests.factories.data_product_setting import DataProductSettingFactory
 
 from app.datasets.enums import DatasetAccessType
 
@@ -200,6 +201,49 @@ class TestDatasetsRouter:
         response = self.update_dataset_status(client, {"status": "pending"}, ds.id)
         response = self.get_dataset_by_id(client, ds.id)
         assert response.json()["status"] == "pending"
+
+    def test_get_graph_data(self, client):
+        ds = DatasetFactory()
+        response = client.get(f"{ENDPOINT}/{ds.id}/graph")
+        assert response.json() == {
+            "edges": [],
+            "nodes": [
+                {
+                    "data": {
+                        "icon_key": None,
+                        "id": str(ds.id),
+                        "link_to_id": None,
+                        "name": ds.name,
+                    },
+                    "id": str(ds.id),
+                    "isMain": True,
+                    "type": "datasetNode",
+                }
+            ],
+        }
+
+    def test_dataset_set_custom_setting_wrong_scope(self, client):
+        ds_owner = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[ds_owner])
+        ds = DatasetFactory()
+        setting = DataProductSettingFactory()
+        response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}")
+        assert response.status_code == 403
+
+    def test_dataset_set_custom_setting_not_owner(self, client):
+        ds = DatasetFactory()
+        setting = DataProductSettingFactory(scope="dataset")
+        response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}")
+        assert response.status_code == 403
+
+    def test_dataset_set_custom_setting(self, client):
+        ds_owner = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[ds_owner])
+        setting = DataProductSettingFactory(scope="dataset")
+        response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}?value=false")
+        assert response.status_code == 200
+        response = client.get(f"{ENDPOINT}/{ds.id}")
+        assert response.json()["data_product_settings"][0]["value"] == "false"
 
     @staticmethod
     def create_default_dataset(client, default_dataset_payload):

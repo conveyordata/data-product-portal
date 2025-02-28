@@ -10,6 +10,7 @@ from tests.factories import (
 )
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_product_membership import DataProductMembershipFactory
+from tests.factories.data_product_setting import DataProductSettingFactory
 from tests.factories.lifecycle import LifecycleFactory
 
 from app.data_product_memberships.enums import DataProductUserRole
@@ -143,6 +144,34 @@ class TestDataProductsRouter:
     def test_remove_data_product_with_invalid_data_product_id(self, client):
         data_product = self.delete_data_product(client, self.invalid_id)
         assert data_product.status_code == 404
+
+    def test_data_product_set_custom_setting_wrong_scope(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        setting = DataProductSettingFactory(scope="dataset")
+        response = client.post(
+            f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
+        )
+        assert response.status_code == 404
+
+    def test_dataset_set_custom_setting_not_owner(self, client):
+        data_product = DataProductFactory()
+        setting = DataProductSettingFactory()
+        response = client.post(f"{ENDPOINT}/{data_product.id}/settings/{setting.id}")
+        assert response.status_code == 403
+
+    def test_dataset_set_custom_setting(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        setting = DataProductSettingFactory()
+        response = client.post(
+            f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
+        )
+        assert response.status_code == 200
+        response = client.get(f"{ENDPOINT}/{data_product.id}")
+        assert response.json()["data_product_settings"][0]["value"] == "false"
 
     @staticmethod
     def create_data_product(client, default_data_product_payload):
