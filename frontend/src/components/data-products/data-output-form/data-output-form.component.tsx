@@ -11,7 +11,6 @@ import { createDataProductIdPath } from '@/types/navigation.ts';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { useCreateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
-import { getDataPlatforms } from '@/pages/data-product/components/data-product-actions/data-product-actions.component';
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { S3DataOutputForm } from './s3-data-output-form.component';
@@ -25,6 +24,7 @@ import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
+import { getDataPlatforms } from '@/utils/data-platforms';
 
 type Props = {
     mode: 'create';
