@@ -9,10 +9,10 @@ root = tree.getroot()
 files = [f for f in root.findall(\".//class\") if 'router' in f.get('name', '')]
 failed = [f.get('name') for f in files if float(f.get('line-rate', 0)) < 1.0]
 if failed:
-print(f'❌ The following router files do not have 100% coverage: {failed}')
-exit(1)
+    print(f'❌ The following router files do not have 100% coverage: {failed}')
+    exit(1)
 else:
-print('✅ All router files have 100% coverage!')
+    print('✅ All router files have 100% coverage!')
 "; then
     echo "Coverage check passed!"
 else
