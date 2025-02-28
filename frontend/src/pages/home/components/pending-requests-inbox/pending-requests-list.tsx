@@ -61,7 +61,7 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                                 className={styles.itemCard}
                                 avatar={
                                     <CustomSvgIconLoader
-                                        iconComponent={getDataProductTypeIcon('exploration')}
+                                        iconComponent={getDataProductTypeIcon()}
                                         hasRoundBorder
                                         size={'default'}
                                     />

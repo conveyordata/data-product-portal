@@ -53,9 +53,7 @@ export const DataProductsList = ({ dataProducts, isFetching, lastVisitedDataProd
                             }
                             icon={
                                 <CustomSvgIconLoader
-                                    iconComponent={getDataProductTypeIcon(
-                                        project?.type.icon_key ? (project.type.icon_key as DataProductIcon) : 'default',
-                                    )}
+                                    iconComponent={getDataProductTypeIcon(project?.type?.icon_key)}
                                     hasRoundBorder
                                     size={'default'}
                                 />

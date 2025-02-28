@@ -84,12 +84,7 @@ export function AddDataProductPopup({ onClose, isOpen, datasetId }: Props) {
                 dataSource={filteredUnlinkedDataProducts}
                 renderItem={({ id, type, name, status }) => {
                     const icon = (
-                        <CustomSvgIconLoader
-                            iconComponent={getDataProductTypeIcon(
-                                type?.icon_key ? (type?.icon_key as DataProductIcon) : 'default',
-                            )}
-                            hasRoundBorder
-                        />
+                        <CustomSvgIconLoader iconComponent={getDataProductTypeIcon(type?.icon_key)} hasRoundBorder />
                     );
                     return (
                         <List.Item key={id}>
