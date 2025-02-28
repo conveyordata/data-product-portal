@@ -13,13 +13,13 @@ import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } 
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
 import { TFunction } from 'i18next';
 import { Link } from 'react-router-dom';
-import { DataProductMembershipLink } from '@/types/data-product-membership';
+import { DataProductMembershipAssociation } from '@/types/data-product-membership';
 import { useListPagination } from '@/hooks/use-list-pagination';
 
 type PendingAction =
     | ({ type: 'data_product' } & DataProductDatasetContract)
     | ({ type: 'data_output' } & DataOutputDatasetContract)
-    | ({ type: 'team' } & DataProductMembershipLink);
+    | ({ type: 'team' } & DataProductMembershipAssociation);
 
 const createPendingItem = (action: PendingAction, t: TFunction) => {
     let link, description, navigatePath, date;

@@ -28,7 +28,7 @@ interface DataProductMembership {
     denied_on?: string | null;
 }
 
-export interface DataProductMembershipLink {
+export interface DataProductMembershipAssociation {
     id: string;
     data_product_id: string;
     user_id: string;

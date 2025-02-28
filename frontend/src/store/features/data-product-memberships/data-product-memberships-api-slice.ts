@@ -7,7 +7,7 @@ import {
     DataProductMembershipRequestAccessResponse,
     DataProductMembershipRoleUpdateRequest,
     DataProductUserMembershipCreateContract,
-    DataProductMembershipLink,
+    DataProductMembershipAssociation,
 } from '@/types/data-product-membership';
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
@@ -109,7 +109,7 @@ export const dataProductMembershipsApiSlice = baseApiSlice
                     queryFulfilled.catch(patchResult.undo);
                 },
             }),
-            getDataProductMembershipPendingActions: builder.query<DataProductMembershipLink[], void>({
+            getDataProductMembershipPendingActions: builder.query<DataProductMembershipAssociation[], void>({
                 query: () => ({
                     url: buildUrl(ApiUrl.DataProductMembershipPendingActions, {}),
                     method: 'GET',

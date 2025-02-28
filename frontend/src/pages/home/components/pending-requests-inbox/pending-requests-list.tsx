@@ -8,6 +8,7 @@ import { ReactNode } from 'react';
 import { formatDate } from '@/utils/date.helper.ts';
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { PaginationConfig } from 'antd/es/pagination';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 
 const COL_SPAN = 12;
 
@@ -28,6 +29,8 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
     const { t } = useTranslation();
     const navigate = useNavigate();
 
+    if (isFetching) return <LoadingSpinner />;
+
     if (!pendingActionItems || pendingActionItems.length === 0) {
         return <EmptyList description={t(`There are currently no pending requests.`)} />;
     }
@@ -39,7 +42,6 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
     return (
         <List
             dataSource={pendingActionItems}
-            loading={isFetching}
             className={styles.antList}
             pagination={{
                 ...pagination,

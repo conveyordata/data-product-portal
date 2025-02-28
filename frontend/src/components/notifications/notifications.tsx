@@ -12,7 +12,7 @@ import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/dat
 import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
 import { DataOutputDatasetContract } from '@/types/data-output-dataset';
 import { DataProductDatasetContract } from '@/types/data-product-dataset';
-import { DataProductMembershipLink } from '@/types/data-product-membership';
+import { DataProductMembershipAssociation } from '@/types/data-product-membership';
 import { TFunction } from 'i18next';
 
 export function Notifications() {
@@ -29,7 +29,7 @@ export function Notifications() {
     type PendingAction =
         | ({ type: 'data_product' } & DataProductDatasetContract)
         | ({ type: 'data_output' } & DataOutputDatasetContract)
-        | ({ type: 'team' } & DataProductMembershipLink);
+        | ({ type: 'team' } & DataProductMembershipAssociation);
 
     const createPendingItem = (action: PendingAction, navigate: Function, t: TFunction) => {
         let link, description, navigatePath;

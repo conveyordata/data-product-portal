@@ -5,7 +5,7 @@ export {
 export type {
     DataProductMembershipModel,
     DataProductMembershipContract,
-    DataProductMembershipLink,
+    DataProductMembershipAssociation,
 } from './data-product-membership.contract.ts';
 export type { DataProductUserMembershipCreateContract } from './data-product-user-membership-create.contract.ts';
 export type { DataProductUserMembership } from './data-product-user-membership.ts';
