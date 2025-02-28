@@ -13,6 +13,8 @@ import { TFunction } from 'i18next';
 import { Link } from 'react-router-dom';
 import { DataProductMembershipAssociation } from '@/types/data-product-membership';
 import { useListPagination } from '@/hooks/use-list-pagination';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 
 type PendingAction =
     | ({ type: 'data_product' } & DataProductDatasetContract)
@@ -40,7 +42,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                     <Typography.Text>.</Typography.Text>
                 </>
             );
-            navigatePath = createDatasetIdPath(action.dataset_id);
+            navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
             date = action.requested_on;
             break;
 
@@ -61,7 +63,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                     <Typography.Text>.</Typography.Text>
                 </>
             );
-            navigatePath = createDatasetIdPath(action.dataset_id);
+            navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
             date = action.requested_on;
             break;
 
@@ -79,7 +81,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                     <Typography.Text>.</Typography.Text>
                 </>
             );
-            navigatePath = createDataProductIdPath(action.data_product_id);
+            navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
             date = action.membership.requested_on;
             break;
 
