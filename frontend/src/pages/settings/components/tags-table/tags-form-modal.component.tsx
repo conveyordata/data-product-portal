@@ -41,7 +41,7 @@ export const CreateTagsModal: React.FC<CreateTagsModalProps> = ({ isOpen, t, onC
 
     const variableText = mode === 'create' ? createText : updateText;
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: TagContract) => {
         try {
             if (mode === 'create') {
                 await createTag(values);

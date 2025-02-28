@@ -71,24 +71,30 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             if (!platformsLoading) {
                 const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
                 switch (selectedConfiguration?.value) {
-                    case DataPlatforms.S3:
+                    case DataPlatforms.S3: {
                         config['configuration_type'] = 'S3DataOutput';
                         break;
-                    case DataPlatforms.Glue:
+                    }
+                    case DataPlatforms.Glue: {
                         config['configuration_type'] = 'GlueDataOutput';
                         break;
-                    case DataPlatforms.Databricks:
+                    }
+                    case DataPlatforms.Databricks: {
                         config['configuration_type'] = 'DatabricksDataOutput';
                         break;
-                    case DataPlatforms.Snowflake:
+                    }
+                    case DataPlatforms.Snowflake: {
                         config['configuration_type'] = 'SnowflakeDataOutput';
                         break;
-                    case DataPlatforms.Redshift:
+                    }
+                    case DataPlatforms.Redshift: {
                         config['configuration_type'] = 'RedshiftDataOutput';
                         break;
-                    default:
+                    }
+                    default: {
                         const errorMessage = 'Data output not configured correctly';
                         dispatchMessage({ content: errorMessage, type: 'error' });
+                    }
                 }
                 const request: DataOutputCreate = {
                     name: values.name,

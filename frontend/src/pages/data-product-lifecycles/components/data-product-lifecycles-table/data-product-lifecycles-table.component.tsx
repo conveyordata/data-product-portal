@@ -43,7 +43,7 @@ export function DataProductLifecyclesTable() {
         handlePaginationChange(pagination);
     };
 
-    const EditableContext = React.createContext<FormInstance<any> | null>(null);
+    const EditableContext = React.createContext<FormInstance<DataProductLifeCycleContract> | null>(null);
     const EditableRow = ({ ...props }) => {
         const [form] = Form.useForm();
         return (

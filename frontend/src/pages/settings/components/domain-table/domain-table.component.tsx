@@ -51,7 +51,7 @@ export function DomainTable() {
                 await onRemoveDomain(domain.id);
                 dispatchMessage({ content: t('Domain removed successfully'), type: 'success' });
             }
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Could not remove Domain'), type: 'error' });
         }
     };

@@ -2,7 +2,7 @@ import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { Button, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
-import { DataProductTypeContract } from '@/types/data-product-type';
+import { DataProductTypeContract, DataProductTypeCreateRequest } from '@/types/data-product-type';
 import {
     useCreateDataProductTypeMutation,
     useUpdateDataProductTypeMutation,
@@ -56,7 +56,7 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
 
     const variableText = mode === 'create' ? createText : updateText;
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DataProductTypeCreateRequest) => {
         try {
             if (mode === 'create') {
                 await createDataProductType(values);

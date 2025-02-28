@@ -19,6 +19,10 @@ interface CreateDataProductTypeMigrateModalProps {
     migrateFrom?: DataProductTypeContract;
 }
 
+interface DataProductTypeMigrateFormValues {
+    toId: string;
+}
+
 export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMigrateModalProps> = ({
     isOpen,
     t,
@@ -30,7 +34,7 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
     const [migrateDataProductType] = useMigrateDataProductTypeMutation();
     const [onRemoveDataProductType] = useRemoveDataProductTypeMutation();
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DataProductTypeMigrateFormValues) => {
         try {
             await migrateDataProductType({ fromId: migrateFrom!.id, toId: values.toId });
             await onRemoveDataProductType(migrateFrom!.id);

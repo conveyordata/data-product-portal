@@ -18,6 +18,10 @@ interface CreateDomainMigrateModalProps {
     migrateFrom?: DomainContract;
 }
 
+interface DomainMigrateFormValues {
+    toId: string;
+}
+
 export const CreateDomainMigrateModal: React.FC<CreateDomainMigrateModalProps> = ({
     isOpen,
     t,
@@ -29,7 +33,7 @@ export const CreateDomainMigrateModal: React.FC<CreateDomainMigrateModalProps> =
     const [migrateDomain] = useMigrateDomainMutation();
     const [onRemoveDomain] = useRemoveDomainMutation();
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DomainMigrateFormValues) => {
         try {
             await migrateDomain({ fromId: migrateFrom!.id, toId: values.toId });
             await onRemoveDomain(migrateFrom!.id);

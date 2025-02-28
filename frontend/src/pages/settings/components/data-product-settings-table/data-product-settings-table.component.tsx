@@ -43,7 +43,7 @@ export function DataProductSettingsTable({ scope }: Props) {
         handlePaginationChange(pagination);
     };
 
-    const EditableContext = React.createContext<FormInstance<any> | null>(null);
+    const EditableContext = React.createContext<FormInstance<DataProductSettingContract> | null>(null);
     const EditableRow = ({ ...props }) => {
         const [form] = Form.useForm();
         return (

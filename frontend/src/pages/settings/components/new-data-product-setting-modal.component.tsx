@@ -17,12 +17,22 @@ interface CreateSettingModalProps {
     scope: 'dataproduct' | 'dataset';
 }
 
+interface DataProductSettingValueForm {
+    name: string;
+    id: string;
+    tooltip: string;
+    type: 'checkbox' | 'tags' | 'input';
+    default: boolean | string | string[];
+    category: string;
+    order: string;
+}
+
 export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose, scope }) => {
     const [form] = Form.useForm();
     const [createDataProductSetting] = useCreateDataProductSettingMutation();
     const typeValue = Form.useWatch('type', form);
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DataProductSettingValueForm) => {
         try {
             const newSetting: DataProductSettingContract = {
                 ...values,
