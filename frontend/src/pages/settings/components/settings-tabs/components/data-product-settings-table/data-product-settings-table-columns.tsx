@@ -1,32 +1,59 @@
-import { Button, Flex, Popconfirm } from 'antd';
+import { Button, Checkbox, Flex, Input, Popconfirm, Select, TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { Sorter } from '@/utils/table-sorter.helper';
 import { DataProductSettingContract } from '@/types/data-product-setting';
-import { ColumnType } from 'antd/es/table';
 
 const iconColumnWidth = 30;
 type Props = {
     t: TFunction;
     isLoading?: boolean;
     isDisabled?: boolean;
-    handleOpen: (id: string) => void;
-    onRemoveDataProductSetting: (id: string) => void;
+    handleEdit: (record: DataProductSettingContract) => () => void;
+    handleRemove: (record: DataProductSettingContract) => void;
 };
 
-export type EditableColumn = DataProductSettingContract & {
-    editable: boolean;
+const defaultItem = (setting: DataProductSettingContract) => {
+    switch (setting.type) {
+        case 'checkbox': {
+            const checked = setting.default === 'true';
+            return <Checkbox checked={checked} />;
+        }
+        case 'tags': {
+            const list = setting.default.split(',');
+            return <Select value={list} allowClear={false} defaultActiveFirstOption mode="tags" />;
+        }
+        case 'input': {
+            const input = setting.default;
+            return <Input value={input} />;
+        }
+        default: {
+            const input = setting.default;
+            return <Input disabled value={input} />;
+        }
+    }
 };
 
-interface EditableColumnType<T> extends ColumnType<T> {
-    editable?: boolean;
-}
+const typeConversion = (type: string, t: TFunction) => {
+    switch (type) {
+        case 'checkbox':
+            return t('Checkbox');
+        case 'tags':
+            return t('List');
+        case 'input':
+            return t('Input');
+        default:
+            return t('Undefined');
+    }
+};
+
 export const getDataProductTableColumns = ({
     t,
     isDisabled,
     isLoading,
-    onRemoveDataProductSetting,
-}: Props): EditableColumnType<DataProductSettingContract>[] => {
+    handleEdit,
+    handleRemove,
+}: Props): TableColumnsType<DataProductSettingContract> => {
     const sorter = new Sorter<DataProductSettingContract>();
     return [
         {
@@ -43,7 +70,6 @@ export const getDataProductTableColumns = ({
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
             sorter: sorter.stringSorter((dp) => dp.name),
             defaultSortOrder: 'ascend',
-            editable: true,
         },
         {
             title: t('Type'),
@@ -51,9 +77,8 @@ export const getDataProductTableColumns = ({
             ellipsis: {
                 showTitle: false,
             },
-            render: (type: string) => <TableCellItem text={type} />,
-            sorter: sorter.stringSorter((dp) => dp.type),
-            defaultSortOrder: 'ascend',
+            render: (type: string) => <TableCellItem text={typeConversion(type, t)} />,
+            sorter: sorter.stringSorter((dp) => typeConversion(dp.type, t)),
         },
         {
             title: t('Tooltip'),
@@ -63,8 +88,6 @@ export const getDataProductTableColumns = ({
             },
             render: (tooltip: string) => <TableCellItem text={tooltip} tooltip={{ content: tooltip }} />,
             sorter: sorter.stringSorter((dp) => dp.tooltip),
-            defaultSortOrder: 'ascend',
-            editable: true,
         },
         {
             title: t('Category'),
@@ -74,8 +97,6 @@ export const getDataProductTableColumns = ({
             },
             render: (category: string) => <TableCellItem text={category} />,
             sorter: sorter.stringSorter((dp) => dp.category),
-            defaultSortOrder: 'ascend',
-            editable: true,
         },
         {
             title: t('Default'),
@@ -83,10 +104,7 @@ export const getDataProductTableColumns = ({
             ellipsis: {
                 showTitle: false,
             },
-            render: (defaultVal: string) => <TableCellItem text={defaultVal} />,
-            sorter: sorter.stringSorter((dp) => dp.default),
-            defaultSortOrder: 'ascend',
-            editable: true,
+            render: (_, record) => defaultItem(record),
         },
         {
             title: t('Order'),
@@ -96,22 +114,23 @@ export const getDataProductTableColumns = ({
             },
             render: (order: number) => <TableCellItem text={order.toString()} />,
             sorter: sorter.numberSorter((dp) => dp.order),
-            defaultSortOrder: 'ascend',
-            editable: true,
         },
         {
             title: t('Actions'),
             key: 'action',
             width: '10%',
-            render: (_, { id }) => {
+            render: (record) => {
                 return (
-                    <Flex vertical>
+                    <Flex>
+                        <Button type={'link'} onClick={handleEdit(record)}>
+                            {t('Edit')}
+                        </Button>
                         <Popconfirm
                             title={t('Remove')}
                             description={t(
                                 'Are you sure you want to delete the data product setting? This will remove the setting from all the data products',
                             )}
-                            onConfirm={() => onRemoveDataProductSetting(id)}
+                            onConfirm={() => handleRemove(record)}
                             placement={'leftTop'}
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}

@@ -1,51 +1,142 @@
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
-import { useCreateDataProductSettingMutation } from '@/store/features/data-product-settings/data-product-settings-api-slice';
+import {
+    useCreateDataProductSettingMutation,
+    useUpdateDataProductSettingMutation,
+} from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DataProductSettingContract } from '@/types/data-product-setting';
 import { generateExternalIdFromName } from '@/utils/external-id.helper';
-import { Button, Checkbox, Form, Input, Select } from 'antd';
+import { Button, Checkbox, Form, Input, InputNumber, Select } from 'antd';
 import { TFunction } from 'i18next';
-import { useEffect } from 'react';
-import styles from '@/components/data-products/data-output-form/data-output-form.module.scss';
+import { useEffect, useMemo } from 'react';
+import styles from './data-product-settings-table.module.scss';
 const { Option } = Select;
+
+type Mode = 'create' | 'edit';
+type Scope = 'dataproduct' | 'dataset';
+type SettingType = 'checkbox' | 'tags' | 'input';
 
 interface CreateSettingModalProps {
     onClose: () => void;
     t: TFunction;
     isOpen: boolean;
-    scope: 'dataproduct' | 'dataset';
+    mode: Mode;
+    scope: Scope;
+    initial?: DataProductSettingContract;
 }
 
-export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose, scope }) => {
+interface SettingsFormText {
+    title: string;
+    successMessage: string;
+    errorMessage: string;
+    submitButtonText: string;
+}
+
+const createText = (t: TFunction, scope: Scope, mode: Mode): SettingsFormText => {
+    if (mode === 'create') {
+        if (scope === 'dataproduct') {
+            return {
+                title: t('Create New Data Product Setting'),
+                successMessage: t('Data product setting created successfully'),
+                errorMessage: t('Failed to create data product setting'),
+                submitButtonText: t('Create'),
+            };
+        } else {
+            return {
+                title: t('Create New Dataset Setting'),
+                successMessage: t('Dataset setting created successfully'),
+                errorMessage: t('Failed to create dataset setting'),
+                submitButtonText: t('Create'),
+            };
+        }
+    } else {
+        if (scope === 'dataproduct') {
+            return {
+                title: t('Update Data Product Setting'),
+                successMessage: t('Data product setting updated successfully'),
+                errorMessage: t('Failed to update data product setting'),
+                submitButtonText: t('Update'),
+            };
+        } else {
+            return {
+                title: t('Update Dataset Setting'),
+                successMessage: t('Dataset setting updated successfully'),
+                errorMessage: t('Failed to update dataset setting'),
+                submitButtonText: t('Update'),
+            };
+        }
+    }
+};
+
+const typeFormItem = (type: SettingType) => {
+    switch (type) {
+        case 'checkbox':
+            return <Checkbox defaultChecked />;
+        case 'tags':
+            return <Select allowClear={false} defaultActiveFirstOption mode="tags" />;
+        case 'input':
+            return <Input />;
+        default:
+            return <Input />;
+    }
+};
+
+const parseInitialValue = (initial: DataProductSettingContract) => {
+    switch (initial.type) {
+        case 'checkbox':
+            return initial.default === 'true';
+        case 'tags':
+            return initial.default.split(',');
+        case 'input':
+            return initial.default;
+        default:
+            return initial.default;
+    }
+};
+
+export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose, scope, mode, initial }) => {
     const [form] = Form.useForm();
     const [createDataProductSetting, { isLoading: isCreating }] = useCreateDataProductSettingMutation();
-    const typeValue = Form.useWatch('type', form);
+    const [updateDataProductSetting, { isLoading: isEditing }] = useUpdateDataProductSettingMutation();
+    const typeValue = Form.useWatch<SettingType>('type', form);
+
+    const initialValues = useMemo(() => {
+        if (initial) {
+            return {
+                ...initial,
+                default: parseInitialValue(initial),
+            };
+        }
+        return undefined;
+    }, [initial]);
+
+    const variableText = createText(t, scope, mode);
 
     const handleFinish = async (values: any) => {
         try {
-            const newSetting: DataProductSettingContract = {
-                ...values,
-                default: values.default.toString(),
-                scope: scope,
-                external_id: generateExternalIdFromName(values.name),
-                order: parseInt(values.order, 10),
-            };
-            await createDataProductSetting(newSetting);
-            dispatchMessage({
-                content:
-                    scope === 'dataproduct'
-                        ? t('Data product setting created successfully')
-                        : t('Dataset setting created successfully'),
-                type: 'success',
-            });
+            if (mode === 'create') {
+                const newSetting: DataProductSettingContract = {
+                    ...values,
+                    default: values.default.toString(),
+                    scope: scope,
+                    external_id: generateExternalIdFromName(values.name),
+                    order: values.order,
+                };
+                await createDataProductSetting(newSetting);
+            } else {
+                const updateSetting: DataProductSettingContract = {
+                    ...initial,
+                    ...values,
+                    default: values.default.toString(),
+                };
+                await updateDataProductSetting(updateSetting);
+            }
+
+            dispatchMessage({ content: variableText.successMessage, type: 'success' });
             form.resetFields();
             onClose();
-        } catch (_e) {
-            const errorMessage =
-                scope === 'dataproduct'
-                    ? t('Failed to create data product setting')
-                    : t('Failed to create dataset setting');
-            dispatchMessage({ content: errorMessage, type: 'error' });
+        } catch (_) {
+            dispatchMessage({ content: variableText.errorMessage, type: 'error' });
         }
     };
 
@@ -56,7 +147,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
     return (
         <FormModal
             isOpen={isOpen}
-            title={scope === 'dataproduct' ? t('Create New Data Product Setting') : t('Create New Dataset Setting')}
+            title={variableText.title}
             onClose={() => {
                 form.resetFields();
                 onClose();
@@ -67,7 +158,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
             }}
             footer={[
                 <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {t('Create')}
+                    {variableText.submitButtonText}
                 </Button>,
                 <Button
                     key="cancel"
@@ -85,21 +176,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 form={form}
                 layout="vertical"
                 onFinish={handleFinish}
-                initialValues={{
-                    type: 'checkbox',
-                    default: (() => {
-                        switch (typeValue) {
-                            case 'checkbox':
-                                return true;
-                            case 'tags':
-                                return [];
-                            case 'input':
-                                return '';
-                            default:
-                                return '';
-                        }
-                    })(),
-                }}
+                initialValues={initialValues || { type: 'checkbox' }}
             >
                 <Form.Item
                     name="name"
@@ -121,7 +198,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                     label={t('Type')}
                     rules={[{ required: true, message: t('Please select a type') }]}
                 >
-                    <Select>
+                    <Select disabled={mode === 'edit'}>
                         <Option value="checkbox">{t('Checkbox')}</Option>
                         <Option value="tags">{t('List')}</Option>
                         <Option value="input">{t('Input')}</Option>
@@ -132,19 +209,9 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                     name="default"
                     label={t('Default Value')}
                     valuePropName={typeValue === 'checkbox' ? 'checked' : 'value'}
+                    dependencies={['type']}
                 >
-                    {(() => {
-                        switch (typeValue) {
-                            case 'checkbox':
-                                return <Checkbox defaultChecked={true}></Checkbox>;
-                            case 'tags':
-                                return <Select allowClear={false} defaultActiveFirstOption mode="tags" />;
-                            case 'input':
-                                return <Input />;
-                            default:
-                                return <Input />;
-                        }
-                    })()}
+                    {typeFormItem(typeValue)}
                 </Form.Item>
                 <Form.Item
                     name="category"
@@ -160,11 +227,11 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                     label={t('Order')}
                     rules={[
                         { required: true, message: t('Please provide an order') },
-                        { pattern: /^\d+$/, message: t('Order must be a number') },
+                        { type: 'integer', message: t('Order must be a number') },
                     ]}
                     tooltip={t('The order in which the setting will appear, within their own section')}
                 >
-                    <Input />
+                    <InputNumber className={styles.numberInput} min={0} precision={0} />
                 </Form.Item>
             </Form>
         </FormModal>
