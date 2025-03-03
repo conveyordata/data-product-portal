@@ -18,7 +18,7 @@ from app.core.auth.device_flows.exceptions import (
 )
 from app.core.auth.device_flows.model import DeviceFlow as DeviceFlowModel
 from app.core.auth.device_flows.schema import DeviceFlow, DeviceFlowStatus
-from app.core.auth.jwt import oidc
+from app.core.auth.jwt import get_oidc, oidc
 from app.core.helpers.templates import render_html_template
 from app.core.logging.logger import logger
 
@@ -57,11 +57,10 @@ class DeviceFlowService:
             client_id=client_id,
             scope=scope,
             max_expiry=utc_now() + timedelta(seconds=1800),
-            oidc_redirect_uri=oidc.redirect_uri,
+            oidc_redirect_uri=get_oidc().redirect_uri,
         )
         db.add(device_flow)
         db.commit()
-
         return DeviceFlow.model_validate(device_flow)
 
     def fetch_jwt_tokens(
