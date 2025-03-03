@@ -63,7 +63,7 @@ class Authorization(metaclass=Singleton):
 
         return default
 
-    def _enforce(self, *, sub: str, dom: str, obj: str, act: str) -> None:
+    def _enforce(self, *, sub: str, dom: str, obj: str, act: int) -> None:
         enforcer: AsyncEnforcer = self.enforcer
         if not enforcer.enforce(sub, dom, obj, act):
             raise HTTPException(

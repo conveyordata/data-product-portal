@@ -17,7 +17,7 @@ class UserService:
             .all()
         )
 
-    def remove_user(self, id: UUID, db: Session):
+    def remove_user(self, id: UUID, db: Session) -> None:
         user = ensure_user_exists(id, db)
         user.data_products = []
         user.owned_datasets = []

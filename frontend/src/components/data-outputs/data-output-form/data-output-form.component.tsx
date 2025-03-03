@@ -1,5 +1,4 @@
-import { Button, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -159,7 +158,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     },
                 ]}
             >
-                <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <Input.TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
                 <Select

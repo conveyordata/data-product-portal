@@ -1,15 +1,17 @@
 import { Button } from 'antd';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CreateRoleModal } from '@/pages/roles/components/create-role-modal.component';
 import styles from '@/pages/roles/components/roles-table.module.scss';
-import type { RoleScope } from '@/pages/roles/roles.page.tsx';
+import type { RoleScope } from '@/pages/roles/roles.page';
 
 type RolesButtonProps = {
     scope: RoleScope;
 };
-export function RolesButton({ scope }: RolesButtonProps) {
+export function CreateRoleButton({ scope }: RolesButtonProps) {
     const { t } = useTranslation();
+    const [modalOpen, setModalOpen] = useState(false);
 
     const message = useMemo(() => {
         switch (scope) {
@@ -23,8 +25,18 @@ export function RolesButton({ scope }: RolesButtonProps) {
     }, [scope, t]);
 
     return (
-        <Button className={styles.formButton} type={'primary'}>
-            {message}
-        </Button>
+        <>
+            <Button
+                className={styles.formButton}
+                type={'primary'}
+                onClick={() => {
+                    setModalOpen(true);
+                }}
+            >
+                {message}
+            </Button>
+
+            <CreateRoleModal scope={scope} title={message} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+        </>
     );
 }
