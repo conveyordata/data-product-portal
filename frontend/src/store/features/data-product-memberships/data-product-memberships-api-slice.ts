@@ -1,16 +1,16 @@
+import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
+import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import { dataProductsApiSlice, dataProductTags } from '@/store/features/data-products/data-products-api-slice.ts';
 import {
     DataProductMembershipApprovalRequest,
     DataProductMembershipApprovalResponse,
+    DataProductMembershipContract,
     DataProductMembershipRequestAccessRequest,
     DataProductMembershipRequestAccessResponse,
     DataProductMembershipRoleUpdateRequest,
     DataProductUserMembershipCreateContract,
-    DataProductMembershipAssociation,
 } from '@/types/data-product-membership';
-import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
-import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 
 export const dataProductMembershipsApiSlice = baseApiSlice
     .enhanceEndpoints({ addTagTypes: dataProductTags })
@@ -109,7 +109,7 @@ export const dataProductMembershipsApiSlice = baseApiSlice
                     queryFulfilled.catch(patchResult.undo);
                 },
             }),
-            getDataProductMembershipPendingActions: builder.query<DataProductMembershipAssociation[], void>({
+            getDataProductMembershipPendingActions: builder.query<DataProductMembershipContract[], void>({
                 query: () => ({
                     url: buildUrl(ApiUrl.DataProductMembershipPendingActions, {}),
                     method: 'GET',

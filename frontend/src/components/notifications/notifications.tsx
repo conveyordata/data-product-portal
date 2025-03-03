@@ -12,8 +12,8 @@ import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/dat
 import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
 import { DataOutputDatasetContract } from '@/types/data-output-dataset';
 import { DataProductDatasetContract } from '@/types/data-product-dataset';
-import { DataProductMembershipAssociation } from '@/types/data-product-membership';
 import { TFunction } from 'i18next';
+import { DataProductMembershipContract } from '@/types/data-product-membership';
 
 export function Notifications() {
     const {
@@ -29,7 +29,7 @@ export function Notifications() {
     type PendingAction =
         | ({ type: 'data_product' } & DataProductDatasetContract)
         | ({ type: 'data_output' } & DataOutputDatasetContract)
-        | ({ type: 'team' } & DataProductMembershipAssociation);
+        | ({ type: 'team' } & DataProductMembershipContract);
 
     const createPendingItem = useCallback((action: PendingAction, navigate: NavigateFunction, t: TFunction) => {
         let link, description, navigatePath;

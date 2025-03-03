@@ -4,7 +4,7 @@ from uuid import UUID
 import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
@@ -14,10 +14,8 @@ from app.data_product_memberships.enums import (
     DataProductUserRole,
 )
 from app.data_product_memberships.model import DataProductMembership
-from app.data_product_memberships.schema import (
-    DataProductMembershipAssociation,
-    DataProductMembershipCreate,
-)
+from app.data_product_memberships.schema import DataProductMembershipCreate
+from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
@@ -220,46 +218,25 @@ class DataProductMembershipService:
 
     def get_user_pending_actions(
         self, db: Session, authenticated_user: User
-    ) -> list[DataProductMembershipAssociation]:
-        owner_subquery = (
-            db.query(DataProductMembership.data_product_id)
-            .filter(
-                DataProductMembership.user_id == authenticated_user.id,
-                DataProductMembership.role == DataProductUserRole.OWNER,
-            )
-            .subquery()
-        )
-
-        pending_memberships = (
+    ) -> list[DataProductMembershipGet]:
+        return (
             db.query(DataProductMembership)
-            .join(
-                DataProductModel,
-                DataProductMembership.data_product_id == DataProductModel.id,
+            .options(
+                joinedload(DataProductMembership.data_product),
+                joinedload(DataProductMembership.user),
+                joinedload(DataProductMembership.requested_by),
             )
             .filter(
                 DataProductMembership.status
-                == DataProductMembershipStatus.PENDING_APPROVAL,
-                DataProductModel.id.in_(select(owner_subquery)),
+                == DataProductMembershipStatus.PENDING_APPROVAL
             )
-            .options(
-                joinedload(DataProductMembership.user),
-                joinedload(DataProductMembership.data_product),
-                joinedload(DataProductMembership.requested_by),
+            .filter(
+                DataProductMembership.data_product.has(
+                    DataProductModel.memberships.any(
+                        user_id=authenticated_user.id, role=DataProductUserRole.OWNER
+                    )
+                )
             )
             .order_by(asc(DataProductMembership.requested_on))
             .all()
         )
-
-        return [
-            DataProductMembershipAssociation(
-                id=membership.id,
-                user_id=membership.user_id,
-                data_product_id=membership.data_product_id,
-                membership_id=membership.id,
-                status=membership.status,
-                membership=membership,
-                user=membership.user,
-                data_product=membership.data_product,
-            )
-            for membership in pending_memberships
-        ]

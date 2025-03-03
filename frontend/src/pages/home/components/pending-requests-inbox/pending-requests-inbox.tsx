@@ -11,15 +11,15 @@ import { DataProductDatasetContract } from '@/types/data-product-dataset';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 import { TFunction } from 'i18next';
 import { Link } from 'react-router-dom';
-import { DataProductMembershipAssociation } from '@/types/data-product-membership';
 import { useListPagination } from '@/hooks/use-list-pagination';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { DataProductMembershipContract } from '@/types/data-product-membership';
 
 type PendingAction =
     | ({ type: 'data_product' } & DataProductDatasetContract)
     | ({ type: 'data_output' } & DataOutputDatasetContract)
-    | ({ type: 'team' } & DataProductMembershipAssociation);
+    | ({ type: 'team' } & DataProductMembershipContract);
 
 const createPendingItem = (action: PendingAction, t: TFunction) => {
     let link, description, navigatePath, date;
@@ -82,7 +82,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                 </>
             );
             navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
-            date = action.membership.requested_on;
+            date = action.requested_on;
             break;
 
         default:

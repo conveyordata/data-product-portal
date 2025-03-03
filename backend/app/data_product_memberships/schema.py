@@ -8,7 +8,6 @@ from app.data_product_memberships.enums import (
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
 )
-from app.data_products.schema_base_get import BaseDataProductGet
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -39,14 +38,3 @@ class DataProductMembership(BaseDataProductMembership):
     approved_on: datetime | None
     denied_by: User | None
     denied_on: datetime | None
-
-
-class DataProductMembershipAssociation(ORMModel):
-    id: UUID
-    user_id: UUID
-    data_product_id: UUID
-    membership_id: UUID
-    status: DataProductMembershipStatus
-    membership: DataProductMembership
-    user: User
-    data_product: BaseDataProductGet
