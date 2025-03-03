@@ -1,6 +1,7 @@
-import { UserContract } from '@/types/users';
+import { DataOutputContract } from '@/types/data-output';
 import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
-import { DataOutputContract } from '../data-output/data-output.contract';
+import { UserContract } from '@/types/users';
+
 import { DatasetContract } from '../dataset';
 
 export type DataOutputDatasetContract = {

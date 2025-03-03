@@ -1,21 +1,23 @@
 import { Button, Form, List, Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DatasetsGetContract } from '@/types/dataset';
-import { useCallback, useMemo } from 'react';
-import { SearchForm } from '@/types/shared';
-import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import type { TFunction } from 'i18next';
-import styles from './add-dataset-popup.module.scss';
-import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
+import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import {
     useGetDataOutputByIdQuery,
     useRequestDatasetAccessForDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
+import { DatasetsGetContract } from '@/types/dataset';
+import { SearchForm } from '@/types/shared';
+
+import styles from './add-dataset-popup.module.scss';
 
 type Props = {
     onClose: () => void;

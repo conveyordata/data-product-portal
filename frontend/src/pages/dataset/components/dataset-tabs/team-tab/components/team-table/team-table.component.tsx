@@ -1,16 +1,18 @@
 import { Flex, Table, TableColumnsType } from 'antd';
-import { UserContract } from '@/types/users';
 import { useCallback, useMemo } from 'react';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useTranslation } from 'react-i18next';
-import styles from './team-table.module.scss';
 import { useSelector } from 'react-redux';
+
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { getDatasetTeamColumns } from './team-table-columns.tsx';
 import {
     useGetDatasetByIdQuery,
     useRemoveUserFromDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { UserContract } from '@/types/users';
+
+import styles from './team-table.module.scss';
+import { getDatasetTeamColumns } from './team-table-columns.tsx';
 
 type Props = {
     isCurrentDatasetOwner: boolean;

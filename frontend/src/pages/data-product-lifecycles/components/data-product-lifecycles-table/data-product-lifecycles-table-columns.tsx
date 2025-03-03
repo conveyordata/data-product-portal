@@ -1,9 +1,10 @@
 import { Button, Checkbox, ColorPicker, Flex, Popconfirm } from 'antd';
-import { TFunction } from 'i18next';
-import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { Sorter } from '@/utils/table-sorter.helper';
 import { ColumnType } from 'antd/es/table';
+import { TFunction } from 'i18next';
+
+import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;

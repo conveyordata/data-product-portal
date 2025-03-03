@@ -1,5 +1,6 @@
 import { OidcClientSettings, WebStorageStateStore } from 'oidc-client-ts';
 import { AuthProviderProps } from 'react-oidc-context';
+
 import { AppConfig } from '@/config/app-config.ts';
 
 const oidcCredentials = AppConfig.getOidcCredentials();

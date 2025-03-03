@@ -1,7 +1,8 @@
 import Icon from '@ant-design/icons';
 import { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
-import { ComponentType, ForwardRefExoticComponent, SVGProps } from 'react';
 import clsx from 'clsx';
+import { ComponentType, ForwardRefExoticComponent, SVGProps } from 'react';
+
 import styles from './custom-svg-icon-loader.module.scss';
 
 type Props = {

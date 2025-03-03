@@ -1,22 +1,24 @@
 import type { TableProps } from 'antd';
-import { Button, Flex, Form, Input, Space, Table, Typography, InputRef } from 'antd';
-import styles from './data-product-settings-table.module.scss';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { getDataProductTableColumns } from './data-product-settings-table-columns.tsx';
 import type { FormInstance } from 'antd';
+import { Button, Flex, Form, Input, InputRef, Space, Table, Typography } from 'antd';
+import type { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { useModal } from '@/hooks/use-modal.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     useGetAllDataProductSettingsQuery,
     useRemoveDataProductSettingMutation,
     useUpdateDataProductSettingMutation,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
-import { DataProductSettingContract } from '@/types/data-product-setting';
-import React from 'react';
-import { useModal } from '@/hooks/use-modal.tsx';
-import { CreateSettingModal } from '../new-data-product-setting-modal.component.tsx';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import type { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
+import { DataProductSettingContract } from '@/types/data-product-setting';
+
+import { CreateSettingModal } from '../new-data-product-setting-modal.component.tsx';
+import styles from './data-product-settings-table.module.scss';
+import { getDataProductTableColumns } from './data-product-settings-table-columns.tsx';
 
 type Props = {
     scope: 'dataproduct' | 'dataset';

@@ -1,5 +1,6 @@
-import { TFunction } from 'i18next';
 import { Button, Popconfirm, TableColumnsType } from 'antd';
+import { TFunction } from 'i18next';
+
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { UserContract } from '@/types/users';
 import { Sorter } from '@/utils/table-sorter.helper';

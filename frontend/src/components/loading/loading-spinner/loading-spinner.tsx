@@ -1,6 +1,7 @@
-import styles from './loading-spinner.module.scss';
 import { Flex, Spin, SpinProps } from 'antd';
 import { ReactNode } from 'react';
+
+import styles from './loading-spinner.module.scss';
 
 type Props = {
     children?: ReactNode;

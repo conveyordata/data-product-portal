@@ -1,6 +1,3 @@
-import { Tabs } from 'antd';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import styles from './dataset-tabs.module.scss';
 import {
     HistoryOutlined,
     InfoCircleOutlined,
@@ -8,19 +5,24 @@ import {
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
+import { Tabs } from 'antd';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { HistoryTab } from './history-tab/history-tab';
-import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ReactFlowProvider } from 'reactflow';
+
+import { Explorer } from '@/components/explorer/explorer';
+import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
-import { AboutTab } from './about-tab/about-tab.tsx';
-import { TeamTab } from './team-tab/team-tab.tsx';
-import { ReactFlowProvider } from 'reactflow';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Explorer } from '@/components/explorer/explorer';
-import { SettingsTab } from './settings-tab/settings-tab';
+import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
+
+import { AboutTab } from './about-tab/about-tab.tsx';
+import styles from './dataset-tabs.module.scss';
+import { HistoryTab } from './history-tab/history-tab';
+import { SettingsTab } from './settings-tab/settings-tab';
+import { TeamTab } from './team-tab/team-tab.tsx';
 
 type Props = {
     datasetId: string;

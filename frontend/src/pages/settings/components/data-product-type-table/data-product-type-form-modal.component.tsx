@@ -1,15 +1,17 @@
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import Icon from '@ant-design/icons';
 import { Button, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
-import { DataProductTypeContract, DataProductTypeCreateRequest } from '@/types/data-product-type';
+
+import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useCreateDataProductTypeMutation,
     useUpdateDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { DataProductTypeContract, DataProductTypeCreateRequest } from '@/types/data-product-type';
 import { DataProductIcon, dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
-import Icon from '@ant-design/icons';
+
 import styles from './data-product-type-table.module.scss';
 
 const { Option } = Select;

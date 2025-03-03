@@ -1,8 +1,10 @@
-import styles from './searchbar.module.scss';
 import { Flex, Form, FormInstance, FormItemProps, FormProps, Input, InputRef } from 'antd';
-import { SearchForm } from '@/types/shared';
-import { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import { SearchProps } from 'antd/lib/input';
+import { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
+
+import { SearchForm } from '@/types/shared';
+
+import styles from './searchbar.module.scss';
 
 type Props = {
     onSearch?: (values: SearchForm) => void;

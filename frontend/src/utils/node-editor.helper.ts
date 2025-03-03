@@ -1,5 +1,5 @@
-import { Edge, FitViewOptions, Node, Position } from 'reactflow';
 import Dagre from '@dagrejs/dagre';
+import { Edge, FitViewOptions, Node, Position } from 'reactflow';
 
 export function getDagreDirection(direction: Position) {
     switch (direction) {

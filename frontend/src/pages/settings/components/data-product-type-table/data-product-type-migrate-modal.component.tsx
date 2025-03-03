@@ -1,14 +1,14 @@
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { Button, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
 
-import { DataProductTypeContract } from '@/types/data-product-type';
+import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useGetAllDataProductTypesQuery,
     useMigrateDataProductTypeMutation,
     useRemoveDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { DataProductTypeContract } from '@/types/data-product-type';
 
 const { Option } = Select;
 

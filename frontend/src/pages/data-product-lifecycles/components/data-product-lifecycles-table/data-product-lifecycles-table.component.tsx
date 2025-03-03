@@ -1,22 +1,24 @@
 import type { TableProps } from 'antd';
-import { Button, Flex, Form, Input, Space, Table, Typography, InputRef } from 'antd';
-import styles from './data-product-lifecycles-table.module.scss';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
 import type { FormInstance } from 'antd';
+import { Button, Flex, Form, Input, InputRef, Space, Table, Typography } from 'antd';
+import type { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { useModal } from '@/hooks/use-modal.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     useGetAllDataProductLifecyclesQuery,
     useRemoveDataProductLifecycleMutation,
     useUpdateDataProductLifecycleMutation,
 } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import React from 'react';
-import { useModal } from '@/hooks/use-modal.tsx';
-import { CreateLifecycleModal } from '../new-data-product-lifecycles-modal.component.tsx';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import type { ColumnGroupType, ColumnType } from 'antd/es/table/interface';
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+
+import { CreateLifecycleModal } from '../new-data-product-lifecycles-modal.component.tsx';
+import styles from './data-product-lifecycles-table.module.scss';
+import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
 
 export function DataProductLifecyclesTable() {
     const { t } = useTranslation();

@@ -1,10 +1,11 @@
+import { Button, Checkbox, ColorPicker, Form, Input } from 'antd';
+import type { TFunction } from 'i18next';
+import React from 'react';
+
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { useCreateDataProductLifecycleMutation } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { Button, Checkbox, ColorPicker, Form, Input } from 'antd';
-import type { TFunction } from 'i18next';
-import React from 'react';
 
 interface CreateLifecycleModalProps {
     onClose: () => void;

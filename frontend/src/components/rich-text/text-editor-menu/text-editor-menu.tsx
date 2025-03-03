@@ -1,9 +1,3 @@
-import { Editor } from '@tiptap/react';
-import { Level } from '@tiptap/extension-heading';
-import { useCallback, useMemo } from 'react';
-import clsx from 'clsx';
-import styles from './text-editor-menu.module.scss';
-import { Button, Divider, Flex, Popover, Select, SelectProps } from 'antd';
 import {
     BoldOutlined,
     CodeOutlined,
@@ -15,7 +9,14 @@ import {
     UndoOutlined,
     UnorderedListOutlined,
 } from '@ant-design/icons';
+import { Level } from '@tiptap/extension-heading';
+import { Editor } from '@tiptap/react';
+import { Button, Divider, Flex, Popover, Select, SelectProps } from 'antd';
+import clsx from 'clsx';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import styles from './text-editor-menu.module.scss';
 
 type Props = {
     editor: Editor;

@@ -1,13 +1,14 @@
+import type { TFunction } from 'i18next';
+
 import awsLogo from '@/assets/icons/aws-logo.svg?react';
-import s3Logo from '@/assets/icons/s3-logo.svg?react';
-import glueLogo from '@/assets/icons/glue-logo.svg?react';
+import redshiftLogo from '@/assets/icons/aws-redshift-logo.svg?react';
 import conveyorLogo from '@/assets/icons/conveyor-logo.svg?react';
 import databricksLogo from '@/assets/icons/databricks-logo.svg?react';
-import tableauLogo from '@/assets/icons/tableau-logo.svg?react';
+import glueLogo from '@/assets/icons/glue-logo.svg?react';
+import s3Logo from '@/assets/icons/s3-logo.svg?react';
 import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
-import redshiftLogo from '@/assets/icons/aws-redshift-logo.svg?react';
-import { DataPlatforms, DataPlatform } from '@/types/data-platform';
-import type { TFunction } from 'i18next';
+import tableauLogo from '@/assets/icons/tableau-logo.svg?react';
+import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { CustomDropdownItemProps } from '@/types/shared';
 
 export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[] => [

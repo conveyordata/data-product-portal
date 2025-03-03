@@ -1,6 +1,8 @@
 import { Flex, Space, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+
 import { DataProductForm } from '@/components/data-products/data-product-form/data-product-form.component.tsx';
+
 import styles from './data-product-create.module.scss';
 
 export function DataProductCreate() {

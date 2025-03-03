@@ -1,4 +1,5 @@
 import { Empty, EmptyProps, Flex, FlexProps } from 'antd';
+
 import styles from './empty-list.module.scss';
 
 type Props = EmptyProps & {

@@ -1,8 +1,9 @@
+import { Flex } from 'antd';
+import clsx from 'clsx';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Flex } from 'antd';
+
 import styles from './breadcrumb-link.module.scss';
-import clsx from 'clsx';
 
 type BreadcrumbLinkProps = {
     title: ReactNode;

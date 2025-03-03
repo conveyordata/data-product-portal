@@ -1,9 +1,11 @@
 import { Form, Space } from 'antd';
-import styles from './data-access-tile-grid.module.scss';
-import { useGetAllEnvironmentsQuery } from '@/store/features/environments/environments-api-slice.tsx';
-import { CustomDropdownItemProps } from '@/types/shared';
-import { DataPlatforms, DataPlatform } from '@/types/data-platform';
+
 import { AccessDataTile } from '@/components/data-access/data-access-tile/data-access-tile.component.tsx';
+import { useGetAllEnvironmentsQuery } from '@/store/features/environments/environments-api-slice.tsx';
+import { DataPlatform, DataPlatforms } from '@/types/data-platform';
+import { CustomDropdownItemProps } from '@/types/shared';
+
+import styles from './data-access-tile-grid.module.scss';
 
 type Props = {
     canAccessData: boolean;

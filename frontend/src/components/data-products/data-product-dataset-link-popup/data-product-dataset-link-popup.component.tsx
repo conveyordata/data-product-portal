@@ -1,7 +1,9 @@
-import { Searchbar } from '@/components/form';
 import { FormInstance } from 'antd';
-import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import { ReactNode } from 'react';
+
+import { Searchbar } from '@/components/form';
+import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
+
 import styles from './data-product-dataset-link-popup.module.scss';
 
 type Props = {

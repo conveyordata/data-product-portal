@@ -1,6 +1,7 @@
-import styles from './history-event-badge.module.scss';
 import { Divider, Flex, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+
+import styles from './history-event-badge.module.scss';
 
 type Props = {
     name: string;

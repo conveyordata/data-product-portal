@@ -1,23 +1,26 @@
-import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { Edge, Node, Position, XYPosition } from 'reactflow';
-import { useCallback, useEffect } from 'react';
-import { Button, Flex, theme } from 'antd';
-import styles from './explorer.module.scss';
-import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
-import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import 'reactflow/dist/base.css';
-import { Link } from 'react-router-dom';
-import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
+
+import { Button, Flex, theme } from 'antd';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { greenThemeConfig } from '@/theme/antd-theme';
-import { NodeContract, EdgeContract } from '@/types/graph/graph-contract.ts';
-import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
+import { Link } from 'react-router-dom';
+import { Edge, Node, Position, XYPosition } from 'reactflow';
+
+import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
+import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
+import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
+import { greenThemeConfig } from '@/theme/antd-theme';
+import { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts';
+import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
+
+import styles from './explorer.module.scss';
 
 const { getDesignToken } = theme;
 

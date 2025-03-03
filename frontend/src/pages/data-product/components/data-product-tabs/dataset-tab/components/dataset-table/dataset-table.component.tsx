@@ -1,14 +1,16 @@
 import { Flex, Table, type TableColumnsType } from 'antd';
 import { useCallback, useMemo } from 'react';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useTranslation } from 'react-i18next';
+
 import {
     useGetDataProductByIdQuery,
     useRemoveDatasetFromDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import type { DatasetLink } from '@/types/data-product';
+
 import styles from './dataset-table.module.scss';
 import { getDataProductDatasetsColumns } from './dataset-table-columns.tsx';
-import type { DatasetLink } from '@/types/data-product';
 
 type Props = {
     isCurrentDataProductOwner: boolean;

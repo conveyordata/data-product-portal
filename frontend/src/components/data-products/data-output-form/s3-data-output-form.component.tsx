@@ -1,8 +1,9 @@
 import { Form, FormInstance, Input, Select } from 'antd';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { DataOutputConfiguration, DataOutputCreateFormSchema, S3DataOutput } from '@/types/data-output';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-import { useEffect } from 'react';
 
 type Props = {
     mode: 'create';

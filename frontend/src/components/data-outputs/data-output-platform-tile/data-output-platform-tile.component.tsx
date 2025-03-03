@@ -1,8 +1,10 @@
-import { Environment } from '@/types/environment';
-import { DropdownProps, Flex, Radio, Space, Spin, Typography } from 'antd';
-import styles from './data-output-platform-tile.module.scss';
-import { CustomDropdownItemProps } from '@/types/shared';
 import Icon from '@ant-design/icons';
+import { DropdownProps, Flex, Radio, Space, Spin, Typography } from 'antd';
+
+import { Environment } from '@/types/environment';
+import { CustomDropdownItemProps } from '@/types/shared';
+
+import styles from './data-output-platform-tile.module.scss';
 
 type Props<T extends string> = {
     dataPlatform: CustomDropdownItemProps<T>;

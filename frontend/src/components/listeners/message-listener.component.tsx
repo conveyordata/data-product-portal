@@ -1,6 +1,7 @@
+import { message } from 'antd';
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { message } from 'antd';
+
 import { selectMessage } from '@/store/features/feedback/feedback-slice.ts';
 
 const MessageListener: React.FC = () => {

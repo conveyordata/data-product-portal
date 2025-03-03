@@ -1,12 +1,14 @@
-import { Button, Form, FormProps, Input, Switch, Space } from 'antd';
+import { Button, Form, FormProps, Input, Space, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
-import styles from './environment-create.module.scss';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useNavigate } from 'react-router-dom';
-import { ApplicationPaths } from '@/types/navigation.ts';
-import { EnvironmentCreateFormSchema } from '@/types/environment';
+
 import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
 import { useCreateEnvironmentMutation } from '@/store/features/environments/environments-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { EnvironmentCreateFormSchema } from '@/types/environment';
+import { ApplicationPaths } from '@/types/navigation.ts';
+
+import styles from './environment-create.module.scss';
 
 export function EnvironmentCreateForm() {
     const { t } = useTranslation();

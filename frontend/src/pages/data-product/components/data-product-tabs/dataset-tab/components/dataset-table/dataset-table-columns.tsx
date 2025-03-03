@@ -1,16 +1,18 @@
 import { Badge, Button, Popconfirm, TableColumnsType } from 'antd';
-import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
-import styles from './dataset-table.module.scss';
 import { TFunction } from 'i18next';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { createDatasetIdPath } from '@/types/navigation.ts';
-import { DatasetLink } from '@/types/data-product';
 import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title.tsx';
 import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title.tsx';
-import { Sorter } from '@/utils/table-sorter.helper';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+import { DatasetLink } from '@/types/data-product';
+import { createDatasetIdPath } from '@/types/navigation.ts';
+import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
+import { Sorter } from '@/utils/table-sorter.helper';
+
+import styles from './dataset-table.module.scss';
 
 type Props = {
     t: TFunction;

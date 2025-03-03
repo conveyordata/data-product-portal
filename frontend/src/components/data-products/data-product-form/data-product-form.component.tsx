@@ -1,33 +1,35 @@
 import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import styles from './data-product-form.module.scss';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
+import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
 import {
     useCreateDataProductMutation,
     useGetDataProductByIdQuery,
     useRemoveDataProductMutation,
     useUpdateDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
-import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
 import {
     getDataProductMemberMemberships,
     getDataProductOwnerIds,
     getIsDataProductOwner,
 } from '@/utils/data-product-user-role.helper.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { useSelector } from 'react-redux';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
-import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
-import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
-import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
-import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
+
+import styles from './data-product-form.module.scss';
 
 const { TextArea } = Input;
 
