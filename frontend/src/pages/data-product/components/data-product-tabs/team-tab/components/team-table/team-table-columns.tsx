@@ -1,15 +1,16 @@
+import { Badge, Button, Popconfirm, Space, TableColumnsType } from 'antd';
+import { TFunction } from 'i18next';
+
+import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
+import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form.tsx';
 import {
     DataProductMembershipRole,
     DataProductMembershipStatus,
     DataProductUserMembership,
 } from '@/types/data-product-membership';
-import { TFunction } from 'i18next';
-import { Badge, Button, Popconfirm, Space, TableColumnsType } from 'antd';
-import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
-import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form.tsx';
 import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper.ts';
-import { Sorter } from '@/utils/table-sorter.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
+import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;

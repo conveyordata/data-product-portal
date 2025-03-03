@@ -1,6 +1,7 @@
-import { NodeProps, Position } from 'reactflow';
-import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
 import type { ReactNode } from 'react';
+import { NodeProps, Position } from 'reactflow';
+
+import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 
 export type DataOutputNodeProps = {

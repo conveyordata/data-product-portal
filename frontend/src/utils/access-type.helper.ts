@@ -1,5 +1,6 @@
-import { DatasetAccess } from '@/types/dataset';
 import type { TFunction } from 'i18next';
+
+import { DatasetAccess } from '@/types/dataset';
 
 export const getDatasetAccessTypeLabel = (t: TFunction, accessType: DatasetAccess) => {
     switch (accessType) {

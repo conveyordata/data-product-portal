@@ -1,16 +1,18 @@
-import { Badge, Popover, TableColumnsType, Tag } from 'antd';
-import { DataProductsGetContract, DataProductStatus } from '@/types/data-product';
 import { TeamOutlined } from '@ant-design/icons';
+import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
-import styles from './data-products-table.module.scss';
-import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
-import { DataProductTypeContract } from '@/types/data-product-type';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import { DataProductsGetContract,DataProductStatus } from '@/types/data-product';
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { DataProductTypeContract } from '@/types/data-product-type';
+import { DomainContract } from '@/types/domain';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { DomainContract } from '@/types/domain';
+
+import styles from './data-products-table.module.scss';
 
 const iconColumnWidth = 30;
 export const getDataProductTableColumns = ({

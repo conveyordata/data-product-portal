@@ -1,17 +1,19 @@
+import { PartitionOutlined, TeamOutlined } from '@ant-design/icons';
+import { Button, Tabs, Typography } from 'antd';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
 import {
     useGetAllDataProductsQuery,
     useGetUserDataProductsQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
-import styles from './data-products-inbox.module.scss';
-import { Button, Tabs, Typography } from 'antd';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { PartitionOutlined, TeamOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import { getItemFromLocalStorage, LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
-import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
+import { getItemFromLocalStorage,LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
+
+import styles from './data-products-inbox.module.scss';
 import { DataProductsList } from './data-products-list.tsx';
 
 type Props = {

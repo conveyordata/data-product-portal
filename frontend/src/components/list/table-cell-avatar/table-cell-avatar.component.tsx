@@ -1,7 +1,8 @@
 import { Flex, Popover, PopoverProps, Space, Typography } from 'antd';
-import styles from './table-cell-avatar.module.scss';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+
+import styles from './table-cell-avatar.module.scss';
 
 type Props = {
     title: ReactNode | string;
@@ -39,7 +40,7 @@ export const TableCellAvatar = ({ title, subtitle, icon, popover, linkTo }: Prop
 
     if (popover) {
         component = (
-            <PopoverComponent placement={'topLeft'} overlayClassName={styles.popoverContent} {...popover}>
+            <PopoverComponent placement={'topLeft'} classNames={{ root: styles.popoverContent }} {...popover}>
                 {component}
             </PopoverComponent>
         );

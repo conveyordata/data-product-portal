@@ -1,7 +1,7 @@
-import { UserContract } from '@/types/users';
+import { ApiUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { TagTypes } from '@/store/features/api/tag-types.ts';
-import { ApiUrl } from '@/api/api-urls.ts';
+import { UserContract } from '@/types/users';
 
 export const authTags: string[] = [TagTypes.Auth];
 

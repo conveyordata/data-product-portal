@@ -1,11 +1,12 @@
-import { RolesTable } from '@/pages/roles/components/roles-table.component.tsx';
-import { Flex, Tabs, Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
-import type { TabsProps } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
+import type { TabsProps } from 'antd';
+import { Flex, Tabs, Typography } from 'antd';
 import { useState } from 'react';
-import { RolesButton } from '@/pages/roles/components/roles-button.component.tsx';
+import { useTranslation } from 'react-i18next';
+
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
+import { RolesButton } from '@/pages/roles/components/roles-button.component.tsx';
+import { RolesTable } from '@/pages/roles/components/roles-table.component.tsx';
 
 const { Paragraph } = Typography;
 

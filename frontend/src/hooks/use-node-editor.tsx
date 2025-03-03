@@ -1,4 +1,4 @@
-import { defaultFitViewOptions, generateDagreLayout } from '@/utils/node-editor.helper.ts';
+import { useCallback, useEffect } from 'react';
 import {
     addEdge,
     Connection,
@@ -10,7 +10,8 @@ import {
     useNodesState,
     useReactFlow,
 } from 'reactflow';
-import { useCallback, useEffect } from 'react';
+
+import { defaultFitViewOptions, generateDagreLayout } from '@/utils/node-editor.helper.ts';
 
 const defaultNodeWidth = 180;
 const defaultNodeHeight = 80;

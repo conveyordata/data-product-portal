@@ -1,14 +1,16 @@
-import { Avatar, Badge, Flex, theme, Typography } from 'antd';
-import headerStyles from '@/components/layout/navbar/navbar.module.scss';
-import styles from './user-menu.module.scss';
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Badge, Flex, theme,Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { useAuth } from 'react-oidc-context';
-import { AppConfig } from '@/config/app-config.ts';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+
+import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
+import headerStyles from '@/components/layout/navbar/navbar.module.scss';
 import { Notifications } from '@/components/notifications/notifications';
+import { AppConfig } from '@/config/app-config.ts';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+
+import styles from './user-menu.module.scss';
 
 const cognitoLogoutParams = AppConfig.getOidcCognitoLogoutParams();
 const isAuthDisabled = !AppConfig.isOidcEnabled();

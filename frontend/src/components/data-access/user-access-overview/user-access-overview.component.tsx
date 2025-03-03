@@ -1,8 +1,10 @@
-import { Flex, theme, Typography } from 'antd';
-import styles from './user-access-overview.module.scss';
+import { Flex, theme,Typography } from 'antd';
+import { ReactNode } from 'react';
+
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { UserContract } from '@/types/users';
-import { ReactNode } from 'react';
+
+import styles from './user-access-overview.module.scss';
 
 const { useToken } = theme;
 

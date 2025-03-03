@@ -1,18 +1,20 @@
 import { Button, Flex, Form } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
-import { DatasetTable } from './components/dataset-table/dataset-table.component.tsx';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { SearchForm } from '@/types/shared';
-import styles from './dataset-tab.module.scss';
+
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
-import { AddDatasetPopup } from '../../../../data-product/components/data-product-tabs/data-output-tab/components/add-dataset-popup/add-dataset-popup.tsx';
-import type { DataOutputDatasetLink } from '@/types/data-output';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import type { DataOutputDatasetLink } from '@/types/data-output';
+import { SearchForm } from '@/types/shared';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
+
+import { AddDatasetPopup } from '../../../../data-product/components/data-product-tabs/data-output-tab/components/add-dataset-popup/add-dataset-popup.tsx';
+import { DatasetTable } from './components/dataset-table/dataset-table.component.tsx';
+import styles from './dataset-tab.module.scss';
 
 type Props = {
     dataOutputId: string;

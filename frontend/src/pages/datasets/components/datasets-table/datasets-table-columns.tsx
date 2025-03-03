@@ -1,17 +1,19 @@
-import { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
-import type { TFunction } from 'i18next';
 import { Badge, Popover, TableColumnsType, Tag } from 'antd';
-import styles from './datasets-table.module.scss';
-import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { DomainContract } from '@/types/domain';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import type { TFunction } from 'i18next';
+
 import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
+import { DatasetStatus } from '@/types/dataset/dataset.contract';
+import { DomainContract } from '@/types/domain';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { DatasetStatus } from '@/types/dataset/dataset.contract';
-import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
+
+import styles from './datasets-table.module.scss';
 
 const iconColumnWidth = 30;
 

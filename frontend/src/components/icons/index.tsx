@@ -1,9 +1,9 @@
 import Icon from '@ant-design/icons';
 import type { ComponentProps } from 'react';
 
+import DataOutputOutlinedIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import DataProductOutlinedIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import DatasetOutlinedIcon from '@/assets/icons/dataset-outline-icon.svg?react';
-import DataOutputOutlinedIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import ProductLogoIcon from '@/assets/icons/logo.svg?react';
 
 type IconProps = Omit<ComponentProps<typeof Icon>, 'component'>;

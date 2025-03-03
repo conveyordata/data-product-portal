@@ -1,8 +1,9 @@
+import { ReactNode } from 'react';
 import { NodeProps, Position } from 'reactflow';
+
+import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
 import { DataProductIcon } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
-import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
-import { ReactNode } from 'react';
 
 export type DataProductNodeProps = {
     id: string;

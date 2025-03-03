@@ -1,5 +1,6 @@
-import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { Navigate, Outlet } from 'react-router-dom';
+
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { ApplicationPaths } from '@/types/navigation';
 

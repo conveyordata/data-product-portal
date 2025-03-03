@@ -1,7 +1,8 @@
-import styles from './sidebar-logo.module.scss';
 import { Flex, Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
+
+import styles from './sidebar-logo.module.scss';
 
 type Props = {
     variant?: 'light' | 'dark';

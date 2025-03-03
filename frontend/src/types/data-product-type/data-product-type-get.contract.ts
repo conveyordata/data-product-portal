@@ -1,4 +1,5 @@
 import { DataProductTypeContract } from '@/types/data-product-type';
+
 import { DataProductContract } from '../data-product';
 
 export type DataProductTypesGetContract = DataProductTypeContract & {

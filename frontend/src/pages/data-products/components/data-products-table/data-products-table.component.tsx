@@ -1,23 +1,25 @@
 import type { RadioChangeEvent, TableProps } from 'antd';
 import { Button, Flex, Form, Input, Space, Table, Typography } from 'antd';
-import styles from './data-products-table.module.scss';
+import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
+
+import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter';
+import { useQuickFilter } from '@/hooks/use-quick-filter';
+import { useTablePagination } from '@/hooks/use-table-pagination';
+import { getDataProductTableColumns } from '@/pages/data-products/components/data-products-table/data-products-table-columns.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import {
     useGetAllDataProductsQuery,
     useGetUserDataProductsQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
-import { useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { getDataProductTableColumns } from '@/pages/data-products/components/data-products-table/data-products-table-columns.tsx';
 import { DataProductsGetContract } from '@/types/data-product';
+import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import { SearchForm } from '@/types/shared';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
-import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter';
-import { useQuickFilter } from '@/hooks/use-quick-filter';
 import { QuickFilterParticipation } from '@/types/shared/table-filters';
-import { useTablePagination } from '@/hooks/use-table-pagination';
+
+import styles from './data-products-table.module.scss';
 
 function filterDataProducts(dataProducts: DataProductsGetContract, searchTerm?: string) {
     if (!searchTerm) {

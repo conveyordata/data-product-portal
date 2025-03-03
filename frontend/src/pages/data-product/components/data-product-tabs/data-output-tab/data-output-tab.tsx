@@ -1,17 +1,19 @@
 import { Button, Flex, Form } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
-import { SearchForm } from '@/types/shared';
-import styles from './data-output-tab.module.scss';
+
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
-import { DataOutputTable } from './components/data-output-table/data-output-table.component';
-import { AddDataOutputPopup } from './components/add-data-output-popup/add-data-output-popup';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
+import { SearchForm } from '@/types/shared';
+import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
+
+import { AddDataOutputPopup } from './components/add-data-output-popup/add-data-output-popup';
+import { DataOutputTable } from './components/data-output-table/data-output-table.component';
+import styles from './data-output-tab.module.scss';
 
 type Props = {
     dataProductId: string;

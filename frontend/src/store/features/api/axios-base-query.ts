@@ -1,11 +1,12 @@
 import type { BaseQueryFn } from '@reduxjs/toolkit/query';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios, { AxiosResponse } from 'axios';
-import { AppConfig } from '@/config/app-config.ts';
-import { ApiError } from '@/types/api-result.ts';
-import { NotificationState, showNotification } from '@/store/features/feedback/feedback-slice.ts';
-import { Headers, QueryParams } from '@/types/http.ts';
 import { User } from 'oidc-client-ts';
+
+import { AppConfig } from '@/config/app-config.ts';
+import { NotificationState, showNotification } from '@/store/features/feedback/feedback-slice.ts';
+import { ApiError } from '@/types/api-result.ts';
+import { Headers, QueryParams } from '@/types/http.ts';
 
 interface CustomAxiosError extends AxiosError {
     response?: AxiosResponse<ApiError>;

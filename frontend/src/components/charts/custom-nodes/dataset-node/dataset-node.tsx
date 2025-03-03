@@ -1,7 +1,8 @@
+import { ReactNode } from 'react';
 import { NodeProps, Position } from 'reactflow';
+
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
-import { ReactNode } from 'react';
 
 export type DatasetNodeProps = {
     id: string;

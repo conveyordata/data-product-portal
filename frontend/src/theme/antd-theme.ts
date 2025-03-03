@@ -1,4 +1,4 @@
-import { theme, ThemeConfig } from 'antd';
+import { theme,ThemeConfig } from 'antd';
 
 const { getDesignToken } = theme;
 

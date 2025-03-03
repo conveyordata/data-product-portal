@@ -1,14 +1,16 @@
 import { Button, Flex, Space, Table, Typography } from 'antd';
-import styles from './tags-table.module.scss';
-import { useTranslation } from 'react-i18next';
-import { TagContract } from '@/types/tag/tag.ts';
-import { useGetAllTagsQuery, useRemoveTagMutation } from '@/store/features/tags/tags-api-slice.tsx';
 import { TableProps } from 'antd/lib';
-import { useTablePagination } from '@/hooks/use-table-pagination';
-import { getTagsTableColums } from './tags-table-columns';
-import { useModal } from '@/hooks/use-modal';
-import { CreateTagsModal } from './tags-form-modal.component';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { useModal } from '@/hooks/use-modal';
+import { useTablePagination } from '@/hooks/use-table-pagination';
+import { useGetAllTagsQuery, useRemoveTagMutation } from '@/store/features/tags/tags-api-slice.tsx';
+import { TagContract } from '@/types/tag/tag.ts';
+
+import { CreateTagsModal } from './tags-form-modal.component';
+import styles from './tags-table.module.scss';
+import { getTagsTableColums } from './tags-table-columns';
 
 export function TagsTable() {
     const { t } = useTranslation();

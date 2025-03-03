@@ -1,12 +1,13 @@
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from 'react-oidc-context';
 import { useCallback, useEffect } from 'react';
+import { useAuth } from 'react-oidc-context';
+import { useSelector } from 'react-redux';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { AppConfig } from '@/config/app-config.ts';
-import { useAuthorizeMutation } from '@/store/features/auth/auth-api-slice.ts';
 import { useAppDispatch } from '@/store';
+import { useAuthorizeMutation } from '@/store/features/auth/auth-api-slice.ts';
 import { selectAuthState, setCredentials } from '@/store/features/auth/auth-slice.ts';
-import { useSelector } from 'react-redux';
 
 const oidcCognitoParams = AppConfig.getOidcCognitoLogoutParams();
 

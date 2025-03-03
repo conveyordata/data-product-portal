@@ -1,18 +1,20 @@
 import { Button, Flex, Space, Table, TableProps, Typography } from 'antd';
-import styles from './data-product-type-table.module.scss';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+
+import { useModal } from '@/hooks/use-modal';
+import { useTablePagination } from '@/hooks/use-table-pagination';
 import {
     useGetAllDataProductTypesQuery,
     useRemoveDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { DataProductTypesGetContract } from '@/types/data-product-type';
-import { getDataProductTypeTableColumns } from './data-product-type-table-columns';
-import { useTablePagination } from '@/hooks/use-table-pagination';
-import { useModal } from '@/hooks/use-modal';
-import { useState } from 'react';
+
 import { CreateDataProductTypeModal } from './data-product-type-form-modal.component';
 import { CreateDataProductTypeMigrateModal } from './data-product-type-migrate-modal.component';
+import styles from './data-product-type-table.module.scss';
+import { getDataProductTypeTableColumns } from './data-product-type-table-columns';
 
 export function DataProductTypeTable() {
     const { t } = useTranslation();

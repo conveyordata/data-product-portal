@@ -1,7 +1,9 @@
-import styles from './environment-config-create.module.scss';
-import { Typography, Flex, Space } from 'antd';
+import { Flex, Space, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+
 import { EnvironmentConfigCreateForm } from '@/components/environment-config-create/components/environment-config-create-form.component';
+
+import styles from './environment-config-create.module.scss';
 
 export function EnvironmentConfigCreate() {
     const { t } = useTranslation();

@@ -1,3 +1,4 @@
+import store from '@/store';
 import {
     hideModal,
     MessageState,
@@ -6,7 +7,6 @@ import {
     showModal,
     showNotification,
 } from '@/store/features/feedback/feedback-slice.ts';
-import store from '@/store';
 
 export function dispatchNotification({ message, description, type }: NotificationState) {
     store.dispatch(showNotification({ message, description, type }));
