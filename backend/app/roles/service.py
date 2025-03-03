@@ -4,32 +4,45 @@ from sqlalchemy.orm import Session
 
 from app.database.database import ensure_exists
 from app.roles.model import Role as RoleModel
-from app.roles.schema import CreateRole, Role
+from app.roles.schema import CreateRole, Role, UpdateRole
 
 
 class RoleService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_role(self, id: UUID) -> RoleModel:
-        return ensure_exists(id, self.db, Role)
+    def get_role(self, role_id: UUID) -> RoleModel:
+        return ensure_exists(role_id, self.db, RoleModel)
 
     def get_roles(self, scope: str) -> list[Role]:
-        return self.db.query(RoleModel).where(RoleModel.scope == scope).all()
+        return self.db.query(RoleModel).where(RoleModel.scope == scope).order_by(RoleModel.created_on).all()
 
     def create_role(self, role: CreateRole) -> Role:
         model = RoleModel(**role.parse_pydantic_schema())
+        model.permissions = self._canonical_permissions(model.permissions)
         self.db.add(model)
         self.db.commit()
         return model
 
-    def update_role(self, role: Role) -> Role:
-        model = RoleModel(**role.parse_pydantic_schema())
-        self.db.add(model)
+    def update_role(self, role: UpdateRole) -> Role:
+        db_role = self.get_role(role.id)
+        updated_role = role.model_dump(exclude_unset=True)
+
+        for k, v in updated_role.items():
+            if k == "permissions":
+                v = self._canonical_permissions(v)
+            setattr(db_role, k, v) if v else None
+
         self.db.commit()
-        return model
+        return db_role
 
     def delete_role(self, id: UUID) -> None:
         role = self.get_role(id)
         role.delete()
         self.db.commit()
+
+    @staticmethod
+    def _canonical_permissions(permissions: list[int]) -> list[int]:
+        result = list(set(permissions))
+        result.sort()
+        return result

@@ -1,7 +1,7 @@
-import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
-import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
-import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import type { RoleContract } from '@/types/roles';
+import { ApiUrl, buildUrl } from '@/api/api-urls';
+import { baseApiSlice } from '@/store/features/api/base-api-slice';
+import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
+import type { RoleContract, RoleUpdate } from '@/types/roles';
 
 export const roleTags: string[] = [TagTypes.Role];
 
@@ -22,10 +22,10 @@ export const rolesApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: roleTa
             }),
             invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
         }),
-        updateRole: builder.mutation<RoleContract, RoleContract>({
+        updateRole: builder.mutation<RoleContract, RoleUpdate>({
             query: (request) => ({
                 url: ApiUrl.Roles,
-                method: 'PUT',
+                method: 'PATCH',
                 data: request,
             }),
             invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
