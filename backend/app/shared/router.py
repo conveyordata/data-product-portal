@@ -14,9 +14,9 @@ from app.datasets.router import router as dataset
 from app.domains.router import router as domain
 from app.environments.router import router as environment
 from app.platforms.router import router as platform
+from app.roles.router import router as role
 from app.tags.router import router as tag
 from app.users.router import router as user
-from app.roles.router import router as role
 
 router = (
     APIRouter(dependencies=[Security(api_key_authenticated)])
