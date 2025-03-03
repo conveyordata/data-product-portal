@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
@@ -20,6 +21,11 @@ class DataProductMembershipGet(ORMModel):
     status: DataProductMembershipStatus
     user: User
     data_product: DataProduct
+    requested_on: datetime
+    approved_by: User | None
+    approved_on: datetime | None
+    denied_by: User | None
+    denied_on: datetime | None
 
 
 class DataProductMembershipsGet(DataProductMembershipGet):
