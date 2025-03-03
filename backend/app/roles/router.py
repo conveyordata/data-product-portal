@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
-from app.roles.schema import CreateRole, Role
+from app.roles.schema import CreateRole, Role, UpdateRole
 from app.roles.service import RoleService
 
 router = APIRouter(prefix="/roles", tags=["roles"])
@@ -32,7 +32,7 @@ def create_role(role: CreateRole, db: Session = Depends(get_db_session)) -> Role
     return RoleService(db).create_role(role)
 
 
-@router.put(
+@router.patch(
     "",
     responses={
         200: {
@@ -44,7 +44,7 @@ def create_role(role: CreateRole, db: Session = Depends(get_db_session)) -> Role
     },
     dependencies=[Depends(only_for_admin)],
 )
-def update_role(role: Role, db: Session = Depends(get_db_session)) -> Role:
+def update_role(role: UpdateRole, db: Session = Depends(get_db_session)) -> Role:
     return RoleService(db).update_role(role)
 
 

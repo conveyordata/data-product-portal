@@ -1,10 +1,10 @@
 import { Checkbox, type CheckboxChangeEvent, Flex, Table, Typography } from 'antd';
 import type { ColumnType } from 'antd/es/table/interface';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import QuestionTooltip from '@/components/tooltip/question-tooltip';
 import type { RoleScope } from '@/pages/roles/roles.page';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
+import { useGetRolesQuery, useUpdateRoleMutation } from '@/store/features/roles/roles-api-slice';
 import type { RoleContract } from '@/types/roles';
 
 import styles from './roles-table.module.scss';
@@ -38,32 +38,25 @@ type RolesTableProps = {
 };
 export function RolesTable({ scope }: RolesTableProps) {
     const { data: roles = [], isFetching } = useGetRolesQuery(scope);
-    const [permissions, setPermissions] = useState<Permission[]>(loadStateForScope(scope, roles));
+    const [updateRole, { isLoading }] = useUpdateRoleMutation();
 
-    console.log(permissions);
-
-    useEffect(() => {
-        setPermissions(loadStateForScope(scope, roles));
-    }, [roles, scope]);
+    const permissions = useMemo(() => determinePermissionsForScope(scope, roles), [roles, scope]);
 
     const handleCheckboxChange = useCallback(
-        (record: PermissionInstance, key: string, value: boolean) => {
-            const updatedData = permissions.map((permission) => {
-                if (permission.type === 'Instance' && permission.id === record.id) {
-                    return {
-                        ...permission,
-                        access: {
-                            ...(permission as PermissionInstance).access,
-                            [key]: value,
-                        },
-                    };
-                }
-                return permission;
-            });
+        (record: PermissionInstance, key: string, checked: boolean) => {
+            const role = roles.find((role) => role.name === key)!;
+            
+            const permissions = [...role.permissions];
+            if (checked && !permissions.includes(record.id)) {
+                permissions.push(record.id);
+            } else if (!checked && permissions.includes(record.id)) {
+                const index = permissions.indexOf(record.id);
+                permissions.splice(index, 1);
+            }
 
-            setPermissions(updatedData);
+            updateRole({ id: role.id, permissions });
         },
-        [permissions],
+        [roles, updateRole],
     );
 
     const renderPermission = (_: string, record: Permission) => {
@@ -131,7 +124,7 @@ export function RolesTable({ scope }: RolesTableProps) {
         <Flex vertical className={styles.tableContainer}>
             <Table
                 columns={columns}
-                loading={isFetching}
+                loading={isFetching || isLoading}
                 dataSource={permissions}
                 pagination={false}
                 rowKey={'id'}
@@ -141,7 +134,7 @@ export function RolesTable({ scope }: RolesTableProps) {
     );
 }
 
-function loadStateForScope(scope: RoleScope, roles: RoleContract[]): Permission[] {
+function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): Permission[] {
     let permissions: Permission[] = [];
 
     switch (scope) {

@@ -1,1 +1,1 @@
-export type { RoleContract } from './role.contract.ts';
+export type { RoleContract, RoleUpdate } from './role.contract.ts';
