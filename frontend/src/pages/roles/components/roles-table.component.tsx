@@ -10,8 +10,10 @@ import styles from './roles-table.module.scss';
 
 const { Text } = Typography;
 
+type RoleName = string;
+
 type Role = {
-    name: string;
+    name: RoleName;
     description: string;
 };
 
@@ -26,7 +28,7 @@ type PermissionBase = {
 type PermissionInstance = PermissionBase & {
     type: 'Instance';
     description: string;
-    access: Map<string, string>;
+    access: Map<RoleName, boolean>;
 };
 
 type PermissionGroup = PermissionBase & {

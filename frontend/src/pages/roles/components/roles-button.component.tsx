@@ -2,9 +2,9 @@ import { Button } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CreateRoleModal } from '@/pages/roles/components/create-role-modal.component';
 import styles from '@/pages/roles/components/roles-table.module.scss';
 import type { RoleScope } from '@/pages/roles/roles.page';
-import { CreateRoleModal } from '@/pages/roles/components/create-role-modal.component';
 
 type RolesButtonProps = {
     scope: RoleScope;
