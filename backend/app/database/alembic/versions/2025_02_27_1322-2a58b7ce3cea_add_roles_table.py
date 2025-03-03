@@ -33,6 +33,7 @@ def upgrade() -> None:
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
         sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("name", "scope", name="uix_name_scope")
     )
 
 

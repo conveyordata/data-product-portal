@@ -1,21 +1,15 @@
 import { Checkbox, type CheckboxChangeEvent, Flex, Table, Typography } from 'antd';
 import type { ColumnType } from 'antd/es/table/interface';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import QuestionTooltip from '@/components/tooltip/question-tooltip.tsx';
-import type { RoleScope } from '@/pages/roles/roles.page.tsx';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
+import QuestionTooltip from '@/components/tooltip/question-tooltip';
+import type { RoleScope } from '@/pages/roles/roles.page';
+import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
+import type { RoleContract } from '@/types/roles';
 
 import styles from './roles-table.module.scss';
 
 const { Text } = Typography;
-
-type RoleName = string;
-
-type Role = {
-    name: RoleName;
-    description: string;
-};
 
 type PermissionType = 'Group' | 'Instance';
 
@@ -27,12 +21,14 @@ type PermissionBase = {
 
 type PermissionInstance = PermissionBase & {
     type: 'Instance';
+    id: number;
     description: string;
-    access: Map<RoleName, boolean>;
+    access?: object;
 };
 
 type PermissionGroup = PermissionBase & {
     type: 'Group';
+    id: string;
 };
 
 type Permission = PermissionInstance | PermissionGroup;
@@ -42,32 +38,32 @@ type RolesTableProps = {
 };
 export function RolesTable({ scope }: RolesTableProps) {
     const { data: roles = [], isFetching } = useGetRolesQuery(scope);
+    const [permissions, setPermissions] = useState<Permission[]>(loadStateForScope(scope, roles));
 
-    const joinedRoles: Role[] = useMemo(() => [...loadRolesForScope(scope), ...roles], [roles, scope]);
-    const [data, setData] = useState<Permission[]>(loadStateForScope(scope));
+    console.log(permissions);
 
     useEffect(() => {
-        setData(loadStateForScope(scope));
-    }, [scope]);
+        setPermissions(loadStateForScope(scope, roles));
+    }, [roles, scope]);
 
     const handleCheckboxChange = useCallback(
         (record: PermissionInstance, key: string, value: boolean) => {
-            const updatedData = data.map((item) => {
-                if (item.type === 'Instance' && item.id === record.id) {
+            const updatedData = permissions.map((permission) => {
+                if (permission.type === 'Instance' && permission.id === record.id) {
                     return {
-                        ...item,
+                        ...permission,
                         access: {
-                            ...(item as PermissionInstance).access,
+                            ...(permission as PermissionInstance).access,
                             [key]: value,
                         },
                     };
                 }
-                return item;
+                return permission;
             });
 
-            setData(updatedData);
+            setPermissions(updatedData);
         },
-        [data],
+        [permissions],
     );
 
     const renderPermission = (_: string, record: Permission) => {
@@ -115,7 +111,7 @@ export function RolesTable({ scope }: RolesTableProps) {
         };
     };
 
-    const roleColumns = joinedRoles.map((item) => createColumn(item.name, item.description));
+    const roleColumns = roles.map((role) => createColumn(role.name, role.description));
 
     const columns: ColumnType<Permission>[] = [
         {
@@ -136,7 +132,7 @@ export function RolesTable({ scope }: RolesTableProps) {
             <Table
                 columns={columns}
                 loading={isFetching}
-                dataSource={data}
+                dataSource={permissions}
                 pagination={false}
                 rowKey={'id'}
                 scroll={{ x: 'max-content' }}
@@ -145,56 +141,12 @@ export function RolesTable({ scope }: RolesTableProps) {
     );
 }
 
-function loadRolesForScope(scope: RoleScope): Role[] {
-    switch (scope) {
-        case 'global':
-            return [
-                {
-                    name: 'Admin',
-                    description: 'Administrators have blanket permissions',
-                },
-                {
-                    name: 'Everyone',
-                    description: "This is the role that is used as fallback for users that don't have another role",
-                },
-            ];
-        case 'data_product':
-            return [
-                {
-                    name: 'Owner',
-                    description: 'The owner of a Data Product',
-                },
-                {
-                    name: 'Solution Architect',
-                    description: 'The Solution Architect for a Data Product',
-                },
-                {
-                    name: 'Member',
-                    description: 'A regular team member of a Data Product',
-                },
-            ];
-        case 'dataset':
-            return [
-                {
-                    name: 'Owner',
-                    description: 'The owner of a Dataset',
-                },
-                {
-                    name: 'Solution Architect',
-                    description: 'The Solution Architect for a Dataset',
-                },
-                {
-                    name: 'Member',
-                    description: 'A regular team member of a Dataset',
-                },
-            ];
-    }
-}
+function loadStateForScope(scope: RoleScope, roles: RoleContract[]): Permission[] {
+    let permissions: Permission[] = [];
 
-function loadStateForScope(scope: RoleScope): Permission[] {
     switch (scope) {
         case 'global':
-            return [
+            permissions = [
                 {
                     type: 'Group',
                     id: 'Manage Installation',
@@ -205,10 +157,6 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 101,
                     name: 'Manage configuration',
                     description: 'Allows modifying the configuration options of this installation',
-                    access: {
-                        Admin: true,
-                        Everyone: false,
-                    },
                 },
                 {
                     type: 'Group',
@@ -220,20 +168,12 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 102,
                     name: 'Create Data Product',
                     description: 'Allows the creation of a Data Product',
-                    access: {
-                        Admin: true,
-                        Everyone: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 103,
                     name: 'Create Dataset',
                     description: 'Allows the creation of a Dataset',
-                    access: {
-                        Admin: true,
-                        Everyone: false,
-                    },
                 },
                 {
                     type: 'Group',
@@ -245,24 +185,17 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 104,
                     name: 'Request Data Product access',
                     description: 'Allows requesting access to a Data Product',
-                    access: {
-                        Admin: true,
-                        Everyone: true,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 105,
                     name: 'Request Dataset access',
                     description: 'Allows requesting access to a Dataset',
-                    access: {
-                        Admin: true,
-                        Everyone: true,
-                    },
                 },
             ];
+            break;
         case 'data_product':
-            return [
+            permissions = [
                 {
                     type: 'Group',
                     id: 'Manage Data Product',
@@ -273,44 +206,24 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 301,
                     name: 'Manage general properties',
                     description: 'Allows modifying properties such as labels and the description of a Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 302,
                     name: 'Manage settings',
                     description: 'Allows changing the settings of a Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 303,
                     name: 'Manage status',
                     description: 'Allows changing the status of a Data Product',
-                    access: {
-                        Owner: false,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 304,
                     name: 'Delete Data Product',
                     description: 'Allows the role to delete the Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Group',
@@ -322,44 +235,24 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 305,
                     name: 'Add User',
                     description: 'Allows adding a user as member to this Data Product and assigning a role',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 307,
                     name: 'Remove User',
                     description: 'Allows removing a user as member from this Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 306,
                     name: 'Modify User',
                     description: 'Allows changing the role of a member of the Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 308,
                     name: 'Review access request',
                     description: 'Allows accepting or rejecting an access request made for the Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Group',
@@ -371,44 +264,24 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 309,
                     name: 'Add Data Output',
                     description: 'Allows adding a Data Output to this Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 311,
                     name: 'Remove and unlink Data Output',
                     description: 'Allows removing a Data Output from this Data Product and unlinking it from a Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 310,
                     name: 'Modify Data Output',
                     description: 'Allows modifying the details of a Data Output of this Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 312,
                     name: 'Request Data Output Link',
                     description: 'Allows to request that a Data Output of Data Product gets linked to a Dataset',
-                    access: {
-                        Owner: false,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Group',
@@ -420,22 +293,12 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 313,
                     name: 'Request Access to Dataset',
                     description: 'Allows to request read access to a Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': true,
-                        Member: true,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 314,
                     name: 'Remove Access to Dataset',
                     description: 'Allows to remove read access to a Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Group',
@@ -447,15 +310,11 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 315,
                     name: 'Access Integrations',
                     description: 'Allows the role to see and access Integrations of the Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: true,
-                    },
                 },
             ];
+            break;
         case 'dataset':
-            return [
+            permissions = [
                 {
                     type: 'Group',
                     id: 'Manage Dataset',
@@ -466,44 +325,24 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 401,
                     name: 'Manage general properties',
                     description: 'Allows modifying properties such as labels and the description of a Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 402,
                     name: 'Manage settings',
                     description: 'Allows changing the settings of a Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 403,
                     name: 'Manage status',
                     description: 'Allows changing the status of a Dataset',
-                    access: {
-                        Owner: false,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 404,
                     name: 'Delete Dataset',
                     description: 'Allows the role to delete the Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Group',
@@ -515,44 +354,24 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 405,
                     name: 'Add User',
                     description: 'Allows adding a user as member to this Dataset and assigning a role',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 407,
                     name: 'Remove User',
                     description: 'Allows removing a user as member from this Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 406,
                     name: 'Modify User',
                     description: 'Allows changing the role of a member of the Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 408,
                     name: 'Review access request',
                     description: 'Allows approving or rejecting an access request made for the Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Group',
@@ -564,22 +383,12 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 409,
                     name: 'Accept Data Output link',
                     description: 'Allows accepting a request to link a Data Output to the Dataset',
-                    access: {
-                        Owner: false,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 410,
                     name: 'Remove Data Output link',
                     description: 'Allows unlinking Data Outputs from the Dataset',
-                    access: {
-                        Owner: false,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Group',
@@ -591,22 +400,12 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 411,
                     name: 'Approve Data Product Access',
                     description: 'Allows the role to accept or reject a read access request from a data product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Instance',
                     id: 412,
                     name: 'Revoke Data Product Access',
                     description: 'Allows the role to revoke read access from a data product again',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
                     type: 'Group',
@@ -618,12 +417,20 @@ function loadStateForScope(scope: RoleScope): Permission[] {
                     id: 413,
                     name: 'Access Integrations',
                     description: 'Allows the role to see and access Integrations of the Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: true,
-                    },
                 },
             ];
+            break;
     }
+
+    const determineAccess = (permission: number) => {
+        return Object.fromEntries(roles.map((role) => [role.name, role.permissions.includes(permission)]))
+    };
+
+    for (const permission of permissions) {
+        if (permission.type === 'Instance') {
+            permission.access = determineAccess(permission.id);
+        }
+    }
+
+    return permissions;
 }
