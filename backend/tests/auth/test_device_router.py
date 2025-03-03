@@ -19,7 +19,7 @@ class TestAuthDeviceRouter:
     def test_get_jwt_token(self, client):
         response = client.post(f"{ENDPOINT}/device_token?client_id=test")
         device_code = response.json()["device_code"]
-        sleep(5)
+        sleep(5)  # Avoids hitting the SlowdownException
         response = client.post(
             f"{ENDPOINT}/jwt_token?"
             f"client_id=test&device_code={device_code}"
