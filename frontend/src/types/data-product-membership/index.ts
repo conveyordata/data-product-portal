@@ -1,4 +1,4 @@
-export type { DataProductMembershipContract,DataProductMembershipModel } from './data-product-membership.contract.ts';
+export type { DataProductMembershipContract, DataProductMembershipModel } from './data-product-membership.contract.ts';
 export type {
     DataProductMembershipApprovalRequest,
     DataProductMembershipApprovalResponse,
@@ -8,7 +8,7 @@ export type {
     DataProductMembershipRequestAccessRequest,
     DataProductMembershipRequestAccessResponse,
 } from './data-product-membership-request-access.contract.ts';
-export { DataProductMembershipRole,type DataProductMembershipRoleType } from './data-product-membership-role.ts';
+export { DataProductMembershipRole, type DataProductMembershipRoleType } from './data-product-membership-role.ts';
 export type { DataProductMembershipRoleUpdateRequest } from './data-product-membership-role-update.contract.ts';
 export {
     DataProductMembershipStatus,

@@ -7,7 +7,7 @@ import { buildUrl } from '@/api/api-urls';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useGetAllEnvironmentConfigsQuery } from '@/store/features/environments/environments-api-slice';
 import { EnvironmentConfigContract } from '@/types/environment';
-import { ApplicationPaths, createEnvironmentConfigPath,DynamicPathParams } from '@/types/navigation';
+import { ApplicationPaths, createEnvironmentConfigPath, DynamicPathParams } from '@/types/navigation';
 import { SearchForm } from '@/types/shared';
 
 import { getEnvironmentConfigTableColumns } from './environment-configs-columns';

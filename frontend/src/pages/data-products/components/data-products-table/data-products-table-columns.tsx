@@ -3,7 +3,7 @@ import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { DataProductsGetContract,DataProductStatus } from '@/types/data-product';
+import { DataProductsGetContract, DataProductStatus } from '@/types/data-product';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import { DataProductTypeContract } from '@/types/data-product-type';
 import { DomainContract } from '@/types/domain';

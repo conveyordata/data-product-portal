@@ -20,12 +20,12 @@ export type {
     DataOutputDatasetRemoveResponse,
 } from './data-output-dataset-remove.contract.ts';
 export type { DataOutputsGetContract } from './data-outputs-get.contract.ts';
-export type { DatabricksDataOutput,DatabricksDataOutputContract } from './databricks-data-output.contract.ts';
+export type { DatabricksDataOutput, DatabricksDataOutputContract } from './databricks-data-output.contract.ts';
 export type { DataOutputDatasetLink } from './dataset-link.contract.ts';
-export type { GlueDataOutput,GlueDataOutputContract } from './glue-data-output.contract.ts';
-export type { RedshiftDataOutput,RedshiftDataOutputContract } from './redshift-data-output.contract.ts';
-export type { S3DataOutput,S3DataOutputContract } from './s3-data-output.contract.ts';
-export type { SnowflakeDataOutput,SnowflakeDataOutputContract } from './snowflake-data-output.contract.ts';
+export type { GlueDataOutput, GlueDataOutputContract } from './glue-data-output.contract.ts';
+export type { RedshiftDataOutput, RedshiftDataOutputContract } from './redshift-data-output.contract.ts';
+export type { S3DataOutput, S3DataOutputContract } from './s3-data-output.contract.ts';
+export type { SnowflakeDataOutput, SnowflakeDataOutputContract } from './snowflake-data-output.contract.ts';
 
 export interface DataOutputConfigurationContract {
     config: GlueDataOutput | S3DataOutput | DatabricksDataOutput | SnowflakeDataOutput | RedshiftDataOutput;

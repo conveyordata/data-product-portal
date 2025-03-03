@@ -16,7 +16,7 @@ import {
     useGetEnvironmentByIdQuery,
 } from '@/store/features/environments/environments-api-slice';
 import { useGetPlatformServiceConfigByIdQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import { ApplicationPaths, createEnvironmentConfigsPath,DynamicPathParams } from '@/types/navigation.ts';
+import { ApplicationPaths, createEnvironmentConfigsPath, DynamicPathParams } from '@/types/navigation.ts';
 import {
     isDataOutputEditPage,
     isDataProductEditPage,

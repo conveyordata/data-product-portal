@@ -4,4 +4,4 @@ export type {
     EnvironmentConfigCreateFormSchema,
     EnvironmentConfigCreateRequest,
 } from './env-platform-service-config.ts';
-export type { Environment, EnvironmentCreateFormSchema,EnvironmentCreateRequest } from './environment.ts';
+export type { Environment, EnvironmentCreateFormSchema, EnvironmentCreateRequest } from './environment.ts';

@@ -1,4 +1,4 @@
-import { Flex, theme,Typography } from 'antd';
+import { Flex, theme, Typography } from 'antd';
 import { ReactNode } from 'react';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';

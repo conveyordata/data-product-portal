@@ -1,5 +1,5 @@
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Badge, Flex, theme,Typography } from 'antd';
+import { Avatar, Badge, Flex, theme, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from 'react-oidc-context';
 import { useSelector } from 'react-redux';

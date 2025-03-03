@@ -1,7 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { dataProductsApiSlice,dataProductTags } from '@/store/features/data-products/data-products-api-slice.ts';
+import { dataProductsApiSlice, dataProductTags } from '@/store/features/data-products/data-products-api-slice.ts';
 import {
     DataProductMembershipApprovalRequest,
     DataProductMembershipApprovalResponse,
