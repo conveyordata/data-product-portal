@@ -73,7 +73,12 @@ jobs:
 
       - name: Run the automated tests
         working-directory: ./backend
-        run: poetry run pytest -v
+        id: run-test
+        run: poetry run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
+      - name: Ensure 100% coverage for router files
+        working-directory: ./scripts
+        run: ./check_coverage.sh
+
 
   lint-golang:
     name: Run Go linters

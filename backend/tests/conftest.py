@@ -1,7 +1,10 @@
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, scoped_session
 
+from app.core.auth.device_flows.service import verify_auth_header
 from app.data_product_memberships.model import DataProductUserRole
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
@@ -35,10 +38,27 @@ def override_get_db():
 
 session = pytest.fixture(override_get_db)
 
+from app.core.auth import jwt  # noqa: E402
+
+
+@pytest.fixture(scope="session", autouse=True)
+def mock_oidc_config():
+    """Mock OIDCConfiguration globally before any test runs."""
+    mock_instance = MagicMock()
+    mock_instance.client_id = "test_client_id"
+    mock_instance.client_secret = "test_client_secret"
+    mock_instance.redirect_uri = "http://test-redirect-uri"
+    mock_instance.token_endpoint = "http://test-token-endpoint"
+    mock_instance.authorization_endpoint = "http://test-authorization-endpoint"
+    mock_instance.provider.name = "test-provider"
+    # Force override the existing instance in `jwt.py`
+    jwt.oidc = mock_instance
+
 
 @pytest.fixture
 def client():
     app.dependency_overrides[get_db_session] = override_get_db
+    app.dependency_overrides[verify_auth_header] = lambda: "test"
     with TestClient(app) as test_client:
         yield test_client
         app.dependency_overrides.clear()

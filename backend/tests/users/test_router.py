@@ -35,3 +35,46 @@ class TestUsersRouter:
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()) == 1
+
+    def test_post_user_not_admin(self, client):
+        response = client.post(f"{ENDPOINT}")
+        assert response.status_code == 403
+
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+
+    @pytest.mark.usefixtures("admin")
+    def test_post_user(self, client):
+        response = client.post(
+            f"{ENDPOINT}",
+            json={
+                "email": "test@user.com",
+                "external_id": "test-user",
+                "first_name": "test",
+                "last_name": "user",
+                "is_admin": False,
+            },
+        )
+        assert response.status_code == 200
+
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        assert len(response.json()) == 2
+
+    @pytest.mark.usefixtures("admin")
+    def test_post_user_default_admin(self, client):
+        response = client.post(
+            f"{ENDPOINT}",
+            json={
+                "email": "test@user.com",
+                "external_id": "test-user",
+                "first_name": "test",
+                "last_name": "user",
+            },
+        )
+        assert response.status_code == 200
+
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        assert len(response.json()) == 2
