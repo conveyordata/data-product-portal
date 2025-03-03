@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import type { TablePaginationConfig } from 'antd';
+import { useState } from 'react';
+
 import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
 
 type Props = {

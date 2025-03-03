@@ -1,16 +1,18 @@
+import Icon, { CodeOutlined, PartitionOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import styles from './data-output-tabs.module.scss';
-import Icon, { CodeOutlined, PartitionOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
-import { TechnologiesTab } from './technologies-tab/technologies-tab';
-import { ReactFlowProvider } from 'reactflow';
-import { Explorer } from '@/components/explorer/explorer';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ReactFlowProvider } from 'reactflow';
+
+import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
+import { Explorer } from '@/components/explorer/explorer';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
+import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
+
+import styles from './data-output-tabs.module.scss';
+import { TechnologiesTab } from './technologies-tab/technologies-tab';
 
 type Props = {
     dataOutputId: string;

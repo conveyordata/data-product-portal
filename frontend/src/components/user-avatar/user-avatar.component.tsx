@@ -1,4 +1,5 @@
-import { Avatar, Flex, Typography, TypographyProps } from 'antd';
+import { Avatar, Flex, Typography, type TypographyProps } from 'antd';
+
 import styles from './user-avatar.module.scss';
 
 type Props = {

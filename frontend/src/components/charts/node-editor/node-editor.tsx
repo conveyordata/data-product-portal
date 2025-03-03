@@ -1,3 +1,8 @@
+import 'reactflow/dist/style.css';
+
+import { Typography } from 'antd';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Background,
     Connection,
@@ -10,13 +15,11 @@ import {
     ReactFlow,
     ReactFlowProps,
 } from 'reactflow';
-import styles from './node-editor.module.scss';
-import { Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
+
 import { edgeTypes, nodeTypes } from '@/components/charts/node-editor/node-types.ts';
-import { useMemo } from 'react';
-import 'reactflow/dist/style.css';
 import { defaultFitViewOptions } from '@/utils/node-editor.helper.ts';
+
+import styles from './node-editor.module.scss';
 
 type Props = {
     nodes: Node[];

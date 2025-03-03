@@ -1,10 +1,11 @@
-import styles from './table-cell-item.module.scss';
-import { Flex, Popover, Typography, TypographyProps } from 'antd';
-import * as React from 'react';
-import { ComponentType, ReactNode } from 'react';
 import Icon from '@ant-design/icons';
 import { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
+import { Flex, Popover, Typography, TypographyProps } from 'antd';
 import type { TooltipPlacement } from 'antd/es/tooltip';
+import * as React from 'react';
+import { ComponentType, ReactNode } from 'react';
+
+import styles from './table-cell-item.module.scss';
 
 type Props = {
     icon?: ReactNode;

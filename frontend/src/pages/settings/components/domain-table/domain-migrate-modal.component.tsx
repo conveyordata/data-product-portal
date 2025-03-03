@@ -1,12 +1,13 @@
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { Button, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
+
+import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useGetAllDomainsQuery,
     useMigrateDomainMutation,
     useRemoveDomainMutation,
 } from '@/store/features/domains/domains-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DomainContract } from '@/types/domain';
 
 const { Option } = Select;

@@ -1,7 +1,8 @@
 import type { TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
-import type { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
+
 import type { RedshiftDataOutputContract } from '@/types/data-output';
+import type { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
 
 type Props = {
     t: TFunction;

@@ -1,12 +1,13 @@
+import { Button, Checkbox, Form, Input, Select } from 'antd';
+import { TFunction } from 'i18next';
+import React, { useEffect } from 'react';
+
+import styles from '@/components/data-products/data-output-form/data-output-form.module.scss';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { useCreateDataProductSettingMutation } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DataProductSettingContract } from '@/types/data-product-setting';
 import { generateExternalIdFromName } from '@/utils/external-id.helper';
-import { Button, Checkbox, Form, Input, Select } from 'antd';
-import { TFunction } from 'i18next';
-import React, { useEffect } from 'react';
-import styles from '@/components/data-products/data-output-form/data-output-form.module.scss';
 
 const { Option } = Select;
 

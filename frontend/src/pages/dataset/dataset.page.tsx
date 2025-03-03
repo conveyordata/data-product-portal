@@ -1,25 +1,27 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import styles from './dataset.module.scss';
+import { SettingOutlined } from '@ant-design/icons';
 import { Flex, Popover, Typography } from 'antd';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
-import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description.tsx';
-import { useEffect, useMemo } from 'react';
-import { SettingOutlined } from '@ant-design/icons';
-import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
-import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
-import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
-import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.tsx';
-import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
-import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
+import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
+import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.tsx';
+import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description.tsx';
+import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
+import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
+
+import styles from './dataset.module.scss';
 
 export function Dataset() {
     const { t } = useTranslation();

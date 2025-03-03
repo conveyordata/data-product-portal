@@ -1,11 +1,12 @@
-import { DataProductStatus } from '@/types/data-product';
-import { DataOutputStatus } from '@/types/data-output';
 import type { BadgeProps } from 'antd';
-import { Status } from '@/types/shared';
+import type { TFunction } from 'i18next';
+
+import { DataOutputStatus } from '@/types/data-output';
+import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
+import { DataProductStatus } from '@/types/data-product';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { DataProductMembershipStatus } from '@/types/data-product-membership';
-import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
-import type { TFunction } from 'i18next';
+import { Status } from '@/types/shared';
 
 export function getStatusLabel(t: TFunction, status: Status): string {
     switch (status) {

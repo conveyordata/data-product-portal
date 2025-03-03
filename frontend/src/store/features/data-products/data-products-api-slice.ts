@@ -1,5 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
+import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
+import { DataOutputsGetContract } from '@/types/data-output';
 import {
     DataProductContract,
     DataProductCreate,
@@ -18,8 +20,6 @@ import {
     DataProductUpdateRequest,
     DataProductUpdateResponse,
 } from '@/types/data-product';
-import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DataOutputsGetContract } from '@/types/data-output';
 import { GraphContract } from '@/types/graph/graph-contract';
 
 export const dataProductTags: string[] = [

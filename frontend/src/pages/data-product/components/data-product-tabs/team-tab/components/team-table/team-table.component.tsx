@@ -1,21 +1,23 @@
 import { Flex, Table, TableColumnsType } from 'antd';
-import { UserContract } from '@/types/users';
 import { useCallback, useMemo } from 'react';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useTranslation } from 'react-i18next';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import styles from './team-table.module.scss';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import {
     useDenyMembershipAccessMutation,
     useGrantMembershipAccessMutation,
     useRemoveMembershipAccessMutation,
     useUpdateMembershipRoleMutation,
 } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+import { UserContract } from '@/types/users';
 import { getDoesUserHaveAnyDataProductMembership } from '@/utils/data-product-user-role.helper.ts';
+
+import styles from './team-table.module.scss';
 
 type Props = {
     isCurrentUserDataProductOwner: boolean;

@@ -1,7 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DomainCreateRequest, DomainCreateResponse, DomainsGetContract, DomainGetContract } from '@/types/domain';
+import { DomainCreateRequest, DomainCreateResponse, DomainGetContract, DomainsGetContract } from '@/types/domain';
 
 export const domainTags: string[] = [
     TagTypes.Domain,

@@ -1,10 +1,12 @@
-import { Environment } from '@/types/environment';
-import { Dropdown, DropdownProps, Flex, MenuProps, Radio, Space, Spin, Typography } from 'antd';
-import styles from './data-access-tile.module.scss';
-import { CustomDropdownItemProps } from '@/types/shared';
-import { useTranslation } from 'react-i18next';
-import { useMemo } from 'react';
 import Icon from '@ant-design/icons';
+import { Dropdown, DropdownProps, Flex, MenuProps, Radio, Space, Spin, Typography } from 'antd';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { Environment } from '@/types/environment';
+import { CustomDropdownItemProps } from '@/types/shared';
+
+import styles from './data-access-tile.module.scss';
 
 type Props<T extends string> = {
     dataPlatform: CustomDropdownItemProps<T>;

@@ -1,9 +1,10 @@
 import { Button, Flex, Popconfirm } from 'antd';
-import type { TFunction } from 'i18next';
-import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { Sorter } from '@/utils/table-sorter.helper';
-import { DataProductSettingContract } from '@/types/data-product-setting';
 import { ColumnType } from 'antd/es/table';
+import type { TFunction } from 'i18next';
+
+import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import { DataProductSettingContract } from '@/types/data-product-setting';
+import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;

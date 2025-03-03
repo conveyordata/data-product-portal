@@ -1,8 +1,9 @@
-import styles from '@/pages/roles/components/roles-table.module.scss';
 import { Button } from 'antd';
-import { useTranslation } from 'react-i18next';
-import type { RoleScope } from '@/pages/roles/roles.page.tsx';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import styles from '@/pages/roles/components/roles-table.module.scss';
+import type { RoleScope } from '@/pages/roles/roles.page.tsx';
 
 type RolesButtonProps = {
     scope: RoleScope;

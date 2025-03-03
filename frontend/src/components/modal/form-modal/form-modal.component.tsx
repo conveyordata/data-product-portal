@@ -1,4 +1,5 @@
 import { Modal, ModalProps, Typography } from 'antd';
+
 import styles from './form-modal.module.scss';
 
 type Props = ModalProps & {

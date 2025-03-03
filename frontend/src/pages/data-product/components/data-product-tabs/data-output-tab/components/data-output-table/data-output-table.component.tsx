@@ -1,17 +1,19 @@
 import { Flex, Table, type TableColumnsType } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import styles from './data-output-table.module.scss';
-import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
-import { DataOutputsGetContract } from '@/types/data-output';
+
 import { useModal } from '@/hooks/use-modal.tsx';
-import { AddDatasetPopup } from '../add-dataset-popup/add-dataset-popup.tsx';
 import {
     useRemoveDataOutputMutation,
     useRemoveDatasetFromDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { DataOutputsGetContract } from '@/types/data-output';
+
+import { AddDatasetPopup } from '../add-dataset-popup/add-dataset-popup.tsx';
+import styles from './data-output-table.module.scss';
+import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
 
 type Props = {
     dataProductId: string;

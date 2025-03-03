@@ -1,7 +1,8 @@
-import { TagContract } from '@/types/tag';
-import { UserContract } from '@/types/users';
 import { DataOutputLink, DataProductLink } from '@/types/dataset';
 import { DomainContract } from '@/types/domain';
+import { TagContract } from '@/types/tag';
+import { UserContract } from '@/types/users';
+
 import { DataProductLifeCycleContract } from '../data-product-lifecycle';
 import { DataProductSettingValueContract } from '../data-product-setting';
 

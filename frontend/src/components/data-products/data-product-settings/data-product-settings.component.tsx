@@ -1,26 +1,28 @@
-import styles from './data-product-settings.module.scss';
 import { Flex, Form, FormProps, Select, Switch, Typography } from 'antd';
+import TextArea from 'antd/es/input/TextArea';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import {
     useCreateDataProductSettingValueMutation,
     useCreateDatasetSettingValueMutation,
     useGetAllDataProductSettingsQuery,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import {
     DataProductSettingContract,
     DataProductSettingValueCreateRequest,
     DataProductSettingValueForm,
 } from '@/types/data-product-setting';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
-import TextArea from 'antd/es/input/TextArea';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
+import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 import { getIsDatasetOwner } from '@/utils/dataset-user.helper';
+
+import styles from './data-product-settings.module.scss';
 
 type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
 type Props = {

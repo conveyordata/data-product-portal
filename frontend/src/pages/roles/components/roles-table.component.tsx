@@ -1,10 +1,11 @@
-import styles from './roles-table.module.scss';
-import { Flex, Table, Typography, Checkbox, type CheckboxChangeEvent } from 'antd';
-
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Checkbox, type CheckboxChangeEvent, Flex, Table, Typography } from 'antd';
 import type { ColumnType } from 'antd/es/table/interface';
-import type { RoleScope } from '@/pages/roles/roles.page.tsx';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import QuestionTooltip from '@/components/tooltip/question-tooltip.tsx';
+import type { RoleScope } from '@/pages/roles/roles.page.tsx';
+
+import styles from './roles-table.module.scss';
 
 const { Text } = Typography;
 

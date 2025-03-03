@@ -1,24 +1,26 @@
 import { Flex } from 'antd';
-import styles from './data-product-actions.module.scss';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useSelector } from 'react-redux';
+
+import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
+import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import {
     useGetDataProductByIdQuery,
     useGetDataProductConveyorIDEUrlMutation,
-    useGetDataProductSignInUrlMutation,
     useGetDataProductDatabricksWorkspaceUrlMutation,
+    useGetDataProductSignInUrlMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { DataPlatform, DataPlatforms } from '@/types/data-platform';
+import { getDataPlatforms } from '@/utils/data-platforms';
 import {
     getCanUserAccessDataProductData,
     getDoesUserHaveAnyDataProductMembership,
 } from '@/utils/data-product-user-role.helper.ts';
-import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
-import { useMemo } from 'react';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataPlatforms, DataPlatform } from '@/types/data-platform';
-import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
-import { getDataPlatforms } from '@/utils/data-platforms';
+
+import styles from './data-product-actions.module.scss';
 
 type Props = {
     dataProductId: string;

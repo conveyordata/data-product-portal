@@ -1,8 +1,10 @@
-import styles from './data-output-request-access-button.module.scss';
 import { Button } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+
 import { useRequestMembershipAccessMutation } from '@/store/features/data-output-memberships/data-output-memberships-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+
+import styles from './data-output-request-access-button.module.scss';
 
 type Props = {
     dataOutputId: string;

@@ -1,5 +1,6 @@
-import { UserContract } from '@/types/users';
 import { DataProductMembershipRoleType, DataProductMembershipStatus } from '@/types/data-product-membership';
+import { UserContract } from '@/types/users';
+
 import { DataProductContract } from '../data-product';
 
 export interface DataProductMembershipContract {

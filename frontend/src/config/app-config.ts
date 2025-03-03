@@ -1,4 +1,5 @@
 import { OidcClientSettings } from 'oidc-client-ts';
+
 import { LogoutCognitoExtraParams } from '@/types/auth/oidc.ts';
 
 interface Config {

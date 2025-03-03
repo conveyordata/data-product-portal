@@ -1,7 +1,8 @@
+import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
+
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { TagContract } from '@/types/tag';
-import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {

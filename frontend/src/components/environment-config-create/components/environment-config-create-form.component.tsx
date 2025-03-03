@@ -1,19 +1,21 @@
 import { Button, Form, type FormProps, Input, Select, Space } from 'antd';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import styles from './environment-config-create.module.scss';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ApplicationPaths } from '@/types/navigation.ts';
-import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
+
+import { buildUrl } from '@/api/api-urls';
 import { ENV_PLATFORM_SERVICE_CONFIG_MAPPING } from '@/constants/environment-config.constants.ts';
-import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
+import { useCreateEnvPlatformServiceConfigMutation } from '@/store/features/environments/environments-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetPlatformServiceConfigQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllPlatformServicesQuery } from '@/store/features/platform-services/platform-services-api-slice';
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
-import { EnvironmentConfigCreateRequest, EnvironmentConfigCreateFormSchema } from '@/types/environment';
-import { buildUrl } from '@/api/api-urls';
-import { useCreateEnvPlatformServiceConfigMutation } from '@/store/features/environments/environments-api-slice';
-import { useGetPlatformServiceConfigQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import { useEffect } from 'react';
+import { EnvironmentConfigCreateFormSchema, EnvironmentConfigCreateRequest } from '@/types/environment';
+import { ApplicationPaths } from '@/types/navigation.ts';
+import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+
+import styles from './environment-config-create.module.scss';
 
 const { TextArea } = Input;
 
