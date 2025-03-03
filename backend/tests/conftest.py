@@ -50,7 +50,7 @@ def mock_oidc_config():
     mock_instance.redirect_uri = "http://test-redirect-uri"
     mock_instance.token_endpoint = "http://test-token-endpoint"
     mock_instance.authorization_endpoint = "http://test-authorization-endpoint"
-    mock_instance.provider = "test-provider"
+    mock_instance.provider.name = "test-provider"
     # Force override the existing instance in `jwt.py`
     jwt.oidc = mock_instance
 

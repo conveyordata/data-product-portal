@@ -48,3 +48,29 @@ class TestAuthDeviceRouter:
         )
         assert response.status_code == 400  # user has not yet authorized
         # TODO Test other flows
+
+    def test_get_root(self, client):
+        response = client.post(f"{ENDPOINT}/device_token?client_id=test")
+        user_code = response.json()["user_code"]
+        response = client.get(f"{ENDPOINT}/?code={user_code}")
+        assert response.status_code == 200
+
+    def test_get_allow(self, client):
+        response = client.post(f"{ENDPOINT}/device_token?client_id=test")
+        device_code = response.json()["device_code"]
+        response = client.get(
+            f"{ENDPOINT}/allow?client_id=test&device_code={device_code}"
+        )
+        assert response.status_code == 200
+
+    def test_get_deny(self, client):
+        response = client.post(f"{ENDPOINT}/device_token?client_id=test")
+        device_code = response.json()["device_code"]
+        response = client.get(
+            f"{ENDPOINT}/deny?client_id=test&device_code={device_code}"
+        )
+        assert response.status_code == 200
+
+    def test_get_callback(self, client):
+        response = client.get(f"{ENDPOINT}/callback?code=test&state=test")
+        assert response.status_code == 200

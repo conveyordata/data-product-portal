@@ -237,13 +237,13 @@ class DeviceFlowService:
         return RedirectResponse(
             status_code=302,
             url=(
-                f"{oidc.authorization_endpoint}?"
+                f"{get_oidc().authorization_endpoint}?"
                 f"response_type=code&client_id={client_id}"
                 f"&scope={device.scope}&"
-                f"redirect_uri={oidc.redirect_uri}api/auth/device/callback/"
+                f"redirect_uri={get_oidc().redirect_uri}api/auth/device/callback/"
                 f"&state={state}&scope={device.scope}&code_challenge_method=S256"
                 f"&code_challenge={code_challenge}"
-                f"&identity_provider={oidc.provider.name}"
+                f"&identity_provider={get_oidc().provider.name}"
             ),
         )
 
