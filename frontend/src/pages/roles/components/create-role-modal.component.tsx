@@ -1,9 +1,11 @@
+import { Button, Form, Input } from 'antd';
+import { useTranslation } from 'react-i18next';
+
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import type { RoleScope } from '@/pages/roles/roles.page.tsx';
 import { useCreateRoleMutation } from '@/store/features/roles/roles-api-slice.ts';
-import { Button, Form, Input } from 'antd';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { useTranslation } from 'react-i18next';
+
 import styles from './create-role-modal.module.scss';
 
 type Props = {

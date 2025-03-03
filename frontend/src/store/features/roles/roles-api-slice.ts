@@ -1,6 +1,6 @@
-import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
+import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
+import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import type { RoleContract } from '@/types/roles';
 
 export const roleTags: string[] = [TagTypes.Role];
