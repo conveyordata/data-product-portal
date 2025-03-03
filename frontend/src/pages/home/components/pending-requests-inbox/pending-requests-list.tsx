@@ -1,23 +1,21 @@
-import { Col, List, Typography } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
+import { List, Space, Typography } from 'antd';
 import { PaginationConfig } from 'antd/es/pagination';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { formatDate } from '@/utils/date.helper.ts';
-
-const COL_SPAN = 12;
 
 type PendingActionItem = {
     key: string;
     description: ReactNode;
     navigatePath: string;
-    date: string | undefined;
+    date: string;
+    author: string;
 } | null;
 
 type DataProductListProps = {
@@ -53,31 +51,24 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                 const formattedDate = item.date ? formatDate(item.date) : undefined;
                 return (
                     <>
+                        <Space size={0} className={styles.listItemTopInfo}>
+                            <Space align="center">
+                                <UserOutlined />
+                                <Typography.Text>{t('{{name}}', { name: item.author })}</Typography.Text>
+                            </Space>
+                            <Space>
+                                <Typography.Text type="secondary">
+                                    {t('{{date}}', { date: formattedDate })}
+                                </Typography.Text>
+                            </Space>
+                        </Space>
+
                         <List.Item
                             key={item.key}
                             className={styles.listItem}
                             onClick={() => handleItemClick(item.navigatePath)}
                         >
-                            <List.Item.Meta
-                                className={styles.itemCard}
-                                avatar={
-                                    <CustomSvgIconLoader
-                                        iconComponent={getDataProductTypeIcon()}
-                                        hasRoundBorder
-                                        size={'default'}
-                                    />
-                                }
-                                description={item.description}
-                            />
-
-                            <Col span={COL_SPAN} className={styles.actionContainer}>
-                                {formattedDate && (
-                                    <div className={styles.dateSection}>
-                                        <Typography.Text type="secondary">{t('Received on')}</Typography.Text>
-                                        <Typography.Text>{t('{{date}}', { date: formattedDate })}</Typography.Text>
-                                    </div>
-                                )}
-                            </Col>
+                            <List.Item.Meta className={styles.itemCard} description={item.description} />
                         </List.Item>
                         <div />
                     </>

@@ -24,67 +24,63 @@ type PendingAction =
     | ({ type: 'team' } & DataProductMembershipContract);
 
 const createPendingItem = (action: PendingAction, t: TFunction) => {
-    let link, description, navigatePath, date;
+    let link, description, navigatePath, date, author;
 
     switch (action.type) {
         case 'data_product':
             link = createDataProductIdPath(action.data_product_id);
             description = (
                 <>
-                    <Typography.Text>
-                        {t('{{name}}, on behalf of data product', { name: action.requested_by?.first_name })}
-                    </Typography.Text>{' '}
+                    <Typography.Text>{t('Made a request for read access to the')}</Typography.Text>{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                        {t('{{name}}', { name: action.dataset.name })}
+                    </Link>{' '}
+                    <Typography.Text>{t('dataset, on behalf of the')}</Typography.Text>{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
                         {t('{{name}}', { name: action.data_product.name })}
                     </Link>{' '}
-                    <Typography.Text>{t('requests read access to dataset')}</Typography.Text>{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        {t('{{name}}', { name: action.dataset.name })}
-                    </Link>
-                    <Typography.Text>.</Typography.Text>
+                    <Typography.Text>{t('data product.')}</Typography.Text>
                 </>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
             date = action.requested_on;
+            author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
             break;
 
         case 'data_output':
             link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
             description = (
                 <>
-                    <Typography.Text>
-                        {t('{{name}}, on behalf of data output', { name: action.requested_by?.first_name })}
-                    </Typography.Text>{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {t('{{name}}', { name: action.data_output.name })}
-                    </Link>{' '}
-                    <Typography.Text>{t('requests a link to dataset')}</Typography.Text>{' '}
+                    <Typography.Text>{t('Made a request for a link to the')}</Typography.Text>{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         {t('{{name}}', { name: action.dataset.name })}
                     </Link>{' '}
-                    <Typography.Text>.</Typography.Text>
+                    <Typography.Text>{t('dataset, on behalf of the')}</Typography.Text>{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={link}>
+                        {t('{{name}}', { name: action.data_output.name })}
+                    </Link>{' '}
+                    <Typography.Text>{t('data output.')}</Typography.Text>
                 </>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
             date = action.requested_on;
+            author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
             break;
 
         case 'team':
             link = createDataProductIdPath(action.data_product_id);
             description = (
                 <>
-                    <Typography.Text>
-                        {t('{{name}} would like to join the data product', { name: action.user?.first_name })}
-                    </Typography.Text>{' '}
+                    <Typography.Text>{t('Made a request to join the')}</Typography.Text>{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
                         {t('{{name}}', { name: action.data_product.name })}
                     </Link>{' '}
-                    <Typography.Text>{t('team')}</Typography.Text>
-                    <Typography.Text>.</Typography.Text>
+                    <Typography.Text>{t('data product team.')}</Typography.Text>
                 </>
             );
             navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
             date = action.requested_on;
+            author = action.user.first_name + ' ' + action.user.last_name;
             break;
 
         default:
@@ -96,6 +92,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
         description: description,
         navigatePath: navigatePath,
         date: date,
+        author: author,
     };
 };
 

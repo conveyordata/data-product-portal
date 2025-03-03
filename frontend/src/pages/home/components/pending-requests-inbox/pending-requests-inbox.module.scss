@@ -6,6 +6,12 @@ $item-card-width: 360px;
     margin-top: globals.$spacing-m;
 }
 
+.list-item-top-info {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
 .list-item {
     width: 100%;
     background-color: globals.$quaternary-color-fill;
