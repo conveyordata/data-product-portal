@@ -1,10 +1,12 @@
 import { Col, Row } from 'antd';
-import styles from './home.module.scss';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+
 import { DataProductsInbox } from '@/pages/home/components/data-products-inbox/data-products-inbox.tsx';
 import { DatasetsInbox } from '@/pages/home/components/datasets-inbox/datasets-inbox.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+
 import { PendingRequestsInbox } from './components/pending-requests-inbox/pending-requests-inbox';
+import styles from './home.module.scss';
 
 const ROW_GUTTER = 96;
 const COL_SPAN = 12;

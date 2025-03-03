@@ -1,14 +1,15 @@
 import { Col, List, Typography } from 'antd';
-import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
-import { useNavigate } from 'react-router-dom';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
-import { useTranslation } from 'react-i18next';
-import { ReactNode } from 'react';
-import { formatDate } from '@/utils/date.helper.ts';
-import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { PaginationConfig } from 'antd/es/pagination';
+import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+
+import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+import { formatDate } from '@/utils/date.helper.ts';
 
 const COL_SPAN = 12;
 

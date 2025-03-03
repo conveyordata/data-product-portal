@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { DEFAULT_LIST_PAGINATION } from '@/constants/list.constants';
 import { PaginationConfig } from 'antd/es/pagination';
+import { useState } from 'react';
+
+import { DEFAULT_LIST_PAGINATION } from '@/constants/list.constants';
 
 type Props = {
     initialPagination?: PaginationConfig;

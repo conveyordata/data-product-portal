@@ -13,7 +13,6 @@ import {
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { DataProductsGetContract } from '@/types/data-product';
-import { DataProductIcon } from '@/types/data-product-type';
 import { DataProductLink } from '@/types/dataset';
 import { SearchForm } from '@/types/shared';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';

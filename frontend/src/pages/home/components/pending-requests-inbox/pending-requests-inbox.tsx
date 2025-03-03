@@ -1,20 +1,22 @@
 import { Badge, Pagination, Typography } from 'antd';
-import styles from './pending-requests-inbox.module.scss';
+import { TFunction } from 'i18next';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
+import { Link } from 'react-router-dom';
+
+import { useListPagination } from '@/hooks/use-list-pagination';
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
 import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
-import { PendingRequestsList } from './pending-requests-list';
-import { useMemo } from 'react';
+import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
 import { DataOutputDatasetContract } from '@/types/data-output-dataset';
 import { DataProductDatasetContract } from '@/types/data-product-dataset';
-import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { TFunction } from 'i18next';
-import { Link } from 'react-router-dom';
-import { useListPagination } from '@/hooks/use-list-pagination';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { DataProductMembershipContract } from '@/types/data-product-membership';
+import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
+
+import styles from './pending-requests-inbox.module.scss';
+import { PendingRequestsList } from './pending-requests-list';
 
 type PendingAction =
     | ({ type: 'data_product' } & DataProductDatasetContract)
