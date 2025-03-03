@@ -1,27 +1,7 @@
 from base64 import b64encode
 from time import sleep
-from unittest.mock import patch
-
-import pytest
 
 ENDPOINT = "/api/auth/device"
-
-
-@pytest.fixture
-def mock_oidc_config_monkey():
-    with patch("app.core.auth.oidc.OIDCConfiguration", autospec=True) as MockOIDC:
-        mock_instance = MockOIDC.return_value  # Mocked instance
-        mock_instance.client_id = "test_client_id"
-        mock_instance.client_secret = "test_client_secret"
-        mock_instance.redirect_uri = "http://test-redirect-uri"
-        mock_instance.token_endpoint = "http://test-token-endpoint"
-        mock_instance.authorization_endpoint = "http://test-authorization-endpoint"
-        mock_instance.provider = "test-provider"
-        from app.core.auth import jwt
-
-        jwt.oidc = mock_instance  # Override existing `oidc` instance in `jwt.py`
-
-        yield mock_instance
 
 
 class TestAuthDeviceRouter:
