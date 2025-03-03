@@ -67,7 +67,7 @@
     "i18next-parser": "^9.3.0",
     "msw": "^2.7.3",
     "prettier": "3.5.2",
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.2",
     "vite": "^6.2.0",
     "vite-plugin-svgr": "^4.3.0"
   },
