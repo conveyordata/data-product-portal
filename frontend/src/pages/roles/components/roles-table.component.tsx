@@ -45,7 +45,7 @@ export function RolesTable({ scope }: RolesTableProps) {
     const handleCheckboxChange = useCallback(
         (record: PermissionInstance, key: string, checked: boolean) => {
             const role = roles.find((role) => role.name === key)!;
-            
+
             const permissions = [...role.permissions];
             if (checked && !permissions.includes(record.id)) {
                 permissions.push(record.id);
@@ -416,7 +416,7 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
     }
 
     const determineAccess = (permission: number) => {
-        return Object.fromEntries(roles.map((role) => [role.name, role.permissions.includes(permission)]))
+        return Object.fromEntries(roles.map((role) => [role.name, role.permissions.includes(permission)]));
     };
 
     for (const permission of permissions) {

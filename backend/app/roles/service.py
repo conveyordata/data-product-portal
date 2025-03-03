@@ -15,7 +15,12 @@ class RoleService:
         return ensure_exists(role_id, self.db, RoleModel)
 
     def get_roles(self, scope: str) -> list[Role]:
-        return self.db.query(RoleModel).where(RoleModel.scope == scope).order_by(RoleModel.created_on).all()
+        return (
+            self.db.query(RoleModel)
+            .where(RoleModel.scope == scope)
+            .order_by(RoleModel.created_on)
+            .all()
+        )
 
     def create_role(self, role: CreateRole) -> Role:
         model = RoleModel(**role.parse_pydantic_schema())

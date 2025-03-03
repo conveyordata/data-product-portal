@@ -1,5 +1,6 @@
-from uuid import UUID
 from typing import Optional
+from uuid import UUID
+
 from app.core.authz.actions import AuthorizationAction
 from app.shared.schema import ORMModel
 
@@ -13,6 +14,7 @@ class CreateRole(ORMModel):
 
 class Role(CreateRole):
     id: UUID
+
 
 class UpdateRole(ORMModel):
     id: UUID

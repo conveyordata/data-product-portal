@@ -8,8 +8,8 @@ Create Date: 2025-02-27 13:22:30.955690
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 from app.shared.model import utcnow
 
@@ -32,7 +32,7 @@ def upgrade() -> None:
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name", "scope", name="uix_name_scope")
+        sa.UniqueConstraint("name", "scope", name="uix_name_scope"),
     )
 
 
