@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = "not-set"
     FROM_MAIL_ADDRESS: str = "noreply@dataproductportal.com"
     CORPORATION: str = "Dataminded"
+    EMAIL_BUTTON_COLOR: str = "#3B9672"
 
 
 class LogLevel(str, Enum):
