@@ -13,7 +13,7 @@ ENDPOINT = "/api/platforms"
 class TestPlatformsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_get_all_platforms(self, client):
+    def test_get_all_platforms(self, session, client):
         platform = PlatformFactory()
 
         response = client.get(ENDPOINT)

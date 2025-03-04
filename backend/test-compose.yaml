@@ -3,6 +3,6 @@ services:
     image: bitnami/postgresql:16.2.0
     container_name: data-product-portal-postgresql-test
     ports:
-      - 5433:5432
+      - "5433:5432"
     env_file:
       - .test.env

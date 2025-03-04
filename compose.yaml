@@ -2,8 +2,8 @@ services:
   mailhog:
     image: mailhog/mailhog
     ports:
-      - 8025:8025
-      - 1025:1025
+      - "8025:8025"
+      - "1025:1025"
   backend:
     build: ./backend
     env_file:
@@ -39,8 +39,8 @@ services:
   nginx:
     build: ./nginx
     ports:
-      - 8080:80
-      - 5050:5050
+      - "8080:80"
+      - "5050:5050"
     depends_on:
       - backend
       - frontend

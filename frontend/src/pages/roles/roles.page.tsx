@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
-import { RolesButton } from '@/pages/roles/components/roles-button.component.tsx';
-import { RolesTable } from '@/pages/roles/components/roles-table.component.tsx';
+import { CreateRoleButton } from '@/pages/roles/components/roles-button.component';
+import { RolesTable } from '@/pages/roles/components/roles-table.component';
 
 const { Paragraph } = Typography;
 
@@ -44,7 +44,7 @@ export function RoleConfiguration() {
         <div>
             <Flex justify="space-between">
                 <Typography.Title level={2}>{t('Manage Roles')}</Typography.Title>
-                <RolesButton scope={current} />
+                <CreateRoleButton scope={current} />
             </Flex>
             <Paragraph>{t('Roles are reusable sets of permissions.')}</Paragraph>
 

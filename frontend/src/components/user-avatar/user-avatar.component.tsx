@@ -1,13 +1,16 @@
-import { Avatar, Flex, Typography, type TypographyProps } from 'antd';
+import { Avatar, Flex, Typography } from 'antd';
+import type { ComponentProps } from 'react';
 
 import styles from './user-avatar.module.scss';
+
+const { Text, Link } = Typography;
 
 type Props = {
     name: string;
     email: string;
     color?: string;
-    linkProps?: TypographyProps['Link']['defaultProps'];
-    textProps?: TypographyProps['Text']['defaultProps'];
+    linkProps?: ComponentProps<typeof Link>;
+    textProps?: ComponentProps<typeof Text>;
 };
 
 export function UserAvatar({ name, email, color, linkProps, textProps }: Props) {
@@ -17,10 +20,10 @@ export function UserAvatar({ name, email, color, linkProps, textProps }: Props) 
                 {name.split('')[0].toUpperCase()}
             </Avatar>
             <Flex vertical className={styles.userInfo}>
-                <Typography.Text strong {...textProps}>
+                <Text strong {...textProps}>
                     {name}
-                </Typography.Text>
-                <Typography.Link {...linkProps}>{email}</Typography.Link>
+                </Text>
+                <Link {...linkProps}>{email}</Link>
             </Flex>
         </Flex>
     );
