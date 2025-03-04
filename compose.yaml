@@ -25,7 +25,7 @@ services:
     volumes:
       - ${PWD:-.}/frontend/config.docker.js:/app/dist/config.js
   postgresql:
-    image: postgres:16.3-alpine
+    image: bitnami/postgresql:16.6.0
     container_name: data-product-portal-postgresql
     ports:
       - ${POSTGRES_PORT:-5432}:5432
