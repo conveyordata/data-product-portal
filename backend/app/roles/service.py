@@ -41,9 +41,9 @@ class RoleService:
         self.db.commit()
         return db_role
 
-    def delete_role(self, id: UUID) -> None:
-        role = self.get_role(id)
-        role.delete()
+    def delete_role(self, id_: UUID) -> None:
+        role = self.get_role(id_)
+        self.db.delete(role)
         self.db.commit()
 
     @staticmethod

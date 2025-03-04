@@ -10,6 +10,7 @@ from app.shared.model import BaseORM
 
 class Role(Base, BaseORM):
     __tablename__ = "roles"
+
     id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
     scope = Column(String)
