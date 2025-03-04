@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.database import ensure_exists
@@ -15,12 +16,12 @@ class RoleService:
         return ensure_exists(role_id, self.db, RoleModel)
 
     def get_roles(self, scope: str) -> list[Role]:
-        return (
-            self.db.query(RoleModel)
+        result = self.db.execute(
+            select(RoleModel)
             .where(RoleModel.scope == scope)
             .order_by(RoleModel.created_on)
-            .all()
         )
+        return [row.Role for row in result]
 
     def create_role(self, role: CreateRole) -> Role:
         model = RoleModel(**role.parse_pydantic_schema())
