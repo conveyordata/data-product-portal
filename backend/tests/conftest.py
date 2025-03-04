@@ -19,10 +19,9 @@ from .factories.user import UserFactory
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_and_teardown_database():
-
     from app.db_tool import init  # noqa: E402
 
-    init(True, False)
+    init(force=True)
     yield
 
 

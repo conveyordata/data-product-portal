@@ -17,6 +17,7 @@ type Props = {
 
 export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef, children }: Props) {
     const { t } = useTranslation();
+
     return (
         <FormModal
             title={title}
