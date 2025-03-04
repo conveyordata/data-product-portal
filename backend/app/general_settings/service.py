@@ -6,7 +6,7 @@ from app.general_settings.schema import GeneralSettings as GeneralSettingsSchema
 
 class GeneralSettingsService:
 
-    def getGeneralSettings(self, db: Session):
+    def getGeneralSettings(self, db: Session) -> GeneralSettingsSchema:
         return GeneralSettingsModel.getSettings(db)
 
     def updateGeneralSettings(self, new_settings: GeneralSettingsSchema, db: Session):
@@ -17,4 +17,3 @@ class GeneralSettingsService:
             setattr(current_settings, attr, value)
 
         db.commit()
-        return current_settings

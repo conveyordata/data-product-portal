@@ -20,14 +20,19 @@ export function GeneralSettingsForm() {
     const isLoading = isFetching || isUpdating;
 
     useEffect(() => {
-        form.setFieldsValue(data);
+        if (data) {
+            form.setFieldsValue(data);
+        }
     }, [isFetching]);
 
     const onSubmit: FormProps<GeneralSettings>['onFinish'] = async (values) => {
         try {
             updateGeneralSettings(values);
+            setCanEditForm(false);
             dispatchMessage({ content: t('Settings updated successfully'), type: 'success' });
         } catch (_) {
+            form.resetFields();
+            setCanEditForm(false);
             dispatchMessage({ content: t('Failed to update settings'), type: 'error' });
         }
     };
@@ -38,8 +43,11 @@ export function GeneralSettingsForm() {
     };
 
     const handleSave = () => {
-        form.submit();
-        setCanEditForm(false);
+        form.validateFields({ validateOnly: true })
+            .then(() => {
+                form.submit();
+            })
+            .catch(() => dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' }));
     };
 
     const handleEdit = () => {
