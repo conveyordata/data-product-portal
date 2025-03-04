@@ -1,3 +1,7 @@
+import { Button, Checkbox, Form, Input, InputNumber, Select } from 'antd';
+import { TFunction } from 'i18next';
+import { useEffect, useMemo } from 'react';
+
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useCreateDataProductSettingMutation,
@@ -6,10 +10,9 @@ import {
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DataProductSettingContract } from '@/types/data-product-setting';
 import { generateExternalIdFromName } from '@/utils/external-id.helper';
-import { Button, Checkbox, Form, Input, InputNumber, Select } from 'antd';
-import { TFunction } from 'i18next';
-import { use, useEffect, useMemo } from 'react';
+
 import styles from './data-product-settings-table.module.scss';
+
 const { Option } = Select;
 
 type Mode = 'create' | 'edit';
@@ -23,6 +26,16 @@ interface CreateSettingModalProps {
     mode: Mode;
     scope: Scope;
     initial?: DataProductSettingContract;
+}
+
+interface DataProductSettingValueForm {
+    name: string;
+    id: string;
+    tooltip: string;
+    type: 'checkbox' | 'tags' | 'input';
+    default: boolean | string | string[];
+    category: string;
+    order: number;
 }
 
 interface SettingsFormText {
@@ -109,8 +122,8 @@ const initialDefaultValue = (type: SettingType) => {
 
 export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose, scope, mode, initial }) => {
     const [form] = Form.useForm();
-    const [createDataProductSetting, { isLoading: isCreating }] = useCreateDataProductSettingMutation();
-    const [updateDataProductSetting, { isLoading: isEditing }] = useUpdateDataProductSettingMutation();
+    const [createDataProductSetting] = useCreateDataProductSettingMutation();
+    const [updateDataProductSetting] = useUpdateDataProductSettingMutation();
     const typeValue = Form.useWatch<SettingType>('type', form);
 
     const initialValues = useMemo(() => {
@@ -122,17 +135,17 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
         } else {
             return { type: 'checkbox', default: initialDefaultValue(typeValue) };
         }
-    }, [initial]);
+    }, [initial, typeValue]);
 
     useEffect(() => {
         if (mode === 'create') {
             form.setFieldValue('default', initialDefaultValue(typeValue));
         }
-    }, [typeValue]);
+    }, [form, typeValue, mode]);
 
     const variableText = createText(t, scope, mode);
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DataProductSettingValueForm) => {
         try {
             if (mode === 'create') {
                 console.log(values);
@@ -146,7 +159,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 await createDataProductSetting(newSetting);
             } else {
                 const updateSetting: DataProductSettingContract = {
-                    ...initial,
+                    ...initial!,
                     ...values,
                     default: values.default.toString(),
                 };

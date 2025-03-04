@@ -31,7 +31,8 @@ def send_mail(recipients: list[User], action: emailgen.Table, url: str, subject:
             )
             email.add_table(action)
             email.add_action(
-                "Click below to take action:", emailgen.Button("Go to Portal", url)
+                "Click below to take action:",
+                emailgen.Button("Go to Portal", url, color=settings.EMAIL_BUTTON_COLOR),
             )
             email.add_outros(
                 "If you have questions or need assistance, "

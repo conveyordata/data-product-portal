@@ -1,21 +1,23 @@
+import Icon, { InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { ReactNode, useMemo } from 'react';
-import styles from './settings-tabs.module.scss';
 import { useTranslation } from 'react-i18next';
-import { GeneralTab } from './general-tab/general-tab.component';
-import { DataProductTab } from './data-product-tab/data-product-tab.component';
-import { RolesTab } from './roles-tab/roles-tab.component';
-import { MetadataTab } from './metadata-tab/metadata-tab.component';
-import { PlatformTab } from './platform-tab/platform-tab.component';
-import { DatasetTab } from './dataset-tab/dataset-tab.component';
-import { DataOutputTab } from './data-output-tab/data-output-tab.component';
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
+
+import chipIcon from '@/assets/icons/chip-icon.svg?react';
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
-import chipIcon from '@/assets/icons/chip-icon.svg?react';
-import Icon, { InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
+import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 
-export enum TabKeys {
+import { DataOutputTab } from './data-output-tab/data-output-tab.component';
+import { DataProductTab } from './data-product-tab/data-product-tab.component';
+import { DatasetTab } from './dataset-tab/dataset-tab.component';
+import { GeneralTab } from './general-tab/general-tab.component';
+import { MetadataTab } from './metadata-tab/metadata-tab.component';
+import { PlatformTab } from './platform-tab/platform-tab.component';
+import { RolesTab } from './roles-tab/roles-tab.component';
+import styles from './settings-tabs.module.scss';
+
+enum TabKeys {
     General = 'general',
     DataProduct = 'data-product',
     DataSet = 'dataset',

@@ -1,24 +1,26 @@
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Flex, Space, Typography } from 'antd';
-import styles from './data-product.module.scss';
-import { DataProductTabs } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
-import { DataProductActions } from '@/pages/data-product/components/data-product-actions/data-product-actions.component.tsx';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { DataProductDescription } from '@/pages/data-product/components/data-product-description/data-product-description.tsx';
-import { useEffect, useMemo } from 'react';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import Icon, { SettingOutlined } from '@ant-design/icons';
+import { Flex, Space, Typography } from 'antd';
 import clsx from 'clsx';
-import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
-import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useSelector } from 'react-redux';
-import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
-import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
+import { useNavigate, useParams } from 'react-router-dom';
+
+import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { DataProductActions } from '@/pages/data-product/components/data-product-actions/data-product-actions.component.tsx';
+import { DataProductDescription } from '@/pages/data-product/components/data-product-description/data-product-description.tsx';
+import { DataProductTabs } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
+import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
+
+import styles from './data-product.module.scss';
 
 export function DataProduct() {
     const { t } = useTranslation();
@@ -29,7 +31,7 @@ export function DataProduct() {
 
     const dataProductTypeIcon = useMemo(() => {
         return getDataProductTypeIcon(dataProduct?.type?.icon_key);
-    }, [dataProduct?.id, dataProduct?.type.icon_key]);
+    }, [dataProduct?.type?.icon_key]);
 
     const dataProductOwners = dataProduct ? getDataProductOwners(dataProduct) : [];
     const isCurrentDataProductOwner = Boolean(
@@ -49,7 +51,7 @@ export function DataProduct() {
             id: dataProductId,
             timestamp: Date.now(),
         });
-    }, []);
+    }, [dataProductId]);
 
     if (isLoading) return <LoadingSpinner />;
 

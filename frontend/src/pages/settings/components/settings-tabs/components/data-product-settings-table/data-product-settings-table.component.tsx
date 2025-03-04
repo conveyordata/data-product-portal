@@ -1,18 +1,20 @@
 import type { TableProps } from 'antd';
 import { Button, Flex, Space, Table, Typography } from 'antd';
-import styles from './data-product-settings-table.module.scss';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getDataProductTableColumns } from './data-product-settings-table-columns.tsx';
+
+import { useModal } from '@/hooks/use-modal.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     useGetAllDataProductSettingsQuery,
     useRemoveDataProductSettingMutation,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
-import { DataProductSettingContract } from '@/types/data-product-setting';
-import { useModal } from '@/hooks/use-modal.tsx';
-import { CreateSettingModal } from './new-data-product-setting-modal.component.tsx';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { DataProductSettingContract } from '@/types/data-product-setting';
+
+import styles from './data-product-settings-table.module.scss';
+import { getDataProductTableColumns } from './data-product-settings-table-columns.tsx';
+import { CreateSettingModal } from './new-data-product-setting-modal.component.tsx';
 
 type Props = {
     scope: 'dataproduct' | 'dataset';
@@ -23,12 +25,12 @@ export function DataProductSettingsTable({ scope }: Props) {
     const { data: dataProductSettings = [], isFetching } = useGetAllDataProductSettingsQuery();
     const filteredSettings = useMemo(() => {
         return dataProductSettings.filter((setting) => setting.scope === scope);
-    }, [dataProductSettings]);
+    }, [dataProductSettings, scope]);
     const { pagination, handlePaginationChange } = useTablePagination({});
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductSettingContract | undefined>(undefined);
-    const [onRemoveDataProductSetting, { isLoading: isRemoving }] = useRemoveDataProductSettingMutation();
+    const [onRemoveDataProductSetting] = useRemoveDataProductSettingMutation();
 
     const onChange: TableProps<DataProductSettingContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
@@ -40,27 +42,36 @@ export function DataProductSettingsTable({ scope }: Props) {
         handleOpen();
     };
 
-    const handleEdit = (setting: DataProductSettingContract) => () => {
-        setMode('edit');
-        setInitial(setting);
-        handleOpen();
-    };
+    const handleEdit = useCallback(
+        (setting: DataProductSettingContract) => () => {
+            setMode('edit');
+            setInitial(setting);
+            handleOpen();
+        },
+        [handleOpen],
+    );
 
-    const handleRemove = async (setting: DataProductSettingContract) => {
-        try {
-            await onRemoveDataProductSetting(setting.id);
-            dispatchMessage({ content: t('Data product lifecycle removed successfully'), type: 'success' });
-        } catch (_) {
-            dispatchMessage({ content: t('Could not remove data product lifecycle'), type: 'error' });
-        }
-    };
+    const handleRemove = useCallback(
+        async (setting: DataProductSettingContract) => {
+            try {
+                await onRemoveDataProductSetting(setting.id);
+                dispatchMessage({ content: t('Data product lifecycle removed successfully'), type: 'success' });
+            } catch (_) {
+                dispatchMessage({ content: t('Could not remove data product lifecycle'), type: 'error' });
+            }
+        },
+        [t, onRemoveDataProductSetting],
+    );
 
     const onClose = () => {
         setInitial(undefined);
         handleClose();
     };
 
-    const columns = useMemo(() => getDataProductTableColumns({ t, handleEdit, handleRemove }), [t, filteredSettings]);
+    const columns = useMemo(
+        () => getDataProductTableColumns({ t, handleEdit, handleRemove }),
+        [t, handleEdit, handleRemove],
+    );
 
     return (
         <Flex vertical className={styles.tableContainer}>

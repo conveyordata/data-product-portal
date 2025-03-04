@@ -1,14 +1,16 @@
-import { Button, Flex, Form, FormProps, Input, Space, Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
-import styles from './general-form.module.scss';
 import { CloseOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { Button, Flex, Form, FormProps, Input, Space, Typography } from 'antd';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
     useGetGeneralSettingsQuery,
     useUpdateGeneralSettingsMutation,
 } from '@/store/features/general-settings/general-settings-api-slice';
 import { GeneralSettings } from '@/types/general-settings';
+
+import styles from './general-form.module.scss';
 
 export function GeneralSettingsForm() {
     const { t } = useTranslation();
@@ -23,7 +25,7 @@ export function GeneralSettingsForm() {
         if (data) {
             form.setFieldsValue(data);
         }
-    }, [isFetching]);
+    }, [isFetching, data, form]);
 
     const onSubmit: FormProps<GeneralSettings>['onFinish'] = async (values) => {
         try {

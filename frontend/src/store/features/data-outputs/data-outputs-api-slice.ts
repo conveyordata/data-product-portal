@@ -1,5 +1,3 @@
-import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
-import { baseApiSlice } from '../api/base-api-slice';
 import { ApiUrl, buildUrl } from '@/api/api-urls';
 import {
     DataOutputContract,
@@ -10,10 +8,13 @@ import {
     DataOutputDatasetRemoveRequest,
     DataOutputDatasetRemoveResponse,
 } from '@/types/data-output';
-import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
-import { datasetsApiSlice } from '../datasets/datasets-api-slice';
+import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import { DataOutputUpdateRequest, DataOutputUpdateResponse } from '@/types/data-output/data-output-update.contract';
 import { GraphContract } from '@/types/graph/graph-contract';
+
+import { baseApiSlice } from '../api/base-api-slice';
+import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
+import { datasetsApiSlice } from '../datasets/datasets-api-slice';
 
 export const dataOutputTags: string[] = [
     TagTypes.DataOutput,

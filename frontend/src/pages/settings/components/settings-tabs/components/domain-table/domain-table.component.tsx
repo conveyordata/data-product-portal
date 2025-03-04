@@ -1,15 +1,17 @@
 import { Button, Flex, Space, Table, TableProps, Typography } from 'antd';
-import styles from './domain-table.module.scss';
-import { useTranslation } from 'react-i18next';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetAllDomainsQuery, useRemoveDomainMutation } from '@/store/features/domains/domains-api-slice';
-import { DomainsGetContract } from '@/types/domain';
-import { getDomainTableColumns } from './domain-table-columns';
-import { useTablePagination } from '@/hooks/use-table-pagination';
-import { useModal } from '@/hooks/use-modal';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { useModal } from '@/hooks/use-modal';
+import { useTablePagination } from '@/hooks/use-table-pagination';
+import { useGetAllDomainsQuery, useRemoveDomainMutation } from '@/store/features/domains/domains-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { DomainsGetContract } from '@/types/domain';
+
 import { CreateDomainModal } from './domain-form-modal.component';
 import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
+import styles from './domain-table.module.scss';
+import { getDomainTableColumns } from './domain-table-columns';
 
 export function DomainTable() {
     const { t } = useTranslation();
@@ -21,7 +23,7 @@ export function DomainTable() {
         handleOpen: handleOpenMigrate,
         handleClose: handleCloseMigrate,
     } = useModal();
-    const [onRemoveDomain, { isLoading: isRemoving }] = useRemoveDomainMutation();
+    const [onRemoveDomain] = useRemoveDomainMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DomainsGetContract | undefined>(undefined);
     const [migrateFrom, setMigrateFrom] = useState<DomainsGetContract | undefined>(undefined);
@@ -51,7 +53,7 @@ export function DomainTable() {
                 await onRemoveDomain(domain.id);
                 dispatchMessage({ content: t('Domain removed successfully'), type: 'success' });
             }
-        } catch (error) {
+        } catch (_error) {
             dispatchMessage({ content: t('Could not remove Domain'), type: 'error' });
         }
     };

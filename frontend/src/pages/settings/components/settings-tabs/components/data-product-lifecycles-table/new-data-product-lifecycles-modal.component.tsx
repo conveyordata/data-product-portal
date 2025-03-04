@@ -1,3 +1,7 @@
+import { Button, Checkbox, ColorPicker, Form, Input, InputNumber } from 'antd';
+import type { TFunction } from 'i18next';
+import React from 'react';
+
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useCreateDataProductLifecycleMutation,
@@ -5,8 +9,7 @@ import {
 } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { Button, Checkbox, ColorPicker, Form, Input, InputNumber } from 'antd';
-import { TFunction } from 'i18next';
+
 import styles from './data-product-lifecycles-table.module.scss';
 
 interface CreateLifecycleModalProps {
@@ -16,7 +19,6 @@ interface CreateLifecycleModalProps {
     mode: 'create' | 'edit';
     initial?: DataProductLifeCycleContract;
 }
-
 interface LifeCycleFormText {
     title: string;
     successMessage: string;
@@ -26,8 +28,8 @@ interface LifeCycleFormText {
 
 export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOpen, t, onClose, mode, initial }) => {
     const [form] = Form.useForm();
-    const [createDataProductLifecycle, { isLoading: isCreating }] = useCreateDataProductLifecycleMutation();
-    const [editDataProductLifecycle, { isLoading: isEditing }] = useUpdateDataProductLifecycleMutation();
+    const [createDataProductLifecycle] = useCreateDataProductLifecycleMutation();
+    const [editDataProductLifecycle] = useUpdateDataProductLifecycleMutation();
 
     const createText: LifeCycleFormText = {
         title: t('Create New Lifecycle'),

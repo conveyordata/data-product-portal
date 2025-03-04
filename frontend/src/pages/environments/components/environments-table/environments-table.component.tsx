@@ -1,14 +1,16 @@
-import styles from './environments-table.module.scss';
-import { Environment } from '@/types/environment';
+import { Button, Flex, Form, Input, Space, Table, TableProps, Typography } from 'antd';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
+
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useGetAllEnvironmentsQuery } from '@/store/features/environments/environments-api-slice.tsx';
-import { useMemo, useEffect } from 'react';
-import { SearchForm } from '@/types/shared';
-import { Button, Flex, Form, Input, Space, Table, TableProps, Typography } from 'antd';
+import { Environment } from '@/types/environment';
 import { ApplicationPaths, createEnvironmentConfigsPath } from '@/types/navigation';
+import { SearchForm } from '@/types/shared';
+
 import { getEnvironmentTableColumns } from './environments-columns';
+import styles from './environments-table.module.scss';
 
 function filterEnvironments(environments: Environment[], searchTerm?: string) {
     if (!searchTerm) {
@@ -45,7 +47,7 @@ export const EnvironmentsTable = () => {
         if (!isFetching) {
             handleTotalChange(environments.length);
         }
-    }, [isFetching]);
+    }, [environments.length, handleTotalChange, isFetching]);
 
     return (
         <Flex vertical className={styles.tableContainer}>

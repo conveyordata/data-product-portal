@@ -1,15 +1,17 @@
-import styles from './data-output-tab.module.scss';
 import { Flex, Form } from 'antd';
 import { useMemo } from 'react';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { useTranslation } from 'react-i18next';
-import { Searchbar } from '@/components/form';
-import { SearchForm } from '@/types/shared';
-import { DataOutputLink } from '@/types/dataset';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+
+import { Searchbar } from '@/components/form';
 import { DataOutputTable } from '@/pages/dataset/components/dataset-tabs/data-output-tab/components/data-output-table/data-output-table.component.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { DataOutputLink } from '@/types/dataset';
+import { SearchForm } from '@/types/shared';
 import { getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
+
+import styles from './data-output-tab.module.scss';
 
 type Props = {
     datasetId: string;
@@ -34,17 +36,17 @@ export function DataOutputTab({ datasetId }: Props) {
 
     const datasetDataOutputs = useMemo(() => {
         return dataset?.data_output_links || [];
-    }, [dataset?.id, dataset?.data_output_links]);
+    }, [dataset?.data_output_links]);
 
     const filteredDataOutputs = useMemo(() => {
         return filterDataOutputs(datasetDataOutputs, searchTerm);
-    }, [dataset?.data_output_links, searchTerm]);
+    }, [datasetDataOutputs, searchTerm]);
 
     const isDatasetOwner = useMemo(() => {
         if (!dataset || !user) return false;
 
         return getIsDatasetOwner(dataset, user.id) || user.is_admin;
-    }, [dataset?.id, user?.id]);
+    }, [dataset, user]);
 
     return (
         <>

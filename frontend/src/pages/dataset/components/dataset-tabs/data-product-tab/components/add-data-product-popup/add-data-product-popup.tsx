@@ -1,21 +1,22 @@
 import { Button, Form, List, Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
-import {
-    useGetAllDataProductsQuery,
-    useRequestDatasetAccessForDataProductMutation,
-} from '@/store/features/data-products/data-products-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataProductLink } from '@/types/dataset';
 import { useCallback, useMemo } from 'react';
-import { SearchForm } from '@/types/shared';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import { DataProductsGetContract } from '@/types/data-product';
+import { useTranslation } from 'react-i18next';
+
 import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import styles from '@/pages/data-product/components/data-product-tabs/dataset-tab/components/add-dataset-popup/add-dataset-popup.module.scss';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+import {
+    useGetAllDataProductsQuery,
+    useRequestDatasetAccessForDataProductMutation,
+} from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { DataProductsGetContract } from '@/types/data-product';
 import { DataProductIcon } from '@/types/data-product-type';
+import { DataProductLink } from '@/types/dataset';
+import { SearchForm } from '@/types/shared';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 
 type Props = {
     onClose: () => void;

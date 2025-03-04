@@ -1,18 +1,20 @@
 import type { TableProps } from 'antd';
 import { Button, Flex, Space, Table, Typography } from 'antd';
-import styles from './data-product-lifecycles-table.module.scss';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
+
+import { useModal } from '@/hooks/use-modal.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     useGetAllDataProductLifecyclesQuery,
     useRemoveDataProductLifecycleMutation,
 } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { useModal } from '@/hooks/use-modal.tsx';
-import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.component.tsx';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+
+import styles from './data-product-lifecycles-table.module.scss';
+import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
+import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.component.tsx';
 
 export function DataProductLifecyclesTable() {
     const { t } = useTranslation();
@@ -21,7 +23,7 @@ export function DataProductLifecyclesTable() {
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductLifeCycleContract | undefined>(undefined);
-    const [onRemoveDataProductLifecycle, { isLoading: isRemoving }] = useRemoveDataProductLifecycleMutation();
+    const [onRemoveDataProductLifecycle] = useRemoveDataProductLifecycleMutation();
 
     const onChange: TableProps<DataProductLifeCycleContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
@@ -33,24 +35,30 @@ export function DataProductLifecyclesTable() {
         handleOpen();
     };
 
-    const handleEdit = (lifeCycle: DataProductLifeCycleContract) => () => {
-        setMode('edit');
-        setInitial(lifeCycle);
-        handleOpen();
-    };
+    const handleEdit = useCallback(
+        (lifeCycle: DataProductLifeCycleContract) => () => {
+            setMode('edit');
+            setInitial(lifeCycle);
+            handleOpen();
+        },
+        [handleOpen],
+    );
 
-    const handleRemove = async (lifeCycle: DataProductLifeCycleContract) => {
-        try {
-            await onRemoveDataProductLifecycle(lifeCycle.id);
-            dispatchMessage({ content: t('Lifecycle removed successfully'), type: 'success' });
-        } catch (_) {
-            dispatchMessage({ content: t('Could not remove lifecycle'), type: 'error' });
-        }
-    };
+    const handleRemove = useCallback(
+        async (lifeCycle: DataProductLifeCycleContract) => {
+            try {
+                await onRemoveDataProductLifecycle(lifeCycle.id);
+                dispatchMessage({ content: t('Lifecycle removed successfully'), type: 'success' });
+            } catch (_) {
+                dispatchMessage({ content: t('Could not remove lifecycle'), type: 'error' });
+            }
+        },
+        [t, onRemoveDataProductLifecycle],
+    );
 
     const columns = useMemo(
         () => getDataProductTableColumns({ t, handleEdit, handleRemove }),
-        [t, dataProductLifecycles],
+        [t, handleEdit, handleRemove],
     );
 
     return (

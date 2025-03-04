@@ -1,25 +1,27 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import styles from './dataset.module.scss';
+import { SettingOutlined } from '@ant-design/icons';
 import { Flex, Popover, Typography } from 'antd';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
-import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description.tsx';
-import { useEffect, useMemo } from 'react';
-import { SettingOutlined } from '@ant-design/icons';
-import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
-import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
-import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
-import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.tsx';
-import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
-import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
+import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
+import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.tsx';
+import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description.tsx';
+import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
+import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
+
+import styles from './dataset.module.scss';
 
 export function Dataset() {
     const { t } = useTranslation();
@@ -31,7 +33,7 @@ export function Dataset() {
     const datasetOwners = useMemo(() => dataset?.owners || [], [dataset?.owners]);
     const isDatasetOwner = useMemo(
         () => datasetOwners.some((owner) => owner.id === currentUser?.id) || Boolean(currentUser?.is_admin),
-        [datasetOwners, currentUser?.id],
+        [datasetOwners, currentUser],
     );
 
     function navigateToDatasetEditPage() {
@@ -45,7 +47,7 @@ export function Dataset() {
             id: datasetId,
             timestamp: Date.now(),
         });
-    }, []);
+    }, [datasetId]);
 
     if (isLoading) return <LoadingSpinner />;
 
@@ -60,9 +62,7 @@ export function Dataset() {
                         <Typography.Title level={3}>{dataset?.name}</Typography.Title>
                         {dataset.access_type === 'restricted' && (
                             <Popover content={t('Restricted access')} trigger="hover">
-                                <Flex>
-                                    <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
-                                </Flex>
+                                <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
                             </Popover>
                         )}
                     </Flex>
@@ -82,7 +82,7 @@ export function Dataset() {
                             lifecycle={dataset.lifecycle}
                             description={dataset.description}
                             domain={dataset.domain.name}
-                            accessType={getDatasetAccessTypeLabel(dataset.access_type)}
+                            accessType={getDatasetAccessTypeLabel(t, dataset.access_type)}
                             tags={[
                                 ...dataset.tags,
                                 ...dataset.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),

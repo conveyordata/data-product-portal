@@ -1,7 +1,8 @@
-import styles from './logo-text.module.scss';
 import { Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
+
+import styles from './logo-text.module.scss';
 
 type Props = {
     variant?: 'light' | 'dark';

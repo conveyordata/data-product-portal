@@ -1,8 +1,9 @@
+import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
+
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { DataProductIcon, DataProductTypesGetContract } from '@/types/data-product-type';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
-import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 const iconColumnWidth = 30;

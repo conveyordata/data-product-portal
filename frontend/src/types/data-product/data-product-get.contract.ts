@@ -1,5 +1,5 @@
-import { TagContract } from '@/types/tag';
 import { DataProductContract } from '@/types/data-product';
+import { TagContract } from '@/types/tag';
 
 export type DataProductsGetContract = (Omit<
     DataProductContract,

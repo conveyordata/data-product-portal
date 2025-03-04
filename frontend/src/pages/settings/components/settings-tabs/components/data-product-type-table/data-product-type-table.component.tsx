@@ -1,18 +1,20 @@
 import { Button, Flex, Space, Table, TableProps, Typography } from 'antd';
-import styles from './data-product-type-table.module.scss';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+
+import { useModal } from '@/hooks/use-modal';
+import { useTablePagination } from '@/hooks/use-table-pagination';
 import {
     useGetAllDataProductTypesQuery,
     useRemoveDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { DataProductTypesGetContract } from '@/types/data-product-type';
-import { getDataProductTypeTableColumns } from './data-product-type-table-columns';
-import { useTablePagination } from '@/hooks/use-table-pagination';
-import { useModal } from '@/hooks/use-modal';
-import { useState } from 'react';
+
 import { CreateDataProductTypeModal } from './data-product-type-form-modal.component';
 import { CreateDataProductTypeMigrateModal } from './data-product-type-migrate-modal.component';
+import styles from './data-product-type-table.module.scss';
+import { getDataProductTypeTableColumns } from './data-product-type-table-columns';
 
 export function DataProductTypeTable() {
     const { t } = useTranslation();
@@ -24,7 +26,7 @@ export function DataProductTypeTable() {
         handleOpen: handleOpenMigrate,
         handleClose: handleCloseMigrate,
     } = useModal();
-    const [onRemoveDataProductType, { isLoading: isRemoving }] = useRemoveDataProductTypeMutation();
+    const [onRemoveDataProductType] = useRemoveDataProductTypeMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductTypesGetContract | undefined>(undefined);
     const [migrateFrom, setMigrateFrom] = useState<DataProductTypesGetContract | undefined>(undefined);
@@ -54,8 +56,8 @@ export function DataProductTypeTable() {
                 await onRemoveDataProductType(type.id);
                 dispatchMessage({ content: t('Type removed successfully'), type: 'success' });
             }
-        } catch (_) {
-            dispatchMessage({ content: t('Could not remove Type'), type: 'error' });
+        } catch (_error) {
+            dispatchMessage({ content: t('Could not remove Data Product Type'), type: 'error' });
         }
     };
 

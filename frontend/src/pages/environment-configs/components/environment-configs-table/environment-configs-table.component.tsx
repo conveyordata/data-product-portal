@@ -1,15 +1,17 @@
-import styles from './environment-configs-table.module.scss';
+import { Button, Flex, Form, Input, Space, Table, TableProps, Typography } from 'antd';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+
+import { buildUrl } from '@/api/api-urls';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import { useMemo, useEffect } from 'react';
-import { SearchForm } from '@/types/shared';
-import { Button, Flex, Form, Input, Space, Table, TableProps, Typography } from 'antd';
-import { ApplicationPaths, DynamicPathParams, createEnvironmentConfigPath } from '@/types/navigation';
-import { getEnvironmentConfigTableColumns } from './environment-configs-columns';
 import { useGetAllEnvironmentConfigsQuery } from '@/store/features/environments/environments-api-slice';
 import { EnvironmentConfigContract } from '@/types/environment';
-import { buildUrl } from '@/api/api-urls';
+import { ApplicationPaths, createEnvironmentConfigPath, DynamicPathParams } from '@/types/navigation';
+import { SearchForm } from '@/types/shared';
+
+import { getEnvironmentConfigTableColumns } from './environment-configs-columns';
+import styles from './environment-configs-table.module.scss';
 
 function filterEnvConfigs(envConfigs: EnvironmentConfigContract[], searchTerm?: string) {
     if (!searchTerm) {
@@ -60,7 +62,7 @@ export const EnvironmentConfigsTable = () => {
         if (!isFetching) {
             handleTotalChange(envConfigs.length);
         }
-    }, [isFetching]);
+    }, [envConfigs.length, handleTotalChange, isFetching]);
 
     return (
         <Flex vertical className={styles.tableContainer}>

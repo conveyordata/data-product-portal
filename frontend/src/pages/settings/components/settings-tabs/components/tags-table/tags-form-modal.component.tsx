@@ -1,9 +1,10 @@
+import { Button, Form, Input } from 'antd';
+import { TFunction } from 'i18next';
+
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useCreateTagMutation, useUpdateTagMutation } from '@/store/features/tags/tags-api-slice';
 import { TagContract } from '@/types/tag';
-import { Button, Form, Input } from 'antd';
-import { TFunction } from 'i18next';
 
 interface CreateTagsModalProps {
     onClose: () => void;
@@ -22,8 +23,8 @@ interface TagsFormText {
 
 export const CreateTagsModal: React.FC<CreateTagsModalProps> = ({ isOpen, t, onClose, mode, initial }) => {
     const [form] = Form.useForm();
-    const [createTag, { isLoading: isCreating }] = useCreateTagMutation();
-    const [editTag, { isLoading: isEditing }] = useUpdateTagMutation();
+    const [createTag] = useCreateTagMutation();
+    const [editTag] = useUpdateTagMutation();
 
     const createText: TagsFormText = {
         title: t('Create New Tag'),
@@ -41,7 +42,7 @@ export const CreateTagsModal: React.FC<CreateTagsModalProps> = ({ isOpen, t, onC
 
     const variableText = mode === 'create' ? createText : updateText;
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: TagContract) => {
         try {
             if (mode === 'create') {
                 await createTag(values);

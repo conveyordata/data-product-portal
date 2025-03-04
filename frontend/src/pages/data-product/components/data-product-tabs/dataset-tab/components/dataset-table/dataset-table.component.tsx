@@ -1,14 +1,16 @@
-import { Flex, Table, TableColumnsType } from 'antd';
-import { useMemo } from 'react';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { Flex, Table, type TableColumnsType } from 'antd';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
     useGetDataProductByIdQuery,
     useRemoveDatasetFromDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import type { DatasetLink } from '@/types/data-product';
+
 import styles from './dataset-table.module.scss';
 import { getDataProductDatasetsColumns } from './dataset-table-columns.tsx';
-import { DatasetLink } from '@/types/data-product';
 
 type Props = {
     isCurrentDataProductOwner: boolean;
@@ -22,29 +24,35 @@ export function DatasetTable({ isCurrentDataProductOwner, dataProductId, dataset
     const [removeDatasetFromDataProduct, { isLoading: isRemovingDatasetFromDataProduct }] =
         useRemoveDatasetFromDataProductMutation();
 
-    const handleRemoveDatasetFromDataProduct = async (datasetId: string, name: string) => {
-        try {
-            await removeDatasetFromDataProduct({ datasetId, dataProductId: dataProductId }).unwrap();
-            dispatchMessage({
-                content: t('Dataset {{name}} has been removed from data product', { name }),
-                type: 'success',
-            });
-        } catch (error) {
-            console.error('Failed to remove dataset from data product', error);
-        }
-    };
+    const handleRemoveDatasetFromDataProduct = useCallback(
+        async (datasetId: string, name: string) => {
+            try {
+                await removeDatasetFromDataProduct({ datasetId, dataProductId: dataProductId }).unwrap();
+                dispatchMessage({
+                    content: t('Dataset {{name}} has been removed from data product', { name }),
+                    type: 'success',
+                });
+            } catch (error) {
+                console.error('Failed to remove dataset from data product', error);
+            }
+        },
+        [dataProductId, removeDatasetFromDataProduct, t],
+    );
 
-    const handleCancelDatasetLinkRequest = async (datasetId: string, name: string) => {
-        try {
-            await removeDatasetFromDataProduct({ datasetId, dataProductId: dataProductId }).unwrap();
-            dispatchMessage({
-                content: t('Request to link dataset {{name}} has been cancelled', { name }),
-                type: 'success',
-            });
-        } catch (error) {
-            console.error('Failed to cancel dataset link request', error);
-        }
-    };
+    const handleCancelDatasetLinkRequest = useCallback(
+        async (datasetId: string, name: string) => {
+            try {
+                await removeDatasetFromDataProduct({ datasetId, dataProductId: dataProductId }).unwrap();
+                dispatchMessage({
+                    content: t('Request to link dataset {{name}} has been cancelled', { name }),
+                    type: 'success',
+                });
+            } catch (error) {
+                console.error('Failed to cancel dataset link request', error);
+            }
+        },
+        [dataProductId, removeDatasetFromDataProduct, t],
+    );
 
     const columns: TableColumnsType<DatasetLink> = useMemo(() => {
         return getDataProductDatasetsColumns({
@@ -55,7 +63,14 @@ export function DatasetTable({ isCurrentDataProductOwner, dataProductId, dataset
             isDisabled: !isCurrentDataProductOwner,
             isLoading: isRemovingDatasetFromDataProduct,
         });
-    }, [dataProductId, t, datasets, isCurrentDataProductOwner]);
+    }, [
+        handleRemoveDatasetFromDataProduct,
+        handleCancelDatasetLinkRequest,
+        t,
+        datasets,
+        isCurrentDataProductOwner,
+        isRemovingDatasetFromDataProduct,
+    ]);
 
     if (!dataProduct) return null;
 

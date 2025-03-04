@@ -1,11 +1,13 @@
-import styles from './environment-config.module.scss';
-import { Typography, Flex } from 'antd';
+import { Flex, Typography } from 'antd';
+import { Input } from 'antd/lib';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { DynamicPathParams } from '@/types/navigation';
-import { useGetEnvConfigByIdQuery } from '@/store/features/environments/environments-api-slice';
+
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
-import { Input } from 'antd/lib';
+import { useGetEnvConfigByIdQuery } from '@/store/features/environments/environments-api-slice';
+import { DynamicPathParams } from '@/types/navigation';
+
+import styles from './environment-config.module.scss';
 
 const { TextArea } = Input;
 

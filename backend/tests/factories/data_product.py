@@ -1,4 +1,5 @@
 import factory
+from tests.factories.lifecycle import LifecycleFactory
 
 from app.data_products.model import DataProduct
 from app.data_products.status import DataProductStatus
@@ -20,3 +21,4 @@ class DataProductFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     type = factory.SubFactory(DataProductTypeFactory)
     domain = factory.SubFactory(DomainFactory)
+    lifecycle = factory.SubFactory(LifecycleFactory)

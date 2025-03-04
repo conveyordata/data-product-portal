@@ -1,5 +1,5 @@
-import { DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 import { DataProductContract } from '@/types/data-product/data-product-contract.ts';
+import { DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 
 export type DataProductCreate = Pick<
     DataProductContract,

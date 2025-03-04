@@ -1,9 +1,11 @@
 import { Flex, Space, Typography } from 'antd';
-import styles from './data-output-edit.module.scss';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ApplicationPaths } from '@/types/navigation.ts';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+
 import { DataOutputForm } from '@/components/data-outputs/data-output-form/data-output-form.component';
+import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { ApplicationPaths } from '@/types/navigation.ts';
+
+import styles from './data-output-edit.module.scss';
 
 export function DataOutputEdit() {
     const { dataOutputId } = useParams();

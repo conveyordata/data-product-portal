@@ -1,14 +1,15 @@
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { Button, Form, Input, Select } from 'antd';
 import { TFunction } from 'i18next';
 
-import { DataProductTypeContract } from '@/types/data-product-type';
+import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useGetAllDataProductTypesQuery,
     useMigrateDataProductTypeMutation,
     useRemoveDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { DataProductTypeContract } from '@/types/data-product-type';
+
 const { Option } = Select;
 
 interface CreateDataProductTypeMigrateModalProps {
@@ -18,6 +19,10 @@ interface CreateDataProductTypeMigrateModalProps {
     migrateFrom?: DataProductTypeContract;
 }
 
+interface DataProductTypeMigrateFormValues {
+    toId: string;
+}
+
 export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMigrateModalProps> = ({
     isOpen,
     t,
@@ -25,11 +30,11 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
     migrateFrom,
 }) => {
     const [form] = Form.useForm();
-    const { data: dataProductTypes = [], isFetching } = useGetAllDataProductTypesQuery();
-    const [migrateDataProductType, { isLoading: isCreating }] = useMigrateDataProductTypeMutation();
-    const [onRemoveDataProductType, { isLoading: isRemoving }] = useRemoveDataProductTypeMutation();
+    const { data: dataProductTypes = [] } = useGetAllDataProductTypesQuery();
+    const [migrateDataProductType] = useMigrateDataProductTypeMutation();
+    const [onRemoveDataProductType] = useRemoveDataProductTypeMutation();
 
-    const handleFinish = async (values: any) => {
+    const handleFinish = async (values: DataProductTypeMigrateFormValues) => {
         try {
             await migrateDataProductType({ fromId: migrateFrom!.id, toId: values.toId });
             await onRemoveDataProductType(migrateFrom!.id);
