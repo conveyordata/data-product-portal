@@ -31,14 +31,14 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
 
     const createText: LifeCycleFormText = {
         title: t('Create New Lifecycle'),
-        successMessage: t('lifecycle created successfully'),
+        successMessage: t('Lifecycle created successfully'),
         errorMessage: t('Failed to create lifecycle'),
         submitButtonText: t('Create'),
     };
 
     const updateText: LifeCycleFormText = {
         title: t('Update Lifecycle'),
-        successMessage: t('lifecycle updated successfully'),
+        successMessage: t('Lifecycle updated successfully'),
         errorMessage: t('Failed to update lifecycle'),
         submitButtonText: t('Update'),
     };
