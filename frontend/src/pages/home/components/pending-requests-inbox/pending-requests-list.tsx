@@ -1,7 +1,7 @@
 import { UserOutlined } from '@ant-design/icons';
 import { List, Space, Typography } from 'antd';
-import { PaginationConfig } from 'antd/es/pagination';
-import { ReactNode } from 'react';
+import type { PaginationConfig } from 'antd/es/pagination';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 

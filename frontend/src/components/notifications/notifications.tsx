@@ -1,6 +1,6 @@
 import { BellOutlined, ExportOutlined } from '@ant-design/icons';
 import { Badge, Button, Dropdown, Flex, type MenuProps, Space, theme, Typography } from 'antd';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, type NavigateFunction, useNavigate } from 'react-router-dom';
@@ -10,9 +10,9 @@ import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-ta
 import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
 import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
 import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
-import { DataOutputDatasetContract } from '@/types/data-output-dataset';
-import { DataProductDatasetContract } from '@/types/data-product-dataset';
-import { DataProductMembershipContract } from '@/types/data-product-membership';
+import type { DataOutputDatasetContract } from '@/types/data-output-dataset';
+import type { DataProductDatasetContract } from '@/types/data-product-dataset';
+import type { DataProductMembershipContract } from '@/types/data-product-membership';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 
 import styles from './notifications.module.scss';

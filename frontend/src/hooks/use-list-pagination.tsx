@@ -1,4 +1,4 @@
-import { PaginationConfig } from 'antd/es/pagination';
+import type { PaginationConfig } from 'antd/es/pagination';
 import { useState } from 'react';
 
 import { DEFAULT_LIST_PAGINATION } from '@/constants/list.constants';

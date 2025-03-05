@@ -1,4 +1,4 @@
-import { ListPaginationConfig } from '@/types/shared/lists';
+import type { ListPaginationConfig } from '@/types/shared/lists';
 
 export const DEFAULT_LIST_PAGINATION: ListPaginationConfig = {
     current: 1,
