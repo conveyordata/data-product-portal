@@ -47,4 +47,6 @@ class DataOutput(Base, BaseORM):
 
     platform: Mapped["Platform"] = relationship()
     service: Mapped["PlatformService"] = relationship()
-    tags: Mapped[list[Tag]] = relationship(secondary=tag_data_output_table)
+    tags: Mapped[list[Tag]] = relationship(
+        secondary=tag_data_output_table, back_populates="data_outputs"
+    )
