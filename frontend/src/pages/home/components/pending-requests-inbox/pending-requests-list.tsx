@@ -16,7 +16,7 @@ type PendingActionItem = {
     navigatePath: string;
     date: string;
     author: string;
-} | null;
+};
 
 type DataProductListProps = {
     isFetching: boolean;
@@ -47,7 +47,6 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                 className: styles.antListPagination,
             }}
             renderItem={(item) => {
-                if (!item) return null;
                 const formattedDate = item.date ? formatDate(item.date) : undefined;
                 return (
                     <>

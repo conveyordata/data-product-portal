@@ -120,12 +120,14 @@ export function PendingRequestsInbox() {
             createPendingItem({ ...action, type: 'team' }, t),
         );
 
-        return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])].sort((a, b) => {
-            if (!a?.date || !b?.date) {
-                return 0;
-            }
-            return new Date(a.date).getTime() - new Date(b.date).getTime();
-        });
+        return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])]
+            .filter((item) => item !== null)
+            .sort((a, b) => {
+                if (!a?.date || !b?.date) {
+                    return 0;
+                }
+                return new Date(a.date).getTime() - new Date(b.date).getTime();
+            });
     }, [pendingActionsDatasets, pendingActionsDataOutputs, pendingActionsDataProducts, t]);
 
     const { pagination, handlePaginationChange } = useListPagination({});
