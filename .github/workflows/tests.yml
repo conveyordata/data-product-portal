@@ -47,7 +47,8 @@ jobs:
       - name: Checkout github repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
+      - name: Setup Python
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
           python-version: "3.12"
 
@@ -73,7 +74,12 @@ jobs:
 
       - name: Run the automated tests
         working-directory: ./backend
-        run: poetry run pytest -v
+        id: run-test
+        run: poetry run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
+      - name: Ensure 100% coverage for router files
+        working-directory: ./scripts
+        run: ./check_coverage.sh
+
 
   lint-golang:
     name: Run Go linters

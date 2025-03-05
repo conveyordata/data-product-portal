@@ -18,7 +18,7 @@ from app.core.auth.device_flows.exceptions import (
 )
 from app.core.auth.device_flows.model import DeviceFlow as DeviceFlowModel
 from app.core.auth.device_flows.schema import DeviceFlow, DeviceFlowStatus
-from app.core.auth.jwt import oidc
+from app.core.auth.jwt import get_oidc
 from app.core.helpers.templates import render_html_template
 from app.core.logging.logger import logger
 
@@ -29,8 +29,8 @@ def verify_auth_header(
     credentials: Annotated[HTTPBasicCredentials, Depends(basic_auth)],
 ) -> bool:
     if (
-        credentials.username != oidc.client_id
-        or credentials.password != oidc.client_secret
+        credentials.username != get_oidc().client_id
+        or credentials.password != get_oidc().client_secret
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -57,11 +57,10 @@ class DeviceFlowService:
             client_id=client_id,
             scope=scope,
             max_expiry=utc_now() + timedelta(seconds=1800),
-            oidc_redirect_uri=oidc.redirect_uri,
+            oidc_redirect_uri=get_oidc().redirect_uri,
         )
         db.add(device_flow)
         db.commit()
-
         return DeviceFlow.model_validate(device_flow)
 
     def fetch_jwt_tokens(
@@ -117,7 +116,7 @@ class DeviceFlowService:
             self.logger.debug("Launching Request for Tokens")
 
             response = httpx.post(
-                oidc.token_endpoint,
+                get_oidc().token_endpoint,
                 headers={
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Authorization": request.headers.get("Authorization"),
@@ -125,7 +124,8 @@ class DeviceFlowService:
                 data={
                     "grant_type": "authorization_code",
                     "client_id": client_id,
-                    "redirect_uri": f"{oidc.redirect_uri}api/auth/device/callback/",
+                    "redirect_uri": f"{get_oidc().redirect_uri}"
+                    "api/auth/device/callback/",
                     "code": device_flow.authz_code,
                     "code_verifier": device_flow.authz_verif,
                 },
@@ -238,13 +238,13 @@ class DeviceFlowService:
         return RedirectResponse(
             status_code=302,
             url=(
-                f"{oidc.authorization_endpoint}?"
+                f"{get_oidc().authorization_endpoint}?"
                 f"response_type=code&client_id={client_id}"
                 f"&scope={device.scope}&"
-                f"redirect_uri={oidc.redirect_uri}api/auth/device/callback/"
+                f"redirect_uri={get_oidc().redirect_uri}api/auth/device/callback/"
                 f"&state={state}&scope={device.scope}&code_challenge_method=S256"
                 f"&code_challenge={code_challenge}"
-                f"&identity_provider={oidc.provider.name}"
+                f"&identity_provider={get_oidc().provider.name}"
             ),
         )
 
