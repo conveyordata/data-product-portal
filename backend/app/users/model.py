@@ -14,6 +14,7 @@ from app.shared.model import BaseORM
 from app.users.schema import User as UserSchema
 
 if TYPE_CHECKING:
+    from app.audit.model import AuditLog
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
@@ -52,6 +53,7 @@ class User(Base, BaseORM):
         foreign_keys="DataProductMembership.requested_by_id",
         back_populates="requested_by",
     )
+    audit_logs: Mapped[list["AuditLog"]] = relationship(lazy="select")
     data_products: Mapped[list["DataProduct"]] = association_proxy(
         "data_product_memberships", "data_product"
     )

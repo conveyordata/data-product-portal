@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Depends, Security
 
+from app.audit.service import audit_logs
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
 from app.data_outputs.router import router as data_outputs
@@ -19,9 +20,9 @@ from app.tags.router import router as tag
 from app.users.router import router as user
 
 router = (
-    APIRouter(dependencies=[Security(api_key_authenticated)])
+    APIRouter(dependencies=[Security(api_key_authenticated), Depends(audit_logs)])
     if get_boolean_variable("OIDC_ENABLED", False)
-    else APIRouter()
+    else APIRouter(dependencies=[Depends(audit_logs)])
 )
 
 router.include_router(dataset)
