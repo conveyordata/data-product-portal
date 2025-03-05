@@ -57,7 +57,9 @@ def mock_oidc_config():
 @pytest.fixture
 def client():
     app.dependency_overrides[get_db_session] = override_get_db
-    app.dependency_overrides[verify_auth_header] = lambda: "test"
+    app.dependency_overrides[verify_auth_header] = (
+        lambda: "8cb30dd2-4e3e-4284-a71e-5dbe8e2bdb69"
+    )
     with TestClient(app) as test_client:
         yield test_client
         app.dependency_overrides.clear()
