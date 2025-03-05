@@ -11,6 +11,10 @@ from app.core.logging.logger import logger
 oidc = OIDCConfiguration()
 
 
+def get_oidc():
+    return oidc
+
+
 class JWTToken(BaseModel):
     sub: str
     token: str

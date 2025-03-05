@@ -20,8 +20,8 @@ module.exports = {
     rules: {
         'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
         'import/newline-after-import': ['error', { count: 1 }],
-        "simple-import-sort/imports": "error",
-        "simple-import-sort/exports": "error",
+        'simple-import-sort/imports': 'error',
+        'simple-import-sort/exports': 'error',
         '@typescript-eslint/no-unused-vars': ['error', { caughtErrorsIgnorePattern: '^_' }],
         '@typescript-eslint/no-empty-object-type': ['off'],
     },

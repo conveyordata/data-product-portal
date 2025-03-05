@@ -1,8 +1,7 @@
 import json
 
 import pytest
-
-from ..factories import (
+from tests.factories import (
     EnvironmentFactory,
     EnvPlatformConfigFactory,
     EnvPlatformServiceConfigFactory,
