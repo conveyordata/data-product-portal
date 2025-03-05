@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, scoped_session
+from starlette.routing import _DefaultLifespan
 
 from app.core.auth.device_flows.service import verify_auth_header
 from app.data_product_memberships.model import DataProductUserRole
@@ -58,6 +59,8 @@ def mock_oidc_config():
 def client():
     app.dependency_overrides[get_db_session] = override_get_db
     app.dependency_overrides[verify_auth_header] = lambda: "test"
+    app.router.lifespan_context = _DefaultLifespan(app.router)
+
     with TestClient(app) as test_client:
         yield test_client
         app.dependency_overrides.clear()

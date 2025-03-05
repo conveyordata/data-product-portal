@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 
 import pytest
+import pytest_asyncio
 from fastapi import HTTPException
 
 from app.core.authz.actions import AuthorizationAction
@@ -15,10 +16,9 @@ def not_raises(exception):
         raise pytest.fail("DID RAISE {0}".format(exception))
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest_asyncio.fixture(loop_scope="module")
 async def authorizer():
-    authorization = await Authorization.initialize()
-    yield authorization
+    yield await Authorization.initialize()
 
 
 class TestAuthorization:
