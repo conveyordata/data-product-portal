@@ -5,6 +5,8 @@ from typing import Sequence, cast
 import casbin_async_sqlalchemy_adapter as sqlalchemy_adapter
 from casbin import AsyncEnforcer
 from fastapi import Depends, HTTPException, Request, status
+from sqlalchemy import NullPool
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.core.auth.auth import get_authenticated_user
 from app.database import database
@@ -27,7 +29,8 @@ class Authorization(metaclass=Singleton):
 
     @staticmethod
     async def _construct_enforcer(model: str) -> AsyncEnforcer:
-        adapter = sqlalchemy_adapter.Adapter(database.get_url(async_=True))
+        engine = create_async_engine(database.get_url(async_=True), poolclass=NullPool)
+        adapter = sqlalchemy_adapter.Adapter(engine, warning=False)
         await adapter.create_table()
         return AsyncEnforcer(model, adapter)
 
