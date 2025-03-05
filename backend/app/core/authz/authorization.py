@@ -1,10 +1,12 @@
 from collections.abc import Callable
 from pathlib import Path
-from typing import cast
+from typing import Sequence, cast
 
 import casbin_async_sqlalchemy_adapter as sqlalchemy_adapter
 from casbin import AsyncEnforcer
 from fastapi import Depends, HTTPException, Request, status
+from sqlalchemy import NullPool
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.core.auth.auth import get_authenticated_user
 from app.database import database
@@ -27,7 +29,8 @@ class Authorization(metaclass=Singleton):
 
     @staticmethod
     async def _construct_enforcer(model: str) -> AsyncEnforcer:
-        adapter = sqlalchemy_adapter.Adapter(database.get_url(async_=True))
+        engine = create_async_engine(database.get_url(async_=True), poolclass=NullPool)
+        adapter = sqlalchemy_adapter.Adapter(engine, warning=False)
         await adapter.create_table()
         return AsyncEnforcer(model, adapter)
 
@@ -65,8 +68,49 @@ class Authorization(metaclass=Singleton):
 
     def _enforce(self, *, sub: str, dom: str, obj: str, act: int) -> None:
         enforcer: AsyncEnforcer = self.enforcer
-        if not enforcer.enforce(sub, dom, obj, act):
+        if not enforcer.enforce(sub, dom, obj, str(act)):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You don't have permission to perform this action",
             )
+
+    async def sync_role(self, *, role_id: str, actions: Sequence[AuthorizationAction]):
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.delete_permissions_for_user(role_id)
+
+        policies = [(role_id, str(action)) for action in actions]
+        await enforcer.add_policies(policies)
+
+    async def sync_everyone_role(self, *, actions: Sequence[AuthorizationAction]):
+        await self.sync_role(role_id="*", actions=actions)
+
+    async def remove_role(self, role_id: str):
+        await self.sync_role(role_id=role_id, actions=())
+
+    async def assign_resource_role(
+        self, *, user_id: str, role_id: str, resource_id: str
+    ):
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.add_named_grouping_policy("g", user_id, role_id, resource_id)
+
+    async def revoke_resource_role(
+        self, *, user_id: str, role_id: str, resource_id: str
+    ):
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.remove_named_grouping_policy("g", user_id, role_id, resource_id)
+
+    async def assign_domain_role(self, *, user_id: str, role_id: str, domain_id: str):
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.add_named_grouping_policy("g2", user_id, role_id, domain_id)
+
+    async def revoke_domain_role(self, *, user_id: str, role_id: str, domain_id: str):
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.remove_named_grouping_policy("g2", user_id, role_id, domain_id)
+
+    async def assign_admin_role(self, *, user_id: str):
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.add_named_grouping_policy("g3", user_id, "*")
+
+    async def revoke_admin_role(self, *, user_id: str):
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.remove_named_grouping_policy("g3", user_id, "*")
