@@ -1,4 +1,3 @@
-import asyncio
 from collections.abc import Callable
 from pathlib import Path
 from typing import Sequence, cast
@@ -76,10 +75,8 @@ class Authorization(metaclass=Singleton):
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.delete_permissions_for_user(role_id)
 
-        add_permissions = (
-            enforcer.add_permission_for_user(role_id, str(action)) for action in actions
-        )
-        await asyncio.gather(*add_permissions)
+        policies = [(role_id, str(action)) for action in actions]
+        await enforcer.add_policies(policies)
 
     async def sync_everyone_role(self, *, actions: Sequence[AuthorizationAction]):
         await self.sync_role(role_id="*", actions=actions)
