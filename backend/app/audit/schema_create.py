@@ -11,6 +11,11 @@ class AuditLogCreate(ORMModel):
     target_id: Optional[UUID] = None
     user_id: UUID
     status_code: int
+    ip: str
+    user_agent: Optional[str] = None
+    response: Optional[str] = None
+    query_parameters: Optional[str] = None
+    path_parameters: Optional[str] = None
 
     class Meta:
         orm_model = AuditLogModel

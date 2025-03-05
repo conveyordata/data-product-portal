@@ -26,3 +26,8 @@ class AuditLog(Base, BaseORM):
         back_populates="audit_logs",
         order_by="User.last_name, User.first_name",
     )
+    ip = Column(String)
+    user_agent = Column(String)
+    response = Column(String)
+    query_parameters = Column(String)
+    path_parameters = Column(String)

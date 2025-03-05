@@ -96,12 +96,14 @@ app.add_middleware(
 @app.middleware("http")
 async def update_audit_status_code(request: Request, call_next):
     response = await call_next(request)
-    if request.method in ["POST", "PUT", "DELETE"] and not request.url.path.startswith(
-        "/api/auth/"
-    ):
+    if not request.url.path.endswith("version"):
         db = next(get_db_session())
         audit = db.get(AuditLogModel, request.state.audit_id)
         audit.status_code = response.status_code
+        response_body = [chunk async for chunk in response.body_iterator]
+        response.body_iterator = iterate_in_threadpool(iter(response_body))
+        body = (b"".join(response_body)).decode()
+        audit.response = body
         db.commit()
     return response
 
