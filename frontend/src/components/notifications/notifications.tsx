@@ -40,18 +40,16 @@ export function Notifications() {
             case 'data_product':
                 link = createDataProductIdPath(action.data_product_id);
                 description = (
-                    <Space className={styles.description}>
-                        <Typography.Text>
-                            {t('{{name}}, on behalf of data product', { name: action.requested_by?.first_name })}
-                        </Typography.Text>
+                    <Typography.Text>
+                        {t('{{name}}, on behalf of data product', { name: action.requested_by?.first_name })}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
                             {t('{{name}}', { name: action.data_product.name })}
-                        </Link>
-                        <Typography.Text>{t('requests read access to dataset')}</Typography.Text>
+                        </Link>{' '}
+                        {t('requests read access to dataset')}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                             {t('{{name}}', { name: action.dataset.name })}
                         </Link>
-                    </Space>
+                    </Typography.Text>
                 );
                 navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
                 break;
@@ -59,18 +57,16 @@ export function Notifications() {
             case 'data_output':
                 link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
                 description = (
-                    <Space className={styles.description}>
-                        <Typography.Text>
-                            {t('{{name}}, on behalf of data output', { name: action.requested_by?.first_name })}
-                        </Typography.Text>
+                    <Typography.Text>
+                        {t('{{name}}, on behalf of data output', { name: action.requested_by?.first_name })}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
                             {t('{{name}}', { name: action.data_output.name })}
-                        </Link>
-                        <Typography.Text>{t('requests a link to dataset ')}</Typography.Text>
+                        </Link>{' '}
+                        {t('requests a link to dataset')}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                             {t('{{name}}', { name: action.dataset.name })}
                         </Link>
-                    </Space>
+                    </Typography.Text>
                 );
                 navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
                 break;
@@ -78,15 +74,13 @@ export function Notifications() {
             case 'team':
                 link = createDataProductIdPath(action.data_product_id);
                 description = (
-                    <Space className={styles.description}>
-                        <Typography.Text>
-                            {t('{{name}} would like to join the data product', { name: action.user?.first_name })}
-                        </Typography.Text>
+                    <Typography.Text>
+                        {t('{{name}} would like to join the data product', { name: action.user?.first_name })}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
                             {t('{{name}}', { name: action.data_product.name })}
-                        </Link>
-                        <Typography.Text>{t('team')}</Typography.Text>
-                    </Space>
+                        </Link>{' '}
+                        {t('team')}{' '}
+                    </Typography.Text>
                 );
                 navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
                 break;
