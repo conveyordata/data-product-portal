@@ -5,10 +5,19 @@ from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
 from app.audit.model import AuditLog as AuditLogModel
+from app.audit.schema import AuditLog
 from app.audit.schema_create import AuditLogCreate
 from app.core.auth.auth import get_authenticated_user
 from app.database.database import get_db_session
 from app.users.schema import User
+
+
+class AuditLogService:
+    def get_audit_logs(self, db: Session) -> list[AuditLog]:
+        return db.query(AuditLogModel).all()
+
+    def get_audit_log(self, id: UUID, db: Session) -> AuditLog:
+        return db.query(AuditLogModel).get(id)
 
 
 def audit_logs(

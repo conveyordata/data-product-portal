@@ -96,7 +96,9 @@ app.add_middleware(
 @app.middleware("http")
 async def update_audit_status_code(request: Request, call_next):
     response = await call_next(request)
-    if request.method in ["POST", "PUT", "DELETE"]:
+    if request.method in ["POST", "PUT", "DELETE"] and not request.url.path.startswith(
+        "/api/auth/"
+    ):
         db = next(get_db_session())
         audit = db.get(AuditLogModel, request.state.audit_id)
         audit.status_code = response.status_code

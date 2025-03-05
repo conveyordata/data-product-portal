@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Security
 
+from app.audit.router import router as audit
 from app.audit.service import audit_logs
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
@@ -40,3 +41,4 @@ router.include_router(platform)
 router.include_router(tag)
 router.include_router(user)
 router.include_router(role)
+router.include_router(audit)
