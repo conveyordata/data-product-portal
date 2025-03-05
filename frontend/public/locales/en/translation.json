@@ -1,6 +1,6 @@
 {
     "by {{author}} on {{date}}": "by {{author}} on {{date}}",
-    "Logo": "Data Product Portal",
+    "Data Product Portal": "Data Product Portal",
     "Nodes": "Nodes",
     "Environments": "Environments",
     "Data output deleted successfully": "Data output deleted successfully",
@@ -505,5 +505,6 @@
     "Update Lifecycle": "Update Lifecycle",
     "Lifecycle updated successfully": "Lifecycle updated successful",
     "Failed to update lifecycle": "Failed to update lifecycle",
-    "Value must be a number": "Value must be a number"
+    "Value must be a number": "Value must be a number",
+    "Settings updated successfully": "Settings updated successfully"
 }
