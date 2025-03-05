@@ -18,6 +18,7 @@ def audit_logs(
     user: User = Depends(get_authenticated_user),
 ):
     if request.method != "GET":
+        target_id = None
         for param, v in request.query_params.items():
             if param.endswith("_id"):
                 target_id = v
