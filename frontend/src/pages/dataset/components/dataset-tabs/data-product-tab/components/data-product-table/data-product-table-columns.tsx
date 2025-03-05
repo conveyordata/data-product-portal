@@ -51,7 +51,7 @@ export const getDatasetDataProductsColumns = ({
                         linkTo={createDataProductIdPath(data_product.id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getDataProductTypeIcon(data_product.type.icon_key)}
+                                iconComponent={getDataProductTypeIcon(data_product?.type?.icon_key)}
                                 hasRoundBorder
                                 size={'default'}
                             />
