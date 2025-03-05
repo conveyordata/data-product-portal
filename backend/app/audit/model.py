@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -18,6 +18,7 @@ class AuditLog(Base, BaseORM):
     action = Column(String)
     subject_id = Column(UUID(as_uuid=True))
     target_id = Column(UUID(as_uuid=True))
+    status_code = Column(Integer)
     user_id: Mapped[uuid.UUID] = mapped_column("user_id", ForeignKey("users.id"))
     user: Mapped["User"] = relationship(
         "User",

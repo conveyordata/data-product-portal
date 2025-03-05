@@ -8,6 +8,7 @@ from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.audit.model import AuditLog as AuditLogModel
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.authz.authorization import Authorization
@@ -15,6 +16,7 @@ from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging.logger import logger
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.webhook import call_webhook
+from app.database.database import get_db_session
 from app.settings import settings
 from app.shared.router import router
 
@@ -89,6 +91,17 @@ app.add_middleware(
     header_name="X-Request-ID",
     update_request_header=True,
 )
+
+
+@app.middleware("http")
+async def update_audit_status_code(request: Request, call_next):
+    response = await call_next(request)
+    if request.method in ["POST", "PUT", "DELETE"]:
+        db = next(get_db_session())
+        audit = db.get(AuditLogModel, request.state.audit_id)
+        audit.status_code = response.status_code
+        db.commit()
+    return response
 
 
 @app.middleware("http")

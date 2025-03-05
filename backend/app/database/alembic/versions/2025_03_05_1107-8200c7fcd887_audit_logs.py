@@ -25,6 +25,7 @@ def upgrade() -> None:
         "audit_logs",
         sa.Column("id", sa.UUID, primary_key=True, nullable=False),
         sa.Column("action", sa.String, nullable=False),
+        sa.Column("status_code", sa.Integer, nullable=False),
         sa.Column("user_id", sa.UUID, sa.ForeignKey("users.id"), nullable=False),
         sa.Column("subject_id", sa.UUID, nullable=True),
         sa.Column("target_id", sa.UUID, nullable=True),

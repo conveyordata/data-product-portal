@@ -10,6 +10,7 @@ class AuditLogCreate(ORMModel):
     subject_id: Optional[UUID] = None
     target_id: Optional[UUID] = None
     user_id: UUID
+    status_code: int
 
     class Meta:
         orm_model = AuditLogModel

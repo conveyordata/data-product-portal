@@ -25,12 +25,16 @@ def audit_logs(
         for param, v in request.path_params.items():
             if param.endswith("_id"):
                 target_id = v
-
         log_entry = AuditLogCreate(
             user_id=user.id,
             action=request.scope["route"].name,
             subject_id=id,
             target_id=target_id,
+            status_code=-1,
         )
-        db.add(AuditLogModel(**log_entry.model_dump()))
+        log = AuditLogModel(**log_entry.model_dump())
+        db.add(log)
         db.commit()
+        request.state.audit_id = log.id
+        print("State 1: ", request.state.audit_id)
+    yield
