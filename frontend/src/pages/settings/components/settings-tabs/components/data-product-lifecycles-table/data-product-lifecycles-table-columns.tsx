@@ -1,5 +1,4 @@
-import { Button, Checkbox, ColorPicker, Flex, Popconfirm } from 'antd';
-import { ColumnType } from 'antd/es/table';
+import { Button, Checkbox, ColorPicker, Flex, Popconfirm, TableColumnsType } from 'antd';
 import { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
@@ -10,25 +9,17 @@ type Props = {
     t: TFunction;
     isLoading?: boolean;
     isDisabled?: boolean;
-    handleOpen: (id: string) => void;
-    editColor: (record: DataProductLifeCycleContract, color: string) => void;
-    onRemoveDataProductLifecycle: (id: string) => void;
+    handleEdit: (record: DataProductLifeCycleContract) => () => void;
+    handleRemove: (record: DataProductLifeCycleContract) => void;
 };
 
-export type EditableColumn = DataProductLifeCycleContract & {
-    editable: boolean;
-};
-
-interface EditableColumnType<T> extends ColumnType<T> {
-    editable?: boolean;
-}
 export const getDataProductTableColumns = ({
     t,
     isDisabled,
     isLoading,
-    editColor,
-    onRemoveDataProductLifecycle,
-}: Props): EditableColumnType<DataProductLifeCycleContract>[] => {
+    handleEdit,
+    handleRemove,
+}: Props): TableColumnsType<DataProductLifeCycleContract> => {
     const sorter = new Sorter<DataProductLifeCycleContract>();
     return [
         {
@@ -45,7 +36,6 @@ export const getDataProductTableColumns = ({
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
             sorter: sorter.stringSorter((dp) => dp.name),
             defaultSortOrder: 'ascend',
-            editable: true,
         },
         {
             title: t('Value'),
@@ -53,10 +43,8 @@ export const getDataProductTableColumns = ({
             ellipsis: {
                 showTitle: false,
             },
-            render: (type: string) => <TableCellItem text={type} />,
-            sorter: sorter.stringSorter((dp) => dp.value),
-            defaultSortOrder: 'ascend',
-            editable: true,
+            render: (value: number) => <TableCellItem text={value.toString()} />,
+            sorter: sorter.numberSorter((dp) => dp.value),
         },
         {
             title: t('Color'),
@@ -64,11 +52,7 @@ export const getDataProductTableColumns = ({
             ellipsis: {
                 showTitle: false,
             },
-            render: (color: string, record) => (
-                <ColorPicker value={color} onChangeComplete={(color) => editColor(record, color.toHexString())} />
-            ),
-            sorter: sorter.stringSorter((dp) => dp.color),
-            defaultSortOrder: 'ascend',
+            render: (color: string) => <ColorPicker value={color} disabled />,
         },
         {
             title: t('Is Default'),
@@ -78,22 +62,24 @@ export const getDataProductTableColumns = ({
             },
             render: (is_default: boolean) => <Checkbox checked={is_default} />,
             sorter: sorter.stringSorter((dp) => dp.is_default.toString()),
-            defaultSortOrder: 'ascend',
         },
         {
             title: t('Actions'),
             key: 'action',
             width: '10%',
-            render: (_, { id, is_default }) => {
+            render: (_, record) => {
                 return (
-                    <Flex vertical>
-                        {!is_default && (
+                    <Flex>
+                        <Button type={'link'} onClick={handleEdit(record)}>
+                            {t('Edit')}
+                        </Button>
+                        {!record.is_default && (
                             <Popconfirm
                                 title={t('Remove')}
                                 description={t(
-                                    'Are you sure you want to delete the data product lifecycle? This will remove the lifecycle from all the data products and return them to default',
+                                    'Are you sure you want to delete the lifecycle? This will remove the lifecycle from all the data products and datasets and return them to default',
                                 )}
-                                onConfirm={() => onRemoveDataProductLifecycle(id)}
+                                onConfirm={() => handleRemove(record)}
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}

@@ -1,6 +1,6 @@
 export interface DataProductLifeCycleContract {
     id: string;
-    value: string;
+    value: number;
     name: string;
     color: string;
     is_default: boolean;

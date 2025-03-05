@@ -46,16 +46,9 @@ export const Sidebar = () => {
         navigationMenuItems = [
             ...navigationMenuItems,
             {
-                label: t('Configure'),
+                label: <Link to={ApplicationPaths.Settings}>{t('Settings')}</Link>,
                 icon: <SettingOutlined />,
-                key: 'Configure',
-                children: [
-                    {
-                        key: ApplicationPaths.AdditionalSettings,
-                        label: <Link to={ApplicationPaths.AdditionalSettings}>{t('Additional Settings')}</Link>,
-                        icon: <SettingOutlined />,
-                    },
-                ],
+                key: 'Settings',
             },
         ];
     }

@@ -29,7 +29,7 @@ import { Environments } from './pages/environments/environments.page.tsx';
 import { PlatformServiceConfig } from './pages/platform-service-config/platform-service-config.page.tsx';
 import { PlatformServiceConfigCreate } from './pages/platform-service-config-create/platform-service-config-create.page.tsx';
 import { PlatformsConfigs } from './pages/platforms-configs/platforms-configs.page.tsx';
-import { AdditionalSettings } from './pages/settings/settings.page.tsx';
+import { Settings } from './pages/settings/settings.page.tsx';
 
 const router = createBrowserRouter([
     {
@@ -101,12 +101,12 @@ const router = createBrowserRouter([
                         element: <AuditLogs />,
                     },
                     {
-                        path: ApplicationPaths.AdditionalSettings,
+                        path: ApplicationPaths.Settings,
                         element: <ProtectedRoute />,
                         children: [
                             {
                                 index: true,
-                                element: <AdditionalSettings />,
+                                element: <Settings />,
                             },
                         ],
                     },

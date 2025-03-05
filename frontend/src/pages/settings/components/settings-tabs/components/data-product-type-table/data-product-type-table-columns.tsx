@@ -60,7 +60,7 @@ export const getDataProductTypeTableColumns = ({
                         </Button>
                         <Popconfirm
                             title={t('Remove')}
-                            description={t('Are you sure you want to delete the Data Product Type?')}
+                            description={t('Are you sure you want to delete the Type?')}
                             onConfirm={() => handleRemove(record)}
                             placement={'leftTop'}
                             okText={t('Confirm')}

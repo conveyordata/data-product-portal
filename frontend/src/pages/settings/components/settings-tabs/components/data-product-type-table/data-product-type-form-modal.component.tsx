@@ -43,16 +43,16 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
     const [editDataProductType] = useUpdateDataProductTypeMutation();
 
     const createText: DataProductTypeFormText = {
-        title: t('Create New Data Product Type'),
-        successMessage: t('Data Product Type created successfully'),
-        errorMessage: t('Failed to create Data Product Type'),
+        title: t('Create New Type'),
+        successMessage: t('Type created successfully'),
+        errorMessage: t('Failed to create Type'),
         submitButtonText: t('Create'),
     };
 
     const updateText: DataProductTypeFormText = {
-        title: t('Update New Data Product Type'),
-        successMessage: t('Data Product Type updated successfully'),
-        errorMessage: t('Failed to update Data Product Type'),
+        title: t('Update New Type'),
+        successMessage: t('Type updated successfully'),
+        errorMessage: t('Failed to update Type'),
         submitButtonText: t('Update'),
     };
 
