@@ -14,3 +14,4 @@ class AuditLogFactory(factory.alchemy.SQLAlchemyModelFactory):
     target_id = factory.Faker("uuid4")
     status_code = 200
     action = "test"
+    ip = "test"
