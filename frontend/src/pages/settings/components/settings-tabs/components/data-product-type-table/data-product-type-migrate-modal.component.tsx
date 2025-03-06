@@ -38,11 +38,11 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
         try {
             await migrateDataProductType({ fromId: migrateFrom!.id, toId: values.toId });
             await onRemoveDataProductType(migrateFrom!.id);
-            dispatchMessage({ content: t('Data Product Type migrated and deleted successfully'), type: 'success' });
+            dispatchMessage({ content: t('Type migrated and deleted successfully'), type: 'success' });
             form.resetFields();
             onClose();
         } catch (_e) {
-            const errorMessage = t('Could not migrate or delete Data Product Type');
+            const errorMessage = t('Could not migrate or delete Type');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -50,7 +50,7 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
     return (
         <FormModal
             isOpen={isOpen}
-            title={t('Delete Data Product Type')}
+            title={t('Delete Type')}
             onClose={() => {
                 form.resetFields();
                 onClose();
