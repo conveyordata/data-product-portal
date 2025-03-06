@@ -1,4 +1,5 @@
 import pytest
+from tests.factories import ThemeSettingsFactory
 
 ENDPOINT = "/api/theme_settings"
 
@@ -10,15 +11,18 @@ def update_payload():
 
 class TestThemeSettingsRouter:
     def test_get_settings(self, client):
+        ThemeSettingsFactory()
         settings = client.get(ENDPOINT)
         assert settings.status_code == 200
 
     def test_update_settings_admin_only(self, client, update_payload):
+        ThemeSettingsFactory()
         response = self.update_settings(client, update_payload)
         assert response.status_code == 403
 
     @pytest.mark.usefixtures("admin")
     def test_update_settings(self, client, update_payload):
+        ThemeSettingsFactory()
         response = self.update_settings(client, update_payload)
         assert response.status_code == 200
 

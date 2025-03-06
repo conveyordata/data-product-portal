@@ -9,7 +9,6 @@ from app.data_product_memberships.model import DataProductUserRole
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.main import app
-from app.theme_settings.model import SETTINGS_ID, ThemeSettings
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
@@ -105,11 +104,6 @@ def clear_db(session: scoped_session[Session]) -> None:
     """Clear database after each test."""
     for table in reversed(Base.metadata.sorted_tables):
         session.execute(table.delete())
-
-    # Reintroduce general settings
-    settings = ThemeSettings(id=SETTINGS_ID, portal_name="Data Product Portal")
-    session.add(settings)
-
     session.commit()
 
 
