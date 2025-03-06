@@ -41,4 +41,4 @@ class DataOutputDatasetAssociation(BaseDataOutputDatasetAssociation):
     requested_on: datetime
     denied_on: datetime | None
     approved_on: datetime | None
-    configuration_type: Literal[NotificationTypes.DataOutputDatasetAssociation]
+    configuration_type: Literal[NotificationTypes.DataOutputDataset]

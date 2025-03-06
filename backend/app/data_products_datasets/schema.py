@@ -41,7 +41,7 @@ class DataProductDatasetAssociation(BaseDataProductDatasetAssociation):
     requested_on: datetime
     denied_on: datetime | None
     approved_on: datetime | None
-    configuration_type: Literal[NotificationTypes.DataProductDatasetAssociation]
+    configuration_type: Literal[NotificationTypes.DataProductDataset]
 
 
 class DatasetDataProductLink(DataProductDatasetAssociation):

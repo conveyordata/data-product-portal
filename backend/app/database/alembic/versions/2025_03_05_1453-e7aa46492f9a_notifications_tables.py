@@ -61,7 +61,7 @@ def upgrade() -> None:
             "configuration_type",
             sa.String,
             nullable=False,
-            server_default="DataProductDatasetAssociation",
+            server_default="DataProductDataset",
         ),
     )
     op.add_column(
@@ -70,7 +70,7 @@ def upgrade() -> None:
             "configuration_type",
             sa.String,
             nullable=False,
-            server_default="DataOutputDatasetAssociation",
+            server_default="DataOutputDataset",
         ),
     )
     op.add_column(

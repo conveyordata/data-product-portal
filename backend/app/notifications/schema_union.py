@@ -15,8 +15,8 @@ Notifications = Union[
 
 NotificationMap = {
     NotificationTypes.DataProductMembership: DataProductMembershipGet,
-    NotificationTypes.DataProductDatasetAssociation: DataProductDatasetAssociation,
-    NotificationTypes.DataOutputDatasetAssociation: DataOutputDatasetAssociation,
+    NotificationTypes.DataProductDataset: DataProductDatasetAssociation,
+    NotificationTypes.DataOutputDataset: DataOutputDatasetAssociation,
 }
 
 NotificationConfiguration = Annotated[

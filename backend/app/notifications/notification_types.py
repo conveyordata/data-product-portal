@@ -2,6 +2,6 @@ from enum import Enum
 
 
 class NotificationTypes(str, Enum):
-    DataProductDatasetAssociation = "DataProductDatasetAssociation"
-    DataOutputDatasetAssociation = "DataOutputDatasetAssociation"
+    DataProductDataset = "DataProductDataset"
+    DataOutputDataset = "DataOutputDataset"
     DataProductMembership = "DataProductMembership"
