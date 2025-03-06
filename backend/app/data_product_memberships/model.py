@@ -7,6 +7,7 @@ from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
     DataProductUserRole,
 )
+from app.database.database import Base
 
 if TYPE_CHECKING:
     from app.users.model import User
@@ -14,11 +15,10 @@ if TYPE_CHECKING:
 
 import uuid
 
-from app.notifications.base_model import BaseNotificationConfiguration
-from app.shared.model import utcnow
+from app.shared.model import BaseORM, utcnow
 
 
-class DataProductMembership(BaseNotificationConfiguration):
+class DataProductMembership(Base, BaseORM):
     __tablename__ = "data_product_memberships"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     data_product_id: Mapped[uuid.UUID] = mapped_column(
@@ -59,6 +59,3 @@ class DataProductMembership(BaseNotificationConfiguration):
     __table_args__ = (
         UniqueConstraint("data_product_id", "user_id", name="unique_data_product_user"),
     )
-    __mapper_args__ = {
-        "polymorphic_identity": "DataProductMembership",
-    }

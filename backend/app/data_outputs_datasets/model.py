@@ -4,6 +4,7 @@ from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstrain
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.database.database import Base
 
 if TYPE_CHECKING:
     from app.users.model import User
@@ -12,11 +13,10 @@ if TYPE_CHECKING:
 
 import uuid
 
-from app.notifications.base_model import BaseNotificationConfiguration
-from app.shared.model import utcnow
+from app.shared.model import BaseORM, utcnow
 
 
-class DataOutputDatasetAssociation(BaseNotificationConfiguration):
+class DataOutputDatasetAssociation(Base, BaseORM):
     __tablename__ = "data_outputs_datasets"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     data_output_id: Mapped[uuid.UUID] = mapped_column(
@@ -57,6 +57,3 @@ class DataOutputDatasetAssociation(BaseNotificationConfiguration):
             "data_output_id", "dataset_id", name="unique_data_output_dataset"
         ),
     )
-    __mapper_args__ = {
-        "polymorphic_identity": "DataOutputDatasetAssociation",
-    }

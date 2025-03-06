@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Literal
 from uuid import UUID
 
 from app.data_outputs.schema_base_get import DataOutputBaseGet
@@ -8,12 +7,11 @@ from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetModel,
 )
 from app.datasets.schema import Dataset
-from app.notifications.notification_types import NotificationTypes
-from app.notifications.schema_base import BaseNotificationConfiguration
+from app.shared.schema import ORMModel
 from app.users.schema import User
 
 
-class BaseDataOutputDatasetAssociation(BaseNotificationConfiguration):
+class BaseDataOutputDatasetAssociation(ORMModel):
     dataset_id: UUID
     status: DataOutputDatasetLinkStatus = DataOutputDatasetLinkStatus.PENDING_APPROVAL
 
@@ -41,4 +39,3 @@ class DataOutputDatasetAssociation(BaseDataOutputDatasetAssociation):
     requested_on: datetime
     denied_on: datetime | None
     approved_on: datetime | None
-    configuration_type: Literal[NotificationTypes.DataOutputDataset]
