@@ -12,7 +12,6 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects.postgresql import UUID
 
-from app.notifications.enums import NotificationTrigger
 from app.notifications.notification_types import NotificationTypes
 
 # revision identifiers, used by Alembic.
@@ -35,7 +34,6 @@ def upgrade() -> None:
         "notifications",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("description", sa.String, nullable=True),
-        sa.Column("trigger", sa.Enum(NotificationTrigger)),
         sa.Column(
             "configuration_id",
             UUID(as_uuid=True),

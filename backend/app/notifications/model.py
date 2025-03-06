@@ -1,11 +1,9 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, relationship
-
-from app.notifications.enums import NotificationTrigger
 
 if TYPE_CHECKING:
     from app.notification_interactions.model import NotificationInteraction
@@ -25,7 +23,6 @@ class Notification(Base, BaseORM):
     # kunt in frontend altijd nog custom via bijgevoegd object
     # status: DataOutputStatus = Column(Enum(DataOutputStatus)) Moet gemapped worden
     # naar andere table, per user_id bijhouden
-    trigger = Column(Enum(NotificationTrigger))
     configuration: Mapped["BaseNotificationConfiguration"] = relationship()
     configuration_id: Mapped[UUID] = Column(
         ForeignKey("notification_configurations.id")
