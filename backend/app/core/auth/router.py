@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.audit.service import audit_logs
 from app.core.auth.auth import authorize_user
 from app.core.auth.credentials import AWSCredentials
 from app.core.auth.device_flows.router import router as device
@@ -9,7 +10,7 @@ from app.database.database import get_db_session
 from app.dependencies import OnlyWithProductAccessName
 from app.users.schema import User
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"], dependencies=[Depends(audit_logs)])
 router.include_router(device)
 
 

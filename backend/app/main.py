@@ -8,6 +8,7 @@ from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.audit.model import AuditLog as AuditLogModel
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.authz.authorization import Authorization
@@ -15,6 +16,7 @@ from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging.logger import logger
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.webhook import call_webhook
+from app.database.database import get_db_session
 from app.settings import settings
 from app.shared.router import router
 
@@ -89,6 +91,28 @@ app.add_middleware(
     header_name="X-Request-ID",
     update_request_header=True,
 )
+
+
+@app.middleware("http")
+async def update_audit_status_code(request: Request, call_next):
+    response = await call_next(request)
+    if not request.url.path.endswith("version"):
+        db = next(get_db_session())
+        try:
+            audit = db.get(AuditLogModel, request.state.audit_id)
+            audit.status_code = response.status_code
+            response_body = [chunk async for chunk in response.body_iterator]
+            response.body_iterator = iterate_in_threadpool(iter(response_body))
+            body = (b"".join(response_body)).decode()
+            audit.response = body
+        except AttributeError:
+            print(request.url.path)
+            response_body = [chunk async for chunk in response.body_iterator]
+            response.body_iterator = iterate_in_threadpool(iter(response_body))
+            body = (b"".join(response_body)).decode()
+            print(body)
+        db.commit()
+    return response
 
 
 @app.middleware("http")
