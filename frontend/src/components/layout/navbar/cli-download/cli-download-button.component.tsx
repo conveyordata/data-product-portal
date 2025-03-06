@@ -1,6 +1,7 @@
-import { AppleOutlined, DownloadOutlined, LinuxOutlined, WindowsOutlined } from '@ant-design/icons';
-import { Button, Dropdown } from 'antd';
+import { AppleOutlined, CodeOutlined, LinuxOutlined, WindowsOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Popover } from 'antd';
 import { JSX } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
 
@@ -18,11 +19,7 @@ const createDownloadLink = (suffix: string, version: string) => {
 
 const downloadMenuItem = (item: DownloadItem, version: string) => {
     return {
-        label: (
-            <a href={createDownloadLink(item.suffix, version)} target="_blank">
-                {item.label}
-            </a>
-        ),
+        label: <a href={createDownloadLink(item.suffix, version)}>{item.label}</a>,
         key: item.suffix,
         icon: item.icon,
     };
@@ -67,6 +64,7 @@ const downloadItems = isWindows
         : WINDOWS_DOWNLOAD_ITEMS.concat(MAC_DOWNLOAD_ITEMS).concat(LINUX_DOWNLOAD_ITEMS);
 
 export const DownloadCLIButton = () => {
+    const { t } = useTranslation();
     const { data: version } = useGetVersionQuery();
 
     const menuProps = {
@@ -74,8 +72,10 @@ export const DownloadCLIButton = () => {
     };
 
     return (
-        <Dropdown menu={menuProps} trigger={['click']} placement={'bottomRight'} disabled={!version}>
-            <Button shape={'circle'} className={styles.iconButton} icon={<DownloadOutlined />} />
-        </Dropdown>
+        <Popover content={t('Download CLI executable')} trigger={'hover'} placement="left">
+            <Dropdown menu={menuProps} trigger={['click']} placement={'bottom'} disabled={!version}>
+                <Button shape={'circle'} className={styles.iconButton} icon={<CodeOutlined />} />
+            </Dropdown>
+        </Popover>
     );
 };
