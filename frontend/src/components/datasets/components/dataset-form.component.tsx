@@ -3,7 +3,7 @@ import type { TFunction } from 'i18next';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';

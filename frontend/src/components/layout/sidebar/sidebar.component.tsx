@@ -3,7 +3,7 @@ import { Flex, Layout, Menu, type MenuProps, Space } from 'antd';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { Link, useMatches } from 'react-router-dom';
+import { Link, useMatches } from 'react-router';
 
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
 import { DataProductOutlined, DatasetOutlined, ProductLogo } from '@/components/icons';

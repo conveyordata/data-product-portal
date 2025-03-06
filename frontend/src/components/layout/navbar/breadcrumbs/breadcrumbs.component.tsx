@@ -3,7 +3,7 @@ import { Breadcrumb, Space, Typography } from 'antd';
 import { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadcrumb/Breadcrumb';
 import { ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router';
 
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
