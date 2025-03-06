@@ -277,17 +277,27 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             </Form.Item>
             <Form.Item hidden={selectedDataPlatform?.children?.length === 0}>
                 <Space wrap className={styles.radioButtonContainer}>
-                    {selectedDataPlatform?.children?.map((dataPlatform) => (
-                        <DataOutputPlatformTile<DataPlatform>
-                            key={dataPlatform.value}
-                            dataPlatform={dataPlatform}
-                            environments={[]}
-                            isDisabled={isLoading}
-                            isSelected={selectedConfiguration !== undefined && dataPlatform === selectedConfiguration}
-                            isLoading={isLoading}
-                            onTileClick={onConfigurationClick}
-                        />
-                    ))}
+                    {selectedDataPlatform?.children
+                        ?.filter((platform) => {
+                            return platformConfig?.some(
+                                (configObj) =>
+                                    configObj.platform.name == platform.label ||
+                                    configObj.service.name == platform.label,
+                            );
+                        })
+                        .map((dataPlatform) => (
+                            <DataOutputPlatformTile<DataPlatform>
+                                key={dataPlatform.value}
+                                dataPlatform={dataPlatform}
+                                environments={[]}
+                                isDisabled={isLoading}
+                                isSelected={
+                                    selectedConfiguration !== undefined && dataPlatform === selectedConfiguration
+                                }
+                                isLoading={isLoading}
+                                onTileClick={onConfigurationClick}
+                            />
+                        ))}
                 </Space>
             </Form.Item>
             {(() => {
