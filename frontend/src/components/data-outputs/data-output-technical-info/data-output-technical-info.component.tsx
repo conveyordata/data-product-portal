@@ -1,15 +1,18 @@
 import { Table, TableColumnsType } from 'antd';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { DataOutputContract } from '@/types/data-output';
-import styles from './data-output-technical-info.module.scss';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetEnvironmentPlatformServiceConfigQuery } from '@/store/features/environments/environments-api-slice';
-import { getS3TechnicalInformationColumns } from './data-output-table-s3-columns';
+import { DataOutputContract } from '@/types/data-output';
 import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
-import { getGlueTechnicalInformationColumns } from './data-output-table-glue-columns';
+
 import { getDatabricksTechnicalInformationColumns } from './data-output-table-databricks-columns';
+import { getGlueTechnicalInformationColumns } from './data-output-table-glue-columns';
+import { getRedshiftTechnicalInformationColumns } from './data-output-table-redshift-columns';
+import { getS3TechnicalInformationColumns } from './data-output-table-s3-columns';
 import { getSnowflakeTechnicalInformationColumns } from './data-output-table-snowflake-columns';
+import styles from './data-output-technical-info.module.scss';
 
 type Props = {
     data_output_id: string;
@@ -48,10 +51,12 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
                 return getDatabricksTechnicalInformationColumns({ t });
             case 'SnowflakeDataOutput':
                 return getSnowflakeTechnicalInformationColumns({ t });
+            case 'RedshiftDataOutput':
+                return getRedshiftTechnicalInformationColumns({ t });
             default:
                 return [];
         }
-    }, [t, technicalInfo, data_output]);
+    }, [t, data_output]);
 
     return (
         <Table<TechnicalInfoContract>

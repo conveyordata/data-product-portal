@@ -1,8 +1,10 @@
-import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
-import { WindowsOutlined, AppleOutlined, LinuxOutlined, DownloadOutlined } from '@ant-design/icons';
+import { AppleOutlined, DownloadOutlined, LinuxOutlined, WindowsOutlined } from '@ant-design/icons';
 import { Button, Dropdown } from 'antd';
-import styles from './cli-download-button.module.scss';
 import { JSX } from 'react';
+
+import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
+
+import styles from './cli-download-button.module.scss';
 
 type DownloadItem = {
     label: string;

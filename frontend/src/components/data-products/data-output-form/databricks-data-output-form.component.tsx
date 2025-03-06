@@ -1,7 +1,8 @@
 import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DataOutputConfiguration, DataOutputCreateFormSchema, DatabricksDataOutput } from '@/types/data-output';
-import { useEffect } from 'react';
+
+import { DatabricksDataOutput, DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
 
 type Props = {
     sourceAligned: boolean;
@@ -13,10 +14,12 @@ type Props = {
 export function DatabricksDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
     const entireCatalog = Form.useWatch('entire_catalog', form);
-    let catalogOptions = (identifiers ?? []).map((catalog) => ({ label: catalog, value: catalog }));
     const catalogValue = Form.useWatch('catalog', form);
     const schemaValue = Form.useWatch('schema', form);
     const tableValue = Form.useWatch('table', form);
+
+    const catalogOptions = useRef((identifiers ?? []).map((catalog) => ({ label: catalog, value: catalog })));
+
     useEffect(() => {
         let catalogOptionsList = identifiers; //TODO
         if (!sourceAligned) {
@@ -25,8 +28,8 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
         } else {
             form.setFieldsValue({ catalog: undefined });
         }
-        catalogOptions = (catalogOptionsList ?? []).map((catalog) => ({ label: catalog, value: catalog }));
-    }, [sourceAligned]);
+        catalogOptions.current = (catalogOptionsList ?? []).map((catalog) => ({ label: catalog, value: catalog }));
+    }, [external_id, form, identifiers, sourceAligned]);
 
     useEffect(() => {
         let result = catalogValue;
@@ -44,7 +47,7 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
         }
 
         form.setFieldsValue({ result: result });
-    }, [catalogValue, sourceAligned, schemaValue, tableValue, entireCatalog]);
+    }, [catalogValue, sourceAligned, schemaValue, tableValue, entireCatalog, form]);
 
     return (
         <div>
@@ -70,7 +73,7 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
                         }
                     }}
                     maxCount={1}
-                    options={catalogOptions}
+                    options={catalogOptions.current}
                 />
             </Form.Item>
             <Form.Item<DatabricksDataOutput & { temp_suffix: string }>

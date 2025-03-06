@@ -1,13 +1,10 @@
-import { DataProductSettingsTable } from '@/pages/settings/components/data-product-settings-table/data-product-settings-table.component';
+import { SettingsTabs } from './components/settings-tabs/settings-tabs.component.tsx';
 import styles from './settings.module.scss';
-import { DataProductLifecyclesTable } from '../data-product-lifecycles/components/data-product-lifecycles-table/data-product-lifecycles-table.component';
 
-export function AdditionalSettings() {
+export function Settings() {
     return (
         <div className={styles.container}>
-            <DataProductSettingsTable scope={'dataproduct'} />
-            <DataProductSettingsTable scope={'dataset'} />
-            <DataProductLifecyclesTable />
+            <SettingsTabs />
         </div>
     );
 }

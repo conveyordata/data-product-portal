@@ -1,14 +1,15 @@
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
+import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import {
     useGetDataProductByIdQuery,
     useUpdateDataProductAboutMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { getCanUserAccessDataProductData } from '@/utils/data-product-user-role.helper.ts';
 
 type Props = {

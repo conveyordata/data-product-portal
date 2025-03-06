@@ -1,0 +1,19 @@
+@use '@/styles/globals';
+
+.container {
+    width: 100%;
+    height: 100%;
+    gap: globals.$column-gap-l;
+
+    .global-settings-header {
+        justify-content: space-between;
+        align-items: center;
+        gap: globals.$column-gap-xs;
+
+        h3 {
+            margin: 0;
+            text-wrap: avoid;
+            white-space: nowrap;
+        }
+    }
+}

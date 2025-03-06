@@ -1,10 +1,12 @@
-import styles from './data-output-description.module.scss';
 import { Badge, Flex, Space, Tag, Typography } from 'antd';
-import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { useTranslation } from 'react-i18next';
+
 import { DataOutputStatus } from '@/types/data-output';
-import { getDataOutputType } from '@/utils/data-output-type.helper';
 import { TagModel } from '@/types/tag';
+import { getDataOutputType } from '@/utils/data-output-type.helper';
+import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
+
+import styles from './data-output-description.module.scss';
 
 type Props = {
     status: DataOutputStatus;
@@ -24,7 +26,7 @@ export function DataOutputDescription({ status, type, description, tags }: Props
                         <Typography.Text strong>{t('Status')}</Typography.Text>
                         <Badge
                             status={getBadgeStatus(status)}
-                            text={getStatusLabel(status)}
+                            text={getStatusLabel(t, status)}
                             className={styles.noSelect}
                         />
                     </Flex>

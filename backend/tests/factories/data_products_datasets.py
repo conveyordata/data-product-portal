@@ -5,6 +5,7 @@ from app.data_products_datasets.model import DataProductDatasetAssociation
 
 from .data_product import DataProductFactory
 from .dataset import DatasetFactory
+from .user import UserFactory
 
 
 class DataProductDatasetAssociationFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -15,3 +16,4 @@ class DataProductDatasetAssociationFactory(factory.alchemy.SQLAlchemyModelFactor
     status = DataProductDatasetLinkStatus.APPROVED.value
     data_product = factory.SubFactory(DataProductFactory)
     dataset = factory.SubFactory(DatasetFactory)
+    requested_by = factory.SubFactory(UserFactory)

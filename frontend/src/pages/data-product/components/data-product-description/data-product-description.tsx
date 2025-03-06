@@ -1,18 +1,20 @@
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import styles from './data-product-description.module.scss';
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import { TagModel } from '@/types/tag';
+
+import styles from './data-product-description.module.scss';
 
 type Props = {
     lifecycle: DataProductLifeCycleContract;
     type: string;
     description: string;
-    businessArea: string;
+    domain: string;
     tags: TagModel[];
 };
 
-export function DataProductDescription({ lifecycle, type, description, businessArea, tags }: Props) {
+export function DataProductDescription({ lifecycle, type, description, domain, tags }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -24,8 +26,8 @@ export function DataProductDescription({ lifecycle, type, description, businessA
                         <Tag color={lifecycle.color}>{lifecycle.name}</Tag>
                     </Flex>
                     <Flex className={styles.statusBadge}>
-                        <Typography.Text strong>{t('Business Area')}</Typography.Text>
-                        <Typography.Text>{businessArea}</Typography.Text>
+                        <Typography.Text strong>{t('Domain')}</Typography.Text>
+                        <Typography.Text>{domain}</Typography.Text>
                     </Flex>
                     <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Type')}</Typography.Text>

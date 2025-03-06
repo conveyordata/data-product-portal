@@ -1,7 +1,8 @@
+import { DataOutputLink, DataProductLink } from '@/types/dataset';
+import { DomainContract } from '@/types/domain';
 import { TagContract } from '@/types/tag';
 import { UserContract } from '@/types/users';
-import { DataOutputLink, DataProductLink } from '@/types/dataset';
-import { BusinessAreaContract } from '@/types/business-area';
+
 import { DataProductLifeCycleContract } from '../data-product-lifecycle';
 import { DataProductSettingValueContract } from '../data-product-setting';
 
@@ -32,7 +33,7 @@ export interface DatasetContract {
     lifecycle_id: string;
     data_output_links: DataOutputLink[];
     access_type: DatasetAccess;
-    business_area: BusinessAreaContract;
+    domain: DomainContract;
     external_id: string;
     data_product_settings: DataProductSettingValueContract[];
 }

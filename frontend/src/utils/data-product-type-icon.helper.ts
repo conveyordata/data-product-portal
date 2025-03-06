@@ -1,28 +1,28 @@
-import { DataProductIcon } from '@/types/data-product-type';
 import chartAnalytics from '@/assets/icons/chart-analytics-icon.svg?react';
-import chipIcon from '@/assets/icons/chip-icon.svg?react';
-import robotIcon from '@/assets/icons/robot-icon.svg?react';
-import explorationIcon from '@/assets/icons/exploration-icon.svg?react';
 import chartPieIcon from '@/assets/icons/chart-pie-icon.svg?react';
+import chipIcon from '@/assets/icons/chip-icon.svg?react';
+import explorationIcon from '@/assets/icons/exploration-icon.svg?react';
 import ingestionIcon from '@/assets/icons/ingestion-icon.svg?react';
+import robotIcon from '@/assets/icons/robot-icon.svg?react';
+import { DataProductIcon } from '@/types/data-product-type/data-product-type.contract';
 
 export function getDataProductTypeIcon(dataProductIcon?: DataProductIcon) {
     if (!dataProductIcon) return chipIcon;
 
     switch (dataProductIcon) {
-        case 'reporting':
+        case DataProductIcon.Reporting:
             return chartPieIcon;
-        case 'processing':
+        case DataProductIcon.Processing:
             return chipIcon;
-        case 'exploration':
+        case DataProductIcon.Exploration:
             return explorationIcon;
-        case 'analytics':
+        case DataProductIcon.Analytics:
             return chartAnalytics;
-        case 'machine_learning':
+        case DataProductIcon.MachineLearning:
             return robotIcon;
-        case 'ingestion':
+        case DataProductIcon.Ingestion:
             return ingestionIcon;
-        case 'default':
+        case DataProductIcon.Default:
             return chipIcon;
         default:
             return chipIcon;

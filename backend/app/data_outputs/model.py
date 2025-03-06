@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, String, Table
+from sqlalchemy import Boolean, Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, relationship
 
@@ -16,17 +16,8 @@ if TYPE_CHECKING:
 from app.database.database import Base, ensure_exists
 from app.platform_services.schema import PlatformService
 from app.platforms.schema import Platform
-from app.shared.model import BaseORM, utcnow
-from app.tags.model import Tag
-
-tag_data_output_table = Table(
-    "tags_data_outputs",
-    Base.metadata,
-    Column("data_output_id", ForeignKey("data_outputs.id")),
-    Column("tag_id", ForeignKey("tags.id")),
-    Column("created_on", DateTime(timezone=False), server_default=utcnow()),
-    Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
-)
+from app.shared.model import BaseORM
+from app.tags.model import Tag, tag_data_output_table
 
 
 def ensure_data_output_exists(data_output_id: UUID, db: Session) -> DataOutputSchema:
@@ -56,4 +47,6 @@ class DataOutput(Base, BaseORM):
 
     platform: Mapped["Platform"] = relationship()
     service: Mapped["PlatformService"] = relationship()
-    tags: Mapped[list[Tag]] = relationship(secondary=tag_data_output_table)
+    tags: Mapped[list[Tag]] = relationship(
+        secondary=tag_data_output_table, back_populates="data_outputs"
+    )

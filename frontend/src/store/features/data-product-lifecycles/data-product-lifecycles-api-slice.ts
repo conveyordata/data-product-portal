@@ -2,9 +2,9 @@ import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import {
+    DataProductLifeCycleContract,
     DataProductLifecycleCreateRequest,
     DataProductLifecycleCreateResponse,
-    DataProductLifeCycleContract,
 } from '@/types/data-product-lifecycle';
 
 export const dataProductLifecycleTags: string[] = [TagTypes.DataProductLifecycle];

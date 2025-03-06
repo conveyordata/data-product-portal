@@ -1,32 +1,34 @@
-import styles from './roles-table.module.scss';
-import { Flex, Table, Typography, Checkbox, type CheckboxChangeEvent } from 'antd';
-
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Checkbox, type CheckboxChangeEvent, Flex, Table, Typography } from 'antd';
 import type { ColumnType } from 'antd/es/table/interface';
-import type { RoleScope } from '@/pages/roles/roles.page.tsx';
-import QuestionTooltip from '@/components/tooltip/question-tooltip.tsx';
+import { useCallback, useMemo } from 'react';
+
+import QuestionTooltip from '@/components/tooltip/question-tooltip';
+import type { RoleScope } from '@/pages/roles/roles.page';
+import { useGetRolesQuery, useUpdateRoleMutation } from '@/store/features/roles/roles-api-slice';
+import type { RoleContract } from '@/types/roles';
+
+import styles from './roles-table.module.scss';
 
 const { Text } = Typography;
 
-type Role = {
-    title: string;
-    description: string;
-};
-
 type PermissionType = 'Group' | 'Instance';
 
-type PermissionInstance = {
+type PermissionBase = {
     type: PermissionType;
-    order: number;
-    permission: string;
-    description: string;
-    access: Map<string, string>;
+    id: number | string;
+    name: string;
 };
 
-type PermissionGroup = {
-    type: PermissionType;
-    order: number;
-    name: string;
+type PermissionInstance = PermissionBase & {
+    type: 'Instance';
+    id: number;
+    description: string;
+    access?: object;
+};
+
+type PermissionGroup = PermissionBase & {
+    type: 'Group';
+    id: string;
 };
 
 type Permission = PermissionInstance | PermissionGroup;
@@ -35,31 +37,26 @@ type RolesTableProps = {
     scope: RoleScope;
 };
 export function RolesTable({ scope }: RolesTableProps) {
-    const roles: Role[] = useMemo(() => loadRolesForScope(scope), [scope]);
-    const [data, setData] = useState<Permission[]>(loadStateForScope(scope));
+    const { data: roles = [], isFetching } = useGetRolesQuery(scope);
+    const [updateRole, { isLoading }] = useUpdateRoleMutation();
 
-    useEffect(() => {
-        setData(loadStateForScope(scope));
-    }, [scope]);
+    const permissions = useMemo(() => determinePermissionsForScope(scope, roles), [roles, scope]);
 
     const handleCheckboxChange = useCallback(
-        (record: PermissionInstance, key: string, value: boolean) => {
-            const updatedData = data.map((item) => {
-                if (item.type === 'Instance' && (item as PermissionInstance).permission === record.permission) {
-                    return {
-                        ...item,
-                        access: {
-                            ...(item as PermissionInstance).access,
-                            [key]: value,
-                        },
-                    };
-                }
-                return item;
-            });
+        (record: PermissionInstance, key: string, checked: boolean) => {
+            const role = roles.find((role) => role.name === key)!;
 
-            setData(updatedData);
+            const permissions = [...role.permissions];
+            if (checked && !permissions.includes(record.id)) {
+                permissions.push(record.id);
+            } else if (!checked && permissions.includes(record.id)) {
+                const index = permissions.indexOf(record.id);
+                permissions.splice(index, 1);
+            }
+
+            updateRole({ id: role.id, permissions });
         },
-        [data],
+        [roles, updateRole],
     );
 
     const renderPermission = (_: string, record: Permission) => {
@@ -67,7 +64,7 @@ export function RolesTable({ scope }: RolesTableProps) {
             record = record as PermissionInstance;
             return (
                 <QuestionTooltip title={record.description}>
-                    <Text className={styles.permissionInstance}>{record.permission}</Text>
+                    <Text className={styles.permissionInstance}>{record.name}</Text>
                 </QuestionTooltip>
             );
         } else if (record.type === 'Group') {
@@ -107,7 +104,7 @@ export function RolesTable({ scope }: RolesTableProps) {
         };
     };
 
-    const roleColumns = roles.map((item) => createColumn(item.title, item.description));
+    const roleColumns = roles.map((role) => createColumn(role.name, role.description));
 
     const columns: ColumnType<Permission>[] = [
         {
@@ -127,467 +124,306 @@ export function RolesTable({ scope }: RolesTableProps) {
         <Flex vertical className={styles.tableContainer}>
             <Table
                 columns={columns}
-                dataSource={data}
+                loading={isFetching || isLoading}
+                dataSource={permissions}
                 pagination={false}
-                rowKey={'order'}
+                rowKey={'id'}
                 scroll={{ x: 'max-content' }}
             />
         </Flex>
     );
 }
 
-function loadRolesForScope(scope: RoleScope): Role[] {
-    switch (scope) {
-        case 'global':
-            return [
-                {
-                    title: 'Admin',
-                    description: 'Administrators have blanket permissions',
-                },
-                {
-                    title: 'Everyone',
-                    description: "This is the role that is used as fallback for users that don't have another role",
-                },
-            ];
-        case 'data_product':
-            return [
-                {
-                    title: 'Owner',
-                    description: 'The owner of a Data Product',
-                },
-                {
-                    title: 'Solution Architect',
-                    description: 'The Solution Architect for a Data Product',
-                },
-                {
-                    title: 'Member',
-                    description: 'A regular team member of a Data Product',
-                },
-            ];
-        case 'dataset':
-            return [
-                {
-                    title: 'Owner',
-                    description: 'The owner of a Dataset',
-                },
-                {
-                    title: 'Solution Architect',
-                    description: 'The Solution Architect for a Dataset',
-                },
-                {
-                    title: 'Member',
-                    description: 'A regular team member of a Dataset',
-                },
-            ];
-    }
-}
+function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): Permission[] {
+    let permissions: Permission[] = [];
 
-function loadStateForScope(scope: RoleScope): Permission[] {
     switch (scope) {
         case 'global':
-            return [
+            permissions = [
                 {
-                    order: 10,
                     type: 'Group',
+                    id: 'Manage Installation',
                     name: 'Manage Installation',
                 },
                 {
-                    order: 11,
                     type: 'Instance',
-                    permission: 'Manage configuration',
+                    id: 101,
+                    name: 'Manage configuration',
                     description: 'Allows modifying the configuration options of this installation',
-                    access: {
-                        Admin: true,
-                        Everyone: false,
-                    },
                 },
                 {
-                    order: 20,
                     type: 'Group',
+                    id: 'Manage Assets',
                     name: 'Manage Assets',
                 },
                 {
-                    order: 21,
                     type: 'Instance',
-                    permission: 'Create Data Product',
+                    id: 102,
+                    name: 'Create Data Product',
                     description: 'Allows the creation of a Data Product',
-                    access: {
-                        Admin: true,
-                        Everyone: false,
-                    },
                 },
                 {
-                    order: 22,
                     type: 'Instance',
-                    permission: 'Create Dataset',
+                    id: 103,
+                    name: 'Create Dataset',
                     description: 'Allows the creation of a Dataset',
-                    access: {
-                        Admin: true,
-                        Everyone: false,
-                    },
                 },
                 {
-                    order: 30,
                     type: 'Group',
+                    id: 'Manage Access',
                     name: 'Manage Access',
                 },
                 {
-                    order: 31,
                     type: 'Instance',
-                    permission: 'Request Data Product access',
+                    id: 104,
+                    name: 'Request Data Product access',
                     description: 'Allows requesting access to a Data Product',
-                    access: {
-                        Admin: true,
-                        Everyone: true,
-                    },
                 },
                 {
-                    order: 32,
                     type: 'Instance',
-                    permission: 'Request Dataset access',
+                    id: 105,
+                    name: 'Request Dataset access',
                     description: 'Allows requesting access to a Dataset',
-                    access: {
-                        Admin: true,
-                        Everyone: true,
-                    },
                 },
             ];
+            break;
         case 'data_product':
-            return [
+            permissions = [
                 {
-                    order: 10,
                     type: 'Group',
+                    id: 'Manage Data Product',
                     name: 'Manage Data Product',
                 },
                 {
-                    order: 11,
                     type: 'Instance',
-                    permission: 'Manage general properties',
+                    id: 301,
+                    name: 'Manage general properties',
                     description: 'Allows modifying properties such as labels and the description of a Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 12,
                     type: 'Instance',
-                    permission: 'Manage settings',
+                    id: 302,
+                    name: 'Manage settings',
                     description: 'Allows changing the settings of a Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 13,
                     type: 'Instance',
-                    permission: 'Manage status',
+                    id: 303,
+                    name: 'Manage status',
                     description: 'Allows changing the status of a Data Product',
-                    access: {
-                        Owner: false,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 14,
                     type: 'Instance',
-                    permission: 'Delete Data Product',
+                    id: 304,
+                    name: 'Delete Data Product',
                     description: 'Allows the role to delete the Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 20,
                     type: 'Group',
+                    id: 'Manage Users',
                     name: 'Manage Users',
                 },
                 {
-                    order: 21,
                     type: 'Instance',
-                    permission: 'Add User',
+                    id: 305,
+                    name: 'Add User',
                     description: 'Allows adding a user as member to this Data Product and assigning a role',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 22,
                     type: 'Instance',
-                    permission: 'Remove User',
+                    id: 307,
+                    name: 'Remove User',
                     description: 'Allows removing a user as member from this Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 23,
                     type: 'Instance',
-                    permission: 'Modify User',
+                    id: 306,
+                    name: 'Modify User',
                     description: 'Allows changing the role of a member of the Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 24,
                     type: 'Instance',
-                    permission: 'Review access request',
-                    description: 'Allows approving or rejecting an access request made for the Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
+                    id: 308,
+                    name: 'Review access request',
+                    description: 'Allows accepting or rejecting an access request made for the Data Product',
                 },
                 {
-                    order: 30,
                     type: 'Group',
+                    id: 'Manage Data Outputs',
                     name: 'Manage Data Outputs',
                 },
                 {
-                    order: 31,
                     type: 'Instance',
-                    permission: 'Add Data Output',
+                    id: 309,
+                    name: 'Add Data Output',
                     description: 'Allows adding a Data Output to this Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 32,
                     type: 'Instance',
-                    permission: 'Remove and unlink Data Output',
+                    id: 311,
+                    name: 'Remove and unlink Data Output',
                     description: 'Allows removing a Data Output from this Data Product and unlinking it from a Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 33,
                     type: 'Instance',
-                    permission: 'Modify Data Output',
+                    id: 310,
+                    name: 'Modify Data Output',
                     description: 'Allows modifying the details of a Data Output of this Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 34,
                     type: 'Instance',
-                    permission: 'Request Data Output Link',
+                    id: 312,
+                    name: 'Request Data Output Link',
                     description: 'Allows to request that a Data Output of Data Product gets linked to a Dataset',
-                    access: {
-                        Owner: false,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 40,
                     type: 'Group',
+                    id: 'Manage Input Datasets',
                     name: 'Manage Input Datasets',
                 },
                 {
-                    order: 41,
                     type: 'Instance',
-                    permission: 'Request Access to Dataset',
+                    id: 313,
+                    name: 'Request Access to Dataset',
                     description: 'Allows to request read access to a Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': true,
-                        Member: true,
-                    },
                 },
                 {
-                    order: 42,
                     type: 'Instance',
-                    permission: 'Remove Access to Dataset',
+                    id: 314,
+                    name: 'Remove Access to Dataset',
                     description: 'Allows to remove read access to a Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 50,
                     type: 'Group',
+                    id: 'Integrations',
                     name: 'Integrations',
                 },
                 {
-                    order: 51,
                     type: 'Instance',
-                    permission: 'Access Integrations',
+                    id: 315,
+                    name: 'Access Integrations',
                     description: 'Allows the role to see and access Integrations of the Data Product',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: true,
-                    },
                 },
             ];
+            break;
         case 'dataset':
-            return [
+            permissions = [
                 {
-                    order: 10,
                     type: 'Group',
+                    id: 'Manage Dataset',
                     name: 'Manage Dataset',
                 },
                 {
-                    order: 11,
                     type: 'Instance',
-                    permission: 'Manage general properties',
+                    id: 401,
+                    name: 'Manage general properties',
                     description: 'Allows modifying properties such as labels and the description of a Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 12,
                     type: 'Instance',
-                    permission: 'Manage settings',
+                    id: 402,
+                    name: 'Manage settings',
                     description: 'Allows changing the settings of a Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 13,
                     type: 'Instance',
-                    permission: 'Manage status',
+                    id: 403,
+                    name: 'Manage status',
                     description: 'Allows changing the status of a Dataset',
-                    access: {
-                        Owner: false,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 14,
                     type: 'Instance',
-                    permission: 'Delete Dataset',
+                    id: 404,
+                    name: 'Delete Dataset',
                     description: 'Allows the role to delete the Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 20,
                     type: 'Group',
+                    id: 'Manage Users',
                     name: 'Manage Users',
                 },
                 {
-                    order: 21,
                     type: 'Instance',
-                    permission: 'Add User',
+                    id: 405,
+                    name: 'Add User',
                     description: 'Allows adding a user as member to this Dataset and assigning a role',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 22,
                     type: 'Instance',
-                    permission: 'Remove User',
+                    id: 407,
+                    name: 'Remove User',
                     description: 'Allows removing a user as member from this Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 23,
                     type: 'Instance',
-                    permission: 'Modify User',
+                    id: 406,
+                    name: 'Modify User',
                     description: 'Allows changing the role of a member of the Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 24,
                     type: 'Instance',
-                    permission: 'Review access request',
+                    id: 408,
+                    name: 'Review access request',
                     description: 'Allows approving or rejecting an access request made for the Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 30,
                     type: 'Group',
+                    id: 'Manage Data Outputs',
                     name: 'Manage Data Outputs',
                 },
                 {
-                    order: 31,
                     type: 'Instance',
-                    permission: 'Accept Data Output link',
+                    id: 409,
+                    name: 'Accept Data Output link',
                     description: 'Allows accepting a request to link a Data Output to the Dataset',
-                    access: {
-                        Owner: false,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 32,
                     type: 'Instance',
-                    permission: 'Remove Data Output link',
+                    id: 410,
+                    name: 'Remove Data Output link',
                     description: 'Allows unlinking Data Outputs from the Dataset',
-                    access: {
-                        Owner: false,
-                        'Solution Architect': true,
-                        Member: false,
-                    },
                 },
                 {
-                    order: 50,
                     type: 'Group',
+                    id: 'Manage Read Access',
+                    name: 'Manage Read Access',
+                },
+                {
+                    type: 'Instance',
+                    id: 411,
+                    name: 'Approve Data Product Access',
+                    description: 'Allows the role to accept or reject a read access request from a data product',
+                },
+                {
+                    type: 'Instance',
+                    id: 412,
+                    name: 'Revoke Data Product Access',
+                    description: 'Allows the role to revoke read access from a data product again',
+                },
+                {
+                    type: 'Group',
+                    id: 'Integrations',
                     name: 'Integrations',
                 },
                 {
-                    order: 51,
                     type: 'Instance',
-                    permission: 'Access Integrations',
+                    id: 413,
+                    name: 'Access Integrations',
                     description: 'Allows the role to see and access Integrations of the Dataset',
-                    access: {
-                        Owner: true,
-                        'Solution Architect': false,
-                        Member: true,
-                    },
                 },
             ];
+            break;
     }
+
+    const determineAccess = (permission: number) => {
+        return Object.fromEntries(roles.map((role) => [role.name, role.permissions.includes(permission)]));
+    };
+
+    for (const permission of permissions) {
+        if (permission.type === 'Instance') {
+            permission.access = determineAccess(permission.id);
+        }
+    }
+
+    return permissions;
 }

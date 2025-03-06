@@ -1,14 +1,16 @@
-import styles from './platforms-configs-table.module.scss';
 import { Button, Flex, Form, Input, Space, Table, TableProps, Typography } from 'antd';
-import { Link, useNavigate } from 'react-router-dom';
-import { ApplicationPaths, createPlatformServiceConfigIdPath } from '@/types/navigation.ts';
-import { useMemo, useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router';
+
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
+import { getPlatformConfigTableColumns } from '@/pages/platforms-configs/components/platforms-configs-table/platforms-configs-columns';
+import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
+import { ApplicationPaths, createPlatformServiceConfigIdPath } from '@/types/navigation.ts';
 import { PlatformServiceConfigContract } from '@/types/platform-service-config';
 import { SearchForm } from '@/types/shared';
-import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import { getPlatformConfigTableColumns } from '@/pages/platforms-configs/components/platforms-configs-table/platforms-configs-columns';
+
+import styles from './platforms-configs-table.module.scss';
 
 function filterPlatformConfigs(platformConfigs: PlatformServiceConfigContract[], searchTerm?: string) {
     if (!searchTerm) {
@@ -55,7 +57,7 @@ export function PlatformsConfigsTable() {
         if (!isFetching) {
             handleTotalChange(platformsConfigs.length);
         }
-    }, [isFetching]);
+    }, [handleTotalChange, isFetching, platformsConfigs.length]);
 
     return (
         <Flex vertical className={styles.tableContainer}>

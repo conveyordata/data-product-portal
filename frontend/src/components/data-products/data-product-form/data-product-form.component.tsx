@@ -1,41 +1,42 @@
-import { Button, Flex, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
+import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import styles from './data-product-form.module.scss';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
+
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
+import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
 import {
     useCreateDataProductMutation,
     useGetDataProductByIdQuery,
     useRemoveDataProductMutation,
     useUpdateDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
-import { useGetAllBusinessAreasQuery } from '@/store/features/business-areas/business-areas-api-slice.ts';
 import {
     getDataProductMemberMemberships,
     getDataProductOwnerIds,
     getIsDataProductOwner,
 } from '@/utils/data-product-user-role.helper.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { useSelector } from 'react-redux';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
-import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
-import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
-import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
-import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
-import { DataProductSettings } from '@/components/data-products/data-product-settings/data-product-settings.component.tsx';
+
+import styles from './data-product-form.module.scss';
+
+const { TextArea } = Input;
 
 type Props = {
     mode: 'create' | 'edit';
     dataProductId?: string;
 };
-
-const { TextArea } = Input;
 
 export function DataProductForm({ mode, dataProductId }: Props) {
     const { t } = useTranslation();
@@ -49,7 +50,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     );
 
     const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
-    const { data: businessAreas = [], isFetching: isFetchingBusinessAreas } = useGetAllBusinessAreasQuery();
+    const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
     const { data: dataProductTypes = [], isFetching: isFetchingDataProductTypes } = useGetAllDataProductTypesQuery();
     const { data: dataProductOwners = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
@@ -77,7 +78,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         isFetchingLifecycles;
 
     const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
-    const businessAreaSelectOptions = businessAreas.map((area) => ({ label: area.name, value: area.id }));
+    const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = dataProductOwners.map((owner) => ({ label: owner.email, value: owner.id }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
@@ -97,7 +98,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     lifecycle_id: values.lifecycle_id,
                     type_id: values.type_id,
                     tag_ids: values.tag_ids ?? [],
-                    business_area_id: values.business_area_id,
+                    domain_id: values.domain_id,
                 };
                 const response = await createDataProduct(request).unwrap();
                 dispatchMessage({ content: t('Data product created successfully'), type: 'success' });
@@ -123,7 +124,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     description: values.description,
                     type_id: values.type_id,
                     lifecycle_id: values.lifecycle_id,
-                    business_area_id: values.business_area_id,
+                    domain_id: values.domain_id,
                     tag_ids: values.tag_ids,
                     memberships,
                 };
@@ -176,7 +177,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         if (mode === 'create') {
             form.setFieldsValue({ external_id: generateExternalIdFromName(dataProductNameValue ?? '') });
         }
-    }, [dataProductNameValue]);
+    }, [dataProductNameValue, form, mode]);
 
     useEffect(() => {
         if (currentDataProduct && mode === 'edit') {
@@ -186,12 +187,13 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 description: currentDataProduct.description,
                 type_id: currentDataProduct.type.id,
                 lifecycle_id: currentDataProduct.lifecycle.id,
-                business_area_id: currentDataProduct.business_area.id,
+                domain_id: currentDataProduct.domain.id,
                 tag_ids: currentDataProduct.tags.map((tag) => tag.id),
                 owners: getDataProductOwnerIds(currentDataProduct),
             });
         }
-    }, [currentDataProduct, mode]);
+    }, [currentDataProduct, form, mode]);
+
     return (
         <Form
             form={form}
@@ -284,18 +286,18 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 />
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema>
-                name={'business_area_id'}
-                label={t('Business Area')}
+                name={'domain_id'}
+                label={t('Domain')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the business area of the data product'),
+                        message: t('Please select the domain of the data product'),
                     },
                 ]}
             >
                 <Select
-                    loading={isFetchingBusinessAreas}
-                    options={businessAreaSelectOptions}
+                    loading={isFetchingDomains}
+                    options={domainSelectOptions}
                     filterOption={selectFilterOptionByLabelAndValue}
                     allowClear
                     showSearch

@@ -1,11 +1,13 @@
 import { Col, Flex, Form, Row, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import styles from './home.module.scss';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+
 import { Searchbar } from '@/components/form';
 import { DataProductsInbox } from '@/pages/home/components/data-products-inbox/data-products-inbox.tsx';
 import { DatasetsInbox } from '@/pages/home/components/datasets-inbox/datasets-inbox.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+
+import styles from './home.module.scss';
 
 const ROW_GUTTER = 96;
 const COL_SPAN = 12;

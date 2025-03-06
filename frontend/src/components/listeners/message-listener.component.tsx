@@ -1,6 +1,7 @@
+import { message } from 'antd';
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { message } from 'antd';
+
 import { selectMessage } from '@/store/features/feedback/feedback-slice.ts';
 
 const MessageListener: React.FC = () => {
@@ -15,7 +16,7 @@ const MessageListener: React.FC = () => {
                 onClose,
             });
         }
-    }, [content, duration, type, id]);
+    }, [content, duration, type, id, messageApi, onClose]);
 
     return <>{contextHolder}</>;
 };
