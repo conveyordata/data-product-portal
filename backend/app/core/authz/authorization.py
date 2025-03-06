@@ -27,6 +27,7 @@ class Authorization(metaclass=Singleton):
 
     @staticmethod
     async def _construct_enforcer(model: str) -> AsyncEnforcer:
+        """Initializes the casbin table in the DB and constructs the enforcer."""
         url = database.get_url(async_=True)
         adapter = sqlalchemy_adapter.Adapter(url, warning=False)
         await adapter.create_table()
@@ -72,43 +73,51 @@ class Authorization(metaclass=Singleton):
                 detail="You don't have permission to perform this action",
             )
 
-    async def sync_role(self, *, role_id: str, actions: Sequence[AuthorizationAction]):
+    async def sync_role(
+        self, *, role_id: str, actions: Sequence[AuthorizationAction]
+    ) -> None:
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.delete_permissions_for_user(role_id)
 
         policies = [(role_id, str(action)) for action in actions]
         await enforcer.add_policies(policies)
 
-    async def sync_everyone_role(self, *, actions: Sequence[AuthorizationAction]):
+    async def sync_everyone_role(
+        self, *, actions: Sequence[AuthorizationAction]
+    ) -> None:
         await self.sync_role(role_id="*", actions=actions)
 
-    async def remove_role(self, role_id: str):
+    async def remove_role(self, *, role_id: str) -> None:
         await self.sync_role(role_id=role_id, actions=())
 
     async def assign_resource_role(
         self, *, user_id: str, role_id: str, resource_id: str
-    ):
+    ) -> None:
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.add_named_grouping_policy("g", user_id, role_id, resource_id)
 
     async def revoke_resource_role(
         self, *, user_id: str, role_id: str, resource_id: str
-    ):
+    ) -> None:
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.remove_named_grouping_policy("g", user_id, role_id, resource_id)
 
-    async def assign_domain_role(self, *, user_id: str, role_id: str, domain_id: str):
+    async def assign_domain_role(
+        self, *, user_id: str, role_id: str, domain_id: str
+    ) -> None:
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.add_named_grouping_policy("g2", user_id, role_id, domain_id)
 
-    async def revoke_domain_role(self, *, user_id: str, role_id: str, domain_id: str):
+    async def revoke_domain_role(
+        self, *, user_id: str, role_id: str, domain_id: str
+    ) -> None:
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.remove_named_grouping_policy("g2", user_id, role_id, domain_id)
 
-    async def assign_admin_role(self, *, user_id: str):
+    async def assign_admin_role(self, *, user_id: str) -> None:
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.add_named_grouping_policy("g3", user_id, "*")
 
-    async def revoke_admin_role(self, *, user_id: str):
+    async def revoke_admin_role(self, *, user_id: str) -> None:
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.remove_named_grouping_policy("g3", user_id, "*")
