@@ -8,11 +8,11 @@ from app.data_product_memberships.enums import (
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
 )
-from app.shared.schema import ORMModel
+from app.notifications.schema_base import BaseNotificationConfiguration
 from app.users.schema import User
 
 
-class BaseDataProductMembership(ORMModel):
+class BaseDataProductMembership(BaseNotificationConfiguration):
     user_id: UUID
     role: DataProductUserRole
 

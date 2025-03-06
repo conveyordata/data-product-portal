@@ -13,6 +13,7 @@ from app.data_products_datasets.router import router as data_product_dataset
 from app.datasets.router import router as dataset
 from app.domains.router import router as domain
 from app.environments.router import router as environment
+from app.notifications.router import router as notification
 from app.platforms.router import router as platform
 from app.roles.router import router as role
 from app.tags.router import router as tag
@@ -39,3 +40,4 @@ router.include_router(platform)
 router.include_router(tag)
 router.include_router(user)
 router.include_router(role)
+router.include_router(notification)

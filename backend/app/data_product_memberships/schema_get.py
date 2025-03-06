@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import Field
@@ -9,6 +9,7 @@ from app.data_product_memberships.enums import (
     DataProductUserRole,
 )
 from app.data_products.schema import DataProduct
+from app.notifications.notification_types import NotificationTypes
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -26,6 +27,7 @@ class DataProductMembershipGet(ORMModel):
     approved_on: datetime | None
     denied_by: User | None
     denied_on: datetime | None
+    configuration_type: Literal[NotificationTypes.DataProductMembership]
 
 
 class DataProductMembershipsGet(DataProductMembershipGet):
