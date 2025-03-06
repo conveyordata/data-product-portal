@@ -1,7 +1,7 @@
 import { Button, Result } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { isRouteErrorResponse, useNavigate, useRouteError } from 'react-router-dom';
+import { isRouteErrorResponse, useNavigate, useRouteError } from 'react-router';
 
 import { Logout } from '@/pages/auth/logout/logout-page.tsx';
 import { ApplicationPaths } from '@/types/navigation.ts';
