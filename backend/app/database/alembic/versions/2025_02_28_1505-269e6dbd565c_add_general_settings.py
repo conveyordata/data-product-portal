@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import orm
 
-from app.general_settings.model import SETTINGS_ID, GeneralSettings
+from app.theme_settings.model import SETTINGS_ID, ThemeSettings
 
 # revision identifiers, used by Alembic.
 revision: str = "269e6dbd565c"
@@ -23,7 +23,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        "general_settings",
+        "theme_settings",
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("portal_name", sa.String),
     )
@@ -32,10 +32,10 @@ def upgrade() -> None:
     bind = op.get_bind()
     session = orm.Session(bind=bind)
 
-    settings = GeneralSettings(id=SETTINGS_ID, portal_name="Data Product Portal")
+    settings = ThemeSettings(id=SETTINGS_ID, portal_name="Data Product Portal")
     session.add(settings)
     session.commit()
 
 
 def downgrade() -> None:
-    op.drop_table("general_settings")
+    op.drop_table("theme_settings")

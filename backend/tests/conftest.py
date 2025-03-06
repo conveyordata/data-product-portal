@@ -8,8 +8,8 @@ from app.core.auth.device_flows.service import verify_auth_header
 from app.data_product_memberships.model import DataProductUserRole
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
-from app.general_settings.model import SETTINGS_ID, GeneralSettings
 from app.main import app
+from app.theme_settings.model import SETTINGS_ID, ThemeSettings
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
@@ -107,7 +107,7 @@ def clear_db(session: scoped_session[Session]) -> None:
         session.execute(table.delete())
 
     # Reintroduce general settings
-    settings = GeneralSettings(id=SETTINGS_ID, portal_name="Data Product Portal")
+    settings = ThemeSettings(id=SETTINGS_ID, portal_name="Data Product Portal")
     session.add(settings)
 
     session.commit()

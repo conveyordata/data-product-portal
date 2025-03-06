@@ -1,9 +1,9 @@
-import { GeneralSettingsForm } from '../components/general-form/general-form.component';
+import { ThemeSettingsForm } from '../components/theme-form/theme-form.component';
 
 export function GeneralTab() {
     return (
         <div>
-            <GeneralSettingsForm />
+            <ThemeSettingsForm />
         </div>
     );
 }

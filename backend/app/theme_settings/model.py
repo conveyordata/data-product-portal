@@ -6,11 +6,11 @@ from app.database.database import Base
 SETTINGS_ID = 1
 
 
-class GeneralSettings(Base):
-    __tablename__ = "general_settings"
+class ThemeSettings(Base):
+    __tablename__ = "theme_settings"
     id = Column(Integer, primary_key=True, default=SETTINGS_ID)
     portal_name = Column(String)
 
     @staticmethod
     def getSettings(db: Session):
-        return db.get(GeneralSettings, SETTINGS_ID)
+        return db.get(ThemeSettings, SETTINGS_ID)

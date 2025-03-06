@@ -5,18 +5,18 @@ import { useTranslation } from 'react-i18next';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
-    useGetGeneralSettingsQuery,
-    useUpdateGeneralSettingsMutation,
-} from '@/store/features/general-settings/general-settings-api-slice';
-import { GeneralSettings } from '@/types/general-settings';
+    useGetThemeSettingsQuery,
+    useUpdateThemeSettingsMutation,
+} from '@/store/features/theme-settings/theme-settings-api-slice';
+import { ThemeSettings } from '@/types/theme-settings';
 
-import styles from './general-form.module.scss';
+import styles from './theme-form.module.scss';
 
-export function GeneralSettingsForm() {
+export function ThemeSettingsForm() {
     const { t } = useTranslation();
-    const { data, isFetching } = useGetGeneralSettingsQuery();
-    const [updateGeneralSettings, { isLoading: isUpdating }] = useUpdateGeneralSettingsMutation();
-    const [form] = Form.useForm<GeneralSettings>();
+    const { data, isFetching } = useGetThemeSettingsQuery();
+    const [updateThemeSettings, { isLoading: isUpdating }] = useUpdateThemeSettingsMutation();
+    const [form] = Form.useForm<ThemeSettings>();
     const [canEditForm, setCanEditForm] = useState(false);
 
     const isLoading = isFetching || isUpdating;
@@ -27,9 +27,9 @@ export function GeneralSettingsForm() {
         }
     }, [isFetching, data, form]);
 
-    const onSubmit: FormProps<GeneralSettings>['onFinish'] = async (values) => {
+    const onSubmit: FormProps<ThemeSettings>['onFinish'] = async (values) => {
         try {
-            updateGeneralSettings(values);
+            updateThemeSettings(values);
             setCanEditForm(false);
             dispatchMessage({ content: t('Settings updated successfully'), type: 'success' });
         } catch (_) {
@@ -56,14 +56,14 @@ export function GeneralSettingsForm() {
         setCanEditForm(true);
     };
 
-    const onSubmitFailed: FormProps<GeneralSettings>['onFinishFailed'] = () => {
+    const onSubmitFailed: FormProps<ThemeSettings>['onFinishFailed'] = () => {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
     return (
         <Flex vertical className={styles.container}>
             <Flex className={styles.globalSettingsHeader}>
-                <Typography.Title level={3}>{t('Customisation')}</Typography.Title>
+                <Typography.Title level={3}>{t('Theme Customisation')}</Typography.Title>
                 <Space>
                     {canEditForm ? (
                         <>

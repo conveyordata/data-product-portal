@@ -2,7 +2,7 @@ import { Flex, Typography } from 'antd';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 
-import { useGetGeneralSettingsQuery } from '@/store/features/general-settings/general-settings-api-slice';
+import { useGetThemeSettingsQuery } from '@/store/features/theme-settings/theme-settings-api-slice';
 
 import styles from './sidebar-logo.module.scss';
 
@@ -12,7 +12,7 @@ type Props = {
 
 export function SidebarLogo({ variant = 'light' }: Props) {
     const { t } = useTranslation();
-    const { data: settings } = useGetGeneralSettingsQuery();
+    const { data: settings } = useGetThemeSettingsQuery();
     return (
         <Flex vertical className={styles.logoWrapper}>
             <Typography.Text className={clsx(styles.logoText, styles[variant])}>
