@@ -7,6 +7,8 @@ from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import DataProductLifecycle
+from app.data_product_memberships.enums import DataProductMembershipStatus
+from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import DatasetAccessType
@@ -73,3 +75,25 @@ class Dataset(Base, BaseORM):
     lifecycle: Mapped["DataProductLifecycle"] = relationship(back_populates="datasets")
     domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
     domain: Mapped["Domain"] = relationship(back_populates="datasets")
+
+    def isVisibleToUser(self, user: "User"):
+        if (
+            self.access_type != DatasetAccessType.PRIVATE
+            or user.is_admin
+            or user in self.owners
+        ):
+            return True
+
+        consuming_data_products = {
+            link.data_product
+            for link in self.data_product_links
+            if link.status == DataProductDatasetLinkStatus.APPROVED
+        }
+
+        user_data_products = {
+            membership.data_product
+            for membership in user.data_product_memberships
+            if membership.status == DataProductMembershipStatus.APPROVED
+        }
+
+        return bool(consuming_data_products & user_data_products)

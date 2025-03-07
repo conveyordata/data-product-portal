@@ -2,7 +2,9 @@ import uuid
 
 import pytest
 from tests.factories import DatasetFactory, DomainFactory, UserFactory
+from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.data_product_setting import DataProductSettingFactory
+from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
 
 from app.datasets.enums import DatasetAccessType
 
@@ -244,6 +246,62 @@ class TestDatasetsRouter:
         assert response.status_code == 200
         response = client.get(f"{ENDPOINT}/{ds.id}")
         assert response.json()["data_product_settings"][0]["value"] == "false"
+
+    def test_get_private_dataset_not_allowed(self, client):
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        response = self.get_dataset_by_id(client, ds.id)
+        assert response.status_code == 403
+
+    def test_get_private_dataset_by_owner(self, client):
+        ds_owner = UserFactory(external_id="sub")
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[ds_owner])
+        response = self.get_dataset_by_id(client, ds.id)
+        assert response.status_code == 200
+
+    @pytest.mark.usefixtures("admin")
+    def test_get_private_dataset_by_admin(self, client):
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        response = self.get_dataset_by_id(client, ds.id)
+        assert response.status_code == 200
+
+    def test_get_private_dataset_by_member_of_consuming_data_product(self, client):
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        dp = DataProductMembershipFactory(user=user).data_product
+        DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+
+        response = self.get_dataset_by_id(client, ds.id)
+        assert response.status_code == 200
+
+    def test_get_private_datasets_not_allowed(self, client):
+        DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200
+        assert len(response.json()) == 0
+
+    def test_get_private_datasets_by_owner(self, client):
+        ds_owner = UserFactory(external_id="sub")
+        DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[ds_owner])
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+
+    @pytest.mark.usefixtures("admin")
+    def test_get_private_datasets_by_admin(self, client):
+        DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+
+    def test_get_private_datasets_by_member_of_consuming_data_product(self, client):
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        dp = DataProductMembershipFactory(user=user).data_product
+        DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200
+        assert len(response.json()) == 1
 
     @staticmethod
     def create_default_dataset(client, default_dataset_payload):
