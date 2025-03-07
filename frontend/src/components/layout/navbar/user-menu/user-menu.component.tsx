@@ -10,6 +10,7 @@ import { Notifications } from '@/components/notifications/notifications';
 import { AppConfig } from '@/config/app-config.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 
+import { DownloadCLIButton } from '../cli-download/cli-download-button.component';
 import styles from './user-menu.module.scss';
 
 const cognitoLogoutParams = AppConfig.getOidcCognitoLogoutParams();
@@ -46,6 +47,9 @@ export function UserMenu() {
         <Flex className={styles.userMenuContainer}>
             <Flex>
                 <Notifications />
+            </Flex>
+            <Flex>
+                <DownloadCLIButton />
             </Flex>
             <Flex className={styles.avatarWrapper}>
                 <Badge

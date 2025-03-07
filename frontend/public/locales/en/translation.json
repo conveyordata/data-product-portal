@@ -506,5 +506,6 @@
     "Lifecycle updated successfully": "Lifecycle updated successful",
     "Failed to update lifecycle": "Failed to update lifecycle",
     "Value must be a number": "Value must be a number",
-    "Settings updated successfully": "Settings updated successfully"
+    "Settings updated successfully": "Settings updated successfully",
+    "Download CLI executable": "Download CLI executable"
 }
