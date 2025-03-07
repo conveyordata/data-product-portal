@@ -2,21 +2,27 @@ from typing import Annotated, Union
 
 from pydantic import Field
 
-from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
-from app.data_product_memberships.schema_get import DataProductMembershipGet
-from app.data_products_datasets.schema import DataProductDatasetAssociation
+from app.notifications.data_output_dataset_association.schema import (
+    DataOutputDatasetNotification,
+)
+from app.notifications.data_product_dataset_association.schema import (
+    DataProductDatasetNotification,
+)
+from app.notifications.data_product_membership.schema import (
+    DataProductMembershipNotification,
+)
 from app.notifications.notification_types import NotificationTypes
 
 Notifications = Union[
-    DataProductMembershipGet,
-    DataProductDatasetAssociation,
-    DataOutputDatasetAssociation,
+    DataProductMembershipNotification,
+    DataProductDatasetNotification,
+    DataOutputDatasetNotification,
 ]
 
 NotificationMap = {
-    NotificationTypes.DataProductMembership: DataProductMembershipGet,
-    NotificationTypes.DataProductDataset: DataProductDatasetAssociation,
-    NotificationTypes.DataOutputDataset: DataOutputDatasetAssociation,
+    NotificationTypes.DataProductMembership: DataProductMembershipNotification,
+    NotificationTypes.DataProductDataset: DataProductDatasetNotification,
+    NotificationTypes.DataOutputDataset: DataOutputDatasetNotification,
 }
 
 NotificationConfiguration = Annotated[
