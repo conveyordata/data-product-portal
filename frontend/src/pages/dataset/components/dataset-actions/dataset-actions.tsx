@@ -22,17 +22,25 @@ const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[]
         value: DataPlatforms.Collibra,
         icon: collibraLogo,
     },
-    { label: t('Datahub'), value: DataPlatforms.Datahub, icon: datahubLogo, disabled: true },
+    { label: t('Datahub'), value: DataPlatforms.Datahub, icon: datahubLogo, disabled: false },
 ];
 
 export function DatasetActions({ datasetId, isCurrentDatasetOwner }: Props) {
     const { t } = useTranslation();
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
 
-    async function handleAccessToData(environment: string, dataPlatform: string) {
+    async function handleTileClick(dataPlatform: string) {
         // Todo - implement endpoints to allow for dataset data access
         // All tiles are currently disabled
-        console.log(dataPlatform, environment, datasetId);
+        console.log(dataPlatform, datasetId);
+        switch (dataPlatform) {
+            case DataPlatforms.Datahub:
+                const datahubUrl = "https://datahub.neo-platform-services.dna.luminus.be/";
+                window.open(datahubUrl, '_blank');
+                break;
+            default:
+                break;
+        }
     }
 
     return (
@@ -40,8 +48,7 @@ export function DatasetActions({ datasetId, isCurrentDatasetOwner }: Props) {
             <DataAccessTileGrid
                 canAccessData={isCurrentDatasetOwner}
                 dataPlatforms={dataPlatforms}
-                onDataPlatformClick={handleAccessToData}
-                isDisabled
+                onTileClick={handleTileClick}
             />
         </Flex>
     );
