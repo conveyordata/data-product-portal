@@ -19,6 +19,7 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { DatasetAccess, DatasetCreateFormSchema, DatasetCreateRequest, DatasetUpdateRequest } from '@/types/dataset';
+import { datasetAccessList } from '@/types/dataset/dataset.contract';
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { getDatasetOwnerIds, getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
@@ -34,16 +35,11 @@ type Props = {
 
 const { TextArea } = Input;
 
-const getAccessTypeOptions = (t: TFunction) => [
-    {
-        value: DatasetAccess.Public,
-        label: getDatasetAccessTypeLabel(t, DatasetAccess.Public),
-    },
-    {
-        value: DatasetAccess.Restricted,
-        label: getDatasetAccessTypeLabel(t, DatasetAccess.Restricted),
-    },
-];
+const getAccessTypeOptions = (t: TFunction) =>
+    datasetAccessList.map((accessType) => ({
+        value: accessType,
+        label: getDatasetAccessTypeLabel(t, accessType),
+    }));
 
 export function DatasetForm({ mode, datasetId }: Props) {
     const { t } = useTranslation();
