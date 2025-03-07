@@ -1,7 +1,7 @@
 import { Flex, Typography } from 'antd';
 import { Input } from 'antd/lib';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { useGetEnvConfigByIdQuery } from '@/store/features/environments/environments-api-slice';

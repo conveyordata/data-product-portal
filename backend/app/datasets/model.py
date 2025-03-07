@@ -58,7 +58,9 @@ class Dataset(Base, BaseORM):
         order_by="DataOutputDatasetAssociation.status.desc()",
         cascade="all, delete-orphan",
     )
-    tags: Mapped[list[Tag]] = relationship(secondary=tag_dataset_table)
+    tags: Mapped[list[Tag]] = relationship(
+        secondary=tag_dataset_table, back_populates="datasets"
+    )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
         back_populates="dataset",

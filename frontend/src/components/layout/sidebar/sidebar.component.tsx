@@ -3,7 +3,7 @@ import { Flex, Layout, Menu, type MenuProps, Space } from 'antd';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { Link, useMatches } from 'react-router-dom';
+import { Link, useMatches } from 'react-router';
 
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
 import { DataProductOutlined, DatasetOutlined, ProductLogo } from '@/components/icons';
@@ -46,16 +46,9 @@ export const Sidebar = () => {
         navigationMenuItems = [
             ...navigationMenuItems,
             {
-                label: t('Configure'),
+                label: <Link to={ApplicationPaths.Settings}>{t('Settings')}</Link>,
                 icon: <SettingOutlined />,
-                key: 'Configure',
-                children: [
-                    {
-                        key: ApplicationPaths.AdditionalSettings,
-                        label: <Link to={ApplicationPaths.AdditionalSettings}>{t('Additional Settings')}</Link>,
-                        icon: <SettingOutlined />,
-                    },
-                ],
+                key: 'Settings',
             },
         ];
     }

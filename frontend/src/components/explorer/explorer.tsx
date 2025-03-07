@@ -3,7 +3,7 @@ import 'reactflow/dist/base.css';
 import { Button, Flex, theme } from 'antd';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Edge, Node, Position, XYPosition } from 'reactflow';
 
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';

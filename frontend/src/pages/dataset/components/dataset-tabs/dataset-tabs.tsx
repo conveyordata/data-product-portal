@@ -8,7 +8,7 @@ import {
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import { ReactFlowProvider } from 'reactflow';
 
 import { Explorer } from '@/components/explorer/explorer';

@@ -1,7 +1,7 @@
 import { Button, Form, type FormProps, Input, Select, Space } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 
 import { buildUrl } from '@/api/api-urls';
 import { ENV_PLATFORM_SERVICE_CONFIG_MAPPING } from '@/constants/environment-config.constants.ts';

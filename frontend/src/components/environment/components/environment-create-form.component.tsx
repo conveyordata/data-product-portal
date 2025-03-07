@@ -1,6 +1,6 @@
 import { Button, Form, FormProps, Input, Space, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
 import { useCreateEnvironmentMutation } from '@/store/features/environments/environments-api-slice';
