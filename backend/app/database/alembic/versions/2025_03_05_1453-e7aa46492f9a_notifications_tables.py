@@ -13,6 +13,7 @@ from alembic import op
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.notifications.notification_types import NotificationTypes
+from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
 revision: str = "e7aa46492f9a"
@@ -42,6 +43,9 @@ def upgrade() -> None:
             UUID(as_uuid=True),
             sa.ForeignKey("data_outputs_datasets.id"),
         ),
+        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
+        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
+        sa.Column("deleted_at", sa.DateTime),
     )
 
     # Create the "notifications" table
@@ -54,6 +58,9 @@ def upgrade() -> None:
             UUID(as_uuid=True),
             sa.ForeignKey("notification_configurations.id"),
         ),
+        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
+        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
+        sa.Column("deleted_at", sa.DateTime),
     )
 
     # Create the "notification_interactions" table
@@ -66,6 +73,9 @@ def upgrade() -> None:
         sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id")),
         sa.Column("last_seen", sa.DateTime, nullable=True),
         sa.Column("last_interaction", sa.DateTime, nullable=True),
+        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
+        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
+        sa.Column("deleted_at", sa.DateTime),
     )
 
 
