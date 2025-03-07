@@ -27,6 +27,21 @@ def upgrade() -> None:
         "notification_configurations",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("configuration_type", sa.Enum(NotificationTypes)),
+        sa.Column(
+            "data_product_membership_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("data_product_memberships.id"),
+        ),
+        sa.Column(
+            "data_product_dataset_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("data_products_datasets.id"),
+        ),
+        sa.Column(
+            "data_output_dataset_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("data_outputs_datasets.id"),
+        ),
     )
 
     # Create the "notifications" table
@@ -53,40 +68,8 @@ def upgrade() -> None:
         sa.Column("last_interaction", sa.DateTime, nullable=True),
     )
 
-    op.add_column(
-        "data_products_datasets",
-        sa.Column(
-            "configuration_type",
-            sa.String,
-            nullable=False,
-            server_default="DataProductDataset",
-        ),
-    )
-    op.add_column(
-        "data_outputs_datasets",
-        sa.Column(
-            "configuration_type",
-            sa.String,
-            nullable=False,
-            server_default="DataOutputDataset",
-        ),
-    )
-    op.add_column(
-        "data_product_memberships",
-        sa.Column(
-            "configuration_type",
-            sa.String,
-            nullable=False,
-            server_default="DataProductMembership",
-        ),
-    )
-
 
 def downgrade() -> None:
-    op.drop_column("data_products_datasets", "configuration_type")
-    op.drop_column("data_outputs_datasets", "configuration_type")
-    op.drop_column("data_product_memberships", "configuration_type")
-
     op.drop_table("notification_interactions")
     op.drop_table("notifications")
     op.drop_table("notification_configurations")
