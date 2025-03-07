@@ -3,7 +3,7 @@ import { List, Space, Typography } from 'antd';
 import type { PaginationConfig } from 'antd/es/pagination';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
