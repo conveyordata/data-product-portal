@@ -1,3 +1,4 @@
+import { EyeInvisibleOutlined } from '@ant-design/icons';
 import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 
@@ -20,6 +21,25 @@ const iconColumnWidth = 30;
 type Props = {
     t: TFunction;
     datasets: DatasetsGetContract;
+};
+
+const getAccessTypeIcon = (accessType: DatasetAccess) => {
+    switch (accessType) {
+        case DatasetAccess.Restricted:
+            return <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />;
+        case DatasetAccess.Private:
+            return <EyeInvisibleOutlined />;
+        default:
+            return null;
+    }
+};
+
+const getAccessTypePopover = (t: TFunction, accessType: DatasetAccess) => {
+    return accessType !== DatasetAccess.Public ? (
+        <Popover content={t('{{Type}} access', { Type: getDatasetAccessTypeLabel(t, accessType) })} placement={'left'}>
+            {getAccessTypeIcon(accessType)}
+        </Popover>
+    ) : null;
 };
 
 export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType<DatasetsGetContract[0]> => {
@@ -46,14 +66,7 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
             title: undefined,
             width: iconColumnWidth,
             dataIndex: 'access_type',
-            render: (accessType: string) => {
-                const isRestricted = accessType === 'restricted';
-                return isRestricted ? (
-                    <Popover content={t('Restricted access')} placement={'left'}>
-                        <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
-                    </Popover>
-                ) : null;
-            },
+            render: (accessType: DatasetAccess) => getAccessTypePopover(t, accessType),
         },
         {
             title: t('Name'),
@@ -112,7 +125,6 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
             title: t('Produced by Data Product'),
             dataIndex: 'data_output_links',
             render: (data_output_links: DataOutputLink[]) => {
-                console.log(data_output_links);
                 if (data_output_links !== undefined) {
                     return (
                         <TableCellItem
@@ -128,8 +140,6 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
                 }
             },
             width: '25%',
-            // ...new FilterSettings(datasets, ds => ds.domain.name),
-            // sorter: sorter.stringSorter(ds => ds.data_output_links.data_output.owner.name),
         },
         {
             title: t('Shared With'),
