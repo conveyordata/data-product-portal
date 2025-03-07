@@ -5,8 +5,9 @@ from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, relationship
 
+from app.notification_interactions.model import NotificationInteraction
+
 if TYPE_CHECKING:
-    from app.notification_interactions.model import NotificationInteraction
     from app.notifications.base_model import BaseNotificationConfiguration
 
 from app.database.database import Base

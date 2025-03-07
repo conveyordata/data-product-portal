@@ -7,6 +7,7 @@ from app.database.database import Base
 
 if TYPE_CHECKING:
     from app.users.model import User
+    from app.notifications.model import Notification
 
 import uuid
 
@@ -18,6 +19,9 @@ class NotificationInteraction(Base, BaseORM):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     notification_id: Mapped[uuid.UUID] = mapped_column(
         "notification_id", ForeignKey("notifications.id")
+    )
+    notification: Mapped["Notification"] = relationship(
+        "Notification", back_populates="notification_interactions"
     )
     user_id: Mapped[uuid.UUID] = mapped_column("user_id", ForeignKey("users.id"))
     user: Mapped["User"] = relationship(
