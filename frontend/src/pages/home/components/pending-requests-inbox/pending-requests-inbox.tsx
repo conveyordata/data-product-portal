@@ -33,11 +33,11 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                 <Typography.Text>
                     {t('Made a request for read access to the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        {t('{{name}}', { name: action.dataset.name })}
+                        {action.dataset.name}
                     </Link>{' '}
                     {t('dataset, on behalf of the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {t('{{name}}', { name: action.data_product.name })}
+                        {action.data_product.name}
                     </Link>{' '}
                     {t('data product.')}
                 </Typography.Text>
@@ -53,11 +53,11 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                 <Typography.Text>
                     {t('Made a request for a link to the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        {t('{{name}}', { name: action.dataset.name })}
+                        {action.dataset.name}
                     </Link>{' '}
                     {t('dataset, on behalf of the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {t('{{name}}', { name: action.data_output.name })}
+                        {action.data_output.name}
                     </Link>{' '}
                     {t('data output.')}
                 </Typography.Text>
@@ -73,7 +73,7 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
                 <Typography.Text>
                     {t('Made a request to join the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {t('{{name}}', { name: action.data_product.name })}
+                        {action.data_product.name}
                     </Link>{' '}
                     {t('data product team.')}
                 </Typography.Text>
