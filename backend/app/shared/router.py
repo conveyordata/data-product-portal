@@ -17,6 +17,7 @@ from app.notification_interactions.router import router as notification
 from app.platforms.router import router as platform
 from app.roles.router import router as role
 from app.tags.router import router as tag
+from app.theme_settings.router import router as theme_settings
 from app.users.router import router as user
 
 router = (
@@ -41,3 +42,4 @@ router.include_router(tag)
 router.include_router(user)
 router.include_router(role)
 router.include_router(notification)
+router.include_router(theme_settings)

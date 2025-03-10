@@ -3,7 +3,7 @@ import { Badge, Button, Dropdown, Flex, type MenuProps, Space, theme, Typography
 import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, type NavigateFunction, useNavigate } from 'react-router-dom';
+import { Link, type NavigateFunction, useNavigate } from 'react-router';
 
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
@@ -43,11 +43,11 @@ export function Notifications() {
                     <Typography.Text>
                         {t('{{name}}, on behalf of data product', { name: action.requested_by?.first_name })}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {t('{{name}}', { name: action.data_product.name })}
+                            {action.data_product.name}
                         </Link>{' '}
                         {t('requests read access to dataset')}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                            {t('{{name}}', { name: action.dataset.name })}
+                            {action.dataset.name}
                         </Link>
                     </Typography.Text>
                 );
@@ -60,11 +60,11 @@ export function Notifications() {
                     <Typography.Text>
                         {t('{{name}}, on behalf of data output', { name: action.requested_by?.first_name })}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {t('{{name}}', { name: action.data_output.name })}
+                            {action.data_output.name}
                         </Link>{' '}
                         {t('requests a link to dataset')}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                            {t('{{name}}', { name: action.dataset.name })}
+                            {action.dataset.name}
                         </Link>
                     </Typography.Text>
                 );
@@ -77,7 +77,7 @@ export function Notifications() {
                     <Typography.Text>
                         {t('{{name}} would like to join the data product', { name: action.user?.first_name })}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {t('{{name}}', { name: action.data_product.name })}
+                            {action.data_product.name}
                         </Link>{' '}
                         {t('team')}{' '}
                     </Typography.Text>

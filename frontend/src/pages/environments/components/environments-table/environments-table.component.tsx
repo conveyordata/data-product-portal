@@ -1,7 +1,7 @@
 import { Button, Flex, Form, Input, Space, Table, TableProps, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useGetAllEnvironmentsQuery } from '@/store/features/environments/environments-api-slice.tsx';

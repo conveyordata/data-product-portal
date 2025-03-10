@@ -2,7 +2,7 @@ import { Button, Flex, Form, Input, RadioChangeEvent, Space, Table, TableProps, 
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 
 import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter.tsx';
 import { useQuickFilter } from '@/hooks/use-quick-filter.tsx';

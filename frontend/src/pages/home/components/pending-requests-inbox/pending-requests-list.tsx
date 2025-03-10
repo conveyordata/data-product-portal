@@ -3,7 +3,7 @@ import { List, Space, Typography } from 'antd';
 import type { PaginationConfig } from 'antd/es/pagination';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
@@ -53,12 +53,10 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                         <Space size={0} className={styles.listItemTopInfo}>
                             <Space align="center">
                                 <UserOutlined />
-                                <Typography.Text>{t('{{name}}', { name: item.author })}</Typography.Text>
+                                <Typography.Text>{item.author}</Typography.Text>
                             </Space>
                             <Space>
-                                <Typography.Text type="secondary">
-                                    {t('{{date}}', { date: formattedDate })}
-                                </Typography.Text>
+                                <Typography.Text type="secondary">{formattedDate}</Typography.Text>
                             </Space>
                         </Space>
 
