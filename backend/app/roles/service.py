@@ -1,11 +1,12 @@
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.database import ensure_exists
 from app.roles.model import Role as RoleModel
-from app.roles.schema import CreateRole, Role, UpdateRole
+from app.roles.schema import CreateRole, Prototype, Role, UpdateRole
 
 
 class RoleService:
@@ -44,6 +45,12 @@ class RoleService:
 
     def delete_role(self, id_: UUID) -> Role:
         role = self.get_role(id_)
+        if role.prototype != Prototype.CUSTOM:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This role cannot be deleted",
+            )
+
         self.db.delete(role)
         self.db.commit()
         return role

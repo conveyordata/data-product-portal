@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from typing import Optional
 from uuid import UUID
 
@@ -13,6 +13,12 @@ class Scope(StrEnum):
     GLOBAL = "global"
 
 
+class Prototype(IntEnum):
+    CUSTOM = 0
+    EVERYONE = 1
+    OWNER = 2
+
+
 class CreateRole(ORMModel):
     name: str
     scope: Scope
@@ -20,13 +26,13 @@ class CreateRole(ORMModel):
     permissions: list[AuthorizationAction]
 
 
-class Role(CreateRole):
-    id: UUID
-
-
 class UpdateRole(ORMModel):
     id: UUID
     name: Optional[str] = None
-    scope: Optional[Scope] = None
     description: Optional[str] = None
     permissions: Optional[list[AuthorizationAction]] = None
+
+
+class Role(CreateRole):
+    id: UUID
+    prototype: Prototype

@@ -27,12 +27,14 @@ function filterUsers(users: DataProductUserMembership[], searchTerm: string) {
     if (!users) return [];
 
     return (
-        users.filter(
-            (membership) =>
-                membership?.user?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                membership?.user?.first_name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                membership?.user?.last_name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
-        ) ?? []
+        users.filter((membership) => {
+            const searchString = searchTerm.toLowerCase();
+            return (
+                membership?.user?.email?.toLowerCase()?.includes(searchString) ||
+                membership?.user?.first_name?.toLowerCase()?.includes(searchString) ||
+                membership?.user?.last_name?.toLowerCase()?.includes(searchString)
+            );
+        }) ?? []
     );
 }
 
