@@ -281,8 +281,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         ?.filter((platform) => {
                             return platformConfig?.some(
                                 (configObj) =>
-                                    configObj.platform.name == platform.label ||
-                                    configObj.service.name == platform.label,
+                                    configObj.platform.name === platform.label ||
+                                    configObj.service.name === platform.label,
                             );
                         })
                         .map((dataPlatform) => (
