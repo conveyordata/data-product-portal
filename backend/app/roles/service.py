@@ -42,10 +42,11 @@ class RoleService:
         self.db.commit()
         return db_role
 
-    def delete_role(self, id_: UUID) -> None:
+    def delete_role(self, id_: UUID) -> Role:
         role = self.get_role(id_)
         self.db.delete(role)
         self.db.commit()
+        return role
 
     @staticmethod
     def _canonical_permissions(permissions: list[int]) -> list[int]:

@@ -73,51 +73,102 @@ class Authorization(metaclass=Singleton):
                 detail="You don't have permission to perform this action",
             )
 
-    async def sync_role(
+    async def sync_role_permissions(
         self, *, role_id: str, actions: Sequence[AuthorizationAction]
     ) -> None:
+        """Creates or updates the permissions for the chosen role."""
         enforcer: AsyncEnforcer = self.enforcer
-        await enforcer.delete_permissions_for_user(role_id)
+        await enforcer.remove_filtered_policy(0, role_id)
 
         policies = [(role_id, str(action)) for action in actions]
         await enforcer.add_policies(policies)
 
-    async def sync_everyone_role(
+    async def sync_everyone_role_permissions(
         self, *, actions: Sequence[AuthorizationAction]
     ) -> None:
-        await self.sync_role(role_id="*", actions=actions)
+        """Updates the permissions belonging to the 'everyone' role."""
+        await self.sync_role_permissions(role_id="*", actions=actions)
 
-    async def remove_role(self, *, role_id: str) -> None:
-        await self.sync_role(role_id=role_id, actions=())
+    async def remove_role_permissions(self, *, role_id: str) -> None:
+        """Removes all the permissions for the chosen role."""
+        await self.sync_role_permissions(role_id=role_id, actions=())
 
     async def assign_resource_role(
         self, *, user_id: str, role_id: str, resource_id: str
     ) -> None:
+        """Creates an entry in the casbin table,
+        assigning the user a role for the chosen resource."""
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.add_named_grouping_policy("g", user_id, role_id, resource_id)
 
     async def revoke_resource_role(
         self, *, user_id: str, role_id: str, resource_id: str
     ) -> None:
+        """Deletes the entry in the casbin table,
+        assigning the user the role for the chosen resource."""
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.remove_named_grouping_policy("g", user_id, role_id, resource_id)
 
     async def assign_domain_role(
         self, *, user_id: str, role_id: str, domain_id: str
     ) -> None:
+        """Creates an entry in the casbin table,
+        assigning the user a role for the chosen domain."""
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.add_named_grouping_policy("g2", user_id, role_id, domain_id)
 
     async def revoke_domain_role(
         self, *, user_id: str, role_id: str, domain_id: str
     ) -> None:
+        """Deletes the entry in the casbin table,
+        assigning the user the role for the chosen domain."""
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.remove_named_grouping_policy("g2", user_id, role_id, domain_id)
 
     async def assign_admin_role(self, *, user_id: str) -> None:
+        """Creates an entry in the casbin table, assigning the user the admin role."""
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.add_named_grouping_policy("g3", user_id, "*")
 
     async def revoke_admin_role(self, *, user_id: str) -> None:
+        """Deletes the entry in the casbin table, assigning the user the admin role."""
         enforcer: AsyncEnforcer = self.enforcer
         await enforcer.remove_named_grouping_policy("g3", user_id, "*")
+
+    async def clear_assignments_for_user(self, *, user_id: str) -> None:
+        """Removes all role assignments for a user inside the casbin table.
+        Should be called when a user is removed.
+        """
+        enforcer: AsyncEnforcer = self.enforcer
+
+        await enforcer.remove_filtered_named_grouping_policy("g", 0, user_id)
+        await enforcer.remove_filtered_named_grouping_policy("g2", 0, user_id)
+        await enforcer.remove_filtered_named_grouping_policy("g3", 0, user_id)
+
+    async def clear_assignments_for_resource_role(self, *, role_id: str) -> None:
+        """Removes all assignments of a resource role inside the casbin table.
+        Should be called when a resource role is removed.
+        """
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.remove_filtered_named_grouping_policy("g", 1, role_id)
+
+    async def clear_assignments_for_domain_role(self, *, role_id: str) -> None:
+        """Removes all assignments of a domain role inside the casbin table.
+        Should be called when a domain role is removed.
+        """
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.remove_filtered_named_grouping_policy("g2", 1, role_id)
+
+    async def clear_assignments_for_resource(self, *, resource_id: str) -> None:
+        """Removes all assignments of a resource role inside the casbin table.
+        Should be called when a resource role is removed.
+        """
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.remove_filtered_named_grouping_policy("g", 2, resource_id)
+
+    async def clear_assignments_for_domain(self, *, domain_id: str) -> None:
+        """Removes all assignments of a resource role inside the casbin table.
+        Should be called when a domain role is removed.
+        """
+        enforcer: AsyncEnforcer = self.enforcer
+        await enforcer.remove_filtered_named_grouping_policy("g2", 2, domain_id)
