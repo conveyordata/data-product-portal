@@ -1,9 +1,7 @@
-import { EyeInvisibleOutlined } from '@ant-design/icons';
 import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 
-import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { DatasetAccessIcon } from '@/components/datasets/dataset-access-icon/dataset-access-icon';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
@@ -21,25 +19,6 @@ const iconColumnWidth = 30;
 type Props = {
     t: TFunction;
     datasets: DatasetsGetContract;
-};
-
-const getAccessTypeIcon = (accessType: DatasetAccess) => {
-    switch (accessType) {
-        case DatasetAccess.Restricted:
-            return <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />;
-        case DatasetAccess.Private:
-            return <EyeInvisibleOutlined />;
-        default:
-            return null;
-    }
-};
-
-const getAccessTypePopover = (t: TFunction, accessType: DatasetAccess) => {
-    return accessType !== DatasetAccess.Public ? (
-        <Popover content={t('{{Type}} access', { Type: getDatasetAccessTypeLabel(t, accessType) })} placement={'left'}>
-            {getAccessTypeIcon(accessType)}
-        </Popover>
-    ) : null;
 };
 
 export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType<DatasetsGetContract[0]> => {
@@ -66,7 +45,7 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
             title: undefined,
             width: iconColumnWidth,
             dataIndex: 'access_type',
-            render: (accessType: DatasetAccess) => getAccessTypePopover(t, accessType),
+            render: (accessType: DatasetAccess) => <DatasetAccessIcon accessType={accessType} hasPopover />,
         },
         {
             title: t('Name'),
