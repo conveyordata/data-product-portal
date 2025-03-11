@@ -1,12 +1,14 @@
+from typing import Optional
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.authz.actions import AuthorizationAction
 from app.database.database import ensure_exists
 from app.roles.model import Role as RoleModel
-from app.roles.schema import CreateRole, Prototype, Role, UpdateRole
+from app.roles.schema import CreateRole, Prototype, Role, Scope, UpdateRole
 
 
 class RoleService:
@@ -16,7 +18,7 @@ class RoleService:
     def get_role(self, role_id: UUID) -> RoleModel:
         return ensure_exists(role_id, self.db, RoleModel)
 
-    def get_roles(self, scope: str) -> list[Role]:
+    def get_roles(self, scope: Scope) -> list[Role]:
         result = self.db.execute(
             select(RoleModel)
             .where(RoleModel.scope == scope)
@@ -63,3 +65,79 @@ class RoleService:
         result = list(set(permissions))
         result.sort()
         return result
+
+    def initialize_prototype_roles(self) -> None:
+        if self._find_prototype(Scope.GLOBAL, Prototype.EVERYONE) is None:
+            self.create_role(
+                CreateRole(
+                    name="everyone",
+                    scope=Scope.GLOBAL,
+                    description="This is the role that is used as fallback for users that don't have another role",  # noqa: E501
+                    permissions=[
+                        AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT,
+                        AuthorizationAction.GLOBAL__CREATE_DATASET,
+                        AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
+                        AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS,
+                    ],
+                ),
+                prototype=Prototype.EVERYONE,
+            )
+
+        if self._find_prototype(Scope.DATASET, Prototype.OWNER) is None:
+            self.create_role(
+                CreateRole(
+                    name="owner",
+                    scope=Scope.DATASET,
+                    description="The owner of a Dataset",
+                    permissions=[
+                        AuthorizationAction.DATASET__UPDATE_PROPERTIES,
+                        AuthorizationAction.DATASET__UPDATE_SETTINGS,
+                        AuthorizationAction.DATASET__UPDATE_STATUS,
+                        AuthorizationAction.DATASET__DELETE,
+                        AuthorizationAction.DATASET__CREATE_USER,
+                        AuthorizationAction.DATASET__UPDATE_USER,
+                        AuthorizationAction.DATASET__DELETE_USER,
+                        AuthorizationAction.DATASET__APPROVE_USER_REQUEST,
+                        AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+                        AuthorizationAction.DATASET__REVOKE_DATA_OUTPUT_LINK,
+                        AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                        AuthorizationAction.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+                        AuthorizationAction.DATASET__READ_INTEGRATIONS,
+                    ],
+                ),
+                prototype=Prototype.OWNER,
+            )
+
+        if self._find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER) is None:
+            self.create_role(
+                CreateRole(
+                    name="owner",
+                    scope=Scope.DATA_PRODUCT,
+                    description="The owner of a Data Product",
+                    permissions=[
+                        AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
+                        AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS,
+                        AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS,
+                        AuthorizationAction.DATA_PRODUCT__DELETE,
+                        AuthorizationAction.DATA_PRODUCT__CREATE_USER,
+                        AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
+                        AuthorizationAction.DATA_PRODUCT__DELETE_USER,
+                        AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                        AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                        AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                        AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+                        AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                        AuthorizationAction.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                        AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                        AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS,
+                    ],
+                ),
+                prototype=Prototype.OWNER,
+            )
+
+    def _find_prototype(self, scope: Scope, prototype: Prototype) -> Optional[Role]:
+        return self.db.execute(
+            select(RoleModel)
+            .where(RoleModel.scope == scope)
+            .where(RoleModel.prototype == prototype)
+        ).one_or_none()

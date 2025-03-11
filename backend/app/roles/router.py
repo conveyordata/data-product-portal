@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
 from app.roles import tasks
-from app.roles.schema import CreateRole, Role, UpdateRole
+from app.roles.schema import CreateRole, Role, Scope, UpdateRole
 from app.roles.service import RoleService
 from app.roles.tasks import AuthRole
 
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/roles", tags=["roles"])
 
 
 @router.get("/{scope}")
-def get_roles(scope: str, db: Session = Depends(get_db_session)) -> list[Role]:
+def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> list[Role]:
     return RoleService(db).get_roles(scope)
 
 

@@ -1,5 +1,6 @@
 import httpx
 from fastapi import Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.api_key import secured_api_key
@@ -75,12 +76,12 @@ if settings.OIDC_ENABLED:
         token: JWTToken = Depends(api_key_authenticated),
         db: Session = Depends(get_db_session),
     ) -> User:
-        user = (
-            db.query(UserModel).filter(UserModel.external_id == token.sub).one_or_none()
-        )
-        if not user:
+        result = db.execute(
+            select(UserModel).where(UserModel.external_id == token.sub)
+        ).one_or_none()
+        if not result:
             return authorize_user(token, db)
-        return user
+        return result.User
 
 else:
 
@@ -107,12 +108,12 @@ else:
         token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
     ) -> User:
         token = JWTToken(sub="sub", token="token_value")
-        user = (
-            db.query(UserModel).filter(UserModel.external_id == token.sub).one_or_none()
-        )
-        if not user:
+        result = db.execute(
+            select(UserModel).where(UserModel.external_id == token.sub)
+        ).one_or_none()
+        if not result:
             return authorize_user(token, db)
-        return user
+        return result.User
 
     def api_key_authenticated(
         api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
