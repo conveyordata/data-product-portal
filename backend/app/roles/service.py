@@ -67,6 +67,10 @@ class RoleService:
         return result
 
     def initialize_prototype_roles(self) -> None:
+        """Initializes the roles that are expected to be present in other parts
+        of the application. This function will first check which roles are already present,
+        and only create the missing ones.
+        """
         if self._find_prototype(Scope.GLOBAL, Prototype.EVERYONE) is None:
             self.create_role(
                 CreateRole(

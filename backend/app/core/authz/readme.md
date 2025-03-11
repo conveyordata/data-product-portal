@@ -17,7 +17,7 @@ The design supports four levels of access:
 ## Example
 
 We describe an example policy here that illustrates how the model can be used.
-You can test this yourself by copying the policy and requests to the [casbin editor](https://casbin.org/editor)
+You can test this yourself by copying the policy and requests to the [casbin editor](https://casbin.org/editor).
 
 ### Policy
 
