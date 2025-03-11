@@ -24,8 +24,11 @@ class RoleService:
         )
         return [row.Role for row in result]
 
-    def create_role(self, role: CreateRole) -> Role:
+    def create_role(
+        self, role: CreateRole, *, prototype: Prototype = Prototype.CUSTOM
+    ) -> Role:
         model = RoleModel(**role.parse_pydantic_schema())
+        model.prototype = prototype
         model.permissions = self._canonical_permissions(model.permissions)
         self.db.add(model)
         self.db.commit()
