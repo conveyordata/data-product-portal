@@ -29,4 +29,3 @@ NotificationConfiguration = Annotated[
     Notifications,
     Field(discriminator="configuration_type"),
 ]
-
