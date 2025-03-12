@@ -161,7 +161,7 @@ begin
     INSERT INTO public.data_products_datasets (id, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('0ab77909-c839-4048-8005-4f5604c6fa5e', sales_forecast_id, customer_data_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.data_products_datasets (id, data_product_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('96f62e70-e8d8-44b3-9303-e8e387a404b0', sales_forecast_id, products_data_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
-    --- NOTIFICATIONS
+    --- NOTIFICATIONS (INCOMPLETE)
     INSERT INTO public.notifications (id, configuration_type, data_product_membership_id, data_product_dataset_id, data_output_dataset_id, created_on, updated_on, deleted_at) VALUES ('d3b3c6e2-4d5a-4e8d-92a3-8f9f70a5c9b1', 'DataProductDataset', NULL, '8c9ae075-aac3-47f3-b46f-1e7d66ea008a', NULL, timezone('utc', CURRENT_TIMESTAMP),NULL ,NULL);
     INSERT INTO public.notification_interactions (id, notification_id, user_id, last_seen, last_interaction, created_on, updated_on, deleted_at) VALUES ('b7d2e5f8-9a6c-4f3a-b5b8-3c1e2d7f6e9d',  'd3b3c6e2-4d5a-4e8d-92a3-8f9f70a5c9b1',  john_id,  NULL,  NULL,  timezone('utc', CURRENT_TIMESTAMP),  NULL,  NULL);
 
