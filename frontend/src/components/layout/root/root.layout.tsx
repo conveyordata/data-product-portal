@@ -1,14 +1,17 @@
-import React from 'react';
 import { Layout } from 'antd';
-import { Outlet, useLocation } from 'react-router-dom';
-import styles from './root.module.scss';
-import { Sidebar } from '@/components/layout/sidebar/sidebar.component.tsx';
-import { Navbar } from '@/components/layout/navbar/navbar.component.tsx';
-import { ApplicationPaths } from '@/types/navigation.ts';
 import clsx from 'clsx';
+import React from 'react';
+import { Outlet, useLocation } from 'react-router';
+
+import { Navbar } from '@/components/layout/navbar/navbar.component.tsx';
+import { Sidebar } from '@/components/layout/sidebar/sidebar.component.tsx';
+import { ApplicationPaths } from '@/types/navigation.ts';
+
+import styles from './root.module.scss';
 
 const RootLayout: React.FC = () => {
     const { pathname } = useLocation();
+
     const isHome = pathname === ApplicationPaths.Home;
     const layoutChildrenWrapperClasses = clsx(styles.childrenWrapper, {
         [styles.layoutContentHome]: isHome,

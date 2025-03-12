@@ -1,12 +1,12 @@
 import type { BaseQueryFn } from '@reduxjs/toolkit/query';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios, { AxiosResponse } from 'axios';
-import { AppConfig } from '@/config/app-config.ts';
-import { ApiError } from '@/types/api-result.ts';
-import { NotificationState, showNotification } from '@/store/features/feedback/feedback-slice.ts';
-import { Headers, QueryParams } from '@/types/http.ts';
 import { User } from 'oidc-client-ts';
-import i18n from '@/i18n.ts';
+
+import { AppConfig } from '@/config/app-config.ts';
+import { NotificationState, showNotification } from '@/store/features/feedback/feedback-slice.ts';
+import { ApiError } from '@/types/api-result.ts';
+import { Headers, QueryParams } from '@/types/http.ts';
 
 interface CustomAxiosError extends AxiosError {
     response?: AxiosResponse<ApiError>;
@@ -46,8 +46,8 @@ export const axiosBaseQuery =
     > =>
     async ({ url, method, data, params, headers }, api) => {
         const defaultErrorMessage: NotificationState = {
-            message: i18n.t('Something went wrong'),
-            description: i18n.t('Please try again later'),
+            message: 'Something went wrong',
+            description: 'Please try again later',
             type: 'error',
         };
 

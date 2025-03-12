@@ -40,6 +40,9 @@ export enum ApiUrl {
     UserDataProducts = '/api/data_products/user/:userId',
     UserDatasets = '/api/datasets/user/:userId',
     Authorize = '/api/auth/user',
+    Roles = '/api/roles',
+    RolesGet = '/api/roles/:scope',
+    RolesDelete = '/api/roles/:id',
     Tags = '/api/tags',
     TagsId = '/api/tags/:tagId',
     Environments = '/api/envs',
@@ -68,6 +71,7 @@ export enum ApiUrl {
     PlatformServiceConfig = '/api/platforms/:platformId/services/:serviceId',
     PlatformServiceConfigById = '/api/platforms/configs/:configId',
     Version = '/api/version',
+    ThemeSettings = '/api/theme_settings',
 }
 
 export type DynamicPathParams =

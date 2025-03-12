@@ -1,25 +1,26 @@
-import { Button, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
-import { useTranslation } from 'react-i18next';
-import styles from './data-output-form.module.scss';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
+
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import {
     useGetDataOutputByIdQuery,
     useRemoveDataOutputMutation,
     useUpdateDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
-import TextArea from 'antd/es/input/TextArea';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
-import { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
+import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
+import { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
+import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
+
+import styles from './data-output-form.module.scss';
 
 type Props = {
     mode: 'edit';
@@ -31,9 +32,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const navigate = useNavigate();
     const { data: currentDataOutput, isFetching: isFetchingInitialValues } = useGetDataOutputByIdQuery(
         dataOutputId || '',
-        {
-            skip: !dataOutputId,
-        },
+        { skip: !dataOutputId },
     );
     const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? '', {
         skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
@@ -116,7 +115,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 tag_ids: currentDataOutput.tags.map((tag) => tag.id),
             });
         }
-    }, [currentDataOutput, mode]);
+    }, [currentDataOutput, form, mode]);
 
     return (
         <Form
@@ -159,7 +158,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     },
                 ]}
             >
-                <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <Input.TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
                 <Select

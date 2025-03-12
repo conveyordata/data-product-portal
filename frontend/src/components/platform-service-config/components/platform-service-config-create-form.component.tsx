@@ -1,20 +1,22 @@
 import { Button, Form, FormProps, Input, Select, Space } from 'antd';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import styles from './platform-service-config-create.module.scss';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useNavigate } from 'react-router-dom';
-import { ApplicationPaths } from '@/types/navigation.ts';
-import { PLATFORM_SERVICE_CONFIG_MAPPING } from '@/constants/platform-service-config.constants';
+import { useNavigate } from 'react-router';
+
 import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
-import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import { PLATFORM_SERVICE_CONFIG_MAPPING } from '@/constants/platform-service-config.constants';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useCreatePlatformServiceConfigMutation } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllPlatformServicesQuery } from '@/store/features/platform-services/platform-services-api-slice';
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
+import { ApplicationPaths } from '@/types/navigation.ts';
 import {
     PlatformServiceConfigCreateFormSchema,
     PlatformServiceConfigCreateRequest,
 } from '@/types/platform-service-config';
-import { useEffect } from 'react';
+import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+
+import styles from './platform-service-config-create.module.scss';
 
 const { TextArea } = Input;
 
@@ -83,7 +85,7 @@ export function PlatformServiceConfigCreateForm() {
                 ),
             );
         }
-    }, [platformIdFormValue, serviceIdFormValue]);
+    }, [form, platformIdFormValue, platforms, serviceIdFormValue, services]);
 
     return (
         <Form<PlatformServiceConfigCreateFormSchema>

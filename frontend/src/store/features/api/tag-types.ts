@@ -9,6 +9,7 @@ export enum TagTypes {
     DataProductSetting = 'DataProductSetting',
     User = 'User',
     Auth = 'Auth',
+    Role = 'Role',
     Environment = 'Environment',
     Dataset = 'Dataset',
     Domain = 'Domain',
@@ -19,6 +20,7 @@ export enum TagTypes {
     EnvironmentConfigs = 'EnvironmentConfigs',
     Version = 'Version',
     AI = 'AI',
+    ThemeSettings = 'ThemeSettings',
 }
 
 export const STATIC_TAG_ID = {

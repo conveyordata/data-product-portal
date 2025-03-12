@@ -55,7 +55,7 @@ export const dataProductsDatasetsApiSlice = baseApiSlice
                     url: buildUrl(ApiUrl.DataProductDatasetLinkRemove, { datasetLinkId }),
                     method: 'POST',
                 }),
-                invalidatesTags: (_, _error, arg) => [
+                invalidatesTags: (_result, _error, arg) => [
                     { type: TagTypes.DataProduct as const, id: arg.dataProductId },
                     { type: TagTypes.Dataset as const, id: arg.datasetId },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
@@ -67,7 +67,7 @@ export const dataProductsDatasetsApiSlice = baseApiSlice
                     url: buildUrl(ApiUrl.DataProductDatasetPendingActions, {}),
                     method: 'GET',
                 }),
-                providesTags: (_, __) => [
+                providesTags: () => [
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                 ],

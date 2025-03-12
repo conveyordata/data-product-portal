@@ -72,3 +72,7 @@ repos:
       name: prettier
       entry: bash -c "cd frontend && npm run format"
       language: node
+    - id: lint
+      name: lint
+      entry: bash -c "cd frontend && npm run lint"
+      language: node

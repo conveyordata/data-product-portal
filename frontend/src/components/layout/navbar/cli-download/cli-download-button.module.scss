@@ -1,0 +1,6 @@
+@use '@/styles/globals';
+
+.icon-button {
+    height: globals.$circle-icon-button-size !important;
+    width: globals.$circle-icon-button-size !important;
+}

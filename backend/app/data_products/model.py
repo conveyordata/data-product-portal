@@ -49,7 +49,9 @@ class DataProduct(Base, BaseORM):
         cascade="all, delete-orphan",
         order_by="DataProductDatasetAssociation.status.desc()",
     )
-    tags: Mapped[list[Tag]] = relationship(secondary=tag_data_product_table)
+    tags: Mapped[list[Tag]] = relationship(
+        secondary=tag_data_product_table, back_populates="data_products"
+    )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
         back_populates="data_product",

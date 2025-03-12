@@ -52,11 +52,11 @@ class Tag(Base, BaseORM):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     value = Column(String)
     datasets: Mapped[list["Dataset"]] = relationship(
-        secondary=tag_dataset_table, lazy="select"
+        secondary=tag_dataset_table, lazy="select", back_populates="tags"
     )
     data_products: Mapped[list["DataProduct"]] = relationship(
-        secondary=tag_data_product_table, lazy="select"
+        secondary=tag_data_product_table, lazy="select", back_populates="tags"
     )
     data_outputs: Mapped[list["DataOutput"]] = relationship(
-        secondary=tag_data_output_table, lazy="select"
+        secondary=tag_data_output_table, lazy="select", back_populates="tags"
     )

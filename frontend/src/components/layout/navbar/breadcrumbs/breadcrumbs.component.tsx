@@ -1,29 +1,31 @@
-import { useLocation, useParams } from 'react-router-dom';
-import { Breadcrumb, Space, Typography } from 'antd';
-import { ApplicationPaths, DynamicPathParams, createEnvironmentConfigsPath } from '@/types/navigation.ts';
 import Icon, { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import styles from './breadcrumbs.module.scss';
+import { Breadcrumb, Space, Typography } from 'antd';
 import { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadcrumb/Breadcrumb';
+import { ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useParams } from 'react-router';
+
+import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
+import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { BreadcrumbLink } from '@/components/layout/navbar/breadcrumbs/breadcrumb-link/breadcrumb-link.component.tsx';
+import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import { ReactNode, useMemo } from 'react';
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
-import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import {
-    isDataProductEditPage,
-    isDataOutputEditPage,
-    isEnvironmentConfigsPage,
-    isEnvironmentConfigCreatePage,
-    isEnvConfigPage,
-} from '@/utils/routes.helper.ts';
-import { useGetPlatformServiceConfigByIdQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import {
-    useGetEnvironmentByIdQuery,
     useGetEnvConfigByIdQuery,
+    useGetEnvironmentByIdQuery,
 } from '@/store/features/environments/environments-api-slice';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetPlatformServiceConfigByIdQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
+import { ApplicationPaths, createEnvironmentConfigsPath, DynamicPathParams } from '@/types/navigation.ts';
+import {
+    isDataOutputEditPage,
+    isDataProductEditPage,
+    isEnvConfigPage,
+    isEnvironmentConfigCreatePage,
+    isEnvironmentConfigsPage,
+} from '@/utils/routes.helper.ts';
+
+import styles from './breadcrumbs.module.scss';
 
 type BreadcrumbType = Partial<BreadcrumbItemType & BreadcrumbSeparatorType> & { icon?: ReactNode };
 
@@ -31,8 +33,10 @@ export const Breadcrumbs = () => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
     const params = useParams<DynamicPathParams>();
-    const pathnames =
-        pathname === ApplicationPaths.Home ? [ApplicationPaths.Home] : pathname.split('/').filter((x) => x);
+    const pathnames = useMemo(
+        () => (pathname === ApplicationPaths.Home ? [ApplicationPaths.Home] : pathname.split('/').filter((x) => x)),
+        [pathname],
+    );
     const {
         dataProductId = '',
         datasetId = '',
@@ -204,7 +208,7 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
-                        case ApplicationPaths.AdditionalSettings:
+                        case ApplicationPaths.Settings:
                             Object.assign(breadcrumbItem, {
                                 title: (
                                     <Space
@@ -212,7 +216,7 @@ export const Breadcrumbs = () => {
                                             item: styles.breadcrumbItem,
                                         }}
                                     >
-                                        {t('Additional Settings')}
+                                        {t('Settings')}
                                     </Space>
                                 ),
                             });

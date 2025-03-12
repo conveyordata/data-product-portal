@@ -1,19 +1,21 @@
-import { Flex, Badge, Button, theme, Dropdown, MenuProps, Space, Typography } from 'antd';
 import { BellOutlined, ExportOutlined } from '@ant-design/icons';
-import styles from './notifications.module.scss';
+import { Badge, Button, Dropdown, Flex, type MenuProps, Space, theme, Typography } from 'antd';
+import type { TFunction } from 'i18next';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMemo } from 'react';
-import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
-import { Link, useNavigate } from 'react-router-dom';
-import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
+import { Link, type NavigateFunction, useNavigate } from 'react-router';
+
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
 import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
-import { DataOutputDatasetContract } from '@/types/data-output-dataset';
-import { DataProductDatasetContract } from '@/types/data-product-dataset';
-import { DataProductMembershipContract } from '@/types/data-product-membership';
-import { TFunction } from 'i18next';
+import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
+import type { DataOutputDatasetContract } from '@/types/data-output-dataset';
+import type { DataProductDatasetContract } from '@/types/data-product-dataset';
+import type { DataProductMembershipContract } from '@/types/data-product-membership';
+import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
+
+import styles from './notifications.module.scss';
 
 export function Notifications() {
     const {
@@ -31,27 +33,23 @@ export function Notifications() {
         | ({ type: 'data_output' } & DataOutputDatasetContract)
         | ({ type: 'team' } & DataProductMembershipContract);
 
-    const createPendingItem = (action: PendingAction, navigate: Function, t: TFunction) => {
+    const createPendingItem = useCallback((action: PendingAction, navigate: NavigateFunction, t: TFunction) => {
         let link, description, navigatePath;
 
         switch (action.type) {
             case 'data_product':
                 link = createDataProductIdPath(action.data_product_id);
                 description = (
-                    <>
-                        <Typography.Text style={{ marginRight: '4px' }}>
-                            {t('{{name}}, on behalf of data product', { name: action.requested_by?.first_name })}
-                        </Typography.Text>
+                    <Typography.Text>
+                        {t('{{name}}, on behalf of data product', { name: action.requested_by?.first_name })}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {t('{{name}}', { name: action.data_product.name })}
-                        </Link>
-                        <Typography.Text style={{ marginRight: '4px', marginLeft: '4px' }}>
-                            {t('requests read access to dataset')}
-                        </Typography.Text>
+                            {action.data_product.name}
+                        </Link>{' '}
+                        {t('requests read access to dataset')}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                            {t('{{name}}', { name: action.dataset.name })}
+                            {action.dataset.name}
                         </Link>
-                    </>
+                    </Typography.Text>
                 );
                 navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
                 break;
@@ -59,20 +57,16 @@ export function Notifications() {
             case 'data_output':
                 link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
                 description = (
-                    <>
-                        <Typography.Text style={{ marginRight: '4px' }}>
-                            {t('{{name}}, on behalf of data output', { name: action.requested_by?.first_name })}
-                        </Typography.Text>
+                    <Typography.Text>
+                        {t('{{name}}, on behalf of data output', { name: action.requested_by?.first_name })}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {t('{{name}}', { name: action.data_output.name })}
-                        </Link>
-                        <Typography.Text style={{ marginRight: '4px', marginLeft: '4px' }}>
-                            {t('requests a link to dataset ')}
-                        </Typography.Text>
+                            {action.data_output.name}
+                        </Link>{' '}
+                        {t('requests a link to dataset')}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                            {t('{{name}}', { name: action.dataset.name })}
+                            {action.dataset.name}
                         </Link>
-                    </>
+                    </Typography.Text>
                 );
                 navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
                 break;
@@ -80,15 +74,13 @@ export function Notifications() {
             case 'team':
                 link = createDataProductIdPath(action.data_product_id);
                 description = (
-                    <>
-                        <Typography.Text style={{ marginRight: '4px' }}>
-                            {t('{{name}} would like to join the data product', { name: action.user?.first_name })}
-                        </Typography.Text>
+                    <Typography.Text>
+                        {t('{{name}} would like to join the data product', { name: action.user?.first_name })}{' '}
                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {t('{{name}}', { name: action.data_product.name })}
-                        </Link>
-                        <Typography.Text style={{ marginLeft: '4px' }}>{t('team')}</Typography.Text>
-                    </>
+                            {action.data_product.name}
+                        </Link>{' '}
+                        {t('team')}{' '}
+                    </Typography.Text>
                 );
                 navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
                 break;
@@ -103,7 +95,7 @@ export function Notifications() {
             extra: <ExportOutlined />,
             onClick: () => navigate(navigatePath),
         };
-    };
+    }, []);
 
     const pendingItems = useMemo(() => {
         const datasets = pending_actions_datasets?.map((action) =>
@@ -117,7 +109,14 @@ export function Notifications() {
         );
 
         return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])];
-    }, [pending_actions_datasets, pending_actions_dataoutputs, pending_actions_data_products, navigate, t]);
+    }, [
+        pending_actions_datasets,
+        pending_actions_dataoutputs,
+        pending_actions_data_products,
+        createPendingItem,
+        navigate,
+        t,
+    ]);
 
     const items: MenuProps['items'] = [
         {

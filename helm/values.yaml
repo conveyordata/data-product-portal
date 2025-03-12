@@ -20,6 +20,7 @@ smtp:
   password: not-set
   no_login: false
 from_mail_address: ""
+email_button_color: ""
 webhook:
   url: ""
   secret: ""
@@ -51,17 +52,17 @@ replicaCount: 1
 image:
   repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/backend
   pullPolicy: Always
-  tag: 0.2.11
+  tag: 0.2.12
 
 frontendimage:
   repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/frontend
   pullPolicy: Always
-  tag: 0.2.11
+  tag: 0.2.12
 
 agenticimage:
   repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/agentic-system
   pullPolicy: Always
-  tag: 0.2.11
+  tag: 0.2.12
 
 imagePullSecrets: []
 nameOverride: ""

@@ -1,12 +1,14 @@
-import styles from './platform-service-config.module.scss';
-import { Typography, Input, Button, Space, Flex } from 'antd';
+import { Button, Flex, Input, Space, Typography } from 'antd';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router';
+
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetPlatformServiceConfigByIdQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { DynamicPathParams } from '@/types/navigation';
-import { useParams } from 'react-router-dom';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { useState, useEffect, ChangeEvent } from 'react';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+
+import styles from './platform-service-config.module.scss';
 
 const { TextArea } = Input;
 

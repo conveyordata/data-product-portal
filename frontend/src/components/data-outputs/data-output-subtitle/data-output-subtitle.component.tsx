@@ -1,4 +1,6 @@
 import { Flex, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
+
 // import { useTranslation } from 'react-i18next';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import {
@@ -8,7 +10,6 @@ import {
     S3DataOutputContract,
     SnowflakeDataOutputContract,
 } from '@/types/data-output';
-import { useTranslation } from 'react-i18next';
 
 type Props = {
     data_output_id: string;

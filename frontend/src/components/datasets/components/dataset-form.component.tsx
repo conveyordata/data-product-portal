@@ -1,28 +1,31 @@
 import { Button, CheckboxOptionType, Form, FormProps, Input, Popconfirm, Radio, Select, Space } from 'antd';
-import { useTranslation } from 'react-i18next';
-import styles from './dataset-form.module.scss';
-import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import type { TFunction } from 'i18next';
 import { useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
-import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
+
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
     useRemoveDatasetMutation,
     useUpdateDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
-import { DatasetAccess, DatasetCreateFormSchema, DatasetCreateRequest, DatasetUpdateRequest } from '@/types/dataset';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-import { getDatasetOwnerIds, getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
-import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
-import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
+import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
+import { DatasetAccess, DatasetCreateFormSchema, DatasetCreateRequest, DatasetUpdateRequest } from '@/types/dataset';
+import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
+import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { getDatasetOwnerIds, getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
+import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
+import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+
+import styles from './dataset-form.module.scss';
 
 type Props = {
     mode: 'create' | 'edit';
@@ -31,14 +34,14 @@ type Props = {
 
 const { TextArea } = Input;
 
-const getAccessTypeOptions = () => [
+const getAccessTypeOptions = (t: TFunction) => [
     {
         value: DatasetAccess.Public,
-        label: getDatasetAccessTypeLabel(DatasetAccess.Public),
+        label: getDatasetAccessTypeLabel(t, DatasetAccess.Public),
     },
     {
         value: DatasetAccess.Restricted,
-        label: getDatasetAccessTypeLabel(DatasetAccess.Restricted),
+        label: getDatasetAccessTypeLabel(t, DatasetAccess.Restricted),
     },
 ];
 
@@ -69,7 +72,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
     const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingTags;
 
-    const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(), []);
+    const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = users.map((user) => ({ label: user.email, value: user.id }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];

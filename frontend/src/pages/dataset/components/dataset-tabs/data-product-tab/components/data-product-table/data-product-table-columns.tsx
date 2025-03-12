@@ -1,15 +1,17 @@
 import { Badge, Button, Flex, Popconfirm, TableColumnsType } from 'antd';
-import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
-import styles from './data-product-table.module.scss';
 import { TFunction } from 'i18next';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { createDataProductIdPath } from '@/types/navigation.ts';
-import { DataProductLink } from '@/types/dataset';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { DataProductDatasetLinkRequest, DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
-import { Sorter } from '@/utils/table-sorter.helper';
+import { DataProductLink } from '@/types/dataset';
+import { createDataProductIdPath } from '@/types/navigation.ts';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
+import { Sorter } from '@/utils/table-sorter.helper';
+
+import styles from './data-product-table.module.scss';
 
 type Props = {
     t: TFunction;
@@ -49,7 +51,7 @@ export const getDatasetDataProductsColumns = ({
                         linkTo={createDataProductIdPath(data_product.id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getDataProductTypeIcon(data_product.type.icon_key)}
+                                iconComponent={getDataProductTypeIcon(data_product?.type?.icon_key)}
                                 hasRoundBorder
                                 size={'default'}
                             />
@@ -58,7 +60,7 @@ export const getDatasetDataProductsColumns = ({
                         subtitle={
                             <Badge
                                 status={getDataProductDatasetLinkBadgeStatus(status)}
-                                text={getDataProductDatasetLinkStatusLabel(status)}
+                                text={getDataProductDatasetLinkStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -66,7 +68,7 @@ export const getDatasetDataProductsColumns = ({
                 );
             },
             width: '100%',
-            ...new FilterSettings(dataProductLinks, (dpl) => getDataProductDatasetLinkStatusLabel(dpl.status)),
+            ...new FilterSettings(dataProductLinks, (dpl) => getDataProductDatasetLinkStatusLabel(t, dpl.status)),
             sorter: sorter.stringSorter((dpl) => dpl.data_product.name),
             defaultSortOrder: 'ascend',
         },

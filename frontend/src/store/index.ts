@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { useDispatch } from 'react-redux';
-import feedbackSlice from '@/store/features/feedback/feedback-slice.ts';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import { isDevMode } from '@/utils/env-mode.helper.ts';
+import { useDispatch } from 'react-redux';
+
 import { baseAIApiSlice, baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import authSlice from '@/store/features/auth/auth-slice.ts';
+import feedbackSlice from '@/store/features/feedback/feedback-slice.ts';
+import { isDevMode } from '@/utils/env-mode.helper.ts';
 
 const store = configureStore({
     reducer: {

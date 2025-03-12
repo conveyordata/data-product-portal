@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
 import { Layout, theme } from 'antd';
-import { Outlet, useNavigate } from 'react-router-dom';
-import styles from './public.module.scss';
+import React, { useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
+import { Outlet, useNavigate } from 'react-router';
+
 import { ApplicationPaths } from '@/types/navigation.ts';
+
+import styles from './public.module.scss';
 
 const PublicLayout: React.FC = () => {
     const {

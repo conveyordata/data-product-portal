@@ -1,8 +1,3 @@
-import { Tabs } from 'antd';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
-import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
-import { HistoryTab } from '@/pages/data-product/components/data-product-tabs/history-tab/history-tab.tsx';
-import styles from './data-product-tabs.module.scss';
 import Icon, {
     HistoryOutlined,
     InfoCircleOutlined,
@@ -10,32 +5,30 @@ import Icon, {
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
+import { Tabs } from 'antd';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
-import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/dataset-tab/dataset-tab.tsx';
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
-import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
-import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
+import { useLocation, useNavigate } from 'react-router';
 import { ReactFlowProvider } from 'reactflow';
-import { useLocation, useNavigate } from 'react-router-dom';
+
+import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
+import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
+import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
+import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
+import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/dataset-tab/dataset-tab.tsx';
+import { HistoryTab } from '@/pages/data-product/components/data-product-tabs/history-tab/history-tab.tsx';
+import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
+
+import styles from './data-product-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 
 type Props = {
     dataProductId: string;
     isLoading: boolean;
 };
-
-export enum TabKeys {
-    About = 'about',
-    DataOutputs = 'dataoutputs',
-    Datasets = 'datasets',
-    Explorer = 'explorer',
-    Team = 'team',
-    Settings = 'settings',
-    History = 'history',
-}
 
 type Tab = {
     label: string;

@@ -1,7 +1,8 @@
 import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { DataOutputConfiguration, DataOutputCreateFormSchema, RedshiftDataOutput } from '@/types/data-output';
-import { useEffect } from 'react';
 
 type Props = {
     sourceAligned: boolean;
@@ -13,10 +14,11 @@ type Props = {
 export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
     const { t } = useTranslation();
     const entireSchema = Form.useWatch('entire_schema', form);
-    let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
+    const databaseOptionsRef = useRef((identifiers ?? []).map((database) => ({ label: database, value: database })));
     const databaseValue = Form.useWatch('database', form);
     const schemaValue = Form.useWatch('schema', form);
     const tableValue = Form.useWatch('table', form);
+
     useEffect(() => {
         let databaseOptionsList = identifiers;
         if (!sourceAligned) {
@@ -25,8 +27,11 @@ export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceA
         } else {
             form.setFieldsValue({ database: undefined });
         }
-        databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
-    }, [sourceAligned]);
+        databaseOptionsRef.current = (databaseOptionsList ?? []).map((database) => ({
+            label: database,
+            value: database,
+        }));
+    }, [sourceAligned, identifiers, external_id, form]);
 
     useEffect(() => {
         let result = databaseValue;
@@ -44,7 +49,7 @@ export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceA
         }
 
         form.setFieldsValue({ result: result });
-    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireSchema]);
+    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireSchema, form]);
 
     return (
         <div>
@@ -70,7 +75,7 @@ export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceA
                         }
                     }}
                     maxCount={1}
-                    options={databaseOptions}
+                    options={databaseOptionsRef.current}
                 />
             </Form.Item>
             <Form.Item<RedshiftDataOutput & { temp_suffix: string }>

@@ -1,11 +1,12 @@
-import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+
+import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useGetDatasetByIdQuery, useUpdateDatasetAboutMutation } from '@/store/features/datasets/datasets-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
 
 type Props = {

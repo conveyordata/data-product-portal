@@ -1,9 +1,11 @@
 import { Flex, Space, Typography } from 'antd';
-import styles from './dataset-edit.module.scss';
+import { useNavigate, useParams } from 'react-router';
+
 import { DatasetForm } from '@/components/datasets/components/dataset-form.component.tsx';
-import { useNavigate, useParams } from 'react-router-dom';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
+
+import styles from './dataset-edit.module.scss';
 
 export function DatasetEdit() {
     const { datasetId = '' } = useParams();

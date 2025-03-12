@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
-import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
-import { RadioGroupProps, Space } from 'antd';
 import { GlobalOutlined, TeamOutlined } from '@ant-design/icons';
+import { RadioGroupProps, Space } from 'antd';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
 
 type Props = {
     initialQuickFilter?: QuickFilterParticipation;

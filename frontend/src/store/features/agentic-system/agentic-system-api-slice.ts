@@ -1,7 +1,8 @@
-import { baseAIApiSlice, baseApiSlice } from '../api/base-api-slice';
 import { AIApiUrl } from '@/api/api-urls';
-import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
 import { HelloWorldContract } from '@/types/agentic-system';
+
+import { baseAIApiSlice } from '../api/base-api-slice';
+import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
 
 export const agenticTags: string[] = [TagTypes.AI];
 
