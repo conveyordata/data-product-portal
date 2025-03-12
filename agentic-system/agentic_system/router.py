@@ -17,4 +17,9 @@ async def hello_world() -> BaseMessage:
     return await AgenticSystemService().test()
 
 
+@router.post("")
+async def ask_question(question: str) -> BaseMessage:
+    return await AgenticSystemService().respond(question)
+
+
 router.include_router(ai_router)

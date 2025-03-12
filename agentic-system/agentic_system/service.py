@@ -27,3 +27,7 @@ class AgenticSystemService(metaclass=Singleton):
     async def test(self) -> BaseMessage:
         result = await self.agent.run('Where does "hello world" come from?')
         return result.data
+
+    async def respond(self, question: str) -> BaseMessage:
+        result = await self.agent.run(question)
+        return result.data

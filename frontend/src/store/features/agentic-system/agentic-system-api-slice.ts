@@ -15,9 +15,19 @@ export const agenticSystemsApiSlice = baseAIApiSlice.enhanceEndpoints({ addTagTy
             }),
             providesTags: [{ type: TagTypes.AI as const, id: STATIC_TAG_ID.LIST }],
         }),
+        askQuestion: builder.mutation<HelloWorldContract, string>({
+            query: (question) => ({
+                url: AIApiUrl.HelloWorld,
+                method: 'POST',
+                params: {
+                    question: question,
+                },
+            }),
+            // providesTags: [{ type: TagTypes.AI as const, id: STATIC_TAG_ID.LIST }],
+        }),
     }),
 
     overrideExisting: false,
 });
 
-export const { useMainAIEndpointQuery } = agenticSystemsApiSlice;
+export const { useMainAIEndpointQuery, useAskQuestionMutation } = agenticSystemsApiSlice;
