@@ -18,16 +18,19 @@ type Props = {
 export const DatasetAccessIcon = ({ accessType, hasPopover = false }: Props) => {
     const { t } = useTranslation();
 
-    if (accessType === DatasetAccess.Public) {
-        return null;
+    let icon;
+    switch (accessType) {
+        case DatasetAccess.Public:
+            return null;
+        case DatasetAccess.Restricted:
+            icon = <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />;
+            break;
+        case DatasetAccess.Private:
+            icon = <EyeInvisibleOutlined className={clsx(styles.defaultIcon, styles.dark, styles.xSmall)} />;
+            break;
+        default:
+            return null;
     }
-
-    const icon =
-        accessType === DatasetAccess.Restricted ? (
-            <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
-        ) : (
-            <EyeInvisibleOutlined className={clsx(styles.defaultIcon, styles.dark, styles.xSmall)} />
-        );
 
     return hasPopover ? (
         <Popover content={t('{{Type}} access', { Type: getDatasetAccessTypeLabel(t, accessType) })} placement={'top'}>
