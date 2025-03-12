@@ -178,14 +178,14 @@ crt = ["awscrt (==0.23.8)"]
 
 [[package]]
 name = "casbin"
-version = "1.38.0"
+version = "1.39.0"
 description = "An authorization library that supports access control models like ACL, RBAC, ABAC in Python"
 optional = false
 python-versions = ">=3.3"
 groups = ["main"]
 files = [
-    {file = "casbin-1.38.0-py3-none-any.whl", hash = "sha256:229245632a98ec17c53cbaf8432826c3180876b5577fe85b2fa3d708c5d293da"},
-    {file = "casbin-1.38.0.tar.gz", hash = "sha256:64a758b367d829aa69d30ef28f58e6b26511ff238a939ad3f7d053535f7d4627"},
+    {file = "casbin-1.39.0-py3-none-any.whl", hash = "sha256:638a5142c31c95b87585611ed3ee89ae29dc573726580ad9536e90fa47df9b17"},
+    {file = "casbin-1.39.0.tar.gz", hash = "sha256:3e1876be97b0708ad5236d9c6ad5d71377c91f96921b3e0a1869ca7982770765"},
 ]
 
 [package.dependencies]
@@ -1838,4 +1838,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "57697da51866790f26dc7bac96ecf664ebc305771f0e37cc8c22702fdd81a749"
+content-hash = "5b3a99b72e81eeae9947d5b6c636de2507f5e88744f828ca3b51d51b37831010"
