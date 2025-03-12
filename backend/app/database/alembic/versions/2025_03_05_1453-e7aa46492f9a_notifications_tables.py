@@ -48,27 +48,14 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime),
     )
 
-    # Create the "notifications" table
-    op.create_table(
-        "notifications",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column("description", sa.String, nullable=True),
-        sa.Column(
-            "configuration_id",
-            UUID(as_uuid=True),
-            sa.ForeignKey("notification_configurations.id"),
-        ),
-        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
-        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
-        sa.Column("deleted_at", sa.DateTime),
-    )
-
     # Create the "notification_interactions" table
     op.create_table(
         "notification_interactions",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column(
-            "notification_id", UUID(as_uuid=True), sa.ForeignKey("notifications.id")
+            "configuration_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("notification_configurations.id"),
         ),
         sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id")),
         sa.Column("last_seen", sa.DateTime, nullable=True),
@@ -81,5 +68,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("notification_interactions")
-    op.drop_table("notifications")
     op.drop_table("notification_configurations")
