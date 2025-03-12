@@ -3,30 +3,23 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Table
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, relationship
+from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
+from app.data_product_lifecycles.model import DataProductLifecycle
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import DatasetAccessType
 from app.datasets.schema import Dataset as DatasetSchema
 from app.datasets.status import DatasetStatus
 from app.shared.model import BaseORM, utcnow
-from app.tags.model import Tag
+from app.tags.model import Tag, tag_dataset_table
 
 if TYPE_CHECKING:
-    from app.business_areas.model import BusinessArea
+    from app.data_product_settings.model import DataProductSettingValue
+    from app.domains.model import Domain
     from app.users.model import User
 
-
-tag_dataset_table = Table(
-    "tags_datasets",
-    Base.metadata,
-    Column("dataset_id", ForeignKey("datasets.id")),
-    Column("tag_id", ForeignKey("tags.id")),
-    Column("created_on", DateTime(timezone=False), server_default=utcnow()),
-    Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
-)
 datasets_owner_table = Table(
     "datasets_owners",
     Base.metadata,
@@ -57,14 +50,26 @@ class Dataset(Base, BaseORM):
         "DataProductDatasetAssociation",
         back_populates="dataset",
         order_by="DataProductDatasetAssociation.status.desc()",
+        cascade="all, delete-orphan",
     )
     data_output_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
         "DataOutputDatasetAssociation",
         back_populates="dataset",
         order_by="DataOutputDatasetAssociation.status.desc()",
+        cascade="all, delete-orphan",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_dataset_table, cascade="all, delete-orphan", single_parent=True
+        secondary=tag_dataset_table, back_populates="datasets"
     )
-    business_area_id: Mapped[UUID] = Column(ForeignKey("business_areas.id"))
-    business_area: Mapped["BusinessArea"] = relationship(back_populates="datasets")
+    data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
+        "DataProductSettingValue",
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        order_by="DataProductSettingValue.dataset_id",
+    )
+    lifecycle_id: Mapped[UUID] = mapped_column(
+        ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
+    )
+    lifecycle: Mapped["DataProductLifecycle"] = relationship(back_populates="datasets")
+    domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
+    domain: Mapped["Domain"] = relationship(back_populates="datasets")

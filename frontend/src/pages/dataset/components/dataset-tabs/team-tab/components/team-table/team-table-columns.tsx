@@ -1,5 +1,6 @@
-import { TFunction } from 'i18next';
 import { Button, Popconfirm, TableColumnsType } from 'antd';
+import { TFunction } from 'i18next';
+
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { UserContract } from '@/types/users';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -31,7 +32,7 @@ export const getDatasetTeamColumns = ({
                 return <UserAvatar name={`${user.first_name} ${user.last_name}`} email={user.email} />;
             },
             width: '70%',
-            sorter: sorter.stringSorter(user => user.last_name),
+            sorter: sorter.stringSorter((user) => user.last_name),
             defaultSortOrder: 'ascend',
         },
         {

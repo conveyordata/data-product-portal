@@ -1,14 +1,16 @@
 import { Badge, Button, Popconfirm, TableColumnsType } from 'antd';
-import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
-import styles from './dataset-table.module.scss';
-import { TFunction } from 'i18next';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+import type { TFunction } from 'i18next';
+
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { createDatasetIdPath } from '@/types/navigation.ts';
-import { DatasetLink } from '@/types/data-output';
 import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title.tsx';
 import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title.tsx';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+import type { DataOutputDatasetLink } from '@/types/data-output';
+import { createDatasetIdPath } from '@/types/navigation.ts';
+import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
+
+import styles from './dataset-table.module.scss';
 
 type Props = {
     t: TFunction;
@@ -24,7 +26,7 @@ export const getDataOutputDatasetsColumns = ({
     t,
     isDisabled,
     isLoading,
-}: Props): TableColumnsType<DatasetLink> => {
+}: Props): TableColumnsType<DataOutputDatasetLink> => {
     return [
         {
             title: t('Id'),
@@ -52,7 +54,7 @@ export const getDataOutputDatasetsColumns = ({
                         subtitle={
                             <Badge
                                 status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(status)}
+                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }

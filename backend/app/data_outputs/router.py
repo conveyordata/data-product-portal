@@ -1,14 +1,20 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_contracts.schema import DataContractGet
-from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
+from app.data_outputs.schema import (
+    DataOutput,
+    DataOutputCreate,
+    DataOutputStatusUpdate,
+    DataOutputUpdate,
+)
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.dependencies import only_data_output_owners
+from app.graph.graph import Graph
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
@@ -83,6 +89,26 @@ def update_data_product(
     return DataOutputService().update_data_output(id, data_output, db)
 
 
+@router.put(
+    "/{id}/status",
+    responses={
+        404: {
+            "description": "Data Output not found",
+            "content": {
+                "application/json": {"example": {"detail": "Data Output id not found"}}
+            },
+        }
+    },
+    dependencies=[Depends(only_data_output_owners)],
+)
+def update_data_product_status(
+    id: UUID,
+    data_output: DataOutputStatusUpdate,
+    db: Session = Depends(get_db_session),
+):
+    return DataOutputService().update_data_output_status(id, data_output, db)
+
+
 @router.post(
     "/{id}/dataset/{dataset_id}",
     responses={
@@ -104,11 +130,12 @@ def update_data_product(
 def link_dataset_to_data_output(
     id: UUID,
     dataset_id: UUID,
+    background_tasks: BackgroundTasks,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
     return DataOutputService().link_dataset_to_data_output(
-        id, dataset_id, authenticated_user, db
+        id, dataset_id, authenticated_user, db, background_tasks
     )
 
 
@@ -139,6 +166,13 @@ def unlink_dataset_from_data_output(
     return DataOutputService().unlink_dataset_from_data_output(
         id, dataset_id, authenticated_user, db
     )
+
+
+@router.get("/{id}/graph")
+def get_graph_data(
+    id: UUID, db: Session = Depends(get_db_session), level: int = 3
+) -> Graph:
+    return DataOutputService().get_graph_data(id, level, db)
 
 
 @router.get("/{id}/data_contracts")

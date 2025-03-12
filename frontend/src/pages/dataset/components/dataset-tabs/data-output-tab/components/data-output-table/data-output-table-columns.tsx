@@ -1,14 +1,16 @@
 import { Badge, Button, Flex, Popconfirm, TableColumnsType } from 'antd';
-import styles from './data-output-table.module.scss';
 import { TFunction } from 'i18next';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
-import { DataOutputLink } from '@/types/dataset';
-import { getDataOutputIcon } from '@/utils/data-output-type.helper';
-import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { DataOutputDatasetLinkRequest, DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
+import { DataOutputLink } from '@/types/dataset';
+import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
+import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
+
+import styles from './data-output-table.module.scss';
 
 type Props = {
     t: TFunction;
@@ -36,34 +38,7 @@ export const getDatasetDataProductsColumns = ({
             hidden: true,
         },
         {
-            title: t('Name'),
-            dataIndex: 'name',
-            render: (_, { data_output, status }) => {
-                return (
-                    <TableCellAvatar
-                        popover={{ title: data_output.name, content: data_output.description }}
-                        linkTo={createDataOutputIdPath(data_output.id, data_output.owner.id)}
-                        icon={
-                            <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(data_output.configuration.configuration_type)!}
-                                size={'default'}
-                            />
-                        }
-                        title={data_output.name}
-                        subtitle={
-                            <Badge
-                                status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(status)}
-                                className={styles.noSelect}
-                            />
-                        }
-                    />
-                );
-            },
-            width: '50%',
-        },
-        {
-            title: t('Data Product'),
+            title: t('Produced by Data Product'),
             dataIndex: 'dataproduct',
             render: (_, { data_output, status }) => {
                 return (
@@ -80,7 +55,34 @@ export const getDatasetDataProductsColumns = ({
                         subtitle={
                             <Badge
                                 status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(status)}
+                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
+                                className={styles.noSelect}
+                            />
+                        }
+                    />
+                );
+            },
+            width: '50%',
+        },
+        {
+            title: t('Data Output name'),
+            dataIndex: 'name',
+            render: (_, { data_output, status }) => {
+                return (
+                    <TableCellAvatar
+                        popover={{ title: data_output.name, content: data_output.description }}
+                        linkTo={createDataOutputIdPath(data_output.id, data_output.owner.id)}
+                        icon={
+                            <CustomSvgIconLoader
+                                iconComponent={getDataOutputIcon(data_output.configuration.configuration_type)!}
+                                size={'default'}
+                            />
+                        }
+                        title={data_output.name}
+                        subtitle={
+                            <Badge
+                                status={getDataOutputDatasetLinkBadgeStatus(status)}
+                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }

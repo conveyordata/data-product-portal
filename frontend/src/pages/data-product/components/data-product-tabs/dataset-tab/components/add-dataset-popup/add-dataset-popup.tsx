@@ -1,22 +1,24 @@
 import { Button, Form, List, Typography } from 'antd';
+import { TFunction } from 'i18next';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
+import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title.tsx';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import {
     useGetDataProductByIdQuery,
     useRequestDatasetAccessForDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DatasetsGetContract } from '@/types/dataset';
-import { useCallback, useMemo } from 'react';
-import { SearchForm } from '@/types/shared';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { DatasetLink } from '@/types/data-product';
-import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { TFunction } from 'i18next';
+import { DatasetsGetContract } from '@/types/dataset';
+import { SearchForm } from '@/types/shared';
+
 import styles from './add-dataset-popup.module.scss';
-import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title.tsx';
 
 type Props = {
     onClose: () => void;
@@ -108,7 +110,7 @@ export function AddDatasetPopup({ onClose, isOpen, dataProductId }: Props) {
                                 }
                                 subtitle={
                                     <Typography.Link className={styles.noCursorPointer}>
-                                        {item.business_area.name}
+                                        {item.domain.name}
                                     </Typography.Link>
                                 }
                             />

@@ -1,14 +1,16 @@
 import { Flex, Table, TableColumnsType } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import styles from './schema-table.module.scss';
+
 import { useGetDataContractByIdQuery } from '@/store/features/data-contracts/data-contracts-api-slice';
 import { ColumnContract } from '@/types/data-contract/column.contract.ts';
+
+import styles from './schema-table.module.scss';
 import { getSchemaColumns } from './schema-table-columns.tsx';
 
 type Props = {
     dataContractId: string;
-}
+};
 
 export function SchemaTable({ dataContractId }: Props) {
     const { t } = useTranslation();

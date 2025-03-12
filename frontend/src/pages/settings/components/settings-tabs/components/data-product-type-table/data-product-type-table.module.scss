@@ -1,0 +1,46 @@
+@use '@/styles/globals';
+
+.table-container {
+    width: 100%;
+    height: 100%;
+    gap: globals.$column-gap-l;
+    margin-bottom: globals.$column-gap-l;
+
+    .add-container {
+        justify-content: space-between;
+        align-items: center;
+        gap: globals.$column-gap-xs;
+
+        h3 {
+            margin: 0;
+            text-wrap: avoid;
+            white-space: nowrap;
+        }
+    }
+}
+
+.table {
+    width: 100%;
+    height: 100%;
+
+    .row {
+        &:hover {
+            cursor: pointer;
+        }
+    }
+}
+
+.custom-icon {
+    height: globals.$icon-size-table-cell;
+    width: globals.$icon-size-table-cell;
+    color: globals.$primary-color;
+
+    svg {
+        height: globals.$icon-size-table-cell;
+        width: globals.$icon-size-table-cell;
+    }
+}
+
+.icon-select {
+    color: globals.$primary-color;
+}

@@ -1,0 +1,59 @@
+@use '@/styles/globals';
+@use '@/styles/colors';
+
+.table-container {
+    max-width: fit-content;
+    height: 100%;
+    gap: globals.$column-gap-l;
+}
+
+.table {
+    width: 100%;
+    height: 100%;
+
+    .row {
+        &:hover {
+            cursor: pointer;
+        }
+    }
+}
+
+.permissions-column {
+    background: var(--ant-table-header-bg) !important;
+    border-right: calc(2 * var(--ant-line-width)) var(--ant-line-type) var(--ant-table-border-color);
+
+    &:has(> .permission-group) {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+    }
+}
+
+.permission-instance {
+    margin-left: 1.5rem;
+}
+
+.tag-wrapper {
+    @include globals.no-select();
+    gap: globals.$column-gap-xs;
+}
+
+.icon-wrapper {
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+
+    .icon {
+        height: globals.$icon-size-table-cell;
+        width: globals.$icon-size-table-cell;
+    }
+}
+
+// Remove column separator for first row
+.table-container table > thead > tr > th:first-child::before {
+    display: none;
+}
+
+// Add border radius for bottom left cell as well
+.table-container table > tbody > tr:last-child > :first-child {
+    border-end-start-radius: var(--ant-table-header-border-radius);
+}

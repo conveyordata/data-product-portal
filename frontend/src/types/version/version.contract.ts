@@ -1,6 +1,6 @@
 export interface VersionContract {
-    version: string
+    version: string;
 }
 
 export interface VersionModel extends VersionContract {}
-export type VersionResponse = VersionContract
+export type VersionResponse = VersionContract;

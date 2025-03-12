@@ -1,8 +1,8 @@
-@use '@/styles/globals' ;
+@use '@/styles/globals';
 
 .user-menu-container {
     align-items: center;
-    gap: globals.$column-gap-l;
+    gap: globals.$column-gap-m;
 }
 
 .avatar-wrapper {

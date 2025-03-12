@@ -1,7 +1,9 @@
 import { Flex, Popover, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+
 import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+
 import styles from './restricted-dataset-title.module.scss';
 
 type Props = {

@@ -1,17 +1,17 @@
-import { TagCreate } from '@/types/tag';
-import { DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 import { DataProductContract } from '@/types/data-product/data-product-contract.ts';
+import { DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 
-export type DataProductCreate = Pick<DataProductContract, 'name' | 'description' | 'type_id' | 'business_area_id'> & {
+export type DataProductCreate = Pick<
+    DataProductContract,
+    'name' | 'description' | 'type_id' | 'lifecycle_id' | 'domain_id' | 'tag_ids'
+> & {
     external_id: string;
     memberships: DataProductUserMembershipCreateContract[];
-    tags: TagCreate[];
 };
 
-export type DataProductCreateFormSchema = Omit<DataProductCreate, 'tags'> & {
+export type DataProductCreateFormSchema = DataProductCreate & {
     owners: string[];
     members: string[];
-    tags: string[];
 };
 
 export type DataProductCreateResponse = {

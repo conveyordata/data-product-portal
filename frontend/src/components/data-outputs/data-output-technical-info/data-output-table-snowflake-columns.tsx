@@ -1,15 +1,14 @@
 import { TableColumnsType } from 'antd';
 import { TFunction } from 'i18next';
-import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
+
 import { SnowflakeDataOutputContract } from '@/types/data-output';
+import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
 
 type Props = {
     t: TFunction;
 };
 
-export const getSnowflakeTechnicalInformationColumns = ({
-    t,
-}: Props): TableColumnsType<TechnicalInfoContract> => {
+export const getSnowflakeTechnicalInformationColumns = ({ t }: Props): TableColumnsType<TechnicalInfoContract> => {
     return [
         {
             title: t('Id'),
@@ -20,7 +19,7 @@ export const getSnowflakeTechnicalInformationColumns = ({
             title: t('Environment'),
             dataIndex: 'environment',
             render: (_, { environmentConfig }) => {
-                return environmentConfig.environment.name
+                return environmentConfig.environment.name;
             },
             width: '30%',
         },
@@ -28,9 +27,10 @@ export const getSnowflakeTechnicalInformationColumns = ({
             title: t('Schema'),
             dataIndex: 'schema',
             render: (_, { data_output }) => {
-                const configuration: SnowflakeDataOutputContract = data_output.configuration as SnowflakeDataOutputContract
+                const configuration: SnowflakeDataOutputContract =
+                    data_output.configuration as SnowflakeDataOutputContract;
                 // TODO figure out how to use product aligned databases here and get their ARN?
-                return configuration.schema + "__" + configuration.schema_suffix
+                return `${configuration.database}__${configuration.schema}`;
             },
             width: '30%',
         },

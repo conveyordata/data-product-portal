@@ -1,12 +1,14 @@
 import { Form, FormProps, Select } from 'antd';
-import styles from './role-change-form.module.scss';
+import { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
+
 import {
     DataProductMembershipRole,
     DataProductMembershipRoleType,
     DataProductUserMembership,
 } from '@/types/data-product-membership';
-import { TFunction } from 'i18next';
-import { useTranslation } from 'react-i18next';
+
+import styles from './role-change-form.module.scss';
 
 type UserRoleForm = {
     role: DataProductMembershipRoleType;

@@ -1,19 +1,17 @@
-import { Flex, Layout, Typography, Menu, MenuProps, Space } from 'antd';
-import styles from './sidebar.module.scss';
-import React from 'react';
-import { Link, useMatches } from 'react-router-dom';
-import { ApplicationPaths } from '@/types/navigation.ts';
-import Icon, { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { Flex, Layout, Menu, type MenuProps, Space } from 'antd';
+import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
-import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
-import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
 import { useSelector } from 'react-redux';
+import { Link, useMatches } from 'react-router';
+
+import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
+import { DataProductOutlined, DatasetOutlined, ProductLogo } from '@/components/icons';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
+import { ApplicationPaths } from '@/types/navigation.ts';
 
-const DataProductIcon = () => <Icon component={dataProductOutlineIcon} />;
-const DatasetIcon = () => <Icon component={datasetOutlineIcon} />;
+import styles from './sidebar.module.scss';
 
 export const Sidebar = () => {
     const matches = useMatches();
@@ -24,22 +22,22 @@ export const Sidebar = () => {
     let navigationMenuItems: MenuProps['items'] = [
         {
             label: <Link to={ApplicationPaths.Home}>{t('Home')}</Link>,
-            icon: React.createElement(HomeOutlined),
+            icon: <HomeOutlined />,
             key: ApplicationPaths.Home,
         },
         {
             label: <Link to={ApplicationPaths.DataProducts}>{t('Data Products')}</Link>,
-            icon: React.createElement(DataProductIcon),
+            icon: <DataProductOutlined />,
             key: ApplicationPaths.DataProducts,
         },
         {
-            label: <Link to={ApplicationPaths.Datasets}>{t('Datasets')}</Link>,
-            icon: React.createElement(DatasetIcon),
+            label: <Link to={ApplicationPaths.Datasets}>{t('Marketplace')}</Link>,
+            icon: <DatasetOutlined />,
             key: ApplicationPaths.Datasets,
         },
         {
             label: <Link to={ApplicationPaths.AuditLogs}>{t('Audit Logs')}</Link>,
-            icon: React.createElement(UnorderedListOutlined),
+            icon: <UnorderedListOutlined />,
             key: ApplicationPaths.AuditLogs,
         },
     ];
@@ -48,27 +46,9 @@ export const Sidebar = () => {
         navigationMenuItems = [
             ...navigationMenuItems,
             {
-                label: t('Configure'),
-                icon: React.createElement(SettingOutlined),
-                key: 'Configure',
-                children: [
-                    {
-                        key: ApplicationPaths.PlatformsConfigs,
-                        label: (
-                            <span className={styles.subMenuTitle}>
-                                <Link to={ApplicationPaths.PlatformsConfigs}>{t('Platforms Configurations')}</Link>
-                            </span>
-                        ),
-                    },
-                    {
-                        key: ApplicationPaths.Environments,
-                        label: (
-                            <span className={styles.subMenuTitle}>
-                                <Link to={ApplicationPaths.Environments}>{t('Environments')}</Link>
-                            </span>
-                        ),
-                    },
-                ],
+                label: <Link to={ApplicationPaths.Settings}>{t('Settings')}</Link>,
+                icon: <SettingOutlined />,
+                key: 'Settings',
             },
         ];
     }
@@ -78,15 +58,18 @@ export const Sidebar = () => {
 
     return (
         <Layout.Sider className={styles.sidebarWrapper}>
-            <Flex vertical className={styles.sidebarContent}>
-                <Space className={styles.logoWrapper}>
-                    <Link to={ApplicationPaths.Home}>
-                        <SidebarLogo />
-                        {version ? version.version : ""}
-                    </Link>
-                </Space>
-                <Menu theme="dark" mode="vertical" selectedKeys={[rootPath]} items={navigationMenuItems} />
+            <Flex className={styles.logoContainer}>
+                <ProductLogo className={clsx([styles.defaultIcon, styles.sidebarContent, styles.iconWrapper])} />
+                <Flex vertical className={styles.sidebarContent}>
+                    <Space className={styles.logoWrapper}>
+                        <Link to={ApplicationPaths.Home}>
+                            <SidebarLogo />
+                            {version ? version.version : ''}
+                        </Link>
+                    </Space>
+                </Flex>
             </Flex>
+            <Menu theme="dark" mode="vertical" selectedKeys={[rootPath]} items={navigationMenuItems} />
         </Layout.Sider>
     );
 };

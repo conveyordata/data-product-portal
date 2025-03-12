@@ -12,7 +12,10 @@ export function isDataProductEditPage(path: string, dataProductId: string) {
 
 export function isDataOutputEditPage(path: string, dataOutputId: string, dataProductId: string) {
     return (
-        getDynamicRoutePath(ApplicationPaths.DataOutputEdit, DynamicPathParams.DataOutputId, dataOutputId).replace(":" + DynamicPathParams.DataProductId, dataProductId) === path
+        getDynamicRoutePath(ApplicationPaths.DataOutputEdit, DynamicPathParams.DataOutputId, dataOutputId).replace(
+            ':' + DynamicPathParams.DataProductId,
+            dataProductId,
+        ) === path
     );
 }
 

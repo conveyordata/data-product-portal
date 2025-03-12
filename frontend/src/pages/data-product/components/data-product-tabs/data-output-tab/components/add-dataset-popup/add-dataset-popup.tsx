@@ -1,21 +1,23 @@
 import { Button, Form, List, Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DatasetsGetContract } from '@/types/dataset';
+import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
-import { SearchForm } from '@/types/shared';
-import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+import { useTranslation } from 'react-i18next';
+
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { TFunction } from 'i18next';
-import styles from './add-dataset-popup.module.scss';
-import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import {
     useGetDataOutputByIdQuery,
     useRequestDatasetAccessForDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
+import { DatasetsGetContract } from '@/types/dataset';
+import { SearchForm } from '@/types/shared';
+
+import styles from './add-dataset-popup.module.scss';
 
 type Props = {
     onClose: () => void;
@@ -36,7 +38,6 @@ const handleDatasetListFilter = (datasets: DatasetsGetContract, searchTerm: stri
         return dataset?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     });
 };
-
 
 const getActionButtonText = (t: TFunction) => {
     return t('Request Link');
@@ -63,15 +64,16 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
             try {
                 await requestDatasetAccessForDataOutput({ dataOutputId: dataOutputId, datasetId }).unwrap();
 
-                const content = t('Dataset link has been requested')
+                const content = t('Dataset link has been requested');
                 dispatchMessage({ content, type: 'success' });
                 onClose();
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to link dataset to data output'), type: 'error' });
             }
         },
-        [dataOutputId, t, requestDatasetAccessForDataOutput],
+        [requestDatasetAccessForDataOutput, dataOutputId, t, onClose],
     );
+
     return (
         <DataProductDatasetLinkPopup
             onClose={onClose}
@@ -96,7 +98,7 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                                 title={item.name}
                                 subtitle={
                                     <Typography.Link className={styles.noCursorPointer}>
-                                        {item.business_area.name}
+                                        {item.domain.name}
                                     </Typography.Link>
                                 }
                             />

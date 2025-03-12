@@ -5,7 +5,6 @@ from sqlalchemy import Boolean, Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, relationship
 
-from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.schema import DataOutput as DataOutputSchema
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
@@ -18,6 +17,7 @@ from app.database.database import Base, ensure_exists
 from app.platform_services.schema import PlatformService
 from app.platforms.schema import Platform
 from app.shared.model import BaseORM
+from app.tags.model import Tag, tag_data_output_table
 
 
 def ensure_data_output_exists(data_output_id: UUID, db: Session) -> DataOutputSchema:
@@ -37,7 +37,6 @@ class DataOutput(Base, BaseORM):
     owner: Mapped["DataProduct"] = relationship(back_populates="data_outputs")
     configuration: Mapped["BaseDataOutputConfiguration"] = relationship()
     configuration_id: Mapped[UUID] = Column(ForeignKey("data_output_configurations.id"))
-    configuration_type: Mapped[DataOutputTypes] = Column(Enum(DataOutputTypes))
     dataset_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
         "DataOutputDatasetAssociation",
         back_populates="data_output",
@@ -48,3 +47,6 @@ class DataOutput(Base, BaseORM):
 
     platform: Mapped["Platform"] = relationship()
     service: Mapped["PlatformService"] = relationship()
+    tags: Mapped[list[Tag]] = relationship(
+        secondary=tag_data_output_table, back_populates="data_outputs"
+    )

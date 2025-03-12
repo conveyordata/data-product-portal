@@ -5,7 +5,7 @@
 [![Issues][issues-shield]][issues-url]
 [![APACHE License][license-shield]][license-url]
 [![OpenSSF Scorecard][scorecard-shield]][scorecard-url]
-
+[![Nightly Docker Compose][nightly-docker-shield]][nightly-docker-url]
 
 # Data Product Portal
 
@@ -25,7 +25,7 @@ data sources, and sharing concepts, ensuring control and oversight for business 
 Our goal is to bridge the gap between data governance, data platforms and data catalogs and provide a 360 view of all
 ongoing data initiatives that is easy to understand by everybody.
 
-To read more about it, please checkout our [announcement blogpost](https://conveyordata.com/portal-introducing-new-open-source-data-product-portal?utm_source=github-portal-readme&utm_medium=referral)
+To read more about it, please check out our [announcement blogpost](https://conveyordata.com/portal-introducing-new-open-source-data-product-portal?utm_source=github-portal-readme&utm_medium=referral)
 
 ## Who is it for?
 
@@ -232,3 +232,7 @@ Project Link: [https://github.com/conveyordata/data-product-portal](https://gith
 [license-url]: https://github.com/conveyordata/data-product-portal/blob/master/LICENSE.md
 
 [product-screenshot]: images/screenshot.png
+
+[nightly-docker-shield]: https://img.shields.io/github/actions/workflow/status/conveyordata/data-product-portal/nightly-build.yml?label=Nightly%20Docker%20Compose&style=for-the-badge
+
+[nightly-docker-url]: https://github.com/conveyordata/data-product-portal/actions/workflows/nightly-build.yml

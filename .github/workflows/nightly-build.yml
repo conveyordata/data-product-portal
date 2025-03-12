@@ -1,0 +1,35 @@
+name: Nightly Docker Compose Test
+on:
+  schedule:
+    - cron: '0 2 * * *'
+permissions:
+  contents: read
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Test Docker Compose
+        run: |
+            docker compose up -d
+            docker compose ps
+            sleep 30
+      - name: Test Curl command
+        id: run_command
+        run: |
+            STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" localhost:8080)
+            echo "Status code: $STATUS_CODE"
+            # Set the output for GitHub Actions
+            echo "::set-output name=status_code::$STATUS_CODE"
+      - name: Check command success
+        if: ${{ steps.run_command.outputs.status_code == '200' }}
+        run: echo "Command was successful (200)"
+
+      - name: Check command failure
+        if: ${{ steps.run_command.outputs.status_code != '200' }}
+        run: |
+          echo "Command failed with status code ${{ steps.run_command.outputs.status_code }}"
+          exit 1

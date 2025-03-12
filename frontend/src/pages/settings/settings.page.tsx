@@ -1,8 +1,10 @@
-import { Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
+import { SettingsTabs } from './components/settings-tabs/settings-tabs.component.tsx';
+import styles from './settings.module.scss';
 
 export function Settings() {
-    const { t } = useTranslation();
-
-    return <Typography.Title level={3}>{t('Settings')}</Typography.Title>;
+    return (
+        <div className={styles.container}>
+            <SettingsTabs />
+        </div>
+    );
 }

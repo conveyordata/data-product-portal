@@ -1,7 +1,7 @@
 repos:
 # Common git hooks
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v5.0.0
   hooks:
     # Git style
     - id: check-added-large-files
@@ -30,7 +30,7 @@ repos:
 
 # Python
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.9.0
+  rev: v1.14.1
   hooks:
     - id: mypy
       additional_dependencies:
@@ -38,26 +38,34 @@ repos:
       - types-requests
       - types-pytz
 - repo: https://github.com/pycqa/flake8
-  rev: 7.0.0
+  rev: 7.1.1
   hooks:
     - id: flake8
       additional_dependencies: [flake8-black]
 - repo: https://github.com/psf/black
-  rev: 24.3.0
+  rev: 25.1.0
   hooks:
     - id: black
+- repo: https://github.com/pycqa/isort
+  rev: 6.0.0
+  hooks:
+    - id: isort
+      name: isort (python)
+- repo: https://github.com/gitleaks/gitleaks
+  rev: v8.23.2
+  hooks:
+    - id: gitleaks
 - repo: local
   hooks:
     - id: add-helm-version
       name: add-helm-version
       entry: ./add_helm_version.sh
       language: script
-- repo: https://github.com/pycqa/isort
-  rev: 5.12.0
-  hooks:
-    - id: isort
-      name: isort (python)
-- repo: https://github.com/gitleaks/gitleaks
-  rev: v8.16.3
-  hooks:
-    - id: gitleaks
+    - id: prettier
+      name: prettier
+      entry: bash -c "cd frontend && npm run format"
+      language: node
+    - id: lint
+      name: lint
+      entry: bash -c "cd frontend && npm run lint"
+      language: node

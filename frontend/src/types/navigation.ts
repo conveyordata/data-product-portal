@@ -1,7 +1,6 @@
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
-import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/dataset-tab/dataset-tab';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
-
+import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 
 export enum ApplicationPaths {
     Home = '/',
@@ -17,7 +16,6 @@ export enum ApplicationPaths {
     DataOutputNew = '/data-outputs/new',
     DataOutputEdit = '/data-products/:dataProductId/:dataOutputId/edit',
     AuditLogs = '/audit-logs',
-    // Settings = '/settings',
     Logout = '/logout',
     PlatformsConfigs = '/platforms-configs',
     PlatformServiceConfigNew = '/platforms-configs/new',
@@ -27,6 +25,9 @@ export enum ApplicationPaths {
     EnvironmentConfig = '/environments/configs/:envConfigId',
     EnvironmentConfigNew = '/environments/:environmentId/new',
     EnvironmentNew = '/environments/new',
+    Settings = '/settings',
+    DataProductLifecycles = '/data-product-lifecycles',
+    RoleConfiguration = '/configuration/roles',
 }
 
 export const authenticatedPaths: string[] = [
@@ -35,12 +36,12 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.DataProduct,
     ApplicationPaths.DataProductNew,
     ApplicationPaths.DataProductEdit,
+    ApplicationPaths.Settings,
     ApplicationPaths.Datasets,
     ApplicationPaths.Dataset,
     ApplicationPaths.AuditLogs,
     ApplicationPaths.DataOutput,
     ApplicationPaths.DataOutputEdit,
-    // ApplicationPaths.Settings,
     ApplicationPaths.PlatformsConfigs,
     ApplicationPaths.PlatformServiceConfig,
     ApplicationPaths.PlatformServiceConfigNew,
@@ -51,16 +52,27 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.EnvironmentConfigNew,
 ];
 
-export function createDataProductIdPath(dataProductId: string) {
-    return ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId)) + '#' + DataProductTabKeys.About;
+export function createDataProductIdPath(dataProductId: string, tabKey: DataProductTabKeys = DataProductTabKeys.About) {
+    return ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId)) + '#' + tabKey;
 }
 
-export function createDataOutputIdPath(dataOutputId: string, dataProductId: string) {
-    return ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(':dataOutputId', encodeURIComponent(dataOutputId));
+export function createDataOutputIdPath(
+    dataOutputId: string,
+    dataProductId: string,
+    tabKey: DataOutputTabKeys = DataOutputTabKeys.Datasets,
+) {
+    return (
+        ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(
+            ':dataOutputId',
+            encodeURIComponent(dataOutputId),
+        ) +
+        '#' +
+        tabKey
+    );
 }
 
-export function createDatasetIdPath(datasetId: string) {
-    return ApplicationPaths.Dataset.replace(':datasetId', encodeURIComponent(datasetId)) + '#' + DatasetTabKeys.About;
+export function createDatasetIdPath(datasetId: string, tabKey: DatasetTabKeys = DatasetTabKeys.About) {
+    return ApplicationPaths.Dataset.replace(':datasetId', encodeURIComponent(datasetId)) + '#' + tabKey;
 }
 
 export function createPlatformServiceConfigIdPath(platformServiceConfigId: string) {
@@ -94,5 +106,5 @@ export enum ApplicationPageTitles {
     Datasets = 'Datasets',
     Dataset = 'Dataset',
     AuditLogs = 'Audit Logs',
-    // Settings = 'Settings',
+    Settings = 'Settings',
 }

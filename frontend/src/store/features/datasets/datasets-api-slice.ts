@@ -1,7 +1,6 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
 import {
     DatasetContract,
     DatasetCreateRequest,
@@ -9,6 +8,8 @@ import {
     DatasetUpdateRequest,
     DatasetUpdateResponse,
 } from '@/types/dataset';
+import { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
+import { GraphContract } from '@/types/graph/graph-contract';
 
 export const datasetTags: string[] = [TagTypes.Dataset, TagTypes.UserDatasets, TagTypes.DataProduct];
 
@@ -122,6 +123,12 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
+        getDatasetGraphData: builder.query<GraphContract, string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DatasetGraph, { datasetId: id }),
+                method: 'GET',
+            }),
+        }),
         removeUserFromDataset: builder.mutation<
             void,
             {
@@ -152,4 +159,5 @@ export const {
     useGetUserDatasetsQuery,
     useAddUserToDatasetMutation,
     useRemoveUserFromDatasetMutation,
+    useGetDatasetGraphDataQuery,
 } = datasetsApiSlice;

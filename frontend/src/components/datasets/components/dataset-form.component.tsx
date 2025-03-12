@@ -1,27 +1,31 @@
 import { Button, CheckboxOptionType, Form, FormProps, Input, Popconfirm, Radio, Select, Space } from 'antd';
-import { useTranslation } from 'react-i18next';
-import styles from './dataset-form.module.scss';
-import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
-import { TagCreate } from '@/types/tag';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import type { TFunction } from 'i18next';
 import { useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
-import { useGetAllBusinessAreasQuery } from '@/store/features/business-areas/business-areas-api-slice.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
+
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
     useRemoveDatasetMutation,
     useUpdateDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
+import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
+import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { DatasetAccess, DatasetCreateFormSchema, DatasetCreateRequest, DatasetUpdateRequest } from '@/types/dataset';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-import { getDatasetOwnerIds, getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
+import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import { getDatasetOwnerIds, getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
+import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
+import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+
+import styles from './dataset-form.module.scss';
 
 type Props = {
     mode: 'create' | 'edit';
@@ -30,14 +34,14 @@ type Props = {
 
 const { TextArea } = Input;
 
-const getAccessTypeOptions = () => [
+const getAccessTypeOptions = (t: TFunction) => [
     {
         value: DatasetAccess.Public,
-        label: getDatasetAccessTypeLabel(DatasetAccess.Public),
+        label: getDatasetAccessTypeLabel(t, DatasetAccess.Public),
     },
     {
         value: DatasetAccess.Restricted,
-        label: getDatasetAccessTypeLabel(DatasetAccess.Restricted),
+        label: getDatasetAccessTypeLabel(t, DatasetAccess.Restricted),
     },
 ];
 
@@ -48,11 +52,13 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const { data: currentDataset, isFetching: isFetchingInitialValues } = useGetDatasetByIdQuery(datasetId || '', {
         skip: mode === 'create' || !datasetId,
     });
-    const { data: businessAreas = [], isFetching: isFetchingBusinessAreas } = useGetAllBusinessAreasQuery();
+    const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
+    const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
+    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
-    const [archiveDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
+    const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
     const [form] = Form.useForm<DatasetCreateFormSchema>();
     const datasetNameValue = Form.useWatch('name', form);
 
@@ -64,25 +70,24 @@ export function DatasetForm({ mode, datasetId }: Props) {
     );
     const canFillInForm = mode === 'create' || canEditForm;
 
-    const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues;
+    const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingTags;
 
-    const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(), []);
-    const businessAreaSelectOptions = businessAreas.map((area) => ({ label: area.name, value: area.id }));
+    const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
+    const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = users.map((user) => ({ label: user.email, value: user.id }));
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
     const onFinish: FormProps<DatasetCreateFormSchema>['onFinish'] = async (values) => {
         try {
-            // Right now we are only creating tags and not reusing yet existing ones
-            const tags: TagCreate[] = values.tags?.map((tag: string) => ({ value: tag })) ?? [];
-
             if (mode === 'create') {
                 const request: DatasetCreateRequest = {
                     name: values.name,
                     external_id: values.external_id,
                     description: values.description,
                     owners: values.owners,
-                    tags: tags,
-                    business_area_id: values.business_area_id,
+                    tag_ids: values.tag_ids ?? [],
+                    domain_id: values.domain_id,
+                    lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
                 const response = await createDataset(request).unwrap();
@@ -100,8 +105,9 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     external_id: values.external_id,
                     description: values.description,
                     owners: values.owners,
-                    tags: tags,
-                    business_area_id: values.business_area_id,
+                    tag_ids: values.tag_ids,
+                    domain_id: values.domain_id,
+                    lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
 
@@ -131,15 +137,15 @@ export function DatasetForm({ mode, datasetId }: Props) {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
-    const handleArchiveDataset = async () => {
+    const handleDeleteDataset = async () => {
         if (canEditForm && currentDataset) {
             try {
-                await archiveDataset(currentDataset?.id).unwrap();
-                dispatchMessage({ content: t('Dataset archived successfully'), type: 'success' });
+                await deleteDataset(currentDataset?.id).unwrap();
+                dispatchMessage({ content: t('Dataset deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Datasets);
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to archive dataset, please try again later'),
+                    content: t('Failed to delete dataset, please try again later'),
                     type: 'error',
                 });
             }
@@ -159,8 +165,9 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 name: currentDataset.name,
                 description: currentDataset.description,
                 access_type: currentDataset.access_type,
-                business_area_id: currentDataset.business_area.id,
-                tags: currentDataset.tags.map((tag) => tag.value),
+                domain_id: currentDataset.domain.id,
+                tag_ids: currentDataset.tags.map((tag) => tag.id),
+                lifecycle_id: currentDataset.lifecycle.id,
                 owners: getDatasetOwnerIds(currentDataset),
             });
         }
@@ -222,21 +229,39 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>
-                name={'business_area_id'}
-                label={t('Business Area')}
+                name={'domain_id'}
+                label={t('Domain')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the business area of the dataset'),
+                        message: t('Please select the domain of the dataset'),
                     },
                 ]}
             >
                 <Select
-                    loading={isFetchingBusinessAreas}
-                    options={businessAreaSelectOptions}
+                    loading={isFetchingDomains}
+                    options={domainSelectOptions}
                     filterOption={selectFilterOptionByLabelAndValue}
                     allowClear
                     showSearch
+                />
+            </Form.Item>
+            <Form.Item<DatasetCreateFormSchema>
+                name={'lifecycle_id'}
+                label={t('Status')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please select the status of the dataset'),
+                    },
+                ]}
+            >
+                <Select
+                    loading={isFetchingLifecycles}
+                    allowClear
+                    showSearch
+                    options={lifecycles.map((lifecycle) => ({ value: lifecycle.id, label: lifecycle.name }))}
+                    filterOption={selectFilterOptionByLabelAndValue}
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>
@@ -253,8 +278,14 @@ export function DatasetForm({ mode, datasetId }: Props) {
             >
                 <Radio.Group options={accessTypeOptions} />
             </Form.Item>
-            <Form.Item<DatasetCreateFormSchema> name={'tags'} label={t('Tags')}>
-                <Select tokenSeparators={[',']} placeholder={t('Select dataset tags')} mode={'tags'} options={[]} />
+            <Form.Item<DatasetCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+                <Select
+                    tokenSeparators={[',']}
+                    placeholder={t('Select dataset tags')}
+                    mode={'multiple'}
+                    options={tagSelectOptions}
+                    filterOption={selectFilterOptionByLabel}
+                />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>
                 name={'description'}
@@ -295,8 +326,8 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     </Button>
                     {canEditForm && (
                         <Popconfirm
-                            title={t('Are you sure you want to archive this dataset?')}
-                            onConfirm={handleArchiveDataset}
+                            title={t('Are you sure you want to delete this dataset?')}
+                            onConfirm={handleDeleteDataset}
                             okText={t('Yes')}
                             cancelText={t('No')}
                         >
@@ -307,7 +338,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                                 loading={isArchiving}
                                 disabled={isLoading}
                             >
-                                {t('Archive')}
+                                {t('Delete')}
                             </Button>
                         </Popconfirm>
                     )}

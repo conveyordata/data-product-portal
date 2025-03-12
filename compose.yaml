@@ -1,9 +1,16 @@
 services:
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+      - "1025:1025"
   backend:
     build: ./backend
     env_file:
       - .env.docker
     depends_on:
+      mailhog:
+         condition: service_started
       postgresql:
         condition: service_healthy
     command: >
@@ -18,7 +25,7 @@ services:
     volumes:
       - ${PWD:-.}/frontend/config.docker.js:/app/dist/config.js
   postgresql:
-    image: postgres:16.3-alpine
+    image: bitnami/postgresql:16.6.0
     container_name: data-product-portal-postgresql
     ports:
       - ${POSTGRES_PORT:-5432}:5432
@@ -32,8 +39,8 @@ services:
   nginx:
     build: ./nginx
     ports:
-      - 8080:80
-      - 5050:5050
+      - "8080:80"
+      - "5050:5050"
     depends_on:
       - backend
       - frontend

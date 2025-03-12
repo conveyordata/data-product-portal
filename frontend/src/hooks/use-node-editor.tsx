@@ -1,4 +1,4 @@
-import { defaultFitViewOptions, generateDagreLayout } from '@/utils/node-editor.helper.ts';
+import { useCallback, useEffect } from 'react';
 import {
     addEdge,
     Connection,
@@ -10,7 +10,8 @@ import {
     useNodesState,
     useReactFlow,
 } from 'reactflow';
-import { useCallback, useEffect } from 'react';
+
+import { defaultFitViewOptions, generateDagreLayout } from '@/utils/node-editor.helper.ts';
 
 const defaultNodeWidth = 180;
 const defaultNodeHeight = 80;
@@ -22,12 +23,15 @@ export function useNodeEditor() {
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { fitView } = useReactFlow();
 
-    const setNodesAndEdges = (nodes: Node[], edges: Edge[], direction: Position = defaultDirection) => {
-        const layouted = generateDagreLayout(nodes, edges, direction, defaultNodeWidth, defaultNodeHeight);
+    const setNodesAndEdges = useCallback(
+        (nodes: Node[], edges: Edge[], direction: Position = defaultDirection) => {
+            const layouted = generateDagreLayout(nodes, edges, direction, defaultNodeWidth, defaultNodeHeight);
 
-        setNodes([...layouted.nodes]);
-        setEdges([...layouted.edges]);
-    };
+            setNodes([...layouted.nodes]);
+            setEdges([...layouted.edges]);
+        },
+        [setEdges, setNodes],
+    );
 
     const onConnect: OnConnect = useCallback(
         (params: Connection) => {
@@ -41,7 +45,7 @@ export function useNodeEditor() {
         window.requestAnimationFrame(() => {
             fitView(defaultFitViewOptions);
         });
-    }, [nodes, edges]);
+    }, [nodes, edges, fitView]);
 
     return {
         setNodesAndEdges,

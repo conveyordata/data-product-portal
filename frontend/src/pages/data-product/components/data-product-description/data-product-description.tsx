@@ -1,17 +1,20 @@
-import styles from './data-product-description.module.scss';
-import { Badge, Flex, Space, Typography } from 'antd';
-import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
+import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DataProductStatus } from '@/types/data-product';
+
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { TagModel } from '@/types/tag';
+
+import styles from './data-product-description.module.scss';
 
 type Props = {
-    status: DataProductStatus;
+    lifecycle: DataProductLifeCycleContract;
     type: string;
     description: string;
-    businessArea: string;
+    domain: string;
+    tags: TagModel[];
 };
 
-export function DataProductDescription({ status, type, description, businessArea }: Props) {
+export function DataProductDescription({ lifecycle, type, description, domain, tags }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -20,21 +23,22 @@ export function DataProductDescription({ status, type, description, businessArea
                 <Space className={styles.contentSubtitle}>
                     <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Status')}</Typography.Text>
-                        <Badge
-                            status={getBadgeStatus(status)}
-                            text={getStatusLabel(status)}
-                            className={styles.noSelect}
-                        />
+                        <Tag color={lifecycle.color}>{lifecycle.name}</Tag>
                     </Flex>
                     <Flex className={styles.statusBadge}>
-                        <Typography.Text strong>{t('Business Area')}</Typography.Text>
-                        <Typography.Text>{businessArea}</Typography.Text>
+                        <Typography.Text strong>{t('Domain')}</Typography.Text>
+                        <Typography.Text>{domain}</Typography.Text>
                     </Flex>
                     <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Type')}</Typography.Text>
                         <Typography.Text>{type}</Typography.Text>
                     </Flex>
                 </Space>
+                <Flex>
+                    {tags.map((tag) => (
+                        <Tag color={tag.rolled_up ? 'red' : 'success'}>{tag.value}</Tag>
+                    ))}
+                </Flex>
                 <Space>
                     <Typography.Paragraph italic>{description}</Typography.Paragraph>
                 </Space>

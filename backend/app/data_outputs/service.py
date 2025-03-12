@@ -1,16 +1,23 @@
 from datetime import datetime
 from uuid import UUID
 
+import emailgen
 import pytz
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.email.send_mail import send_mail
 from app.data_contracts.model import DataContract as DataContractModel
 from app.data_contracts.schema import DataContractGet
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
-from app.data_outputs.schema import DataOutput, DataOutputCreate, DataOutputUpdate
+from app.data_outputs.schema import (
+    DataOutput,
+    DataOutputCreate,
+    DataOutputStatusUpdate,
+    DataOutputUpdate,
+)
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
@@ -18,7 +25,12 @@ from app.data_outputs_datasets.model import (
 )
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
+from app.graph.graph import Graph
+from app.settings import settings
+from app.tags.model import Tag as TagModel
+from app.tags.model import ensure_tag_exists
 from app.users.schema import User
 
 
@@ -68,6 +80,13 @@ class DataOutputService:
                 detail="Only owners can execute this operation",
             )
 
+    def _get_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
+        tags = []
+        for tag_id in tag_ids:
+            tag = ensure_tag_exists(tag_id, db)
+            tags.append(tag)
+        return tags
+
     def get_data_outputs(self, db: Session) -> list[DataOutput]:
         data_outputs = db.query(DataOutputModel).all()
         return data_outputs
@@ -88,7 +107,10 @@ class DataOutputService:
             # TODO Figure out if this validation needs to happen either way
             # somehow and let sourcealigned be handled internally there?
             data_output.configuration.validate_configuration(data_product)
-        data_output = DataOutputModel(**data_output.parse_pydantic_schema())
+
+        data_output = data_output.parse_pydantic_schema()
+        tags = self._get_tags(db, data_output.pop("tag_ids", []))
+        data_output = DataOutputModel(**data_output, tags=tags)
 
         db.add(data_output)
         db.commit()
@@ -109,12 +131,24 @@ class DataOutputService:
             )
         self.ensure_owner(authenticated_user, data_output, db)
         data_output.dataset_links = []
-        data_output.delete()
+        db.delete(data_output)
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
+    def update_data_output_status(
+        self, id: UUID, data_output: DataOutputStatusUpdate, db: Session
+    ):
+        current_data_output = ensure_data_output_exists(id, db)
+        current_data_output.status = data_output.status
+        db.commit()
+
     def link_dataset_to_data_output(
-        self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
+        self,
+        id: UUID,
+        dataset_id: UUID,
+        authenticated_user: User,
+        db: Session,
+        background_tasks: BackgroundTasks,
     ):
         dataset = ensure_dataset_exists(dataset_id, db)
         data_output = ensure_data_output_exists(id, db)
@@ -142,6 +176,32 @@ class DataOutputService:
         db.commit()
         db.refresh(data_output)
         RefreshInfrastructureLambda().trigger()
+        url = settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-output"
+        action = emailgen.Table(
+            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
+        )
+        action.add_row(
+            [
+                data_output.owner.name,
+                "Wants to provide data to ",
+                dataset.name,
+                ", ".join(
+                    [
+                        f"{owner.first_name} {owner.last_name}"
+                        for owner in dataset.owners
+                    ]
+                ),
+                f"{authenticated_user.first_name} {authenticated_user.last_name}",
+            ]
+        )
+        background_tasks.add_task(
+            send_mail,
+            [User.model_validate(owner) for owner in dataset.owners],
+            action,
+            url,
+            f"Action Required: {data_output.owner.name} wants "
+            f"to provide data to {dataset.name}",
+        )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_output(
@@ -172,10 +232,27 @@ class DataOutputService:
         update_data_output = data_output.model_dump(exclude_unset=True)
 
         for k, v in update_data_output.items():
-            setattr(current_data_output, k, v) if v else None
+            if k == "tag_ids":
+                new_tags = self._get_tags(db, v)
+                current_data_output.tags = new_tags
+            else:
+                setattr(current_data_output, k, v) if v else None
+
         db.commit()
         RefreshInfrastructureLambda().trigger()
         return {"id": current_data_output.id}
+
+    def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
+        dataOutput = db.get(DataOutputModel, id)
+        graph = DataProductService().get_graph_data(dataOutput.owner_id, level, db)
+
+        for node in graph.nodes:
+            if node.isMain:
+                node.isMain = False
+            if node.id == id:
+                node.isMain = True
+
+        return graph
 
     def get_data_contracts(
         self, data_output_id: UUID, db: Session

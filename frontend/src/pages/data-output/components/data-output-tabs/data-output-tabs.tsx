@@ -1,24 +1,24 @@
+import Icon, { CodeOutlined, FileProtectOutlined, PartitionOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
-import { ReactNode, useMemo } from 'react';
-import styles from './data-output-tabs.module.scss';
-import Icon, { FileProtectOutlined, CodeOutlined } from '@ant-design/icons';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
+import { useLocation, useNavigate } from 'react-router';
+import { ReactFlowProvider } from 'reactflow';
+
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
-import { TechnologiesTab } from './technologies-tab/technologies-tab';
+import { Explorer } from '@/components/explorer/explorer';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
+import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
+
 import { DataContractsTab } from './data-contracts-tab/data-contracts-tab';
+import styles from './data-output-tabs.module.scss';
+import { TechnologiesTab } from './technologies-tab/technologies-tab';
 
 type Props = {
     dataOutputId: string;
     isLoading: boolean;
 };
-
-enum TabKeys {
-    Datasets = 'datasets',
-    Technologies = 'technologies',
-    DataContracts = 'contracts'
-}
 
 type Tab = {
     label: string;
@@ -29,6 +29,21 @@ type Tab = {
 
 export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
     const { t } = useTranslation();
+
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.Datasets);
+
+    useEffect(() => {
+        const hash = location.hash.slice(1);
+        if (hash) {
+            setActiveTab(hash);
+        }
+    }, [location]);
+
+    const onTabChange = (key: string) => {
+        navigate(`#${key}`);
+    };
 
     const tabs: Tab[] = useMemo(() => {
         return [
@@ -42,13 +57,23 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 label: t('Technical information'),
                 key: TabKeys.Technologies,
                 icon: <CodeOutlined />,
-                children: <TechnologiesTab dataOutputId={dataOutputId} />
+                children: <TechnologiesTab dataOutputId={dataOutputId} />,
+            },
+            {
+                label: t('Explorer'),
+                key: TabKeys.Explorer,
+                icon: <PartitionOutlined />,
+                children: (
+                    <ReactFlowProvider>
+                        <Explorer id={dataOutputId} type={'dataoutput'} />
+                    </ReactFlowProvider>
+                ),
             },
             {
                 label: t('Data contracts'),
                 key: TabKeys.DataContracts,
                 icon: <FileProtectOutlined />,
-                children: <DataContractsTab dataOutputId={dataOutputId} />
+                children: <DataContractsTab dataOutputId={dataOutputId} />,
             },
         ];
     }, [dataOutputId, t]);
@@ -59,7 +84,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
 
     return (
         <Tabs
-            defaultActiveKey={TabKeys.Datasets}
+            activeKey={activeTab}
             items={tabs.map(({ key, label, icon, children }) => {
                 return {
                     label,
@@ -72,6 +97,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
             })}
             size={'middle'}
             rootClassName={styles.tabContainer}
+            onChange={onTabChange}
         />
     );
 }

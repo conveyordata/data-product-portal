@@ -1,9 +1,11 @@
-import { useAuth } from 'react-oidc-context';
+import { ArrowRightOutlined } from '@ant-design/icons';
 import { Button, Flex, Result, Typography, Watermark } from 'antd';
 import { useTranslation } from 'react-i18next';
-import styles from './logout.module.scss';
-import { ArrowRightOutlined } from '@ant-design/icons';
+import { useAuth } from 'react-oidc-context';
+
 import { LogoText } from '@/components/branding/logo/logo-text.tsx';
+
+import styles from './logout.module.scss';
 
 export function Logout() {
     const { t } = useTranslation();

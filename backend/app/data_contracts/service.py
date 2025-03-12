@@ -32,7 +32,7 @@ class DataContractService:
 
         data_contract.columns = []
         data_contract.service_level_objectives = []
-        data_contract.delete()
+        db.delete(data_contract)
         db.commit()
 
     def update_quality_score(

@@ -1,13 +1,6 @@
 @use '@/styles/globals';
 
 .container {
-    @extend .container;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: globals.$column-gap-l;
-}
-
-.form-container {
-    @extend .container;
-    gap: globals.$spacing-l;
+    height: auto;
+    width: 100%;
 }

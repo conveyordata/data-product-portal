@@ -1,24 +1,30 @@
-import { Button, Form, FormProps, Input, Popconfirm, Space } from 'antd';
-import { useTranslation } from 'react-i18next';
-import styles from './data-output-form.module.scss';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { useGetDataOutputByIdQuery, useRemoveDataOutputMutation, useUpdateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-import TextArea from 'antd/es/input/TextArea';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
+
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
+import {
+    useGetDataOutputByIdQuery,
+    useRemoveDataOutputMutation,
+    useUpdateDataOutputMutation,
+} from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
+import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
 import { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
-import { ApiUrl, buildUrl } from '@/api/api-urls';
+import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
+import { selectFilterOptionByLabel } from '@/utils/form.helper';
+
+import styles from './data-output-form.module.scss';
 
 type Props = {
     mode: 'edit';
-    dataOutputId: string
+    dataOutputId: string;
 };
 
 export function DataOutputForm({ mode, dataOutputId }: Props) {
@@ -26,32 +32,34 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const navigate = useNavigate();
     const { data: currentDataOutput, isFetching: isFetchingInitialValues } = useGetDataOutputByIdQuery(
         dataOutputId || '',
-        {
-            skip: !dataOutputId,
-        },
+        { skip: !dataOutputId },
     );
-    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? "", {skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId});
+    const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? '', {
+        skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
+    });
+    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
-    const [archiveDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
+    const [deleteDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
     const canEditForm = Boolean(
-            dataProduct &&
+        dataProduct &&
             currentUser?.id &&
             (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
     );
     const canFillInForm = canEditForm;
-    const isLoading = isFetchingInitialValues;
+    const isLoading = isFetchingInitialValues || isFetchingTags;
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
-    const handleArchiveDataProduct = async () => {
+    const handleDeleteDataProduct = async () => {
         if (canEditForm && currentDataOutput) {
             try {
-                await archiveDataOutput(currentDataOutput?.id).unwrap();
-                dispatchMessage({ content: t('Data output archived successfully'), type: 'success' });
+                await deleteDataOutput(currentDataOutput?.id).unwrap();
+                dispatchMessage({ content: t('Data output deleted successfully'), type: 'success' });
                 navigate(createDataProductIdPath(dataProduct!.id));
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to archive data output, please try again later'),
+                    content: t('Failed to delete data output, please try again later'),
                     type: 'error',
                 });
             }
@@ -63,14 +71,14 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 if (!canEditForm) {
                     dispatchMessage({ content: t('You are not allowed to edit this data output'), type: 'error' });
                     return;
-                };
+                }
 
                 // TODO Figure out what fields are updateable and which are not
                 const request: DataOutputUpdateRequest = {
                     name: values.name,
                     description: values.description,
+                    tag_ids: values.tag_ids ?? [],
                 };
-                console.log(buildUrl(ApiUrl.DataOutputGet, { dataOutputId: dataOutputId }),)
                 const response = await updateDataOutput({
                     dataOutput: request,
                     dataOutputId: dataOutputId,
@@ -104,9 +112,10 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                 owner_id: currentDataOutput.owner_id,
                 name: currentDataOutput.name,
                 description: currentDataOutput.description,
+                tag_ids: currentDataOutput.tags.map((tag) => tag.id),
             });
         }
-    }, [currentDataOutput, mode]);
+    }, [currentDataOutput, form, mode]);
 
     return (
         <Form
@@ -149,7 +158,16 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     },
                 ]}
             >
-                <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <Input.TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+            </Form.Item>
+            <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+                <Select
+                    tokenSeparators={[',']}
+                    placeholder={t('Select data output tags')}
+                    mode={'multiple'}
+                    options={tagSelectOptions}
+                    filterOption={selectFilterOptionByLabel}
+                />
             </Form.Item>
             <Form.Item>
                 <Space>
@@ -173,8 +191,8 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     </Button>
                     {canEditForm && (
                         <Popconfirm
-                            title={t('Are you sure you want to archive this data output?')}
-                            onConfirm={handleArchiveDataProduct}
+                            title={t('Are you sure you want to delete this data output?')}
+                            onConfirm={handleDeleteDataProduct}
                             okText={t('Yes')}
                             cancelText={t('No')}
                         >
@@ -185,7 +203,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                                 loading={isArchiving}
                                 disabled={isLoading}
                             >
-                                {t('Archive')}
+                                {t('Delete')}
                             </Button>
                         </Popconfirm>
                     )}

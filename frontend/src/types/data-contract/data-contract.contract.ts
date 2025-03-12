@@ -1,5 +1,5 @@
-import { ColumnContract } from "./column.contract";
-import { ServiceLevelObjectiveContract } from "./service-level-objective.contract";
+import { ColumnContract } from './column.contract';
+import { ServiceLevelObjectiveContract } from './service-level-objective.contract';
 
 export interface DataContractContract {
     id: string;

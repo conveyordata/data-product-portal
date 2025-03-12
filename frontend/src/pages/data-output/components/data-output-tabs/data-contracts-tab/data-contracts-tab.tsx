@@ -1,9 +1,10 @@
-import { Flex, Collapse } from 'antd';
-import { useTranslation } from 'react-i18next';
-import styles from './data-contracts-tab.module.scss';
-import { useGetDataContractByOutputIdQuery } from '@/store/features/data-contracts/data-contracts-api-slice.ts';
 import type { CollapseProps } from 'antd';
+import { Collapse, Flex } from 'antd';
+
+import { useGetDataContractByOutputIdQuery } from '@/store/features/data-contracts/data-contracts-api-slice.ts';
+
 import { getCollapseItems } from './components/contract-collapse/collapse-item.component';
+import styles from './data-contracts-tab.module.scss';
 
 type Props = {
     dataOutputId: string;
@@ -12,14 +13,14 @@ type Props = {
 export function DataContractsTab({ dataOutputId }: Props) {
     const { data: dataContracts } = useGetDataContractByOutputIdQuery(dataOutputId);
 
-    if(!dataContracts) return null;
+    if (!dataContracts) return null;
 
-    const items: CollapseProps['items'] = getCollapseItems({dataContracts})
+    const items: CollapseProps['items'] = getCollapseItems({ dataContracts });
 
     return (
         <>
             <Flex vertical className={styles.container}>
-                    <Collapse items={items}/>
+                <Collapse items={items} />
             </Flex>
         </>
     );

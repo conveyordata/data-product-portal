@@ -1,5 +1,7 @@
+import { DataProductContract } from '@/types/data-product';
+import { TagContract } from '@/types/tag';
+
 import { DataOutputConfiguration } from '.';
-import { DataProductContract } from '../data-product/data-product-contract';
 import { DataOutputDatasetLink } from './dataset-link.contract';
 
 export enum DataOutputConfigurationTypes {
@@ -10,7 +12,7 @@ export enum DataOutputConfigurationTypes {
 export enum DataOutputStatus {
     Pending = 'pending',
     Active = 'active',
-    Archived = 'archived',
+    Deleted = 'deleted',
 }
 
 export interface DataOutputContract {
@@ -26,6 +28,8 @@ export interface DataOutputContract {
     platform_id: string;
     service_id: string;
     dataset_links: DataOutputDatasetLink[];
+    tag_ids: string[];
+    tags: TagContract[];
 }
 
 export interface DataOutputModel extends DataOutputContract {}

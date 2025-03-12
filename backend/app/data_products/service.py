@@ -4,10 +4,11 @@ from typing import List
 from urllib import parse
 from uuid import UUID
 
+import emailgen
 import httpx
 import pytz
 from botocore.exceptions import ClientError
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
@@ -15,8 +16,13 @@ from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
+from app.core.email.send_mail import send_mail
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_get import DataOutputGet
+from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.data_product_lifecycles.model import (
+    DataProductLifecycle as DataProductLifeCycleModel,
+)
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
     DataProductUserRole,
@@ -29,6 +35,7 @@ from app.data_products.schema import (
     DataProduct,
     DataProductAboutUpdate,
     DataProductCreate,
+    DataProductStatusUpdate,
     DataProductUpdate,
 )
 from app.data_products.schema_get import DataProductGet, DataProductsGet
@@ -43,15 +50,21 @@ from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
 from app.environments.model import Environment as EnvironmentModel
+from app.graph.edge import Edge
+from app.graph.graph import Graph
+from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
+from app.settings import settings
 from app.tags.model import Tag as TagModel
+from app.tags.model import ensure_tag_exists
+from app.users.model import User as UserModel
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 
 
 class DataProductService:
     def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
-        data_product = (
+        data_product: DataProductGet = (
             db.query(DataProductModel)
             .options(
                 joinedload(DataProductModel.dataset_links),
@@ -60,14 +73,37 @@ class DataProductService:
             .first()
         )
 
+        default_lifecycle = (
+            db.query(DataProductLifeCycleModel)
+            .filter(DataProductLifeCycleModel.is_default)
+            .first()
+        )
+
+        rolled_up_tags = set()
+
         if not data_product:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
             )
+
+        for link in data_product.dataset_links:
+            rolled_up_tags.update(link.dataset.tags)
+            for output_link in link.dataset.data_output_links:
+                rolled_up_tags.update(output_link.data_output.tags)
+
+        data_product.rolled_up_tags = rolled_up_tags
+
+        if not data_product.lifecycle:
+            data_product.lifecycle = default_lifecycle
         return data_product
 
     def get_data_products(self, db: Session) -> list[DataProductsGet]:
-        return (
+        default_lifecycle = (
+            db.query(DataProductLifeCycleModel)
+            .filter(DataProductLifeCycleModel.is_default)
+            .first()
+        )
+        dps = (
             db.query(DataProductModel)
             .options(
                 joinedload(DataProductModel.dataset_links),
@@ -75,6 +111,19 @@ class DataProductService:
             .order_by(asc(DataProductModel.name))
             .all()
         )
+        for dp in dps:
+            if not dp.lifecycle:
+                dp.lifecycle = default_lifecycle
+        return dps
+
+    def get_owners(self, id: UUID, db: Session) -> List[User]:
+        data_product = ensure_data_product_exists(id, db)
+        user_ids = [
+            membership.user_id
+            for membership in data_product.memberships
+            if membership.role == DataProductUserRole.OWNER
+        ]
+        return db.query(UserModel).filter(UserModel.id.in_(user_ids)).all()
 
     def get_user_data_products(
         self, user_id: UUID, db: Session
@@ -84,7 +133,11 @@ class DataProductService:
             .options(
                 joinedload(DataProductModel.memberships),
             )
-            .filter(DataProductModel.memberships.any(user_id=user_id))
+            .filter(
+                DataProductModel.memberships.any(
+                    user_id=user_id, status=DataProductMembershipStatus.APPROVED
+                )
+            )
             .order_by(asc(DataProductModel.name))
             .all()
         )
@@ -130,11 +183,20 @@ class DataProductService:
             )
         return data_product
 
+    def _get_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
+        tags = []
+        for tag_id in tag_ids:
+            tag = ensure_tag_exists(tag_id, db)
+            tags.append(tag)
+        return tags
+
     def create_data_product(
         self, data_product: DataProductCreate, db: Session, authenticated_user: User
     ) -> dict[str, UUID]:
         data_product = self._update_users(data_product, db)
-        data_product = DataProductModel(**data_product.parse_pydantic_schema())
+        data_product = data_product.parse_pydantic_schema()
+        tags = self._get_tags(db, data_product.pop("tag_ids", []))
+        data_product = DataProductModel(**data_product, tags=tags)
         for membership in data_product.memberships:
             membership.status = DataProductMembershipStatus.APPROVED
             membership.requested_by_id = authenticated_user.id
@@ -161,7 +223,10 @@ class DataProductService:
             )
         data_product.memberships = []
         data_product.dataset_links = []
-        data_product.delete()
+        for output in data_product.data_outputs:
+            output.dataset_links = []
+            db.delete(output)
+        db.delete(data_product)
         db.commit()
 
     def _create_new_membership(
@@ -233,11 +298,9 @@ class DataProductService:
                         denied_on=dataset.denied_on,
                     )
                     current_data_product.dataset_links.append(dataset)
-            elif k == "tags":
-                current_data_product.tags = []
-                for tag_data in v:
-                    tag = TagModel(**tag_data)
-                    current_data_product.tags.append(tag)
+            elif k == "tag_ids":
+                new_tags = self._get_tags(db, v)
+                current_data_product.tags = new_tags
             else:
                 setattr(current_data_product, k, v) if v else None
 
@@ -252,8 +315,20 @@ class DataProductService:
         current_data_product.about = data_product.about
         db.commit()
 
+    def update_data_product_status(
+        self, id: UUID, data_product: DataProductStatusUpdate, db: Session
+    ):
+        current_data_product = ensure_data_product_exists(id, db)
+        current_data_product.status = data_product.status
+        db.commit()
+
     def link_dataset_to_data_product(
-        self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
+        self,
+        id: UUID,
+        dataset_id: UUID,
+        authenticated_user: User,
+        db: Session,
+        background_tasks: BackgroundTasks,
     ):
         dataset = ensure_dataset_exists(dataset_id, db)
         data_product = ensure_data_product_exists(id, db)
@@ -283,6 +358,35 @@ class DataProductService:
         db.commit()
         db.refresh(data_product)
         RefreshInfrastructureLambda().trigger()
+
+        url = (
+            settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-product"
+        )
+        action = emailgen.Table(
+            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
+        )
+        action.add_row(
+            [
+                data_product.name,
+                "Access to consume data from ",
+                dataset.name,
+                ", ".join(
+                    [
+                        f"{owner.first_name} {owner.last_name}"
+                        for owner in dataset.owners
+                    ]
+                ),
+                f"{authenticated_user.first_name} {authenticated_user.last_name}",
+            ]
+        )
+        background_tasks.add_task(
+            send_mail,
+            [User.model_validate(owner) for owner in dataset.owners],
+            action,
+            url,
+            f"Action Required: {data_product.name} wants "
+            f"to consume data from {dataset.name}",
+        )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID, db: Session):
@@ -363,10 +467,6 @@ class DataProductService:
 
         return request_url
 
-    def get_conveyor_notebook_url(self, id: UUID, db: Session) -> str:
-        data_product = db.get(DataProductModel, id)
-        return CONVEYOR_SERVICE.generate_notebook_url(data_product.external_id)
-
     def get_conveyor_ide_url(self, id: UUID, db: Session) -> str:
         data_product = db.get(DataProductModel, id)
         return CONVEYOR_SERVICE.generate_ide_url(data_product.external_id)
@@ -395,18 +495,121 @@ class DataProductService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for business"
-                    f"area {data_product.business_area.name}"
+                    "Workspace not configured for" f"domain {data_product.domain.name}"
                 ),
             )
 
         config = json.loads(config.config)["workspace_urls"]
-        if not str(data_product.business_area_id) in config:
+        if not str(data_product.domain_id) in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for business"
-                    f"area {data_product.business_area.name}"
+                    "Workspace not configured for" f"domain {data_product.domain.name}"
                 ),
             )
-        return config[str(data_product.business_area_id)]
+        return config[str(data_product.domain_id)]
+
+    def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
+        product = db.get(DataProductModel, id)
+        nodes = [
+            Node(
+                id=id,
+                isMain=True,
+                data=NodeData(id=id, name=product.name, icon_key=product.type.icon_key),
+                type=NodeType.dataProductNode,
+            )
+        ]
+        edges = []
+        for upstream_datasets in product.dataset_links:
+            nodes.append(
+                Node(
+                    id=upstream_datasets.id,
+                    data=NodeData(
+                        id=upstream_datasets.dataset_id,
+                        name=upstream_datasets.dataset.name,
+                    ),
+                    type=NodeType.datasetNode,
+                )
+            )
+            edges.append(
+                Edge(
+                    id=f"{upstream_datasets.id}-{product.id}",
+                    target=product.id,
+                    source=upstream_datasets.id,
+                    animated=upstream_datasets.status
+                    == DataProductDatasetLinkStatus.APPROVED,
+                )
+            )
+
+        for data_output in product.data_outputs:
+            nodes.append(
+                Node(
+                    id=data_output.id,
+                    data=NodeData(
+                        id=data_output.id,
+                        icon_key=data_output.configuration.configuration_type,
+                        name=data_output.name,
+                        link_to_id=data_output.owner_id,
+                    ),
+                    type=NodeType.dataOutputNode,
+                )
+            )
+            edges.append(
+                Edge(
+                    id=f"{data_output.id}-{product.id}",
+                    source=product.id,
+                    target=data_output.id,
+                    animated=True,
+                )
+            )
+            if level >= 2:
+                for downstream_datasets in data_output.dataset_links:
+                    nodes.append(
+                        Node(
+                            id=f"{downstream_datasets.dataset_id}_2",
+                            data=NodeData(
+                                id=f"{downstream_datasets.dataset_id}",
+                                name=downstream_datasets.dataset.name,
+                            ),
+                            type=NodeType.datasetNode,
+                        )
+                    )
+                    edges.append(
+                        Edge(
+                            id=f"{downstream_datasets.dataset_id}-{data_output.id}-2",
+                            target=f"{downstream_datasets.dataset_id}_2",
+                            source=data_output.id,
+                            animated=downstream_datasets.status
+                            == DataOutputDatasetLinkStatus.APPROVED,
+                        )
+                    )
+                    if level >= 3:
+                        for (
+                            downstream_dps
+                        ) in downstream_datasets.dataset.data_product_links:
+                            icon = downstream_dps.data_product.type.icon_key
+                            nodes.append(
+                                Node(
+                                    id=f"{downstream_dps.id}_3",
+                                    data=NodeData(
+                                        id=f"{downstream_dps.data_product_id}",
+                                        icon_key=icon,
+                                        name=downstream_dps.data_product.name,
+                                    ),
+                                    type=NodeType.dataProductNode,
+                                )
+                            )
+                            edges.append(
+                                Edge(
+                                    id=(
+                                        f"{downstream_dps.id}-"
+                                        f"{downstream_datasets.dataset.id}-3"
+                                    ),
+                                    target=f"{downstream_dps.id}_3",
+                                    source=f"{downstream_datasets.dataset.id}_2",
+                                    animated=downstream_dps.status
+                                    == DataProductDatasetLinkStatus.APPROVED,
+                                )
+                            )
+
+        return Graph(nodes=set(nodes), edges=set(edges))

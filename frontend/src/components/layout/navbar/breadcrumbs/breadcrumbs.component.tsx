@@ -1,29 +1,31 @@
-import { useLocation, useParams } from 'react-router-dom';
-import { Breadcrumb, Space, Typography } from 'antd';
-import { ApplicationPaths, DynamicPathParams, createEnvironmentConfigsPath } from '@/types/navigation.ts';
 import Icon, { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import styles from './breadcrumbs.module.scss';
+import { Breadcrumb, Space, Typography } from 'antd';
 import { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadcrumb/Breadcrumb';
+import { ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useParams } from 'react-router';
+
+import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
+import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { BreadcrumbLink } from '@/components/layout/navbar/breadcrumbs/breadcrumb-link/breadcrumb-link.component.tsx';
+import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import { ReactNode, useMemo } from 'react';
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
-import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import {
-    isDataProductEditPage,
-    isDataOutputEditPage,
-    isEnvironmentConfigsPage,
-    isEnvironmentConfigCreatePage,
-    isEnvConfigPage,
-} from '@/utils/routes.helper.ts';
-import { useGetPlatformServiceConfigByIdQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import {
-    useGetEnvironmentByIdQuery,
     useGetEnvConfigByIdQuery,
+    useGetEnvironmentByIdQuery,
 } from '@/store/features/environments/environments-api-slice';
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetPlatformServiceConfigByIdQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
+import { ApplicationPaths, createEnvironmentConfigsPath, DynamicPathParams } from '@/types/navigation.ts';
+import {
+    isDataOutputEditPage,
+    isDataProductEditPage,
+    isEnvConfigPage,
+    isEnvironmentConfigCreatePage,
+    isEnvironmentConfigsPage,
+} from '@/utils/routes.helper.ts';
+
+import styles from './breadcrumbs.module.scss';
 
 type BreadcrumbType = Partial<BreadcrumbItemType & BreadcrumbSeparatorType> & { icon?: ReactNode };
 
@@ -31,8 +33,10 @@ export const Breadcrumbs = () => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
     const params = useParams<DynamicPathParams>();
-    const pathnames =
-        pathname === ApplicationPaths.Home ? [ApplicationPaths.Home] : pathname.split('/').filter((x) => x);
+    const pathnames = useMemo(
+        () => (pathname === ApplicationPaths.Home ? [ApplicationPaths.Home] : pathname.split('/').filter((x) => x)),
+        [pathname],
+    );
     const {
         dataProductId = '',
         datasetId = '',
@@ -139,7 +143,7 @@ export const Breadcrumbs = () => {
                                         }}
                                     >
                                         <Icon component={datasetOutlineIcon} />
-                                        {t('Datasets')}
+                                        {t('Marketplace')}
                                     </Space>
                                 ),
                             });
@@ -204,6 +208,19 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
+                        case ApplicationPaths.Settings:
+                            Object.assign(breadcrumbItem, {
+                                title: (
+                                    <Space
+                                        classNames={{
+                                            item: styles.breadcrumbItem,
+                                        }}
+                                    >
+                                        {t('Settings')}
+                                    </Space>
+                                ),
+                            });
+                            break;
                         case ApplicationPaths.PlatformServiceConfigNew:
                             Object.assign(breadcrumbItem, {
                                 title: (
@@ -217,6 +234,19 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
+                        case ApplicationPaths.RoleConfiguration:
+                            Object.assign(breadcrumbItem, {
+                                title: (
+                                    <Space
+                                        classNames={{
+                                            item: styles.breadcrumbItem,
+                                        }}
+                                    >
+                                        {t('Role Management')}
+                                    </Space>
+                                ),
+                            });
+                            break;
                         default:
                             Object.assign(breadcrumbItem, {
                                 title: '',
@@ -224,7 +254,10 @@ export const Breadcrumbs = () => {
 
                             // Case for data product and dataset
                             if (dataProductId && dataProduct && !isFetchingDataProduct) {
-                                if (isDataProductEditPage(path, dataProductId) || isDataOutputEditPage(path, dataOutputId, dataProductId)) {
+                                if (
+                                    isDataProductEditPage(path, dataProductId) ||
+                                    isDataOutputEditPage(path, dataOutputId, dataProductId)
+                                ) {
                                     Object.assign(breadcrumbItem, {
                                         title: (
                                             <Space
@@ -237,7 +270,12 @@ export const Breadcrumbs = () => {
                                         ),
                                     });
                                 } else {
-                                    if (dataOutputId && dataOutput && !isFetchingDataOutput && path.split('/').length == 4) {
+                                    if (
+                                        dataOutputId &&
+                                        dataOutput &&
+                                        !isFetchingDataOutput &&
+                                        path.split('/').length == 4
+                                    ) {
                                         Object.assign(breadcrumbItem, {
                                             title: (
                                                 <Typography.Text
@@ -355,8 +393,30 @@ export const Breadcrumbs = () => {
                     return breadcrumbItem;
                 }),
             ].filter(Boolean) as Partial<BreadcrumbItemType & BreadcrumbSeparatorType>[],
-        [pathnames, dataProductId, datasetId, dataOutputId],
+        [
+            pathnames,
+            t,
+            dataProductId,
+            dataProduct,
+            isFetchingDataProduct,
+            datasetId,
+            dataset,
+            isFetchingDataset,
+            platformServiceConfigId,
+            platformServiceConfig,
+            isFetchingPlatformServiceConfig,
+            environmentId,
+            environment,
+            isFetchingEnvironment,
+            envConfigId,
+            envConfig,
+            isFetchingEnvConfig,
+            dataOutputId,
+            dataOutput,
+            isFetchingDataOutput,
+        ],
     );
+
     return (
         <Breadcrumb
             itemRender={(route, _params, routes) => {

@@ -1,16 +1,18 @@
 import { Flex, Table, TableColumnsType } from 'antd';
-import { UserContract } from '@/types/users';
-import { useMemo } from 'react';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import styles from './team-table.module.scss';
 import { useSelector } from 'react-redux';
+
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { getDatasetTeamColumns } from './team-table-columns.tsx';
 import {
     useGetDatasetByIdQuery,
     useRemoveUserFromDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { UserContract } from '@/types/users';
+
+import styles from './team-table.module.scss';
+import { getDatasetTeamColumns } from './team-table-columns.tsx';
 
 type Props = {
     isCurrentDatasetOwner: boolean;
@@ -28,15 +30,18 @@ export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Pr
     const { data: dataset, isLoading: isFetchingDataset } = useGetDatasetByIdQuery(datasetId);
     const [removeDatasetUser, { isLoading: isRemovingOwner }] = useRemoveUserFromDatasetMutation();
 
-    const handleRemoveUserAccess = async (userId: string) => {
-        try {
-            if (!dataset) return;
-            await removeDatasetUser({ datasetId: dataset.id, userId }).unwrap();
-            dispatchMessage({ content: t('User access to dataset has been removed'), type: 'success' });
-        } catch (_error) {
-            dispatchMessage({ content: t('Failed to remove user access from dataset'), type: 'error' });
-        }
-    };
+    const handleRemoveUserAccess = useCallback(
+        async (userId: string) => {
+            try {
+                if (!dataset) return;
+                await removeDatasetUser({ datasetId: dataset.id, userId }).unwrap();
+                dispatchMessage({ content: t('User access to dataset has been removed'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to remove user access from dataset'), type: 'error' });
+            }
+        },
+        [dataset, removeDatasetUser, t],
+    );
 
     const columns: TableColumnsType<UserContract> = useMemo(() => {
         return getDatasetTeamColumns({

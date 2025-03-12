@@ -25,15 +25,15 @@ def get_all_platforms(
     return PlatformsService(db).get_all_platforms()
 
 
-@router.get("/{platform_id}/services")
+@router.get("/{id}/services")
 def get_platform_services(
-    platform_id: UUID, db: Session = Depends(get_db_session)
+    id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[PlatformService]:
-    return PlatformServiceService(db).get_platform_services(platform_id)
+    return PlatformServiceService(db).get_platform_services(id)
 
 
 @router.get(
-    "/{platform_id}/services/{service_id}",
+    "/{id}/services/{service_id}",
     description="Get Platform Service config",
     responses={
         404: {
@@ -47,12 +47,12 @@ def get_platform_services(
     },
 )
 def get_platform_service_config(
-    platform_id: UUID, service_id: UUID, db: Session = Depends(get_db_session)
+    id: UUID, service_id: UUID, db: Session = Depends(get_db_session)
 ) -> PlatformServiceConfiguration:
     if not (
         service_config := PlatformServiceConfigurationService(
             db
-        ).get_platform_service_configuration(platform_id, service_id)
+        ).get_platform_service_configuration(id, service_id)
     ):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

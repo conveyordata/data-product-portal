@@ -2,6 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+custom_translation_file_path: ""
 global:
   postgresql:
     auth:
@@ -10,6 +11,17 @@ global:
       port: "!!string 5432"
       server: data-product-portal-postgresql
       username: postgres
+smtp:
+  host: localhost
+  port: "!!string 1025"
+  username: user
+  password: not-set
+  no_login: false
+from_mail_address: ""
+email_button_color: ""
+webhook:
+  url: ""
+  secret: ""
 postgres_enabled: false
 cloudwatch_enabled: false
 api_key:
@@ -36,14 +48,14 @@ infrastructure_lambda_arn: ""
 replicaCount: 1
 
 image:
-  repository: public.ecr.aws/conveyordata/data-product-portal/backend
+  repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/backend
   pullPolicy: Always
-  tag: 0.2.1
+  tag: 0.2.12
 
 frontendimage:
-  repository: public.ecr.aws/conveyordata/data-product-portal/frontend
+  repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/frontend
   pullPolicy: Always
-  tag: 0.2.1
+  tag: 0.2.12
 
 imagePullSecrets: []
 nameOverride: ""

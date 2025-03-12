@@ -1,15 +1,18 @@
 from uuid import UUID
 
 from app.shared.schema import ORMModel
-from app.tags.model import Tag as TagModel
 
 
 class TagCreate(ORMModel):
     value: str
 
-    class Meta:
-        orm_model = TagModel
+    class Config:
+        frozen = True
 
 
 class Tag(TagCreate):
     id: UUID
+
+
+class TagUpdate(TagCreate):
+    pass

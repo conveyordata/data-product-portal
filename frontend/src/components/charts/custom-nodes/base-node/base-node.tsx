@@ -1,10 +1,12 @@
-import { NodeProps, NodeToolbar, Position } from 'reactflow';
-import styles from './base-node.module.scss';
-import { Flex, Typography } from 'antd';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { DefaultHandle } from '@/components/charts/custom-handles/default-handle.tsx';
-import { ComponentType, ForwardRefExoticComponent, ReactNode, SVGProps } from 'react';
 import { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
+import { Flex, Typography } from 'antd';
+import { ComponentType, ForwardRefExoticComponent, ReactNode, SVGProps } from 'react';
+import { NodeProps, NodeToolbar, Position } from 'reactflow';
+
+import { DefaultHandle } from '@/components/charts/custom-handles/default-handle.tsx';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+
+import styles from './base-node.module.scss';
 
 export type BaseNodeProps = {
     id: string;
@@ -29,16 +31,14 @@ export function BaseNode<T extends BaseNodeProps>({
                 <DefaultHandle id={'left_t'} type={'target'} position={Position.Left} isConnectable={false} />
                 <DefaultHandle id={'left_s'} type={'source'} position={Position.Left} isConnectable={false} />
                 <Flex className={styles.nodeWrapper}>
-                    <Flex>
-                        <CustomSvgIconLoader
-                            iconComponent={icon}
-                            hasRoundBorder={borderType === 'round'}
-                            hasSquareBorder={borderType === 'square'}
-                            size={'large'}
-                            inverted={isMainNode}
-                            color={isActive ? 'primary' : 'light'}
-                        />
-                    </Flex>
+                    <CustomSvgIconLoader
+                        iconComponent={icon}
+                        hasRoundBorder={borderType === 'round'}
+                        hasSquareBorder={borderType === 'square'}
+                        size={'large'}
+                        inverted={isMainNode}
+                        color={isActive ? 'primary' : 'light'}
+                    />
                 </Flex>
                 <DefaultHandle id={'right_t'} type={'target'} position={Position.Right} isConnectable={false} />
                 <DefaultHandle id={'right_s'} type={'source'} position={Position.Right} isConnectable={false} />

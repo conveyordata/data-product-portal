@@ -1,33 +1,33 @@
+import {
+    HistoryOutlined,
+    InfoCircleOutlined,
+    PartitionOutlined,
+    SettingOutlined,
+    TeamOutlined,
+} from '@ant-design/icons';
 import { Tabs } from 'antd';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
-import styles from './dataset-tabs.module.scss';
-import Icon, { HistoryOutlined, InfoCircleOutlined, PartitionOutlined, TeamOutlined } from '@ant-design/icons';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExplorerTab } from './explorer-tab/explorer-tab';
-import { HistoryTab } from './history-tab/history-tab';
-import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab.tsx';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
-import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
-import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab.tsx';
-import { AboutTab } from './about-tab/about-tab.tsx';
-import { TeamTab } from './team-tab/team-tab.tsx';
+import { useLocation, useNavigate } from 'react-router';
 import { ReactFlowProvider } from 'reactflow';
-import { useLocation, useNavigate } from 'react-router-dom';
+
+import { Explorer } from '@/components/explorer/explorer';
+import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
+import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
+import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+
+import { AboutTab } from './about-tab/about-tab.tsx';
+import styles from './dataset-tabs.module.scss';
+import { HistoryTab } from './history-tab/history-tab';
+import { SettingsTab } from './settings-tab/settings-tab';
+import { TeamTab } from './team-tab/team-tab.tsx';
 
 type Props = {
     datasetId: string;
     isLoading: boolean;
 };
-
-export enum TabKeys {
-    About = 'about',
-    DataProduct = 'data-product',
-    DataOutput = 'data-output',
-    Team = 'team',
-    Explorer = 'explorer',
-    History = 'history',
-}
 
 type Tab = {
     label: string;
@@ -39,6 +39,17 @@ type Tab = {
 export function DatasetTabs({ datasetId, isLoading }: Props) {
     const { t } = useTranslation();
 
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
+
+    useEffect(() => {
+        const hash = location.hash.slice(1);
+        if (hash) {
+            setActiveTab(hash);
+        }
+    }, [location]);
+
     const tabs: Tab[] = useMemo(() => {
         return [
             {
@@ -48,22 +59,22 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 children: <AboutTab datasetId={datasetId} />,
             },
             {
-                label: t('Data Products'),
-                key: TabKeys.DataProduct,
-                icon: <Icon component={dataProductOutlineIcon} />,
-                children: <DataProductTab datasetId={datasetId} />,
-            },
-            {
-                label: t('Data Outputs'),
+                label: t('Producing Data Products'),
                 key: TabKeys.DataOutput,
-                icon: <Icon component={dataOutputOutlineIcon} />,
+                icon: <DataOutputOutlined />,
                 children: <DataOutputTab datasetId={datasetId} />,
             },
             {
-                label: t('Team'),
+                label: t('Dataset Owners'),
                 key: TabKeys.Team,
                 icon: <TeamOutlined />,
                 children: <TeamTab datasetId={datasetId} />,
+            },
+            {
+                label: t('Consuming Data Products'),
+                key: TabKeys.DataProduct,
+                icon: <DataProductOutlined />,
+                children: <DataProductTab datasetId={datasetId} />,
             },
             {
                 label: t('Explorer'),
@@ -71,7 +82,17 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 icon: <PartitionOutlined />,
                 children: (
                     <ReactFlowProvider>
-                        <ExplorerTab datasetId={datasetId} />
+                        <Explorer id={datasetId} type={'dataset'} />
+                    </ReactFlowProvider>
+                ),
+            },
+            {
+                label: t('Settings'),
+                key: TabKeys.Settings,
+                icon: <SettingOutlined />,
+                children: (
+                    <ReactFlowProvider>
+                        <SettingsTab datasetId={datasetId} />
                     </ReactFlowProvider>
                 ),
             },
@@ -87,17 +108,6 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
     if (isLoading) {
         return <LoadingSpinner />;
     }
-
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
-
-    useEffect(() => {
-        const hash = location.hash.slice(1);
-        if(hash) {
-            setActiveTab(hash);
-        }
-    }, [location])
 
     const onTabChange = (key: string) => {
         navigate(`#${key}`);

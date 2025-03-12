@@ -1,12 +1,14 @@
 import { Button, Form, List, Typography } from 'antd';
-import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
-import { useTranslation } from 'react-i18next';
-import styles from './user-popup.module.scss';
-import { UserContract } from '@/types/users';
 import { useMemo } from 'react';
-import { SearchForm } from '@/types/shared';
+import { useTranslation } from 'react-i18next';
+
 import { Searchbar } from '@/components/form';
+import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
+import { SearchForm } from '@/types/shared';
+import { UserContract } from '@/types/users';
+
+import styles from './user-popup.module.scss';
 
 type Props = {
     onClose: () => void;

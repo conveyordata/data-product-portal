@@ -1,20 +1,21 @@
+import { CheckOutlined, EditOutlined } from '@ant-design/icons';
+import Link from '@tiptap/extension-link';
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
+import Typography from '@tiptap/extension-typography';
+import Underline from '@tiptap/extension-underline';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
-import { useEffect, useState } from 'react';
-import styles from './text-editor.module.scss';
-import Link from '@tiptap/extension-link';
-import { TextEditorMenu } from '@/components/rich-text/text-editor-menu/text-editor-menu.tsx';
-import Underline from '@tiptap/extension-underline';
-import Typography from '@tiptap/extension-typography';
-import { CheckOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Popover } from 'antd';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TextStyleCustomExtension } from '@/components/rich-text/extensions/text-style/text-style-custom-extension.tsx';
-import Table from '@tiptap/extension-table'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
 
+import { TextStyleCustomExtension } from '@/components/rich-text/extensions/text-style/text-style-custom-extension.tsx';
+import { TextEditorMenu } from '@/components/rich-text/text-editor-menu/text-editor-menu.tsx';
+
+import styles from './text-editor.module.scss';
 
 type Props = {
     initialContent?: string;
@@ -36,7 +37,7 @@ const extensions = [
     Table,
     TableCell,
     TableHeader,
-    TableRow
+    TableRow,
 ];
 
 export const TextEditor = ({
