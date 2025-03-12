@@ -23,9 +23,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create the "notification_configurations" table
+    # Create the "notifications" table
     op.create_table(
-        "notification_configurations",
+        "notifications",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("configuration_type", sa.Enum(NotificationTypes)),
         sa.Column(
@@ -53,9 +53,9 @@ def upgrade() -> None:
         "notification_interactions",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column(
-            "configuration_id",
+            "notification_id",
             UUID(as_uuid=True),
-            sa.ForeignKey("notification_configurations.id"),
+            sa.ForeignKey("notifications.id"),
         ),
         sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id")),
         sa.Column("last_seen", sa.DateTime, nullable=True),

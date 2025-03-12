@@ -4,7 +4,7 @@ from sqlalchemy import UUID, Column, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
-from app.notifications.base_model import BaseNotificationConfiguration
+from app.notifications.model import Notification
 
 if TYPE_CHECKING:
     from app.users.model import User
@@ -18,10 +18,10 @@ class NotificationInteraction(Base, BaseORM):
     __tablename__ = "notification_interactions"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     notification_id: Mapped[uuid.UUID] = mapped_column(
-        "configuration_id", ForeignKey("notification_configurations.id")
+        "notification_id", ForeignKey("notifications.id")
     )
-    notification: Mapped["BaseNotificationConfiguration"] = relationship(
-        "BaseNotificationConfiguration", back_populates="notification_interactions"
+    notification: Mapped["Notification"] = relationship(
+        "Notification", back_populates="notification_interactions"
     )
     user_id: Mapped[uuid.UUID] = mapped_column("user_id", ForeignKey("users.id"))
     user: Mapped["User"] = relationship(

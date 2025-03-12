@@ -5,10 +5,10 @@ from app.shared.schema import ORMModel
 from app.users.schema import User
 
 
-class NotificationInteraction(ORMModel):  # no base?
+class NotificationInteraction(ORMModel):
     id: UUID
     notification_id: UUID
-    user_id: UUID  # redundant?
+    user_id: UUID
     user: User
     last_seen: datetime | None
     last_interaction: datetime | None

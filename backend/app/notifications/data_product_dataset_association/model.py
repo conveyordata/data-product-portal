@@ -3,10 +3,10 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, relationship
 
 from app.data_products_datasets.model import DataProductDatasetAssociation
-from app.notifications.base_model import BaseNotificationConfiguration
+from app.notifications.model import Notification
 
 
-class DataProductDatasetNotification(BaseNotificationConfiguration):
+class DataProductDatasetNotification(Notification):
     data_product_dataset_id: Mapped[UUID] = Column(
         ForeignKey("data_products_datasets.id")
     )

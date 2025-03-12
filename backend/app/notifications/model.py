@@ -13,8 +13,8 @@ from app.notifications.notification_types import NotificationTypes
 from app.shared.model import BaseORM
 
 
-class BaseNotificationConfiguration(Base, BaseORM):
-    __tablename__ = "notification_configurations"
+class Notification(Base, BaseORM):
+    __tablename__ = "notifications"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     configuration_type: Mapped[NotificationTypes] = Column(Enum(NotificationTypes))
     notification_interactions: Mapped[list["NotificationInteraction"]] = relationship(
