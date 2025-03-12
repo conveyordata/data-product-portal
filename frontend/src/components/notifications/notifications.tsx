@@ -16,6 +16,7 @@ import type { DataProductMembershipContract } from '@/types/data-product-members
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 
 import styles from './notifications.module.scss';
+import { useGetNotificationsQuery } from '@/store/features/notifications/notifications-api-slice';
 
 export function Notifications() {
     const {
@@ -27,6 +28,7 @@ export function Notifications() {
     const { data: pending_actions_datasets } = useGetDataProductDatasetPendingActionsQuery();
     const { data: pending_actions_dataoutputs } = useGetDataOutputDatasetPendingActionsQuery();
     const { data: pending_actions_data_products } = useGetDataProductMembershipPendingActionsQuery();
+    const { data: notifications } = useGetNotificationsQuery();
 
     type PendingAction =
         | ({ type: 'data_product' } & DataProductDatasetContract)
@@ -107,6 +109,8 @@ export function Notifications() {
         const dataProducts = pending_actions_data_products?.map((action) =>
             createPendingItem({ ...action, type: 'team' }, navigate, t),
         );
+
+        console.log(JSON.stringify(notifications));
 
         return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])];
     }, [
