@@ -35,7 +35,7 @@
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
     "antd": "^5.24.3",
-    "axios": "^1.8.2",
+    "axios": "^1.8.3",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "i18next": "^24.2.2",
