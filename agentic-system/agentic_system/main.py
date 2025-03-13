@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.auth.jwt import oidc
 
 logfire.configure()
+logfire.instrument_httpx(capture_all=True)
 logfire.instrument_asyncpg()
 
 with open("./VERSION", "r") as f:

@@ -11,9 +11,9 @@ dependencies = [
     "fastapi (>=0.115.8,<0.116.0)",
     "uvicorn (>=0.34.0,<0.35.0)",
     "pydantic-settings (>=2.7.1,<3.0.0)",
-    "pydantic-ai[groq] (>=0.0.28,<0.0.29)",
+    "pydantic-ai (>=0.0.38,<0.0.39)",
     "app @ file:///Users/stijn/Documents/data-minded/projects/data-product-portal/backend",
-    "logfire[asyncpg] (>=3.6.4,<4.0.0)",
+    "logfire[asyncpg,httpx] (>=3.6.4,<4.0.0)",
 ]
 
 
