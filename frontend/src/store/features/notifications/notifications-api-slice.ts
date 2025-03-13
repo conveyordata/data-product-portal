@@ -1,6 +1,6 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
-import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
+import { TagTypes } from '@/store/features/api/tag-types.ts';
 import { NotificationModel } from '@/types/notifications/notification.contract';
 
 export const notificationsTags: string[] = [
@@ -16,10 +16,11 @@ export const notificationsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
                 url: buildUrl(ApiUrl.Notifications, {}),
                 method: 'GET',
             }),
-            providesTags: () => [
-                { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-            ],
+            // Comment out or remove the following line to disable tags:
+            // providesTags: () => [
+            //     { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
+            //     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+            // ],
         }),
     }),
     overrideExisting: false,
