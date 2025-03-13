@@ -23,7 +23,7 @@ class DataProductCreate(BaseDataProduct):
         ...,
         description=(
             "List of memberships associated"
-            "with the data product, must include at least one owner",
+            "with the data product, must include at least one owner"
         ),
     )
     domain_id: UUID = Field(
