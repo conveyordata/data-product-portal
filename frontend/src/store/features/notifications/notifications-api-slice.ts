@@ -22,10 +22,21 @@ export const notificationsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
             //     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             // ],
         }),
+        getPendingActionNotifications: builder.query<NotificationModel[], void>({
+            query: () => ({
+                url: buildUrl(ApiUrl.PendingActionsNotifications, {}),
+                method: 'GET',
+            }),
+            // Comment out or remove the following line to disable tags:
+            // providesTags: () => [
+            //     { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
+            //     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+            // ],
+        }),
     }),
     overrideExisting: false,
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetNotificationsQuery } = notificationsApiSlice;
+export const { useGetNotificationsQuery, useGetPendingActionNotificationsQuery } = notificationsApiSlice;

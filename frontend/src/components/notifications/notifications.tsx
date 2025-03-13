@@ -8,6 +8,9 @@ import { Link, type NavigateFunction, useNavigate } from 'react-router';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetNotificationsQuery } from '@/store/features/notifications/notifications-api-slice';
+import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
+import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
+import { DataProductMembershipStatus } from '@/types/data-product-membership';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 import { NotificationModel, NotificationTypes } from '@/types/notifications/notification.contract';
 
@@ -28,23 +31,35 @@ export function Notifications() {
         switch (userNotification.notification.configuration_type) {
             case NotificationTypes.DataProductDataset:
                 link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
-                description = (
-                    <Typography.Text>
-                        {t('{{name}}, on behalf of data product', {
-                            name: userNotification.notification.data_product_dataset.requested_by?.first_name,
-                        })}{' '}
-                        <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {userNotification.notification.data_product_dataset.data_product.name}
-                        </Link>{' '}
-                        {t('requests read access to dataset')}{' '}
-                        <Link
-                            onClick={(e) => e.stopPropagation()}
-                            to={createDatasetIdPath(userNotification.notification.data_product_dataset.dataset_id)}
-                        >
-                            {userNotification.notification.data_product_dataset.dataset.name}
-                        </Link>
-                    </Typography.Text>
-                );
+                switch (userNotification.notification.data_product_dataset.status) {
+                    case DataProductDatasetLinkStatus.Pending:
+                        description = (
+                            <Typography.Text>
+                                {t('{{name}}, on behalf of data product', {
+                                    name: userNotification.notification.data_product_dataset.requested_by?.first_name,
+                                })}{' '}
+                                <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                    {userNotification.notification.data_product_dataset.data_product.name}
+                                </Link>{' '}
+                                {t('requests read access to dataset')}{' '}
+                                <Link
+                                    onClick={(e) => e.stopPropagation()}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_product_dataset.dataset_id,
+                                    )}
+                                >
+                                    {userNotification.notification.data_product_dataset.dataset.name}
+                                </Link>
+                            </Typography.Text>
+                        );
+                        break;
+                    case DataProductDatasetLinkStatus.Approved:
+                        description = <Typography.Text>APPROVED, TODO</Typography.Text>;
+                        break;
+                    case DataProductDatasetLinkStatus.Denied:
+                        description = <Typography.Text>DENIED, TODO</Typography.Text>;
+                        break;
+                }
                 navigatePath = createDatasetIdPath(
                     userNotification.notification.data_product_dataset.dataset_id,
                     DatasetTabKeys.DataProduct,
@@ -56,23 +71,35 @@ export function Notifications() {
                     userNotification.notification.data_output_dataset.data_output_id,
                     userNotification.notification.data_output_dataset.data_output.owner_id,
                 );
-                description = (
-                    <Typography.Text>
-                        {t('{{name}}, on behalf of data output', {
-                            name: userNotification.notification.data_output_dataset.requested_by?.first_name,
-                        })}{' '}
-                        <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {userNotification.notification.data_output_dataset.data_output.name}
-                        </Link>{' '}
-                        {t('requests a link to dataset')}{' '}
-                        <Link
-                            onClick={(e) => e.stopPropagation()}
-                            to={createDatasetIdPath(userNotification.notification.data_output_dataset.dataset_id)}
-                        >
-                            {userNotification.notification.data_output_dataset.dataset.name}
-                        </Link>
-                    </Typography.Text>
-                );
+                switch (userNotification.notification.data_output_dataset.status) {
+                    case DataOutputDatasetLinkStatus.Pending:
+                        description = (
+                            <Typography.Text>
+                                {t('{{name}}, on behalf of data output', {
+                                    name: userNotification.notification.data_output_dataset.requested_by?.first_name,
+                                })}{' '}
+                                <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                    {userNotification.notification.data_output_dataset.data_output.name}
+                                </Link>{' '}
+                                {t('requests a link to dataset')}{' '}
+                                <Link
+                                    onClick={(e) => e.stopPropagation()}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_output_dataset.dataset_id,
+                                    )}
+                                >
+                                    {userNotification.notification.data_output_dataset.dataset.name}
+                                </Link>
+                            </Typography.Text>
+                        );
+                        break;
+                    case DataOutputDatasetLinkStatus.Approved:
+                        description = <Typography.Text>APPROVED, TODO</Typography.Text>;
+                        break;
+                    case DataOutputDatasetLinkStatus.Denied:
+                        description = <Typography.Text>DENIED, TODO</Typography.Text>;
+                        break;
+                }
                 navigatePath = createDatasetIdPath(
                     userNotification.notification.data_output_dataset.dataset_id,
                     DatasetTabKeys.DataOutput,
@@ -81,17 +108,27 @@ export function Notifications() {
 
             case NotificationTypes.DataProductMembership:
                 link = createDataProductIdPath(userNotification.notification.data_product_membership.data_product_id);
-                description = (
-                    <Typography.Text>
-                        {t('{{name}} would like to join the data product', {
-                            name: userNotification.notification.data_product_membership.user?.first_name,
-                        })}{' '}
-                        <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {userNotification.notification.data_product_membership.data_product.name}
-                        </Link>{' '}
-                        {t('team')}{' '}
-                    </Typography.Text>
-                );
+                switch (userNotification.notification.data_product_membership.status) {
+                    case DataProductMembershipStatus.Pending:
+                        description = (
+                            <Typography.Text>
+                                {t('{{name}} would like to join the data product', {
+                                    name: userNotification.notification.data_product_membership.user?.first_name,
+                                })}{' '}
+                                <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                    {userNotification.notification.data_product_membership.data_product.name}
+                                </Link>{' '}
+                                {t('team')}{' '}
+                            </Typography.Text>
+                        );
+                        break;
+                    case DataProductMembershipStatus.Approved:
+                        description = <Typography.Text>APPROVED, TODO</Typography.Text>;
+                        break;
+                    case DataProductMembershipStatus.Denied:
+                        description = <Typography.Text>DENIED, TODO</Typography.Text>;
+                        break;
+                }
                 navigatePath = createDataProductIdPath(
                     userNotification.notification.data_product_membership.data_product_id,
                     DataProductTabKeys.Team,
