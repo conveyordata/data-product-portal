@@ -158,6 +158,18 @@ class DataProductMembershipService:
 
         data_product = data_product_membership.data_product
 
+        if not any(
+            membership.role == DataProductUserRole.OWNER
+            for membership in data_product.memberships
+            if membership != data_product_membership
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Cannot remove the last owner from data product {data_product.id}"
+                ),
+            )
+
         data_product.memberships.remove(data_product_membership)
         db.commit()
         RefreshInfrastructureLambda().trigger()
@@ -200,16 +212,31 @@ class DataProductMembershipService:
         membership_role: DataProductUserRole,
         db: Session,
     ):
-        data_product_membership = (
-            db.query(DataProductMembership).filter_by(id=id).first()
-        )
+        data_product_membership = db.get(DataProductMembership, id)
         if data_product_membership is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product membership {id} not found",
             )
 
-        data_product_membership = db.get(DataProductMembership, id)
+        data_product = data_product_membership.data_product
+
+        if (
+            data_product_membership.role == DataProductUserRole.OWNER
+            and membership_role != DataProductUserRole.OWNER
+            and not any(
+                membership.role == DataProductUserRole.OWNER
+                for membership in data_product.memberships
+                if membership != data_product_membership
+            )
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Cannot remove the last owner from data product {data_product.id}"
+                ),
+            )
+
         data_product_membership.role = membership_role
         db.commit()
         db.refresh(data_product_membership)
