@@ -1,9 +1,9 @@
 import Icon, { CodeOutlined, PartitionOutlined } from '@ant-design/icons';
+import { ReactFlowProvider } from '@xyflow/react';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
-import { ReactFlowProvider } from 'reactflow';
 
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer';

@@ -1,10 +1,11 @@
-import 'reactflow/dist/base.css';
+import '@xyflow/react/dist/base.css';
 
+import type { Edge, Node, XYPosition } from '@xyflow/react';
+import { Position } from '@xyflow/react';
 import { Button, Flex, theme } from 'antd';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Edge, Node, Position, XYPosition } from 'reactflow';
 
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
@@ -17,7 +18,7 @@ import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/da
 import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
 import { greenThemeConfig } from '@/theme/antd-theme';
-import { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts';
+import type { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 
 import styles from './explorer.module.scss';
@@ -175,7 +176,7 @@ export function Explorer({ id, type }: Props) {
                 onEdgesChange={onEdgesChange}
                 editorProps={{
                     draggable: false,
-                    edgesUpdatable: false,
+                    edgesReconnectable: false,
                     nodesConnectable: false,
                 }}
             />

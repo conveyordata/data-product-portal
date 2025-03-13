@@ -5,11 +5,11 @@ import {
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
+import { ReactFlowProvider } from '@xyflow/react';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
-import { ReactFlowProvider } from 'reactflow';
 
 import { Explorer } from '@/components/explorer/explorer';
 import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
