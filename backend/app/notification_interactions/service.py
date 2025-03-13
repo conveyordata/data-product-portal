@@ -1,10 +1,18 @@
 from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy.sql import and_, or_
 
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.data_outputs_datasets.model import (
+    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+)
 from app.data_product_memberships.enums import DataProductMembershipStatus
+from app.data_product_memberships.model import (
+    DataProductMembership as DataProductMembershipModel,
+)
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
+from app.data_products_datasets.model import (
+    DataProductDatasetAssociation as DataProductDatasetAssociationModel,
+)
 from app.notification_interactions.model import NotificationInteraction
 from app.notification_interactions.schema_get import NotificationInteractionGet
 from app.notifications.data_output_dataset_association.model import (
@@ -16,8 +24,6 @@ from app.notifications.data_product_dataset_association.model import (
 from app.notifications.data_product_membership.model import (
     DataProductMembershipNotification,
 )
-from app.notifications.model import Notification
-from app.notifications.notification_types import NotificationTypes
 from app.users.schema import User
 
 
@@ -39,56 +45,50 @@ class NotificationInteractionService:
     def get_user_action_notification_interactions(
         self, db: Session, authenticated_user: User
     ) -> list[NotificationInteractionGet]:
-        query = (
-            db.query(NotificationInteraction)
-            .options(
-                joinedload(NotificationInteraction.notification)
-            )  # Loads notifications efficiently
-            .filter(NotificationInteraction.user_id == authenticated_user.id)
-            .order_by(asc(NotificationInteraction.last_seen))
+        data_product_dataset_notification_ids = (
+            db.query(DataProductDatasetNotification.id)
+            .options(joinedload(DataProductDatasetNotification.data_product_dataset))
+            .filter(
+                DataProductDatasetNotification.data_product_dataset.has(
+                    DataProductDatasetAssociationModel.status
+                    == DataProductDatasetLinkStatus.PENDING_APPROVAL
+                )
+            )
         )
 
-        # Define filtering conditions for polymorphic notifications
-        conditions = [
-            and_(
-                Notification.configuration_type == NotificationTypes.DataProductDataset,
-                Notification.id.in_(
-                    db.query(DataProductDatasetNotification.id)
-                    .filter(
-                        DataProductDatasetNotification.data_product_dataset.has(
-                            status=DataProductDatasetLinkStatus.PENDING_APPROVAL
-                        )
-                    )
-                    .subquery()
-                ),
-            ),
-            and_(
-                Notification.configuration_type == NotificationTypes.DataOutputDataset,
-                Notification.id.in_(
-                    db.query(DataOutputDatasetNotification.id)
-                    .filter(
-                        DataOutputDatasetNotification.data_output_dataset.has(
-                            status=DataOutputDatasetLinkStatus.PENDING_APPROVAL
-                        )
-                    )
-                    .subquery()
-                ),
-            ),
-            and_(
-                Notification.configuration_type
-                == NotificationTypes.DataProductMembership,
-                Notification.id.in_(
-                    db.query(DataProductMembershipNotification.id)
-                    .filter(
-                        DataProductMembershipNotification.data_product_membership.has(
-                            status=DataProductMembershipStatus.PENDING_APPROVAL
-                        )
-                    )
-                    .subquery()
-                ),
-            ),
-        ]
+        data_output_dataset_notification_ids = (
+            db.query(DataOutputDatasetNotification.id)
+            .options(joinedload(DataOutputDatasetNotification.data_output_dataset))
+            .filter(
+                DataOutputDatasetNotification.data_output_dataset.has(
+                    DataOutputDatasetAssociationModel.status
+                    == DataOutputDatasetLinkStatus.PENDING_APPROVAL
+                )
+            )
+        )
 
-        query = query.filter(or_(*conditions))
+        data_product_membership_notification_ids = (
+            db.query(DataProductMembershipNotification.id)
+            .options(
+                joinedload(DataProductMembershipNotification.data_product_membership)
+            )
+            .filter(
+                DataProductMembershipNotification.data_product_membership.has(
+                    DataProductMembershipModel.status
+                    == DataProductMembershipStatus.PENDING_APPROVAL
+                )
+            )
+        )
 
-        return query.all()
+        notification_ids = data_product_dataset_notification_ids.union(
+            data_output_dataset_notification_ids,
+            data_product_membership_notification_ids,
+        )
+
+        return (
+            db.query(NotificationInteraction)
+            .options(joinedload(NotificationInteraction.notification))
+            .filter(NotificationInteraction.user_id == authenticated_user.id)
+            .filter(NotificationInteraction.notification_id.in_(notification_ids))
+            .order_by(asc(NotificationInteraction.last_seen))
+        )
