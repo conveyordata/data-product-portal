@@ -188,7 +188,7 @@ function InternalExplorer({ id, type }: Props) {
 export function Explorer(props: Props) {
     return (
         <ReactFlowProvider>
-            <InternalExplorer id={props.id} type={props.type} />
+            <InternalExplorer {...props} />
         </ReactFlowProvider>
     );
 }
