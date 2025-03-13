@@ -1,32 +1,42 @@
-from typing import Annotated, List
+from typing import Annotated
 from uuid import UUID
 
 from annotated_types import MinLen
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 
+from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.schema import (
+    DataProductMembership,
     DataProductMembershipCreate,
 )
 from app.data_products.schema_base import BaseDataProduct
 from app.data_products.status import DataProductStatus
+from app.data_products_datasets.schema import DataProductDatasetAssociation
+from app.domains.schema import Domain
 from app.shared.schema import ORMModel
+from app.tags.schema import Tag
 
 
 class DataProductCreate(BaseDataProduct):
     memberships: Annotated[list[DataProductMembershipCreate], MinLen(1)] = Field(
         ...,
         description=(
-            "The list of memberships of" "the data product, shows owners and members"
+            "List of memberships associated"
+            "with the data product, must include at least one owner",
         ),
     )
-    domain_id: UUID = Field(..., description="The domain id of the data product")
-    tag_ids: list[UUID] = Field(..., description="The list of tags of the data product")
+    domain_id: UUID = Field(
+        ...,
+        description="Unique identifier of the domain to which the data product belongs",
+    )
+    tag_ids: list[UUID] = Field(
+        ..., description="List of tag identifiers associated with the data product"
+    )
     lifecycle_id: UUID = Field(
         ...,
         description=(
-            "The lifecycleid of the data product, "
-            "the lifecycle is a user defined state",
+            "Unique identifier of the lifecycle" "associated with the data product"
         ),
     )
 
@@ -47,28 +57,30 @@ class DataProductUpdate(DataProductCreate):
 
 
 class DataProductAboutUpdate(ORMModel):
-    about: str = Field(..., description="The about section of the data product")
+    about: str = Field(..., description="Additional information about the data product")
 
 
 class DataProductStatusUpdate(ORMModel):
     status: DataProductStatus = Field(
-        ..., description="The creation state of the data product"
+        ..., description="Current status of the data product"
     )
 
 
-class DataProduct(BaseModel):
+class DataProduct(BaseDataProduct):
     id: UUID = Field(..., description="Unique identifier for the data product")
-    name: str = Field(..., description="Name of the data product")
-    description: str = Field(..., description="Description of the data product")
-    tags: List[str] = Field(
+    status: DataProductStatus = Field(
+        ..., description="Current status of the data product"
+    )
+    dataset_links: list[DataProductDatasetAssociation] = Field(
+        ..., description="Links to datasets associated with the data product"
+    )
+    tags: list[Tag] = Field(
         ..., description="List of tags associated with the data product"
     )
-    owner_id: UUID = Field(
-        ..., description="Unique identifier of the owner of the data product"
+    memberships: list[DataProductMembership] = Field(
+        ..., description="List of memberships associated with the data product"
     )
-    created_at: str = Field(
-        ..., description="Timestamp when the data product was created"
-    )
-    updated_at: str = Field(
-        ..., description="Timestamp when the data product was last updated"
+    domain: Domain = Field(..., description="Domain to which the data product belongs")
+    data_outputs: list[DataOutputGet] = Field(
+        ..., description="List of data outputs associated with the data product"
     )
