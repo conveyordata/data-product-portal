@@ -18,30 +18,60 @@ from app.tags.schema import Tag
 
 
 class DataProductGet(ORMModel):
-    id: UUID
-    name: str
-    description: str
-    about: Optional[str]
-    external_id: str
-    tags: list[Tag]
-    status: DataProductStatus
-    lifecycle: Optional[DataProductLifeCycle]
-    dataset_links: list[DatasetDataProductLink]
-    memberships: list[DataProductMembershipGet]
-    type: DataProductType
-    domain: Domain
-    data_outputs: list[DataOutputGet]
-    data_product_settings: list[DataProductSettingValue]
-    rolled_up_tags: set[Tag]
+    id: UUID = Field(..., description="Unique identifier for the data product")
+    name: str = Field(..., description="Name of the data product")
+    description: str = Field(..., description="Description of the data product")
+    about: Optional[str] = Field(
+        None, description="Additional information about the data product"
+    )
+    external_id: str = Field(
+        ..., description="External identifier for the data product"
+    )
+    tags: list[Tag] = Field(
+        ..., description="List of tags associated with the data product"
+    )
+    status: DataProductStatus = Field(
+        ..., description="Current status of the data product"
+    )
+    lifecycle: Optional[DataProductLifeCycle] = Field(
+        None, description="Lifecycle status of the data product"
+    )
+    dataset_links: list[DatasetDataProductLink] = Field(
+        ..., description="Links to datasets associated with the data product"
+    )
+    memberships: list[DataProductMembershipGet] = Field(
+        ..., description="List of memberships associated with the data product"
+    )
+    type: DataProductType = Field(..., description="Type of the data product")
+    domain: Domain = Field(..., description="Domain to which the data product belongs")
+    data_outputs: list[DataOutputGet] = Field(
+        ..., description="List of data outputs associated with the data product"
+    )
+    data_product_settings: list[DataProductSettingValue] = Field(
+        ..., description="Settings for the data product"
+    )
+    rolled_up_tags: set[Tag] = Field(
+        ..., description="Set of rolled-up tags associated with the data product"
+    )
 
 
 class DataProductsGet(DataProductGet):
-    id: UUID
-    about: Optional[Annotated[str, Field(exclude=True)]]
-    dataset_links: Annotated[list[DatasetDataProductLink], Field(exclude=True)]
-    memberships: Annotated[list[DataProductMembershipGet], Field(exclude=True)]
-    data_outputs: Annotated[list[DataOutputGet], Field(exclude=True)]
-    rolled_up_tags: Annotated[set[Tag], Field(exclude=True)] = set()
+    id: UUID = Field(..., description="Unique identifier for the data product")
+    about: Optional[Annotated[str, Field(exclude=True)]] = Field(
+        None, description="Additional information about the data product"
+    )
+    dataset_links: Annotated[list[DatasetDataProductLink], Field(exclude=True)] = Field(
+        ..., description="Links to datasets associated with the data product"
+    )
+    memberships: Annotated[list[DataProductMembershipGet], Field(exclude=True)] = Field(
+        ..., description="List of memberships associated with the data product"
+    )
+    data_outputs: Annotated[list[DataOutputGet], Field(exclude=True)] = Field(
+        ..., description="List of data outputs associated with the data product"
+    )
+    rolled_up_tags: Annotated[set[Tag], Field(exclude=True)] = Field(
+        set(), description="Set of rolled-up tags associated with the data product"
+    )
 
     @computed_field
     def user_count(self) -> int:

@@ -8,8 +8,16 @@ from app.domains.schema import Domain
 
 
 class DomainsGet(Domain):
-    data_products: Annotated[list[DataProduct], Field(exclude=True)]
-    datasets: Annotated[list[Dataset], Field(exclude=True)]
+    data_products: Annotated[
+        list[DataProduct],
+        Field(
+            exclude=True, description="List of data products associated with the domain"
+        ),
+    ]
+    datasets: Annotated[
+        list[Dataset],
+        Field(exclude=True, description="List of datasets associated with the domain"),
+    ]
 
     @computed_field
     def data_product_count(self) -> int:
@@ -21,5 +29,9 @@ class DomainsGet(Domain):
 
 
 class DomainGet(Domain):
-    data_products: list[DataProduct]
-    datasets: list[Dataset]
+    data_products: list[DataProduct] = Field(
+        ..., description="List of data products associated with the domain"
+    )
+    datasets: list[Dataset] = Field(
+        ..., description="List of datasets associated with the domain"
+    )

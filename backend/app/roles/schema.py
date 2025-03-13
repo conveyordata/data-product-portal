@@ -2,6 +2,8 @@ from enum import IntEnum, StrEnum
 from typing import Optional
 from uuid import UUID
 
+from pydantic import Field
+
 from app.core.authz.actions import AuthorizationAction
 from app.shared.schema import ORMModel
 
@@ -20,19 +22,23 @@ class Prototype(IntEnum):
 
 
 class CreateRole(ORMModel):
-    name: str
-    scope: Scope
-    description: str
-    permissions: list[AuthorizationAction]
+    name: str = Field(..., description="Name of the role")
+    scope: Scope = Field(..., description="Scope of the role")
+    description: str = Field(..., description="Description of the role")
+    permissions: list[AuthorizationAction] = Field(
+        ..., description="List of permissions associated with the role"
+    )
 
 
 class UpdateRole(ORMModel):
-    id: UUID
-    name: Optional[str] = None
-    description: Optional[str] = None
-    permissions: Optional[list[AuthorizationAction]] = None
+    id: UUID = Field(..., description="Unique identifier for the role")
+    name: Optional[str] = Field(None, description="Name of the role")
+    description: Optional[str] = Field(None, description="Description of the role")
+    permissions: Optional[list[AuthorizationAction]] = Field(
+        None, description="List of permissions associated with the role"
+    )
 
 
 class Role(CreateRole):
-    id: UUID
-    prototype: Prototype
+    id: UUID = Field(..., description="Unique identifier for the role")
+    prototype: Prototype = Field(..., description="Prototype type of the role")
