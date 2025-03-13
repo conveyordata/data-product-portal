@@ -1,71 +1,72 @@
 repos:
-# Common git hooks
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
-  hooks:
-    # Git style
-    - id: check-added-large-files
-      exclude: ^frontend/src/assets/fonts/
-    - id: check-merge-conflict
-    - id: no-commit-to-branch
+  # Common git hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Git style
+      - id: check-added-large-files
+        exclude: ^frontend/src/assets/fonts/
+      - id: check-merge-conflict
+      - id: no-commit-to-branch
 
-    # Common errors
-    - id: end-of-file-fixer
-    - id: trailing-whitespace
-    - id: check-yaml
-      exclude: ^helm/templates
-    - id: check-merge-conflict
-    - id: check-executables-have-shebangs
+      # Common errors
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+        exclude: ^helm/templates
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
 
-    # Cross-platform
-    - id: check-case-conflict
-    - id: mixed-line-ending
-      args: [--fix=lf]
-    - id: check-symlinks
+      # Cross-platform
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-symlinks
 
-    # Security
-    - id: detect-aws-credentials
-      args: ['--allow-missing-credentials']
-    - id: detect-private-key
+      # Security
+      - id: detect-aws-credentials
+        args: ["--allow-missing-credentials"]
+      - id: detect-private-key
 
-# Python
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.14.1
-  hooks:
-    - id: mypy
-      additional_dependencies:
-      - types-PyYAML
-      - types-requests
-      - types-pytz
-- repo: https://github.com/pycqa/flake8
-  rev: 7.1.1
-  hooks:
-    - id: flake8
-      additional_dependencies: [flake8-black]
-- repo: https://github.com/psf/black
-  rev: 25.1.0
-  hooks:
-    - id: black
-- repo: https://github.com/pycqa/isort
-  rev: 6.0.0
-  hooks:
-    - id: isort
-      name: isort (python)
-- repo: https://github.com/gitleaks/gitleaks
-  rev: v8.23.2
-  hooks:
-    - id: gitleaks
-- repo: local
-  hooks:
-    - id: add-helm-version
-      name: add-helm-version
-      entry: ./add_helm_version.sh
-      language: script
-    - id: prettier
-      name: prettier
-      entry: bash -c "cd frontend && npm run format"
-      language: node
-    - id: lint
-      name: lint
-      entry: bash -c "cd frontend && npm run lint"
-      language: node
+  # Python
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.14.1
+    hooks:
+      - id: mypy
+        args: [--python-version=3.12]
+        additional_dependencies:
+          - types-PyYAML
+          - types-requests
+          - types-pytz
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-black]
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
+  - repo: https://github.com/pycqa/isort
+    rev: 6.0.0
+    hooks:
+      - id: isort
+        name: isort (python)
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.23.2
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: add-helm-version
+        name: add-helm-version
+        entry: ./add_helm_version.sh
+        language: script
+      - id: prettier
+        name: prettier
+        entry: bash -c "cd frontend && npm run format"
+        language: node
+      - id: lint
+        name: lint
+        entry: bash -c "cd frontend && npm run lint"
+        language: node
