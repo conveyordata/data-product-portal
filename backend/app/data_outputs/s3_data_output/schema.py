@@ -1,5 +1,7 @@
 from typing import Literal
 
+from pydantic import Field
+
 from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.s3_data_output.model import S3DataOutput as S3DataOutputModel
 from app.data_outputs.schema_base import BaseDataOutputConfiguration
@@ -7,10 +9,12 @@ from app.data_products.schema_base import BaseDataProduct
 
 
 class S3DataOutput(BaseDataOutputConfiguration):
-    bucket: str
-    suffix: str = ""
-    path: str
-    configuration_type: Literal[DataOutputTypes.S3DataOutput]
+    bucket: str = Field(..., description="Bucket name of the data output")
+    suffix: str = Field("", description="Suffix used in the data output")
+    path: str = Field(..., description="Path for the data output")
+    configuration_type: Literal[DataOutputTypes.S3DataOutput] = Field(
+        ..., description="Type of the data output configuration"
+    )
 
     class Meta:
         orm_model = S3DataOutputModel

@@ -80,6 +80,12 @@ class TestDataProductMembershipsRouter:
         response = self.remove_data_product_membership(client, membership_2.id)
         assert response.status_code == 200
 
+    def test_remove_data_product_membership_last_owner(self, client):
+        membership = DataProductMembershipFactory(user=UserFactory(external_id="sub"))
+
+        response = self.remove_data_product_membership(client, membership.id)
+        assert response.status_code == 400
+
     def test_update_data_product_membership_role(self, client):
         owner_membership = DataProductMembershipFactory(
             user=UserFactory(external_id="sub")
@@ -94,6 +100,13 @@ class TestDataProductMembershipsRouter:
             client, membership.id, DataProductUserRole.OWNER.value
         )
         assert response.status_code == 200
+
+    def test_update_data_product_membership_role_last_owner(self, client):
+        membership = DataProductMembershipFactory(user=UserFactory(external_id="sub"))
+        response = self.update_data_product_membership_user_role(
+            client, membership.id, DataProductUserRole.MEMBER.value
+        )
+        assert response.status_code == 400
 
     def test_get_pending_actions_no_action(self, client):
         DataProductMembershipFactory(user=UserFactory(external_id="sub"))
