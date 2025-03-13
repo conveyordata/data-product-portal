@@ -1,15 +1,17 @@
-import { Button, Flex, Form, Input, Typography } from 'antd';
-import { useMemo, useState } from 'react';
-
-import {
-    useAskQuestionMutation,
-    useMainAIEndpointQuery,
-} from '@/store/features/agentic-system/agentic-system-api-slice';
+import { Button, Flex, Form, Input } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import MarkDown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
+import remarkBreaks from 'remark-breaks';
+import remarkGfm from 'remark-gfm';
+
+import { useAskQuestionMutation } from '@/store/features/agentic-system/agentic-system-api-slice';
 
 export function AgenticSystem() {
     // const { data: agenticSystem } = useMainAIEndpointQuery();
-    const [askQuestion, isFetching] = useAskQuestionMutation();
+    const [askQuestion] = useAskQuestionMutation();
     const [form] = Form.useForm();
     const { t } = useTranslation();
     const [result, setResult] = useState('');
@@ -17,8 +19,7 @@ export function AgenticSystem() {
     //     console.log(agenticSystem);
     //     return agenticSystem?.message;
     // }, [agenticSystem]);
-
-    const onSubmit = async (values: any) => {
+    const onSubmit = async (values: { question: string }) => {
         console.log(values);
         await askQuestion(values.question)
             .unwrap()
@@ -42,7 +43,14 @@ export function AgenticSystem() {
                 <Form.Item name={'question'} label={t('Question')} tooltip={t('The question for the AI system')}>
                     <Input />
                 </Form.Item>
-                <Typography.Title>{result}</Typography.Title>
+
+                {/* <ReactMarkDown>{result}</ReactMarkDown> */}
+                {/* <Typography.Title>{result}</Typography.Title> */}
+                <MarkDown
+                    children={result}
+                    remarkPlugins={[remarkGfm, remarkBreaks]}
+                    rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                ></MarkDown>
                 <Button
                     type="primary"
                     htmlType={'submit'}
