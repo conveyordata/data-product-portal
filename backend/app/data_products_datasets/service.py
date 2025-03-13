@@ -84,3 +84,13 @@ class DataProductDatasetService:
             .order_by(asc(DataProductDatasetAssociationModel.requested_on))
             .all()
         )
+
+    def get_all_requests(self, db: Session):
+        return db.query(DataProductDatasetAssociationModel).all()
+
+    def get_requests_by_status(self, status: str, db: Session):
+        return (
+            db.query(DataProductDatasetAssociationModel)
+            .filter(DataProductDatasetAssociationModel.status == status)
+            .all()
+        )

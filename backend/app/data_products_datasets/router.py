@@ -15,6 +15,16 @@ router = APIRouter(
 )
 
 
+@router.get("")
+def get_all_requests(db: Session = Depends(get_db_session)):
+    return DataProductDatasetService().get_all_requests(db)
+
+
+@router.get("/status/{status}")
+def get_requests_by_status(status: str, db: Session = Depends(get_db_session)):
+    return DataProductDatasetService().get_requests_by_status(status, db)
+
+
 @router.post(
     "/approve/{id}", dependencies=[Depends(only_dataproduct_dataset_link_owners)]
 )
