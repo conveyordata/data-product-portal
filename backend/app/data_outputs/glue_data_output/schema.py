@@ -1,6 +1,6 @@
 from typing import Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import model_validator
 
 from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.glue_data_output.model import (
@@ -11,19 +11,13 @@ from app.data_products.schema_base import BaseDataProduct
 
 
 class GlueDataOutput(BaseDataOutputConfiguration):
-    database: str = Field(..., description="Database linked to the data output")
-    database_suffix: str = Field(
-        "", description="Suffix of the Database linked to the data output"
-    )
-    table: str = Field("*", description="Table used for the data output")
-    configuration_type: Literal[DataOutputTypes.GlueDataOutput] = Field(
-        ..., description="Type of the data output configuration"
-    )
-    bucket_identifier: str = Field(
-        "", description="Bucket identifier for the data output"
-    )
-    database_path: str = Field("", description="Database path for the data output")
-    table_path: str = Field("", description="Table path for the data output")
+    database: str
+    database_suffix: str = ""
+    table: str = "*"
+    bucket_identifier: str = ""
+    database_path: str = ""
+    table_path: str = ""
+    configuration_type: Literal[DataOutputTypes.GlueDataOutput]
 
     class Meta:
         orm_model = GlueDataOutputModel
@@ -37,7 +31,7 @@ class GlueDataOutput(BaseDataOutputConfiguration):
         return self
 
     def validate_configuration(self, data_product: BaseDataProduct):
-        # If product aligned
+        # TODO Force defaul t bucket identifier if bucket = ''
         if not self.database.startswith(data_product.external_id):
             raise ValueError("Invalid database specified")
 

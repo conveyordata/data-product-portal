@@ -7,19 +7,11 @@ from app.data_products.schema import DataProduct
 
 
 class DataProductTypeGet(DataProductType):
-    data_products: list[DataProduct] = Field(
-        ..., description="List of data products associated with the data product type"
-    )
+    data_products: list[DataProduct]
 
 
 class DataProductTypesGet(DataProductType):
-    data_products: Annotated[
-        list[DataProduct],
-        Field(
-            exclude=True,
-            description="List of data products associated with the data product type",
-        ),
-    ]
+    data_products: Annotated[list[DataProduct], Field(exclude=True)]
 
     @computed_field
     def data_product_count(self) -> int:

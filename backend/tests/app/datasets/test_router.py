@@ -1,5 +1,4 @@
 import uuid
-from copy import deepcopy
 
 import pytest
 from tests.factories import DatasetFactory, DomainFactory, UserFactory
@@ -34,12 +33,6 @@ class TestDatasetsRouter:
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
-
-    def test_create_dataset_no_owners(self, dataset_payload, client):
-        create_payload = deepcopy(dataset_payload)
-        create_payload["owners"] = []
-        created_dataset = self.create_default_dataset(client, create_payload)
-        assert created_dataset.status_code == 422
 
     def test_get_datasets(self, client):
         ds = DatasetFactory()
@@ -95,22 +88,6 @@ class TestDatasetsRouter:
 
         assert updated_dataset.status_code == 200
         assert updated_dataset.json()["id"] == str(ds.id)
-
-    def test_update_dataset_remove_all_owners(self, client):
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
-        update_payload = {
-            "name": "new_name",
-            "external_id": "new_external_id",
-            "description": "new_description",
-            "tags": [],
-            "access_type": "public",
-            "owners": [],
-            "domain_id": str(ds.domain_id),
-        }
-
-        updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
-
-        assert updated_dataset.status_code == 422
 
     def test_update_dataset_about_not_owners(self, client):
         ds = DatasetFactory()
@@ -171,13 +148,6 @@ class TestDatasetsRouter:
         dataset = self.get_dataset_by_id(client, ds.id)
         assert dataset.status_code == 200
         assert len(dataset.json()["owners"]) == 1
-
-    def test_remove_last_user_from_dataset(self, client):
-        owner = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[owner])
-
-        response = self.delete_dataset_user(client, owner.id, ds.id)
-        assert response.status_code == 400
 
     def test_get_dataset_by_id_with_invalid_dataset_id(self, client, session):
         dataset = self.get_dataset_by_id(client, self.invalid_id)

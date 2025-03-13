@@ -14,6 +14,5 @@ class Role(Base, BaseORM):
     id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
     scope = Column(String)
-    prototype = Column(Integer)
     description = Column(String)
     permissions = Column(ARRAY(Integer))

@@ -1,6 +1,6 @@
 from typing import Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import model_validator
 
 from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.redshift_data_output.model import (
@@ -11,17 +11,13 @@ from app.data_products.schema_base import BaseDataProduct
 
 
 class RedshiftDataOutput(BaseDataOutputConfiguration):
-    database: str = Field(..., description="Database linked to the data output")
-    schema: str = Field("", description="Schema linked to the data output")
-    configuration_type: Literal[DataOutputTypes.RedshiftDataOutput] = Field(
-        ..., description="Type of the data output configuration"
-    )
-    table: str = Field("*", description="Table used for the data output")
-    bucket_identifier: str = Field(
-        "", description="Bucket identifier for the data output"
-    )
-    database_path: str = Field("", description="Database path for the data output")
-    table_path: str = Field("", description="Table path for the data output")
+    database: str
+    schema: str = ""
+    configuration_type: Literal[DataOutputTypes.RedshiftDataOutput]
+    table: str = "*"
+    bucket_identifier: str = ""
+    database_path: str = ""
+    table_path: str = ""
 
     class Meta:
         orm_model = RedshiftDataOutputModel

@@ -1,6 +1,6 @@
 from typing import Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import model_validator
 
 from app.data_outputs.data_output_types import DataOutputTypes
 from app.data_outputs.databricks_data_output.model import (
@@ -11,19 +11,13 @@ from app.data_products.schema_base import BaseDataProduct
 
 
 class DatabricksDataOutput(BaseDataOutputConfiguration):
-    catalog: str = Field(..., description="Catalog linked to the data output")
-    schema: str = Field(
-        "", description="Schema of the catalog linked to the data output"
-    )
-    table: str = Field("*", description="Table used for the data output")
-    configuration_type: Literal[DataOutputTypes.DatabricksDataOutput] = Field(
-        ..., description="Type of the data output configuration"
-    )
-    bucket_identifier: str = Field(
-        "", description="Bucket identifier for the data output"
-    )
-    catalog_path: str = Field("", description="Catalog path for the data output")
-    table_path: str = Field("", description="Table path for the data output")
+    catalog: str
+    schema: str = ""
+    configuration_type: Literal[DataOutputTypes.DatabricksDataOutput]
+    table: str = "*"
+    bucket_identifier: str = ""
+    catalog_path: str = ""
+    table_path: str = ""
 
     class Meta:
         orm_model = DatabricksDataOutputModel

@@ -14,50 +14,20 @@ from app.users.schema import User
 
 
 class DataProductMembershipGet(ORMModel):
-    id: UUID = Field(
-        ..., description="Unique identifier for the data product membership"
-    )
-    user_id: UUID = Field(..., description="Unique identifier of the user")
-    data_product_id: UUID = Field(
-        ..., description="Unique identifier of the data product"
-    )
-    role: DataProductUserRole = Field(
-        ..., description="Role of the user in the data product"
-    )
-    status: DataProductMembershipStatus = Field(
-        ..., description="Status of the data product membership"
-    )
-    user: User = Field(
-        ..., description="User associated with the data product membership"
-    )
-    data_product: DataProduct = Field(
-        ..., description="Data product associated with the membership"
-    )
-    requested_on: datetime = Field(
-        ..., description="Timestamp when the membership was requested"
-    )
-    approved_by: User | None = Field(
-        None, description="User who approved the membership, if applicable"
-    )
-    approved_on: datetime | None = Field(
-        None, description="Timestamp when the membership was approved, if applicable"
-    )
-    denied_by: User | None = Field(
-        None, description="User who denied the membership, if applicable"
-    )
-    denied_on: datetime | None = Field(
-        None, description="Timestamp when the membership was denied, if applicable"
-    )
+    id: UUID
+    user_id: UUID
+    data_product_id: UUID
+    role: DataProductUserRole
+    status: DataProductMembershipStatus
+    user: User
+    data_product: DataProduct
+    requested_on: datetime
+    approved_by: User | None
+    approved_on: datetime | None
+    denied_by: User | None
+    denied_on: datetime | None
 
 
 class DataProductMembershipsGet(DataProductMembershipGet):
-    user: Annotated[
-        User,
-        Field(
-            exclude=True, description="User associated with the data product membership"
-        ),
-    ]
-    data_product: Annotated[
-        DataProduct,
-        Field(exclude=True, description="Data product associated with the membership"),
-    ]
+    user: Annotated[User, Field(exclude=True)]
+    data_product: Annotated[DataProduct, Field(exclude=True)]
