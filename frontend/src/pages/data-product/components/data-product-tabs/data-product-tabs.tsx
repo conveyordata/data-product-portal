@@ -5,7 +5,6 @@ import Icon, {
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
-import { ReactFlowProvider } from '@xyflow/react';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -81,21 +80,13 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <PartitionOutlined />,
-                children: (
-                    <ReactFlowProvider>
-                        <Explorer id={dataProductId} type={'dataproduct'} />
-                    </ReactFlowProvider>
-                ),
+                children: <Explorer id={dataProductId} type={'dataproduct'} />,
             },
             {
                 label: t('Settings'),
                 key: TabKeys.Settings,
                 icon: <SettingOutlined />,
-                children: (
-                    <ReactFlowProvider>
-                        <SettingsTab dataProductId={dataProductId} />
-                    </ReactFlowProvider>
-                ),
+                children: <SettingsTab dataProductId={dataProductId} />,
             },
             {
                 label: t('History'),

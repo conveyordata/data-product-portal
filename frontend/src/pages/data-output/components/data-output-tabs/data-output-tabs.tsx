@@ -1,5 +1,4 @@
 import Icon, { CodeOutlined, PartitionOutlined } from '@ant-design/icons';
-import { ReactFlowProvider } from '@xyflow/react';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,11 +61,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <PartitionOutlined />,
-                children: (
-                    <ReactFlowProvider>
-                        <Explorer id={dataOutputId} type={'dataoutput'} />
-                    </ReactFlowProvider>
-                ),
+                children: <Explorer id={dataOutputId} type={'dataoutput'} />,
             },
         ];
     }, [dataOutputId, t]);

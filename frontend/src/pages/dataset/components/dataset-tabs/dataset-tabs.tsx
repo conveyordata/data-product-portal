@@ -5,7 +5,6 @@ import {
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
-import { ReactFlowProvider } from '@xyflow/react';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -80,21 +79,13 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <PartitionOutlined />,
-                children: (
-                    <ReactFlowProvider>
-                        <Explorer id={datasetId} type={'dataset'} />
-                    </ReactFlowProvider>
-                ),
+                children: <Explorer id={datasetId} type={'dataset'} />,
             },
             {
                 label: t('Settings'),
                 key: TabKeys.Settings,
                 icon: <SettingOutlined />,
-                children: (
-                    <ReactFlowProvider>
-                        <SettingsTab datasetId={datasetId} />
-                    </ReactFlowProvider>
-                ),
+                children: <SettingsTab datasetId={datasetId} />,
             },
             {
                 label: t('History'),

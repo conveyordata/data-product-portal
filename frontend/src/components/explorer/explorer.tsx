@@ -1,7 +1,7 @@
 import '@xyflow/react/dist/base.css';
 
 import type { Edge, Node, XYPosition } from '@xyflow/react';
-import { Position } from '@xyflow/react';
+import { Position, ReactFlowProvider } from '@xyflow/react';
 import { Button, Flex, theme } from 'antd';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -110,6 +110,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
             default:
                 break;
         }
+
         return {
             id: node.id,
             position: defaultNodePosition,
@@ -127,7 +128,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
     });
 }
 
-export function Explorer({ id, type }: Props) {
+function InternalExplorer({ id, type }: Props) {
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
@@ -181,5 +182,13 @@ export function Explorer({ id, type }: Props) {
                 }}
             />
         </Flex>
+    );
+}
+
+export function Explorer(props: Props) {
+    return (
+        <ReactFlowProvider>
+            <InternalExplorer id={props.id} type={props.type} />
+        </ReactFlowProvider>
     );
 }
