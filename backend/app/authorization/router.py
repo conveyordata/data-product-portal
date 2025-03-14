@@ -25,14 +25,11 @@ def check_access(
     """Allows the requesting user to check whether an access check will fail or succeed.
     Useful to conditionally disable parts of the UI that are known to be inaccessible.
     """
-    authorizer = Authorization()
+    dom = "*" if request.domain is None else request.domain
+    obj = "*" if request.object_id is None else str(request.object_id)
 
-    domain = "*" if request.domain is None else request.domain
-    object_ = "*" if request.object_id is None else str(request.object_id)
+    authorizer = Authorization()
     access = authorizer.has_access(
-        subject=str(user.id),
-        domain=domain,
-        object_=object_,
-        action=request.action,
+        sub=str(user.id), dom=dom, obj=obj, act=request.action
     )
     return AccessResponse(access=access)
