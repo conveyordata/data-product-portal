@@ -21,13 +21,20 @@ router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 
 @router.get("")
-def get_datasets(db: Session = Depends(get_db_session)) -> list[DatasetsGet]:
-    return DatasetService().get_datasets(db)
+def get_datasets(
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> list[DatasetsGet]:
+    return DatasetService().get_datasets(db, user)
 
 
 @router.get("/{id}")
-def get_dataset(id: UUID, db: Session = Depends(get_db_session)) -> DatasetGet:
-    return DatasetService().get_dataset(id, db)
+def get_dataset(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> DatasetGet:
+    return DatasetService().get_dataset(id, db, user)
 
 
 @router.get("/user/{user_id}")

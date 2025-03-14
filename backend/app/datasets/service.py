@@ -23,11 +23,11 @@ from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
-from app.users.model import ensure_user_exists
+from app.users.model import User, ensure_user_exists
 
 
 class DatasetService:
-    def get_dataset(self, id: UUID, db: Session) -> DatasetGet:
+    def get_dataset(self, id: UUID, db: Session, user: User) -> DatasetGet:
         dataset = db.get(
             DatasetModel,
             id,
@@ -36,36 +36,45 @@ class DatasetService:
             ],
         )
 
-        rolled_up_tags = set()
-
-        default_lifecycle = (
-            db.query(DataProductLifeCycleModel)
-            .filter(DataProductLifeCycleModel.is_default)
-            .first()
-        )
-
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
             )
 
+        if not dataset.isVisibleToUser(user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User does not have access to this dataset",
+            )
+
+        rolled_up_tags = set()
         for output_link in dataset.data_output_links:
             rolled_up_tags.update(output_link.data_output.tags)
 
         dataset.rolled_up_tags = rolled_up_tags
 
         if not dataset.lifecycle:
+            default_lifecycle = (
+                db.query(DataProductLifeCycleModel)
+                .filter(DataProductLifeCycleModel.is_default)
+                .first()
+            )
             dataset.lifecycle = default_lifecycle
 
         return dataset
 
-    def get_datasets(self, db: Session) -> list[DatasetsGet]:
+    def get_datasets(self, db: Session, user: User) -> list[DatasetsGet]:
         default_lifecycle = (
             db.query(DataProductLifeCycleModel)
             .filter(DataProductLifeCycleModel.is_default)
             .first()
         )
-        datasets = db.query(DatasetModel).order_by(asc(DatasetModel.name)).all()
+        datasets = [
+            dataset
+            for dataset in db.query(DatasetModel).order_by(asc(DatasetModel.name)).all()
+            if dataset.isVisibleToUser(user)
+        ]
+
         for dataset in datasets:
             if not dataset.lifecycle:
                 dataset.lifecycle = default_lifecycle

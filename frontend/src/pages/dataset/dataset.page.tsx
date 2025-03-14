@@ -1,14 +1,14 @@
 import { SettingOutlined } from '@ant-design/icons';
-import { Flex, Popover, Typography } from 'antd';
+import { Flex, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { DatasetAccessIcon } from '@/components/datasets/dataset-access-icon/dataset-access-icon';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.tsx';
@@ -60,11 +60,7 @@ export function Dataset() {
                     <Flex className={styles.datasetHeader}>
                         <CustomSvgIconLoader iconComponent={datasetBorderIcon} size="large" />
                         <Typography.Title level={3}>{dataset?.name}</Typography.Title>
-                        {dataset.access_type === 'restricted' && (
-                            <Popover content={t('Restricted access')} trigger="hover">
-                                <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
-                            </Popover>
-                        )}
+                        <DatasetAccessIcon accessType={dataset.access_type} hasPopover />
                     </Flex>
                     {isDatasetOwner && (
                         <CircleIconButton

@@ -1,8 +1,7 @@
 import { Badge, Popover, TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 
-import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { DatasetAccessIcon } from '@/components/datasets/dataset-access-icon/dataset-access-icon';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
@@ -46,14 +45,7 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
             title: undefined,
             width: iconColumnWidth,
             dataIndex: 'access_type',
-            render: (accessType: string) => {
-                const isRestricted = accessType === 'restricted';
-                return isRestricted ? (
-                    <Popover content={t('Restricted access')} placement={'left'}>
-                        <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
-                    </Popover>
-                ) : null;
-            },
+            render: (accessType: DatasetAccess) => <DatasetAccessIcon accessType={accessType} hasPopover />,
         },
         {
             title: t('Name'),
@@ -112,7 +104,6 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
             title: t('Produced by Data Product'),
             dataIndex: 'data_output_links',
             render: (data_output_links: DataOutputLink[]) => {
-                console.log(data_output_links);
                 if (data_output_links !== undefined) {
                     return (
                         <TableCellItem
@@ -128,8 +119,6 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
                 }
             },
             width: '25%',
-            // ...new FilterSettings(datasets, ds => ds.domain.name),
-            // sorter: sorter.stringSorter(ds => ds.data_output_links.data_output.owner.name),
         },
         {
             title: t('Shared With'),
