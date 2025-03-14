@@ -1,3 +1,5 @@
+# Must precede any llm module imports
+
 import logfire
 from agentic_system.router import router
 from agentic_system.settings import settings
@@ -14,7 +16,6 @@ with open("./VERSION", "r") as f:
     API_VERSION = f.read().strip()
 
 TITLE = "Data product portal Agentic System"
-
 
 oidc_kwargs = (
     {
