@@ -2,7 +2,7 @@ import json
 from typing import Union
 from uuid import UUID
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 
 from app.environment_platform_configurations.schemas import (
     AWSEnvironmentPlatformConfiguration,
@@ -16,7 +16,7 @@ from app.shared.schema import ORMModel
 class EnvironmentPlatformConfiguration(ORMModel):
     config: Union[
         AWSEnvironmentPlatformConfiguration, DatabricksEnvironmentPlatformConfiguration
-    ]
+    ] = Field(..., description="Configuration settings for the environment platform")
 
     @field_validator("config", mode="before")
     @classmethod
@@ -25,6 +25,12 @@ class EnvironmentPlatformConfiguration(ORMModel):
             return json.loads(v)
         return v
 
-    id: UUID
-    environment: Environment
-    platform: Platform
+    id: UUID = Field(
+        ..., description="Unique identifier for the environment platform configuration"
+    )
+    environment: Environment = Field(
+        ..., description="Environment associated with the platform configuration"
+    )
+    platform: Platform = Field(
+        ..., description="Platform associated with the environment configuration"
+    )
