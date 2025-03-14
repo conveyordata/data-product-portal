@@ -56,12 +56,7 @@ class Authorization(metaclass=Singleton):
             obj = cls.resolve_parameter(request, object_id)
             dom = cls.resolve_domain(db, model, obj)
 
-            if not cls().has_access(
-                subject=str(user.id),
-                domain=dom,
-                object_=obj,
-                action=action,
-            ):
+            if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="You don't have permission to perform this action",
@@ -92,10 +87,10 @@ class Authorization(metaclass=Singleton):
 
     @cachedmethod(lambda self: self._cache)
     def has_access(
-        self, *, subject: str, domain: str, object_: str, action: AuthorizationAction
+        self, *, sub: str, dom: str, obj: str, act: AuthorizationAction
     ) -> bool:
         enforcer: AsyncEnforcer = self._enforcer
-        return enforcer.enforce(subject, domain, object_, str(action))
+        return enforcer.enforce(sub, dom, obj, str(act))
 
     def _after_update(self) -> None:
         """The cache should be purged when the casbin database is altered,
