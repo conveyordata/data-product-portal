@@ -9,9 +9,11 @@ import remarkGfm from 'remark-gfm';
 
 import { useAskQuestionMutation } from '@/store/features/agentic-system/agentic-system-api-slice';
 
+import { LoadingSpinner } from '../loading/loading-spinner/loading-spinner';
+
 export function AgenticSystem() {
     // const { data: agenticSystem } = useMainAIEndpointQuery();
-    const [askQuestion] = useAskQuestionMutation();
+    const [askQuestion, { isLoading }] = useAskQuestionMutation();
     const [form] = Form.useForm();
     const { t } = useTranslation();
     const [result, setResult] = useState('');
@@ -46,11 +48,19 @@ export function AgenticSystem() {
 
                 {/* <ReactMarkDown>{result}</ReactMarkDown> */}
                 {/* <Typography.Title>{result}</Typography.Title> */}
-                <MarkDown
-                    children={result}
-                    remarkPlugins={[remarkGfm, remarkBreaks]}
-                    rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                ></MarkDown>
+                {(() => {
+                    if (isLoading) {
+                        return <LoadingSpinner />;
+                    } else {
+                        return (
+                            <MarkDown
+                                children={result}
+                                remarkPlugins={[remarkGfm, remarkBreaks]}
+                                rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                            ></MarkDown>
+                        );
+                    }
+                })()}
                 <Button
                     type="primary"
                     htmlType={'submit'}
