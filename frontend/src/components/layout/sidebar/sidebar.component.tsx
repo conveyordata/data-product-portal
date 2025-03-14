@@ -1,12 +1,11 @@
 import { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Flex, Layout, Menu, type MenuProps, Space } from 'antd';
-import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useMatches } from 'react-router';
 
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
-import { DataProductOutlined, DatasetOutlined, ProductLogo } from '@/components/icons';
+import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
 import { ApplicationPaths } from '@/types/navigation.ts';
@@ -59,7 +58,7 @@ export const Sidebar = () => {
     return (
         <Layout.Sider className={styles.sidebarWrapper}>
             <Flex className={styles.logoContainer}>
-                <ProductLogo className={clsx([styles.defaultIcon, styles.sidebarContent, styles.iconWrapper])} />
+                {/* <ProductLogo className={clsx([styles.defaultIcon, styles.sidebarContent, styles.iconWrapper])} /> */}
                 <Flex vertical className={styles.sidebarContent}>
                     <Space className={styles.logoWrapper}>
                         <Link to={ApplicationPaths.Home}>
