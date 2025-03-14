@@ -45,7 +45,7 @@ from app.data_products_datasets.model import (
 )
 from app.data_products_datasets.schema import DataProductDatasetAssociationCreate
 from app.datasets.enums import DatasetAccessType
-from app.datasets.model import ensure_dataset_exists
+from app.datasets.model import Dataset, ensure_dataset_exists
 from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
@@ -53,6 +53,11 @@ from app.environments.model import Environment as EnvironmentModel
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.notification_interactions.service import NotificationInteractionService
+from app.notifications.data_product_dataset_association.model import (
+    DataProductDatasetNotification,
+)
+from app.notifications.notification_types import NotificationTypes
 from app.platforms.model import Platform as PlatformModel
 from app.settings import settings
 from app.tags.model import Tag as TagModel
@@ -355,9 +360,42 @@ class DataProductService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.dataset_links.append(dataset_link)
+        RefreshInfrastructureLambda().trigger()
+
+        db.flush()
+        db.refresh(dataset_link)
+
+        notification = DataProductDatasetNotification(
+            configuration_type=NotificationTypes.DataProductDataset,
+            data_product_dataset_id=dataset_link.id,
+        )
+        db.add(notification)
+        db.flush()
+        db.refresh(notification)
+
+        if dataset_link.status == DataProductDatasetLinkStatus.PENDING_APPROVAL:
+            owner_ids = (
+                db.query(UserModel.id)
+                .join(Dataset.owners)
+                .filter(Dataset.id == dataset_link.dataset_id)
+                .all()
+            )
+            owner_ids = [owner_id for (owner_id,) in owner_ids]
+            NotificationInteractionService().update_notification_interactions_for_notification(
+                db, notification.id, owner_ids
+            )
+        elif dataset_link.status == DataProductDatasetLinkStatus.APPROVED:
+            NotificationInteractionService().update_notification_interactions_for_notification(
+                db, notification.id, [dataset_link.requested_by_id]
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unsupported status for DataOutPutDatasetStatus when creating link between data product and dataset.",
+            )
+
         db.commit()
         db.refresh(data_product)
-        RefreshInfrastructureLambda().trigger()
 
         url = (
             settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-product"
@@ -406,6 +444,9 @@ class DataProductService:
                 detail=f"Data product dataset for data product {id} not found",
             )
         data_product.dataset_links.remove(data_product_dataset)
+
+        # TODO Drop notification with CASCADE
+
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
