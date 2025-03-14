@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Security
 
+from app.authorization.router import router as authorization
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
 from app.data_outputs.router import router as data_outputs
@@ -25,6 +26,7 @@ router = (
     else APIRouter()
 )
 
+router.include_router(authorization)
 router.include_router(dataset)
 router.include_router(data_product)
 router.include_router(data_product_type)

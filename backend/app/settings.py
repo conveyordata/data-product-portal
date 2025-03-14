@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     CORPORATION: str = "Dataminded"
     EMAIL_BUTTON_COLOR: str = "#3B9672"
 
+    # Authorizer
+    AUTHORIZER_CACHE_SIZE: int = 128
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"

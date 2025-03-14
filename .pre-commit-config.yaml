@@ -34,15 +34,16 @@ repos:
   hooks:
     - id: mypy
       additional_dependencies:
-      - types-PyYAML
+      - types-cachetools
       - types-requests
       - types-pytz
+      - types-PyYAML
 - repo: https://github.com/pycqa/flake8
   rev: 7.1.1
   hooks:
     - id: flake8
       additional_dependencies: [flake8-black]
-- repo: https://github.com/psf/black
+- repo: https://github.com/psf/black-pre-commit-mirror
   rev: 25.1.0
   hooks:
     - id: black
