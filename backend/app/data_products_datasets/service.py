@@ -16,6 +16,7 @@ from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.notification_interactions.model import NotificationInteraction
+from app.notification_interactions.service import NotificationInteractionService
 from app.notifications.data_product_dataset_association.model import (
     DataProductDatasetNotification,
 )
@@ -44,15 +45,9 @@ class DataProductDatasetService:
             .scalar()
         )
         if notification_id:
-            db.query(NotificationInteraction).filter(
-                NotificationInteraction.notification_id == notification_id
-            ).delete(synchronize_session=False)
-
-            new_interaction = NotificationInteraction(
-                notification_id=notification_id,
-                user_id=current_link.requested_by_id,
+            NotificationInteractionService().update_notification_interactions_for_notification(
+                db, notification_id, [current_link.requested_by_id]
             )
-            db.add(new_interaction)
 
         db.commit()
 
@@ -76,15 +71,9 @@ class DataProductDatasetService:
             .scalar()
         )
         if notification_id:
-            db.query(NotificationInteraction).filter(
-                NotificationInteraction.notification_id == notification_id
-            ).delete(synchronize_session=False)
-
-            new_interaction = NotificationInteraction(
-                notification_id=notification_id,
-                user_id=current_link.requested_by_id,
+            NotificationInteractionService().update_notification_interactions_for_notification(
+                db, notification_id, [current_link.requested_by_id]
             )
-            db.add(new_interaction)
 
         db.commit()
 

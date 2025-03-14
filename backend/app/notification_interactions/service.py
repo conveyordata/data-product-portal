@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
 
@@ -28,6 +30,26 @@ from app.users.schema import User
 
 
 class NotificationInteractionService:
+    def update_notification_interactions_for_notification(
+        self, db: Session, notification_id: UUID, user_ids: list[UUID]
+    ):
+        """
+        Clears the NotificationInteractions for the specified Notification.
+        New interactions are then created for the users provided.
+        db.commit() should be used after using this function.
+
+        """
+        db.query(NotificationInteraction).filter(
+            NotificationInteraction.notification_id == notification_id
+        ).delete(synchronize_session=False)
+
+        for user_id in user_ids:
+            new_interaction = NotificationInteraction(
+                notification_id=notification_id,
+                user_id=user_id,
+            )
+            db.add(new_interaction)
+
     def get_user_notification_interactions(
         self, db: Session, authenticated_user: User
     ) -> list[NotificationInteractionGet]:
