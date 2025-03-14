@@ -34,9 +34,10 @@ repos:
   hooks:
     - id: mypy
       additional_dependencies:
-      - types-PyYAML
+      - types-cachetools
       - types-requests
       - types-pytz
+      - types-PyYAML
 - repo: https://github.com/pycqa/flake8
   rev: 7.1.1
   hooks:
