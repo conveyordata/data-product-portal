@@ -15,6 +15,10 @@ from app.data_products_datasets.model import (
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
+from app.notification_interactions.model import NotificationInteraction
+from app.notifications.data_product_dataset_association.model import (
+    DataProductDatasetNotification,
+)
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -33,6 +37,23 @@ class DataProductDatasetService:
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
         RefreshInfrastructureLambda().trigger()
+
+        notification_id = (
+            db.query(DataProductDatasetNotification.id)
+            .filter(DataProductDatasetNotification.data_product_dataset_id == id)
+            .scalar()
+        )
+        if notification_id:
+            db.query(NotificationInteraction).filter(
+                NotificationInteraction.notification_id == notification_id
+            ).delete(synchronize_session=False)
+
+            new_interaction = NotificationInteraction(
+                notification_id=notification_id,
+                user_id=current_link.requested_by_id,
+            )
+            db.add(new_interaction)
+
         db.commit()
 
     def deny_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
@@ -48,6 +69,23 @@ class DataProductDatasetService:
         current_link.status = DataProductDatasetLinkStatus.DENIED
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
+
+        notification_id = (
+            db.query(DataProductDatasetNotification.id)
+            .filter(DataProductDatasetNotification.data_product_dataset_id == id)
+            .scalar()
+        )
+        if notification_id:
+            db.query(NotificationInteraction).filter(
+                NotificationInteraction.notification_id == notification_id
+            ).delete(synchronize_session=False)
+
+            new_interaction = NotificationInteraction(
+                notification_id=notification_id,
+                user_id=current_link.requested_by_id,
+            )
+            db.add(new_interaction)
+
         db.commit()
 
     def remove_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
