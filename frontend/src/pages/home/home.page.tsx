@@ -26,9 +26,9 @@ export function Home() {
                     </Col>
                 </Row>
             </div>
-            <Flex>
+            {/* <Flex> */}
                 <AgenticSystem />
-            </Flex>
+            {/* </Flex> */}
 
             <div className={styles.contentSecondary}>
                 <Row gutter={ROW_GUTTER}>

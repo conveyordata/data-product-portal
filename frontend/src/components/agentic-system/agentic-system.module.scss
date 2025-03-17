@@ -1,0 +1,19 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%; /* Ensure the container takes the full height */
+    overflow: hidden; /* Prevent content from overflowing */
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Allow the form to grow and shrink as needed */
+    overflow-y: auto; /* Enable vertical scrolling if content overflows */
+    padding: 16px; /* Add some padding for better spacing */
+}
+
+button {
+    margin-top: 16px; /* Add spacing above the button */
+}

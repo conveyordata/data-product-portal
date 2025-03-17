@@ -135,7 +135,9 @@ export function PendingRequestsInbox() {
     const onPaginationChange = (current: number, pageSize: number) => {
         handlePaginationChange({ current, pageSize });
     };
-
+    if (!pendingItems.length) {
+        return null;
+    }
     return (
         <div className={styles.section}>
             <div className={styles.sectionTitle}>

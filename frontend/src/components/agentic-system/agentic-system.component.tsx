@@ -6,7 +6,7 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
-
+import styles from './agentic-system.module.scss';
 import { useAskQuestionMutation } from '@/store/features/agentic-system/agentic-system-api-slice';
 
 import { LoadingSpinner } from '../loading/loading-spinner/loading-spinner';
@@ -32,7 +32,7 @@ export function AgenticSystem() {
     };
 
     return (
-        <Flex>
+        <Flex className={styles.container}>
             <Form
                 form={form}
                 layout="vertical"

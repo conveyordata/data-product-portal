@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     CORS_ALLOWED_ORIGINS: str = ""
     OPEN_AI_API_KEY: str = ""
     LANGTRACE_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
 
     # OIDC Configuration
     OIDC_ENABLED: bool = False
