@@ -381,18 +381,18 @@ class DataProductService:
                 .all()
             )
             owner_ids = [owner_id for (owner_id,) in owner_ids]
-            NotificationInteractionService().update_notification_interactions_for_notification(
+            NotificationInteractionService().reset_interactions_for_notification(
                 db, notification.id, owner_ids
             )
         elif dataset_link.status == DataProductDatasetLinkStatus.APPROVED:
-            NotificationInteractionService().update_notification_interactions_for_notification(
+            NotificationInteractionService().reset_interactions_for_notification(
                 db, notification.id, [dataset_link.requested_by_id]
             )
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=
-                "Unsupported status for DataOutPutDatasetStatus when creating link between data product and dataset."
+                detail="Unsupported status on creating link"
+                + " between data product and dataset.",
             )
 
         db.commit()

@@ -120,7 +120,7 @@ class DataProductMembershipService:
             .scalar()
         )
         if notification_id:
-            NotificationInteractionService().update_notification_interactions_for_notification(
+            NotificationInteractionService().reset_interactions_for_notification(
                 db, notification_id, [data_product_membership.requested_by_id]
             )
 
@@ -163,7 +163,7 @@ class DataProductMembershipService:
             .scalar()
         )
         if notification_id:
-            NotificationInteractionService().update_notification_interactions_for_notification(
+            NotificationInteractionService().reset_interactions_for_notification(
                 db, notification_id, [data_product_membership.requested_by_id]
             )
 

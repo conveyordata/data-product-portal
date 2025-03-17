@@ -30,7 +30,7 @@ from app.users.schema import User
 
 
 class NotificationInteractionService:
-    def update_notification_interactions_for_notification(
+    def reset_interactions_for_notification(
         self, db: Session, notification_id: UUID, user_ids: list[UUID]
     ):
         """

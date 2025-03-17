@@ -15,7 +15,6 @@ from app.data_products_datasets.model import (
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.notification_interactions.model import NotificationInteraction
 from app.notification_interactions.service import NotificationInteractionService
 from app.notifications.data_product_dataset_association.model import (
     DataProductDatasetNotification,
@@ -45,7 +44,7 @@ class DataProductDatasetService:
             .scalar()
         )
         if notification_id:
-            NotificationInteractionService().update_notification_interactions_for_notification(
+            NotificationInteractionService().reset_interactions_for_notification(
                 db, notification_id, [current_link.requested_by_id]
             )
 
@@ -71,7 +70,7 @@ class DataProductDatasetService:
             .scalar()
         )
         if notification_id:
-            NotificationInteractionService().update_notification_interactions_for_notification(
+            NotificationInteractionService().reset_interactions_for_notification(
                 db, notification_id, [current_link.requested_by_id]
             )
 

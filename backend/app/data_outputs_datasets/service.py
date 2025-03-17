@@ -55,7 +55,7 @@ class DataOutputDatasetService:
             .scalar()
         )
         if notification_id:
-            NotificationInteractionService().update_notification_interactions_for_notification(
+            NotificationInteractionService().reset_interactions_for_notification(
                 db, notification_id, [current_link.requested_by_id]
             )
 
@@ -86,7 +86,7 @@ class DataOutputDatasetService:
             .scalar()
         )
         if notification_id:
-            NotificationInteractionService().update_notification_interactions_for_notification(
+            NotificationInteractionService().reset_interactions_for_notification(
                 db, notification_id, [current_link.requested_by_id]
             )
 
