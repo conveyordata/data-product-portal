@@ -24,7 +24,8 @@ from app.data_outputs_datasets.model import (
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
-from app.datasets.model import Dataset, ensure_dataset_exists
+from app.datasets.model import ensure_dataset_exists
+from app.datasets.service import DatasetService
 from app.graph.graph import Graph
 from app.notification_interactions.service import NotificationInteractionService
 from app.notifications.data_output_dataset_association.model import (
@@ -34,7 +35,6 @@ from app.notifications.notification_types import NotificationTypes
 from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
-from app.users.model import User as UserModel
 from app.users.schema import User
 
 
@@ -178,32 +178,23 @@ class DataOutputService:
         )
         data_output.dataset_links.append(dataset_link)
 
-        db.flush()
-        db.refresh(dataset_link)
-
-        notification = DataOutputDatasetNotification(
-            configuration_type=NotificationTypes.DataOutputDataset,
-            data_output_dataset_id=dataset_link.id,
-        )
-        db.add(notification)
-        db.flush()
-        db.refresh(notification)
-
         if dataset_link.status == DataOutputDatasetLinkStatus.PENDING_APPROVAL:
-            owner_ids = (
-                db.query(UserModel.id)
-                .join(Dataset.owners)
-                .filter(Dataset.id == dataset_link.dataset_id)
-                .all()
+            db.flush()
+            db.refresh(dataset_link)
+            notification = DataOutputDatasetNotification(
+                configuration_type=NotificationTypes.DataOutputDataset,
+                data_output_dataset_id=dataset_link.id,
             )
-            owner_ids = [owner_id for (owner_id,) in owner_ids]
+            db.add(notification)
+            db.flush()
+            db.refresh(notification)
+            owner_ids = DatasetService().get_owner_ids(dataset_link.dataset_id, db)
             NotificationInteractionService().reset_interactions_for_notification(
                 db, notification.id, owner_ids
             )
 
         db.commit()
         db.refresh(data_output)
-
         RefreshInfrastructureLambda().trigger()
         url = settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-output"
         action = emailgen.Table(
@@ -252,6 +243,11 @@ class DataOutputService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data output {id} not found",
             )
+        NotificationInteractionService().remove_notification_relations(
+            db, data_output_dataset.id, NotificationTypes.DataOutputDataset
+        )
+        db.flush()
+        db.refresh(data_output_dataset)
         data_output.dataset_links.remove(data_output_dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()

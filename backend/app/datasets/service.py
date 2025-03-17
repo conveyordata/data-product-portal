@@ -23,6 +23,7 @@ from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
+from app.users.model import User as UserModel
 from app.users.model import ensure_user_exists
 
 
@@ -256,3 +257,12 @@ class DatasetService:
                     )
                 )
         return Graph(nodes=set(nodes), edges=set(edges))
+
+    def get_owner_ids(self, id: UUID, db: Session) -> list[UUID]:
+        owner_ids = (
+            db.query(UserModel.id)
+            .join(DatasetModel.owners)
+            .filter(DatasetModel.id == id)
+            .all()
+        )
+        return [owner_id for (owner_id,) in owner_ids]

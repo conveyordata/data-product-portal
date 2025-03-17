@@ -10,7 +10,9 @@ class DataProductDatasetNotification(Notification):
     data_product_dataset_id: Mapped[UUID] = Column(
         ForeignKey("data_products_datasets.id")
     )
-    data_product_dataset: Mapped["DataProductDatasetAssociation"] = relationship()
+    data_product_dataset: Mapped["DataProductDatasetAssociation"] = relationship(
+        "DataProductDatasetAssociation", foreign_keys=[data_product_dataset_id]
+    )
     __mapper_args__ = {
         "polymorphic_identity": "DataProductDataset",
     }

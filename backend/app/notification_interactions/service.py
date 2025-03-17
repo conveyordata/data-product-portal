@@ -26,6 +26,11 @@ from app.notifications.data_product_dataset_association.model import (
 from app.notifications.data_product_membership.model import (
     DataProductMembershipNotification,
 )
+from app.notifications.notification_types import NotificationTypes
+from app.notifications.schema_union import (
+    NotificationForeignKeyMap,
+    NotificationModelMap,
+)
 from app.users.schema import User
 
 
@@ -49,6 +54,30 @@ class NotificationInteractionService:
                 user_id=user_id,
             )
             db.add(new_interaction)
+
+    def remove_notification_relations(
+        self, db: Session, reference_id: UUID, notification_type: NotificationTypes
+    ):
+        """
+        Removes all notification info related to the id.
+        db.commit() should be used after using this function.
+
+        """
+        notification_cls = NotificationModelMap[notification_type]
+        key_attribute = NotificationForeignKeyMap.get(notification_type)
+        notifications_to_delete = (
+            db.query(notification_cls).filter(key_attribute == reference_id).all()
+        )
+        if notifications_to_delete:
+            db.query(NotificationInteraction).filter(
+                NotificationInteraction.notification_id.in_(
+                    [n.id for n in notifications_to_delete]
+                )
+            ).delete(synchronize_session=False)
+
+            db.query(notification_cls).filter(key_attribute == reference_id).delete(
+                synchronize_session=False
+            )
 
     def get_user_notification_interactions(
         self, db: Session, authenticated_user: User
