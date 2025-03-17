@@ -371,7 +371,7 @@ class DataProductService:
             db.add(notification)
             db.flush()
             db.refresh(notification)
-            owner_ids = DatasetService().get_owner_ids(dataset_link.id, db)
+            owner_ids = DatasetService().get_owner_ids(dataset_link.dataset_id, db)
             NotificationInteractionService().reset_interactions_for_notification(
                 db, notification.id, owner_ids
             )
