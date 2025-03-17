@@ -54,6 +54,26 @@ class TestDataProductsRouter:
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
 
+    def test_create_data_product_no_members(self, payload, client):
+        create_payload = deepcopy(payload)
+        create_payload["memberships"] = []
+        created_data_product = self.create_data_product(client, create_payload)
+        assert created_data_product.status_code == 422
+
+    def test_create_data_product_no_owner(self, payload, client):
+        user = UserFactory()
+        memberships = [
+            {
+                "user_id": str(user.id),
+                "role": DataProductUserRole.MEMBER.value,
+            }
+        ]
+        create_payload = deepcopy(payload)
+        create_payload["memberships"] = memberships
+
+        created_data_product = self.create_data_product(client, create_payload)
+        assert created_data_product.status_code == 422
+
     def test_get_data_products(self, client):
         data_product = DataProductFactory()
         response = client.get(ENDPOINT)
@@ -117,6 +137,31 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         response = self.update_data_product_about(client, data_product.id)
         assert response.status_code == 403
+
+    def test_update_data_product_about_remove_all_members(self, payload, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        update_payload = deepcopy(payload)
+        update_payload["memberships"] = []
+        response = self.update_data_product(client, update_payload, data_product.id)
+        assert response.status_code == 422
+
+    def test_update_data_product_about_remove_last_owner(self, payload, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        update_payload = deepcopy(payload)
+        user = UserFactory()
+        memberships = [
+            {
+                "user_id": str(user.id),
+                "role": DataProductUserRole.MEMBER.value,
+            }
+        ]
+        update_payload["memberships"] = memberships
+        response = self.update_data_product(client, update_payload, data_product.id)
+        assert response.status_code == 422
 
     def test_update_data_product_about(self, client):
         data_product = DataProductMembershipFactory(
