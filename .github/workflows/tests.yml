@@ -99,7 +99,7 @@ jobs:
           go-version-file: cli/go.mod
           cache-dependency-path: cli/go.sum
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@4696ba8babb6127d732c3c6dde519db15edab9ea # v6.5.1
+        uses: golangci/golangci-lint-action@55c2c1448f86e01eaae002a5a3a9624417608d84 # v6.5.2
         with:
           args: --timeout 15m0s
           working-directory: cli
@@ -115,7 +115,7 @@ jobs:
       with:
         python-version: "3.12"
     - name: Setup Node.js
-      uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+      uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
       with:
         node-version-file: frontend/package.json
         cache: 'npm'
