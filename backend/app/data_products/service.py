@@ -384,16 +384,6 @@ class DataProductService:
             NotificationInteractionService().reset_interactions_for_notification(
                 db, notification.id, owner_ids
             )
-        elif dataset_link.status == DataProductDatasetLinkStatus.APPROVED:
-            NotificationInteractionService().reset_interactions_for_notification(
-                db, notification.id, [dataset_link.requested_by_id]
-            )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Unsupported status on creating link"
-                + " between data product and dataset.",
-            )
 
         db.commit()
         db.refresh(data_product)

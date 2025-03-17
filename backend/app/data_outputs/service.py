@@ -200,12 +200,6 @@ class DataOutputService:
             NotificationInteractionService().reset_interactions_for_notification(
                 db, notification.id, owner_ids
             )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Unsupported status on creating link"
-                + " between data output and dataset.",
-            )
 
         db.commit()
         db.refresh(data_output)
