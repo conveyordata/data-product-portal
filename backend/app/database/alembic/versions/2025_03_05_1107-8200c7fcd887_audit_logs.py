@@ -11,6 +11,7 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
+from app.events.schema import Type
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
@@ -39,7 +40,21 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime),
         sa.PrimaryKeyConstraint("id"),
     )
+    op.create_table(
+        "events",
+        sa.Column("id", sa.UUID, primary_key=True, nullable=False),
+        sa.Column("name", sa.String, nullable=False),
+        sa.Column("subject_id", sa.UUID),
+        sa.Column("target_id", sa.UUID, nullable=True),
+        sa.Column("subject_type", sa.Enum(Type)),
+        sa.Column("target_type", sa.Enum(Type), nullable=True),
+        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
+        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
+        sa.Column("deleted_at", sa.DateTime),
+        sa.PrimaryKeyConstraint("id"),
+    )
 
 
 def downgrade() -> None:
+    op.drop_table("events")
     op.drop_table("audit_logs")
