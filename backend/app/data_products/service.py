@@ -268,11 +268,6 @@ class DataProductService:
         for membership in memberships_to_remove:
             data_product.memberships.remove(membership)
 
-        if not any(
-            m.role == DataProductUserRole.OWNER for m in data_product.memberships
-        ):
-            raise ValueError("At least one owner membership is required.")
-
     def update_data_product(
         self, id: UUID, data_product: DataProductUpdate, db: Session
     ):

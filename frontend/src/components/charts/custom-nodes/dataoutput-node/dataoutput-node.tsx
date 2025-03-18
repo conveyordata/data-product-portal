@@ -1,10 +1,10 @@
+import type { Node, NodeProps, Position } from '@xyflow/react';
 import type { ReactNode } from 'react';
-import { NodeProps, Position } from 'reactflow';
 
 import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 
-export type DataOutputNodeProps = {
+export type DataOutputNodeProps = Node<{
     id: string;
     name: string;
     isMainNode?: boolean;
@@ -13,7 +13,7 @@ export type DataOutputNodeProps = {
     sourceHandlePosition?: Position;
     isActive?: boolean;
     icon_key: string;
-};
+}>;
 
 export function DataOutputNode({
     data: { name, id, isMainNode, nodeToolbarActions, targetHandlePosition, sourceHandlePosition, icon_key, isActive },

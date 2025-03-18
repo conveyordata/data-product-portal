@@ -55,7 +55,7 @@ jobs:
       - name: Run image
         uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
         with:
-          poetry-version: "1.8.2"
+          poetry-version: "2.1.1"
 
       - name: Setup a local virtual environment (if no poetry.toml file)
         run: |
@@ -76,6 +76,7 @@ jobs:
         working-directory: ./backend
         id: run-test
         run: poetry run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
+
       - name: Ensure 100% coverage for router files
         working-directory: ./scripts
         run: ./check_coverage.sh
@@ -98,7 +99,7 @@ jobs:
           go-version-file: cli/go.mod
           cache-dependency-path: cli/go.sum
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@2226d7cb06a077cd73e56eedd38eecad18e5d837 # v6.5.0
+        uses: golangci/golangci-lint-action@4696ba8babb6127d732c3c6dde519db15edab9ea # v6.5.1
         with:
           args: --timeout 15m0s
           working-directory: cli
