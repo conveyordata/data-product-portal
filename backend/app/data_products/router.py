@@ -150,6 +150,7 @@ def update_data_product_status(
 
 @router.post(
     "/{id}/dataset/{dataset_id}",
+    description="Request read access from a data product to a dataset. If the dataset is restricted a request will be post, if the dataset is public, the request will automatically succeed.",
     responses={
         400: {
             "description": "Dataset not found",

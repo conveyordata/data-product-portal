@@ -6,10 +6,11 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
-import styles from './agentic-system.module.scss';
+
 import { useAskQuestionMutation } from '@/store/features/agentic-system/agentic-system-api-slice';
 
 import { LoadingSpinner } from '../loading/loading-spinner/loading-spinner';
+import styles from './agentic-system.module.scss';
 
 export function AgenticSystem() {
     // const { data: agenticSystem } = useMainAIEndpointQuery();

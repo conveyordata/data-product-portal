@@ -1,4 +1,4 @@
-import { Col, Flex, Row } from 'antd';
+import { Col, Row } from 'antd';
 import { useSelector } from 'react-redux';
 
 import { AgenticSystem } from '@/components/agentic-system/agentic-system.component';
@@ -27,7 +27,7 @@ export function Home() {
                 </Row>
             </div>
             {/* <Flex> */}
-                <AgenticSystem />
+            <AgenticSystem />
             {/* </Flex> */}
 
             <div className={styles.contentSecondary}>
