@@ -17,6 +17,7 @@ from app.data_products.schema_get import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.dependencies import OnlyWithProductAccessID
+from app.events.schema import Event
 from app.graph.graph import Graph
 from app.users.schema import User
 
@@ -38,6 +39,11 @@ def get_user_data_products(
 @router.get("/{id}")
 def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataProductGet:
     return DataProductService().get_data_product(id, db)
+
+
+@router.get("/{id}/history")
+def get_event_history(id: UUID, db: Session = Depends(get_db_session)) -> list[Event]:
+    return DataProductService().get_event_history(id, db)
 
 
 @router.post(

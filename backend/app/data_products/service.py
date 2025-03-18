@@ -50,6 +50,9 @@ from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
 from app.environments.model import Environment as EnvironmentModel
+from app.events.enum import Type
+from app.events.schema import Event, EventCreate
+from app.events.service import EventService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -96,6 +99,9 @@ class DataProductService:
         if not data_product.lifecycle:
             data_product.lifecycle = default_lifecycle
         return data_product
+
+    def get_event_history(self, id: UUID, db: Session) -> list[Event]:
+        return EventService().get_history(db, id, Type.DATA_PRODUCT)
 
     def get_data_products(self, db: Session) -> list[DataProductsGet]:
         default_lifecycle = (
@@ -159,6 +165,7 @@ class DataProductService:
                     role=membership.role,
                 )
             )
+
         return data_product
 
     def _update_datasets(
@@ -206,7 +213,14 @@ class DataProductService:
 
         db.add(data_product)
         db.commit()
-
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data product created",
+                subject_id=data_product.id,
+                subject_type=Type.DATA_PRODUCT,
+            ),
+        )
         RefreshInfrastructureLambda().trigger()
         return {"id": data_product.id}
 
@@ -227,6 +241,14 @@ class DataProductService:
             output.dataset_links = []
             db.delete(output)
         db.delete(data_product)
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data product deleted",
+                subject_id=data_product.id,
+                subject_type=Type.DATA_PRODUCT,
+            ),
+        )
         db.commit()
 
     def _create_new_membership(
@@ -261,12 +283,32 @@ class DataProductService:
                     user, membership_item["role"]
                 )
                 data_product.memberships.append(new_membership)
+            EventService().create_event(
+                db,
+                EventCreate(
+                    name="Data product memberships updated",
+                    subject_id=data_product.id,
+                    subject_type=Type.DATA_PRODUCT,
+                    target_id=user.id,
+                    target_type=Type.USER,
+                ),
+            )
 
         memberships_to_remove = [
             m for m in existing_memberships if m.user_id not in request_user_ids
         ]
         for membership in memberships_to_remove:
             data_product.memberships.remove(membership)
+            EventService().create_event(
+                db,
+                EventCreate(
+                    name="Data product membership removed",
+                    subject_id=data_product.id,
+                    subject_type=Type.DATA_PRODUCT,
+                    target_id=membership.user_id,
+                    target_type=Type.USER,
+                ),
+            )
 
         if not any(
             m.role == DataProductUserRole.OWNER for m in data_product.memberships
@@ -306,6 +348,14 @@ class DataProductService:
 
         db.commit()
         RefreshInfrastructureLambda().trigger()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data product updated",
+                subject_id=id,
+                subject_type=Type.DATA_PRODUCT,
+            ),
+        )
         return {"id": current_data_product.id}
 
     def update_data_product_about(
@@ -313,6 +363,14 @@ class DataProductService:
     ):
         current_data_product = ensure_data_product_exists(id, db)
         current_data_product.about = data_product.about
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data product about updated",
+                subject_id=data_product.id,
+                subject_type=Type.DATA_PRODUCT,
+            ),
+        )
         db.commit()
 
     def update_data_product_status(
@@ -320,6 +378,14 @@ class DataProductService:
     ):
         current_data_product = ensure_data_product_exists(id, db)
         current_data_product.status = data_product.status
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data product status updated",
+                subject_id=data_product.id,
+                subject_type=Type.DATA_PRODUCT,
+            ),
+        )
         db.commit()
 
     def link_dataset_to_data_product(
@@ -387,6 +453,16 @@ class DataProductService:
             f"Action Required: {data_product.name} wants "
             f"to consume data from {dataset.name}",
         )
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data product access request to dataset",
+                subject_id=data_product.id,
+                subject_type=Type.DATA_PRODUCT,
+                target_id=dataset.id,
+                target_type=Type.DATASET,
+            ),
+        )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID, db: Session):
@@ -407,6 +483,16 @@ class DataProductService:
             )
         data_product.dataset_links.remove(data_product_dataset)
         db.commit()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data product access request to dataset removed",
+                subject_id=data_product.id,
+                subject_type=Type.DATA_PRODUCT,
+                target_id=data_product_dataset.dataset_id,
+                target_type=Type.DATASET,
+            ),
+        )
         RefreshInfrastructureLambda().trigger()
 
     def get_data_product_role_arn(self, id: UUID, environment: str, db: Session) -> str:

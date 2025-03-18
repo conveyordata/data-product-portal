@@ -11,7 +11,7 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-from app.events.schema import Type
+from app.events.enum import Type
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
