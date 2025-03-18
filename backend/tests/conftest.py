@@ -1,3 +1,4 @@
+from typing import Any, AsyncGenerator, Generator
 from unittest.mock import MagicMock
 
 import pytest
@@ -58,7 +59,7 @@ def mock_oidc_config():
 
 
 @pytest.fixture
-def client():
+def client() -> Generator[TestClient, None, None]:
     # Disable lifespan for testing
     app.router.lifespan_context = _DefaultLifespan(app.router)
 
@@ -71,7 +72,7 @@ def client():
 
 
 @pytest.fixture
-def default_data_product_payload():
+def default_data_product_payload() -> dict[str, Any]:
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
     domain = DomainFactory()
@@ -92,7 +93,7 @@ def default_data_product_payload():
 
 
 @pytest.fixture
-def default_dataset_payload():
+def default_dataset_payload() -> dict[str, Any]:
     user = UserFactory()
     domain = DomainFactory()
     return {
@@ -115,11 +116,11 @@ def clear_db(session: scoped_session[Session]) -> None:
 
 
 @pytest.fixture
-def admin():
+def admin() -> UserFactory:
     return UserFactory(external_id="sub", is_admin=True)
 
 
 @pytest_asyncio.fixture(loop_scope="session", autouse=True)
-async def authorizer():
+async def authorizer() -> AsyncGenerator[Authorization, None]:
     """Initializes casbin at the start of the testing session."""
     yield await Authorization.initialize()

@@ -7,7 +7,7 @@ from app.shared.schema import ORMModel
 
 class AccessRequest(ORMModel):
     object_id: Optional[UUID]
-    domain: Optional[str]
+    domain: Optional[UUID]
     action: AuthorizationAction
 
 
