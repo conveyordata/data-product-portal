@@ -20,9 +20,8 @@ import {
     DataProductUpdateRequest,
     DataProductUpdateResponse,
 } from '@/types/data-product';
-import { DatasetContract } from '@/types/dataset';
+import { EventContract } from '@/types/events/event.contract';
 import { GraphContract } from '@/types/graph/graph-contract';
-import { UserContract } from '@/types/users';
 
 export const dataProductTags: string[] = [
     TagTypes.DataProduct,
@@ -69,17 +68,7 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        getDataProductHistory: builder.query<
-            {
-                name: string;
-                subject_id: string;
-                target_id: string;
-                data_product: DataProductContract;
-                user: UserContract;
-                dataset: DatasetContract;
-            }[],
-            string
-        >({
+        getDataProductHistory: builder.query<EventContract[], string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductHistory, { dataProductId: id }),
                 method: 'GET',

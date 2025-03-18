@@ -48,11 +48,13 @@ def upgrade() -> None:
         sa.Column("target_id", sa.UUID, nullable=True),
         sa.Column("subject_type", sa.Enum(Type)),
         sa.Column("target_type", sa.Enum(Type), nullable=True),
+        sa.Column("actor_id", sa.UUID, sa.ForeignKey("users.id"), nullable=False),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
         sa.PrimaryKeyConstraint("id"),
     )
+    op.create_unique_constraint
 
 
 def downgrade() -> None:

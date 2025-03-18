@@ -17,10 +17,12 @@ class EventService:
 
     def get_history(self, db: Session, id: UUID, type: Type):
         return db.scalars(
-            select(EventModel).where(
+            select(EventModel)
+            .where(
                 or_(
                     (EventModel.subject_id == id) & (EventModel.subject_type == type),
                     (EventModel.target_id == id) & (EventModel.target_type == type),
                 )
             )
+            .order_by(EventModel.created_on.desc())
         ).all()

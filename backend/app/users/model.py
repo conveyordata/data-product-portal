@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
+    from app.events.model import Event
 
 
 def ensure_user_exists(user_id: UUID, db: Session) -> UserSchema:
@@ -32,7 +33,9 @@ class User(Base, BaseORM):
     first_name = Column(String)
     last_name = Column(String)
     is_admin = Column(Boolean, server_default="false", nullable=False)
-
+    events: Mapped[list["Event"]] = relationship(
+        "Event", back_populates="actor", foreign_keys="Event.actor_id"
+    )
     data_product_memberships: Mapped[list["DataProductMembership"]] = relationship(
         "DataProductMembership",
         foreign_keys="DataProductMembership.user_id",

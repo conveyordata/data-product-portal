@@ -54,6 +54,7 @@ export enum ApiUrl {
     DatasetSettingValue = '/api/datasets/:datasetId/settings/:dataProductSettingId',
     DatasetAbout = '/api/datasets/:datasetId/about',
     DatasetGraph = '/api/datasets/:datasetId/graph',
+    DatasetHistory = '/api/datasets/:datasetId/history',
     Domains = '/api/domains',
     DomainsId = '/api/domains/:domainId',
     DomainsMigrate = '/api/domains/migrate/:fromId/:toId',

@@ -219,12 +219,13 @@ class DataProductService:
                 name="Data product created",
                 subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
+                actor_id=authenticated_user.id,
             ),
         )
         RefreshInfrastructureLambda().trigger()
         return {"id": data_product.id}
 
-    def remove_data_product(self, id: UUID, db: Session):
+    def remove_data_product(self, id: UUID, db: Session, authenticated_user: User):
         data_product = db.get(
             DataProductModel,
             id,
@@ -247,25 +248,33 @@ class DataProductService:
                 name="Data product deleted",
                 subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
+                actor_id=authenticated_user.id,
             ),
         )
         db.commit()
 
     def _create_new_membership(
-        self, user: User, role: DataProductUserRole
+        self,
+        user: User,
+        role: DataProductUserRole,
+        authenticated_user: User,
     ) -> DataProductMembership:
         return DataProductMembership(
             user_id=user.id,
             role=role,
             status=DataProductMembershipStatus.APPROVED,
-            requested_by_id=user.id,
+            requested_by_id=authenticated_user.id,
             requested_on=datetime.now(tz=pytz.utc),
-            approved_by_id=user.id,
+            approved_by_id=authenticated_user.id,
             approved_on=datetime.now(tz=pytz.utc),
         )
 
     def _update_memberships(
-        self, data_product: DataProduct, membership_data: List[dict], db: Session
+        self,
+        data_product: DataProduct,
+        membership_data: List[dict],
+        db: Session,
+        authenticated_user: User,
     ):
         existing_memberships = data_product.memberships
         request_user_ids = set(m["user_id"] for m in membership_data)
@@ -277,22 +286,35 @@ class DataProductService:
                 None,
             )
             if membership:
+                if membership.role != membership_item["role"]:
+                    EventService().create_event(
+                        db,
+                        EventCreate(
+                            name="Data product memberships updated",
+                            subject_id=data_product.id,
+                            subject_type=Type.DATA_PRODUCT,
+                            target_id=user.id,
+                            target_type=Type.USER,
+                            actor_id=authenticated_user.id,
+                        ),
+                    )
                 membership.role = membership_item["role"]
             else:
                 new_membership = self._create_new_membership(
-                    user, membership_item["role"]
+                    user, membership_item["role"], authenticated_user
                 )
                 data_product.memberships.append(new_membership)
-            EventService().create_event(
-                db,
-                EventCreate(
-                    name="Data product memberships updated",
-                    subject_id=data_product.id,
-                    subject_type=Type.DATA_PRODUCT,
-                    target_id=user.id,
-                    target_type=Type.USER,
-                ),
-            )
+                EventService().create_event(
+                    db,
+                    EventCreate(
+                        name="Data product memberships updated",
+                        subject_id=data_product.id,
+                        subject_type=Type.DATA_PRODUCT,
+                        target_id=user.id,
+                        target_type=Type.USER,
+                        actor_id=authenticated_user.id,
+                    ),
+                )
 
         memberships_to_remove = [
             m for m in existing_memberships if m.user_id not in request_user_ids
@@ -307,6 +329,7 @@ class DataProductService:
                     subject_type=Type.DATA_PRODUCT,
                     target_id=membership.user_id,
                     target_type=Type.USER,
+                    actor_id=authenticated_user.id,
                 ),
             )
 
@@ -316,14 +339,20 @@ class DataProductService:
             raise ValueError("At least one owner membership is required.")
 
     def update_data_product(
-        self, id: UUID, data_product: DataProductUpdate, db: Session
+        self,
+        id: UUID,
+        data_product: DataProductUpdate,
+        db: Session,
+        authenticated_user: User,
     ):
         current_data_product = ensure_data_product_exists(id, db)
         update_data_product = data_product.model_dump(exclude_unset=True)
 
         for k, v in update_data_product.items():
             if k == "memberships":
-                self._update_memberships(current_data_product, v, db)
+                self._update_memberships(
+                    current_data_product, v, db, authenticated_user
+                )
             elif k == "dataset_links":
                 current_data_product.dataset_links = []
                 for dataset in v:
@@ -354,12 +383,17 @@ class DataProductService:
                 name="Data product updated",
                 subject_id=id,
                 subject_type=Type.DATA_PRODUCT,
+                actor_id=authenticated_user.id,
             ),
         )
         return {"id": current_data_product.id}
 
     def update_data_product_about(
-        self, id: UUID, data_product: DataProductAboutUpdate, db: Session
+        self,
+        id: UUID,
+        data_product: DataProductAboutUpdate,
+        db: Session,
+        authenticated_user: User,
     ):
         current_data_product = ensure_data_product_exists(id, db)
         current_data_product.about = data_product.about
@@ -369,12 +403,17 @@ class DataProductService:
                 name="Data product about updated",
                 subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
+                actor_id=authenticated_user.id,
             ),
         )
         db.commit()
 
     def update_data_product_status(
-        self, id: UUID, data_product: DataProductStatusUpdate, db: Session
+        self,
+        id: UUID,
+        data_product: DataProductStatusUpdate,
+        db: Session,
+        authenticated_user: User,
     ):
         current_data_product = ensure_data_product_exists(id, db)
         current_data_product.status = data_product.status
@@ -384,6 +423,7 @@ class DataProductService:
                 name="Data product status updated",
                 subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
+                actor_id=authenticated_user.id,
             ),
         )
         db.commit()
@@ -456,16 +496,23 @@ class DataProductService:
         EventService().create_event(
             db,
             EventCreate(
-                name="Data product access request to dataset",
+                name=(
+                    "Data product requested access to dataset"
+                    if dataset.access_type != DatasetAccessType.PUBLIC
+                    else "Data product linked to dataset"
+                ),
                 subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
                 target_id=dataset.id,
                 target_type=Type.DATASET,
+                actor_id=authenticated_user.id,
             ),
         )
         return {"id": dataset_link.id}
 
-    def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID, db: Session):
+    def unlink_dataset_from_data_product(
+        self, id: UUID, dataset_id: UUID, db: Session, authenticated_user: User
+    ):
         ensure_dataset_exists(dataset_id, db)
         data_product = ensure_data_product_exists(id, db)
         data_product_dataset = next(
@@ -486,11 +533,17 @@ class DataProductService:
         EventService().create_event(
             db,
             EventCreate(
-                name="Data product access request to dataset removed",
+                name=(
+                    "Data product access request to dataset removed"
+                    if data_product_dataset.status
+                    != DataProductDatasetLinkStatus.APPROVED
+                    else "Data product unlinked from dataset"
+                ),
                 subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
                 target_id=data_product_dataset.dataset_id,
                 target_type=Type.DATASET,
+                actor_id=authenticated_user.id,
             ),
         )
         RefreshInfrastructureLambda().trigger()

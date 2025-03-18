@@ -1,4 +1,5 @@
-import { Flex, Form, Input, List } from 'antd';
+import { Descriptions, Flex, Form, Input, List, Typography } from 'antd';
+import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
@@ -36,31 +37,38 @@ export function HistoryTab({ dataProductId }: Props) {
             </Form>
             {history && history.length > 0 ? (
                 <List
-                    dataSource={history}
+                    dataSource={[...history].sort((a, b) => dayjs(b.created_on).diff(dayjs(a.created_on)))}
                     renderItem={(item) => (
-                        <List.Item>
-                            <List.Item.Meta
-                                title={item.name || t('No title available')}
-                                description={
-                                    <>
-                                        {item.data_product && (
-                                            <p>
-                                                <strong>{t('Data Product')}:</strong> {item.data_product.name}
-                                            </p>
-                                        )}
-                                        {item.user && (
-                                            <p>
-                                                <strong>{t('User')}:</strong> {item.user.email}
-                                            </p>
-                                        )}
-                                        {item.dataset && (
-                                            <p>
-                                                <strong>{t('Dataset')}:</strong> {item.dataset.name}
-                                            </p>
-                                        )}
-                                    </>
-                                }
-                            />
+                        <List.Item className={styles.listItem}>
+                            <div className={styles.leftContent}>
+                                <Descriptions
+                                    bordered
+                                    size="small"
+                                    column={1}
+                                    title={item.name || t('No title available')}
+                                >
+                                    {/* {item.data_product && (
+                                        <Descriptions.Item label={t('Data Product')}>
+                                            {item.data_product.name}
+                                        </Descriptions.Item>
+                                    )} */}
+                                    {item.user && (
+                                        <Descriptions.Item label={t('User')}>{item.user.email}</Descriptions.Item>
+                                    )}
+                                    {item.dataset && (
+                                        <Descriptions.Item label={t('Dataset')}>{item.dataset.name}</Descriptions.Item>
+                                    )}
+                                </Descriptions>
+                            </div>
+                            <div className={styles.rightContent}>
+                                <Typography.Text type="secondary" className={styles.actor}>
+                                    {item.actor.first_name} {item.actor.last_name}
+                                </Typography.Text>
+                                <Typography.Text type="secondary" className={styles.timestamp}>
+                                    {t('Created on')}:{' '}
+                                    {dayjs(item.created_on).tz(dayjs.tz.guess()).format('YYYY-MM-DD HH:mm')} {t('UTC')}
+                                </Typography.Text>
+                            </div>
                         </List.Item>
                     )}
                 />

@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, String
+from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, relationship
 
@@ -23,6 +23,8 @@ class Event(Base, BaseORM):
     target_id = Column(UUID(as_uuid=True))
     subject_type = Column(Enum(Type))
     target_type = Column(Enum(Type))
+    actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    actor: Mapped["User"] = relationship("User")
 
     # Conditional relationships based on subject_type
     data_product: Mapped["DataProduct"] = relationship(
