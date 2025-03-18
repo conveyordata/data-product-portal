@@ -28,30 +28,24 @@ class Event(Base, BaseORM):
     data_product: Mapped["DataProduct"] = relationship(
         "DataProduct",
         # back_populates="events",
-        primaryjoin=(
-            "or_(and_(Event.subject_id == "
-            "foreign(DataProduct.id), Event.subject_type == 'DATA_PRODUCT'), "
-            "and_(Event.target_id == foreign(DataProduct.id), "
-            "Event.target_type == 'DATA_PRODUCT'))"
-        ),
+        primaryjoin="or_(and_(Event.subject_id == "
+        "foreign(DataProduct.id), Event.subject_type == 'DATA_PRODUCT'), "
+        "and_(Event.target_id == foreign(DataProduct.id), "
+        "Event.target_type == 'DATA_PRODUCT'))",
     )
     user: Mapped["User"] = relationship(
         "User",
         # back_populates="events",
-        primaryjoin=(
-            "or_(and_(Event.subject_id == "
-            "foreign(User.id), Event.subject_type == 'USER')"
-            ",and_(Event.target_id == foreign(User.id), "
-            "Event.target_type == 'USER'))",
-        ),
+        primaryjoin="or_(and_(Event.subject_id == "
+        "foreign(User.id), Event.subject_type == 'USER')"
+        ",and_(Event.target_id == foreign(User.id), "
+        "Event.target_type == 'USER'))",
     )
     dataset: Mapped["Dataset"] = relationship(
         "Dataset",
         # back_populates="events",
-        primaryjoin=(
-            "or_(and_(Event.subject_id == foreign(Dataset.id),"
-            " Event.subject_type == 'DATASET'),"
-            "and_(Event.target_id == foreign(Dataset.id),"
-            " Event.target_type == 'DATASET'))",
-        ),
+        primaryjoin="or_(and_(Event.subject_id == foreign(Dataset.id),"
+        " Event.subject_type == 'DATASET'),"
+        "and_(Event.target_id == foreign(Dataset.id),"
+        " Event.target_type == 'DATASET'))",
     )
