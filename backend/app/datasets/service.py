@@ -109,7 +109,8 @@ class DatasetService:
                 db, output_link_id, NotificationTypes.DataOutputDataset, owner_ids
             )
 
-        db.commit()
+        db.flush()
+        db.refresh(dataset)
         return dataset
 
     def _fetch_tags(self, db: Session, tag_ids: list[UUID] = []) -> list[TagModel]:
