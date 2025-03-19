@@ -6,12 +6,10 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
-from app.data_outputs_datasets.service import DataOutputDatasetService
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
-from app.data_products_datasets.service import DataProductDatasetService
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema import (
@@ -25,6 +23,7 @@ from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.notification_interactions.service import NotificationInteractionService
 from app.notifications.notification_types import NotificationTypes
+from app.notifications.service import NotificationService
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import ensure_user_exists
@@ -95,14 +94,14 @@ class DatasetService:
             user = ensure_user_exists(owner, db)
             dataset.owners.append(user)
         data_product_dataset_pending_ids = (
-            DataProductDatasetService().get_pending_action_ids(db, dataset.id)
+            NotificationService().get_data_product_dataset_pending_ids(db, dataset.id)
         )
         for product_link_id in data_product_dataset_pending_ids:
             NotificationInteractionService().update_interactions_by_reference(
                 db, product_link_id, NotificationTypes.DataProductDataset, owner_ids
             )
         data_output_dataset_pending_ids = (
-            DataOutputDatasetService().get_pending_action_ids(db, dataset.id)
+            NotificationService().get_data_output_dataset_pending_ids(db, dataset.id)
         )
         for output_link_id in data_output_dataset_pending_ids:
             NotificationInteractionService().update_interactions_by_reference(
@@ -205,14 +204,14 @@ class DatasetService:
         db.refresh(dataset)
         owner_ids = [dataset_owner.id for dataset_owner in dataset.owners]
         data_product_dataset_pending_ids = (
-            DataProductDatasetService().get_pending_action_ids(db, dataset.id)
+            NotificationService().get_data_product_dataset_pending_ids(db, dataset.id)
         )
         for product_link_id in data_product_dataset_pending_ids:
             NotificationInteractionService().update_interactions_by_reference(
                 db, product_link_id, NotificationTypes.DataProductDataset, owner_ids
             )
         data_output_dataset_pending_ids = (
-            DataOutputDatasetService().get_pending_action_ids(db, dataset.id)
+            NotificationService().get_data_output_dataset_pending_ids(db, dataset.id)
         )
         for output_link_id in data_output_dataset_pending_ids:
             NotificationInteractionService().update_interactions_by_reference(
@@ -241,14 +240,14 @@ class DatasetService:
         db.refresh(dataset)
         owner_ids = [dataset_owner.id for dataset_owner in dataset.owners]
         data_product_dataset_pending_ids = (
-            DataProductDatasetService().get_pending_action_ids(db, dataset.id)
+            NotificationService().get_data_product_dataset_pending_ids(db, dataset.id)
         )
         for product_link_id in data_product_dataset_pending_ids:
             NotificationInteractionService().update_interactions_by_reference(
                 db, product_link_id, NotificationTypes.DataProductDataset, owner_ids
             )
         data_output_dataset_pending_ids = (
-            DataOutputDatasetService().get_pending_action_ids(db, dataset.id)
+            NotificationService().get_data_output_dataset_pending_ids(db, dataset.id)
         )
         for output_link_id in data_output_dataset_pending_ids:
             NotificationInteractionService().update_interactions_by_reference(

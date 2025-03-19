@@ -312,15 +312,3 @@ class DataProductMembershipService:
             .order_by(asc(DataProductMembership.requested_on))
             .all()
         )
-
-    def get_pending_action_ids(self, db: Session, data_product_id: UUID) -> list[UUID]:
-        return [
-            row.id
-            for row in db.query(DataProductMembership.id)
-            .filter(
-                DataProductMembership.status
-                == DataProductMembershipStatus.PENDING_APPROVAL
-            )
-            .filter(DataProductMembership.data_product_id == data_product_id)
-            .all()
-        ]

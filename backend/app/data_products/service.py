@@ -59,6 +59,7 @@ from app.notifications.data_product_dataset_association.model import (
     DataProductDatasetNotification,
 )
 from app.notifications.notification_types import NotificationTypes
+from app.notifications.service import NotificationService
 from app.platforms.model import Platform as PlatformModel
 from app.settings import settings
 from app.tags.model import Tag as TagModel
@@ -165,6 +166,27 @@ class DataProductService:
                     role=membership.role,
                 )
             )
+        db.flush()
+        db.refresh(data_product)
+        owner_ids = [
+            product_owner.user_id
+            for product_owner in data_product.memberships
+            if product_owner.role == DataProductUserRole.OWNER
+        ]
+        data_product_membership_pending_ids = (
+            NotificationService().get_data_product_membership_pending_ids(
+                db, data_product.id
+            )
+        )
+        for product_membership_id in data_product_membership_pending_ids:
+            NotificationInteractionService().update_interactions_by_reference(
+                db,
+                product_membership_id,
+                NotificationTypes.DataProductDataset,
+                owner_ids,
+            )
+        db.flush()
+        db.refresh(data_product)
         return data_product
 
     def _update_datasets(
@@ -288,6 +310,28 @@ class DataProductService:
         ]
         for membership in memberships_to_remove:
             data_product.memberships.remove(membership)
+
+        db.flush()
+        db.refresh(data_product)
+        owner_ids = [
+            product_owner.user_id
+            for product_owner in data_product.memberships
+            if product_owner.role == DataProductUserRole.OWNER
+        ]
+        data_product_membership_pending_ids = (
+            NotificationService().get_data_product_membership_pending_ids(
+                db, data_product.id
+            )
+        )
+        for product_membership_id in data_product_membership_pending_ids:
+            NotificationInteractionService().update_interactions_by_reference(
+                db,
+                product_membership_id,
+                NotificationTypes.DataProductDataset,
+                owner_ids,
+            )
+        db.flush()
+        db.refresh(data_product)
 
     def update_data_product(
         self, id: UUID, data_product: DataProductUpdate, db: Session

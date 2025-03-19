@@ -132,15 +132,3 @@ class DataOutputDatasetService:
             .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
             .all()
         )
-
-    def get_pending_action_ids(self, db: Session, dataset_id: UUID) -> list[UUID]:
-        return [
-            row.id
-            for row in db.query(DataOutputDatasetAssociationModel.id)
-            .filter(
-                DataOutputDatasetAssociationModel.status
-                == DataOutputDatasetLinkStatus.PENDING_APPROVAL
-            )
-            .filter(DataOutputDatasetAssociationModel.dataset_id == dataset_id)
-            .all()
-        ]
