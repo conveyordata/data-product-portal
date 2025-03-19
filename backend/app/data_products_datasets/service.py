@@ -106,3 +106,15 @@ class DataProductDatasetService:
             .order_by(asc(DataProductDatasetAssociationModel.requested_on))
             .all()
         )
+
+    def get_pending_action_ids(self, db: Session, dataset_id: UUID) -> list[UUID]:
+        return [
+            row.id
+            for row in db.query(DataProductDatasetAssociationModel.id)
+            .filter(
+                DataProductDatasetAssociationModel.status
+                == DataProductDatasetLinkStatus.PENDING_APPROVAL
+            )
+            .filter(DataProductDatasetAssociationModel.dataset_id == dataset_id)
+            .all()
+        ]
