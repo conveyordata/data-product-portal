@@ -200,6 +200,23 @@ class DatasetService:
             )
 
         dataset.owners.append(user)
+        db.flush()
+        db.refresh(dataset)
+        owner_ids = [dataset_owner.id for dataset_owner in dataset.owners]
+        data_product_dataset_pending_ids = (
+            DataProductDatasetService().get_pending_action_ids(db, dataset.id)
+        )
+        for product_link_id in data_product_dataset_pending_ids:
+            NotificationInteractionService().update_interactions_by_reference(
+                db, product_link_id, NotificationTypes.DataProductDataset, owner_ids
+            )
+        data_output_dataset_pending_ids = (
+            DataOutputDatasetService().get_pending_action_ids(db, dataset.id)
+        )
+        for output_link_id in data_output_dataset_pending_ids:
+            NotificationInteractionService().update_interactions_by_reference(
+                db, output_link_id, NotificationTypes.DataOutputDataset, owner_ids
+            )
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
@@ -219,6 +236,23 @@ class DatasetService:
             )
 
         dataset.owners.remove(user)
+        db.flush()
+        db.refresh(dataset)
+        owner_ids = [dataset_owner.id for dataset_owner in dataset.owners]
+        data_product_dataset_pending_ids = (
+            DataProductDatasetService().get_pending_action_ids(db, dataset.id)
+        )
+        for product_link_id in data_product_dataset_pending_ids:
+            NotificationInteractionService().update_interactions_by_reference(
+                db, product_link_id, NotificationTypes.DataProductDataset, owner_ids
+            )
+        data_output_dataset_pending_ids = (
+            DataOutputDatasetService().get_pending_action_ids(db, dataset.id)
+        )
+        for output_link_id in data_output_dataset_pending_ids:
+            NotificationInteractionService().update_interactions_by_reference(
+                db, output_link_id, NotificationTypes.DataOutputDataset, owner_ids
+            )
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
