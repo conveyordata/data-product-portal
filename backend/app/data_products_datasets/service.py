@@ -37,7 +37,6 @@ class DataProductDatasetService:
         current_link.status = DataProductDatasetLinkStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        RefreshInfrastructureLambda().trigger()
 
         notification_id = (
             db.query(DataProductDatasetNotification.id)
@@ -49,6 +48,7 @@ class DataProductDatasetService:
                 db, notification_id, [current_link.requested_by_id]
             )
 
+        RefreshInfrastructureLambda().trigger()
         db.commit()
 
     def deny_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
