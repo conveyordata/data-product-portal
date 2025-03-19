@@ -55,6 +55,27 @@ class NotificationInteractionService:
             )
             db.add(new_interaction)
 
+    def update_interactions_by_reference(
+        self,
+        db: Session,
+        reference_id: UUID,
+        notification_type: NotificationTypes,
+        user_ids: list[UUID],
+    ):
+        """
+        Clears the NotificationInteractions for the specified Notification.
+        New interactions are then created for the users provided.
+        db.commit() should be used after using this function.
+
+        """
+        notification_cls = NotificationModelMap[notification_type]
+        key_attribute = NotificationForeignKeyMap.get(notification_type)
+        notification_id = (
+            db.query(notification_cls.id).filter(key_attribute == reference_id).scalar()
+        )
+        if notification_id:
+            self.reset_interactions_for_notification(db, notification_id, user_ids)
+
     def remove_notification_relations(
         self, db: Session, reference_id: UUID, notification_type: NotificationTypes
     ):

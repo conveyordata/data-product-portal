@@ -16,9 +16,6 @@ from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.notification_interactions.service import NotificationInteractionService
-from app.notifications.data_output_dataset_association.model import (
-    DataOutputDatasetNotification,
-)
 from app.notifications.notification_types import NotificationTypes
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -49,15 +46,12 @@ class DataOutputDatasetService:
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
 
-        notification_id = (
-            db.query(DataOutputDatasetNotification.id)
-            .filter(DataOutputDatasetNotification.data_output_dataset_id == id)
-            .scalar()
+        NotificationInteractionService().update_interactions_by_reference(
+            db,
+            current_link.id,
+            NotificationTypes.DataOutputDataset,
+            [current_link.requested_by_id],
         )
-        if notification_id:
-            NotificationInteractionService().reset_interactions_for_notification(
-                db, notification_id, [current_link.requested_by_id]
-            )
 
         RefreshInfrastructureLambda().trigger()
         db.commit()
@@ -81,15 +75,12 @@ class DataOutputDatasetService:
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
 
-        notification_id = (
-            db.query(DataOutputDatasetNotification.id)
-            .filter(DataOutputDatasetNotification.data_output_dataset_id == id)
-            .scalar()
+        NotificationInteractionService().update_interactions_by_reference(
+            db,
+            current_link.id,
+            NotificationTypes.DataOutputDataset,
+            [current_link.requested_by_id],
         )
-        if notification_id:
-            NotificationInteractionService().reset_interactions_for_notification(
-                db, notification_id, [current_link.requested_by_id]
-            )
 
         db.commit()
 

@@ -136,15 +136,12 @@ class DataProductMembershipService:
         data_product_membership.approved_by_id = authenticated_user.id
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
 
-        notification_id = (
-            db.query(DataProductMembershipNotification.id)
-            .filter(DataProductMembershipNotification.data_product_membership_id == id)
-            .scalar()
+        NotificationInteractionService().update_interactions_by_reference(
+            db,
+            data_product_membership.id,
+            NotificationTypes.DataProductMembership,
+            [data_product_membership.requested_by_id],
         )
-        if notification_id:
-            NotificationInteractionService().reset_interactions_for_notification(
-                db, notification_id, [data_product_membership.requested_by_id]
-            )
 
         db.commit()
         db.refresh(data_product_membership)
@@ -179,19 +176,15 @@ class DataProductMembershipService:
         data_product_membership.denied_by_id = authenticated_user.id
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
 
-        notification_id = (
-            db.query(DataProductMembershipNotification.id)
-            .filter(DataProductMembershipNotification.data_product_membership_id == id)
-            .scalar()
+        NotificationInteractionService().update_interactions_by_reference(
+            db,
+            data_product_membership.id,
+            NotificationTypes.DataProductMembership,
+            [data_product_membership.requested_by_id],
         )
-        if notification_id:
-            NotificationInteractionService().reset_interactions_for_notification(
-                db, notification_id, [data_product_membership.requested_by_id]
-            )
 
         db.commit()
         db.refresh(data_product_membership)
-
         return {"id": data_product_membership.id}
 
     def remove_membership(self, id: UUID, db: Session, authenticated_user: User):
