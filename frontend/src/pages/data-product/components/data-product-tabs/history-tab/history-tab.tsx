@@ -38,39 +38,53 @@ export function HistoryTab({ dataProductId }: Props) {
             {history && history.length > 0 ? (
                 <List
                     dataSource={[...history].sort((a, b) => dayjs(b.created_on).diff(dayjs(a.created_on)))}
-                    renderItem={(item) => (
-                        <List.Item className={styles.listItem}>
-                            <div className={styles.leftContent}>
-                                <Descriptions
-                                    bordered
-                                    size="small"
-                                    column={1}
-                                    title={item.name || t('No title available')}
-                                >
-                                    {/* {item.data_product && (
-                                        <Descriptions.Item label={t('Data Product')}>
-                                            {item.data_product.name}
-                                        </Descriptions.Item>
-                                    )} */}
-                                    {item.user && (
-                                        <Descriptions.Item label={t('User')}>{item.user.email}</Descriptions.Item>
-                                    )}
-                                    {item.dataset && (
-                                        <Descriptions.Item label={t('Dataset')}>{item.dataset.name}</Descriptions.Item>
-                                    )}
-                                </Descriptions>
-                            </div>
-                            <div className={styles.rightContent}>
-                                <Typography.Text type="secondary" className={styles.actor}>
-                                    {item.actor.first_name} {item.actor.last_name}
-                                </Typography.Text>
-                                <Typography.Text type="secondary" className={styles.timestamp}>
-                                    {t('Created on')}:{' '}
-                                    {dayjs(item.created_on).tz(dayjs.tz.guess()).format('YYYY-MM-DD HH:mm')} {t('UTC')}
-                                </Typography.Text>
-                            </div>
-                        </List.Item>
-                    )}
+                    pagination={{
+                        pageSize: 5, // Show 5 items per page
+                        showSizeChanger: true, // Allow changing the page size
+                        pageSizeOptions: ['5', '10', '20'], // Page size options
+                    }}
+                    renderItem={(item) => {
+                        const hasContent = item.user || item.dataset;
+
+                        return (
+                            <List.Item className={styles.listItem}>
+                                <div className={styles.leftContent}>
+                                    <Descriptions
+                                        bordered
+                                        size="small"
+                                        column={2} // Display two items per row
+                                        layout="horizontal" // Horizontal layout
+                                        title={item.name || t('No title available')}
+                                        className={styles.descriptions}
+                                    >
+                                        {item.user && (
+                                            <Descriptions.Item label={t('User')}>{item.user.email}</Descriptions.Item>
+                                        )}
+                                        {item.dataset && (
+                                            <Descriptions.Item label={t('Dataset')}>
+                                                {item.dataset.name}
+                                            </Descriptions.Item>
+                                        )}
+                                        {!hasContent && (
+                                            <Descriptions.Item>
+                                                <Typography.Text type="secondary">
+                                                    {t('No additional details available')}
+                                                </Typography.Text>
+                                            </Descriptions.Item>
+                                        )}
+                                    </Descriptions>
+                                </div>
+                                <div className={styles.rightContent}>
+                                    <Typography.Text type="secondary" className={styles.actor}>
+                                        {item.actor.first_name} {item.actor.last_name}
+                                    </Typography.Text>
+                                    <Typography.Text type="secondary" className={styles.timestamp}>
+                                        {dayjs(item.created_on).format('YYYY-MM-DD HH:mm')} {t('UTC')}
+                                    </Typography.Text>
+                                </div>
+                            </List.Item>
+                        );
+                    }}
                 />
             ) : (
                 <EmptyList

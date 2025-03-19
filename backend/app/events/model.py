@@ -12,6 +12,7 @@ from app.shared.model import BaseORM
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
     from app.datasets.model import Dataset
+    from app.domains.model import Domain
     from app.users.model import User
 
 
@@ -24,6 +25,8 @@ class Event(Base, BaseORM):
     subject_type = Column(Enum(Type))
     target_type = Column(Enum(Type))
     actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    domain_id = Column(UUID(as_uuid=True), ForeignKey("domains.id"))
+    domain: Mapped["Domain"] = relationship("Domain")
     actor: Mapped["User"] = relationship("User")
 
     # Conditional relationships based on subject_type

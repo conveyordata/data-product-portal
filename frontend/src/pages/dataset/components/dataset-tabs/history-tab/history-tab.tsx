@@ -64,7 +64,7 @@ export function HistoryTab({ datasetId }: Props) {
                                     {item.actor.first_name} {item.actor.last_name}
                                 </Typography.Text>
                                 <Typography.Text type="secondary" className={styles.timestamp}>
-                                    {t('Created on')}: {dayjs(item.created_on).format('YYYY-MM-DD HH:mm')} {t('UTC')}
+                                    {dayjs(item.created_on).format('YYYY-MM-DD HH:mm')} {t('UTC')}
                                 </Typography.Text>
                             </div>
                         </List.Item>

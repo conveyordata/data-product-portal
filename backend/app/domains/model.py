@@ -11,6 +11,7 @@ from app.shared.model import BaseORM
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
     from app.datasets.model import Dataset
+    from app.events.model import Event
 
 
 class Domain(Base, BaseORM):
@@ -20,6 +21,9 @@ class Domain(Base, BaseORM):
     description = Column(String)
     datasets: Mapped[list["Dataset"]] = relationship(lazy="select")
     data_products: Mapped[list["DataProduct"]] = relationship(lazy="select")
+    events: Mapped[list["Event"]] = relationship(
+        "Event", back_populates="domain", foreign_keys="Event.domain_id"
+    )
 
 
 def ensure_domain_exists(data_product_type_id: UUID, db: Session) -> Domain:
