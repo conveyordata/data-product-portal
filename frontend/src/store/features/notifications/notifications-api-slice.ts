@@ -1,14 +1,10 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
-import { TagTypes } from '@/store/features/api/tag-types.ts';
+import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import { NotificationModel } from '@/types/notifications/notification.contract';
 
-export const notificationsTags: string[] = [
-    //TODO
-    TagTypes.DataOutput,
-    TagTypes.Dataset,
-    TagTypes.DataProduct,
-];
+export const notificationsTags: string[] = [TagTypes.UserDataProducts, TagTypes.UserDatasets, TagTypes.UserDataOutputs];
+
 export const notificationsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: notificationsTags }).injectEndpoints({
     endpoints: (builder) => ({
         getNotifications: builder.query<NotificationModel[], void>({
@@ -16,22 +12,22 @@ export const notificationsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
                 url: buildUrl(ApiUrl.Notifications, {}),
                 method: 'GET',
             }),
-            // Comment out or remove the following line to disable tags:
-            // providesTags: () => [
-            //     { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
-            //     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-            // ],
+            providesTags: () => [
+                { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+            ],
         }),
         getPendingActionNotifications: builder.query<NotificationModel[], void>({
             query: () => ({
                 url: buildUrl(ApiUrl.PendingActionsNotifications, {}),
                 method: 'GET',
             }),
-            // Comment out or remove the following line to disable tags:
-            // providesTags: () => [
-            //     { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
-            //     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-            // ],
+            providesTags: () => [
+                { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+            ],
         }),
     }),
     overrideExisting: false,
