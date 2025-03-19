@@ -221,7 +221,6 @@ class DataProductMembershipService:
         NotificationInteractionService().remove_notification_relations(
             db, data_product_membership.id, NotificationTypes.DataProductMembership
         )
-        db.flush()
         db.refresh(data_product_membership)
         data_product.memberships.remove(data_product_membership)
         db.commit()

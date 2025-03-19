@@ -86,7 +86,6 @@ class DataProductDatasetService:
         NotificationInteractionService().remove_notification_relations(
             db, current_link.id, NotificationTypes.DataProductDataset
         )
-        db.flush()
         db.refresh(current_link)
         data_product.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()

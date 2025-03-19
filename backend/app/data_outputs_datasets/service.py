@@ -112,7 +112,6 @@ class DataOutputDatasetService:
         NotificationInteractionService().remove_notification_relations(
             db, current_link.id, NotificationTypes.DataOutputDataset
         )
-        db.flush()
         db.refresh(current_link)
         data_output.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()

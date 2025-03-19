@@ -227,9 +227,24 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data Product {id} not found",
             )
+        for membership in data_product.memberships:
+            NotificationInteractionService().remove_notification_relations(
+                db, membership.id, NotificationTypes.DataProductMembership
+            )
+            db.refresh(membership)
         data_product.memberships = []
+        for dataset_link in data_product.dataset_links:
+            NotificationInteractionService().remove_notification_relations(
+                db, dataset_link.id, NotificationTypes.DataProductDataset
+            )
+            db.refresh(dataset_link)
         data_product.dataset_links = []
         for output in data_product.data_outputs:
+            for output_dataset_link in output.dataset_links:
+                NotificationInteractionService().remove_notification_relations(
+                    db, output_dataset_link.id, NotificationTypes.DataOutputDataset
+                )
+                db.refresh(output_dataset_link)
             output.dataset_links = []
             db.delete(output)
         db.delete(data_product)
@@ -425,7 +440,6 @@ class DataProductService:
         NotificationInteractionService().remove_notification_relations(
             db, data_product_dataset.id, NotificationTypes.DataProductDataset
         )
-        db.flush()
         db.refresh(data_product_dataset)
         data_product.dataset_links.remove(data_product_dataset)
         db.commit()

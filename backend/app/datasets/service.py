@@ -21,6 +21,8 @@ from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.notification_interactions.service import NotificationInteractionService
+from app.notifications.notification_types import NotificationTypes
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import ensure_user_exists
@@ -124,7 +126,18 @@ class DatasetService:
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
             )
         dataset.owners = []
+        for data_product_link in dataset.data_product_links:
+            NotificationInteractionService().remove_notification_relations(
+                db, data_product_link.id, NotificationTypes.DataProductDataset
+            )
+            db.refresh(data_product_link)
         dataset.data_product_links = []
+        for data_output_link in dataset.data_output_links:
+            NotificationInteractionService().remove_notification_relations(
+                db, data_output_link.id, NotificationTypes.DataOutputDataset
+            )
+            db.refresh(data_output_link)
+        dataset.data_output_links = []
         dataset.tags = []
         db.delete(dataset)
 

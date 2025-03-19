@@ -78,6 +78,7 @@ class NotificationInteractionService:
             db.query(notification_cls).filter(key_attribute == reference_id).delete(
                 synchronize_session=False
             )
+            db.flush()
 
     def get_user_notification_interactions(
         self, db: Session, authenticated_user: User
