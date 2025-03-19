@@ -19,6 +19,7 @@ from app.notification_interactions.service import NotificationInteractionService
 from app.notifications.data_product_dataset_association.model import (
     DataProductDatasetNotification,
 )
+from app.notifications.notification_types import NotificationTypes
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -82,6 +83,11 @@ class DataProductDatasetService:
         ensure_dataset_exists(dataset.id, db)
         linked_data_product = current_link.data_product
         data_product = ensure_data_product_exists(linked_data_product.id, db)
+        NotificationInteractionService().remove_notification_relations(
+            db, current_link.id, NotificationTypes.DataProductDataset
+        )
+        db.flush()
+        db.refresh(current_link)
         data_product.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()

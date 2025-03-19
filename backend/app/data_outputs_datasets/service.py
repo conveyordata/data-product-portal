@@ -19,6 +19,7 @@ from app.notification_interactions.service import NotificationInteractionService
 from app.notifications.data_output_dataset_association.model import (
     DataOutputDatasetNotification,
 )
+from app.notifications.notification_types import NotificationTypes
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -108,6 +109,11 @@ class DataOutputDatasetService:
             )
         linked_data_output = current_link.data_output
         data_output = ensure_data_output_exists(linked_data_output.id, db)
+        NotificationInteractionService().remove_notification_relations(
+            db, current_link.id, NotificationTypes.DataOutputDataset
+        )
+        db.flush()
+        db.refresh(current_link)
         data_output.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()

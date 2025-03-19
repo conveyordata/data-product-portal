@@ -9,7 +9,7 @@ from app.notification_interactions.schema_get import (
 from app.notification_interactions.service import NotificationInteractionService
 from app.users.schema import User
 
-router = APIRouter(prefix="/notifications", tags=["notifications"])  # TODO tags?
+router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 
 @router.get("")
