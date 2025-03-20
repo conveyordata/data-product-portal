@@ -8,8 +8,7 @@ import Icon, {
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ReactFlowProvider } from 'reactflow';
+import { useLocation, useNavigate } from 'react-router';
 
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
@@ -81,21 +80,13 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <PartitionOutlined />,
-                children: (
-                    <ReactFlowProvider>
-                        <Explorer id={dataProductId} type={'dataproduct'} />
-                    </ReactFlowProvider>
-                ),
+                children: <Explorer id={dataProductId} type={'dataproduct'} />,
             },
             {
                 label: t('Settings'),
                 key: TabKeys.Settings,
                 icon: <SettingOutlined />,
-                children: (
-                    <ReactFlowProvider>
-                        <SettingsTab dataProductId={dataProductId} />
-                    </ReactFlowProvider>
-                ),
+                children: <SettingsTab dataProductId={dataProductId} />,
             },
             {
                 label: t('History'),

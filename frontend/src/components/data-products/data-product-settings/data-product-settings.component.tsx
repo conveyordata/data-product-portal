@@ -1,4 +1,4 @@
-import { Flex, Form, FormProps, Select, Switch, Typography } from 'antd';
+import { Flex, Form, type FormProps, Select, Switch, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -338,11 +338,6 @@ class DataProductService:
                 ),
             )
 
-        if not any(
-            m.role == DataProductUserRole.OWNER for m in data_product.memberships
-        ):
-            raise ValueError("At least one owner membership is required.")
-
     def update_data_product(
         self,
         id: UUID,

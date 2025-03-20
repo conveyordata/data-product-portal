@@ -1,6 +1,7 @@
 from typing import Annotated, Optional
 from uuid import UUID
 
+from annotated_types import MinLen
 from pydantic import Field, computed_field
 
 from app.data_outputs.schema_get import DataOutputGet
@@ -31,7 +32,7 @@ class DatasetGet(ORMModel):
     external_id: str
     name: str
     description: str
-    owners: list[User]
+    owners: Annotated[list[User], MinLen(1)]
     data_product_links: list[DataProductLink]
     lifecycle: Optional[DataProductLifeCycle]
     status: DatasetStatus

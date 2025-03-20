@@ -11,6 +11,7 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
+from app.roles.schema import Prototype
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
@@ -26,6 +27,9 @@ def upgrade() -> None:
         sa.Column("id", sa.UUID, primary_key=True, nullable=False),
         sa.Column("name", sa.String, nullable=False),
         sa.Column("scope", sa.String, nullable=False),
+        sa.Column(
+            "prototype", sa.SmallInteger, nullable=False, default=Prototype.CUSTOM
+        ),
         sa.Column("description", sa.String, nullable=False),
         sa.Column("permissions", sa.ARRAY(sa.Integer), nullable=False),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),

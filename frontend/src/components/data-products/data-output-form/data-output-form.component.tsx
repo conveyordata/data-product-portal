@@ -2,7 +2,7 @@ import { Form, type FormInstance, type FormProps, Input, Select, Space } from 'a
 import TextArea from 'antd/es/input/TextArea';
 import { type RefObject, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
@@ -277,17 +277,27 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             </Form.Item>
             <Form.Item hidden={selectedDataPlatform?.children?.length === 0}>
                 <Space wrap className={styles.radioButtonContainer}>
-                    {selectedDataPlatform?.children?.map((dataPlatform) => (
-                        <DataOutputPlatformTile<DataPlatform>
-                            key={dataPlatform.value}
-                            dataPlatform={dataPlatform}
-                            environments={[]}
-                            isDisabled={isLoading}
-                            isSelected={selectedConfiguration !== undefined && dataPlatform === selectedConfiguration}
-                            isLoading={isLoading}
-                            onTileClick={onConfigurationClick}
-                        />
-                    ))}
+                    {selectedDataPlatform?.children
+                        ?.filter((platform) => {
+                            return platformConfig?.some(
+                                (configObj) =>
+                                    configObj.platform.name === platform.label ||
+                                    configObj.service.name === platform.label,
+                            );
+                        })
+                        .map((dataPlatform) => (
+                            <DataOutputPlatformTile<DataPlatform>
+                                key={dataPlatform.value}
+                                dataPlatform={dataPlatform}
+                                environments={[]}
+                                isDisabled={isLoading}
+                                isSelected={
+                                    selectedConfiguration !== undefined && dataPlatform === selectedConfiguration
+                                }
+                                isLoading={isLoading}
+                                onTileClick={onConfigurationClick}
+                            />
+                        ))}
                 </Space>
             </Form.Item>
             {(() => {

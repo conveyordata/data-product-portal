@@ -62,18 +62,18 @@ def data_output_payload_not_owner():
 class TestDataOutputsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_dataoutput(self, data_output_payload, client):
-        created_dataoutput = self.create_data_output(client, data_output_payload)
-        assert created_dataoutput.status_code == 200
-        assert "id" in created_dataoutput.json()
+    def test_create_data_output(self, data_output_payload, client):
+        created_data_output = self.create_data_output(client, data_output_payload)
+        assert created_data_output.status_code == 200
+        assert "id" in created_data_output.json()
 
-    def test_create_dataoutput_not_product_owner(
+    def test_create_data_output_not_product_owner(
         self, data_output_payload_not_owner, client
     ):
-        created_dataoutput = self.create_data_output(
+        created_data_output = self.create_data_output(
             client, data_output_payload_not_owner
         )
-        assert created_dataoutput.status_code == 403
+        assert created_data_output.status_code == 403
 
     def test_get_data_outputs(self, client):
         data_output = DataOutputFactory()
@@ -83,7 +83,7 @@ class TestDataOutputsRouter:
         assert len(data) == 1
         assert data[0]["id"] == str(data_output.id)
 
-    def test_get_data_ouptut_by_id(self, client):
+    def test_get_data_output_by_id(self, client):
         data_output = DataOutputFactory()
 
         response = self.get_data_output_by_id(client, data_output.id)
@@ -138,7 +138,7 @@ class TestDataOutputsRouter:
         data_output = DataOutputFactory(owner=data_product)
         response = self.get_data_output_by_id(client, data_output.id)
         assert response.json()["status"] == "active"
-        response = self.update_data_output_status(
+        _ = self.update_data_output_status(
             client, {"status": "pending"}, data_output.id
         )
         response = self.get_data_output_by_id(client, data_output.id)

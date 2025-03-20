@@ -263,6 +263,18 @@ class DatasetService:
     ):
         dataset = ensure_dataset_exists(dataset_id, db)
         user = ensure_user_exists(user_id, db)
+
+        if user not in dataset.owners:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"User {user_id} is not an owner of dataset {dataset_id}",
+            )
+        elif len(dataset.owners) == 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Cannot remove the last owner of dataset {dataset_id}",
+            )
+
         dataset.owners.remove(user)
         db.commit()
         RefreshInfrastructureLambda().trigger()

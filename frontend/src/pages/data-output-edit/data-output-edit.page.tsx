@@ -1,5 +1,5 @@
 import { Flex, Space, Typography } from 'antd';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 
 import { DataOutputForm } from '@/components/data-outputs/data-output-form/data-output-form.component';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';

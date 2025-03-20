@@ -20,6 +20,7 @@ from .platform_service_config import PlatformServiceConfigFactory
 from .role import RoleFactory
 from .s3_data_output import S3DataOutputFactory
 from .tags import TagFactory
+from .theme_settings import ThemeSettingsFactory
 from .user import UserFactory
 
 factories = [
@@ -44,6 +45,7 @@ factories = [
     TagFactory,
     UserFactory,
     AuditLogFactory,
+    ThemeSettingsFactory,
 ]
 
 for factory_model in factories:

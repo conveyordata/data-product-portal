@@ -1,10 +1,14 @@
+from typing import Any, AsyncGenerator, Generator
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, scoped_session
+from starlette.routing import _DefaultLifespan
 
 from app.core.auth.device_flows.service import verify_auth_header
+from app.core.authz.authorization import Authorization
 from app.data_product_memberships.model import DataProductUserRole
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
@@ -55,7 +59,10 @@ def mock_oidc_config():
 
 
 @pytest.fixture
-def client():
+def client() -> Generator[TestClient, None, None]:
+    # Disable lifespan for testing
+    app.router.lifespan_context = _DefaultLifespan(app.router)
+
     app.dependency_overrides[get_db_session] = override_get_db
     app.dependency_overrides[verify_auth_header] = (
         lambda: "8cb30dd2-4e3e-4284-a71e-5dbe8e2bdb69"
@@ -66,7 +73,7 @@ def client():
 
 
 @pytest.fixture
-def default_data_product_payload():
+def default_data_product_payload() -> dict[str, Any]:
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
     domain = DomainFactory()
@@ -87,7 +94,7 @@ def default_data_product_payload():
 
 
 @pytest.fixture
-def default_dataset_payload():
+def default_dataset_payload() -> dict[str, Any]:
     user = UserFactory()
     domain = DomainFactory()
     return {
@@ -110,5 +117,11 @@ def clear_db(session: scoped_session[Session]) -> None:
 
 
 @pytest.fixture
-def admin():
+def admin() -> UserFactory:
     return UserFactory(external_id="sub", is_admin=True)
+
+
+@pytest_asyncio.fixture(loop_scope="session", autouse=True)
+async def authorizer() -> AsyncGenerator[Authorization, None]:
+    """Initializes casbin at the start of the testing session."""
+    yield await Authorization.initialize()

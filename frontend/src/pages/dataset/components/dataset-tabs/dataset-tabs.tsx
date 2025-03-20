@@ -8,8 +8,7 @@ import {
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ReactFlowProvider } from 'reactflow';
+import { useLocation, useNavigate } from 'react-router';
 
 import { Explorer } from '@/components/explorer/explorer';
 import { HistoryTab } from '@/components/history/history-tab.tsx';
@@ -80,21 +79,13 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <PartitionOutlined />,
-                children: (
-                    <ReactFlowProvider>
-                        <Explorer id={datasetId} type={'dataset'} />
-                    </ReactFlowProvider>
-                ),
+                children: <Explorer id={datasetId} type={'dataset'} />,
             },
             {
                 label: t('Settings'),
                 key: TabKeys.Settings,
                 icon: <SettingOutlined />,
-                children: (
-                    <ReactFlowProvider>
-                        <SettingsTab datasetId={datasetId} />
-                    </ReactFlowProvider>
-                ),
+                children: <SettingsTab datasetId={datasetId} />,
             },
             {
                 label: t('History'),
