@@ -92,6 +92,14 @@ class NotificationService:
         reference_parent_id: UUID,
         notification_type: NotificationTypes,
     ) -> list[UUID]:
+        """
+        Receives the UUID's for pending notifications.
+        'reference_parent_id' is the id of the parent that is:
+        -> linked to notification referenced object
+        -> linked to the notification.
+        db.commit() should be used after using this function.
+
+        """
         notification_function_map = {
             NotificationTypes.DataProductDataset: self.get_data_product_dataset_notification_pending_ids,
             NotificationTypes.DataOutputDataset: self.get_data_output_dataset_notification_pending_ids,
@@ -108,6 +116,12 @@ class NotificationService:
         reference_id: UUID,
         notification_type: NotificationTypes,
     ) -> Notification:
+        """
+        Creates a Notification object for NotificationInteraction
+        objects to attach to.
+        db.commit() should be used after using this function.
+
+        """
         notification_cls = NotificationModelMap[notification_type]
         key_attribute = NotificationForeignKeyMap.get(notification_type)
         key_attribute = NotificationForeignKeyMap[notification_type].name
