@@ -183,6 +183,29 @@ class TestDataOutputsRouter:
                     "type": "dataProductNode",
                 }
 
+    def test_get_data_product_history(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        data_output = DataOutputFactory(owner=data_product)
+        id = data_output.id
+        response = self.update_data_output_status(
+            client, {"status": "active"}, data_output.id
+        )
+        response = self.delete_data_output(client, data_output.id)
+        response = self.get_data_output_history(client, id)
+        assert len(response.json()) == 2
+
+    def test_no_history(self, client):
+        data_output = DataOutputFactory()
+        id = data_output.id
+        response = self.update_data_output_status(
+            client, {"status": "active"}, data_output.id
+        )
+        response = self.delete_data_output(client, data_output.id)
+        response = self.get_data_output_history(client, id)
+        assert len(response.json()) == 0
+
     @staticmethod
     def create_data_output(client, default_data_output_payload):
         return client.post(ENDPOINT, json=default_data_output_payload)
@@ -198,6 +221,10 @@ class TestDataOutputsRouter:
     @staticmethod
     def delete_data_output(client, data_output_id):
         return client.delete(f"{ENDPOINT}/{data_output_id}")
+
+    @staticmethod
+    def get_data_output_history(client, data_output_id):
+        return client.get(f"{ENDPOINT}/{data_output_id}/history")
 
     @staticmethod
     def update_data_output_status(client, status, data_output_id):
