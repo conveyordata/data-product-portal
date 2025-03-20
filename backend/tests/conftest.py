@@ -13,6 +13,7 @@ from app.data_product_memberships.model import DataProductUserRole
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.main import app
+from app.settings import settings
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
@@ -124,3 +125,8 @@ def admin() -> UserFactory:
 async def authorizer() -> AsyncGenerator[Authorization, None]:
     """Initializes casbin at the start of the testing session."""
     yield await Authorization.initialize()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def enable_authorizer() -> None:
+    settings.AUTHORIZER_ENABLED = True
