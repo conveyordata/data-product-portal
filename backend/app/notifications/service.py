@@ -19,7 +19,12 @@ from app.notifications.data_product_dataset_association.model import (
 from app.notifications.data_product_membership.model import (
     DataProductMembershipNotification,
 )
+from app.notifications.model import Notification
 from app.notifications.notification_types import NotificationTypes
+from app.notifications.schema_union import (
+    NotificationForeignKeyMap,
+    NotificationModelMap,
+)
 
 
 class NotificationService:
@@ -96,3 +101,18 @@ class NotificationService:
             return notification_function_map[notification_type](db, reference_parent_id)
         else:
             raise ValueError(f"Unsupported notification type: {notification_type}")
+
+    def initiate_notification_by_reference(
+        self,
+        db: Session,
+        reference_id: UUID,
+        notification_type: NotificationTypes,
+    ) -> Notification:
+        notification_cls = NotificationModelMap[notification_type]
+        key_attribute = NotificationForeignKeyMap.get(notification_type)
+        key_attribute = NotificationForeignKeyMap[notification_type].name
+        notification = notification_cls(**{key_attribute: reference_id})
+        db.add(notification)
+        db.flush()
+        db.refresh(notification)
+        return notification

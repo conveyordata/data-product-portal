@@ -20,9 +20,6 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
 from app.notification_interactions.service import NotificationInteractionService
-from app.notifications.data_product_membership.model import (
-    DataProductMembershipNotification,
-)
 from app.notifications.notification_types import NotificationTypes
 from app.settings import settings
 from app.users.model import ensure_user_exists
@@ -65,16 +62,12 @@ class DataProductMembershipService:
             data_product_membership.status
             == DataProductMembershipStatus.PENDING_APPROVAL
         ):
-            notification = DataProductMembershipNotification(
-                configuration_type=NotificationTypes.DataProductMembership,
-                data_product_membership=data_product_membership.id,
-            )
-            db.add(notification)
-            db.flush()
-            db.refresh(notification)
             owner_ids = [owner.id for owner in owners]
-            NotificationInteractionService().reset_interactions_for_notification(
-                db, notification.id, owner_ids
+            NotificationInteractionService().create_notification_relations(
+                db,
+                data_product_membership.id,
+                owner_ids,
+                NotificationTypes.DataProductMembership,
             )
 
         db.commit()

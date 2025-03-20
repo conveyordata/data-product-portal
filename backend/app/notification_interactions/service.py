@@ -124,6 +124,23 @@ class NotificationInteractionService:
                 db, notification_id, updated_owner_ids
             )
 
+    def create_notification_relations(
+        self,
+        db: Session,
+        reference_id: UUID,
+        receiving_ids: list[UUID],
+        notification_type: NotificationTypes,
+    ):
+        """
+        Ensures pending requests are received by the correct owners.
+        db.commit() should be used after using this function.
+
+        """
+        notification = NotificationService().initiate_notification_by_reference(
+            db, reference_id, notification_type
+        )
+        self.reset_interactions_for_notification(db, notification.id, receiving_ids)
+
     def get_user_notification_interactions(
         self, db: Session, authenticated_user: User
     ) -> list[NotificationInteractionGet]:

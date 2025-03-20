@@ -28,9 +28,6 @@ from app.datasets.model import ensure_dataset_exists
 from app.datasets.service import DatasetService
 from app.graph.graph import Graph
 from app.notification_interactions.service import NotificationInteractionService
-from app.notifications.data_output_dataset_association.model import (
-    DataOutputDatasetNotification,
-)
 from app.notifications.notification_types import NotificationTypes
 from app.settings import settings
 from app.tags.model import Tag as TagModel
@@ -186,16 +183,9 @@ class DataOutputService:
         if dataset_link.status == DataOutputDatasetLinkStatus.PENDING_APPROVAL:
             db.flush()
             db.refresh(dataset_link)
-            notification = DataOutputDatasetNotification(
-                configuration_type=NotificationTypes.DataOutputDataset,
-                data_output_dataset_id=dataset_link.id,
-            )
-            db.add(notification)
-            db.flush()
-            db.refresh(notification)
             owner_ids = DatasetService().get_owner_ids(dataset_link.dataset_id, db)
-            NotificationInteractionService().reset_interactions_for_notification(
-                db, notification.id, owner_ids
+            NotificationInteractionService().create_notification_relations(
+                db, dataset_link.id, owner_ids, NotificationTypes.DataOutputDataset
             )
 
         db.commit()

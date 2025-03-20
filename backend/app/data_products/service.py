@@ -55,9 +55,6 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.notification_interactions.service import NotificationInteractionService
-from app.notifications.data_product_dataset_association.model import (
-    DataProductDatasetNotification,
-)
 from app.notifications.notification_types import NotificationTypes
 from app.platforms.model import Platform as PlatformModel
 from app.settings import settings
@@ -403,16 +400,9 @@ class DataProductService:
         if dataset_link.status == DataProductDatasetLinkStatus.PENDING_APPROVAL:
             db.flush()
             db.refresh(dataset_link)
-            notification = DataProductDatasetNotification(
-                configuration_type=NotificationTypes.DataProductDataset,
-                data_product_dataset_id=dataset_link.id,
-            )
-            db.add(notification)
-            db.flush()
-            db.refresh(notification)
             owner_ids = DatasetService().get_owner_ids(dataset_link.dataset_id, db)
-            NotificationInteractionService().reset_interactions_for_notification(
-                db, notification.id, owner_ids
+            NotificationInteractionService().create_notification_relations(
+                db, dataset_link.id, owner_ids, NotificationTypes.DataProductDataset
             )
 
         db.commit()
