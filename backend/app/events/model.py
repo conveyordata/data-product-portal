@@ -10,6 +10,7 @@ from app.events.enum import Type
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
+    from app.data_outputs.model import DataOutput
     from app.data_products.model import DataProduct
     from app.datasets.model import Dataset
     from app.domains.model import Domain
@@ -53,4 +54,12 @@ class Event(Base, BaseORM):
         " Event.subject_type == 'DATASET'),"
         "and_(Event.target_id == foreign(Dataset.id),"
         " Event.target_type == 'DATASET'))",
+    )
+    data_output: Mapped["DataOutput"] = relationship(
+        "DataOutput",
+        # back_populates="events",
+        primaryjoin="or_(and_(Event.subject_id == "
+        "foreign(DataOutput.id), Event.subject_type == 'DATA_OUTPUT'),"
+        "and_(Event.target_id == foreign(DataOutput.id),"
+        " Event.target_type == 'DATA_OUTPUT'))",
     )

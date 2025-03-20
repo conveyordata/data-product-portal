@@ -220,6 +220,7 @@ class DataProductService:
                 subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
+                domain_id=data_product.domain_id,
             ),
         )
         RefreshInfrastructureLambda().trigger()
@@ -249,6 +250,7 @@ class DataProductService:
                 subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
+                domain_id=data_product.domain_id,
             ),
         )
         db.commit()
@@ -296,6 +298,7 @@ class DataProductService:
                             target_id=user.id,
                             target_type=Type.USER,
                             actor_id=authenticated_user.id,
+                            domain_id=data_product.domain.id,
                         ),
                     )
                 membership.role = membership_item["role"]
@@ -313,6 +316,7 @@ class DataProductService:
                         target_id=user.id,
                         target_type=Type.USER,
                         actor_id=authenticated_user.id,
+                        domain_id=data_product.domain.id,
                     ),
                 )
 
@@ -330,6 +334,7 @@ class DataProductService:
                     target_id=membership.user_id,
                     target_type=Type.USER,
                     actor_id=authenticated_user.id,
+                    domain_id=data_product.domain.id,
                 ),
             )
 
@@ -384,6 +389,7 @@ class DataProductService:
                 subject_id=id,
                 subject_type=Type.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
+                domain_id=data_product.domain_id,
             ),
         )
         return {"id": current_data_product.id}
@@ -404,6 +410,7 @@ class DataProductService:
                 subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
+                domain_id=current_data_product.domain.id,
             ),
         )
         db.commit()
@@ -424,6 +431,7 @@ class DataProductService:
                 subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
+                domain_id=current_data_product.domain.id,
             ),
         )
         db.commit()
@@ -506,6 +514,7 @@ class DataProductService:
                 target_id=dataset.id,
                 target_type=Type.DATASET,
                 actor_id=authenticated_user.id,
+                domain_id=data_product.domain.id,
             ),
         )
         return {"id": dataset_link.id}
@@ -544,6 +553,7 @@ class DataProductService:
                 target_id=data_product_dataset.dataset_id,
                 target_type=Type.DATASET,
                 actor_id=authenticated_user.id,
+                domain_id=data_product.domain.id,
             ),
         )
         RefreshInfrastructureLambda().trigger()

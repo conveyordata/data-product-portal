@@ -124,6 +124,7 @@ class DatasetService:
                 subject_id=dataset.id,
                 subject_type=Type.DATASET,
                 actor_id=authenticated_user.id,
+                domain_id=dataset.domain_id,
             ),
         )
         return {"id": dataset.id}
@@ -151,6 +152,7 @@ class DatasetService:
                 subject_id=dataset.id,
                 subject_type=Type.DATASET,
                 actor_id=authenticated_user.id,
+                domain_id=dataset.domain_id,
             ),
         )
         RefreshInfrastructureLambda().trigger()
@@ -182,6 +184,7 @@ class DatasetService:
                 subject_id=current_dataset.id,
                 subject_type=Type.DATASET,
                 actor_id=authenticated_user.id,
+                domain_id=dataset.domain_id,
             ),
         )
         return {"id": current_dataset.id}
@@ -203,6 +206,7 @@ class DatasetService:
                 subject_id=current_dataset.id,
                 subject_type=Type.DATASET,
                 actor_id=authenticated_user.id,
+                domain_id=current_dataset.domain.id,
             ),
         )
 
@@ -223,6 +227,7 @@ class DatasetService:
                 subject_id=current_dataset.id,
                 subject_type=Type.DATASET,
                 actor_id=authenticated_user.id,
+                domain_id=current_dataset.domain.id,
             ),
         )
 
@@ -249,6 +254,7 @@ class DatasetService:
                 actor_id=authenticated_user.id,
                 target_id=user.id,
                 target_type=Type.USER,
+                domain_id=dataset.domain.id,
             ),
         )
 
@@ -269,6 +275,7 @@ class DatasetService:
                 actor_id=authenticated_user.id,
                 target_id=user.id,
                 target_type=Type.USER,
+                domain_id=dataset.domain.id,
             ),
         )
 

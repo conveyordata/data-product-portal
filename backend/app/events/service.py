@@ -26,3 +26,17 @@ class EventService:
             )
             .order_by(EventModel.created_on.desc())
         ).all()
+
+    def get_domain_history(self, db: Session, domain_id: UUID):
+        return db.scalars(
+            select(EventModel)
+            .where(EventModel.domain_id == domain_id)
+            .order_by(EventModel.created_on.desc())
+        ).all()
+
+    def get_user_history(self, db: Session, user_id: UUID):
+        return db.scalars(
+            select(EventModel)
+            .where(EventModel.actor_id == user_id)
+            .order_by(EventModel.created_on.desc())
+        ).all()

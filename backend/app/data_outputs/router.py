@@ -13,6 +13,7 @@ from app.data_outputs.schema import (
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.dependencies import only_data_output_owners
+from app.events.schema import Event
 from app.graph.graph import Graph
 from app.users.schema import User
 
@@ -27,6 +28,11 @@ def get_data_outputs(db: Session = Depends(get_db_session)) -> list[DataOutput]:
 @router.get("/{id}")
 def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutput:
     return DataOutputService().get_data_output(id, db)
+
+
+@router.get("/{id}/history")
+def get_event_history(id: UUID, db: Session = Depends(get_db_session)) -> list[Event]:
+    return DataOutputService().get_event_history(id, db)
 
 
 @router.delete(

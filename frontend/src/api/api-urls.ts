@@ -8,6 +8,7 @@ export enum ApiUrl {
     DataOutputDatasetLinkRemove = '/api/data_output_dataset_links/remove/:datasetLinkId',
     DataOutputDatasetPendingActions = '/api/data_output_dataset_links/actions',
     DataOutputGraph = '/api/data_outputs/:dataOutputId/graph',
+    DataOutputHistory = '/api/data_outputs/:dataOutputId/history',
     DataProducts = '/api/data_products',
     DataProductsDataOutput = '/api/data_products/:dataProductId/data_outputs',
     DataProductGet = '/api/data_products/:dataProductId',

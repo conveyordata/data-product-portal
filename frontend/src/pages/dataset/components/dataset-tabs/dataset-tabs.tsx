@@ -12,6 +12,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
 
 import { Explorer } from '@/components/explorer/explorer';
+import { HistoryTab } from '@/components/history/history-tab.tsx';
 import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
@@ -20,7 +21,6 @@ import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys
 
 import { AboutTab } from './about-tab/about-tab.tsx';
 import styles from './dataset-tabs.module.scss';
-import { HistoryTab } from './history-tab/history-tab';
 import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
 
@@ -100,7 +100,7 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 label: t('History'),
                 key: TabKeys.History,
                 icon: <HistoryOutlined />,
-                children: <HistoryTab datasetId={datasetId} />,
+                children: <HistoryTab id={datasetId} type="dataset" />,
             },
         ];
     }, [datasetId, t]);

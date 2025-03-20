@@ -25,6 +25,9 @@ from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
+from app.events.enum import Type
+from app.events.schema import Event, EventCreate
+from app.events.service import EventService
 from app.graph.graph import Graph
 from app.settings import settings
 from app.tags.model import Tag as TagModel
@@ -92,6 +95,9 @@ class DataOutputService:
     def get_data_output(self, id: UUID, db: Session) -> DataOutput:
         return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
 
+    def get_event_history(self, id: UUID, db: Session) -> list[Event]:
+        return EventService().get_history(db, id, Type.DATA_OUTPUT)
+
     def create_data_output(
         self, data_output: DataOutputCreate, db: Session, authenticated_user: User
     ) -> dict[str, UUID]:
@@ -115,6 +121,18 @@ class DataOutputService:
 
         # config.on_create()
         RefreshInfrastructureLambda().trigger()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data output created",
+                subject_id=data_output.id,
+                subject_type=Type.DATA_OUTPUT,
+                target_id=data_output.owner_id,
+                target_type=Type.DATA_PRODUCT,
+                actor_id=authenticated_user.id,
+                domain_id=data_product.domain_id,
+            ),
+        )
         return {"id": data_output.id}
 
     def remove_data_output(self, id: UUID, db: Session, authenticated_user: User):
@@ -131,6 +149,18 @@ class DataOutputService:
         data_output.dataset_links = []
         db.delete(data_output)
         db.commit()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data output removed",
+                subject_id=id,
+                subject_type=Type.DATA_OUTPUT,
+                target_id=data_output.owner_id,
+                target_type=Type.DATA_PRODUCT,
+                actor_id=authenticated_user.id,
+                domain_id=data_output.owner.domain_id,
+            ),
+        )
         RefreshInfrastructureLambda().trigger()
 
     def update_data_output_status(
@@ -139,6 +169,18 @@ class DataOutputService:
         current_data_output = ensure_data_output_exists(id, db)
         current_data_output.status = data_output.status
         db.commit()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data output status updated",
+                subject_id=id,
+                subject_type=Type.DATA_OUTPUT,
+                target_id=current_data_output.owner.id,
+                target_type=Type.DATA_PRODUCT,
+                actor_id=current_data_output.owner.id,
+                domain_id=current_data_output.owner.domain.id,
+            ),
+        )
 
     def link_dataset_to_data_output(
         self,
@@ -200,6 +242,18 @@ class DataOutputService:
             f"Action Required: {data_output.owner.name} wants "
             f"to provide data to {dataset.name}",
         )
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data output link requested to dataset",
+                subject_id=id,
+                subject_type=Type.DATA_OUTPUT,
+                target_id=dataset_id,
+                target_type=Type.DATASET,
+                actor_id=authenticated_user.id,
+                domain_id=data_output.owner.domain.id,
+            ),
+        )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_output(
@@ -224,6 +278,18 @@ class DataOutputService:
         data_output.dataset_links.remove(data_output_dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data output link removed from dataset",
+                subject_id=id,
+                subject_type=Type.DATA_OUTPUT,
+                target_id=dataset_id,
+                target_type=Type.DATASET,
+                actor_id=authenticated_user.id,
+                domain_id=data_output.owner.domain.id,
+            ),
+        )
 
     def update_data_output(self, id: UUID, data_output: DataOutputUpdate, db: Session):
         current_data_output = ensure_data_output_exists(id, db)
@@ -238,6 +304,18 @@ class DataOutputService:
 
         db.commit()
         RefreshInfrastructureLambda().trigger()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Data output updated",
+                subject_id=id,
+                subject_type=Type.DATA_OUTPUT,
+                target_id=current_data_output.owner.id,
+                target_type=Type.DATA_PRODUCT,
+                actor_id=current_data_output.owner.id,
+                domain_id=current_data_output.owner.domain.id,
+            ),
+        )
         return {"id": current_data_output.id}
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
