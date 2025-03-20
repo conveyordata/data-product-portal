@@ -1,5 +1,7 @@
-ARG PYTHON_IMAGE=python:3.12.9-slim-bookworm@sha256:a866731a6b71c4a194a845d86e06568725e430ed21821d0c52e4efb385cf6c6f
-FROM --platform=linux/amd64 ${PYTHON_IMAGE} AS build-stage
+ARG PLATFORM=linux/amd64
+FROM --platform=${PLATFORM} python:3.12.9-slim-bookworm@sha256:a866731a6b71c4a194a845d86e06568725e430ed21821d0c52e4efb385cf6c6f AS base-image
+
+FROM base-image AS build-stage
 
 # Python configuration
 ENV PYTHONFAULTHANDLER=1 \
@@ -23,7 +25,7 @@ RUN pip install -r requirements-poetry.txt --require-hashes
 COPY poetry.lock pyproject.toml alembic.ini sample_data.sql /
 RUN poetry install --no-root
 
-FROM --platform=linux/amd64 ${PYTHON_IMAGE}
+FROM base-image
 
 COPY --from=build-stage /usr/local /usr/local
 COPY --from=build-stage alembic.ini .
