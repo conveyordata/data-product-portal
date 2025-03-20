@@ -31,6 +31,7 @@ from app.notifications.schema_union import (
     NotificationForeignKeyMap,
     NotificationModelMap,
 )
+from app.notifications.service import NotificationService
 from app.users.schema import User
 
 
@@ -100,6 +101,28 @@ class NotificationInteractionService:
                 synchronize_session=False
             )
             db.flush()
+
+    def redirect_pending_requests(
+        self,
+        db: Session,
+        reference_parent_id: UUID,
+        updated_owner_ids: list[UUID],
+        notification_type: NotificationTypes,
+    ):
+        """
+        Ensures pending requests are received by the correct owners.
+        db.commit() should be used after using this function.
+
+        """
+        pending_notifications_ids = (
+            NotificationService().get_pending_notifications_by_reference(
+                db, reference_parent_id, notification_type
+            )
+        )
+        for notification_id in pending_notifications_ids:
+            NotificationInteractionService().reset_interactions_for_notification(
+                db, notification_id, updated_owner_ids
+            )
 
     def get_user_notification_interactions(
         self, db: Session, authenticated_user: User

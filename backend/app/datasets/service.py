@@ -23,7 +23,6 @@ from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.notification_interactions.service import NotificationInteractionService
 from app.notifications.notification_types import NotificationTypes
-from app.notifications.service import NotificationService
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import ensure_user_exists
@@ -93,20 +92,13 @@ class DatasetService:
         for owner in owner_ids:
             user = ensure_user_exists(owner, db)
             dataset.owners.append(user)
-        data_product_dataset_pending_ids = (
-            NotificationService().get_data_product_dataset_pending_ids(db, dataset.id)
+
+        NotificationInteractionService().redirect_pending_requests(
+            db, dataset.id, owner_ids, NotificationTypes.DataProductDataset
         )
-        for product_link_id in data_product_dataset_pending_ids:
-            NotificationInteractionService().update_interactions_by_reference(
-                db, product_link_id, NotificationTypes.DataProductDataset, owner_ids
-            )
-        data_output_dataset_pending_ids = (
-            NotificationService().get_data_output_dataset_pending_ids(db, dataset.id)
+        NotificationInteractionService().redirect_pending_requests(
+            db, dataset.id, owner_ids, NotificationTypes.DataOutputDataset
         )
-        for output_link_id in data_output_dataset_pending_ids:
-            NotificationInteractionService().update_interactions_by_reference(
-                db, output_link_id, NotificationTypes.DataOutputDataset, owner_ids
-            )
 
         db.flush()
         db.refresh(dataset)
@@ -203,20 +195,14 @@ class DatasetService:
         db.flush()
         db.refresh(dataset)
         owner_ids = [dataset_owner.id for dataset_owner in dataset.owners]
-        data_product_dataset_pending_ids = (
-            NotificationService().get_data_product_dataset_pending_ids(db, dataset.id)
+
+        NotificationInteractionService().redirect_pending_requests(
+            db, dataset.id, owner_ids, NotificationTypes.DataProductDataset
         )
-        for product_link_id in data_product_dataset_pending_ids:
-            NotificationInteractionService().update_interactions_by_reference(
-                db, product_link_id, NotificationTypes.DataProductDataset, owner_ids
-            )
-        data_output_dataset_pending_ids = (
-            NotificationService().get_data_output_dataset_pending_ids(db, dataset.id)
+        NotificationInteractionService().redirect_pending_requests(
+            db, dataset.id, owner_ids, NotificationTypes.DataOutputDataset
         )
-        for output_link_id in data_output_dataset_pending_ids:
-            NotificationInteractionService().update_interactions_by_reference(
-                db, output_link_id, NotificationTypes.DataOutputDataset, owner_ids
-            )
+
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
@@ -239,20 +225,14 @@ class DatasetService:
         db.flush()
         db.refresh(dataset)
         owner_ids = [dataset_owner.id for dataset_owner in dataset.owners]
-        data_product_dataset_pending_ids = (
-            NotificationService().get_data_product_dataset_pending_ids(db, dataset.id)
+
+        NotificationInteractionService().redirect_pending_requests(
+            db, dataset.id, owner_ids, NotificationTypes.DataProductDataset
         )
-        for product_link_id in data_product_dataset_pending_ids:
-            NotificationInteractionService().update_interactions_by_reference(
-                db, product_link_id, NotificationTypes.DataProductDataset, owner_ids
-            )
-        data_output_dataset_pending_ids = (
-            NotificationService().get_data_output_dataset_pending_ids(db, dataset.id)
+        NotificationInteractionService().redirect_pending_requests(
+            db, dataset.id, owner_ids, NotificationTypes.DataOutputDataset
         )
-        for output_link_id in data_output_dataset_pending_ids:
-            NotificationInteractionService().update_interactions_by_reference(
-                db, output_link_id, NotificationTypes.DataOutputDataset, owner_ids
-            )
+
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
