@@ -165,7 +165,7 @@ class DataOutputService:
         if not dataset.isVisibleToUser(authenticated_user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="User does not have access to this private dataset",
+                detail="You do not have access to this private dataset",
             )
         # Data output requests always need to be approved
         approval_status = DataOutputDatasetLinkStatus.PENDING_APPROVAL

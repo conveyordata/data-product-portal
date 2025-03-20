@@ -44,7 +44,7 @@ class DatasetService:
         if not dataset.isVisibleToUser(user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="User does not have access to this dataset",
+                detail="You do not have access to this private dataset",
             )
 
         rolled_up_tags = set()

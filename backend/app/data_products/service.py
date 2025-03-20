@@ -341,7 +341,7 @@ class DataProductService:
         if not dataset.isVisibleToUser(authenticated_user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="User does not have access to this private dataset",
+                detail="You do not have access to this private dataset",
             )
 
         approval_status = (
