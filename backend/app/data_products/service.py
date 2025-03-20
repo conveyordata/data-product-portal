@@ -402,7 +402,7 @@ class DataProductService:
             db,
             EventCreate(
                 name="Data product about updated",
-                subject_id=data_product.id,
+                subject_id=current_data_product.id,
                 subject_type=Type.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=current_data_product.domain.id,
@@ -423,7 +423,7 @@ class DataProductService:
             db,
             EventCreate(
                 name="Data product status updated",
-                subject_id=data_product.id,
+                subject_id=current_data_product.id,
                 subject_type=Type.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=current_data_product.domain.id,

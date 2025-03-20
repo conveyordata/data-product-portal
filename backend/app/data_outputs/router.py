@@ -89,9 +89,14 @@ def create_data_output(
     dependencies=[Depends(only_data_output_owners)],
 )
 def update_data_product(
-    id: UUID, data_output: DataOutputUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    data_output: DataOutputUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataOutputService().update_data_output(id, data_output, db)
+    return DataOutputService().update_data_output(
+        id, data_output, db, authenticated_user
+    )
 
 
 @router.put(
@@ -110,8 +115,11 @@ def update_data_product_status(
     id: UUID,
     data_output: DataOutputStatusUpdate,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataOutputService().update_data_output_status(id, data_output, db)
+    return DataOutputService().update_data_output_status(
+        id, data_output, db, authenticated_user
+    )
 
 
 @router.post(

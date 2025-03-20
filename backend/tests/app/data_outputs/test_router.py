@@ -90,7 +90,7 @@ class TestDataOutputsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_output.id)
 
-    def test_update_data_product(self, client):
+    def test_update_data_output(self, client):
         data_product = DataProductMembershipFactory(
             user=UserFactory(external_id="sub")
         ).data_product

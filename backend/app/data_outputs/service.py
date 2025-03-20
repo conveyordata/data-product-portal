@@ -130,7 +130,7 @@ class DataOutputService:
                 target_id=data_output.owner_id,
                 target_type=Type.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=data_product.domain_id,
+                domain_id=data_output.owner.domain_id,
             ),
         )
         return {"id": data_output.id}
@@ -147,8 +147,6 @@ class DataOutputService:
             )
         self.ensure_owner(authenticated_user, data_output, db)
         data_output.dataset_links = []
-        db.delete(data_output)
-        db.commit()
         EventService().create_event(
             db,
             EventCreate(
@@ -161,10 +159,16 @@ class DataOutputService:
                 domain_id=data_output.owner.domain_id,
             ),
         )
+        db.delete(data_output)
+        db.commit()
         RefreshInfrastructureLambda().trigger()
 
     def update_data_output_status(
-        self, id: UUID, data_output: DataOutputStatusUpdate, db: Session
+        self,
+        id: UUID,
+        data_output: DataOutputStatusUpdate,
+        db: Session,
+        authenticated_user: User,
     ):
         current_data_output = ensure_data_output_exists(id, db)
         current_data_output.status = data_output.status
@@ -177,7 +181,7 @@ class DataOutputService:
                 subject_type=Type.DATA_OUTPUT,
                 target_id=current_data_output.owner.id,
                 target_type=Type.DATA_PRODUCT,
-                actor_id=current_data_output.owner.id,
+                actor_id=authenticated_user.id,
                 domain_id=current_data_output.owner.domain.id,
             ),
         )
@@ -291,7 +295,13 @@ class DataOutputService:
             ),
         )
 
-    def update_data_output(self, id: UUID, data_output: DataOutputUpdate, db: Session):
+    def update_data_output(
+        self,
+        id: UUID,
+        data_output: DataOutputUpdate,
+        db: Session,
+        authenticated_user: User,
+    ):
         current_data_output = ensure_data_output_exists(id, db)
         update_data_output = data_output.model_dump(exclude_unset=True)
 
@@ -312,7 +322,7 @@ class DataOutputService:
                 subject_type=Type.DATA_OUTPUT,
                 target_id=current_data_output.owner.id,
                 target_type=Type.DATA_PRODUCT,
-                actor_id=current_data_output.owner.id,
+                actor_id=authenticated_user.id,
                 domain_id=current_data_output.owner.domain.id,
             ),
         )
