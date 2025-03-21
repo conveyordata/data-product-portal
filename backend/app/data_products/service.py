@@ -46,7 +46,6 @@ from app.data_products_datasets.model import (
 from app.data_products_datasets.schema import DataProductDatasetAssociationCreate
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import ensure_dataset_exists
-from app.datasets.service import DatasetService
 from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
@@ -162,15 +161,11 @@ class DataProductService:
                     role=membership.role,
                 )
             )
-        db.flush()
-        db.refresh(data_product)
 
-        NotificationInteractionService().redirect_pending_requests(
-            db, data_product.id, NotificationTypes.DataProductMembership
-        )
-
-        db.flush()
-        db.refresh(data_product)
+        if hasattr(data_product, "id") and data_product.id:
+            NotificationInteractionService().redirect_pending_requests(
+                db, data_product.id, NotificationTypes.DataProductMembership
+            )
         return data_product
 
     def _update_datasets(
@@ -200,9 +195,8 @@ class DataProductService:
             )
             db.flush()
             db.refresh(dataset)
-            owner_ids = DatasetService().get_owner_ids(dataset.dataset_id, db)
             NotificationInteractionService().create_notification_relations(
-                db, dataset.id, owner_ids, NotificationTypes.DataProductDataset
+                db, dataset.id, NotificationTypes.DataProductDataset
             )
         return data_product
 
@@ -348,9 +342,8 @@ class DataProductService:
                     current_data_product.dataset_links.append(dataset)
                     db.flush()
                     db.refresh(dataset)
-                    owner_ids = DatasetService().get_owner_ids(dataset.dataset_id, db)
                     NotificationInteractionService().create_notification_relations(
-                        db, dataset.id, owner_ids, NotificationTypes.DataProductDataset
+                        db, dataset.id, NotificationTypes.DataProductDataset
                     )
             elif k == "tag_ids":
                 new_tags = self._get_tags(db, v)
@@ -412,9 +405,8 @@ class DataProductService:
         if dataset_link.status == DataProductDatasetLinkStatus.PENDING_APPROVAL:
             db.flush()
             db.refresh(dataset_link)
-            owner_ids = DatasetService().get_owner_ids(dataset_link.dataset_id, db)
             NotificationInteractionService().create_notification_relations(
-                db, dataset_link.id, owner_ids, NotificationTypes.DataProductDataset
+                db, dataset_link.id, NotificationTypes.DataProductDataset
             )
 
         db.commit()

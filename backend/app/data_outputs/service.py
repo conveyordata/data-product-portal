@@ -25,7 +25,6 @@ from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
-from app.datasets.service import DatasetService
 from app.graph.graph import Graph
 from app.notification_interactions.service import NotificationInteractionService
 from app.notifications.notification_types import NotificationTypes
@@ -183,9 +182,8 @@ class DataOutputService:
         if dataset_link.status == DataOutputDatasetLinkStatus.PENDING_APPROVAL:
             db.flush()
             db.refresh(dataset_link)
-            owner_ids = DatasetService().get_owner_ids(dataset_link.dataset_id, db)
             NotificationInteractionService().create_notification_relations(
-                db, dataset_link.id, owner_ids, NotificationTypes.DataOutputDataset
+                db, dataset_link.id, NotificationTypes.DataOutputDataset
             )
 
         db.commit()

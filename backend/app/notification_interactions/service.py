@@ -104,6 +104,29 @@ class NotificationInteractionService:
             )
             db.flush()
 
+    def get_owner_ids_via_reference_parent_id(
+        self,
+        db: Session,
+        reference_parent_id: UUID,
+        notification_type: NotificationTypes,
+    ) -> list[UUID]:
+        notification_owner_ids = {
+            NotificationTypes.DataProductDataset: lambda db, ref_id: [
+                owner.id for owner in ensure_dataset_exists(ref_id, db).owners
+            ],
+            NotificationTypes.DataOutputDataset: lambda db, ref_id: [
+                owner.id for owner in ensure_dataset_exists(ref_id, db).owners
+            ],
+            NotificationTypes.DataProductMembership: lambda db, ref_id: [
+                membership.user_id
+                for membership in ensure_data_product_exists(ref_id, db).memberships
+            ],
+        }
+        if notification_type in notification_owner_ids:
+            return notification_owner_ids[notification_type](db, reference_parent_id)
+        else:
+            raise ValueError(f"Unsupported notification type: {notification_type}")
+
     def redirect_pending_requests(
         self,
         db: Session,
@@ -112,30 +135,16 @@ class NotificationInteractionService:
         updated_owner_ids: list[UUID] = [],
     ):
         """
+        Called from parent of a notification referenced object
         Ensures pending requests are received by the correct owners.
         db.commit() should be used after using this function.
 
         """
         if not updated_owner_ids:
             db.flush()
-            notification_owner_ids = {
-                NotificationTypes.DataProductDataset: lambda db, ref_id: [
-                    owner.id for owner in ensure_dataset_exists(ref_id, db).owners
-                ],
-                NotificationTypes.DataOutputDataset: lambda db, ref_id: [
-                    owner.id for owner in ensure_dataset_exists(ref_id, db).owners
-                ],
-                NotificationTypes.DataProductMembership: lambda db, ref_id: [
-                    membership.user_id
-                    for membership in ensure_data_product_exists(ref_id, db).memberships
-                ],
-            }
-            if notification_type in notification_owner_ids:
-                updated_owner_ids = notification_owner_ids[notification_type](
-                    db, reference_parent_id
-                )
-            else:
-                raise ValueError(f"Unsupported notification type: {notification_type}")
+            updated_owner_ids = self.get_owner_ids_via_reference_parent_id(
+                db, reference_parent_id, notification_type
+            )
 
         pending_notifications_ids = (
             NotificationService().get_pending_notifications_by_reference(
@@ -151,14 +160,47 @@ class NotificationInteractionService:
         self,
         db: Session,
         reference_id: UUID,
-        receiving_ids: list[UUID],
         notification_type: NotificationTypes,
+        receiving_ids: list[UUID] = [],
     ):
         """
+        Called from notification referenced object
         Ensures pending requests are received by the correct owners.
         db.commit() should be used after using this function.
 
         """
+        if not receiving_ids:
+            db.flush()
+            notification_owner_ids = {
+                NotificationTypes.DataProductDataset: lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
+                    db,
+                    db.query(DataProductDatasetAssociationModel.dataset_id)
+                    .filter(DataProductDatasetAssociationModel.id == ref_id)
+                    .scalar(),
+                    notification_type,
+                ),
+                NotificationTypes.DataOutputDataset: lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
+                    db,
+                    db.query(DataOutputDatasetAssociationModel.dataset_id)
+                    .filter(DataOutputDatasetAssociationModel.id == ref_id)
+                    .scalar(),
+                    notification_type,
+                ),
+                NotificationTypes.DataProductMembership: lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
+                    db,
+                    db.query(DataProductMembershipModel.data_product_id)
+                    .filter(DataProductMembershipModel.id == ref_id)
+                    .scalar(),
+                    notification_type,
+                ),
+            }
+            if notification_type in notification_owner_ids:
+                receiving_ids = notification_owner_ids[notification_type](
+                    db, reference_id
+                )
+            else:
+                raise ValueError(f"Unsupported notification type: {notification_type}")
+
         notification = NotificationService().initiate_notification_by_reference(
             db, reference_id, notification_type
         )

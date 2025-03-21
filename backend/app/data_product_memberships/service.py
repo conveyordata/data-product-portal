@@ -66,8 +66,8 @@ class DataProductMembershipService:
             NotificationInteractionService().create_notification_relations(
                 db,
                 data_product_membership.id,
-                owner_ids,
                 NotificationTypes.DataProductMembership,
+                owner_ids,
             )
 
         db.commit()

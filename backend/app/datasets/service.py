@@ -93,15 +93,13 @@ class DatasetService:
             user = ensure_user_exists(owner, db)
             dataset.owners.append(user)
 
-        NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, NotificationTypes.DataProductDataset, owner_ids
-        )
-        NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, NotificationTypes.DataOutputDataset, owner_ids
-        )
-
-        db.flush()
-        db.refresh(dataset)
+        if hasattr(dataset, "id") and dataset.id:
+            NotificationInteractionService().redirect_pending_requests(
+                db, dataset.id, NotificationTypes.DataProductDataset, owner_ids
+            )
+            NotificationInteractionService().redirect_pending_requests(
+                db, dataset.id, NotificationTypes.DataOutputDataset, owner_ids
+            )
         return dataset
 
     def _fetch_tags(self, db: Session, tag_ids: list[UUID] = []) -> list[TagModel]:
