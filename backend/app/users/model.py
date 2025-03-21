@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
+    from app.notification_interactions.model import NotificationInteraction
 
 
 def ensure_user_exists(user_id: UUID, db: Session) -> UserSchema:
@@ -87,4 +88,7 @@ class User(Base, BaseORM):
         "DataOutputDatasetAssociation",
         foreign_keys="DataOutputDatasetAssociation.approved_by_id",
         back_populates="approved_by",
+    )
+    notification_interactions: Mapped[list["NotificationInteraction"]] = relationship(
+        "NotificationInteraction", back_populates="user"
     )
