@@ -34,6 +34,3 @@ class NotificationInteraction(Base, BaseORM):
     )
     last_seen = Column(DateTime(timezone=False))
     last_interaction = Column(DateTime(timezone=False))
-    # __table_args__ = (
-    # UniqueConstraint("data_product_id", "user_id", name="unique_data_product_user"),
-    # ) deze lijn nachecken
