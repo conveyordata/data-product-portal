@@ -8,6 +8,7 @@ from tests.factories import (
 from tests.factories.data_output import DataOutputFactory
 
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.datasets.enums import DatasetAccessType
 
 DATA_OUTPUTS_DATASETS_ENDPOINT = "/api/data_output_dataset_links"
 DATA_OUTPUTS_ENDPOINT = "/api/data_outputs"
@@ -20,6 +21,24 @@ class TestDataOutputsDatasetsRouter:
         membership = DataProductMembershipFactory(user=UserFactory(external_id="sub"))
         data_output = DataOutputFactory(owner=membership.data_product)
         ds = DatasetFactory()
+
+        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        assert response.status_code == 200
+
+    def test_request_data_output_link_private_dataset_no_access(self, client):
+        user = UserFactory(external_id="sub")
+        membership = DataProductMembershipFactory(user=user)
+        data_output = DataOutputFactory(owner=membership.data_product)
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+
+        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        assert response.status_code == 403
+
+    def test_request_data_output_link_private_dataset(self, client):
+        user = UserFactory(external_id="sub")
+        membership = DataProductMembershipFactory(user=user)
+        data_output = DataOutputFactory(owner=membership.data_product)
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[user])
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 200

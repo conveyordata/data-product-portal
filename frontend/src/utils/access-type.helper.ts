@@ -8,6 +8,8 @@ export const getDatasetAccessTypeLabel = (t: TFunction, accessType: DatasetAcces
             return t('Public');
         case DatasetAccess.Restricted:
             return t('Restricted');
+        case DatasetAccess.Private:
+            return t('Private');
         default:
             return t('Unknown');
     }
