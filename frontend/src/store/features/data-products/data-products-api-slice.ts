@@ -20,6 +20,7 @@ import {
     DataProductUpdateRequest,
     DataProductUpdateResponse,
 } from '@/types/data-product';
+import { EventContract } from '@/types/events/event.contract';
 import { GraphContract } from '@/types/graph/graph-contract';
 
 export const dataProductTags: string[] = [
@@ -60,6 +61,16 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
         getDataProductById: builder.query<DataProductContract, string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductGet, { dataProductId: id }),
+                method: 'GET',
+            }),
+            providesTags: (_, __, id) => [
+                { type: TagTypes.DataProduct as const, id },
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+            ],
+        }),
+        getDataProductHistory: builder.query<EventContract[], string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataProductHistory, { dataProductId: id }),
                 method: 'GET',
             }),
             providesTags: (_, __, id) => [
@@ -215,4 +226,5 @@ export const {
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
+    useGetDataProductHistoryQuery,
 } = dataProductsApiSlice;

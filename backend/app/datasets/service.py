@@ -18,12 +18,16 @@ from app.datasets.schema import (
     DatasetStatusUpdate,
 )
 from app.datasets.schema_get import DatasetGet, DatasetsGet
+from app.events.enum import Type
+from app.events.schema import Event, EventCreate
+from app.events.service import EventService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import ensure_user_exists
+from app.users.schema import User
 
 
 class DatasetService:
@@ -71,6 +75,9 @@ class DatasetService:
                 dataset.lifecycle = default_lifecycle
         return datasets
 
+    def get_event_history(self, id: UUID, db: Session) -> list[Event]:
+        return EventService().get_history(db, id, Type.DATASET)
+
     def get_user_datasets(self, user_id: UUID, db: Session) -> list[DatasetsGet]:
         return (
             db.query(DatasetModel)
@@ -101,7 +108,7 @@ class DatasetService:
         return tags
 
     def create_dataset(
-        self, dataset: DatasetCreateUpdate, db: Session
+        self, dataset: DatasetCreateUpdate, db: Session, authenticated_user: User
     ) -> dict[str, UUID]:
         dataset = self._update_owners(dataset, db)
         dataset = dataset.parse_pydantic_schema()
@@ -110,10 +117,19 @@ class DatasetService:
         db.add(dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()
-
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Dataset created",
+                subject_id=dataset.id,
+                subject_type=Type.DATASET,
+                actor_id=authenticated_user.id,
+                domain_id=dataset.domain_id,
+            ),
+        )
         return {"id": dataset.id}
 
-    def remove_dataset(self, id: UUID, db: Session):
+    def remove_dataset(self, id: UUID, db: Session, authenticated_user: User):
         dataset = db.get(
             DatasetModel,
             id,
@@ -129,9 +145,25 @@ class DatasetService:
         db.delete(dataset)
 
         db.commit()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Dataset removed",
+                subject_id=dataset.id,
+                subject_type=Type.DATASET,
+                actor_id=authenticated_user.id,
+                domain_id=dataset.domain_id,
+            ),
+        )
         RefreshInfrastructureLambda().trigger()
 
-    def update_dataset(self, id: UUID, dataset: DatasetCreateUpdate, db: Session):
+    def update_dataset(
+        self,
+        id: UUID,
+        dataset: DatasetCreateUpdate,
+        db: Session,
+        authenticated_user: User,
+    ):
         current_dataset = ensure_dataset_exists(id, db)
         updated_dataset = dataset.model_dump(exclude_unset=True)
 
@@ -145,21 +177,63 @@ class DatasetService:
                 setattr(current_dataset, k, v) if v else None
         db.commit()
         RefreshInfrastructureLambda().trigger()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Dataset updated",
+                subject_id=current_dataset.id,
+                subject_type=Type.DATASET,
+                actor_id=authenticated_user.id,
+                domain_id=dataset.domain_id,
+            ),
+        )
         return {"id": current_dataset.id}
 
-    def update_dataset_about(self, id: UUID, dataset: DatasetAboutUpdate, db: Session):
+    def update_dataset_about(
+        self,
+        id: UUID,
+        dataset: DatasetAboutUpdate,
+        db: Session,
+        authenticated_user: User,
+    ):
         current_dataset = ensure_dataset_exists(id, db)
         current_dataset.about = dataset.about
         db.commit()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Dataset about updated",
+                subject_id=current_dataset.id,
+                subject_type=Type.DATASET,
+                actor_id=authenticated_user.id,
+                domain_id=current_dataset.domain.id,
+            ),
+        )
 
     def update_dataset_status(
-        self, id: UUID, dataset: DatasetStatusUpdate, db: Session
+        self,
+        id: UUID,
+        dataset: DatasetStatusUpdate,
+        db: Session,
+        authenticated_user: User,
     ):
         current_dataset = ensure_dataset_exists(id, db)
         current_dataset.status = dataset.status
         db.commit()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="Dataset status updated",
+                subject_id=current_dataset.id,
+                subject_type=Type.DATASET,
+                actor_id=authenticated_user.id,
+                domain_id=current_dataset.domain.id,
+            ),
+        )
 
-    def add_user_to_dataset(self, dataset_id: UUID, user_id: UUID, db: Session):
+    def add_user_to_dataset(
+        self, dataset_id: UUID, user_id: UUID, db: Session, authenticated_user: User
+    ):
         dataset = ensure_dataset_exists(dataset_id, db)
         user = ensure_user_exists(user_id, db)
         if user in dataset.owners:
@@ -171,8 +245,22 @@ class DatasetService:
         dataset.owners.append(user)
         db.commit()
         RefreshInfrastructureLambda().trigger()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="User added to dataset",
+                subject_id=dataset.id,
+                subject_type=Type.DATASET,
+                actor_id=authenticated_user.id,
+                target_id=user.id,
+                target_type=Type.USER,
+                domain_id=dataset.domain.id,
+            ),
+        )
 
-    def remove_user_from_dataset(self, dataset_id: UUID, user_id: UUID, db: Session):
+    def remove_user_from_dataset(
+        self, dataset_id: UUID, user_id: UUID, db: Session, authenticated_user: User
+    ):
         dataset = ensure_dataset_exists(dataset_id, db)
         user = ensure_user_exists(user_id, db)
 
@@ -190,6 +278,18 @@ class DatasetService:
         dataset.owners.remove(user)
         db.commit()
         RefreshInfrastructureLambda().trigger()
+        EventService().create_event(
+            db,
+            EventCreate(
+                name="User removed from dataset",
+                subject_id=dataset.id,
+                subject_type=Type.DATASET,
+                actor_id=authenticated_user.id,
+                target_id=user.id,
+                target_type=Type.USER,
+                domain_id=dataset.domain.id,
+            ),
+        )
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
         dataset = db.get(DatasetModel, id)

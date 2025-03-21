@@ -1,4 +1,4 @@
-import Icon, { CodeOutlined, PartitionOutlined } from '@ant-design/icons';
+import Icon, { CodeOutlined, HistoryOutlined, PartitionOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router';
 
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer';
+import { HistoryTab } from '@/components/history/history-tab';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
@@ -62,6 +63,12 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 key: TabKeys.Explorer,
                 icon: <PartitionOutlined />,
                 children: <Explorer id={dataOutputId} type={'dataoutput'} />,
+            },
+            {
+                label: t('History'),
+                key: TabKeys.History,
+                icon: <HistoryOutlined />,
+                children: <HistoryTab id={dataOutputId} type="dataoutput" />,
             },
         ];
     }, [dataOutputId, t]);

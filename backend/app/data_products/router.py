@@ -17,6 +17,7 @@ from app.data_products.schema_get import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.dependencies import OnlyWithProductAccessID
+from app.events.schema import Event
 from app.graph.graph import Graph
 from app.users.schema import User
 
@@ -38,6 +39,11 @@ def get_user_data_products(
 @router.get("/{id}")
 def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataProductGet:
     return DataProductService().get_data_product(id, db)
+
+
+@router.get("/{id}/history")
+def get_event_history(id: UUID, db: Session = Depends(get_db_session)) -> list[Event]:
+    return DataProductService().get_event_history(id, db)
 
 
 @router.post(
@@ -86,8 +92,9 @@ def create_data_product(
 def remove_data_product(
     id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductService().remove_data_product(id, db)
+    return DataProductService().remove_data_product(id, db, authenticated_user)
 
 
 @router.put(
@@ -103,9 +110,14 @@ def remove_data_product(
     dependencies=[Depends(OnlyWithProductAccessID())],
 )
 def update_data_product(
-    id: UUID, data_product: DataProductUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    data_product: DataProductUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductService().update_data_product(id, data_product, db)
+    return DataProductService().update_data_product(
+        id, data_product, db, authenticated_user
+    )
 
 
 @router.put(
@@ -124,8 +136,11 @@ def update_data_product_about(
     id: UUID,
     data_product: DataProductAboutUpdate,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductService().update_data_product_about(id, data_product, db)
+    return DataProductService().update_data_product_about(
+        id, data_product, db, authenticated_user
+    )
 
 
 @router.put(
@@ -144,8 +159,11 @@ def update_data_product_status(
     id: UUID,
     data_product: DataProductStatusUpdate,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductService().update_data_product_status(id, data_product, db)
+    return DataProductService().update_data_product_status(
+        id, data_product, db, authenticated_user
+    )
 
 
 @router.post(
@@ -200,8 +218,11 @@ def unlink_dataset_from_data_product(
     id: UUID,
     dataset_id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductService().unlink_dataset_from_data_product(id, dataset_id, db)
+    return DataProductService().unlink_dataset_from_data_product(
+        id, dataset_id, db, authenticated_user
+    )
 
 
 @router.get("/{id}/role", dependencies=[Depends(OnlyWithProductAccessID())])

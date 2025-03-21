@@ -42,7 +42,7 @@ class DatasetGet(ORMModel):
     access_type: DatasetAccessType
     data_output_links: list[DataOutputLink]
     data_product_settings: list[DataProductSettingValue]
-    rolled_up_tags: set[Tag]
+    rolled_up_tags: set[Tag] = set([])
 
 
 class DatasetsGet(DatasetGet):
