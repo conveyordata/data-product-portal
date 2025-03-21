@@ -11,10 +11,12 @@ from app.data_product_memberships.enums import DataProductMembershipStatus
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
 )
+from app.data_products.model import ensure_data_product_exists
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
+from app.datasets.model import ensure_dataset_exists
 from app.notification_interactions.model import NotificationInteraction
 from app.notification_interactions.schema_get import NotificationInteractionGet
 from app.notifications.data_output_dataset_association.model import (
@@ -106,14 +108,35 @@ class NotificationInteractionService:
         self,
         db: Session,
         reference_parent_id: UUID,
-        updated_owner_ids: list[UUID],
         notification_type: NotificationTypes,
+        updated_owner_ids: list[UUID] = [],
     ):
         """
         Ensures pending requests are received by the correct owners.
         db.commit() should be used after using this function.
 
         """
+        if not updated_owner_ids:
+            db.flush()
+            notification_owner_ids = {
+                NotificationTypes.DataProductDataset: lambda db, ref_id: [
+                    owner.id for owner in ensure_dataset_exists(ref_id, db).owners
+                ],
+                NotificationTypes.DataOutputDataset: lambda db, ref_id: [
+                    owner.id for owner in ensure_dataset_exists(ref_id, db).owners
+                ],
+                NotificationTypes.DataProductMembership: lambda db, ref_id: [
+                    membership.user_id
+                    for membership in ensure_data_product_exists(ref_id, db).memberships
+                ],
+            }
+            if notification_type in notification_owner_ids:
+                updated_owner_ids = notification_owner_ids[notification_type](
+                    db, reference_parent_id
+                )
+            else:
+                raise ValueError(f"Unsupported notification type: {notification_type}")
+
         pending_notifications_ids = (
             NotificationService().get_pending_notifications_by_reference(
                 db, reference_parent_id, notification_type

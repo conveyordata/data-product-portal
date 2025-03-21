@@ -94,10 +94,10 @@ class DatasetService:
             dataset.owners.append(user)
 
         NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, owner_ids, NotificationTypes.DataProductDataset
+            db, dataset.id, NotificationTypes.DataProductDataset, owner_ids
         )
         NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, owner_ids, NotificationTypes.DataOutputDataset
+            db, dataset.id, NotificationTypes.DataOutputDataset, owner_ids
         )
 
         db.flush()
@@ -194,15 +194,13 @@ class DatasetService:
         dataset.owners.append(user)
         db.flush()
         db.refresh(dataset)
-        owner_ids = [dataset_owner.id for dataset_owner in dataset.owners]
 
         NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, owner_ids, NotificationTypes.DataProductDataset
+            db, dataset.id, NotificationTypes.DataProductDataset
         )
         NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, owner_ids, NotificationTypes.DataOutputDataset
+            db, dataset.id, NotificationTypes.DataOutputDataset
         )
-
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
@@ -224,15 +222,13 @@ class DatasetService:
         dataset.owners.remove(user)
         db.flush()
         db.refresh(dataset)
-        owner_ids = [dataset_owner.id for dataset_owner in dataset.owners]
 
         NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, owner_ids, NotificationTypes.DataProductDataset
+            db, dataset.id, NotificationTypes.DataProductDataset
         )
         NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, owner_ids, NotificationTypes.DataOutputDataset
+            db, dataset.id, NotificationTypes.DataOutputDataset
         )
-
         db.commit()
         RefreshInfrastructureLambda().trigger()
 

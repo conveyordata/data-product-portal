@@ -164,14 +164,9 @@ class DataProductService:
             )
         db.flush()
         db.refresh(data_product)
-        owner_ids = [
-            product_owner.user_id
-            for product_owner in data_product.memberships
-            if product_owner.role == DataProductUserRole.OWNER
-        ]
 
         NotificationInteractionService().redirect_pending_requests(
-            db, data_product.id, owner_ids, NotificationTypes.DataProductMembership
+            db, data_product.id, NotificationTypes.DataProductMembership
         )
 
         db.flush()
@@ -313,14 +308,9 @@ class DataProductService:
 
         db.flush()
         db.refresh(data_product)
-        owner_ids = [
-            membership_item["user_id"]
-            for membership_item in membership_data
-            if membership_item["role"] == DataProductUserRole.OWNER
-        ]
 
         NotificationInteractionService().redirect_pending_requests(
-            db, data_product.id, owner_ids, NotificationTypes.DataProductMembership
+            db, data_product.id, NotificationTypes.DataProductMembership
         )
 
         db.flush()
