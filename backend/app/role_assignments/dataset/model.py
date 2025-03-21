@@ -21,23 +21,22 @@ class DatasetRoleAssignment(Base, BaseORM):
         UniqueConstraint("dataset_id", "user_id", name="unique_dataset_assignment"),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(UUID, primary_key=True, default=uuid.uuid4)
     dataset_id: Mapped[uuid.UUID] = mapped_column(
         "dataset_id", ForeignKey("datasets.id")
     )
-    dataset: Mapped[Dataset] = relationship("Dataset", foreign_keys=[dataset_id])
+    dataset: Mapped["Dataset"] = relationship("Dataset", foreign_keys=[dataset_id])
     user_id: Mapped[uuid.UUID] = mapped_column("user_id", ForeignKey("users.id"))
-    user: Mapped[User] = relationship("User", foreign_keys=[user_id])
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
     role_id: Mapped[uuid.UUID] = mapped_column("role_id", ForeignKey("roles.id"))
-    role: Mapped[Role] = mapped_column("Role", foreign_keys=[role_id])
+    role: Mapped["Role"] = relationship("Role", foreign_keys=[role_id])
     decision: Mapped[DecisionStatus] = mapped_column(
-        Enum(DecisionStatus),
-        default=DecisionStatus.PENDING,
+        Enum(DecisionStatus), default=DecisionStatus.PENDING
     )
 
     requested_on = Column(DateTime(timezone=False), server_default=utcnow())
     requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
-    requested_by: Mapped[User] = relationship(foreign_keys=[requested_by_id])
-    decided_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
-    decided_by: Mapped[User] = relationship(foreign_keys=[decided_by_id])
+    requested_by: Mapped["User"] = relationship(foreign_keys=[requested_by_id])
     decided_on = Column(DateTime(timezone=False))
+    decided_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    decided_by: Mapped["User"] = relationship(foreign_keys=[decided_by_id])

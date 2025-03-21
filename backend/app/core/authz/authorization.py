@@ -82,7 +82,9 @@ class Authorization(metaclass=Singleton):
     ) -> str:
         if id_ == default:
             return default
-        domain = db.execute(select(model.domain_id).where(model.id == id_)).scalar()
+        domain = db.scalars(
+            select(model.domain_id).where(model.id == id_)
+        ).one_or_none()
         return default if domain is None else str(domain)
 
     @cachedmethod(lambda self: self._cache)

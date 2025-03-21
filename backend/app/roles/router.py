@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
+from typing import Sequence
 
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/roles", tags=["roles"])
 
 
 @router.get("/{scope}")
-def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> list[Role]:
+def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> Sequence[Role]:
     return RoleService(db).get_roles(scope)
 
 

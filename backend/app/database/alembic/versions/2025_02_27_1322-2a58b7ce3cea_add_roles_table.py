@@ -1,4 +1,4 @@
-"""add roles table
+"""Add roles
 
 Revision ID: 2a58b7ce3cea
 Revises: d98efbda5e7c

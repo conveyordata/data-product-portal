@@ -1,3 +1,5 @@
+from typing import Optional
+
 import httpx
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
@@ -76,7 +78,7 @@ if settings.OIDC_ENABLED:
         token: JWTToken = Depends(api_key_authenticated),
         db: Session = Depends(get_db_session),
     ) -> User:
-        result = db.execute(
+        result = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)
         ).one_or_none()
         if not result:
@@ -108,12 +110,12 @@ else:
         token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
     ) -> User:
         token = JWTToken(sub="sub", token="token_value")
-        result = db.execute(
+        user: Optional[User] = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)
         ).one_or_none()
-        if not result:
+        if not user:
             return authorize_user(token, db)
-        return result.User
+        return user
 
     def api_key_authenticated(
         api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)

@@ -1,7 +1,7 @@
-from enum import StrEnum, unique
+from enum import UNIQUE, StrEnum, verify
 
 
-@unique
+@verify(UNIQUE)
 class DecisionStatus(StrEnum):
     APPROVED = "approved"
     PENDING = "pending"
