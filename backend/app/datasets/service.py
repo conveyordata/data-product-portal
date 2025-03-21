@@ -307,7 +307,3 @@ class DatasetService:
                     )
                 )
         return Graph(nodes=set(nodes), edges=set(edges))
-
-    def get_owner_ids(self, id: UUID, db: Session) -> list[UUID]:
-        dataset = ensure_dataset_exists(id, db)
-        return [owner.id for owner in dataset.owners]
