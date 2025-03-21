@@ -54,10 +54,46 @@ export function Notifications() {
                         );
                         break;
                     case DataProductDatasetLinkStatus.Approved:
-                        description = <Typography.Text>APPROVED, TODO</Typography.Text>;
+                        description = (
+                            <Typography.Text>
+                                {t('{{name}}, approved your request made on behalf of data output', {
+                                    name: userNotification.notification.data_product_dataset.approved_by?.first_name,
+                                })}{' '}
+                                <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                    {userNotification.notification.data_product_dataset.data_product.name}
+                                </Link>{' '}
+                                {t('for read access to dataset')}{' '}
+                                <Link
+                                    onClick={(e) => e.stopPropagation()}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_product_dataset.dataset_id,
+                                    )}
+                                >
+                                    {userNotification.notification.data_product_dataset.dataset.name}
+                                </Link>
+                            </Typography.Text>
+                        );
                         break;
                     case DataProductDatasetLinkStatus.Denied:
-                        description = <Typography.Text>DENIED, TODO</Typography.Text>;
+                        description = (
+                            <Typography.Text>
+                                {t('{{name}}, denied your request made on behalf of data output', {
+                                    name: userNotification.notification.data_product_dataset.approved_by?.first_name,
+                                })}{' '}
+                                <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                    {userNotification.notification.data_product_dataset.data_product.name}
+                                </Link>{' '}
+                                {t('for read access to dataset')}{' '}
+                                <Link
+                                    onClick={(e) => e.stopPropagation()}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_product_dataset.dataset_id,
+                                    )}
+                                >
+                                    {userNotification.notification.data_product_dataset.dataset.name}
+                                </Link>
+                            </Typography.Text>
+                        );
                         break;
                 }
                 navigatePath = createDatasetIdPath(
@@ -94,10 +130,46 @@ export function Notifications() {
                         );
                         break;
                     case DataOutputDatasetLinkStatus.Approved:
-                        description = <Typography.Text>APPROVED, TODO</Typography.Text>;
+                        description = (
+                            <Typography.Text>
+                                {t('{{name}}, approved your request made on behalf of data output', {
+                                    name: userNotification.notification.data_output_dataset.approved_by?.first_name,
+                                })}{' '}
+                                <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                    {userNotification.notification.data_output_dataset.data_output.name}
+                                </Link>{' '}
+                                {t('for a link to dataset')}{' '}
+                                <Link
+                                    onClick={(e) => e.stopPropagation()}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_output_dataset.dataset_id,
+                                    )}
+                                >
+                                    {userNotification.notification.data_output_dataset.dataset.name}
+                                </Link>
+                            </Typography.Text>
+                        );
                         break;
                     case DataOutputDatasetLinkStatus.Denied:
-                        description = <Typography.Text>DENIED, TODO</Typography.Text>;
+                        description = (
+                            <Typography.Text>
+                                {t('{{name}}, denied your request made on behalf of data output', {
+                                    name: userNotification.notification.data_output_dataset.approved_by?.first_name,
+                                })}{' '}
+                                <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                    {userNotification.notification.data_output_dataset.data_output.name}
+                                </Link>{' '}
+                                {t('for a link to dataset')}{' '}
+                                <Link
+                                    onClick={(e) => e.stopPropagation()}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_output_dataset.dataset_id,
+                                    )}
+                                >
+                                    {userNotification.notification.data_output_dataset.dataset.name}
+                                </Link>
+                            </Typography.Text>
+                        );
                         break;
                 }
                 navigatePath = createDatasetIdPath(
@@ -123,10 +195,30 @@ export function Notifications() {
                         );
                         break;
                     case DataProductMembershipStatus.Approved:
-                        description = <Typography.Text>APPROVED, TODO</Typography.Text>;
+                        description = (
+                            <Typography.Text>
+                                {t('{{name}} approved your request to join the data product', {
+                                    name: userNotification.notification.data_product_membership.approved_by?.first_name,
+                                })}{' '}
+                                <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                    {userNotification.notification.data_product_membership.data_product.name}
+                                </Link>{' '}
+                                {t('team')}{' '}
+                            </Typography.Text>
+                        );
                         break;
                     case DataProductMembershipStatus.Denied:
-                        description = <Typography.Text>DENIED, TODO</Typography.Text>;
+                        description = (
+                            <Typography.Text>
+                                {t('{{name}} denied your request to join the data product', {
+                                    name: userNotification.notification.data_product_membership.approved_by?.first_name,
+                                })}{' '}
+                                <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                    {userNotification.notification.data_product_membership.data_product.name}
+                                </Link>{' '}
+                                {t('team')}{' '}
+                            </Typography.Text>
+                        );
                         break;
                 }
                 navigatePath = createDataProductIdPath(
