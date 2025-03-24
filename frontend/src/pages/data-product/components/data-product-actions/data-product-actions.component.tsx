@@ -45,7 +45,9 @@ export function DataProductActions({ dataProductId }: Props) {
             skip: !dataProductId,
         },
     );
-    if (!dataProduct || !user) return null;
+    if (!dataProduct || !user) {
+        return null;
+    }
 
     const doesUserHaveAnyDataProductMembership = getDoesUserHaveAnyDataProductMembership(
         user?.id,
