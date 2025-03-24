@@ -49,18 +49,18 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
             object_id: dataProductId,
             action: 302,
         },
-        { skip: !dataProductId },
+        { skip: !dataProductId || scope !== 'dataproduct' },
     );
     const { data: dataset_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
             action: 402,
         },
-        { skip: !dataProductId },
+        { skip: !dataProductId || scope !== 'dataset' },
     );
 
-    const canUpdateProductSettingNew = product_access?.access || false;
-    const canUpdateDatasetSettingNew = dataset_access?.access || false;
+    const canUpdateProductSettingNew = product_access?.access || scope === 'dataset';
+    const canUpdateDatasetSettingNew = dataset_access?.access || scope === 'dataproduct';
 
     const [updateDataProductSetting] = useCreateDataProductSettingValueMutation();
     const [updateDatasetSetting] = useCreateDatasetSettingValueMutation();
@@ -256,10 +256,8 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
                         isFetching ||
                         isFetchingDP ||
                         isFetchingDS ||
-                        (!canUpdateProductSettingNew && scope === 'dataproduct') ||
-                        isDataProductOwner ||
-                        (!canUpdateDatasetSettingNew && scope === 'dataset') ||
-                        !isDatasetOwner
+                        !(canUpdateProductSettingNew || isDataProductOwner) ||
+                        !(canUpdateDatasetSettingNew || isDatasetOwner)
                     }
                     className={styles.form}
                     onValuesChange={(_, allValues) => {
@@ -289,7 +287,6 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
         isDatasetOwner,
         canUpdateProductSettingNew,
         canUpdateDatasetSettingNew,
-        scope,
         t,
     ]);
     return settingsRender;
