@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useCreateDataProductSettingValueMutation,
     useCreateDatasetSettingValueMutation,
@@ -42,6 +43,24 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
     const filteredSettings = useMemo(() => {
         return settings?.filter((setting) => setting.scope === scope);
     }, [scope, settings]);
+
+    const { data: product_access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: 302,
+        },
+        { skip: !dataProductId },
+    );
+    const { data: dataset_access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: 402,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canUpdateProductSettingNew = product_access?.access || false;
+    const canUpdateDatasetSettingNew = dataset_access?.access || false;
 
     const [updateDataProductSetting] = useCreateDataProductSettingValueMutation();
     const [updateDatasetSetting] = useCreateDatasetSettingValueMutation();
@@ -233,7 +252,15 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
                     requiredMark={'optional'}
                     labelWrap
                     labelAlign={'left'}
-                    disabled={isFetching || isFetchingDP || isFetchingDS || !isDataProductOwner || !isDatasetOwner}
+                    disabled={
+                        isFetching ||
+                        isFetchingDP ||
+                        isFetchingDS ||
+                        (!canUpdateProductSettingNew && scope === 'dataproduct') ||
+                        isDataProductOwner ||
+                        (!canUpdateDatasetSettingNew && scope === 'dataset') ||
+                        !isDatasetOwner
+                    }
                     className={styles.form}
                     onValuesChange={(_, allValues) => {
                         // Trigger form submission after 0.5 seconds of unchanged input values
@@ -260,6 +287,9 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
         isFetchingDS,
         isDataProductOwner,
         isDatasetOwner,
+        canUpdateProductSettingNew,
+        canUpdateDatasetSettingNew,
+        scope,
         t,
     ]);
     return settingsRender;

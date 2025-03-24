@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetDataProductByIdQuery,
     useGetDataProductConveyorIDEUrlMutation,
@@ -35,7 +36,15 @@ export function DataProductActions({ dataProductId }: Props) {
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
     const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
         useGetDataProductDatabricksWorkspaceUrlMutation();
-
+    const { data: access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: 315,
+        },
+        {
+            skip: !dataProductId,
+        },
+    );
     if (!dataProduct || !user) return null;
 
     const doesUserHaveAnyDataProductMembership = getDoesUserHaveAnyDataProductMembership(
@@ -43,6 +52,7 @@ export function DataProductActions({ dataProductId }: Props) {
         dataProduct?.memberships,
     );
     const canAccessDataProductData = getCanUserAccessDataProductData(user?.id, dataProduct?.memberships);
+    const canAccessNew = access?.access || false;
 
     async function handleAccessToData(environment: string, dataPlatform: DataPlatform) {
         switch (dataPlatform) {
@@ -108,11 +118,11 @@ export function DataProductActions({ dataProductId }: Props) {
                 )}
                 <Flex vertical className={styles.accessDataContainer}>
                     <DataAccessTileGrid
-                        canAccessData={canAccessDataProductData}
+                        canAccessData={canAccessNew || canAccessDataProductData}
                         dataPlatforms={dataPlatforms}
                         onDataPlatformClick={handleAccessToData}
                         onTileClick={handleTileClick}
-                        isDisabled={isLoading || !canAccessDataProductData}
+                        isDisabled={isLoading || !canAccessNew || !canAccessDataProductData}
                         isLoading={isLoading || isConveyorLoading || isDatabricksLoading}
                     />
                 </Flex>
