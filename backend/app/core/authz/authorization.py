@@ -90,7 +90,7 @@ class Authorization(metaclass=Singleton):
         self, *, sub: str, dom: str, obj: str, act: AuthorizationAction
     ) -> bool:
         if not settings.AUTHORIZER_ENABLED:
-            return True
+            return False
 
         enforcer: AsyncEnforcer = self._enforcer
         return enforcer.enforce(sub, dom, obj, str(act))
