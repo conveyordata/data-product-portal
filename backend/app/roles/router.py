@@ -1,8 +1,8 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
-from typing import Sequence
 
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
