@@ -64,7 +64,7 @@ class DatasetService:
 
         return dataset
 
-    def get_datasets(self, db: Session, user: User) -> list[DatasetsGet]:
+    def get_datasets(self, db: Session, user: User) -> Sequence[DatasetsGet]:
         default_lifecycle = (
             db.query(DataProductLifeCycleModel)
             .filter(DataProductLifeCycleModel.is_default)
