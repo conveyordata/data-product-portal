@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -33,3 +34,9 @@ class RoleAssignment(ORMModel):
     requested_by: User
     decided_on: datetime
     decided_by: User
+
+
+class UpdateRoleAssignment(ORMModel):
+    id: UUID
+    role_id: Optional[UUID] = None
+    decision: Optional[DecisionStatus] = None

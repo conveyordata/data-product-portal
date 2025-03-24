@@ -1,5 +1,5 @@
-import uuid
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -23,16 +23,16 @@ class DataProductRoleAssignment(Base, BaseORM):
         ),
     )
 
-    id = Column(UUID, primary_key=True, default=uuid.uuid4)
-    data_product_id: Mapped[uuid.UUID] = mapped_column(
+    id = Column(UUID, primary_key=True, default=uuid4)
+    data_product_id: Mapped[UUID] = mapped_column(
         "data_product_id", ForeignKey("data_products.id")
     )
     data_product: Mapped["DataProduct"] = relationship(
         "DataProduct", foreign_keys=[data_product_id]
     )
-    user_id: Mapped[uuid.UUID] = mapped_column("user_id", ForeignKey("users.id"))
+    user_id: Mapped[UUID] = mapped_column("user_id", ForeignKey("users.id"))
     user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
-    role_id: Mapped[uuid.UUID] = mapped_column("role_id", ForeignKey("roles.id"))
+    role_id: Mapped[UUID] = mapped_column("role_id", ForeignKey("roles.id"))
     role: Mapped["Role"] = relationship("Role", foreign_keys=[role_id])
     decision: Mapped[DecisionStatus] = mapped_column(
         Enum(DecisionStatus), default=DecisionStatus.PENDING
