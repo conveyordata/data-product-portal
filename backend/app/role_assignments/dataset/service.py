@@ -6,8 +6,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.database import ensure_exists
-from app.role_assignments.data_product.model import DataProductRoleAssignment
-from app.role_assignments.data_product.schema import (
+from app.role_assignments.dataset.model import DatasetRoleAssignment
+from app.role_assignments.dataset.schema import (
     CreateRoleAssignment,
     RoleAssignment,
     UpdateRoleAssignment,
@@ -21,23 +21,21 @@ class RoleAssignmentService:
         self.user = user
 
     def get_assignment(self, id_: UUID) -> RoleAssignment:
-        return ensure_exists(id_, self.db, DataProductRoleAssignment)
+        return ensure_exists(id_, self.db, DatasetRoleAssignment)
 
     def list_assignments(
-        self, *, data_product_id: Optional[UUID], user_id: Optional[UUID]
+        self, *, dataset_id: Optional[UUID], user_id: Optional[UUID]
     ) -> Sequence[RoleAssignment]:
-        query = select(DataProductRoleAssignment)
-        if data_product_id is not None:
-            query = query.where(
-                DataProductRoleAssignment.data_product_id == data_product_id
-            )
+        query = select(DatasetRoleAssignment)
+        if dataset_id is not None:
+            query = query.where(DatasetRoleAssignment.dataset_id == dataset_id)
         if user_id is not None:
-            query = query.where(DataProductRoleAssignment.user_id == user_id)
+            query = query.where(DatasetRoleAssignment.user_id == user_id)
 
         return self.db.scalars(query).all()
 
     def create_assignment(self, request: CreateRoleAssignment) -> RoleAssignment:
-        role_assignment = DataProductRoleAssignment(
+        role_assignment = DatasetRoleAssignment(
             **request.model_dump(),
             requested_on=datetime.now(),
             requested_by_id=self.user.id,

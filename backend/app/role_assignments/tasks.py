@@ -6,6 +6,7 @@ from app.core.authz.authorization import Authorization
 from app.role_assignments.data_product.schema import (
     RoleAssignment as DataProductRoleAssignment,
 )
+from app.role_assignments.dataset.schema import RoleAssignment as DatasetRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 
 
@@ -30,6 +31,18 @@ class AuthAssignment:
             role_id=assignment.role_id,
             user_id=assignment.user_id,
             resource_id=assignment.data_product_id,
+        )
+
+    @classmethod
+    def from_dataset(cls, assignment: DatasetRoleAssignment) -> "AuthAssignment":
+        assert (
+            assignment.decision is DecisionStatus.APPROVED
+        ), "Only approved decisions can be propagated to the enforcer"
+
+        return AuthAssignment(
+            role_id=assignment.role_id,
+            user_id=assignment.user_id,
+            resource_id=assignment.dataset_id,
         )
 
     def with_previous(self, role_id: UUID) -> "AuthAssignment":

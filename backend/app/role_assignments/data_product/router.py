@@ -30,7 +30,7 @@ def list_assignments(
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[RoleAssignmentResponse]:
     return RoleAssignmentService(db=db, user=user).list_assignments(
-        data_product_id, user_id
+        data_product_id=data_product_id, user_id=user_id
     )
 
 
