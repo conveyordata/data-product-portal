@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { DatasetLink } from '@/types/data-product';
 import { SearchForm } from '@/types/shared';
@@ -41,6 +42,16 @@ export function DatasetTab({ dataProductId }: Props) {
         return filterDatasets(dataProduct?.dataset_links ?? [], searchTerm);
     }, [dataProduct?.dataset_links, searchTerm]);
 
+    const { data: access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: 313,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canCreateDatasetNew = access?.access || false;
+
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;
 
@@ -56,7 +67,7 @@ export function DatasetTab({ dataProductId }: Props) {
                     form={searchForm}
                     actionButton={
                         <Button
-                            disabled={!isDataProductOwner}
+                            disabled={!(canCreateDatasetNew || isDataProductOwner)}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}

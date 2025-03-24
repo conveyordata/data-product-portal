@@ -23,6 +23,9 @@ type Props = {
     canPerformTeamActions: (userId: string) => boolean;
     isLoading?: boolean;
     hasCurrentUserMembership: boolean;
+    canEdit?: boolean;
+    canRemove?: boolean;
+    canAdd?: boolean;
 };
 
 export const getDataProductUsersTableColumns = ({
@@ -36,6 +39,9 @@ export const getDataProductUsersTableColumns = ({
     dataProductUsers,
     canPerformTeamActions,
     hasCurrentUserMembership,
+    canEdit,
+    canRemove,
+    canAdd,
 }: Props): TableColumnsType<DataProductUserMembership> => {
     const sorter = new Sorter<DataProductUserMembership>();
     return [
@@ -72,7 +78,7 @@ export const getDataProductUsersTableColumns = ({
                         userId={user.id}
                         dataProductUsers={dataProductUsers}
                         onRoleChange={(role) => onRoleChange(role, id)}
-                        isDisabled={!canPerformTeamActions(user.id) || !isApproved}
+                        isDisabled={!(canEdit || canPerformTeamActions(user.id)) || !isApproved}
                     />
                 );
             },
@@ -106,7 +112,7 @@ export const getDataProductUsersTableColumns = ({
                     {status === DataProductMembershipStatus.Pending ? (
                         <Space>
                             <Popconfirm
-                                title={t('Remove User')}
+                                title={t('Allow User')}
                                 description={t('Are you sure you want to allow access to user {{name}}?', {
                                     name: user.first_name,
                                 })}
@@ -119,7 +125,7 @@ export const getDataProductUsersTableColumns = ({
                             >
                                 <Button
                                     loading={isLoading}
-                                    disabled={isLoading || !canPerformTeamActions(user.id)}
+                                    disabled={isLoading || !(canAdd || canPerformTeamActions(user.id))}
                                     type={'link'}
                                 >
                                     {t('Accept')}
@@ -139,7 +145,8 @@ export const getDataProductUsersTableColumns = ({
                             >
                                 <Button
                                     loading={isLoading}
-                                    disabled={isLoading || !canPerformTeamActions(user.id)}
+                                    // TODO Do we want the rejection as part of the Add or Remove rights?
+                                    disabled={isLoading || !(canAdd || canPerformTeamActions(user.id))}
                                     type={'link'}
                                 >
                                     {t('Reject')}
@@ -161,7 +168,7 @@ export const getDataProductUsersTableColumns = ({
                         >
                             <Button
                                 loading={isRemovingUser}
-                                disabled={isRemovingUser || !canPerformTeamActions(user.id)}
+                                disabled={isRemovingUser || !(canRemove || canPerformTeamActions(user.id))}
                                 type={'link'}
                             >
                                 {t('Remove')}

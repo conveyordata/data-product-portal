@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import { SearchForm } from '@/types/shared';
@@ -41,6 +42,16 @@ export function DataOutputTab({ dataProductId }: Props) {
         return filterDataOutputs(dataProduct?.data_outputs ?? [], searchTerm);
     }, [dataProduct?.data_outputs, searchTerm]);
 
+    const { data: access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: 309,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canCreateDataOutputNew = access?.access || false;
+
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;
 
@@ -56,7 +67,7 @@ export function DataOutputTab({ dataProductId }: Props) {
                     form={searchForm}
                     actionButton={
                         <Button
-                            disabled={!isDataProductOwner}
+                            disabled={!(canCreateDataOutputNew || isDataProductOwner)}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}

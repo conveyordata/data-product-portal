@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useDenyMembershipAccessMutation,
     useGrantMembershipAccessMutation,
@@ -38,6 +39,32 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         useRemoveMembershipAccessMutation();
     const [grantMembershipAccess] = useGrantMembershipAccessMutation();
     const [denyMembershipAccess] = useDenyMembershipAccessMutation();
+
+    const { data: edit_access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: 306,
+        },
+        { skip: !dataProductId },
+    );
+    const { data: add_access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: 305,
+        },
+        { skip: !dataProductId },
+    );
+    const { data: remove_access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: 307,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canAddUserNew = add_access?.access || false;
+    const canEditUserNew = edit_access?.access || false;
+    const canRemoveUserNew = remove_access?.access || false;
 
     const handleRemoveUserAccess = useCallback(
         async (membershipId: string) => {
@@ -103,6 +130,9 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
             hasCurrentUserMembership: getDoesUserHaveAnyDataProductMembership(currentUser.id, dataProductUsers),
             onRejectMembershipRequest: handleDenyAccessToDataProduct,
             onAcceptMembershipRequest: handleGrantAccessToDataProduct,
+            canEdit: canEditUserNew,
+            canRemove: canRemoveUserNew,
+            canAdd: canAddUserNew,
         });
     }, [
         t,
@@ -116,6 +146,9 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         handleDenyAccessToDataProduct,
         handleGrantAccessToDataProduct,
         isCurrentUserDataProductOwner,
+        canEditUserNew,
+        canRemoveUserNew,
+        canAddUserNew,
     ]);
 
     if (!dataProduct) return null;
