@@ -136,6 +136,13 @@ class DataProductMembershipService:
             [data_product_membership.requested_by_id],
         )
 
+        if data_product_membership.role == DataProductUserRole.OWNER:
+            NotificationInteractionService().redirect_pending_requests(
+                db,
+                data_product_membership.data_product_id,
+                NotificationTypes.DataProductMembership,
+            )
+
         db.commit()
         db.refresh(data_product_membership)
         RefreshInfrastructureLambda().trigger()
@@ -207,8 +214,17 @@ class DataProductMembershipService:
         NotificationInteractionService().remove_notification_relations(
             db, data_product_membership.id, NotificationTypes.DataProductMembership
         )
+
         db.refresh(data_product_membership)
+        redirection_needed = data_product_membership.role == DataProductUserRole.OWNER
         data_product.memberships.remove(data_product_membership)
+
+        if redirection_needed:
+            db.refresh(data_product)
+            NotificationInteractionService().redirect_pending_requests(
+                db, data_product.id, NotificationTypes.DataProductMembership
+            )
+
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
@@ -239,6 +255,12 @@ class DataProductMembershipService:
             approved_on=datetime.now(tz=pytz.utc),
         )
         data_product.memberships.append(data_product_membership)
+
+        if data_product_membership.role == DataProductUserRole.OWNER:
+            NotificationInteractionService().redirect_pending_requests(
+                db, data_product.id, NotificationTypes.DataProductMembership
+            )
+
         db.commit()
         db.refresh(data_product_membership)
         RefreshInfrastructureLambda().trigger()
@@ -276,6 +298,11 @@ class DataProductMembershipService:
             )
 
         data_product_membership.role = membership_role
+
+        NotificationInteractionService().redirect_pending_requests(
+            db, data_product.id, NotificationTypes.DataProductMembership
+        )
+
         db.commit()
         db.refresh(data_product_membership)
         RefreshInfrastructureLambda().trigger()
