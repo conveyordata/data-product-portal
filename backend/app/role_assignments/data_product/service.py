@@ -34,17 +34,13 @@ class RoleAssignmentService:
         if user_id is not None:
             query = query.where(DataProductRoleAssignment.user_id == user_id)
 
-        return self.db.scalars(
-            query.order_by(
-                DataProductRoleAssignment.data_product.name.asc(),
-                DataProductRoleAssignment.user.last_name.asc(),
-                DataProductRoleAssignment.user.first_name.asc(),
-            )
-        ).all()
+        return self.db.scalars(query).all()
 
     def create_assignment(self, request: CreateRoleAssignment) -> RoleAssignment:
         role_assignment = DataProductRoleAssignment(
-            **request, requested_by_id=self.user.id, requested_on=datetime.now()
+            **request.model_dump(),
+            requested_on=datetime.now(),
+            requested_by_id=self.user.id,
         )
         self.db.add(role_assignment)
         self.db.commit()
@@ -59,10 +55,12 @@ class RoleAssignmentService:
     def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
 
-        if (role := request.role) is not None:
-            assignment.role = role
+        if (role_id := request.role_id) is not None:
+            assignment.role_id = role_id
         if (decision := request.decision) is not None:
             assignment.decision = decision
+            assignment.decided_on = datetime.now()
+            assignment.decided_by_id = self.user.id
 
         self.db.commit()
         return assignment

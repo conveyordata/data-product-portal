@@ -27,8 +27,8 @@ class AuthAssignment:
         ), "Only approved decisions can be propagated to the enforcer"
 
         return AuthAssignment(
-            role_id=assignment.role.id,
-            user_id=assignment.user.id,
+            role_id=assignment.role_id,
+            user_id=assignment.user_id,
             resource_id=assignment.data_product_id,
         )
 

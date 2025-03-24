@@ -11,7 +11,7 @@ from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     DecideRoleAssignment,
     ModifyRoleAssignment,
-    RoleAssignment,
+    RoleAssignmentResponse,
     UpdateRoleAssignment,
 )
 from app.role_assignments.data_product.service import RoleAssignmentService
@@ -28,7 +28,7 @@ def list_assignments(
     user_id: Optional[UUID] = None,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> Sequence[RoleAssignment]:
+) -> Sequence[RoleAssignmentResponse]:
     return RoleAssignmentService(db=db, user=user).list_assignments(
         data_product_id, user_id
     )
@@ -39,7 +39,7 @@ def create_assignment(
     request: CreateRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignment:
+) -> RoleAssignmentResponse:
     return RoleAssignmentService(db=db, user=user).create_assignment(request)
 
 
@@ -66,7 +66,7 @@ def decide_assignment(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignment:
+) -> RoleAssignmentResponse:
     assignment = RoleAssignmentService(db=db, user=user).update_assignment(
         UpdateRoleAssignment(id=id, decision=request.decision)
     )
@@ -80,13 +80,13 @@ def decide_assignment(
 
 
 @router.patch("/{id}/role")
-def change_assignment_role(
+def modify_assigned_role(
     id: UUID,
     request: ModifyRoleAssignment,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignment:
+) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
     original_role = service.get_assignment(id).role.id
 
