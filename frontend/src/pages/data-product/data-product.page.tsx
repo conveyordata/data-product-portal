@@ -3,6 +3,7 @@ import { Flex, Space, Typography } from 'antd';
 import clsx from 'clsx';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
 
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
@@ -11,11 +12,12 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { DataProductActions } from '@/pages/data-product/components/data-product-actions/data-product-actions.component.tsx';
 import { DataProductDescription } from '@/pages/data-product/components/data-product-description/data-product-description.tsx';
 import { DataProductTabs } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
-import { getDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
+import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 
@@ -23,6 +25,7 @@ import styles from './data-product.module.scss';
 
 export function DataProduct() {
     const { t } = useTranslation();
+    const currentUser = useSelector(selectCurrentUser);
     const { dataProductId = '' } = useParams();
     const { data: dataProduct, isLoading } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
     const navigate = useNavigate();
@@ -42,8 +45,12 @@ export function DataProduct() {
 
     const dataProductOwners = dataProduct ? getDataProductOwners(dataProduct) : [];
 
+    const isCurrentDataProductOwner = Boolean(
+        dataProduct && currentUser && (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
+    );
+
     function navigateToEditPage() {
-        if (canEditProduct) {
+        if (canEditProduct || (isCurrentDataProductOwner && dataProductId)) {
             navigate(
                 getDynamicRoutePath(ApplicationPaths.DataProductEdit, DynamicPathParams.DataProductId, dataProductId),
             );
@@ -77,7 +84,7 @@ export function DataProduct() {
                             {dataProduct?.name}
                         </Typography.Title>
                     </Space>
-                    {canEditProduct && (
+                    {(canEditProduct || isCurrentDataProductOwner) && (
                         <Space className={styles.editIcon}>
                             <CircleIconButton
                                 icon={<SettingOutlined />}
