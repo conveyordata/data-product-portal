@@ -14,6 +14,7 @@ import {
 } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
 import { UserContract } from '@/types/users';
 import { getDoesUserHaveAnyDataProductMembership } from '@/utils/data-product-user-role.helper.ts';
@@ -43,21 +44,21 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     const { data: edit_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: 306,
+            action: AuthorizationAction.DATA_PRODUCT_UPDATE_USER,
         },
         { skip: !dataProductId },
     );
     const { data: add_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: 305,
+            action: AuthorizationAction.DATA_PRODUCT_CREATE_USER,
         },
         { skip: !dataProductId },
     );
     const { data: remove_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: 307,
+            action: AuthorizationAction.DATA_PRODUCT_DELETE_USER,
         },
         { skip: !dataProductId },
     );

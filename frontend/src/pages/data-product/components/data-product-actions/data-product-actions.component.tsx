@@ -14,6 +14,7 @@ import {
     useGetDataProductSignInUrlMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { getDataPlatforms } from '@/utils/data-platforms';
 import {
@@ -39,7 +40,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const { data: access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: 315,
+            action: AuthorizationAction.DATA_PRODUCT_READ_INTEGRATIONS, // TODO Is this intended action?
         },
         {
             skip: !dataProductId,

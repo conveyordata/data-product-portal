@@ -15,6 +15,7 @@ import { DataProductTabs } from '@/pages/data-product/components/data-product-ta
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
@@ -32,7 +33,7 @@ export function DataProduct() {
     const { data: edit_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: 301,
+            action: AuthorizationAction.DATA_PRODUCT_UPDATE_PROPERTIES,
         },
         { skip: !dataProductId },
     );

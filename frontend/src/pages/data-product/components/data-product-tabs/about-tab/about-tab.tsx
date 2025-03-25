@@ -11,6 +11,7 @@ import {
     useUpdateDataProductAboutMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { getCanUserAccessDataProductData } from '@/utils/data-product-user-role.helper.ts';
 
 type Props = {
@@ -25,7 +26,7 @@ export function AboutTab({ dataProductId }: Props) {
     const { data: edit_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: 301,
+            action: AuthorizationAction.DATA_PRODUCT_UPDATE_PROPERTIES,
         },
         { skip: !dataProductId },
     );

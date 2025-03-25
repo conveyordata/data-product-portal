@@ -8,6 +8,7 @@ import { useModal } from '@/hooks/use-modal.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { DatasetLink } from '@/types/data-product';
 import { SearchForm } from '@/types/shared';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
@@ -45,7 +46,7 @@ export function DatasetTab({ dataProductId }: Props) {
     const { data: access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: 313,
+            action: AuthorizationAction.DATA_PRODUCT_REQUEST_DATASET_ACCESS,
         },
         { skip: !dataProductId },
     );

@@ -15,6 +15,7 @@ import {
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import {
     DataProductSettingContract,
     DataProductSettingValueCreateRequest,
@@ -27,17 +28,17 @@ import styles from './data-product-settings.module.scss';
 
 type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
 type Props = {
-    dataProductId: string | undefined;
+    id: string | undefined;
     scope: 'dataproduct' | 'dataset';
 };
 
-export function DataProductSettings({ dataProductId, scope }: Props) {
+export function DataProductSettings({ id, scope }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(dataProductId || '', {
-        skip: !dataProductId || scope !== 'dataproduct',
+    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(id || '', {
+        skip: !id || scope !== 'dataproduct',
     });
-    const { data: dataset, isFetching: isFetchingDS } = useGetDatasetByIdQuery(dataProductId || '', {
-        skip: !dataProductId || scope !== 'dataset',
+    const { data: dataset, isFetching: isFetchingDS } = useGetDatasetByIdQuery(id || '', {
+        skip: !id || scope !== 'dataset',
     });
     const { data: settings, isFetching } = useGetAllDataProductSettingsQuery();
     const filteredSettings = useMemo(() => {
@@ -46,17 +47,17 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
 
     const { data: product_access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
-            action: 302,
+            object_id: id,
+            action: AuthorizationAction.DATA_PRODUCT_UPDATE_SETTINGS,
         },
-        { skip: !dataProductId || scope !== 'dataproduct' },
+        { skip: !id || scope !== 'dataproduct' },
     );
     const { data: dataset_access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
-            action: 402,
+            object_id: id,
+            action: AuthorizationAction.DATASET_UPDATE_SETTINGS,
         },
-        { skip: !dataProductId || scope !== 'dataset' },
+        { skip: !id || scope !== 'dataset' },
     );
 
     const canUpdateProductSettingNew = product_access?.access || scope === 'dataset';

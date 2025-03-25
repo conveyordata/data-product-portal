@@ -12,6 +12,7 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useAddDataProductMembershipMutation } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
@@ -56,7 +57,7 @@ export function TeamTab({ dataProductId }: Props) {
     const { data: access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: 305,
+            action: AuthorizationAction.DATA_PRODUCT_CREATE_USER,
         },
         { skip: !dataProductId },
     );
