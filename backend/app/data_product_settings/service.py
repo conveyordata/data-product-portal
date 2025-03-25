@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.enums import DataProductSettingScope
 from app.data_product_settings.model import (
@@ -75,6 +76,7 @@ class DataProductSettingService:
                 )
             db.add(DataProductSettingValueModel(**new_setting.parse_pydantic_schema()))
         db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def create_data_product_setting(
         self, setting: DataProductSetting, db: Session
