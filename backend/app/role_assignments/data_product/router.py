@@ -22,7 +22,7 @@ from app.users.model import User
 router = APIRouter(prefix="/data_product")
 
 
-@router.get("/")
+@router.get("")
 def list_assignments(
     data_product_id: Optional[UUID] = None,
     user_id: Optional[UUID] = None,
@@ -34,7 +34,7 @@ def list_assignments(
     )
 
 
-@router.post("/")
+@router.post("")
 def create_assignment(
     request: CreateRoleAssignment,
     db: Session = Depends(get_db_session),

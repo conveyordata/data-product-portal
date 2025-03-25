@@ -1,8 +1,8 @@
 """Add role assignments
 
-Revision ID: 3b18d71bcaba
-Revises: 269e6dbd565c
-Create Date: 2025-03-21 16:31:41.325704
+Revision ID: c02e4638423f
+Revises: aeffee7f1029
+Create Date: 2025-03-25 15:42:49.337247
 
 """
 
@@ -15,8 +15,8 @@ from app.role_assignments.enums import DecisionStatus
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
-revision: str = "3b18d71bcaba"
-down_revision: Union[str, None] = "269e6dbd565c"
+revision: str = "c02e4638423f"
+down_revision: Union[str, None] = "aeffee7f1029"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -35,7 +35,7 @@ def upgrade() -> None:
         sa.Column("decided_on", sa.DateTime(timezone=False)),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
-        sa.Column("deleted_at", sa.DateTime),
+        sa.Column("deleted_at", sa.DateTime(timezone=False)),
     )
     op.create_table(
         "role_assignments_dataset",
@@ -50,7 +50,7 @@ def upgrade() -> None:
         sa.Column("decided_on", sa.DateTime(timezone=False)),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
-        sa.Column("deleted_at", sa.DateTime),
+        sa.Column("deleted_at", sa.DateTime(timezone=False)),
     )
 
 
