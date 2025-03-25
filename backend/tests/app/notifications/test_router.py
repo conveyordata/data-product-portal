@@ -4,8 +4,25 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.data_output import DataOutputFactory
+from tests.factories.data_output_dataset_notification import (
+    DataOutputDatasetNotificationFactory,
+)
+from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
+from tests.factories.data_product_dataset_notification import (
+    DataProductDatasetNotificationFactory,
+)
+from tests.factories.data_product_membership_notification import (
+    DataProductMembershipNotificationFactory,
+)
+from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
+from tests.factories.notification_interaction import NotificationInteractionFactory
 
-from app.data_product_memberships.enums import DataProductUserRole
+from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.data_product_memberships.enums import (
+    DataProductMembershipStatus,
+    DataProductUserRole,
+)
+from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.enums import DatasetAccessType
 
 NOTIFICATIONS_ENDPOINT = "/api/notifications"
@@ -14,6 +31,7 @@ DATA_PRODUCTS_ENDPOINT = "/api/data_products"
 DATA_OUTPUTS_ENDPOINT = "/api/data_outputs"
 MEMBERSHIPS_ENDPOINT = "/api/data_product_memberships"
 DATASET_ENDPOINT = "/api/datasets"
+DATA_OUTPUTS_DATASETS_ENDPOINT = "/api/data_output_dataset_links"
 
 
 class TestNotificationsRouter:
@@ -27,6 +45,7 @@ class TestNotificationsRouter:
             client, membership.data_product_id, ds.id
         )
         assert response.status_code == 200
+
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
         assert (
             response.json()[0]["notification"]["configuration_type"]
@@ -42,6 +61,9 @@ class TestNotificationsRouter:
         assert response.json()[0]["notification"]["data_product_dataset"][
             "requested_by"
         ]["id"] == str(owner.id)
+
+        all_notifications = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == all_notifications.json()
 
     def test_get_pending_actions_data_output_dataset(self, client):
         owner = UserFactory(external_id="sub")
@@ -67,6 +89,9 @@ class TestNotificationsRouter:
             "requested_by"
         ]["id"] == str(owner.id)
 
+        all_notifications = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == all_notifications.json()
+
     def test_get_pending_actions_data_product_membership(self, client):
         owner_membership = DataProductMembershipFactory(
             user=UserFactory(external_id="sub")
@@ -91,6 +116,9 @@ class TestNotificationsRouter:
         assert response.json()[0]["notification"]["data_product_membership"]["user"][
             "id"
         ] == str(user_id)
+
+        all_notifications = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == all_notifications.json()
 
     def test_change_notification_ownership_data_product_dataset(self, client):
         owner = UserFactory(external_id="sub", is_admin=True)
@@ -176,6 +204,105 @@ class TestNotificationsRouter:
             "data_product_id"
         ] == str(owner_membership.data_product.id)
 
+    def test_approve_data_product_dataset(self, client):
+        requester = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[requester])
+        link = DataProductDatasetAssociationFactory(
+            dataset=ds,
+            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
+            requested_by=requester,
+        )
+        NotificationInteractionFactory(
+            notification=DataProductDatasetNotificationFactory(
+                data_product_dataset=link
+            ),
+            user=requester,
+        )
+        response = self.approve_default_data_product_dataset_link(client, link.id)
+        assert response.status_code == 200
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert (
+            response.json()[0]["notification"]["configuration_type"]
+            == "DataProductDataset"
+        )
+        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
+            link.id
+        )
+        assert (
+            response.json()[0]["notification"]["data_product_dataset"]["status"]
+            == "approved"
+        )
+        assert response.json()[0]["notification"]["data_product_dataset"][
+            "requested_by"
+        ]["id"] == str(requester.id)
+
+    def test_approve_data_output_dataset(self, client):
+        requester = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[requester])
+        link = DataOutputDatasetAssociationFactory(
+            dataset=ds,
+            status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
+            requested_by=requester,
+        )
+        NotificationInteractionFactory(
+            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            user=requester,
+        )
+        response = self.approve_default_data_output_dataset_link(client, link.id)
+        assert response.status_code == 200
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert (
+            response.json()[0]["notification"]["configuration_type"]
+            == "DataOutputDataset"
+        )
+        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
+            link.id
+        )
+        assert (
+            response.json()[0]["notification"]["data_output_dataset"]["status"]
+            == "approved"
+        )
+        assert response.json()[0]["notification"]["data_output_dataset"][
+            "requested_by"
+        ]["id"] == str(requester.id)
+
+    def test_approve_data_product_membership(self, client):
+        requester = UserFactory(external_id="sub")
+        owner_membership = DataProductMembershipFactory(user=requester)
+        membership_request = DataProductMembershipFactory(
+            data_product=owner_membership.data_product,
+            user=requester,
+            role=DataProductUserRole.MEMBER.value,
+            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
+            requested_by_id=str(requester.id),
+        )
+        NotificationInteractionFactory(
+            notification=DataProductMembershipNotificationFactory(
+                data_product_membership=membership_request
+            ),
+            user=requester,
+        )
+        response = self.approve_data_product_membership(client, membership_request.id)
+        assert response.status_code == 200
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert (
+            response.json()[0]["notification"]["configuration_type"]
+            == "DataProductMembership"
+        )
+        assert response.json()[0]["notification"]["data_product_membership"][
+            "id"
+        ] == str(membership_request.id)
+        assert (
+            response.json()[0]["notification"]["data_product_membership"]["status"]
+            == "approved"
+        )
+        assert response.json()[0]["notification"]["data_product_membership"]["user"][
+            "id"
+        ] == str(requester.id)
+
     @staticmethod
     def request_data_product_dataset_link(client, data_product_id, dataset_id):
         return client.post(
@@ -217,3 +344,15 @@ class TestNotificationsRouter:
             f"{MEMBERSHIPS_ENDPOINT}/create?data_product_id={str(data_product_id)}",
             json=data,
         )
+
+    @staticmethod
+    def approve_default_data_product_dataset_link(client, link_id):
+        return client.post(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/approve/{link_id}")
+
+    @staticmethod
+    def approve_default_data_output_dataset_link(client, link_id):
+        return client.post(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/approve/{link_id}")
+
+    @staticmethod
+    def approve_data_product_membership(client, membership_id):
+        return client.post(f"{MEMBERSHIPS_ENDPOINT}/{membership_id}/approve")
