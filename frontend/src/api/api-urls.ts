@@ -68,7 +68,7 @@ export enum ApiUrl {
     PlatformServiceConfigById = '/api/platforms/configs/:configId',
     Version = '/api/version',
     ThemeSettings = '/api/theme_settings',
-    AccessCheck = '/api/access/check',
+    AccessCheck = '/api/authz/access/check',
 }
 
 export type DynamicPathParams =

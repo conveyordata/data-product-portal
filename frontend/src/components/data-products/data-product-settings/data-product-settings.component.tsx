@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useCreateDataProductSettingValueMutation,
     useCreateDatasetSettingValueMutation,
@@ -14,6 +15,7 @@ import {
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import {
     DataProductSettingContract,
     DataProductSettingValueCreateRequest,
@@ -26,22 +28,40 @@ import styles from './data-product-settings.module.scss';
 
 type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
 type Props = {
-    dataProductId: string | undefined;
+    id: string | undefined;
     scope: 'dataproduct' | 'dataset';
 };
 
-export function DataProductSettings({ dataProductId, scope }: Props) {
+export function DataProductSettings({ id, scope }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(dataProductId || '', {
-        skip: !dataProductId || scope !== 'dataproduct',
+    const { data: dataProduct, isFetching: isFetchingDP } = useGetDataProductByIdQuery(id || '', {
+        skip: !id || scope !== 'dataproduct',
     });
-    const { data: dataset, isFetching: isFetchingDS } = useGetDatasetByIdQuery(dataProductId || '', {
-        skip: !dataProductId || scope !== 'dataset',
+    const { data: dataset, isFetching: isFetchingDS } = useGetDatasetByIdQuery(id || '', {
+        skip: !id || scope !== 'dataset',
     });
     const { data: settings, isFetching } = useGetAllDataProductSettingsQuery();
     const filteredSettings = useMemo(() => {
         return settings?.filter((setting) => setting.scope === scope);
     }, [scope, settings]);
+
+    const { data: product_access } = useCheckAccessQuery(
+        {
+            object_id: id,
+            action: AuthorizationAction.DATA_PRODUCT_UPDATE_SETTINGS,
+        },
+        { skip: !id || scope !== 'dataproduct' },
+    );
+    const { data: dataset_access } = useCheckAccessQuery(
+        {
+            object_id: id,
+            action: AuthorizationAction.DATASET_UPDATE_SETTINGS,
+        },
+        { skip: !id || scope !== 'dataset' },
+    );
+
+    const canUpdateProductSettingNew = product_access?.access || scope === 'dataset';
+    const canUpdateDatasetSettingNew = dataset_access?.access || scope === 'dataproduct';
 
     const [updateDataProductSetting] = useCreateDataProductSettingValueMutation();
     const [updateDatasetSetting] = useCreateDatasetSettingValueMutation();
@@ -233,7 +253,13 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
                     requiredMark={'optional'}
                     labelWrap
                     labelAlign={'left'}
-                    disabled={isFetching || isFetchingDP || isFetchingDS || !isDataProductOwner || !isDatasetOwner}
+                    disabled={
+                        isFetching ||
+                        isFetchingDP ||
+                        isFetchingDS ||
+                        !(canUpdateProductSettingNew || isDataProductOwner) ||
+                        !(canUpdateDatasetSettingNew || isDatasetOwner)
+                    }
                     className={styles.form}
                     onValuesChange={(_, allValues) => {
                         // Trigger form submission after 0.5 seconds of unchanged input values
@@ -260,6 +286,8 @@ export function DataProductSettings({ dataProductId, scope }: Props) {
         isFetchingDS,
         isDataProductOwner,
         isDatasetOwner,
+        canUpdateProductSettingNew,
+        canUpdateDatasetSettingNew,
         t,
     ]);
     return settingsRender;
