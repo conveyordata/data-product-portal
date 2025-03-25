@@ -25,7 +25,7 @@ type Props = {
     hasCurrentUserMembership: boolean;
     canEdit?: boolean;
     canRemove?: boolean;
-    canAdd?: boolean;
+    canApprove?: boolean;
 };
 
 export const getDataProductUsersTableColumns = ({
@@ -41,7 +41,7 @@ export const getDataProductUsersTableColumns = ({
     hasCurrentUserMembership,
     canEdit,
     canRemove,
-    canAdd,
+    canApprove,
 }: Props): TableColumnsType<DataProductUserMembership> => {
     const sorter = new Sorter<DataProductUserMembership>();
     return [
@@ -125,7 +125,7 @@ export const getDataProductUsersTableColumns = ({
                             >
                                 <Button
                                     loading={isLoading}
-                                    disabled={isLoading || !(canAdd || canPerformTeamActions(user.id))}
+                                    disabled={isLoading || !(canApprove || canPerformTeamActions(user.id))}
                                     type={'link'}
                                 >
                                     {t('Accept')}
@@ -145,7 +145,7 @@ export const getDataProductUsersTableColumns = ({
                             >
                                 <Button
                                     loading={isLoading}
-                                    disabled={isLoading || !(canAdd || canPerformTeamActions(user.id))}
+                                    disabled={isLoading || !(canApprove || canPerformTeamActions(user.id))}
                                     type={'link'}
                                 >
                                     {t('Reject')}
