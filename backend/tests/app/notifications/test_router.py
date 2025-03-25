@@ -237,6 +237,39 @@ class TestNotificationsRouter:
             "requested_by"
         ]["id"] == str(requester.id)
 
+    def test_deny_data_product_dataset(self, client):
+        requester = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[requester])
+        link = DataProductDatasetAssociationFactory(
+            dataset=ds,
+            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
+            requested_by=requester,
+        )
+        NotificationInteractionFactory(
+            notification=DataProductDatasetNotificationFactory(
+                data_product_dataset=link
+            ),
+            user=requester,
+        )
+        response = self.deny_default_data_product_dataset_link(client, link.id)
+        assert response.status_code == 200
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert (
+            response.json()[0]["notification"]["configuration_type"]
+            == "DataProductDataset"
+        )
+        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
+            link.id
+        )
+        assert (
+            response.json()[0]["notification"]["data_product_dataset"]["status"]
+            == "denied"
+        )
+        assert response.json()[0]["notification"]["data_product_dataset"][
+            "requested_by"
+        ]["id"] == str(requester.id)
+
     def test_approve_data_output_dataset(self, client):
         requester = UserFactory(external_id="sub")
         ds = DatasetFactory(owners=[requester])
@@ -263,6 +296,37 @@ class TestNotificationsRouter:
         assert (
             response.json()[0]["notification"]["data_output_dataset"]["status"]
             == "approved"
+        )
+        assert response.json()[0]["notification"]["data_output_dataset"][
+            "requested_by"
+        ]["id"] == str(requester.id)
+
+    def test_deny_data_output_dataset(self, client):
+        requester = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[requester])
+        link = DataOutputDatasetAssociationFactory(
+            dataset=ds,
+            status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
+            requested_by=requester,
+        )
+        NotificationInteractionFactory(
+            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            user=requester,
+        )
+        response = self.deny_default_data_output_dataset_link(client, link.id)
+        assert response.status_code == 200
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert (
+            response.json()[0]["notification"]["configuration_type"]
+            == "DataOutputDataset"
+        )
+        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
+            link.id
+        )
+        assert (
+            response.json()[0]["notification"]["data_output_dataset"]["status"]
+            == "denied"
         )
         assert response.json()[0]["notification"]["data_output_dataset"][
             "requested_by"
@@ -298,6 +362,41 @@ class TestNotificationsRouter:
         assert (
             response.json()[0]["notification"]["data_product_membership"]["status"]
             == "approved"
+        )
+        assert response.json()[0]["notification"]["data_product_membership"]["user"][
+            "id"
+        ] == str(requester.id)
+
+    def test_deny_data_product_membership(self, client):
+        requester = UserFactory(external_id="sub")
+        owner_membership = DataProductMembershipFactory(user=requester)
+        membership_request = DataProductMembershipFactory(
+            data_product=owner_membership.data_product,
+            user=requester,
+            role=DataProductUserRole.MEMBER.value,
+            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
+            requested_by_id=str(requester.id),
+        )
+        NotificationInteractionFactory(
+            notification=DataProductMembershipNotificationFactory(
+                data_product_membership=membership_request
+            ),
+            user=requester,
+        )
+        response = self.deny_data_product_membership(client, membership_request.id)
+        assert response.status_code == 200
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert (
+            response.json()[0]["notification"]["configuration_type"]
+            == "DataProductMembership"
+        )
+        assert response.json()[0]["notification"]["data_product_membership"][
+            "id"
+        ] == str(membership_request.id)
+        assert (
+            response.json()[0]["notification"]["data_product_membership"]["status"]
+            == "denied"
         )
         assert response.json()[0]["notification"]["data_product_membership"]["user"][
             "id"
@@ -434,12 +533,24 @@ class TestNotificationsRouter:
         return client.post(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/approve/{link_id}")
 
     @staticmethod
+    def deny_default_data_product_dataset_link(client, link_id):
+        return client.post(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/deny/{link_id}")
+
+    @staticmethod
     def approve_default_data_output_dataset_link(client, link_id):
         return client.post(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/approve/{link_id}")
 
     @staticmethod
+    def deny_default_data_output_dataset_link(client, link_id):
+        return client.post(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/deny/{link_id}")
+
+    @staticmethod
     def approve_data_product_membership(client, membership_id):
         return client.post(f"{MEMBERSHIPS_ENDPOINT}/{membership_id}/approve")
+
+    @staticmethod
+    def deny_data_product_membership(client, membership_id):
+        return client.post(f"{MEMBERSHIPS_ENDPOINT}/{membership_id}/deny")
 
     @staticmethod
     def delete_default_dataset(client, dataset_id):
