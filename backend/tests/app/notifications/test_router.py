@@ -486,6 +486,48 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert response.json() == []
 
+    def test_delete_parent_data_product_data_product_membership(self, client):
+        owner = UserFactory(external_id="sub")
+        membership = DataProductMembershipFactory(
+            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
+            data_product=(DataProductMembershipFactory(user=owner).data_product),
+        )
+        NotificationInteractionFactory(
+            notification=DataProductMembershipNotificationFactory(
+                data_product_membership=membership
+            ),
+            user=owner,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["notification"]["data_product_membership"][
+            "id"
+        ] == str(membership.id)
+        response = self.delete_data_product(client, membership.data_product.id)
+        assert response.status_code == 200
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == []
+
+    def test_delete_parent_data_output_data_output_dataset(self, client):
+        owner = UserFactory(external_id="sub")
+        link = DataOutputDatasetAssociationFactory(
+            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
+            data_output=DataOutputFactory(
+                owner=(DataProductMembershipFactory(user=owner).data_product)
+            ),
+        )
+        NotificationInteractionFactory(
+            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            user=owner,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
+            link.id
+        )
+        response = self.delete_data_output(client, link.data_output.id)
+        assert response.status_code == 200
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == []
+
     @staticmethod
     def request_data_product_dataset_link(client, data_product_id, dataset_id):
         return client.post(
@@ -559,3 +601,7 @@ class TestNotificationsRouter:
     @staticmethod
     def delete_data_product(client, data_product_id):
         return client.delete(f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}")
+
+    @staticmethod
+    def delete_data_output(client, data_output_id):
+        return client.delete(f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}")
