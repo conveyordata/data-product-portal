@@ -6,8 +6,10 @@ import { useSelector } from 'react-redux';
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputDatasetLink } from '@/types/data-output';
 import { SearchForm } from '@/types/shared';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
@@ -40,6 +42,14 @@ export function DatasetTab({ dataOutputId }: Props) {
     const { data: dataProduct } = useGetDataProductByIdQuery(dataOutput?.owner.id ?? '', {
         skip: !dataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
     });
+    const { data: access } = useCheckAccessQuery(
+        {
+            object_id: dataProduct?.id,
+            action: AuthorizationAction.DATA_PRODUCT_REQUEST_DATA_OUTPUT_LINK,
+        },
+        { skip: !dataProduct },
+    );
+    const canAddDatasetNew = access?.access || false;
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 
@@ -61,7 +71,7 @@ export function DatasetTab({ dataOutputId }: Props) {
                     form={searchForm}
                     actionButton={
                         <Button
-                            disabled={!isDataOutputOwner}
+                            disabled={!(canAddDatasetNew || isDataOutputOwner)}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}
