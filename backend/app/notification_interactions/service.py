@@ -172,26 +172,32 @@ class NotificationInteractionService:
         if not receiving_ids:
             db.flush()
             notification_owner_ids = {
-                NotificationTypes.DataProductDataset: lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
-                    db,
-                    db.query(DataProductDatasetAssociationModel.dataset_id)
-                    .filter(DataProductDatasetAssociationModel.id == ref_id)
-                    .scalar(),
-                    notification_type,
+                NotificationTypes.DataProductDataset: (
+                    lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
+                        db,
+                        db.query(DataProductDatasetAssociationModel.dataset_id)
+                        .filter(DataProductDatasetAssociationModel.id == ref_id)
+                        .scalar(),
+                        notification_type,
+                    )
                 ),
-                NotificationTypes.DataOutputDataset: lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
-                    db,
-                    db.query(DataOutputDatasetAssociationModel.dataset_id)
-                    .filter(DataOutputDatasetAssociationModel.id == ref_id)
-                    .scalar(),
-                    notification_type,
+                NotificationTypes.DataOutputDataset: (
+                    lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
+                        db,
+                        db.query(DataOutputDatasetAssociationModel.dataset_id)
+                        .filter(DataOutputDatasetAssociationModel.id == ref_id)
+                        .scalar(),
+                        notification_type,
+                    )
                 ),
-                NotificationTypes.DataProductMembership: lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
-                    db,
-                    db.query(DataProductMembershipModel.data_product_id)
-                    .filter(DataProductMembershipModel.id == ref_id)
-                    .scalar(),
-                    notification_type,
+                NotificationTypes.DataProductMembership: (
+                    lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
+                        db,
+                        db.query(DataProductMembershipModel.data_product_id)
+                        .filter(DataProductMembershipModel.id == ref_id)
+                        .scalar(),
+                        notification_type,
+                    )
                 ),
             }
             if notification_type in notification_owner_ids:

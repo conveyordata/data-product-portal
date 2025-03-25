@@ -42,9 +42,15 @@ NotificationModelMap = {
 }
 
 NotificationForeignKeyMap = {
-    NotificationTypes.DataProductDataset: Notification.__table__.c.data_product_dataset_id,
-    NotificationTypes.DataOutputDataset: Notification.__table__.c.data_output_dataset_id,
-    NotificationTypes.DataProductMembership: Notification.__table__.c.data_product_membership_id,
+    NotificationTypes.DataProductDataset: (
+        Notification.__table__.c.data_product_dataset_id
+    ),
+    NotificationTypes.DataOutputDataset: (
+        Notification.__table__.c.data_output_dataset_id
+    ),
+    NotificationTypes.DataProductMembership: (
+        Notification.__table__.c.data_product_membership_id
+    ),
 }
 
 NotificationConfiguration = Annotated[

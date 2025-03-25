@@ -101,9 +101,15 @@ class NotificationService:
 
         """
         notification_function_map = {
-            NotificationTypes.DataProductDataset: self.get_data_product_dataset_notification_pending_ids,
-            NotificationTypes.DataOutputDataset: self.get_data_output_dataset_notification_pending_ids,
-            NotificationTypes.DataProductMembership: self.get_data_product_membership_notification_pending_ids,
+            NotificationTypes.DataProductDataset: (
+                self.get_data_product_dataset_notification_pending_ids
+            ),
+            NotificationTypes.DataOutputDataset: (
+                self.get_data_output_dataset_notification_pending_ids
+            ),
+            NotificationTypes.DataProductMembership: (
+                self.get_data_product_membership_notification_pending_ids
+            ),
         }
         if notification_type in notification_function_map:
             return notification_function_map[notification_type](db, reference_parent_id)
