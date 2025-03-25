@@ -303,6 +303,90 @@ class TestNotificationsRouter:
             "id"
         ] == str(requester.id)
 
+    def test_delete_parent_dataset_data_product_dataset(self, client):
+        owner = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[owner])
+        link = DataProductDatasetAssociationFactory(
+            dataset=ds,
+            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
+        )
+        NotificationInteractionFactory(
+            notification=DataProductDatasetNotificationFactory(
+                data_product_dataset=link
+            ),
+            user=owner,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
+            link.id
+        )
+        response = self.delete_default_dataset(client, ds.id)
+        assert response.status_code == 200
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == []
+
+    def test_delete_parent_dataset_data_output_dataset(self, client):
+        owner = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[owner])
+        link = DataOutputDatasetAssociationFactory(
+            dataset=ds,
+            status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
+        )
+        NotificationInteractionFactory(
+            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            user=owner,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
+            link.id
+        )
+        response = self.delete_default_dataset(client, ds.id)
+        assert response.status_code == 200
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == []
+
+    def test_delete_parent_data_product_data_product_dataset(self, client):
+        owner = UserFactory(external_id="sub")
+        link = DataProductDatasetAssociationFactory(
+            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
+            data_product=(DataProductMembershipFactory(user=owner).data_product),
+        )
+        NotificationInteractionFactory(
+            notification=DataProductDatasetNotificationFactory(
+                data_product_dataset=link
+            ),
+            user=owner,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
+            link.id
+        )
+        response = self.delete_data_product(client, link.data_product.id)
+        assert response.status_code == 200
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == []
+
+    def test_delete_parent_data_product_data_output_dataset(self, client):
+        owner = UserFactory(external_id="sub")
+        link = DataOutputDatasetAssociationFactory(
+            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
+            data_output=DataOutputFactory(
+                owner=(DataProductMembershipFactory(user=owner).data_product)
+            ),
+        )
+        NotificationInteractionFactory(
+            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            user=owner,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
+            link.id
+        )
+        response = self.delete_data_product(client, link.data_output.owner.id)
+        assert response.status_code == 200
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == []
+
     @staticmethod
     def request_data_product_dataset_link(client, data_product_id, dataset_id):
         return client.post(
@@ -356,3 +440,11 @@ class TestNotificationsRouter:
     @staticmethod
     def approve_data_product_membership(client, membership_id):
         return client.post(f"{MEMBERSHIPS_ENDPOINT}/{membership_id}/approve")
+
+    @staticmethod
+    def delete_default_dataset(client, dataset_id):
+        return client.delete(f"{DATASET_ENDPOINT}/{dataset_id}")
+
+    @staticmethod
+    def delete_data_product(client, data_product_id):
+        return client.delete(f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}")
