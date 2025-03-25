@@ -40,7 +40,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const { data: access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_READ_INTEGRATIONS, // TODO Is this intended action?
+            action: AuthorizationAction.DATA_PRODUCT_READ_INTEGRATIONS,
         },
         {
             skip: !dataProductId,
@@ -125,7 +125,7 @@ export function DataProductActions({ dataProductId }: Props) {
                         dataPlatforms={dataPlatforms}
                         onDataPlatformClick={handleAccessToData}
                         onTileClick={handleTileClick}
-                        isDisabled={isLoading || !canAccessNew || !canAccessDataProductData}
+                        isDisabled={isLoading || !(canAccessNew || canAccessDataProductData)}
                         isLoading={isLoading || isConveyorLoading || isDatabricksLoading}
                     />
                 </Flex>

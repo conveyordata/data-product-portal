@@ -145,7 +145,6 @@ export const getDataProductUsersTableColumns = ({
                             >
                                 <Button
                                     loading={isLoading}
-                                    // TODO Do we want the rejection as part of the Add or Remove rights?
                                     disabled={isLoading || !(canAdd || canPerformTeamActions(user.id))}
                                     type={'link'}
                                 >
