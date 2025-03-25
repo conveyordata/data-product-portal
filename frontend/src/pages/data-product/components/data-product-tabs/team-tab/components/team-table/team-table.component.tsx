@@ -48,10 +48,10 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         },
         { skip: !dataProductId },
     );
-    const { data: add_access } = useCheckAccessQuery(
+    const { data: approve_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_CREATE_USER,
+            action: AuthorizationAction.DATA_PRODUCT_APPROVE_USER_REQUEST,
         },
         { skip: !dataProductId },
     );
@@ -63,7 +63,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         { skip: !dataProductId },
     );
 
-    const canAddUserNew = add_access?.access || false;
+    const canApproveUserNew = approve_access?.access || false;
     const canEditUserNew = edit_access?.access || false;
     const canRemoveUserNew = remove_access?.access || false;
 
@@ -133,7 +133,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
             onAcceptMembershipRequest: handleGrantAccessToDataProduct,
             canEdit: canEditUserNew,
             canRemove: canRemoveUserNew,
-            canAdd: canAddUserNew,
+            canApprove: canApproveUserNew,
         });
     }, [
         t,
@@ -149,7 +149,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         isCurrentUserDataProductOwner,
         canEditUserNew,
         canRemoveUserNew,
-        canAddUserNew,
+        canApproveUserNew,
     ]);
 
     if (!dataProduct) return null;
