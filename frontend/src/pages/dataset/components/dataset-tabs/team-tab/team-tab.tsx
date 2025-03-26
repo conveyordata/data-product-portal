@@ -11,6 +11,7 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useAddUserToDatasetMutation, useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import { DatasetMembershipContract } from '@/types/dataset-membership/dataset-membership.contract.ts';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
 import { getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
@@ -22,7 +23,7 @@ type Props = {
     datasetId: string;
 };
 
-function filterUsers(users: UserContract[], searchTerm: string) {
+function filterUsers(users: DatasetMembershipContract[], searchTerm: string) {
     if (!searchTerm) return users;
     if (!users) return [];
 
@@ -57,8 +58,8 @@ export function TeamTab({ datasetId }: Props) {
     const canAddNew = access?.access || false;
 
     const filteredUsers = useMemo(() => {
-        return filterUsers(dataset?.owners ?? [], searchTerm);
-    }, [dataset?.owners, searchTerm]);
+        return filterUsers(dataset?.memberships ?? [], searchTerm);
+    }, [dataset?.memberships, searchTerm]);
 
     const isDatasetOwner = useMemo(() => {
         if (!dataset || !user) return false;
@@ -95,7 +96,11 @@ export function TeamTab({ datasetId }: Props) {
                         </Button>
                     }
                 />
-                <TeamTable isCurrentDatasetOwner={isDatasetOwner} datasetUsers={filteredUsers} datasetId={datasetId} />
+                <TeamTable
+                    isCurrentUserDatasetOwner={isDatasetOwner}
+                    datasetUsers={filteredUsers}
+                    datasetId={datasetId}
+                />
             </Flex>
             {isVisible && (
                 <UserPopup

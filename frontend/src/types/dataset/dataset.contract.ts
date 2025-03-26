@@ -5,6 +5,7 @@ import { UserContract } from '@/types/users';
 
 import { DataProductLifeCycleContract } from '../data-product-lifecycle';
 import { DataProductSettingValueContract } from '../data-product-setting';
+import { DatasetMembershipContract } from '../dataset-membership';
 
 export enum DatasetStatus {
     Pending = 'pending',
@@ -32,6 +33,7 @@ export interface DatasetContract {
     rolled_up_tags: TagContract[];
     tag_ids: string[];
     data_product_links: DataProductLink[];
+    memberships: DatasetMembershipContract[];
     lifecycle: DataProductLifeCycleContract;
     lifecycle_id: string;
     data_output_links: DataOutputLink[];

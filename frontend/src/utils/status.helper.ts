@@ -6,6 +6,7 @@ import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
 import { DataProductStatus } from '@/types/data-product';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { DataProductMembershipStatus } from '@/types/data-product-membership';
+import { DatasetMembershipStatus } from '@/types/dataset-membership';
 import { Status } from '@/types/shared';
 
 export function getStatusLabel(t: TFunction, status: Status): string {
@@ -97,11 +98,33 @@ export function getDataProductMembershipBadgeStatus(role: DataProductMembershipS
     }
 }
 
+export function getDatasetMembershipBadgeStatus(role: DatasetMembershipStatus): BadgeProps['status'] {
+    switch (role) {
+        case DatasetMembershipStatus.Approved:
+            return 'success';
+        case DatasetMembershipStatus.Denied:
+            return 'default';
+        default:
+            return 'processing';
+    }
+}
+
 export function getDataProductMembershipStatusLabel(t: TFunction, role: DataProductMembershipStatus): string {
     switch (role) {
         case DataProductMembershipStatus.Approved:
             return t('Approved');
         case DataProductMembershipStatus.Denied:
+            return t('Denied');
+        default:
+            return t('Pending');
+    }
+}
+
+export function getDatasetMembershipStatusLabel(t: TFunction, role: DatasetMembershipStatus): string {
+    switch (role) {
+        case DatasetMembershipStatus.Approved:
+            return t('Approved');
+        case DatasetMembershipStatus.Denied:
             return t('Denied');
         default:
             return t('Pending');
