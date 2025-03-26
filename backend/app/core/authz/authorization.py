@@ -164,13 +164,15 @@ class Authorization(metaclass=Singleton):
         self._after_update()
 
     async def assign_global_role(self, *, user_id: str, role_id: str) -> None:
-        """Creates an entry in the casbin table, assigning the user the admin role."""
+        """Creates an entry in the casbin table,
+        assigning the user the chosen global role."""
         enforcer: AsyncEnforcer = self._enforcer
         await enforcer.add_named_grouping_policy("g3", user_id, role_id)
         self._after_update()
 
     async def revoke_global_role(self, *, user_id: str, role_id: str) -> None:
-        """Deletes the entry in the casbin table, assigning the user the admin role."""
+        """Deletes the entry in the casbin table,
+        revoking the chosen global role for the user."""
         enforcer: AsyncEnforcer = self._enforcer
         await enforcer.remove_named_grouping_policy("g3", user_id, role_id)
         self._after_update()
