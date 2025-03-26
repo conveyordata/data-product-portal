@@ -48,7 +48,7 @@ class Authorization(metaclass=Singleton):
         cls,
         action: AuthorizationAction,
         model: Model = None,
-        object_id: str = "object_id",
+        object_id: str = "id",
     ) -> Callable[[Request, User, Session], None]:
         def inner(
             request: Request,
