@@ -93,7 +93,9 @@ class Authorization(metaclass=Singleton):
     ) -> str:
         if id_ == default or model is None:
             return default
-        domain = db.scalar(select(model.domain_id).where(model.id == id_))
+        domain = db.scalars(
+            select(model.domain_id).where(model.id == id_)
+        ).one_or_none()
         return default if domain is None else str(domain)
 
     @cachedmethod(lambda self: self._cache)
@@ -147,7 +149,7 @@ class Authorization(metaclass=Singleton):
         self, *, user_id: str, role_id: str, resource_id: str
     ) -> None:
         """Deletes the entry in the casbin table,
-        assigning the user the role for the chosen resource."""
+        revoking the role for the chosen resource and user."""
         enforcer: AsyncEnforcer = self._enforcer
         await enforcer.remove_named_grouping_policy("g", user_id, role_id, resource_id)
         self._after_update()
@@ -165,7 +167,7 @@ class Authorization(metaclass=Singleton):
         self, *, user_id: str, role_id: str, domain_id: str
     ) -> None:
         """Deletes the entry in the casbin table,
-        assigning the user the role for the chosen domain."""
+        revoking the role for the chosen domain and user."""
         enforcer: AsyncEnforcer = self._enforcer
         await enforcer.remove_named_grouping_policy("g2", user_id, role_id, domain_id)
         self._after_update()
@@ -227,16 +229,16 @@ class Authorization(metaclass=Singleton):
         self._after_update()
 
     async def clear_assignments_for_resource(self, *, resource_id: str) -> None:
-        """Removes all assignments of a resource role inside the casbin table.
-        Should be called when a resource role is removed.
+        """Removes all assignments to a resource inside the casbin table.
+        Should be called when a resource is removed.
         """
         enforcer: AsyncEnforcer = self._enforcer
         await enforcer.remove_filtered_named_grouping_policy("g", 2, resource_id)
         self._after_update()
 
     async def clear_assignments_for_domain(self, *, domain_id: str) -> None:
-        """Removes all assignments of a resource role inside the casbin table.
-        Should be called when a domain role is removed.
+        """Removes all assignments to a domain inside the casbin table.
+        Should be called when a domain is removed.
         """
         enforcer: AsyncEnforcer = self._enforcer
         await enforcer.remove_filtered_named_grouping_policy("g2", 2, domain_id)
