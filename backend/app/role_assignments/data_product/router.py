@@ -1,7 +1,7 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -67,6 +67,21 @@ def decide_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
+    service = RoleAssignmentService(db=db, user=user)
+    original = service.get_assignment(id)
+
+    if original.decision not in (DecisionStatus.PENDING, request.decision):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="This assignment was already decided",
+        )
+
+    if request.decision is DecisionStatus.APPROVED and original.role_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Cannot approve a request that does not have a role assignment",
+        )
+
     assignment = RoleAssignmentService(db=db, user=user).update_assignment(
         UpdateRoleAssignment(id=id, decision=request.decision)
     )
@@ -88,16 +103,23 @@ def modify_assigned_role(
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
-    original_role = service.get_assignment(id).role.id
+    original_role = service.get_assignment(id).role_id
 
     assignment = service.update_assignment(
         UpdateRoleAssignment(id=id, role_id=request.role_id)
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
-        background_tasks.add_task(
-            tasks.swap_assignment,
-            AuthAssignment.from_data_product(assignment).with_previous(original_role),
-        )
+        if original_role is not None:
+            background_tasks.add_task(
+                tasks.swap_assignment,
+                AuthAssignment.from_data_product(assignment).with_previous(
+                    original_role
+                ),
+            )
+        else:
+            background_tasks.add_task(
+                tasks.add_assignment, AuthAssignment.from_data_product(assignment)
+            )
 
     return assignment

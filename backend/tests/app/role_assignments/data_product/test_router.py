@@ -94,6 +94,59 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["id"] == str(assignment.id)
         assert data["decision"] == DecisionStatus.APPROVED
 
+    def test_decide_assignment_already_decided(self, client: TestClient):
+        data_product: DataProduct = DataProductFactory()
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.DENIED,
+        )
+
+        response = client.patch(
+            f"{ENDPOINT}/{assignment.id}/decide",
+            json={"decision": DecisionStatus.APPROVED},
+        )
+
+        assert response.status_code == 422
+        assert "already decided" in response.json()["detail"]
+
+    def test_decide_assignment_idempotency(self, client: TestClient):
+        data_product: DataProduct = DataProductFactory()
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.DENIED,
+        )
+
+        response = client.patch(
+            f"{ENDPOINT}/{assignment.id}/decide",
+            json={"decision": DecisionStatus.DENIED},
+        )
+        assert response.status_code == 200
+
+    def test_decide_assignment_no_role(self, client: TestClient):
+        data_product: DataProduct = DataProductFactory()
+        user: User = UserFactory()
+        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=None,
+        )
+
+        response = client.patch(
+            f"{ENDPOINT}/{assignment.id}/decide",
+            json={"decision": DecisionStatus.APPROVED},
+        )
+
+        assert response.status_code == 422
+        assert "does not have a role assignment" in response.json()["detail"]
+
     def test_modify_assigned_role(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()

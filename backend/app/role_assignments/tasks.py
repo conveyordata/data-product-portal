@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID
 
 from app.core.authz.authorization import Authorization
@@ -23,27 +23,36 @@ class AuthAssignment:
     def from_data_product(
         cls, assignment: DataProductRoleAssignment
     ) -> "AuthAssignment":
-        assert (
-            assignment.decision is DecisionStatus.APPROVED
-        ), "Only approved decisions can be propagated to the enforcer"
+        role_id = cls._assert_invariants(assignment)
 
         return AuthAssignment(
-            role_id=assignment.role_id,
+            role_id=role_id,
             user_id=assignment.user_id,
             resource_id=assignment.data_product_id,
         )
 
     @classmethod
     def from_dataset(cls, assignment: DatasetRoleAssignment) -> "AuthAssignment":
-        assert (
-            assignment.decision is DecisionStatus.APPROVED
-        ), "Only approved decisions can be propagated to the enforcer"
+        role_id = cls._assert_invariants(assignment)
 
         return AuthAssignment(
-            role_id=assignment.role_id,
+            role_id=role_id,
             user_id=assignment.user_id,
             resource_id=assignment.dataset_id,
         )
+
+    @classmethod
+    def _assert_invariants(
+        cls, assignment: Union[DataProductRoleAssignment, DatasetRoleAssignment]
+    ) -> UUID:
+        assert (
+            assignment.decision is DecisionStatus.APPROVED
+        ), "Only approved decisions can be propagated to the enforcer"
+        assert (
+            assignment.role_id is not None
+        ), "Only decisions that define a role can be propagated to the enforcer"
+
+        return assignment.role_id
 
     def with_previous(self, role_id: UUID) -> "AuthAssignment":
         self.previous_role_id = role_id

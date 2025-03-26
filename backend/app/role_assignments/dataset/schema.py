@@ -15,7 +15,7 @@ from app.users.schema import User
 class CreateRoleAssignment(BaseModel):
     dataset_id: UUID
     user_id: UUID
-    role_id: UUID
+    role_id: Optional[UUID] = None
 
 
 class DecideRoleAssignment(BaseModel):
@@ -30,7 +30,7 @@ class RoleAssignmentResponse(ORMModel):
     id: UUID
     dataset: Dataset
     user: User
-    role: Role
+    role: Optional[Role]
     decision: DecisionStatus
     requested_on: Optional[datetime]
     requested_by: Optional[User]
@@ -44,7 +44,7 @@ class RoleAssignmentResponse(ORMModel):
 class RoleAssignment(RoleAssignmentResponse):
     dataset_id: UUID
     user_id: UUID
-    role_id: UUID
+    role_id: Optional[UUID]
     requested_by_id: Optional[UUID]
     decided_by_id: Optional[UUID]
 

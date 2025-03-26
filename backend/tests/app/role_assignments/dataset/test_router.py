@@ -15,12 +15,12 @@ from app.users.schema import User
 ENDPOINT = "/api/role_assignments/dataset"
 
 
-class TestDataProductRoleAssignmentsRouter:
+class TestDatasetRoleAssignmentsRouter:
 
     def test_list_assignments(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id, user_id=user.id, role_id=role.id
         )
@@ -34,7 +34,7 @@ class TestDataProductRoleAssignmentsRouter:
     def test_create_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        role: Role = RoleFactory(scope=Scope.DATASET)
 
         response = client.post(
             f"{ENDPOINT}",
@@ -54,7 +54,7 @@ class TestDataProductRoleAssignmentsRouter:
     def test_delete_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
@@ -76,7 +76,7 @@ class TestDataProductRoleAssignmentsRouter:
     def test_decide_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
@@ -94,11 +94,64 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["id"] == str(assignment.id)
         assert data["decision"] == DecisionStatus.APPROVED
 
+    def test_decide_assignment_already_decided(self, client: TestClient):
+        dataset: Dataset = DatasetFactory()
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
+        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+            dataset_id=dataset.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.DENIED,
+        )
+
+        response = client.patch(
+            f"{ENDPOINT}/{assignment.id}/decide",
+            json={"decision": DecisionStatus.APPROVED},
+        )
+
+        assert response.status_code == 422
+        assert "already decided" in response.json()["detail"]
+
+    def test_decide_assignment_idempotency(self, client: TestClient):
+        dataset: Dataset = DatasetFactory()
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
+        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+            dataset_id=dataset.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.DENIED,
+        )
+
+        response = client.patch(
+            f"{ENDPOINT}/{assignment.id}/decide",
+            json={"decision": DecisionStatus.DENIED},
+        )
+        assert response.status_code == 200
+
+    def test_decide_assignment_no_role(self, client: TestClient):
+        dataset: Dataset = DatasetFactory()
+        user: User = UserFactory()
+        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+            dataset_id=dataset.id,
+            user_id=user.id,
+            role_id=None,
+        )
+
+        response = client.patch(
+            f"{ENDPOINT}/{assignment.id}/decide",
+            json={"decision": DecisionStatus.APPROVED},
+        )
+
+        assert response.status_code == 422
+        assert "does not have a role assignment" in response.json()["detail"]
+
     def test_modify_assigned_role(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        new_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        role: Role = RoleFactory(scope=Scope.DATASET)
+        new_role: Role = RoleFactory(scope=Scope.DATASET)
 
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,

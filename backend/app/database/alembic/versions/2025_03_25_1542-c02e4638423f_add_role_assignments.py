@@ -24,11 +24,21 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table(
         "role_assignments_data_product",
-        sa.Column("id", sa.UUID, primary_key=True),
-        sa.Column("data_product_id", sa.UUID, sa.ForeignKey("data_products.id")),
-        sa.Column("user_id", sa.UUID, sa.ForeignKey("users.id")),
-        sa.Column("role_id", sa.UUID, sa.ForeignKey("roles.id")),
-        sa.Column("decision", sa.Enum(DecisionStatus), default=DecisionStatus.PENDING),
+        sa.Column("id", sa.UUID, primary_key=True, nullable=False),
+        sa.Column(
+            "data_product_id",
+            sa.UUID,
+            sa.ForeignKey("data_products.id"),
+            nullable=False,
+        ),
+        sa.Column("user_id", sa.UUID, sa.ForeignKey("users.id"), nullable=False),
+        sa.Column("role_id", sa.UUID, sa.ForeignKey("roles.id"), nullable=True),
+        sa.Column(
+            "decision",
+            sa.Enum(DecisionStatus),
+            default=DecisionStatus.PENDING,
+            nullable=False,
+        ),
         sa.Column("requested_by_id", sa.UUID, sa.ForeignKey("users.id")),
         sa.Column("requested_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("decided_by_id", sa.UUID, sa.ForeignKey("users.id")),
@@ -39,11 +49,16 @@ def upgrade() -> None:
     )
     op.create_table(
         "role_assignments_dataset",
-        sa.Column("id", sa.UUID, primary_key=True),
-        sa.Column("dataset_id", sa.UUID, sa.ForeignKey("datasets.id")),
-        sa.Column("user_id", sa.UUID, sa.ForeignKey("users.id")),
-        sa.Column("role_id", sa.UUID, sa.ForeignKey("roles.id")),
-        sa.Column("decision", sa.Enum(DecisionStatus), default=DecisionStatus.PENDING),
+        sa.Column("id", sa.UUID, primary_key=True, nullable=False),
+        sa.Column("dataset_id", sa.UUID, sa.ForeignKey("datasets.id"), nullable=False),
+        sa.Column("user_id", sa.UUID, sa.ForeignKey("users.id"), nullable=False),
+        sa.Column("role_id", sa.UUID, sa.ForeignKey("roles.id"), nullable=True),
+        sa.Column(
+            "decision",
+            sa.Enum(DecisionStatus),
+            default=DecisionStatus.PENDING,
+            nullable=False,
+        ),
         sa.Column("requested_by_id", sa.UUID, sa.ForeignKey("users.id")),
         sa.Column("requested_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("decided_by_id", sa.UUID, sa.ForeignKey("users.id")),
