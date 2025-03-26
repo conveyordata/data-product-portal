@@ -74,6 +74,21 @@ class TestAuthorization:
         assert authorizer.has_access(sub=user, dom=dom, obj=ANY, act=allowed) is False
 
     @pytest.mark.asyncio(loop_scope="session")
+    async def test_global_role(self, authorizer: Authorization):
+        user = "test_user"
+        role = "test_role"
+        act = AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS
+
+        await authorizer.sync_role_permissions(role_id=role, actions=[act])
+        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
+
+        await authorizer.assign_global_role(user_id=user, role_id=role)
+        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is True
+
+        await authorizer.revoke_global_role(user_id=user, role_id=role)
+        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
+
+    @pytest.mark.asyncio(loop_scope="session")
     async def test_admin_role(self, authorizer: Authorization):
         user = "test_user"
 
