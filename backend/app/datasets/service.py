@@ -1,7 +1,8 @@
+from typing import Iterable, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
@@ -63,7 +64,7 @@ class DatasetService:
 
         return dataset
 
-    def get_datasets(self, db: Session, user: User) -> list[DatasetsGet]:
+    def get_datasets(self, db: Session, user: User) -> Sequence[DatasetsGet]:
         default_lifecycle = (
             db.query(DataProductLifeCycleModel)
             .filter(DataProductLifeCycleModel.is_default)
@@ -71,7 +72,9 @@ class DatasetService:
         )
         datasets = [
             dataset
-            for dataset in db.query(DatasetModel).order_by(asc(DatasetModel.name)).all()
+            for dataset in db.scalars(
+                select(DatasetModel).order_by(asc(DatasetModel.name))
+            ).all()
             if dataset.isVisibleToUser(user)
         ]
 
@@ -80,7 +83,7 @@ class DatasetService:
                 dataset.lifecycle = default_lifecycle
         return datasets
 
-    def get_user_datasets(self, user_id: UUID, db: Session) -> list[DatasetsGet]:
+    def get_user_datasets(self, user_id: UUID, db: Session) -> Sequence[DatasetsGet]:
         return (
             db.query(DatasetModel)
             .options(joinedload(DatasetModel.owners))
@@ -91,7 +94,7 @@ class DatasetService:
         )
 
     def _update_owners(
-        self, dataset: DatasetCreateUpdate, db: Session, owner_ids: list[UUID] = []
+        self, dataset: DatasetCreateUpdate, db: Session, owner_ids: Iterable[UUID] = ()
     ) -> DatasetCreateUpdate:
         if not owner_ids:
             owner_ids = dataset.owners
@@ -101,7 +104,7 @@ class DatasetService:
             dataset.owners.append(user)
         return dataset
 
-    def _fetch_tags(self, db: Session, tag_ids: list[UUID] = []) -> list[TagModel]:
+    def _fetch_tags(self, db: Session, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
         for tag_id in tag_ids:
             tag = ensure_tag_exists(tag_id, db)
@@ -113,16 +116,16 @@ class DatasetService:
         self, dataset: DatasetCreateUpdate, db: Session
     ) -> dict[str, UUID]:
         dataset = self._update_owners(dataset, db)
-        dataset = dataset.parse_pydantic_schema()
-        tags = self._fetch_tags(db, dataset.pop("tag_ids", []))
-        dataset = DatasetModel(**dataset, tags=tags)
-        db.add(dataset)
+        dataset_schema = dataset.parse_pydantic_schema()
+        tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
+        model = DatasetModel(**dataset_schema, tags=tags)
+        db.add(model)
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
-        return {"id": dataset.id}
+        return {"id": model.id}
 
-    def remove_dataset(self, id: UUID, db: Session):
+    def remove_dataset(self, id: UUID, db: Session) -> None:
         dataset = db.get(
             DatasetModel,
             id,
@@ -140,7 +143,9 @@ class DatasetService:
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
-    def update_dataset(self, id: UUID, dataset: DatasetCreateUpdate, db: Session):
+    def update_dataset(
+        self, id: UUID, dataset: DatasetCreateUpdate, db: Session
+    ) -> dict[str, UUID]:
         current_dataset = ensure_dataset_exists(id, db)
         updated_dataset = dataset.model_dump(exclude_unset=True)
 
@@ -156,19 +161,21 @@ class DatasetService:
         RefreshInfrastructureLambda().trigger()
         return {"id": current_dataset.id}
 
-    def update_dataset_about(self, id: UUID, dataset: DatasetAboutUpdate, db: Session):
+    def update_dataset_about(
+        self, id: UUID, dataset: DatasetAboutUpdate, db: Session
+    ) -> None:
         current_dataset = ensure_dataset_exists(id, db)
         current_dataset.about = dataset.about
         db.commit()
 
     def update_dataset_status(
         self, id: UUID, dataset: DatasetStatusUpdate, db: Session
-    ):
+    ) -> None:
         current_dataset = ensure_dataset_exists(id, db)
         current_dataset.status = dataset.status
         db.commit()
 
-    def add_user_to_dataset(self, dataset_id: UUID, user_id: UUID, db: Session):
+    def add_user_to_dataset(self, dataset_id: UUID, user_id: UUID, db: Session) -> None:
         dataset = ensure_dataset_exists(dataset_id, db)
         user = ensure_user_exists(user_id, db)
         if user in dataset.owners:
@@ -181,7 +188,9 @@ class DatasetService:
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
-    def remove_user_from_dataset(self, dataset_id: UUID, user_id: UUID, db: Session):
+    def remove_user_from_dataset(
+        self, dataset_id: UUID, user_id: UUID, db: Session
+    ) -> None:
         dataset = ensure_dataset_exists(dataset_id, db)
         user = ensure_user_exists(user_id, db)
 

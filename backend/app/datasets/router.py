@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -24,7 +25,7 @@ router = APIRouter(prefix="/datasets", tags=["datasets"])
 def get_datasets(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> list[DatasetsGet]:
+) -> Sequence[DatasetsGet]:
     return DatasetService().get_datasets(db, user)
 
 
@@ -40,7 +41,7 @@ def get_dataset(
 @router.get("/user/{user_id}")
 def get_user_datasets(
     user_id: UUID, db: Session = Depends(get_db_session)
-) -> list[DatasetsGet]:
+) -> Sequence[DatasetsGet]:
     return DatasetService().get_user_datasets(user_id, db)
 
 
@@ -99,7 +100,7 @@ def remove_dataset(id: UUID, db: Session = Depends(get_db_session)):
 )
 def update_dataset(
     id: UUID, dataset: DatasetCreateUpdate, db: Session = Depends(get_db_session)
-):
+) -> dict[str, UUID]:
     return DatasetService().update_dataset(id, dataset, db)
 
 
@@ -117,7 +118,7 @@ def update_dataset(
 )
 def update_dataset_about(
     id: UUID, dataset: DatasetAboutUpdate, db: Session = Depends(get_db_session)
-):
+) -> None:
     return DatasetService().update_dataset_about(id, dataset, db)
 
 
@@ -135,7 +136,7 @@ def update_dataset_about(
 )
 def update_dataset_status(
     id: UUID, dataset: DatasetStatusUpdate, db: Session = Depends(get_db_session)
-):
+) -> None:
     return DatasetService().update_dataset_status(id, dataset, db)
 
 
@@ -161,7 +162,7 @@ def add_user_to_dataset(
     id: UUID,
     user_id: UUID,
     db: Session = Depends(get_db_session),
-):
+) -> None:
     return DatasetService().add_user_to_dataset(id, user_id, db)
 
 
@@ -187,7 +188,7 @@ def remove_user_from_dataset(
     id: UUID,
     user_id: UUID,
     db: Session = Depends(get_db_session),
-):
+) -> None:
     return DatasetService().remove_user_from_dataset(id, user_id, db)
 
 
@@ -208,7 +209,7 @@ def set_value_for_dataset(
     value: str,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
-):
+) -> None:
     return DataProductSettingService().set_value_for_product(
         setting_id, id, value, authenticated_user, db
     )

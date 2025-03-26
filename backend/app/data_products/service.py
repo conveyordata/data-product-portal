@@ -194,21 +194,21 @@ class DataProductService:
         self, data_product: DataProductCreate, db: Session, authenticated_user: User
     ) -> dict[str, UUID]:
         data_product = self._update_users(data_product, db)
-        data_product = data_product.parse_pydantic_schema()
-        tags = self._get_tags(db, data_product.pop("tag_ids", []))
-        data_product = DataProductModel(**data_product, tags=tags)
-        for membership in data_product.memberships:
+        data_product_schema = data_product.parse_pydantic_schema()
+        tags = self._get_tags(db, data_product_schema.pop("tag_ids", []))
+        model = DataProductModel(**data_product_schema, tags=tags)
+        for membership in model.memberships:
             membership.status = DataProductMembershipStatus.APPROVED
             membership.requested_by_id = authenticated_user.id
             membership.requested_on = datetime.now(tz=pytz.utc)
             membership.approved_by_id = authenticated_user.id
             membership.approved_on = datetime.now(tz=pytz.utc)
 
-        db.add(data_product)
+        db.add(model)
         db.commit()
 
         RefreshInfrastructureLambda().trigger()
-        return {"id": data_product.id}
+        return {"id": model.id}
 
     def remove_data_product(self, id: UUID, db: Session):
         data_product = db.get(

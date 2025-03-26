@@ -8,11 +8,11 @@ class ORMModel(BaseModel):
         from_attributes = True
 
     @classmethod
-    def is_pydantic(cls, obj: object):
+    def is_pydantic(cls, obj: object) -> bool:
         """Checks whether an object is pydantic."""
         return type(obj).__class__.__name__ == "ModelMetaclass"
 
-    def parse_pydantic_schema(self):
+    def parse_pydantic_schema(self) -> dict:
         """
         Iterates through pydantic schema and parses nested schemas
         to a dictionary containing SQLAlchemy models.

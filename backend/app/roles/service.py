@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -18,13 +18,12 @@ class RoleService:
     def get_role(self, role_id: UUID) -> RoleModel:
         return ensure_exists(role_id, self.db, RoleModel)
 
-    def get_roles(self, scope: Scope) -> list[Role]:
-        result = self.db.execute(
+    def get_roles(self, scope: Scope) -> Sequence[Role]:
+        return self.db.scalars(
             select(RoleModel)
             .where(RoleModel.scope == scope)
             .order_by(RoleModel.created_on)
-        )
-        return [row.Role for row in result]
+        ).all()
 
     def create_role(
         self, role: CreateRole, *, prototype: Prototype = Prototype.CUSTOM
@@ -140,7 +139,7 @@ class RoleService:
             )
 
     def _find_prototype(self, scope: Scope, prototype: Prototype) -> Optional[Role]:
-        return self.db.execute(
+        return self.db.scalars(
             select(RoleModel)
             .where(RoleModel.scope == scope)
             .where(RoleModel.prototype == prototype)

@@ -106,16 +106,16 @@ class DataOutputService:
             # somehow and let sourcealigned be handled internally there?
             data_output.configuration.validate_configuration(data_product)
 
-        data_output = data_output.parse_pydantic_schema()
-        tags = self._get_tags(db, data_output.pop("tag_ids", []))
-        data_output = DataOutputModel(**data_output, tags=tags)
+        data_output_schema = data_output.parse_pydantic_schema()
+        tags = self._get_tags(db, data_output_schema.pop("tag_ids", []))
+        model = DataOutputModel(**data_output_schema, tags=tags)
 
-        db.add(data_output)
+        db.add(model)
         db.commit()
 
         # config.on_create()
         RefreshInfrastructureLambda().trigger()
-        return {"id": data_output.id}
+        return {"id": model.id}
 
     def remove_data_output(self, id: UUID, db: Session, authenticated_user: User):
         data_output = db.get(
