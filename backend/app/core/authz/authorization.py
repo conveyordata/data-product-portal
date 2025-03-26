@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from pathlib import Path
-from typing import Sequence, Type, Union, cast
+from typing import Sequence, Type, TypeAlias, Union, cast
 
 import casbin_async_sqlalchemy_adapter as sqlalchemy_adapter
 from cachetools import Cache, LRUCache, cachedmethod
@@ -19,6 +19,8 @@ from app.users.schema import User
 from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
+
+Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], None]
 
 
 class Authorization(metaclass=Singleton):
@@ -44,10 +46,10 @@ class Authorization(metaclass=Singleton):
     @classmethod
     def enforce(
         cls,
-        model: Union[Type[DataProduct], Type[Dataset]],
         action: AuthorizationAction,
-        object_id: str = "object_id",
-    ) -> Callable[[Request, User], None]:
+        model: Model = None,
+        object_id: str = "id",
+    ) -> Callable[[Request, User, Session], None]:
         def inner(
             request: Request,
             user: User = Depends(get_authenticated_user),
@@ -76,11 +78,11 @@ class Authorization(metaclass=Singleton):
     @staticmethod
     def resolve_domain(
         db: Session,
-        model: Union[Type[DataProduct], Type[Dataset]],
+        model: Model,
         id_: str,
         default: str = "*",
     ) -> str:
-        if id_ == default:
+        if id_ == default or model is None:
             return default
         domain = db.scalars(
             select(model.domain_id).where(model.id == id_)
@@ -161,19 +163,27 @@ class Authorization(metaclass=Singleton):
         await enforcer.remove_named_grouping_policy("g2", user_id, role_id, domain_id)
         self._after_update()
 
-    async def assign_admin_role(self, *, user_id: str) -> None:
+    async def assign_global_role(self, *, user_id: str, role_id: str) -> None:
         """Creates an entry in the casbin table,
-        assigning the user the admin role."""
+        assigning the user the chosen global role."""
         enforcer: AsyncEnforcer = self._enforcer
-        await enforcer.add_named_grouping_policy("g3", user_id, "*")
+        await enforcer.add_named_grouping_policy("g3", user_id, role_id)
         self._after_update()
 
-    async def revoke_admin_role(self, *, user_id: str) -> None:
+    async def revoke_global_role(self, *, user_id: str, role_id: str) -> None:
         """Deletes the entry in the casbin table,
-        revoking the admin role for the user."""
+        revoking the chosen global role for the user."""
         enforcer: AsyncEnforcer = self._enforcer
-        await enforcer.remove_named_grouping_policy("g3", user_id, "*")
+        await enforcer.remove_named_grouping_policy("g3", user_id, role_id)
         self._after_update()
+
+    async def assign_admin_role(self, *, user_id: str) -> None:
+        """Creates an entry in the casbin table, assigning the user the admin role."""
+        await self.assign_global_role(user_id=user_id, role_id="*")
+
+    async def revoke_admin_role(self, *, user_id: str) -> None:
+        """Deletes the entry in the casbin table, assigning the user the admin role."""
+        await self.revoke_global_role(user_id=user_id, role_id="*")
 
     async def clear_assignments_for_user(self, *, user_id: str) -> None:
         """Removes all role assignments for a user inside the casbin table.
@@ -199,6 +209,14 @@ class Authorization(metaclass=Singleton):
         """
         enforcer: AsyncEnforcer = self._enforcer
         await enforcer.remove_filtered_named_grouping_policy("g2", 1, role_id)
+        self._after_update()
+
+    async def clear_assignments_for_global_role(self, *, role_id: str) -> None:
+        """Removes all assignments of a global role inside the casbin table.
+        Should be called when a global role is removed.
+        """
+        enforcer: AsyncEnforcer = self._enforcer
+        await enforcer.remove_filtered_named_grouping_policy("g3", 1, role_id)
         self._after_update()
 
     async def clear_assignments_for_resource(self, *, resource_id: str) -> None:
