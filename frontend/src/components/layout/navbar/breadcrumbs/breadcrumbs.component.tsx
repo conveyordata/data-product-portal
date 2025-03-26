@@ -280,7 +280,7 @@ export const Breadcrumbs = () => {
                                         path.split('/').length == 4
                                     ) {
                                         Object.assign(breadcrumbItem, {
-                                            path: path + '#' + DataOutputTabKeys.Datasets,
+                                            path: `${path}#${DataOutputTabKeys.Datasets}`,
                                             title: (
                                                 <Typography.Text
                                                     ellipsis={{ tooltip: dataOutput.name }}
@@ -292,7 +292,7 @@ export const Breadcrumbs = () => {
                                         });
                                     } else {
                                         Object.assign(breadcrumbItem, {
-                                            path: path + '#' + DataProductTabKeys.About,
+                                            path: `${path}#${DataProductTabKeys.About}`,
                                             title: (
                                                 <Typography.Text
                                                     ellipsis={{ tooltip: dataProduct.name }}
@@ -320,7 +320,7 @@ export const Breadcrumbs = () => {
                                     });
                                 } else {
                                     Object.assign(breadcrumbItem, {
-                                        path: path + '#' + DatasetTabKeys.About,
+                                        path: `${path}#${DatasetTabKeys.About}`,
                                         title: (
                                             <Typography.Text
                                                 ellipsis={{ tooltip: dataset.name }}
