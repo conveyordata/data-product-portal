@@ -110,16 +110,12 @@ def modify_assigned_role(
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
-        if original_role is not None:
-            background_tasks.add_task(
-                tasks.swap_assignment,
-                AuthAssignment.from_data_product(assignment).with_previous(
-                    original_role
-                ),
-            )
-        else:
-            background_tasks.add_task(
-                tasks.add_assignment, AuthAssignment.from_data_product(assignment)
-            )
+        assert (
+            original_role is not None
+        ), "Decision status can only be approved when the role is set"
+        background_tasks.add_task(
+            tasks.swap_assignment,
+            AuthAssignment.from_data_product(assignment).with_previous(original_role),
+        )
 
     return assignment
