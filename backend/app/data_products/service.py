@@ -613,5 +613,4 @@ class DataProductService:
                                     == DataProductDatasetLinkStatus.APPROVED,
                                 )
                             )
-
         return Graph(nodes=set(nodes), edges=set(edges))
