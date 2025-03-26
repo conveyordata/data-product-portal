@@ -55,5 +55,4 @@ class DataProduct(BaseDataProduct):
     tags: list[Tag]
     memberships: list[DataProductMembership]
     domain: Domain
-    domain_id: UUID
     data_outputs: list[DataOutputGet]
