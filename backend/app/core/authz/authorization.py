@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.data_outputs.model import DataOutput
 from app.data_products.model import DataProduct
 from app.database import database
 from app.database.database import get_db_session
@@ -20,7 +21,7 @@ from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
 
-Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], None]
+Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], Type[DataOutput], None]
 
 
 class Authorization(metaclass=Singleton):
@@ -58,7 +59,13 @@ class Authorization(metaclass=Singleton):
             if not settings.AUTHORIZER_ENABLED:
                 return
             obj = cls.resolve_parameter(request, object_id)
-            dom = cls.resolve_domain(db, model, obj)
+            dom_model = model
+            if model == DataOutput and obj != "*":
+                data_output = db.scalar(select(model).where(model.id == obj))
+                obj = data_output.owner_id
+                dom_model = DataProduct
+
+            dom = cls.resolve_domain(db, dom_model, obj)
 
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
                 raise HTTPException(

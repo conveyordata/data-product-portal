@@ -127,6 +127,8 @@ async def authorizer() -> AsyncGenerator[Authorization, None]:
     yield await Authorization.initialize()
 
 
-@pytest.fixture(scope="session", autouse=True)
-def enable_authorizer() -> None:
+@pytest.fixture
+def enable_authorizer():
     settings.AUTHORIZER_ENABLED = True
+    yield
+    settings.AUTHORIZER_ENABLED = False
