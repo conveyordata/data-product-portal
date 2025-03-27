@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
+import { DatasetTitle } from '@/components/datasets/dataset-title/dataset-title';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import {
@@ -95,7 +96,7 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                         <List.Item key={item.id}>
                             <TableCellAvatar
                                 icon={icon}
-                                title={item.name}
+                                title={<DatasetTitle name={item.name} accessType={item.access_type} hasPopover />}
                                 subtitle={
                                     <Typography.Link className={styles.noCursorPointer}>
                                         {item.domain.name}

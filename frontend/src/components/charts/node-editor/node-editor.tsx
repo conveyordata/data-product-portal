@@ -1,25 +1,18 @@
-import 'reactflow/dist/style.css';
+import '@xyflow/react/dist/style.css';
 
+import type { Connection, Edge, EdgeChange, Node, NodeChange, ReactFlowProps } from '@xyflow/react';
+import { Background, ConnectionLineType, Controls, ReactFlow } from '@xyflow/react';
 import { Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-    Background,
-    Connection,
-    ConnectionLineType,
-    Controls,
-    Edge,
-    EdgeChange,
-    Node,
-    NodeChange,
-    ReactFlow,
-    ReactFlowProps,
-} from 'reactflow';
 
 import { edgeTypes, nodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { defaultFitViewOptions } from '@/utils/node-editor.helper.ts';
 
 import styles from './node-editor.module.scss';
+
+const MIN_ZOOM = 0.1;
+const MAX_ZOOM = 2;
 
 type Props = {
     nodes: Node[];
@@ -30,9 +23,6 @@ type Props = {
     editorProps?: Omit<ReactFlowProps, 'nodes' | 'edges' | 'onConnect' | 'onNodesChange' | 'onEdgesChange'>;
     debug?: boolean;
 };
-
-const MIN_ZOOM = 0.1;
-const MAX_ZOOM = 2;
 
 export function NodeEditor({
     nodes = [],

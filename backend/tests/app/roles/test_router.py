@@ -1,7 +1,8 @@
 import pytest
+from fastapi.testclient import TestClient
 from tests.factories import RoleFactory
 
-from app.roles.model import Role
+from app.roles.schema import Role
 
 ENDPOINT = "/api/roles"
 
@@ -15,7 +16,7 @@ class TestRolesRouter:
         "permissions": [101],
     }
 
-    def test_get_roles(self, client):
+    def test_get_roles(self, client: TestClient):
         role: Role = RoleFactory(scope="global")
         response = client.get(f"{ENDPOINT}/global")
 
@@ -25,7 +26,7 @@ class TestRolesRouter:
         assert data[0]["scope"] == role.scope
 
     @pytest.mark.usefixtures("admin")
-    def test_create_role(self, client):
+    def test_create_role(self, client: TestClient):
         response = client.post(
             ENDPOINT,
             json={
@@ -44,7 +45,7 @@ class TestRolesRouter:
         assert data["permissions"] == self.test_role["permissions"]
 
     @pytest.mark.usefixtures("admin")
-    def test_update_role(self, client):
+    def test_update_role(self, client: TestClient):
         role: Role = RoleFactory()
         response = client.patch(
             ENDPOINT,
@@ -64,7 +65,7 @@ class TestRolesRouter:
         assert data["permissions"] == [101, 102]
 
     @pytest.mark.usefixtures("admin")
-    def test_delete_role(self, client):
+    def test_delete_role(self, client: TestClient):
         role: Role = RoleFactory()
         response = client.get(f"{ENDPOINT}/{role.scope}")
         assert response.status_code == 200

@@ -108,16 +108,16 @@ class DataOutputService:
             # somehow and let sourcealigned be handled internally there?
             data_output.configuration.validate_configuration(data_product)
 
-        data_output = data_output.parse_pydantic_schema()
-        tags = self._get_tags(db, data_output.pop("tag_ids", []))
-        data_output = DataOutputModel(**data_output, tags=tags)
+        data_output_schema = data_output.parse_pydantic_schema()
+        tags = self._get_tags(db, data_output_schema.pop("tag_ids", []))
+        model = DataOutputModel(**data_output_schema, tags=tags)
 
-        db.add(data_output)
+        db.add(model)
         db.commit()
 
         # config.on_create()
         RefreshInfrastructureLambda().trigger()
-        return {"id": data_output.id}
+        return {"id": model.id}
 
     def remove_data_output(self, id: UUID, db: Session, authenticated_user: User):
         data_output = db.get(
@@ -167,6 +167,12 @@ class DataOutputService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Dataset {dataset_id} already exists in data product {id}",
+            )
+
+        if not dataset.isVisibleToUser(authenticated_user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this private dataset",
             )
         # Data output requests always need to be approved
         approval_status = DataOutputDatasetLinkStatus.PENDING_APPROVAL

@@ -25,6 +25,26 @@ class TestDataProductsDatasetsRouter:
         )
         assert response.status_code == 200
 
+    def test_request_data_product_link_private_dataset_no_access(self, client):
+        user = UserFactory(external_id="sub")
+        membership = DataProductMembershipFactory(user=user)
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+
+        response = self.request_data_product_dataset_link(
+            client, membership.data_product_id, ds.id
+        )
+        assert response.status_code == 403
+
+    def test_request_data_product_link_private_dataset(self, client):
+        user = UserFactory(external_id="sub")
+        membership = DataProductMembershipFactory(user=user)
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[user])
+
+        response = self.request_data_product_dataset_link(
+            client, membership.data_product_id, ds.id
+        )
+        assert response.status_code == 200
+
     def test_request_data_product_remove(self, client):
         membership = DataProductMembershipFactory(user=UserFactory(external_id="sub"))
         ds = DatasetFactory()

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Security
 
+from app.authorization.router import router as authorization
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
 from app.data_outputs.router import router as data_outputs
@@ -15,6 +16,7 @@ from app.domains.router import router as domain
 from app.environments.router import router as environment
 from app.notification_interactions.router import router as notification
 from app.platforms.router import router as platform
+from app.role_assignments.router import router as role_assignment
 from app.roles.router import router as role
 from app.tags.router import router as tag
 from app.theme_settings.router import router as theme_settings
@@ -26,6 +28,7 @@ router = (
     else APIRouter()
 )
 
+router.include_router(authorization)
 router.include_router(dataset)
 router.include_router(data_product)
 router.include_router(data_product_type)
@@ -42,4 +45,5 @@ router.include_router(tag)
 router.include_router(user)
 router.include_router(role)
 router.include_router(notification)
+router.include_router(role_assignment)
 router.include_router(theme_settings)

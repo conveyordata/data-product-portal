@@ -3,7 +3,6 @@ import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
-import { ReactFlowProvider } from 'reactflow';
 
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer';
@@ -62,11 +61,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <PartitionOutlined />,
-                children: (
-                    <ReactFlowProvider>
-                        <Explorer id={dataOutputId} type={'dataoutput'} />
-                    </ReactFlowProvider>
-                ),
+                children: <Explorer id={dataOutputId} type={'dataoutput'} />,
             },
         ];
     }, [dataOutputId, t]);

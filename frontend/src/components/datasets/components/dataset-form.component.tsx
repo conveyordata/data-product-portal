@@ -1,4 +1,4 @@
-import { Button, CheckboxOptionType, Form, FormProps, Input, Popconfirm, Radio, Select, Space } from 'antd';
+import { Button, CheckboxOptionType, Form, FormProps, Input, Popconfirm, Radio, Select, Space, Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,16 +34,34 @@ type Props = {
 
 const { TextArea } = Input;
 
-const getAccessTypeOptions = (t: TFunction) => [
-    {
-        value: DatasetAccess.Public,
-        label: getDatasetAccessTypeLabel(t, DatasetAccess.Public),
-    },
-    {
-        value: DatasetAccess.Restricted,
-        label: getDatasetAccessTypeLabel(t, DatasetAccess.Restricted),
-    },
-];
+const getAccessTypeOptions = (t: TFunction) => {
+    return [
+        {
+            label: (
+                <Tooltip title={t('Public datasets are visible to everyone and are free to use by anyone')}>
+                    {getDatasetAccessTypeLabel(t, DatasetAccess.Public)}
+                </Tooltip>
+            ),
+            value: DatasetAccess.Public,
+        },
+        {
+            label: (
+                <Tooltip title={t('Restricted datasets are visible to everyone but require permission to use')}>
+                    {getDatasetAccessTypeLabel(t, DatasetAccess.Restricted)}
+                </Tooltip>
+            ),
+            value: DatasetAccess.Restricted,
+        },
+        {
+            label: (
+                <Tooltip title={t('Private datasets are only visible to owners and users with access')}>
+                    {getDatasetAccessTypeLabel(t, DatasetAccess.Private)}
+                </Tooltip>
+            ),
+            value: DatasetAccess.Private,
+        },
+    ];
+};
 
 export function DatasetForm({ mode, datasetId }: Props) {
     const { t } = useTranslation();

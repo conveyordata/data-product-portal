@@ -384,7 +384,6 @@
     "Create new data product role": "Create new data product role",
     "Create new dataset role": "Create new dataset role",
     "Global": "Global",
-    "Data Product": "Data Product",
     "Dataset": "Dataset",
     "Manage Roles": "Manage Roles",
     "Roles are reusable sets of permissions.": "Roles are reusable sets of permissions.",
@@ -488,7 +487,6 @@
     "Custom Settings": "Custom Settings",
     "Add Custom Setting": "Add Custom Setting",
     "Update Data Product Setting": "Update Data Product Setting",
-    "Data product setting updated successfully": "Data product setting updated successfully",
     "Failed to update data product setting": "Failed to update data product setting",
     "Update Dataset Setting": "Update Dataset Setting",
     "Dataset setting updated successfully": "Dataset setting updated successfully",
@@ -521,5 +519,10 @@
     "Failed to update lifecycle": "Failed to update lifecycle",
     "Value must be a number": "Value must be a number",
     "Settings updated successfully": "Settings updated successfully",
-    "Download CLI executable": "Download CLI executable"
+    "Download CLI executable": "Download CLI executable",
+    "Public datasets are visible to everyone and are free to use by anyone": "Public datasets are visible to everyone and are free to use by anyone",
+    "Restricted datasets are visible to everyone but require permission to use": "Restricted datasets are visible to everyone but require permission to use",
+    "Private datasets are only visible to owners and users with access": "Private datasets are only visible to owners and users with access",
+    "Private": "Private",
+    "{{Type}} access": "{{Type}} access"
 }

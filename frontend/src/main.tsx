@@ -1,5 +1,6 @@
 import '@/styles/_globals.scss';
 import './i18n.ts';
+import '@ant-design/v5-patch-for-react-19';
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';

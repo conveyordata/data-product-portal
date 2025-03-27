@@ -1,15 +1,6 @@
+import type { Connection, Edge, Node, OnConnect } from '@xyflow/react';
+import { addEdge, Position, useEdgesState, useNodesState, useReactFlow } from '@xyflow/react';
 import { useCallback, useEffect } from 'react';
-import {
-    addEdge,
-    Connection,
-    Edge,
-    Node,
-    OnConnect,
-    Position,
-    useEdgesState,
-    useNodesState,
-    useReactFlow,
-} from 'reactflow';
 
 import { defaultFitViewOptions, generateDagreLayout } from '@/utils/node-editor.helper.ts';
 
@@ -19,8 +10,8 @@ const defaultNodePosition = { x: 0, y: 0 };
 const defaultDirection = Position.Left;
 
 export function useNodeEditor() {
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const [nodes, setNodes, onNodesChange] = useNodesState([] as Node[]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[]);
     const { fitView } = useReactFlow();
 
     const setNodesAndEdges = useCallback(
@@ -42,9 +33,7 @@ export function useNodeEditor() {
     );
 
     useEffect(() => {
-        window.requestAnimationFrame(() => {
-            fitView(defaultFitViewOptions);
-        });
+        window.requestAnimationFrame(() => fitView(defaultFitViewOptions));
     }, [nodes, edges, fitView]);
 
     return {

@@ -26,7 +26,7 @@ func CheckIfTokenNeedsRefresh(token *Token) (bool, error) {
 		return true, errors.Wrap(err, "Failed parsing the token")
 	}
 	// Refresh 10 minutes before expiry
-	if claims.ExpiresAt.Time.Before(time.Now().Add(10 * time.Minute)) {
+	if claims.ExpiresAt.Before(time.Now().Add(10 * time.Minute)) {
 		return true, nil
 	}
 
