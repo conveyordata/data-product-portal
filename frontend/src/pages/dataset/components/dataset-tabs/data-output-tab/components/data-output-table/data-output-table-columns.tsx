@@ -20,6 +20,8 @@ type Props = {
     isCurrentDatasetOwner: boolean;
     isLoading?: boolean;
     isDisabled?: boolean;
+    canAcceptNew?: boolean;
+    canRevokeNew?: boolean;
 };
 
 export const getDatasetDataProductsColumns = ({
@@ -30,6 +32,8 @@ export const getDatasetDataProductsColumns = ({
     isDisabled,
     isLoading,
     isCurrentDatasetOwner,
+    canAcceptNew,
+    canRevokeNew,
 }: Props): TableColumnsType<DataOutputLink> => {
     return [
         {
@@ -111,7 +115,11 @@ export const getDatasetDataProductsColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                <Button
+                                    loading={isLoading}
+                                    disabled={isLoading || (!canAcceptNew && isDisabled)}
+                                    type={'link'}
+                                >
                                     {t('Accept')}
                                 </Button>
                             </Popconfirm>
@@ -127,7 +135,11 @@ export const getDatasetDataProductsColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                <Button
+                                    loading={isLoading}
+                                    disabled={isLoading || (!canAcceptNew && isDisabled)}
+                                    type={'link'}
+                                >
                                     {t('Reject')}
                                 </Button>
                             </Popconfirm>
@@ -148,7 +160,11 @@ export const getDatasetDataProductsColumns = ({
                             okButtonProps={{ loading: isLoading }}
                             autoAdjustOverflow={true}
                         >
-                            <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                            <Button
+                                loading={isLoading}
+                                disabled={isLoading || (!canRevokeNew && isDisabled)}
+                                type={'link'}
+                            >
                                 {t('Revoke Access')}
                             </Button>
                         </Popconfirm>

@@ -10,6 +10,8 @@ import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './dataset-actions.module.scss';
+// import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+// import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 
 type Props = {
     datasetId: string;
@@ -34,6 +36,17 @@ export function DatasetActions({ datasetId, isCurrentDatasetOwner }: Props) {
         // All tiles are currently disabled
         console.log(dataPlatform, environment, datasetId);
     }
+
+    // const { data: access } = useCheckAccessQuery(
+    //     {
+    //         object_id: datasetId,
+    //         action: AuthorizationAction.DATASET_READ_INTEGRATIONS,
+    //     },
+    //     {
+    //         skip: !datasetId,
+    //     },
+    // );
+    // const canAccessNew = access?.access || false;
 
     return (
         <Flex vertical className={styles.actionsContainer}>
