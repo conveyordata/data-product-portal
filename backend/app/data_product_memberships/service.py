@@ -299,9 +299,10 @@ class DataProductMembershipService:
 
         data_product_membership.role = membership_role
 
-        NotificationInteractionService().redirect_pending_requests(
-            db, data_product.id, NotificationTypes.DataProductMembership
-        )
+        if data_product_membership.status == DataProductMembershipStatus.APPROVED:
+            NotificationInteractionService().redirect_pending_requests(
+                db, data_product.id, NotificationTypes.DataProductMembership
+            )
 
         db.commit()
         db.refresh(data_product_membership)
