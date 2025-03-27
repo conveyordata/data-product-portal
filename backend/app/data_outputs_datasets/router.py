@@ -5,7 +5,10 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import (
+    Authorization,
+    DataOutputDatasetAssociationResolver,
+)
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_outputs_datasets.service import DataOutputDatasetService
 from app.database.database import get_db_session
@@ -23,7 +26,7 @@ router = APIRouter(
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
-                Authorization.resolve_parameter_data_output_dataset_association,
+                DataOutputDatasetAssociationResolver,
                 Dataset,
             )
         )
