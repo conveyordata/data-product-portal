@@ -43,7 +43,6 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
-from app.data_products_datasets.schema import DataProductDatasetAssociationCreate
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import ensure_dataset_exists
 from app.environment_platform_configurations.model import (
@@ -165,38 +164,6 @@ class DataProductService:
         if hasattr(data_product, "id") and data_product.id:
             NotificationInteractionService().redirect_pending_requests(
                 db, data_product.id, NotificationTypes.DataProductMembership
-            )
-        return data_product
-
-    def _update_datasets(
-        self,
-        data_product: DataProductCreate,
-        db: Session,
-        authenticated_user: User,
-        dataset_links: list[DataProductDatasetAssociationCreate] = [],
-    ) -> DataProductCreate:
-        if not dataset_links:
-            dataset_links = data_product.dataset_links
-        for dataset_link in data_product.dataset_links:
-            NotificationInteractionService().remove_notification_relations(
-                db, dataset_link.id, NotificationTypes.DataProductDataset
-            )
-            db.refresh(dataset_link)
-        data_product.dataset_links = []
-        for dataset in dataset_links:
-            dataset_model = ensure_dataset_exists(dataset.dataset_id, db)
-            data_product.dataset_links.append(
-                DataProductDatasetModel(
-                    dataset_id=dataset_model.id,
-                    status=DataProductDatasetLinkStatus.PENDING_APPROVAL,
-                    requested_by_id=authenticated_user.id,
-                    requested_on=datetime.now(tz=pytz.utc),
-                )
-            )
-            db.flush()
-            db.refresh(dataset)
-            NotificationInteractionService().create_notification_relations(
-                db, dataset.id, NotificationTypes.DataProductDataset
             )
         return data_product
 
