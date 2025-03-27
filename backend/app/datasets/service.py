@@ -106,11 +106,12 @@ class DatasetService:
             dataset.owners.append(user)
 
         if hasattr(dataset, "id") and dataset.id:
+            owner_ids_list = list(owner_ids)
             NotificationInteractionService().redirect_pending_requests(
-                db, dataset.id, NotificationTypes.DataProductDataset, owner_ids
+                db, dataset.id, NotificationTypes.DataProductDataset, owner_ids_list
             )
             NotificationInteractionService().redirect_pending_requests(
-                db, dataset.id, NotificationTypes.DataOutputDataset, owner_ids
+                db, dataset.id, NotificationTypes.DataOutputDataset, owner_ids_list
             )
         return dataset
 

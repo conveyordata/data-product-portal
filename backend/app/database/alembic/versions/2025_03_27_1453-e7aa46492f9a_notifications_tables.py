@@ -1,8 +1,8 @@
 """Notifications tables
 
 Revision ID: e7aa46492f9a
-Revises: 269e6dbd565c
-Create Date: 2025-03-05 14:53:15.943060
+Revises: c02e4638423f
+Create Date: 2025-03-27 14:53:15.943060
 
 """
 
@@ -17,7 +17,7 @@ from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
 revision: str = "e7aa46492f9a"
-down_revision: Union[str, None] = "269e6dbd565c"
+down_revision: Union[str, None] = "c02e4638423f"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
