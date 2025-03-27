@@ -1,5 +1,5 @@
-import { UserOutlined } from '@ant-design/icons';
-import { List, Space, Typography } from 'antd';
+import { ArrowRightOutlined, UserOutlined } from '@ant-design/icons';
+import { Col, List, Space, Typography } from 'antd';
 import type { PaginationConfig } from 'antd/es/pagination';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -54,7 +54,7 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                             <Space align="center">
                                 <UserOutlined />
                                 <Typography.Text>
-                                    {t('{{name}} requests:', {
+                                    {t('{{name}}', {
                                         name: item.author,
                                     })}
                                 </Typography.Text>
@@ -69,7 +69,7 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                             className={styles.listItem}
                             onClick={() => handleItemClick(item.navigatePath)}
                         >
-                            <List.Item.Meta className={styles.itemCard} description={item.description} />
+                            <List.Item.Meta className={styles.itemCard} description={item.description} />{' '}
                         </List.Item>
                         <div />
                     </>

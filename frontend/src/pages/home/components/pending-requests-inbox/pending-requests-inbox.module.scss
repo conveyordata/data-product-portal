@@ -4,6 +4,8 @@ $item-card-width: 360px;
 
 .requests-list-container {
     margin-top: globals.$spacing-m;
+    gap: globals.$spacing-xxl * 2;
+    display: flex;
 }
 
 .list-item-top-info {
@@ -13,12 +15,15 @@ $item-card-width: 360px;
 }
 
 .list-item {
+    display: flex;
+    flex-direction: row; // Explicitly sets children to be in a row
+    justify-content: space-between;
     width: 100%;
     background-color: globals.$quaternary-color-fill;
     border: 1px solid globals.$border-color-secondary;
-    border-radius: globals.$border-radius-lg;
+    border-radius: globals.$border-radius-sm;
     padding: unset !important;
-    margin-bottom: globals.$spacing-m;
+    margin-bottom: globals.$spacing-regular;
     transition: border-color 0.3s;
     cursor: pointer;
 
@@ -32,7 +37,7 @@ $item-card-width: 360px;
         display: flex;
         align-items: center !important;
         height: 100%;
-        padding: globals.$spacing-m globals.$spacing-l;
+        padding: globals.$spacing-xs;
         min-width: $item-card-width;
     }
 }
@@ -65,4 +70,8 @@ $item-card-width: 360px;
 
 .requestsInfo {
     padding-left: globals.$spacing-xs;
+}
+
+.requestsInbox {
+    padding-right: globals.$spacing-xxl * 2;
 }

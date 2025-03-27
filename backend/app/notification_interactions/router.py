@@ -17,7 +17,7 @@ def get_user_notification_interactions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> list[NotificationInteractionGet]:
-    return NotificationInteractionService().get_user_notification_interactions(
+    return NotificationInteractionService().get_user_confirmation_notification_interactions(
         db, authenticated_user
     )
 

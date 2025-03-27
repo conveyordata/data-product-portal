@@ -1,4 +1,4 @@
-import { Badge, Pagination, Typography } from 'antd';
+import { Badge, Col, Pagination, Typography } from 'antd';
 import { TFunction } from 'i18next';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,9 @@ import { NotificationModel, NotificationTypes } from '@/types/notifications/noti
 
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
+import { PendingRequestsDetails } from './pending-requests-details';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 
 const createPendingItem = (userNotification: NotificationModel, t: TFunction) => {
     let link, description, navigatePath, date, author;
@@ -22,18 +25,24 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
             link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
             description = (
                 <Typography.Text>
-                    {t('Read access to the')}{' '}
-                    <Link
-                        onClick={(e) => e.stopPropagation()}
-                        to={createDatasetIdPath(userNotification.notification.data_product_dataset.dataset_id)}
-                    >
-                        {userNotification.notification.data_product_dataset.dataset.name}
-                    </Link>{' '}
-                    {t('dataset, on behalf of the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {userNotification.notification.data_product_dataset.data_product.name}
-                    </Link>{' '}
-                    {t('data product.')}
+                    <span style={{ display: 'block', marginLeft: '1rem' }}>
+                        {' '}
+                        {t('Requests read access to the')}{' '}
+                        <Link
+                            onClick={(e) => e.stopPropagation()}
+                            to={createDatasetIdPath(userNotification.notification.data_product_dataset.dataset_id)}
+                        >
+                            {userNotification.notification.data_product_dataset.dataset.name}
+                        </Link>{' '}
+                        {t('dataset,')}
+                    </span>
+                    <span style={{ display: 'block', marginLeft: '1rem' }}>
+                        {t('for the')}{' '}
+                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                            {userNotification.notification.data_product_dataset.data_product.name}
+                        </Link>{' '}
+                        {t('data product.')}
+                    </span>
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(
@@ -54,18 +63,23 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
             );
             description = (
                 <Typography.Text>
-                    {t('Made a request for a link to the')}{' '}
-                    <Link
-                        onClick={(e) => e.stopPropagation()}
-                        to={createDatasetIdPath(userNotification.notification.data_output_dataset.dataset_id)}
-                    >
-                        {userNotification.notification.data_output_dataset.dataset.name}
-                    </Link>{' '}
-                    {t('dataset, on behalf of the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {userNotification.notification.data_output_dataset.data_output.name}
-                    </Link>{' '}
-                    {t('data output.')}
+                    <span style={{ display: 'block', marginLeft: '1rem' }}>
+                        {t('Requests to link the')}{' '}
+                        <Link
+                            onClick={(e) => e.stopPropagation()}
+                            to={createDatasetIdPath(userNotification.notification.data_output_dataset.dataset_id)}
+                        >
+                            {userNotification.notification.data_output_dataset.dataset.name}
+                        </Link>{' '}
+                        {t('dataset,')}
+                    </span>
+                    <span style={{ display: 'block', marginLeft: '1rem' }}>
+                        {t('with the')}{' '}
+                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                            {userNotification.notification.data_output_dataset.data_output.name}
+                        </Link>{' '}
+                        {t('data output.')}
+                    </span>
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(
@@ -83,11 +97,13 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
             link = createDataProductIdPath(userNotification.notification.data_product_membership.data_product_id);
             description = (
                 <Typography.Text>
-                    {t('Made a request to join the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {userNotification.notification.data_product_membership.data_product.name}
-                    </Link>{' '}
-                    {t('data product team.')}
+                    <span style={{ display: 'block', marginLeft: '1rem' }}>
+                        {t('Requests to join the')}{' '}
+                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                            {userNotification.notification.data_product_membership.data_product.name}
+                        </Link>{' '}
+                        {t('data product team.')}
+                    </span>
                 </Typography.Text>
             );
             navigatePath = createDataProductIdPath(
@@ -116,6 +132,9 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
 
 export function PendingRequestsInbox() {
     const { t } = useTranslation();
+    const currentUser = useSelector(selectCurrentUser);
+
+    if (!currentUser) return null;
 
     const { data: pendingActions, isFetching } = useGetPendingActionNotificationsQuery();
 
@@ -143,7 +162,7 @@ export function PendingRequestsInbox() {
     };
 
     return (
-        <div className={styles.section}>
+        <div className={styles.requestsInbox}>
             <div className={styles.sectionTitle}>
                 <Typography.Title level={3}>
                     {t('Pending Requests')}{' '}
@@ -158,11 +177,16 @@ export function PendingRequestsInbox() {
                 />
             </div>
             <div className={styles.requestsListContainer}>
-                <PendingRequestsList
-                    pendingActionItems={pendingItems}
-                    isFetching={isFetching}
-                    pagination={pagination}
-                />
+                <Col span={12}>
+                    <PendingRequestsList
+                        pendingActionItems={pendingItems}
+                        isFetching={isFetching}
+                        pagination={pagination}
+                    />
+                </Col>
+                <Col span={12}>
+                    <PendingRequestsDetails userId={currentUser.id} />
+                </Col>
             </div>
         </div>
     );
