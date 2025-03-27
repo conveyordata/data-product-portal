@@ -53,7 +53,11 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                         <Space size={0} className={styles.listItemTopInfo}>
                             <Space align="center">
                                 <UserOutlined />
-                                <Typography.Text>{item.author}</Typography.Text>
+                                <Typography.Text>
+                                    {t('{{name}} requests:', {
+                                        name: item.author,
+                                    })}
+                                </Typography.Text>
                             </Space>
                             <Space>
                                 <Typography.Text type="secondary">{formattedDate}</Typography.Text>

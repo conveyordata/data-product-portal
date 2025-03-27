@@ -22,7 +22,7 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
             link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
             description = (
                 <Typography.Text>
-                    {t('Made a request for read access to the')}{' '}
+                    {t('Read access to the')}{' '}
                     <Link
                         onClick={(e) => e.stopPropagation()}
                         to={createDatasetIdPath(userNotification.notification.data_product_dataset.dataset_id)}
