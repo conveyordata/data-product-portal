@@ -1,3 +1,4 @@
+from typing import Iterable
 from uuid import UUID
 
 from sqlalchemy import asc
@@ -39,7 +40,7 @@ from app.users.schema import User
 
 class NotificationInteractionService:
     def reset_interactions_for_notification(
-        self, db: Session, notification_id: UUID, user_ids: list[UUID]
+        self, db: Session, notification_id: UUID, user_ids: Iterable[UUID]
     ):
         """
         Clears the NotificationInteractions for the specified Notification.
@@ -63,7 +64,7 @@ class NotificationInteractionService:
         db: Session,
         reference_id: UUID,
         notification_type: NotificationTypes,
-        user_ids: list[UUID],
+        user_ids: Iterable[UUID],
     ):
         """
         Clears the NotificationInteractions for the specified Notification.
@@ -132,7 +133,7 @@ class NotificationInteractionService:
         db: Session,
         reference_parent_id: UUID,
         notification_type: NotificationTypes,
-        updated_owner_ids: list[UUID] = [],
+        updated_owner_ids: Iterable[UUID] = [],
     ):
         """
         Called from parent of a notification referenced object
@@ -161,7 +162,7 @@ class NotificationInteractionService:
         db: Session,
         reference_id: UUID,
         notification_type: NotificationTypes,
-        receiving_ids: list[UUID] = [],
+        receiving_ids: Iterable[UUID] = [],
     ):
         """
         Called from notification referenced object

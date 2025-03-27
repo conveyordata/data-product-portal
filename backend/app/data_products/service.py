@@ -286,32 +286,6 @@ class DataProductService:
         for k, v in update_data_product.items():
             if k == "memberships":
                 self._update_memberships(current_data_product, v, db)
-            elif k == "dataset_links":
-                for dataset_link in current_data_product.dataset_links:
-                    NotificationInteractionService().remove_notification_relations(
-                        db, dataset_link.id, NotificationTypes.DataProductDataset
-                    )
-                    db.refresh(dataset_link)
-                current_data_product.dataset_links = []
-                for dataset in v:
-                    dataset_model = ensure_dataset_exists(dataset.dataset_id, db)
-                    dataset = DataProductDatasetModel(
-                        dataset_id=dataset_model.id,
-                        data_product_id=current_data_product.id,
-                        status=dataset.status,
-                        requested_by=dataset.requested_by,
-                        requested_on=dataset.requested_on,
-                        approved_by=dataset.approved_by,
-                        approved_on=dataset.approved_on,
-                        denied_by=dataset.denied_by,
-                        denied_on=dataset.denied_on,
-                    )
-                    current_data_product.dataset_links.append(dataset)
-                    db.flush()
-                    db.refresh(dataset)
-                    NotificationInteractionService().create_notification_relations(
-                        db, dataset.id, NotificationTypes.DataProductDataset
-                    )
             elif k == "tag_ids":
                 new_tags = self._get_tags(db, v)
                 current_data_product.tags = new_tags
