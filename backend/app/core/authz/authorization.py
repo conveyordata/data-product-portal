@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from pathlib import Path
-from typing import Sequence, Type, TypeAlias, Union, cast
+from typing import Self, Sequence, Type, TypeAlias, Union, cast
 
 import casbin_async_sqlalchemy_adapter as sqlalchemy_adapter
 from cachetools import Cache, LRUCache, cachedmethod
@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.model import DataOutput
+from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products.model import DataProduct
 from app.database import database
 from app.database.database import get_db_session
@@ -44,10 +45,63 @@ class Authorization(metaclass=Singleton):
         await adapter.create_table()
         return AsyncEnforcer(model, adapter)
 
+    @staticmethod
+    def resolve_parameter_data_output(
+        cls,
+        request: Request,
+        key: str,
+        default: str = "*",
+        db: Session = Depends(get_db_session),
+    ) -> str:
+        obj = cls.resolve_parameter(request, key, default)
+        if obj != "*":
+            data_output = db.scalars(
+                select(DataOutput).where(DataOutput.id == obj)
+            ).one_or_none()
+            if data_output:
+                return data_output.owner_id
+        return default
+
+    @staticmethod
+    def resolve_parameter_data_output_dataset_association(
+        cls,
+        request: Request,
+        key: str,
+        default: str = "*",
+        db: Session = Depends(get_db_session),
+    ) -> str:
+        obj = cls.resolve_parameter(request, key, default)
+        if obj != "*":
+            data_output_dataset = db.scalars(
+                select(DataOutputDatasetAssociation).where(
+                    DataOutputDatasetAssociation.id == obj
+                )
+            ).one_or_none()
+            if data_output_dataset:
+                return data_output_dataset.dataset_id
+        return default
+
+    @staticmethod
+    def resolve_parameter(
+        cls,
+        request: Request,
+        key: str,
+        default: str = "*",
+        db: Session = Depends(get_db_session),
+    ) -> str:
+        if (result := request.query_params.get(key)) is not None:
+            return cast(str, result)
+        if (result := request.path_params.get(key)) is not None:
+            return cast(str, result)
+        return default
+
     @classmethod
     def enforce(
         cls,
         action: AuthorizationAction,
+        object_fetch: Callable[
+            [type[Self], Request, str, str, Session], str
+        ] = resolve_parameter,
         model: Model = None,
         object_id: str = "id",
     ) -> Callable[[Request, User, Session], None]:
@@ -58,14 +112,8 @@ class Authorization(metaclass=Singleton):
         ) -> None:
             if not settings.AUTHORIZER_ENABLED:
                 return
-            obj = cls.resolve_parameter(request, object_id)
-            dom_model = model
-            if model == DataOutput and obj != "*":
-                data_output = db.scalar(select(model).where(model.id == obj))
-                obj = data_output.owner_id
-                dom_model = DataProduct
-
-            dom = cls.resolve_domain(db, dom_model, obj)
+            obj = object_fetch(cls, request, object_id, "*", db)
+            dom = cls.resolve_domain(db, model, obj)
 
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
                 raise HTTPException(
@@ -74,15 +122,6 @@ class Authorization(metaclass=Singleton):
                 )
 
         return inner
-
-    @staticmethod
-    def resolve_parameter(request: Request, key: str, default: str = "*") -> str:
-        if (result := request.query_params.get(key)) is not None:
-            return cast(str, result)
-        if (result := request.path_params.get(key)) is not None:
-            return cast(str, result)
-
-        return default
 
     @staticmethod
     def resolve_domain(

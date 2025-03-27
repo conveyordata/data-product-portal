@@ -4,9 +4,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz.actions import AuthorizationAction
+from app.core.authz.authorization import Authorization
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_outputs_datasets.service import DataOutputDatasetService
 from app.database.database import get_db_session
+from app.datasets.model import Dataset
 from app.users.schema import User
 
 router = APIRouter(
@@ -14,7 +17,18 @@ router = APIRouter(
 )
 
 
-@router.post("/approve/{id}")
+@router.post(
+    "/approve/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+                Authorization.resolve_parameter_data_output_dataset_association,
+                Dataset,
+            )
+        )
+    ],
+)
 def approve_data_output_link(
     id: UUID,
     db: Session = Depends(get_db_session),

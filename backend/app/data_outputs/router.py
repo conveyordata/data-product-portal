@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
-from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema import (
     DataOutput,
     DataOutputCreate,
@@ -14,6 +13,7 @@ from app.data_outputs.schema import (
     DataOutputUpdate,
 )
 from app.data_outputs.service import DataOutputService
+from app.data_products.model import DataProduct
 from app.database.database import get_db_session
 from app.dependencies import only_data_output_owners
 from app.graph.graph import Graph
@@ -46,7 +46,9 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
         Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT, DataOutputModel
+                AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+                Authorization.resolve_parameter_data_output,
+                DataProduct,
             )
         ),
     ],
@@ -74,7 +76,9 @@ def remove_data_output(
     dependencies=[
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT, DataOutputModel
+                AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                Authorization.resolve_parameter_data_output,
+                DataProduct,
             )
         )
     ],
@@ -102,7 +106,8 @@ def create_data_output(
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
-                DataOutputModel,
+                Authorization.resolve_parameter_data_output,
+                DataProduct,
             )
         ),
     ],
@@ -127,7 +132,9 @@ def update_data_output(
         Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT, DataOutputModel
+                AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                Authorization.resolve_parameter_data_output,
+                DataProduct,
             )
         ),
     ],
@@ -161,7 +168,8 @@ def update_data_output_status(
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
-                DataOutputModel,
+                Authorization.resolve_parameter_data_output,
+                DataProduct,
             )
         ),
     ],
@@ -198,7 +206,9 @@ def link_dataset_to_data_output(
         Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS, DataOutputModel
+                AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Authorization.resolve_parameter_data_output,
+                DataProduct,
             )
         ),
     ],
