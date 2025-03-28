@@ -5,7 +5,11 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization, DataOutputResolver
+from app.core.authz.authorization import (
+    Authorization,
+    DataOutputOwnerResolver,
+    DataOutputResolver,
+)
 from app.data_outputs.schema import (
     DataOutput,
     DataOutputCreate,
@@ -75,7 +79,8 @@ def remove_data_output(
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
-                DataOutputResolver,
+                DataOutputOwnerResolver,
+                object_id="owner_id",
             )
         )
     ],
