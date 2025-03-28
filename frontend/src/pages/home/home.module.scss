@@ -8,6 +8,7 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     display: flex;
     flex-direction: column;
     padding: 0;
+    padding-right: globals.$spacing-xl;
 }
 
 .content {

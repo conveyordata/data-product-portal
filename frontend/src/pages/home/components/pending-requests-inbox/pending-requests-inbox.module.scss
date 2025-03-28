@@ -2,10 +2,8 @@
 
 $item-card-width: 360px;
 
-.requests-list-container {
-    margin-top: globals.$spacing-m;
-    gap: globals.$spacing-xxl * 2;
-    display: flex;
+.pagination {
+    padding-bottom: globals.$spacing-m;
 }
 
 .list-item-top-info {
@@ -15,15 +13,10 @@ $item-card-width: 360px;
 }
 
 .list-item {
-    display: flex;
-    flex-direction: row; // Explicitly sets children to be in a row
-    justify-content: space-between;
-    width: 100%;
     background-color: globals.$quaternary-color-fill;
     border: 1px solid globals.$border-color-secondary;
     border-radius: globals.$border-radius-sm;
     padding: unset !important;
-    margin-bottom: globals.$spacing-regular;
     transition: border-color 0.3s;
     cursor: pointer;
 
@@ -31,47 +24,22 @@ $item-card-width: 360px;
         border-color: globals.$primary-color-border-hover;
         transition: border-color 0.3s;
     }
-
+    margin: 0;
+    margin-bottom: globals.$spacing-regular;
     .item-card {
-        width: 100% !important;
-        display: flex;
-        align-items: center !important;
         height: 100%;
         padding: globals.$spacing-xs;
-        min-width: $item-card-width;
+        padding-left: globals.$spacing-m;
     }
-}
-
-.section {
-    height: 100%;
 }
 
 .section-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.action-container {
-    margin-left: auto;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.date-section {
-    display: flex;
-    flex-direction: column;
+    padding-bottom: globals.$spacing-regular;
 }
 
 .ant-list .ant-list-pagination {
     display: none !important;
-}
-
-.requestsInfo {
-    padding-left: globals.$spacing-xs;
-}
-
-.requestsInbox {
-    padding-right: globals.$spacing-xxl * 2;
 }

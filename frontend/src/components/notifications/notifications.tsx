@@ -247,7 +247,7 @@ export function Notifications() {
     const items: MenuProps['items'] = [
         {
             type: 'group',
-            label: notificationItems?.length > 0 ? t('Notifications') : t('No notifications available'),
+            label: notificationItems?.length > 0 ? null : t('No notifications available'),
             children: notificationItems,
         },
     ];

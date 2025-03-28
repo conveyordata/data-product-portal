@@ -1,5 +1,5 @@
-import { ArrowRightOutlined, UserOutlined } from '@ant-design/icons';
-import { Col, List, Space, Typography } from 'antd';
+import { ArrowRightOutlined, DownOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Dropdown, List, Menu, Space, Typography } from 'antd';
 import type { PaginationConfig } from 'antd/es/pagination';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ type PendingActionItem = {
     navigatePath: string;
     date: string;
     author: string;
+    origin: ReactNode;
 };
 
 type DataProductListProps = {
@@ -53,24 +54,44 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                         <Space size={0} className={styles.listItemTopInfo}>
                             <Space align="center">
                                 <UserOutlined />
-                                <Typography.Text>
-                                    {t('{{name}}', {
-                                        name: item.author,
-                                    })}
-                                </Typography.Text>
+                                <Typography.Text>{item.author}</Typography.Text>
+                                {item.origin && (
+                                    <Typography.Text>
+                                        <ArrowRightOutlined /> {item.origin}
+                                    </Typography.Text>
+                                )}
                             </Space>
                             <Space>
                                 <Typography.Text type="secondary">{formattedDate}</Typography.Text>
                             </Space>
                         </Space>
-
                         <List.Item
                             key={item.key}
                             className={styles.listItem}
                             onClick={() => handleItemClick(item.navigatePath)}
                         >
-                            <List.Item.Meta className={styles.itemCard} description={item.description} />{' '}
+                            <List.Item.Meta className={styles.itemCard} description={item.description} />
+                            <div>
+                                <Dropdown
+                                    trigger={['click']}
+                                    placement="bottomRight"
+                                    dropdownRender={() => (
+                                        <Menu>
+                                            <Menu.Item key="accept">Accept</Menu.Item>
+                                            <Menu.Item key="deny">Deny</Menu.Item>
+                                        </Menu>
+                                    )}
+                                >
+                                    <Button
+                                        icon={<DownOutlined />}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                    ></Button>
+                                </Dropdown>
+                            </div>
                         </List.Item>
+
                         <div />
                     </>
                 );
