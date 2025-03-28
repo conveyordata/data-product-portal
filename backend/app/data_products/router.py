@@ -87,7 +87,9 @@ def create_data_product(
     dependencies=[
         Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
         Depends(
-            Authorization.enforce(AuthorizationAction.DATA_PRODUCT__DELETE, DataProduct)
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__DELETE, model=DataProduct
+            )
         ),
     ],
 )

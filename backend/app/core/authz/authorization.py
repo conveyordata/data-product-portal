@@ -29,6 +29,7 @@ Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], Type[DataOutput], Non
 class SubjectResolver(ABC):
     DEFAULT: str = "*"
 
+    @classmethod
     @abstractmethod
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
         pass
@@ -96,7 +97,8 @@ class Authorization(metaclass=Singleton):
     def enforce(
         cls,
         action: AuthorizationAction,
-        object_fetcher: type[SubjectResolver] = DefaultResolver,
+        *,
+        resolver: type[SubjectResolver] = DefaultResolver,
         model: Model = None,
         object_id: str = "id",
     ) -> Callable[[Request, User, Session], None]:
@@ -107,7 +109,7 @@ class Authorization(metaclass=Singleton):
         ) -> None:
             if not settings.AUTHORIZER_ENABLED:
                 return
-            obj = object_fetcher.resolve(request, object_id, db)
+            obj = resolver.resolve(request, object_id, db)
             dom = cls.resolve_domain(db, model, obj)
 
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
