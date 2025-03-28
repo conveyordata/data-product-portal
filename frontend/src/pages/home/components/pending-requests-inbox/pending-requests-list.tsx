@@ -23,13 +23,19 @@ type DataProductListProps = {
     isFetching: boolean;
     pendingActionItems: PendingActionItem[];
     pagination: PaginationConfig;
+    isFirstHalf: boolean;
 };
 
-export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination }: DataProductListProps) => {
+export const PendingRequestsList = ({
+    isFetching,
+    pendingActionItems,
+    pagination,
+    isFirstHalf,
+}: DataProductListProps) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    if (isFetching) return <LoadingSpinner />;
+    if (isFetching || !(pagination.current && pagination.pageSize)) return <LoadingSpinner />;
 
     if (!pendingActionItems || pendingActionItems.length === 0) {
         return <EmptyList description={t(`There are currently no pending requests.`)} />;
@@ -39,14 +45,21 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
         navigate(navigatePath);
     };
 
+    const totalItems = pagination.pageSize;
+    const half = Math.ceil(totalItems / 2);
+    const itemsToRender = isFirstHalf
+        ? pendingActionItems.slice(0, half)
+        : pendingActionItems.slice(half, pagination.pageSize);
+    const currentPage = pagination.current - 1;
+    const pageSize = pagination.pageSize;
+    const startIndex = currentPage * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedItems = itemsToRender.slice(startIndex, endIndex);
+
     return (
         <List
-            dataSource={pendingActionItems}
+            dataSource={paginatedItems}
             className={styles.antList}
-            pagination={{
-                ...pagination,
-                className: styles.antListPagination,
-            }}
             renderItem={(item) => {
                 const formattedDate = item.date ? formatDate(item.date) : undefined;
                 return (

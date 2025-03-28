@@ -179,6 +179,7 @@ export function PendingRequestsInbox() {
                             pendingActionItems={pendingItems}
                             isFetching={isFetching}
                             pagination={pagination}
+                            isFirstHalf={true}
                         />
                     </Col>
                     <Col span={COL_SPAN}>
@@ -186,6 +187,7 @@ export function PendingRequestsInbox() {
                             pendingActionItems={pendingItems}
                             isFetching={isFetching}
                             pagination={pagination}
+                            isFirstHalf={false}
                         />
                     </Col>
                 </Row>
