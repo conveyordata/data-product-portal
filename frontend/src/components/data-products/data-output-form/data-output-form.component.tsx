@@ -111,12 +111,11 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
                             config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase(),
                     )[0].service.id,
-                    owner_id: dataProductId,
                     sourceAligned: sourceAligned === undefined ? false : sourceAligned,
                     status: DataOutputStatus.Active,
                     tag_ids: values.tag_ids ?? [],
                 };
-                await createDataOutput(request).unwrap();
+                await createDataOutput({ id: dataProductId, dataOutput: request }).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
                 navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));

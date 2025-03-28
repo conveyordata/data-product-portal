@@ -46,15 +46,15 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        createDataOutput: builder.mutation<DataOutputCreateResponse, DataOutputCreate>({
-            query: (dataOutput) => ({
-                url: ApiUrl.DataOutputs,
+        createDataOutput: builder.mutation<DataOutputCreateResponse, { id: string; dataOutput: DataOutputCreate }>({
+            query: ({ id, dataOutput }) => ({
+                url: buildUrl(ApiUrl.DataProductOutputCreate, { dataProductId: id }),
                 method: 'POST',
                 data: dataOutput,
             }),
             invalidatesTags: (_, _error, arg) => [
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.DataProduct as const, id: arg.owner_id },
+                { type: TagTypes.DataProduct as const, id: arg.id },
                 { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
             ],
             // invalidatesTags: (_, _error, arg) => [

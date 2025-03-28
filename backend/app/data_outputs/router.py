@@ -5,10 +5,12 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization, DataOutputResolver
+from app.core.authz.authorization import (
+    Authorization,
+    DataOutputResolver,
+)
 from app.data_outputs.schema import (
     DataOutput,
-    DataOutputCreate,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
@@ -57,35 +59,6 @@ def remove_data_output(
     authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataOutputService().remove_data_output(id, db, authenticated_user)
-
-
-@router.post(
-    "",
-    responses={
-        200: {
-            "description": "DataOutput successfully created",
-            "content": {
-                "application/json": {
-                    "example": {"id": "random id of the new data_output"}
-                }
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
-                DataOutputResolver,
-            )
-        )
-    ],
-)
-def create_data_output(
-    data_output: DataOutputCreate,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> dict[str, UUID]:
-    return DataOutputService().create_data_output(data_output, db, authenticated_user)
 
 
 @router.put(

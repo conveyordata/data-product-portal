@@ -13,6 +13,7 @@ from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs.schema import (
     DataOutput,
     DataOutputCreate,
+    DataOutputCreateRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
@@ -93,8 +94,15 @@ class DataOutputService:
         return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
 
     def create_data_output(
-        self, data_output: DataOutputCreate, db: Session, authenticated_user: User
+        self,
+        id: UUID,
+        data_output: DataOutputCreateRequest,
+        db: Session,
+        authenticated_user: User,
     ) -> dict[str, UUID]:
+        data_output = DataOutputCreate(
+            **data_output.parse_pydantic_schema(), owner_id=id
+        )
         self.ensure_member(authenticated_user, data_output, db)
 
         if data_output.sourceAligned:
