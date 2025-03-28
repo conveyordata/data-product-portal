@@ -136,7 +136,6 @@ def update_data_product(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
                 DataProductResolver,
-                object_id="owner_id",
             )
         )
     ],
