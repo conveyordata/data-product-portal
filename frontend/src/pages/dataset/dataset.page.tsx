@@ -15,7 +15,9 @@ import { DatasetActions } from '@/pages/dataset/components/dataset-actions/datas
 import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description.tsx';
 import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
@@ -35,9 +37,17 @@ export function Dataset() {
         () => datasetOwners.some((owner) => owner.id === currentUser?.id) || Boolean(currentUser?.is_admin),
         [datasetOwners, currentUser],
     );
+    const { data: access } = useCheckAccessQuery(
+        {
+            object_id: datasetId,
+            action: AuthorizationAction.DATASET_UPDATE_PROPERTIES,
+        },
+        { skip: !datasetId },
+    );
+    const canEditNew = access?.access || false;
 
     function navigateToDatasetEditPage() {
-        if (isDatasetOwner && datasetId) {
+        if (canEditNew || (isDatasetOwner && datasetId)) {
             navigate(getDynamicRoutePath(ApplicationPaths.DatasetEdit, DynamicPathParams.DatasetId, datasetId));
         }
     }
@@ -62,7 +72,7 @@ export function Dataset() {
                         <Typography.Title level={3}>{dataset?.name}</Typography.Title>
                         <DatasetAccessIcon accessType={dataset.access_type} hasPopover />
                     </Flex>
-                    {isDatasetOwner && (
+                    {(canEditNew || isDatasetOwner) && (
                         <CircleIconButton
                             icon={<SettingOutlined />}
                             tooltip={t('Edit dataset')}

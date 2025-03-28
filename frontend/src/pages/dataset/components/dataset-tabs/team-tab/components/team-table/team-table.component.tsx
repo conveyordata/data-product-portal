@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
     useGetDatasetByIdQuery,
     useRemoveUserFromDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { UserContract } from '@/types/users';
 
 import styles from './team-table.module.scss';
@@ -30,6 +32,14 @@ export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Pr
     const { data: dataset, isLoading: isFetchingDataset } = useGetDatasetByIdQuery(datasetId);
     const [removeDatasetUser, { isLoading: isRemovingOwner }] = useRemoveUserFromDatasetMutation();
 
+    const { data: remove_access } = useCheckAccessQuery(
+        {
+            object_id: datasetId,
+            action: AuthorizationAction.DATASET_DELETE_USER,
+        },
+        { skip: !datasetId },
+    );
+    const canRemoveNew = remove_access?.access || false;
     const handleRemoveUserAccess = useCallback(
         async (userId: string) => {
             try {
@@ -50,8 +60,9 @@ export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Pr
             isRemovingUser: false,
             canPerformTeamActions: (userId: string) =>
                 canPerformTeamActions(isCurrentDatasetOwner, userId, currentUser.id),
+            canRemove: canRemoveNew,
         });
-    }, [t, handleRemoveUserAccess, isCurrentDatasetOwner, currentUser.id]);
+    }, [t, handleRemoveUserAccess, isCurrentDatasetOwner, currentUser.id, canRemoveNew]);
 
     if (!dataset) return null;
 

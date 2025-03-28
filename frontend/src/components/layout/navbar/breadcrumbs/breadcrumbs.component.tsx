@@ -8,6 +8,9 @@ import { useLocation, useParams } from 'react-router';
 import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { BreadcrumbLink } from '@/components/layout/navbar/breadcrumbs/breadcrumb-link/breadcrumb-link.component.tsx';
+import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
@@ -20,6 +23,7 @@ import { ApplicationPaths, createEnvironmentConfigsPath, DynamicPathParams } fro
 import {
     isDataOutputEditPage,
     isDataProductEditPage,
+    isDatasetEditPage,
     isEnvConfigPage,
     isEnvironmentConfigCreatePage,
     isEnvironmentConfigsPage,
@@ -86,7 +90,6 @@ export const Breadcrumbs = () => {
                 ...pathnames.map((pathname, index) => {
                     const path =
                         pathname === ApplicationPaths.Home ? pathname : `/${pathnames.slice(0, index + 1).join('/')}`;
-
                     const breadcrumbItem: Partial<BreadcrumbItemType> = {
                         path,
                         title: pathname,
@@ -277,6 +280,7 @@ export const Breadcrumbs = () => {
                                         path.split('/').length == 4
                                     ) {
                                         Object.assign(breadcrumbItem, {
+                                            path: `${path}#${DataOutputTabKeys.Datasets}`,
                                             title: (
                                                 <Typography.Text
                                                     ellipsis={{ tooltip: dataOutput.name }}
@@ -288,6 +292,7 @@ export const Breadcrumbs = () => {
                                         });
                                     } else {
                                         Object.assign(breadcrumbItem, {
+                                            path: `${path}#${DataProductTabKeys.About}`,
                                             title: (
                                                 <Typography.Text
                                                     ellipsis={{ tooltip: dataProduct.name }}
@@ -301,16 +306,31 @@ export const Breadcrumbs = () => {
                                 }
                             }
                             if (datasetId && dataset && !isFetchingDataset) {
-                                Object.assign(breadcrumbItem, {
-                                    title: (
-                                        <Typography.Text
-                                            ellipsis={{ tooltip: dataset.name }}
-                                            rootClassName={styles.title}
-                                        >
-                                            {dataset.name}
-                                        </Typography.Text>
-                                    ),
-                                });
+                                if (isDatasetEditPage(path, datasetId)) {
+                                    Object.assign(breadcrumbItem, {
+                                        title: (
+                                            <Space
+                                                classNames={{
+                                                    item: styles.breadcrumbItem,
+                                                }}
+                                            >
+                                                {t('Edit')}
+                                            </Space>
+                                        ),
+                                    });
+                                } else {
+                                    Object.assign(breadcrumbItem, {
+                                        path: `${path}#${DatasetTabKeys.About}`,
+                                        title: (
+                                            <Typography.Text
+                                                ellipsis={{ tooltip: dataset.name }}
+                                                rootClassName={styles.title}
+                                            >
+                                                {dataset.name}
+                                            </Typography.Text>
+                                        ),
+                                    });
+                                }
                             }
 
                             if (platformServiceConfigId && platformServiceConfig && !isFetchingPlatformServiceConfig) {

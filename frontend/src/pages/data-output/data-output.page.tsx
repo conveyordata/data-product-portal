@@ -11,8 +11,10 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataOutputDescription } from '@/pages/data-output/components/data-output-description/data-output-description.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
@@ -38,8 +40,17 @@ export function DataOutput() {
         dataProduct && currentUser && (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
     );
 
+    const { data: edit_access } = useCheckAccessQuery(
+        {
+            object_id: dataProduct?.id,
+            action: AuthorizationAction.DATA_PRODUCT_UPDATE_PROPERTIES,
+        },
+        { skip: !dataProduct },
+    );
+    const canEditNew = edit_access?.access || false;
+
     function navigateToEditPage() {
-        if (isCurrentDataOutputOwner && dataOutputId && dataOutput && !isLoading) {
+        if ((canEditNew || isCurrentDataOutputOwner) && dataOutputId && dataOutput && !isLoading) {
             navigate(
                 getDynamicRoutePath(
                     ApplicationPaths.DataOutputEdit,
@@ -74,7 +85,7 @@ export function DataOutput() {
                             {dataOutput?.name}
                         </Typography.Title>
                     </Space>
-                    {isCurrentDataOutputOwner && (
+                    {(canEditNew || isCurrentDataOutputOwner) && (
                         <Space className={styles.editIcon}>
                             <CircleIconButton
                                 icon={<SettingOutlined />}

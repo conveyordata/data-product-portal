@@ -35,7 +35,7 @@
     "@tiptap/pm": "^2.11.5",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
-    "@xyflow/react": "^12.4.4",
+    "@xyflow/react": "^12.5.1",
     "antd": "^5.24.5",
     "axios": "^1.8.4",
     "clsx": "^2.1.1",
@@ -46,12 +46,12 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-i18next": "^15.4.1",
-    "react-oidc-context": "^3.2.0",
+    "react-oidc-context": "^3.3.0",
     "react-redux": "^9.2.0",
     "react-router": "^7.4.0"
   },
   "devDependencies": {
-    "@types/node": "^22.13.13",
+    "@types/node": "^22.13.14",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.28.0",

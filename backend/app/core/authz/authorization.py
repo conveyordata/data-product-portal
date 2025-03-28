@@ -139,8 +139,8 @@ class Authorization(metaclass=Singleton):
             user: User = Depends(get_authenticated_user),
             db: Session = Depends(get_db_session),
         ) -> None:
-            # if not settings.AUTHORIZER_ENABLED:
-            #     return
+            if not settings.AUTHORIZER_ENABLED:
+                return
             obj = await resolver.resolve(request, object_id, db)
             dom = resolver.resolve_domain(db, obj)
 

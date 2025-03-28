@@ -7,8 +7,10 @@ import { Searchbar } from '@/components/form';
 import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useAddUserToDatasetMutation, useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
 import { getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
@@ -45,6 +47,14 @@ export function TeamTab({ datasetId }: Props) {
     const searchTerm = Form.useWatch('search', searchForm);
 
     const datasetOwnerIds = dataset?.owners.map((owner) => owner.id) ?? [];
+    const { data: access } = useCheckAccessQuery(
+        {
+            object_id: datasetId,
+            action: AuthorizationAction.DATASET_CREATE_USER,
+        },
+        { skip: !datasetId },
+    );
+    const canAddNew = access?.access || false;
 
     const filteredUsers = useMemo(() => {
         return filterUsers(dataset?.owners ?? [], searchTerm);
@@ -79,7 +89,7 @@ export function TeamTab({ datasetId }: Props) {
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}
-                            disabled={!isDatasetOwner}
+                            disabled={!(canAddNew || isDatasetOwner)}
                         >
                             {t('Add User')}
                         </Button>
