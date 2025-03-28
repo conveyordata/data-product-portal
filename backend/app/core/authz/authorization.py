@@ -53,23 +53,12 @@ class DataProductResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        if (result := request.query_params.get(key)) is not None:
-            return cast(str, result)
-        if (result := request.path_params.get(key)) is not None:
-            return cast(str, result)
-        return cls.DEFAULT
-
-
-class DataOutputOwnerResolver(SubjectResolver):
-    model: Model = DataProduct
-
-    @classmethod
     async def resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
-        body = await request.json()
-        if (result := body.get(key)) is not None:
+        if (result := request.query_params.get(key)) is not None:
+            return cast(str, result)
+        if (result := request.path_params.get(key)) is not None:
             return cast(str, result)
         return cls.DEFAULT
 
