@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Coroutine, Sequence, Type, TypeAlias, Union, cast
+from typing import Sequence, Type, TypeAlias, Union, cast
 
 import casbin_async_sqlalchemy_adapter as sqlalchemy_adapter
 from cachetools import Cache, LRUCache, cachedmethod
@@ -122,15 +122,15 @@ class Authorization(metaclass=Singleton):
         resolver: type[SubjectResolver],
         *,
         object_id: str = "id",
-    ) -> Callable[[Request, User, Session], Coroutine[Any, Any, None]]:
-        async def inner(
+    ) -> Callable[[Request, User, Session], None]:
+        def inner(
             request: Request,
             user: User = Depends(get_authenticated_user),
             db: Session = Depends(get_db_session),
         ) -> None:
             if not settings.AUTHORIZER_ENABLED:
                 return
-            obj = await resolver.resolve(request, object_id, db)
+            obj = resolver.resolve(request, object_id, db)
             dom = resolver.resolve_domain(db, obj)
 
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
