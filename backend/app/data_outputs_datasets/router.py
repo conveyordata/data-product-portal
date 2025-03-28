@@ -40,7 +40,17 @@ def approve_data_output_link(
     )
 
 
-@router.post("/deny/{id}")
+@router.post(
+    "/deny/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+                DataOutputDatasetAssociationResolver,
+            )
+        )
+    ],
+)
 def deny_data_output_link(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -49,7 +59,17 @@ def deny_data_output_link(
     return DataOutputDatasetService().deny_data_output_link(id, db, authenticated_user)
 
 
-@router.post("/remove/{id}")
+@router.post(
+    "/remove/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATASET__REVOKE_DATA_OUTPUT_LINK,
+                DataOutputDatasetAssociationResolver,
+            )
+        )
+    ],
+)
 def remove_data_output_link(
     id: UUID,
     db: Session = Depends(get_db_session),
