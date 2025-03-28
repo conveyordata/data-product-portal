@@ -197,8 +197,6 @@ class TestDataOutputsRouter:
 
     @staticmethod
     def update_data_output(client, payload, data_output_id):
-        print(f"{ENDPOINT}/{data_output_id}")
-        print(payload)
         return client.put(f"{ENDPOINT}/{data_output_id}", json=payload)
 
     @staticmethod

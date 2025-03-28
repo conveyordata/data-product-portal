@@ -4,6 +4,12 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz.actions import AuthorizationAction
+from app.core.authz.authorization import (
+    Authorization,
+    DataProductMembershipResolver,
+    DataProductResolver,
+)
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.schema import DataProductMembershipCreate
 from app.data_product_memberships.schema_get import DataProductMembershipGet
@@ -23,7 +29,14 @@ router = APIRouter(
 @router.post(
     "/create",
     dependencies=[
-        Depends(OnlyWithProductAccessDataProductID([DataProductUserRole.OWNER]))
+        Depends(OnlyWithProductAccessDataProductID([DataProductUserRole.OWNER])),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__CREATE_USER,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        ),
     ],
 )
 def create_data_product_membership(
@@ -37,7 +50,18 @@ def create_data_product_membership(
     )
 
 
-@router.post("/request")
+@router.post(
+    "/request",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
 def request_data_product_membership(
     user_id: UUID,
     data_product_id: UUID,
@@ -50,7 +74,18 @@ def request_data_product_membership(
     )
 
 
-@router.post("/{id}/approve", dependencies=[Depends(only_product_membership_owners)])
+@router.post(
+    "/{id}/approve",
+    dependencies=[
+        Depends(only_product_membership_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                DataProductMembershipResolver,
+            )
+        ),
+    ],
+)
 def approve_data_product_membership(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -61,7 +96,18 @@ def approve_data_product_membership(
     )
 
 
-@router.post("/{id}/deny", dependencies=[Depends(only_product_membership_owners)])
+@router.post(
+    "/{id}/deny",
+    dependencies=[
+        Depends(only_product_membership_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                DataProductMembershipResolver,
+            )
+        ),
+    ],
+)
 def deny_data_product_membership(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -72,7 +118,18 @@ def deny_data_product_membership(
     )
 
 
-@router.post("/{id}/remove", dependencies=[Depends(only_product_membership_owners)])
+@router.post(
+    "/{id}/remove",
+    dependencies=[
+        Depends(only_product_membership_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__DELETE_USER,
+                DataProductMembershipResolver,
+            )
+        ),
+    ],
+)
 def remove_data_product_membership(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -95,7 +152,15 @@ def remove_data_product_membership(
             },
         },
     },
-    dependencies=[Depends(only_product_membership_owners)],
+    dependencies=[
+        Depends(only_product_membership_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
+                DataProductMembershipResolver,
+            )
+        ),
+    ],
 )
 def update_data_product_role(
     id: UUID,
