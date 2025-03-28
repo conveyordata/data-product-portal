@@ -53,9 +53,7 @@ class DataProductResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
-    async def resolve(
-        cls, request: Request, key: str, db: Session = Depends(get_db_session)
-    ):
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
         if (result := request.query_params.get(key)) is not None:
             return cast(str, result)
         if (result := request.path_params.get(key)) is not None:
@@ -138,7 +136,6 @@ class Authorization(metaclass=Singleton):
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="You don't have permission to perform this action",
                 )
-            return None
 
         return inner
 
