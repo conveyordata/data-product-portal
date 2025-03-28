@@ -72,7 +72,7 @@ def remove_data_output(
         }
     },
     dependencies=[
-        # Depends(only_data_output_owners),
+        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
