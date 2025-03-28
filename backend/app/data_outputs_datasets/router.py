@@ -25,7 +25,7 @@ router = APIRouter(
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
-                resolver=DataOutputDatasetAssociationResolver,
+                DataOutputDatasetAssociationResolver,
             )
         )
     ],

@@ -117,8 +117,8 @@ class Authorization(metaclass=Singleton):
     def enforce(
         cls,
         action: AuthorizationAction,
+        resolver: type[SubjectResolver],
         *,
-        resolver: type[SubjectResolver] = DataProductResolver,
         object_id: str = "id",
     ) -> Callable[[Request, User, Session], None]:
         def inner(

@@ -46,7 +46,7 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
-                resolver=DataOutputResolver,
+                DataOutputResolver,
             )
         ),
     ],
@@ -75,7 +75,7 @@ def remove_data_output(
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
-                resolver=DataOutputResolver,
+                DataOutputResolver,
             )
         )
     ],
@@ -103,7 +103,7 @@ def create_data_output(
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
-                resolver=DataOutputResolver,
+                DataOutputResolver,
             )
         ),
     ],
@@ -129,7 +129,7 @@ def update_data_output(
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
-                resolver=DataOutputResolver,
+                DataOutputResolver,
             )
         ),
     ],
@@ -163,7 +163,7 @@ def update_data_output_status(
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
-                resolver=DataOutputResolver,
+                DataOutputResolver,
             )
         ),
     ],
@@ -201,7 +201,7 @@ def link_dataset_to_data_output(
         Depends(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
-                resolver=DataOutputResolver,
+                DataOutputResolver,
             )
         ),
     ],
