@@ -2,10 +2,7 @@ import { ArrowRightOutlined, DownOutlined, UserOutlined } from '@ant-design/icon
 import { Button, Dropdown, List, Menu, Space, Typography } from 'antd';
 import type { PaginationConfig } from 'antd/es/pagination';
 import type { ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-
-import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
 import { formatDate } from '@/utils/date.helper.ts';
@@ -32,13 +29,12 @@ export const PendingRequestsList = ({
     pagination,
     isFirstHalf,
 }: DataProductListProps) => {
-    const { t } = useTranslation();
     const navigate = useNavigate();
 
     if (isFetching || !(pagination.current && pagination.pageSize)) return <LoadingSpinner />;
 
     if (!pendingActionItems || pendingActionItems.length === 0) {
-        return <EmptyList description={t(`There are currently no pending requests.`)} />;
+        return;
     }
 
     const handleItemClick = (navigatePath: string) => {
@@ -55,6 +51,8 @@ export const PendingRequestsList = ({
     const startIndex = currentPage * pageSize;
     const endIndex = startIndex + pageSize;
     const paginatedItems = itemsToRender.slice(startIndex, endIndex);
+
+    if (paginatedItems.length == 0 && isFirstHalf == false) return;
 
     return (
         <List

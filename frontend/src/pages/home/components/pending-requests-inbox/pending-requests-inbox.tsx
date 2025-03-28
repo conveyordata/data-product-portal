@@ -155,6 +155,14 @@ export function PendingRequestsInbox() {
         handlePaginationChange({ current, pageSize });
     };
 
+    if (pendingItems.length == 0 && isFetching == false) {
+        return (
+            <div>
+                <Typography.Title level={1}>{t('Welcome back.')}</Typography.Title>
+            </div>
+        );
+    }
+
     return (
         <div className={styles.requestsInbox}>
             <div className={styles.sectionTitle}>
@@ -169,6 +177,7 @@ export function PendingRequestsInbox() {
                         total={pendingItems.length}
                         onChange={onPaginationChange}
                         size="small"
+                        hideOnSinglePage={true}
                     />
                 </div>
             </div>
