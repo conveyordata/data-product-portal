@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from collections.abc import Callable
 from pathlib import Path
 from typing import Sequence, Type, TypeAlias, Union, cast
@@ -10,6 +11,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.data_outputs.model import DataOutput
+from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_products.model import DataProduct
 from app.database import database
 from app.database.database import get_db_session
@@ -20,7 +23,74 @@ from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
 
-Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], None]
+Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], Type[DataOutput], None]
+
+
+class SubjectResolver(ABC):
+    DEFAULT: str = "*"
+    model: Model = None
+
+    @classmethod
+    @abstractmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        pass
+
+    @classmethod
+    def resolve_domain(
+        cls,
+        db: Session,
+        id_: str,
+    ) -> str:
+        if id_ == cls.DEFAULT or cls.model is None:
+            return cls.DEFAULT
+        domain = db.scalars(
+            select(cls.model.domain_id).where(cls.model.id == id_)
+        ).one_or_none()
+        return cls.DEFAULT if domain is None else str(domain)
+
+
+class DataProductResolver(SubjectResolver):
+    model: Model = DataProduct
+
+    @classmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        if (result := request.query_params.get(key)) is not None:
+            return cast(str, result)
+        if (result := request.path_params.get(key)) is not None:
+            return cast(str, result)
+        return cls.DEFAULT
+
+
+class DataOutputResolver(SubjectResolver):
+    model: Model = DataProduct
+
+    @classmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        obj = DataProductResolver.resolve(request, key, db)
+        if obj != cls.DEFAULT:
+            data_output = db.scalars(
+                select(DataOutput).where(DataOutput.id == obj)
+            ).one_or_none()
+            if data_output:
+                return data_output.owner_id
+        return cls.DEFAULT
+
+
+class DataOutputDatasetAssociationResolver(SubjectResolver):
+    model: Model = Dataset
+
+    @classmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        obj = DataProductResolver.resolve(request, key, db)
+        if obj != cls.DEFAULT:
+            data_output_dataset = db.scalars(
+                select(DataOutputDatasetAssociation).where(
+                    DataOutputDatasetAssociation.id == obj
+                )
+            ).one_or_none()
+            if data_output_dataset:
+                return data_output_dataset.dataset_id
+        return cls.DEFAULT
 
 
 class Authorization(metaclass=Singleton):
@@ -47,7 +117,8 @@ class Authorization(metaclass=Singleton):
     def enforce(
         cls,
         action: AuthorizationAction,
-        model: Model = None,
+        resolver: type[SubjectResolver],
+        *,
         object_id: str = "id",
     ) -> Callable[[Request, User, Session], None]:
         def inner(
@@ -55,8 +126,10 @@ class Authorization(metaclass=Singleton):
             user: User = Depends(get_authenticated_user),
             db: Session = Depends(get_db_session),
         ) -> None:
-            obj = cls.resolve_parameter(request, object_id)
-            dom = cls.resolve_domain(db, model, obj)
+            if not settings.AUTHORIZER_ENABLED:
+                return
+            obj = resolver.resolve(request, object_id, db)
+            dom = resolver.resolve_domain(db, obj)
 
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
                 raise HTTPException(
@@ -65,29 +138,6 @@ class Authorization(metaclass=Singleton):
                 )
 
         return inner
-
-    @staticmethod
-    def resolve_parameter(request: Request, key: str, default: str = "*") -> str:
-        if (result := request.query_params.get(key)) is not None:
-            return cast(str, result)
-        if (result := request.path_params.get(key)) is not None:
-            return cast(str, result)
-
-        return default
-
-    @staticmethod
-    def resolve_domain(
-        db: Session,
-        model: Model,
-        id_: str,
-        default: str = "*",
-    ) -> str:
-        if id_ == default or model is None:
-            return default
-        domain = db.scalars(
-            select(model.domain_id).where(model.id == id_)
-        ).one_or_none()
-        return default if domain is None else str(domain)
 
     @cachedmethod(lambda self: self._cache)
     def has_access(

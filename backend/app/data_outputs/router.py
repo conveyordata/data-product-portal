@@ -4,6 +4,8 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz.actions import AuthorizationAction
+from app.core.authz.authorization import Authorization, DataOutputResolver
 from app.data_outputs.schema import (
     DataOutput,
     DataOutputCreate,
@@ -39,7 +41,15 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
             },
         }
     },
-    dependencies=[Depends(only_data_output_owners)],
+    dependencies=[
+        Depends(only_data_output_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+                DataOutputResolver,
+            )
+        ),
+    ],
 )
 def remove_data_output(
     id: UUID,
@@ -61,6 +71,14 @@ def remove_data_output(
             },
         },
     },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                DataOutputResolver,
+            )
+        )
+    ],
 )
 def create_data_output(
     data_output: DataOutputCreate,
@@ -80,9 +98,17 @@ def create_data_output(
             },
         }
     },
-    dependencies=[Depends(only_data_output_owners)],
+    dependencies=[
+        Depends(only_data_output_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                DataOutputResolver,
+            )
+        ),
+    ],
 )
-def update_data_product(
+def update_data_output(
     id: UUID, data_output: DataOutputUpdate, db: Session = Depends(get_db_session)
 ):
     return DataOutputService().update_data_output(id, data_output, db)
@@ -98,9 +124,17 @@ def update_data_product(
             },
         }
     },
-    dependencies=[Depends(only_data_output_owners)],
+    dependencies=[
+        Depends(only_data_output_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                DataOutputResolver,
+            )
+        ),
+    ],
 )
-def update_data_product_status(
+def update_data_output_status(
     id: UUID,
     data_output: DataOutputStatusUpdate,
     db: Session = Depends(get_db_session),
@@ -124,7 +158,15 @@ def update_data_product_status(
             },
         },
     },
-    dependencies=[Depends(only_data_output_owners)],
+    dependencies=[
+        Depends(only_data_output_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                DataOutputResolver,
+            )
+        ),
+    ],
 )
 def link_dataset_to_data_output(
     id: UUID,
@@ -154,7 +196,15 @@ def link_dataset_to_data_output(
             },
         },
     },
-    dependencies=[Depends(only_data_output_owners)],
+    dependencies=[
+        Depends(only_data_output_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                DataOutputResolver,
+            )
+        ),
+    ],
 )
 def unlink_dataset_from_data_output(
     id: UUID,

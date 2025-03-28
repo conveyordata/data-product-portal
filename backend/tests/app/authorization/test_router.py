@@ -12,8 +12,7 @@ ENDPOINT = "/api/authz"
 
 
 class TestAuthorizationRouter:
-
-    def test_check_access(self, client: TestClient):
+    def test_check_access(self, client: TestClient, enable_authorizer):
         request = AccessRequest(
             object_id=None,
             domain=None,
@@ -29,7 +28,7 @@ class TestAuthorizationRouter:
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_check_access_authorized(
-        self, client: TestClient, authorizer: Authorization
+        self, client: TestClient, authorizer: Authorization, enable_authorizer
     ):
         user = UserFactory(external_id="sub")
         role_id = uuid.uuid4()
