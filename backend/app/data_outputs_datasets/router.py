@@ -12,7 +12,6 @@ from app.core.authz.authorization import (
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_outputs_datasets.service import DataOutputDatasetService
 from app.database.database import get_db_session
-from app.datasets.model import Dataset
 from app.users.schema import User
 
 router = APIRouter(
@@ -27,7 +26,6 @@ router = APIRouter(
             Authorization.enforce(
                 AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
                 resolver=DataOutputDatasetAssociationResolver,
-                model=Dataset,
             )
         )
     ],

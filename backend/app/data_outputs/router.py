@@ -13,7 +13,6 @@ from app.data_outputs.schema import (
     DataOutputUpdate,
 )
 from app.data_outputs.service import DataOutputService
-from app.data_products.model import DataProduct
 from app.database.database import get_db_session
 from app.dependencies import only_data_output_owners
 from app.graph.graph import Graph
@@ -48,7 +47,6 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
                 resolver=DataOutputResolver,
-                model=DataProduct,
             )
         ),
     ],
@@ -78,7 +76,6 @@ def remove_data_output(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
                 resolver=DataOutputResolver,
-                model=DataProduct,
             )
         )
     ],
@@ -107,7 +104,6 @@ def create_data_output(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
                 resolver=DataOutputResolver,
-                model=DataProduct,
             )
         ),
     ],
@@ -134,7 +130,6 @@ def update_data_output(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
                 resolver=DataOutputResolver,
-                model=DataProduct,
             )
         ),
     ],
@@ -169,7 +164,6 @@ def update_data_output_status(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
                 resolver=DataOutputResolver,
-                model=DataProduct,
             )
         ),
     ],
@@ -208,7 +202,6 @@ def link_dataset_to_data_output(
             Authorization.enforce(
                 AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
                 resolver=DataOutputResolver,
-                model=DataProduct,
             )
         ),
     ],

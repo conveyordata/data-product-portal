@@ -28,14 +28,30 @@ Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], Type[DataOutput], Non
 
 class SubjectResolver(ABC):
     DEFAULT: str = "*"
+    model: Model = None
 
     @classmethod
     @abstractmethod
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
         pass
 
+    @classmethod
+    def resolve_domain(
+        cls,
+        db: Session,
+        id_: str,
+    ) -> str:
+        if id_ == cls.DEFAULT or cls.model is None:
+            return cls.DEFAULT
+        domain = db.scalars(
+            select(cls.model.domain_id).where(cls.model.id == id_)
+        ).one_or_none()
+        return cls.DEFAULT if domain is None else str(domain)
 
-class DefaultResolver(SubjectResolver):
+
+class DataProductResolver(SubjectResolver):
+    model: Model = DataProduct
+
     @classmethod
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
         if (result := request.query_params.get(key)) is not None:
@@ -46,9 +62,11 @@ class DefaultResolver(SubjectResolver):
 
 
 class DataOutputResolver(SubjectResolver):
+    model: Model = DataProduct
+
     @classmethod
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        obj = DefaultResolver.resolve(request, key, db)
+        obj = DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_output = db.scalars(
                 select(DataOutput).where(DataOutput.id == obj)
@@ -59,9 +77,11 @@ class DataOutputResolver(SubjectResolver):
 
 
 class DataOutputDatasetAssociationResolver(SubjectResolver):
+    model: Model = Dataset
+
     @classmethod
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        obj = DefaultResolver.resolve(request, key, db)
+        obj = DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_output_dataset = db.scalars(
                 select(DataOutputDatasetAssociation).where(
@@ -98,8 +118,7 @@ class Authorization(metaclass=Singleton):
         cls,
         action: AuthorizationAction,
         *,
-        resolver: type[SubjectResolver] = DefaultResolver,
-        model: Model = None,
+        resolver: type[SubjectResolver] = DataProductResolver,
         object_id: str = "id",
     ) -> Callable[[Request, User, Session], None]:
         def inner(
@@ -110,7 +129,7 @@ class Authorization(metaclass=Singleton):
             if not settings.AUTHORIZER_ENABLED:
                 return
             obj = resolver.resolve(request, object_id, db)
-            dom = cls.resolve_domain(db, model, obj)
+            dom = resolver.resolve_domain(db, obj)
 
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
                 raise HTTPException(
@@ -119,20 +138,6 @@ class Authorization(metaclass=Singleton):
                 )
 
         return inner
-
-    @staticmethod
-    def resolve_domain(
-        db: Session,
-        model: Model,
-        id_: str,
-        default: str = "*",
-    ) -> str:
-        if id_ == default or model is None:
-            return default
-        domain = db.scalars(
-            select(model.domain_id).where(model.id == id_)
-        ).one_or_none()
-        return default if domain is None else str(domain)
 
     @cachedmethod(lambda self: self._cache)
     def has_access(

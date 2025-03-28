@@ -9,7 +9,6 @@ from app.core.authz.authorization import Authorization
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.service import DataProductSettingService
-from app.data_products.model import DataProduct
 from app.data_products.schema import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -86,11 +85,7 @@ def create_data_product(
     },
     dependencies=[
         Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
-        Depends(
-            Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__DELETE, model=DataProduct
-            )
-        ),
+        Depends(Authorization.enforce(AuthorizationAction.DATA_PRODUCT__DELETE)),
     ],
 )
 def remove_data_product(
