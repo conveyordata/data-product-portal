@@ -138,18 +138,18 @@ test = ["distro (>=1.9.0,<1.10.0)", "flake8 (>=6.1,<7.0)", "flake8-pyi (>=24.1.0
 
 [[package]]
 name = "boto3"
-version = "1.37.21"
+version = "1.37.22"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "boto3-1.37.21-py3-none-any.whl", hash = "sha256:722eec9da1305fd7d0af839d80f1e76873faf8c030b8bace70c553c0b836e1d3"},
-    {file = "boto3-1.37.21.tar.gz", hash = "sha256:69227716293facaf80d78c6c5c7291bdcc4e2cb5f8e2d3e7258c1cbd071c9cc3"},
+    {file = "boto3-1.37.22-py3-none-any.whl", hash = "sha256:a14324d5fa5f4fea00c0e3c69754cbd28100f7fe194693eeecf2dc07446cf4ef"},
+    {file = "boto3-1.37.22.tar.gz", hash = "sha256:78a0ec0aafbf6044104c98ad80b69e6d1c83d8233fda2c2d241029e6c705c510"},
 ]
 
 [package.dependencies]
-botocore = ">=1.37.21,<1.38.0"
+botocore = ">=1.37.22,<1.38.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.11.0,<0.12.0"
 
@@ -158,14 +158,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.37.21"
+version = "1.37.22"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "botocore-1.37.21-py3-none-any.whl", hash = "sha256:2cd6016bff3877bea32c5257ab34f92210400293745ac95f291d6620fea1662a"},
-    {file = "botocore-1.37.21.tar.gz", hash = "sha256:b4b08daa9b4b2c379ef978a75a48907d72ac5b3b9247280488109eb41c19be36"},
+    {file = "botocore-1.37.22-py3-none-any.whl", hash = "sha256:184db7c9314d13002bc827f511a5140574b5da1acda342d51e093dad6317de98"},
+    {file = "botocore-1.37.22.tar.gz", hash = "sha256:b3b26f1a90236bcd17d4092f8c85a256b44e9955a16b633319a2f5678d605e9f"},
 ]
 
 [package.dependencies]
@@ -1869,4 +1869,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "cbfa9f6c96b13f20cf7378fa9185c33b3bfe17af50396c5e75de045a3d860ee6"
+content-hash = "8a2e21f21b120aaf8020ac9af7d1035a787bc813f25940cf20a2f074c566e9dc"
