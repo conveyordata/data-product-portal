@@ -64,6 +64,13 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
             },
         },
     },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT, DataProductResolver
+            )
+        )
+    ],
 )
 def create_data_product(
     data_product: DataProductCreate,
@@ -111,7 +118,14 @@ def remove_data_product(
             },
         }
     },
-    dependencies=[Depends(OnlyWithProductAccessID())],
+    dependencies=[
+        Depends(OnlyWithProductAccessID()),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
+            )
+        ),
+    ],
 )
 def update_data_product(
     id: UUID, data_product: DataProductUpdate, db: Session = Depends(get_db_session)
@@ -161,7 +175,14 @@ def create_data_output(
             },
         }
     },
-    dependencies=[Depends(OnlyWithProductAccessID())],
+    dependencies=[
+        Depends(OnlyWithProductAccessID()),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
+            )
+        ),
+    ],
 )
 def update_data_product_about(
     id: UUID,
@@ -181,7 +202,14 @@ def update_data_product_about(
             },
         }
     },
-    dependencies=[Depends(OnlyWithProductAccessID())],
+    dependencies=[
+        Depends(OnlyWithProductAccessID()),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS, DataProductResolver
+            )
+        ),
+    ],
 )
 def update_data_product_status(
     id: UUID,
@@ -207,7 +235,15 @@ def update_data_product_status(
             },
         },
     },
-    dependencies=[Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER]))],
+    dependencies=[
+        Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                DataProductResolver,
+            )
+        ),
+    ],
 )
 def link_dataset_to_data_product(
     id: UUID,
@@ -237,7 +273,15 @@ def link_dataset_to_data_product(
             },
         },
     },
-    dependencies=[Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER]))],
+    dependencies=[
+        Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                DataProductResolver,
+            )
+        ),
+    ],
 )
 def unlink_dataset_from_data_product(
     id: UUID,
@@ -247,14 +291,31 @@ def unlink_dataset_from_data_product(
     return DataProductService().unlink_dataset_from_data_product(id, dataset_id, db)
 
 
-@router.get("/{id}/role", dependencies=[Depends(OnlyWithProductAccessID())])
+@router.get(
+    "/{id}/role",
+    dependencies=[
+        Depends(OnlyWithProductAccessID()),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
+        ),
+    ],
+)
 def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) -> str:
     return DataProductService().get_data_product_role_arn(id, environment, db)
 
 
 @router.get(
     "/{id}/signin_url",
-    dependencies=[Depends(OnlyWithProductAccessID())],
+    dependencies=[
+        Depends(OnlyWithProductAccessID()),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
+        ),
+    ],
 )
 def get_signin_url(
     id: UUID,
@@ -269,7 +330,14 @@ def get_signin_url(
 
 @router.get(
     "/{id}/conveyor_ide_url",
-    dependencies=[Depends(OnlyWithProductAccessID())],
+    dependencies=[
+        Depends(OnlyWithProductAccessID()),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
+        ),
+    ],
 )
 def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
     return DataProductService().get_conveyor_ide_url(id, db)
@@ -277,7 +345,14 @@ def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str
 
 @router.get(
     "/{id}/databricks_workspace_url",
-    dependencies=[Depends(OnlyWithProductAccessID())],
+    dependencies=[
+        Depends(OnlyWithProductAccessID()),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
+        ),
+    ],
 )
 def get_databricks_workspace_url(
     id: UUID,
@@ -303,7 +378,14 @@ def get_graph_data(
 
 @router.post(
     "/{id}/settings/{setting_id}",
-    dependencies=[Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER]))],
+    dependencies=[
+        Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS, DataProductResolver
+            )
+        ),
+    ],
 )
 def set_value_for_data_product(
     id: UUID,
