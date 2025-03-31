@@ -360,35 +360,38 @@ class DataProductService:
         db.commit()
         db.refresh(data_product)
         RefreshInfrastructureLambda().trigger()
-
-        url = (
-            settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-product"
-        )
-        action = emailgen.Table(
-            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
-        )
-        action.add_row(
-            [
-                data_product.name,
-                "Access to consume data from ",
-                dataset.name,
-                ", ".join(
-                    [
-                        f"{owner.first_name} {owner.last_name}"
-                        for owner in dataset.owners
-                    ]
-                ),
-                f"{authenticated_user.first_name} {authenticated_user.last_name}",
-            ]
-        )
-        background_tasks.add_task(
-            send_mail,
-            [User.model_validate(owner) for owner in dataset.owners],
-            action,
-            url,
-            f"Action Required: {data_product.name} wants "
-            f"to consume data from {dataset.name}",
-        )
+        if dataset.access_type != DatasetAccessType.PUBLIC:
+            url = (
+                settings.HOST.strip("/")
+                + "/datasets/"
+                + str(dataset.id)
+                + "#data-product"
+            )
+            action = emailgen.Table(
+                ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
+            )
+            action.add_row(
+                [
+                    data_product.name,
+                    "Access to consume data from ",
+                    dataset.name,
+                    ", ".join(
+                        [
+                            f"{owner.first_name} {owner.last_name}"
+                            for owner in dataset.owners
+                        ]
+                    ),
+                    f"{authenticated_user.first_name} {authenticated_user.last_name}",
+                ]
+            )
+            background_tasks.add_task(
+                send_mail,
+                [User.model_validate(owner) for owner in dataset.owners],
+                action,
+                url,
+                f"Action Required: {data_product.name} wants "
+                f"to consume data from {dataset.name}",
+            )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID, db: Session):
