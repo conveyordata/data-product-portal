@@ -21,25 +21,21 @@ const ROW_GUTTER = 96;
 const COL_SPAN = 12;
 
 const createPendingItem = (userNotification: NotificationModel, t: TFunction) => {
-    let link, description, navigatePath, date, author, origin;
+    let link, description, navigatePath, date, author;
 
     switch (userNotification.notification.configuration_type) {
         case NotificationTypes.DataProductDataset:
             link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
             description = (
                 <Typography.Text className="description">
-                    {t('Requests for read access to the')}{' '}
+                    {t('Requests read access to the')}{' '}
                     <Link
                         onClick={(e) => e.stopPropagation()}
                         to={createDatasetIdPath(userNotification.notification.data_product_dataset.dataset_id)}
                     >
                         {userNotification.notification.data_product_dataset.dataset.name}
                     </Link>{' '}
-                    {t('dataset.')}
-                </Typography.Text>
-            );
-            origin = (
-                <Typography.Text>
+                    {t('dataset, for the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
                         {userNotification.notification.data_product_dataset.data_product.name}
                     </Link>{' '}
@@ -63,19 +59,15 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
                 userNotification.notification.data_output_dataset.data_output.owner_id,
             );
             description = (
-                <Typography.Text>
-                    {t('Requests to create a link to the')}{' '}
+                <Typography.Text className="description">
+                    {t('Requests to create a link with the')}{' '}
                     <Link
                         onClick={(e) => e.stopPropagation()}
                         to={createDatasetIdPath(userNotification.notification.data_output_dataset.dataset_id)}
                     >
                         {userNotification.notification.data_output_dataset.dataset.name}
                     </Link>{' '}
-                    {t('dataset.')}
-                </Typography.Text>
-            );
-            origin = (
-                <Typography.Text>
+                    {t('dataset, from the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
                         {userNotification.notification.data_output_dataset.data_output.name}
                     </Link>{' '}
@@ -104,7 +96,6 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
                     {t('data product team.')}
                 </Typography.Text>
             );
-            origin = null;
             navigatePath = createDataProductIdPath(
                 userNotification.notification.data_product_membership.data_product_id,
                 DataProductTabKeys.Team,
@@ -126,7 +117,6 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
         navigatePath: navigatePath,
         date: date,
         author: author,
-        origin: origin,
     };
 };
 

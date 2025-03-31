@@ -33,6 +33,7 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     }
     margin: 0;
     margin-bottom: globals.$spacing-regular;
+    height: globals.$spacing-regular * 4;
     .item-card {
         height: 100%;
         padding: globals.$spacing-xs;

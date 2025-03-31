@@ -1,4 +1,4 @@
-import { ArrowRightOutlined, DownOutlined, UserOutlined } from '@ant-design/icons';
+import { DownOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Dropdown, List, Menu, Space, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router';
@@ -13,7 +13,6 @@ type PendingActionItem = {
     navigatePath: string;
     date: string;
     author: string;
-    origin: ReactNode;
 };
 
 type DataProductListProps = {
@@ -46,11 +45,6 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems }: DataProd
                             <Space align="center">
                                 <UserOutlined />
                                 <Typography.Text>{item.author}</Typography.Text>
-                                {item.origin && (
-                                    <Typography.Text>
-                                        <ArrowRightOutlined /> {item.origin}
-                                    </Typography.Text>
-                                )}
                             </Space>
                             <Space>
                                 <Typography.Text type="secondary">{formattedDate}</Typography.Text>
