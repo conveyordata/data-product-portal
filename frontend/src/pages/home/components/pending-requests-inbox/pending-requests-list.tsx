@@ -1,8 +1,8 @@
 import { ArrowRightOutlined, DownOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Dropdown, List, Menu, Space, Typography } from 'antd';
-import type { PaginationConfig } from 'antd/es/pagination';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router';
+
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
 import { formatDate } from '@/utils/date.helper.ts';
@@ -19,19 +19,12 @@ type PendingActionItem = {
 type DataProductListProps = {
     isFetching: boolean;
     pendingActionItems: PendingActionItem[];
-    pagination: PaginationConfig;
-    isFirstHalf: boolean;
 };
 
-export const PendingRequestsList = ({
-    isFetching,
-    pendingActionItems,
-    pagination,
-    isFirstHalf,
-}: DataProductListProps) => {
+export const PendingRequestsList = ({ isFetching, pendingActionItems }: DataProductListProps) => {
     const navigate = useNavigate();
 
-    if (isFetching || !(pagination.current && pagination.pageSize)) return <LoadingSpinner />;
+    if (isFetching) return <LoadingSpinner />;
 
     if (!pendingActionItems || pendingActionItems.length === 0) {
         return;
@@ -41,22 +34,9 @@ export const PendingRequestsList = ({
         navigate(navigatePath);
     };
 
-    const totalItems = pagination.pageSize;
-    const half = Math.ceil(totalItems / 2);
-    const itemsToRender = isFirstHalf
-        ? pendingActionItems.slice(0, half)
-        : pendingActionItems.slice(half, pagination.pageSize);
-    const currentPage = pagination.current - 1;
-    const pageSize = pagination.pageSize;
-    const startIndex = currentPage * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedItems = itemsToRender.slice(startIndex, endIndex);
-
-    if (paginatedItems.length == 0 && isFirstHalf == false) return;
-
     return (
         <List
-            dataSource={paginatedItems}
+            dataSource={pendingActionItems}
             className={styles.antList}
             renderItem={(item) => {
                 const formattedDate = item.date ? formatDate(item.date) : undefined;

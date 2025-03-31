@@ -155,6 +155,17 @@ export function PendingRequestsInbox() {
         handlePaginationChange({ current, pageSize });
     };
 
+    const pageStart = (pagination.current - 1) * pagination.pageSize;
+    const pageEnd = pagination.current * pagination.pageSize;
+    const currentPageItems = pendingItems.slice(pageStart, pageEnd);
+
+    const midIndex =
+        currentPageItems.length > Math.ceil(pagination.pageSize / 2)
+            ? Math.ceil(pagination.pageSize / 2)
+            : currentPageItems.length;
+    const firstListItems = currentPageItems.slice(0, midIndex);
+    const secondListItems = currentPageItems.slice(midIndex);
+
     if (pendingItems.length == 0 && isFetching == false) {
         return (
             <div>
@@ -184,20 +195,10 @@ export function PendingRequestsInbox() {
             <div className={styles.contentSecondary}>
                 <Row gutter={ROW_GUTTER}>
                     <Col span={COL_SPAN}>
-                        <PendingRequestsList
-                            pendingActionItems={pendingItems}
-                            isFetching={isFetching}
-                            pagination={pagination}
-                            isFirstHalf={true}
-                        />
+                        <PendingRequestsList pendingActionItems={firstListItems} isFetching={isFetching} />
                     </Col>
                     <Col span={COL_SPAN}>
-                        <PendingRequestsList
-                            pendingActionItems={pendingItems}
-                            isFetching={isFetching}
-                            pagination={pagination}
-                            isFirstHalf={false}
-                        />
+                        <PendingRequestsList pendingActionItems={secondListItems} isFetching={isFetching} />
                     </Col>
                 </Row>
             </div>
