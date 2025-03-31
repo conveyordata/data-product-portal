@@ -78,7 +78,7 @@ export function Notifications() {
                         description = (
                             <Typography.Text>
                                 {t('{{name}}, denied your request made on behalf of data output', {
-                                    name: userNotification.notification.data_product_dataset.approved_by?.first_name,
+                                    name: userNotification.notification.data_product_dataset.denied_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
                                     {userNotification.notification.data_product_dataset.data_product.name}
@@ -154,7 +154,7 @@ export function Notifications() {
                         description = (
                             <Typography.Text>
                                 {t('{{name}}, denied your request made on behalf of data output', {
-                                    name: userNotification.notification.data_output_dataset.approved_by?.first_name,
+                                    name: userNotification.notification.data_output_dataset.denied_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
                                     {userNotification.notification.data_output_dataset.data_output.name}
@@ -211,7 +211,7 @@ export function Notifications() {
                         description = (
                             <Typography.Text>
                                 {t('{{name}} denied your request to join the data product', {
-                                    name: userNotification.notification.data_product_membership.approved_by?.first_name,
+                                    name: userNotification.notification.data_product_membership.denied_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
                                     {userNotification.notification.data_product_membership.data_product.name}
