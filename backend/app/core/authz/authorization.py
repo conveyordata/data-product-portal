@@ -63,6 +63,10 @@ class DataProductResolver(SubjectResolver):
         return cls.DEFAULT
 
 
+class DatasetResolver(DataProductResolver):
+    model: Model = Dataset
+
+
 class DataOutputResolver(SubjectResolver):
     model: Model = DataProduct
 

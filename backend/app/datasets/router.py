@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz.actions import AuthorizationAction
+from app.core.authz.authorization import Authorization, DatasetResolver
 from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
 from app.datasets.schema import (
@@ -63,6 +65,13 @@ def get_user_datasets(
             },
         },
     },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.GLOBAL__CREATE_DATASET, DatasetResolver
+            )
+        ),
+    ],
 )
 def create_dataset(
     dataset: DatasetCreateUpdate, db: Session = Depends(get_db_session)
@@ -80,7 +89,12 @@ def create_dataset(
             },
         }
     },
-    dependencies=[Depends(only_dataset_owners)],
+    dependencies=[
+        Depends(only_dataset_owners),
+        Depends(
+            Authorization.enforce(AuthorizationAction.DATASET__DELETE, DatasetResolver)
+        ),
+    ],
 )
 def remove_dataset(id: UUID, db: Session = Depends(get_db_session)):
     return DatasetService().remove_dataset(id, db)
@@ -96,7 +110,14 @@ def remove_dataset(id: UUID, db: Session = Depends(get_db_session)):
             },
         }
     },
-    dependencies=[Depends(only_dataset_owners)],
+    dependencies=[
+        Depends(only_dataset_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATASET__UPDATE_PROPERTIES, DatasetResolver
+            )
+        ),
+    ],
 )
 def update_dataset(
     id: UUID, dataset: DatasetCreateUpdate, db: Session = Depends(get_db_session)
@@ -114,7 +135,14 @@ def update_dataset(
             },
         }
     },
-    dependencies=[Depends(only_dataset_owners)],
+    dependencies=[
+        Depends(only_dataset_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATASET__UPDATE_PROPERTIES, DatasetResolver
+            )
+        ),
+    ],
 )
 def update_dataset_about(
     id: UUID, dataset: DatasetAboutUpdate, db: Session = Depends(get_db_session)
@@ -132,7 +160,14 @@ def update_dataset_about(
             },
         }
     },
-    dependencies=[Depends(only_dataset_owners)],
+    dependencies=[
+        Depends(only_dataset_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATASET__UPDATE_STATUS, DatasetResolver
+            )
+        ),
+    ],
 )
 def update_dataset_status(
     id: UUID, dataset: DatasetStatusUpdate, db: Session = Depends(get_db_session)
@@ -156,7 +191,14 @@ def update_dataset_status(
             },
         },
     },
-    dependencies=[Depends(only_dataset_owners)],
+    dependencies=[
+        Depends(only_dataset_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATASET__CREATE_USER, DatasetResolver
+            )
+        ),
+    ],
 )
 def add_user_to_dataset(
     id: UUID,
@@ -182,7 +224,14 @@ def add_user_to_dataset(
             },
         },
     },
-    dependencies=[Depends(only_dataset_owners)],
+    dependencies=[
+        Depends(only_dataset_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATASET__DELETE_USER, DatasetResolver
+            )
+        ),
+    ],
 )
 def remove_user_from_dataset(
     id: UUID,
@@ -201,7 +250,14 @@ def get_graph_data(
 
 @router.post(
     "/{id}/settings/{setting_id}",
-    dependencies=[Depends(only_dataset_owners)],
+    dependencies=[
+        Depends(only_dataset_owners),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATASET__UPDATE_SETTINGS, DatasetResolver
+            )
+        ),
+    ],
 )
 def set_value_for_dataset(
     id: UUID,
