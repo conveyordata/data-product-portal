@@ -74,9 +74,11 @@ def get_user_datasets(
     ],
 )
 def create_dataset(
-    dataset: DatasetCreateUpdate, db: Session = Depends(get_db_session)
+    dataset: DatasetCreateUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DatasetService().create_dataset(dataset, db)
+    return DatasetService().create_dataset(dataset, db, authenticated_user)
 
 
 @router.delete(

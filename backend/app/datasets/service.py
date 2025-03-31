@@ -1,6 +1,8 @@
+from datetime import datetime
 from typing import Iterable, Sequence
 from uuid import UUID
 
+import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
@@ -14,6 +16,7 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema import (
+    Dataset,
     DatasetAboutUpdate,
     DatasetCreateUpdate,
     DatasetStatusUpdate,
@@ -22,6 +25,10 @@ from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.role_assignments.dataset.model import DatasetRoleAssignment
+from app.role_assignments.enums import DecisionStatus
+from app.roles.schema import Scope
+from app.roles.service import RoleService
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User, ensure_user_exists
@@ -113,13 +120,39 @@ class DatasetService:
         return tags
 
     def create_dataset(
-        self, dataset: DatasetCreateUpdate, db: Session
+        self, dataset: DatasetCreateUpdate, db: Session, authenticated_user: User
     ) -> dict[str, UUID]:
-        dataset = self._update_owners(dataset, db)
-        dataset_schema = dataset.parse_pydantic_schema()
+        new_dataset: Dataset = self._update_owners(dataset, db)
+        dataset_schema = new_dataset.parse_pydantic_schema()
         tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
         model = DatasetModel(**dataset_schema, tags=tags)
+        owner_role = [
+            role
+            for role in RoleService(db).get_roles(Scope.DATASET)
+            if role.name == "Owner"
+        ]
+        if len(owner_role) == 1:
+            owner_role = owner_role[0]
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Owner role not found",
+            )
         db.add(model)
+        db.commit()
+        for owner in new_dataset.owners:
+            db.add(
+                DatasetRoleAssignment(
+                    dataset_id=model.id,
+                    user_id=owner.id,
+                    role_id=owner_role.id,
+                    requested_by_id=authenticated_user.id,
+                    requested_on=datetime.now(tz=pytz.utc),
+                    decided_by_id=authenticated_user.id,
+                    decided_on=datetime.now(tz=pytz.utc),
+                    decision=DecisionStatus.APPROVED,
+                )
+            )
         db.commit()
         RefreshInfrastructureLambda().trigger()
 

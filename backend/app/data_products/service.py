@@ -54,6 +54,10 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
+from app.role_assignments.data_product.model import DataProductRoleAssignment
+from app.role_assignments.enums import DecisionStatus
+from app.roles.schema import Scope
+from app.roles.service import RoleService
 from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
@@ -197,6 +201,20 @@ class DataProductService:
         data_product_schema = data_product.parse_pydantic_schema()
         tags = self._get_tags(db, data_product_schema.pop("tag_ids", []))
         model = DataProductModel(**data_product_schema, tags=tags)
+
+        owner_role = [
+            role
+            for role in RoleService(db).get_roles(Scope.DATA_PRODUCT)
+            if role.name == "Owner"
+        ]
+        if len(owner_role) == 1:
+            owner_role = owner_role[0]
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Owner role not found",
+            )
+
         for membership in model.memberships:
             membership.status = DataProductMembershipStatus.APPROVED
             membership.requested_by_id = authenticated_user.id
@@ -205,6 +223,21 @@ class DataProductService:
             membership.approved_on = datetime.now(tz=pytz.utc)
 
         db.add(model)
+        db.commit()
+
+        for membership in model.memberships:
+            db.add(
+                DataProductRoleAssignment(
+                    data_product_id=model.id,
+                    user_id=membership.user_id,
+                    role_id=owner_role.id,
+                    requested_by_id=authenticated_user.id,
+                    requested_on=datetime.now(tz=pytz.utc),
+                    decided_by_id=authenticated_user.id,
+                    decided_on=datetime.now(tz=pytz.utc),
+                    decision=DecisionStatus.APPROVED,
+                )
+            )
         db.commit()
 
         RefreshInfrastructureLambda().trigger()
