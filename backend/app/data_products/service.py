@@ -54,7 +54,14 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
-from app.role_assignments.data_product.model import DataProductRoleAssignment
+from app.role_assignments.data_product.router import (
+    create_assignment,
+    decide_assignment,
+)
+from app.role_assignments.data_product.schema import (
+    CreateRoleAssignment,
+    DecideRoleAssignment,
+)
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Scope
 from app.roles.service import RoleService
@@ -195,7 +202,11 @@ class DataProductService:
         return tags
 
     def create_data_product(
-        self, data_product: DataProductCreate, db: Session, authenticated_user: User
+        self,
+        data_product: DataProductCreate,
+        db: Session,
+        authenticated_user: User,
+        background_tasks: BackgroundTasks,
     ) -> dict[str, UUID]:
         data_product = self._update_users(data_product, db)
         data_product_schema = data_product.parse_pydantic_schema()
@@ -226,19 +237,22 @@ class DataProductService:
         db.commit()
 
         for membership in model.memberships:
-            db.add(
-                DataProductRoleAssignment(
-                    data_product_id=model.id,
+            resp = create_assignment(
+                CreateRoleAssignment(
+                    dataset_id=model.id,
                     user_id=membership.user_id,
                     role_id=owner_role.id,
-                    requested_by_id=authenticated_user.id,
-                    requested_on=datetime.now(tz=pytz.utc),
-                    decided_by_id=authenticated_user.id,
-                    decided_on=datetime.now(tz=pytz.utc),
-                    decision=DecisionStatus.APPROVED,
-                )
+                ),
+                db,
+                authenticated_user,
             )
-        db.commit()
+            decide_assignment(
+                id=resp.id,
+                background_tasks=background_tasks,
+                request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+                db=db,
+                user=authenticated_user,
+            )
 
         RefreshInfrastructureLambda().trigger()
         return {"id": model.id}

@@ -1,9 +1,7 @@
-from datetime import datetime
 from typing import Iterable, Sequence
 from uuid import UUID
 
-import pytz
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
@@ -25,7 +23,11 @@ from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.role_assignments.dataset.model import DatasetRoleAssignment
+from app.role_assignments.dataset.router import create_assignment, decide_assignment
+from app.role_assignments.dataset.schema import (
+    CreateRoleAssignment,
+    DecideRoleAssignment,
+)
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Scope
 from app.roles.service import RoleService
@@ -120,7 +122,11 @@ class DatasetService:
         return tags
 
     def create_dataset(
-        self, dataset: DatasetCreateUpdate, db: Session, authenticated_user: User
+        self,
+        dataset: DatasetCreateUpdate,
+        db: Session,
+        authenticated_user: User,
+        background_tasks: BackgroundTasks,
     ) -> dict[str, UUID]:
         new_dataset: Dataset = self._update_owners(dataset, db)
         dataset_schema = new_dataset.parse_pydantic_schema()
@@ -141,19 +147,20 @@ class DatasetService:
         db.add(model)
         db.commit()
         for owner in new_dataset.owners:
-            db.add(
-                DatasetRoleAssignment(
-                    dataset_id=model.id,
-                    user_id=owner.id,
-                    role_id=owner_role.id,
-                    requested_by_id=authenticated_user.id,
-                    requested_on=datetime.now(tz=pytz.utc),
-                    decided_by_id=authenticated_user.id,
-                    decided_on=datetime.now(tz=pytz.utc),
-                    decision=DecisionStatus.APPROVED,
-                )
+            resp = create_assignment(
+                CreateRoleAssignment(
+                    dataset_id=model.id, user_id=owner.id, role_id=owner_role.id
+                ),
+                db,
+                authenticated_user,
             )
-        db.commit()
+            decide_assignment(
+                id=resp.id,
+                background_tasks=background_tasks,
+                request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+                db=db,
+                user=authenticated_user,
+            )
         RefreshInfrastructureLambda().trigger()
 
         return {"id": model.id}

@@ -74,11 +74,12 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
 )
 def create_data_product(
     data_product: DataProductCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
     return DataProductService().create_data_product(
-        data_product, db, authenticated_user
+        data_product, db, authenticated_user, background_tasks
     )
 
 

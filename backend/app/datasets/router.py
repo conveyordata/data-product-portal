@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -75,10 +75,13 @@ def get_user_datasets(
 )
 def create_dataset(
     dataset: DatasetCreateUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DatasetService().create_dataset(dataset, db, authenticated_user)
+    return DatasetService().create_dataset(
+        dataset, db, authenticated_user, background_tasks
+    )
 
 
 @router.delete(
