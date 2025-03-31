@@ -52,6 +52,7 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 }
 
 .background-image {
+    background: url('~@/assets/background/landing-background-green.svg') no-repeat center center;
     background-size: cover;
     -webkit-background-size: cover;
     -moz-background-size: cover;
@@ -63,6 +64,13 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     align-items: center;
     text-align: center;
     gap: globals.$spacing-regular;
+}
+
+.requests-inbox {
+    margin-left: globals.$spacing-xxl;
+    margin-right: globals.$spacing-xxl;
+    margin-top: globals.$spacing-xl;
+    padding-top: globals.$spacing-s;
 }
 
 .search-bar {

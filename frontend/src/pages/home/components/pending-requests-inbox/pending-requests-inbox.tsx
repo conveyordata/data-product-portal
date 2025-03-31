@@ -2,20 +2,20 @@ import { Badge, Col, Flex, Form, Pagination, Row, Typography } from 'antd';
 import { TFunction } from 'i18next';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
 
+import { Searchbar } from '@/components/form';
 import { useListPagination } from '@/hooks/use-list-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useGetPendingActionNotificationsQuery } from '@/store/features/notifications/notifications-api-slice';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 import { NotificationModel, NotificationTypes } from '@/types/notifications/notification.contract';
 
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
-import { Searchbar } from '@/components/form';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
-import { useSelector } from 'react-redux';
 
 const ROW_GUTTER = 96;
 const COL_SPAN = 12;
