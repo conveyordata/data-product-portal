@@ -75,6 +75,7 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems }: DataProd
                                 >
                                     <Button
                                         icon={<DownOutlined />}
+                                        className={styles.actionOptions}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                         }}
