@@ -35,6 +35,11 @@
     margin: 0;
     margin-left: auto;
 }
+
+.notificationTitle {
+    margin-right: globals.$spacing-xl;
+    padding-right: globals.$spacing-xs;
+}
 .notificationItem {
     width: 100%;
     display: block;

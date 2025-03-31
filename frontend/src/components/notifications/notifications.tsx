@@ -37,7 +37,7 @@ export function Notifications() {
                         description = (
                             <div className={styles.notification}>
                                 <div className={styles.notificationHeader}>
-                                    <div>
+                                    <div className={styles.notificationTitle}>
                                         <Link onClick={(e) => e.stopPropagation()} to={link}>
                                             {userNotification.notification.data_product_dataset.data_product.name}
                                         </Link>{' '}
@@ -89,9 +89,9 @@ export function Notifications() {
 
                                     <Tag color="blue" className={styles.timestampTag}>
                                         {t('{{time}}', {
-                                            time: userNotification.notification.data_product_dataset.approved_on
+                                            time: userNotification.notification.data_product_dataset.denied_on
                                                 ? formatDateToNow(
-                                                      userNotification.notification.data_product_dataset.approved_on,
+                                                      userNotification.notification.data_product_dataset.denied_on,
                                                   )
                                                 : undefined,
                                         })}
@@ -184,9 +184,9 @@ export function Notifications() {
 
                                     <Tag color="blue" className={styles.timestampTag}>
                                         {t('{{time}}', {
-                                            time: userNotification.notification.data_output_dataset.approved_on
+                                            time: userNotification.notification.data_output_dataset.denied_on
                                                 ? formatDateToNow(
-                                                      userNotification.notification.data_output_dataset.approved_on,
+                                                      userNotification.notification.data_output_dataset.denied_on,
                                                   )
                                                 : undefined,
                                         })}
@@ -222,28 +222,72 @@ export function Notifications() {
                 switch (userNotification.notification.data_product_membership.status) {
                     case DataProductMembershipStatus.Approved:
                         description = (
-                            <Typography.Text>
-                                {t('{{name}} approved your request to join the data product', {
-                                    name: userNotification.notification.data_product_membership.approved_by?.first_name,
-                                })}{' '}
-                                <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.data_product_membership.data_product.name}
-                                </Link>{' '}
-                                {t('team')}{' '}
-                            </Typography.Text>
+                            <div className={styles.notification}>
+                                <div className={styles.notificationHeader}>
+                                    <div>
+                                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                            {userNotification.notification.data_product_membership.data_product.name}
+                                        </Link>{' '}
+                                        <Typography.Text className={styles.notificationMessage}>
+                                            {t('data product:')}
+                                        </Typography.Text>
+                                    </div>
+
+                                    <Tag color="blue" className={styles.timestampTag}>
+                                        {t('{{time}}', {
+                                            time: userNotification.notification.data_product_membership.approved_on
+                                                ? formatDateToNow(
+                                                      userNotification.notification.data_product_membership.approved_on,
+                                                  )
+                                                : undefined,
+                                        })}
+                                    </Tag>
+                                    <ExportOutlined />
+                                </div>
+
+                                <div className={styles.notificationContent}>
+                                    <Typography.Text className={styles.notificationMessage}>
+                                        {t('You have been granted the role of {{role}}', {
+                                            role: userNotification.notification.data_product_membership.role,
+                                        })}{' '}
+                                    </Typography.Text>
+                                </div>
+                            </div>
                         );
                         break;
                     case DataProductMembershipStatus.Denied:
                         description = (
-                            <Typography.Text>
-                                {t('{{name}} denied your request to join the data product', {
-                                    name: userNotification.notification.data_product_membership.denied_by?.first_name,
-                                })}{' '}
-                                <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.data_product_membership.data_product.name}
-                                </Link>{' '}
-                                {t('team')}{' '}
-                            </Typography.Text>
+                            <div className={styles.notification}>
+                                <div className={styles.notificationHeader}>
+                                    <div>
+                                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                            {userNotification.notification.data_product_membership.data_product.name}
+                                        </Link>{' '}
+                                        <Typography.Text className={styles.notificationMessage}>
+                                            {t('data product:')}
+                                        </Typography.Text>
+                                    </div>
+
+                                    <Tag color="blue" className={styles.timestampTag}>
+                                        {t('{{time}}', {
+                                            time: userNotification.notification.data_product_membership.denied_on
+                                                ? formatDateToNow(
+                                                      userNotification.notification.data_product_membership.denied_on,
+                                                  )
+                                                : undefined,
+                                        })}
+                                    </Tag>
+                                    <ExportOutlined />
+                                </div>
+
+                                <div className={styles.notificationContent}>
+                                    <Typography.Text className={styles.notificationMessage}>
+                                        {t('You have been denied the role of {{role}}', {
+                                            role: userNotification.notification.data_product_membership.role,
+                                        })}{' '}
+                                    </Typography.Text>
+                                </div>
+                            </div>
                         );
                         break;
                 }
