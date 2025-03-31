@@ -1,4 +1,4 @@
-import { ArrowRightOutlined, BellOutlined, CheckCircleOutlined, ExportOutlined } from '@ant-design/icons';
+import { BellOutlined, ExportOutlined } from '@ant-design/icons';
 import { Badge, Button, Dropdown, Flex, type MenuProps, Space, Tag, theme, Typography } from 'antd';
 import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
@@ -37,8 +37,15 @@ export function Notifications() {
                         description = (
                             <div className={styles.notification}>
                                 <div className={styles.notificationHeader}>
-                                    <CheckCircleOutlined />
-                                    <Typography.Text>{t('Request approved:')}</Typography.Text>{' '}
+                                    <div>
+                                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                            {userNotification.notification.data_product_dataset.data_product.name}
+                                        </Link>{' '}
+                                        <Typography.Text className={styles.notificationMessage}>
+                                            {t('data product:')}
+                                        </Typography.Text>
+                                    </div>
+
                                     <Tag color="blue" className={styles.timestampTag}>
                                         {t('{{time}}', {
                                             time: userNotification.notification.data_product_dataset.approved_on
@@ -52,15 +59,8 @@ export function Notifications() {
                                 </div>
 
                                 <div className={styles.notificationContent}>
-                                    <Typography.Text className={styles.notificationInfo}>
-                                        {' '}
-                                        <ArrowRightOutlined />
-                                        <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                            {userNotification.notification.data_product_dataset.data_product.name}
-                                        </Link>{' '}
-                                    </Typography.Text>
                                     <Typography.Text className={styles.notificationMessage}>
-                                        {t('You now have read access to dataset: ')}{' '}
+                                        {t('Read access granted to dataset:')}{' '}
                                         <Link
                                             onClick={(e) => e.stopPropagation()}
                                             to={createDatasetIdPath(
@@ -76,23 +76,43 @@ export function Notifications() {
                         break;
                     case DataProductDatasetLinkStatus.Denied:
                         description = (
-                            <Typography.Text>
-                                {t('{{name}}, denied your request made on behalf of data output', {
-                                    name: userNotification.notification.data_product_dataset.denied_by?.first_name,
-                                })}{' '}
-                                <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.data_product_dataset.data_product.name}
-                                </Link>{' '}
-                                {t('for read access to dataset')}{' '}
-                                <Link
-                                    onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(
-                                        userNotification.notification.data_product_dataset.dataset_id,
-                                    )}
-                                >
-                                    {userNotification.notification.data_product_dataset.dataset.name}
-                                </Link>
-                            </Typography.Text>
+                            <div className={styles.notification}>
+                                <div className={styles.notificationHeader}>
+                                    <div>
+                                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                            {userNotification.notification.data_product_dataset.data_product.name}
+                                        </Link>{' '}
+                                        <Typography.Text className={styles.notificationMessage}>
+                                            {t('data product:')}
+                                        </Typography.Text>
+                                    </div>
+
+                                    <Tag color="blue" className={styles.timestampTag}>
+                                        {t('{{time}}', {
+                                            time: userNotification.notification.data_product_dataset.approved_on
+                                                ? formatDateToNow(
+                                                      userNotification.notification.data_product_dataset.approved_on,
+                                                  )
+                                                : undefined,
+                                        })}
+                                    </Tag>
+                                    <ExportOutlined />
+                                </div>
+
+                                <div className={styles.notificationContent}>
+                                    <Typography.Text className={styles.notificationMessage}>
+                                        {t('Read access denied to dataset:')}{' '}
+                                        <Link
+                                            onClick={(e) => e.stopPropagation()}
+                                            to={createDatasetIdPath(
+                                                userNotification.notification.data_product_dataset.dataset_id,
+                                            )}
+                                        >
+                                            {userNotification.notification.data_product_dataset.dataset.name}
+                                        </Link>
+                                    </Typography.Text>
+                                </div>
+                            </div>
                         );
                         break;
                 }
@@ -112,8 +132,15 @@ export function Notifications() {
                         description = (
                             <div className={styles.notification}>
                                 <div className={styles.notificationHeader}>
-                                    <CheckCircleOutlined />
-                                    <Typography.Text>{t('Request approved:')}</Typography.Text>{' '}
+                                    <div>
+                                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                            {userNotification.notification.data_output_dataset.data_output.name}
+                                        </Link>{' '}
+                                        <Typography.Text className={styles.notificationMessage}>
+                                            {t('data output:')}
+                                        </Typography.Text>
+                                    </div>
+
                                     <Tag color="blue" className={styles.timestampTag}>
                                         {t('{{time}}', {
                                             time: userNotification.notification.data_output_dataset.approved_on
@@ -127,15 +154,8 @@ export function Notifications() {
                                 </div>
 
                                 <div className={styles.notificationContent}>
-                                    <Typography.Text className={styles.notificationInfo}>
-                                        {' '}
-                                        <ArrowRightOutlined />
-                                        <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                            {userNotification.notification.data_output_dataset.data_output.name}
-                                        </Link>{' '}
-                                    </Typography.Text>
                                     <Typography.Text className={styles.notificationMessage}>
-                                        {t('A link has been provided to dataset: ')}{' '}
+                                        {t('Linking approved for dataset:')}{' '}
                                         <Link
                                             onClick={(e) => e.stopPropagation()}
                                             to={createDatasetIdPath(
@@ -148,27 +168,46 @@ export function Notifications() {
                                 </div>
                             </div>
                         );
-
                         break;
                     case DataOutputDatasetLinkStatus.Denied:
                         description = (
-                            <Typography.Text>
-                                {t('{{name}}, denied your request made on behalf of data output', {
-                                    name: userNotification.notification.data_output_dataset.denied_by?.first_name,
-                                })}{' '}
-                                <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.data_output_dataset.data_output.name}
-                                </Link>{' '}
-                                {t('for a link to dataset')}{' '}
-                                <Link
-                                    onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(
-                                        userNotification.notification.data_output_dataset.dataset_id,
-                                    )}
-                                >
-                                    {userNotification.notification.data_output_dataset.dataset.name}
-                                </Link>
-                            </Typography.Text>
+                            <div className={styles.notification}>
+                                <div className={styles.notificationHeader}>
+                                    <div>
+                                        <Link onClick={(e) => e.stopPropagation()} to={link}>
+                                            {userNotification.notification.data_output_dataset.data_output.name}
+                                        </Link>{' '}
+                                        <Typography.Text className={styles.notificationMessage}>
+                                            {t('data output:')}
+                                        </Typography.Text>
+                                    </div>
+
+                                    <Tag color="blue" className={styles.timestampTag}>
+                                        {t('{{time}}', {
+                                            time: userNotification.notification.data_output_dataset.approved_on
+                                                ? formatDateToNow(
+                                                      userNotification.notification.data_output_dataset.approved_on,
+                                                  )
+                                                : undefined,
+                                        })}
+                                    </Tag>
+                                    <ExportOutlined />
+                                </div>
+
+                                <div className={styles.notificationContent}>
+                                    <Typography.Text className={styles.notificationMessage}>
+                                        {t('Linking denied for dataset:')}{' '}
+                                        <Link
+                                            onClick={(e) => e.stopPropagation()}
+                                            to={createDatasetIdPath(
+                                                userNotification.notification.data_output_dataset.dataset_id,
+                                            )}
+                                        >
+                                            {userNotification.notification.data_output_dataset.dataset.name}
+                                        </Link>
+                                    </Typography.Text>
+                                </div>
+                            </div>
                         );
                         break;
                 }
