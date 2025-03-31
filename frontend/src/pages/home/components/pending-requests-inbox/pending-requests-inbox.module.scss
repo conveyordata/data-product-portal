@@ -1,6 +1,8 @@
 @use '@/styles/globals';
 
 $item-card-width: 360px;
+$landing-banner-height: 260px;
+$landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgba(3, 79, 165, 0.1) 45.13%);
 
 .pagination {
     padding-bottom: globals.$spacing-m;
@@ -47,4 +49,22 @@ $item-card-width: 360px;
 .action-options {
     background: transparent !important;
     border: none !important;
+}
+
+.background-image {
+    background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    flex: 0.4;
+    min-height: $landing-banner-height;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: globals.$spacing-regular;
+}
+
+.search-bar {
+    width: 50%;
 }

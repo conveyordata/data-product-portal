@@ -1,4 +1,4 @@
-import { Badge, Col, Pagination, Row, Typography } from 'antd';
+import { Badge, Col, Flex, Form, Pagination, Row, Typography } from 'antd';
 import { TFunction } from 'i18next';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,9 @@ import { NotificationModel, NotificationTypes } from '@/types/notifications/noti
 
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
+import { Searchbar } from '@/components/form';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useSelector } from 'react-redux';
 
 const ROW_GUTTER = 96;
 const COL_SPAN = 12;
@@ -129,6 +132,8 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
 
 export function PendingRequestsInbox() {
     const { t } = useTranslation();
+    const currentUser = useSelector(selectCurrentUser);
+    const [searchForm] = Form.useForm();
 
     const { data: pendingActions, isFetching } = useGetPendingActionNotificationsQuery();
 
@@ -168,9 +173,14 @@ export function PendingRequestsInbox() {
 
     if (pendingItems.length == 0 && isFetching == false) {
         return (
-            <div>
-                <Typography.Title level={1}>{t('Welcome back.')}</Typography.Title>
-            </div>
+            <Flex className={styles.backgroundImage}>
+                <Typography.Title level={2}>
+                    {t('Welcome back, {{name}}', { name: currentUser?.first_name })}
+                </Typography.Title>
+                <div className={styles.searchBar}>
+                    <Searchbar form={searchForm} placeholder={t('Search for data products and datasets by name')} />
+                </div>
+            </Flex>
         );
     }
 
