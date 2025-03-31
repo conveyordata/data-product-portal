@@ -4,3 +4,38 @@
     height: globals.$circle-icon-button-size !important;
     width: globals.$circle-icon-button-size !important;
 }
+
+.notification {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.notification-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: end;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: globals.$spacing-s;
+}
+.notification-info {
+    margin-right: auto;
+}
+.notification-message {
+    margin-left: auto;
+}
+
+.timestamp-tag {
+    margin: 0;
+    margin-left: auto;
+}
+.notificationItem {
+    width: 100%;
+    display: block;
+}

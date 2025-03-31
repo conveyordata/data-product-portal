@@ -188,7 +188,7 @@ export function PendingRequestsInbox() {
         <div className={styles.requestsInbox}>
             <div className={styles.sectionTitle}>
                 <Typography.Title level={3}>
-                    {t('Pending Requests')}{' '}
+                    {t('Pending Requests')}
                     <Badge count={pendingItems.length} color="gray" className={styles.requestsInfo} />
                 </Typography.Title>
                 <div className={styles.pagination}>
