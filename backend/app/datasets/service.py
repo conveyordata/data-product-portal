@@ -135,7 +135,7 @@ class DatasetService:
         owner_role = [
             role
             for role in RoleService(db).get_roles(Scope.DATASET)
-            if role.name == "Owner"
+            if role.name.lower() == "owner"
         ]
         if len(owner_role) == 1:
             owner_role = owner_role[0]

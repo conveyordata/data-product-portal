@@ -216,7 +216,7 @@ class DataProductService:
         owner_role = [
             role
             for role in RoleService(db).get_roles(Scope.DATA_PRODUCT)
-            if role.name == "Owner"
+            if role.name.lower() == "owner"
         ]
         if len(owner_role) == 1:
             owner_role = owner_role[0]
@@ -235,11 +235,10 @@ class DataProductService:
 
         db.add(model)
         db.commit()
-
         for membership in model.memberships:
             resp = create_assignment(
                 CreateRoleAssignment(
-                    dataset_id=model.id,
+                    data_product_id=model.id,
                     user_id=membership.user_id,
                     role_id=owner_role.id,
                 ),

@@ -18,6 +18,7 @@ from tests.factories.lifecycle import LifecycleFactory
 from tests.factories.platform import PlatformFactory
 
 from app.data_product_memberships.enums import DataProductUserRole
+from app.roles.service import RoleService
 
 ENDPOINT = "/api/data_products"
 
@@ -49,7 +50,8 @@ def payload():
 class TestDataProductsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_data_product(self, payload, client):
+    def test_create_data_product(self, payload, client, session):
+        RoleService(db=session).initialize_prototype_roles()
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
