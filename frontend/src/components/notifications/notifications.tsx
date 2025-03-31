@@ -47,13 +47,11 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {t('{{time}}', {
-                                            time: userNotification.notification.data_product_dataset.approved_on
-                                                ? formatDateToNow(
-                                                      userNotification.notification.data_product_dataset.approved_on,
-                                                  )
-                                                : undefined,
-                                        })}
+                                        {userNotification.notification.data_product_dataset.approved_on
+                                            ? formatDateToNow(
+                                                  userNotification.notification.data_product_dataset.approved_on,
+                                              )
+                                            : undefined}
                                     </Tag>
                                     <ExportOutlined />
                                 </div>
@@ -88,13 +86,11 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {t('{{time}}', {
-                                            time: userNotification.notification.data_product_dataset.denied_on
-                                                ? formatDateToNow(
-                                                      userNotification.notification.data_product_dataset.denied_on,
-                                                  )
-                                                : undefined,
-                                        })}
+                                        {userNotification.notification.data_product_dataset.denied_on
+                                            ? formatDateToNow(
+                                                  userNotification.notification.data_product_dataset.denied_on,
+                                              )
+                                            : undefined}
                                     </Tag>
                                     <ExportOutlined />
                                 </div>
@@ -142,13 +138,11 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {t('{{time}}', {
-                                            time: userNotification.notification.data_output_dataset.approved_on
-                                                ? formatDateToNow(
-                                                      userNotification.notification.data_output_dataset.approved_on,
-                                                  )
-                                                : undefined,
-                                        })}
+                                        {userNotification.notification.data_output_dataset.approved_on
+                                            ? formatDateToNow(
+                                                  userNotification.notification.data_output_dataset.approved_on,
+                                              )
+                                            : undefined}
                                     </Tag>
                                     <ExportOutlined />
                                 </div>
@@ -183,13 +177,11 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {t('{{time}}', {
-                                            time: userNotification.notification.data_output_dataset.denied_on
-                                                ? formatDateToNow(
-                                                      userNotification.notification.data_output_dataset.denied_on,
-                                                  )
-                                                : undefined,
-                                        })}
+                                        {userNotification.notification.data_output_dataset.denied_on
+                                            ? formatDateToNow(
+                                                  userNotification.notification.data_output_dataset.denied_on,
+                                              )
+                                            : undefined}
                                     </Tag>
                                     <ExportOutlined />
                                 </div>
@@ -234,13 +226,11 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {t('{{time}}', {
-                                            time: userNotification.notification.data_product_membership.approved_on
-                                                ? formatDateToNow(
-                                                      userNotification.notification.data_product_membership.approved_on,
-                                                  )
-                                                : undefined,
-                                        })}
+                                        {userNotification.notification.data_product_membership.approved_on
+                                            ? formatDateToNow(
+                                                  userNotification.notification.data_product_membership.approved_on,
+                                              )
+                                            : undefined}
                                     </Tag>
                                     <ExportOutlined />
                                 </div>
@@ -269,13 +259,11 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {t('{{time}}', {
-                                            time: userNotification.notification.data_product_membership.denied_on
-                                                ? formatDateToNow(
-                                                      userNotification.notification.data_product_membership.denied_on,
-                                                  )
-                                                : undefined,
-                                        })}
+                                        {userNotification.notification.data_product_membership.denied_on
+                                            ? formatDateToNow(
+                                                  userNotification.notification.data_product_membership.denied_on,
+                                              )
+                                            : undefined}
                                     </Tag>
                                     <ExportOutlined />
                                 </div>
