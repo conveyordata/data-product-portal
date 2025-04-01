@@ -5,7 +5,7 @@ export type DataProductCreate = Pick<
     DataProductContract,
     'name' | 'description' | 'type_id' | 'lifecycle_id' | 'domain_id' | 'tag_ids'
 > & {
-    external_id: string;
+    namespace: string;
     memberships: DataProductUserMembershipCreateContract[];
 };
 

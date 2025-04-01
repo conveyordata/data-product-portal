@@ -32,7 +32,7 @@ def payload():
     return {
         "name": "Data Product Name",
         "description": "Updated Data Product Description",
-        "external_id": "Updated Data Product External ID",
+        "namespace": "Updated Data Product External ID",
         "tag_ids": [str(tag.id)],
         "type_id": str(data_product_type.id),
         "memberships": [
@@ -272,7 +272,7 @@ class TestDataProductsRouter:
             f"{ENDPOINT}/{data_product.id}/role?environment=production"
         )
         assert response.status_code == 200
-        assert response.json() == env.context.replace("{{}}", data_product.external_id)
+        assert response.json() == env.context.replace("{{}}", data_product.namespace)
 
     def test_get_signin_url_not_implemented(self, client):
         EnvironmentFactory(name="production")

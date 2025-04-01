@@ -1,7 +1,7 @@
 """Add general settings
 
 Revision ID: 269e6dbd565c
-Revises: d98efbda5e7c
+Revises: 2a58b7ce3cea
 Create Date: 2025-02-28 15:05:41.442418
 
 """
@@ -16,7 +16,7 @@ from app.theme_settings.model import SETTINGS_ID, ThemeSettings
 
 # revision identifiers, used by Alembic.
 revision: str = "269e6dbd565c"
-down_revision: Union[str, None] = "d98efbda5e7c"
+down_revision: Union[str, None] = "2a58b7ce3cea"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

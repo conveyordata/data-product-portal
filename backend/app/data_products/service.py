@@ -17,6 +17,12 @@ from app.core.aws.boto3_clients import get_client
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.core.email.send_mail import send_mail
+from app.core.helpers.namespace import (
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidation,
+    NamespaceValidator,
+)
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
@@ -63,6 +69,9 @@ from app.users.schema import User
 
 
 class DataProductService:
+    def __init__(self):
+        self.namespace_validator = NamespaceValidator(DataProductModel)
+
     def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
         data_product: DataProductGet = (
             db.query(DataProductModel)
@@ -417,8 +426,8 @@ class DataProductService:
             .get_one(EnvironmentModel.name, environment)
             .context
         )
-        external_id = db.get(DataProductModel, id).external_id
-        role_arn = environment_context.replace("{{}}", external_id)
+        namespace = db.get(DataProductModel, id).namespace
+        role_arn = environment_context.replace("{{}}", namespace)
         return role_arn
 
     def get_aws_temporary_credentials(
@@ -471,7 +480,7 @@ class DataProductService:
 
     def get_conveyor_ide_url(self, id: UUID, db: Session) -> str:
         data_product = db.get(DataProductModel, id)
-        return CONVEYOR_SERVICE.generate_ide_url(data_product.external_id)
+        return CONVEYOR_SERVICE.generate_ide_url(data_product.namespace)
 
     def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
         return db.query(DataOutputModel).filter(DataOutputModel.owner_id == id).all()
@@ -615,3 +624,16 @@ class DataProductService:
                             )
 
         return Graph(nodes=set(nodes), edges=set(edges))
+
+    def validate_data_product_namespace(
+        self, namespace: str, db: Session
+    ) -> NamespaceValidation:
+        return self.namespace_validator.validate_namespace(namespace, db)
+
+    def data_product_namespace_suggestion(
+        self, name: str, db: Session
+    ) -> NamespaceSuggestion:
+        return self.namespace_validator.namespace_suggestion(name, db)
+
+    def data_product_namespace_length_limits(self) -> NamespaceLengthLimits:
+        return self.namespace_validator.namespace_length_limits()

@@ -4,6 +4,11 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.helpers.namespace import (
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidation,
+)
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.service import DataProductSettingService
@@ -26,6 +31,25 @@ router = APIRouter(prefix="/data_products", tags=["data_products"])
 @router.get("")
 def get_data_products(db: Session = Depends(get_db_session)) -> list[DataProductsGet]:
     return DataProductService().get_data_products(db)
+
+
+@router.get("/namespace_suggestion")
+async def get_data_product_namespace_suggestion(
+    name: str, db: Session = Depends(get_db_session)
+) -> NamespaceSuggestion:
+    return DataProductService().data_product_namespace_suggestion(name, db)
+
+
+@router.get("/validate_namespace")
+async def validate_data_product_namespace(
+    namespace: str, db: Session = Depends(get_db_session)
+) -> NamespaceValidation:
+    return DataProductService().validate_data_product_namespace(namespace, db)
+
+
+@router.get("/namespace_length_limits")
+async def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
+    return DataProductService().data_product_namespace_length_limits()
 
 
 @router.get("/user/{user_id}")

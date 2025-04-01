@@ -1,5 +1,7 @@
+import { EditOutlined } from '@ant-design/icons';
 import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
-import { useEffect } from 'react';
+import { debounce } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
@@ -11,6 +13,9 @@ import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-ty
 import {
     useCreateDataProductMutation,
     useGetDataProductByIdQuery,
+    useGetNamespaceLengthLimitsQuery,
+    useLazyGetNamespaceSuggestionQuery,
+    useLazyValidateNamespaceQuery,
     useRemoveDataProductMutation,
     useUpdateDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -20,18 +25,20 @@ import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
 import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
+import { ValidationType } from '@/types/namespace/namespace';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import {
     getDataProductMemberMemberships,
     getDataProductOwnerIds,
     getIsDataProductOwner,
 } from '@/utils/data-product-user-role.helper.ts';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
 import styles from './data-product-form.module.scss';
 
 const { TextArea } = Input;
+
+const DEBOUNCE = 500;
 
 type Props = {
     mode: 'create' | 'edit';
@@ -53,12 +60,19 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
     const { data: dataProductTypes = [], isFetching: isFetchingDataProductTypes } = useGetAllDataProductTypesQuery();
     const { data: dataProductOwners = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
-    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
+    const { data: availableTags = [], isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
     const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
+    const [fetchNamespace, { data: namespaceSuggestion, isFetching: isFetchingNamespaceSuggestion }] =
+        useLazyGetNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetNamespaceLengthLimitsQuery();
+
     const [form] = Form.useForm<DataProductCreateFormSchema>();
     const dataProductNameValue = Form.useWatch('name', form);
+
+    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
     const canEditForm = Boolean(
         mode === 'edit' &&
@@ -80,7 +94,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = dataProductOwners.map((owner) => ({ label: owner.email, value: owner.id }));
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id }));
 
     const onSubmit: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
         try {
@@ -92,7 +106,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             if (mode === 'create') {
                 const request: DataProductCreate = {
                     name: values.name,
-                    external_id: values.external_id,
+                    namespace: values.namespace,
                     description: values.description,
                     memberships: owners,
                     lifecycle_id: values.lifecycle_id,
@@ -120,7 +134,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
                 const request: DataProductUpdateRequest = {
                     name: values.name,
-                    external_id: values.external_id,
+                    namespace: values.namespace,
                     description: values.description,
                     type_id: values.type_id,
                     lifecycle_id: values.lifecycle_id,
@@ -173,16 +187,47 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     };
 
+    const fetchNamespaceDebounced = useMemo(
+        () =>
+            debounce((name: string) => {
+                fetchNamespace(name);
+            }, DEBOUNCE),
+        [fetchNamespace],
+    );
+
     useEffect(() => {
-        if (mode === 'create') {
-            form.setFieldsValue({ external_id: generateExternalIdFromName(dataProductNameValue ?? '') });
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFields([
+                {
+                    name: 'namespace',
+                    validating: true,
+                    errors: [],
+                },
+            ]);
+            fetchNamespaceDebounced(dataProductNameValue ?? '');
         }
-    }, [dataProductNameValue, form, mode]);
+    }, [mode, form, canEditNamespace, dataProductNameValue, fetchNamespaceDebounced]);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFields([
+                {
+                    name: 'namespace',
+                    value: namespaceSuggestion?.namespace,
+                    validating: isFetchingNamespaceSuggestion,
+                    errors:
+                        !namespaceSuggestion || namespaceSuggestion?.available
+                            ? []
+                            : [t('The namespace of the data product must be unique')],
+                },
+            ]);
+        }
+    }, [form, mode, canEditNamespace, namespaceSuggestion, isFetchingNamespaceSuggestion, t]);
 
     useEffect(() => {
         if (currentDataProduct && mode === 'edit') {
             form.setFieldsValue({
-                external_id: currentDataProduct.external_id,
+                namespace: currentDataProduct.namespace,
                 name: currentDataProduct.name,
                 description: currentDataProduct.description,
                 type_id: currentDataProduct.type.id,
@@ -220,14 +265,54 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             >
                 <Input />
             </Form.Item>
-            {/*Disabled field that will render an external ID everytime the name changes*/}
             <Form.Item<DataProductCreateFormSchema>
+                label={t('Namespace')}
+                tooltip={t('The namespace of the data product')}
                 required
-                name={'external_id'}
-                label={t('External ID')}
-                tooltip={t('The external ID of the data product')}
             >
-                <Input disabled />
+                <Space.Compact direction="horizontal" className={styles.namespace}>
+                    <Form.Item
+                        name={'namespace'}
+                        noStyle
+                        hasFeedback
+                        validateFirst
+                        validateDebounce={DEBOUNCE}
+                        rules={[
+                            { required: true, message: t('Please input the namespace of the data product') },
+                            {
+                                validator: async (_, value) => {
+                                    if (mode === 'edit') {
+                                        return Promise.resolve();
+                                    }
+
+                                    const validationResponse = await validateNamespace(value).unwrap();
+
+                                    switch (validationResponse.validity) {
+                                        case ValidationType.VALID:
+                                            return Promise.resolve();
+                                        case ValidationType.INVALID_LENGTH:
+                                            return Promise.reject(new Error(t('Namespace is too long')));
+                                        case ValidationType.INVALID_CHARACTERS:
+                                            return Promise.reject(
+                                                new Error(t('Namespace contains invalid characters')),
+                                            );
+                                        case ValidationType.DUPLICATE_NAMESPACE:
+                                            return Promise.reject(
+                                                new Error(t('The namespace of the data product must be unique')),
+                                            );
+                                        default:
+                                            return Promise.reject(new Error(t('Unknown namespace validation error')));
+                                    }
+                                },
+                            },
+                        ]}
+                    >
+                        <Input disabled={!canEditNamespace} showCount maxLength={namespaceLengthLimits?.max_length} />
+                    </Form.Item>
+                    <Button disabled={mode === 'edit'} onClick={() => setCanEditNamespace((prevState) => !prevState)}>
+                        <EditOutlined />
+                    </Button>
+                </Space.Compact>
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema>
                 name={'owners'}
