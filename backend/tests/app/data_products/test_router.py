@@ -56,6 +56,10 @@ class TestDataProductsRouter:
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
 
+    def test_create_data_product_no_owner_role(self, payload, client):
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 400
+
     def test_create_data_product_no_members(self, payload, client):
         create_payload = deepcopy(payload)
         create_payload["memberships"] = []

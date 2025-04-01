@@ -39,6 +39,10 @@ class TestDatasetsRouter:
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
+    def test_create_dataset_no_owner_role(self, dataset_payload, client):
+        created_dataset = self.create_default_dataset(client, dataset_payload)
+        assert created_dataset.status_code == 400
+
     def test_create_dataset_no_owners(self, dataset_payload, client):
         create_payload = deepcopy(dataset_payload)
         create_payload["owners"] = []
