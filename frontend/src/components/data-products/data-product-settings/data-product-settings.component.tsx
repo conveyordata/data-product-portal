@@ -48,7 +48,7 @@ export function DataProductSettings({ id, scope }: Props) {
     const { data: product_access } = useCheckAccessQuery(
         {
             object_id: id,
-            action: AuthorizationAction.DATA_PRODUCT_UPDATE_SETTINGS,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS,
         },
         { skip: !id || scope !== 'dataproduct' },
     );

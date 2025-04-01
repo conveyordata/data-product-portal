@@ -38,7 +38,7 @@ export function DatasetsTable() {
     );
     const { data: access } = useCheckAccessQuery(
         {
-            action: AuthorizationAction.GLOBAL_CREATE_DATASET,
+            action: AuthorizationAction.GLOBAL__CREATE_DATASET,
         },
         { skip: !currentUser },
     );

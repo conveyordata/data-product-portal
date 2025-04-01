@@ -26,7 +26,7 @@ export function AboutTab({ dataProductId }: Props) {
     const { data: edit_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_UPDATE_PROPERTIES,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
         },
         { skip: !dataProductId },
     );

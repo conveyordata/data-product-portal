@@ -43,7 +43,7 @@ export function DataOutput() {
     const { data: edit_access } = useCheckAccessQuery(
         {
             object_id: dataProduct?.id,
-            action: AuthorizationAction.DATA_PRODUCT_UPDATE_PROPERTIES,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
         },
         { skip: !dataProduct },
     );
