@@ -16,8 +16,9 @@ from app.role_assignments.global_.schema import (
     RoleAssignmentResponse,
     UpdateRoleAssignment,
 )
-from app.role_assignments.global_.service import ADMIN_UUID, RoleAssignmentService
+from app.role_assignments.global_.service import RoleAssignmentService
 from app.role_assignments.global_.tasks import AuthAssignment
+from app.roles.service import ADMIN_UUID
 from app.users.schema import User
 
 router = APIRouter(prefix="/global")

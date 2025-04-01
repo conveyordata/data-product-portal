@@ -3,9 +3,9 @@ from typing import Optional
 from uuid import UUID
 
 from app.core.authz.authorization import Authorization
+from app.roles.service import ADMIN_UUID
 
 from .schema import RoleAssignment
-from .service import ADMIN_UUID
 
 
 @dataclass

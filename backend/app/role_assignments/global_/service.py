@@ -14,8 +14,6 @@ from app.role_assignments.global_.schema import (
 )
 from app.users.schema import User
 
-ADMIN_UUID = UUID(int=0)
-
 
 class RoleAssignmentService:
     def __init__(self, db: Session, user: User) -> None:
