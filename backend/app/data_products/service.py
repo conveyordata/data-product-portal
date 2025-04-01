@@ -46,6 +46,7 @@ from app.data_products_datasets.model import (
 from app.data_products_datasets.schema import DataProductDatasetAssociationCreate
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import ensure_dataset_exists
+from app.datasets.schema import Dataset
 from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
@@ -317,6 +318,42 @@ class DataProductService:
         current_data_product.status = data_product.status
         db.commit()
 
+    def _send_email_for_dataset_link(
+        self,
+        dataset: Dataset,
+        data_product: DataProduct,
+        authenticated_user: User,
+        background_tasks: BackgroundTasks,
+    ):
+        url = (
+            settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-product"
+        )
+        action = emailgen.Table(
+            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
+        )
+        action.add_row(
+            [
+                data_product.name,
+                "Access to consume data from ",
+                dataset.name,
+                ", ".join(
+                    [
+                        f"{owner.first_name} {owner.last_name}"
+                        for owner in dataset.owners
+                    ]
+                ),
+                f"{authenticated_user.first_name} {authenticated_user.last_name}",
+            ]
+        )
+        background_tasks.add_task(
+            send_mail,
+            [User.model_validate(owner) for owner in dataset.owners],
+            action,
+            url,
+            f"Action Required: {data_product.name} wants "
+            f"to consume data from {dataset.name}",
+        )
+
     def link_dataset_to_data_product(
         self,
         id: UUID,
@@ -360,35 +397,10 @@ class DataProductService:
         db.commit()
         db.refresh(data_product)
         RefreshInfrastructureLambda().trigger()
-
-        url = (
-            settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-product"
-        )
-        action = emailgen.Table(
-            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
-        )
-        action.add_row(
-            [
-                data_product.name,
-                "Access to consume data from ",
-                dataset.name,
-                ", ".join(
-                    [
-                        f"{owner.first_name} {owner.last_name}"
-                        for owner in dataset.owners
-                    ]
-                ),
-                f"{authenticated_user.first_name} {authenticated_user.last_name}",
-            ]
-        )
-        background_tasks.add_task(
-            send_mail,
-            [User.model_validate(owner) for owner in dataset.owners],
-            action,
-            url,
-            f"Action Required: {data_product.name} wants "
-            f"to consume data from {dataset.name}",
-        )
+        if dataset.access_type != DatasetAccessType.PUBLIC:
+            self._send_email_for_dataset_link(
+                dataset, data_product, authenticated_user, background_tasks
+            )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID, db: Session):
