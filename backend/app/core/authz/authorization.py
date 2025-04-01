@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections.abc import Callable
 from pathlib import Path
 from typing import Sequence, Type, TypeAlias, Union, cast
@@ -33,9 +33,12 @@ class SubjectResolver(ABC):
     model: Model = None
 
     @classmethod
-    @abstractmethod
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        pass
+        if (result := request.query_params.get(key)) is not None:
+            return cast(str, result)
+        if (result := request.path_params.get(key)) is not None:
+            return cast(str, result)
+        return cls.DEFAULT
 
     @classmethod
     def resolve_domain(
@@ -54,16 +57,8 @@ class SubjectResolver(ABC):
 class DataProductResolver(SubjectResolver):
     model: Model = DataProduct
 
-    @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        if (result := request.query_params.get(key)) is not None:
-            return cast(str, result)
-        if (result := request.path_params.get(key)) is not None:
-            return cast(str, result)
-        return cls.DEFAULT
 
-
-class DatasetResolver(DataProductResolver):
+class DatasetResolver(SubjectResolver):
     model: Model = Dataset
 
 
