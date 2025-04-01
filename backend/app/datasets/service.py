@@ -1,7 +1,7 @@
 from typing import Iterable, Sequence
 from uuid import UUID
 
-from fastapi import BackgroundTasks, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
@@ -23,14 +23,6 @@ from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.role_assignments.dataset.router import create_assignment, decide_assignment
-from app.role_assignments.dataset.schema import (
-    CreateRoleAssignment,
-    DecideRoleAssignment,
-)
-from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Scope
-from app.roles.service import RoleService
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User, ensure_user_exists
@@ -125,45 +117,16 @@ class DatasetService:
         self,
         dataset: DatasetCreateUpdate,
         db: Session,
-        authenticated_user: User,
-        background_tasks: BackgroundTasks,
-    ) -> dict[str, UUID]:
+    ) -> Dataset:
         new_dataset: Dataset = self._update_owners(dataset, db)
         dataset_schema = new_dataset.parse_pydantic_schema()
         tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
         model = DatasetModel(**dataset_schema, tags=tags)
-        owner_role = [
-            role
-            for role in RoleService(db).get_roles(Scope.DATASET)
-            if role.name.lower() == "owner"
-        ]
-        if len(owner_role) == 1:
-            owner_role = owner_role[0]
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Owner role not found",
-            )
+
         db.add(model)
         db.commit()
-        for owner in new_dataset.owners:
-            resp = create_assignment(
-                CreateRoleAssignment(
-                    dataset_id=model.id, user_id=owner.id, role_id=owner_role.id
-                ),
-                db,
-                authenticated_user,
-            )
-            decide_assignment(
-                id=resp.id,
-                background_tasks=background_tasks,
-                request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
-                db=db,
-                user=authenticated_user,
-            )
         RefreshInfrastructureLambda().trigger()
-
-        return {"id": model.id}
+        return model
 
     def remove_dataset(self, id: UUID, db: Session) -> None:
         dataset = db.get(

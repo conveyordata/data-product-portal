@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -18,6 +18,14 @@ from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
 from app.dependencies import only_dataset_owners
 from app.graph.graph import Graph
+from app.role_assignments.dataset.router import create_assignment, decide_assignment
+from app.role_assignments.dataset.schema import (
+    CreateRoleAssignment,
+    DecideRoleAssignment,
+)
+from app.role_assignments.enums import DecisionStatus
+from app.roles.schema import Scope
+from app.roles.service import RoleService
 from app.users.model import User
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
@@ -79,9 +87,36 @@ def create_dataset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DatasetService().create_dataset(
-        dataset, db, authenticated_user, background_tasks
-    )
+    new_dataset = DatasetService().create_dataset(dataset, db)
+    owner_role = [
+        role
+        for role in RoleService(db).get_roles(Scope.DATASET)
+        if role.name.lower() == "owner"
+    ]
+    if len(owner_role) == 1:
+        owner_role = owner_role[0]
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Owner role not found",
+        )
+    for owner in new_dataset.owners:
+        resp = create_assignment(
+            CreateRoleAssignment(
+                dataset_id=new_dataset.id, user_id=owner.id, role_id=owner_role.id
+            ),
+            db,
+            authenticated_user,
+        )
+        decide_assignment(
+            id=resp.id,
+            background_tasks=background_tasks,
+            request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+            db=db,
+            user=authenticated_user,
+        )
+
+    return {"id": new_dataset.id}
 
 
 @router.delete(

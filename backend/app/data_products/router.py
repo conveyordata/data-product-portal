@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -22,6 +22,17 @@ from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.dependencies import OnlyWithProductAccessID
 from app.graph.graph import Graph
+from app.role_assignments.data_product.router import (
+    create_assignment,
+    decide_assignment,
+)
+from app.role_assignments.data_product.schema import (
+    CreateRoleAssignment,
+    DecideRoleAssignment,
+)
+from app.role_assignments.enums import DecisionStatus
+from app.roles.schema import Scope
+from app.roles.service import RoleService
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_products", tags=["data_products"])
@@ -78,9 +89,39 @@ def create_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DataProductService().create_data_product(
-        data_product, db, authenticated_user, background_tasks
+    created_data_product = DataProductService().create_data_product(
+        data_product, db, authenticated_user
     )
+    owner_role = [
+        role
+        for role in RoleService(db).get_roles(Scope.DATA_PRODUCT)
+        if role.name.lower() == "owner"
+    ]
+    if len(owner_role) == 1:
+        owner_role = owner_role[0]
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Owner role not found",
+        )
+    for membership in created_data_product.memberships:
+        resp = create_assignment(
+            CreateRoleAssignment(
+                data_product_id=created_data_product.id,
+                user_id=membership.user_id,
+                role_id=owner_role.id,
+            ),
+            db,
+            authenticated_user,
+        )
+        decide_assignment(
+            id=resp.id,
+            background_tasks=background_tasks,
+            request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+            db=db,
+            user=authenticated_user,
+        )
+    return {"id": created_data_product.id}
 
 
 @router.delete(
