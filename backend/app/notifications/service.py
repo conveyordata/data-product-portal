@@ -101,13 +101,13 @@ class NotificationService:
 
         """
         notification_function_map = {
-            NotificationTypes.DataProductDataset: (
+            NotificationTypes.DataProductDatasetNotification: (
                 self.get_data_product_dataset_notification_pending_ids
             ),
-            NotificationTypes.DataOutputDataset: (
+            NotificationTypes.DataOutputDatasetNotification: (
                 self.get_data_output_dataset_notification_pending_ids
             ),
-            NotificationTypes.DataProductMembership: (
+            NotificationTypes.DataProductMembershipNotification: (
                 self.get_data_product_membership_notification_pending_ids
             ),
         }

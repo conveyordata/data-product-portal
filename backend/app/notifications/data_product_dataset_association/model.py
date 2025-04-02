@@ -14,5 +14,5 @@ class DataProductDatasetNotification(Notification):
         "DataProductDatasetAssociation", foreign_keys=[data_product_dataset_id]
     )
     __mapper_args__ = {
-        "polymorphic_identity": "DataProductDataset",
+        "polymorphic_identity": "DataProductDatasetNotification",
     }

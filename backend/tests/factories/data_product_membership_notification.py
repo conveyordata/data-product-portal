@@ -12,5 +12,5 @@ class DataProductMembershipNotificationFactory(factory.alchemy.SQLAlchemyModelFa
         model = DataProductMembershipNotification
 
     id = factory.Faker("uuid4")
-    configuration_type = NotificationTypes.DataProductMembership.value
+    configuration_type = NotificationTypes.DataProductMembershipNotification.value
     data_product_membership = factory.SubFactory(DataProductMembershipFactory)

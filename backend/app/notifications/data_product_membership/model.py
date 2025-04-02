@@ -12,5 +12,5 @@ class DataProductMembershipNotification(Notification):
     )
     data_product_membership: Mapped["DataProductMembership"] = relationship()
     __mapper_args__ = {
-        "polymorphic_identity": "DataProductMembership",
+        "polymorphic_identity": "DataProductMembershipNotification",
     }

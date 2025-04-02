@@ -112,13 +112,13 @@ class NotificationInteractionService:
         notification_type: NotificationTypes,
     ) -> list[UUID]:
         notification_owner_ids = {
-            NotificationTypes.DataProductDataset: lambda db, ref_id: [
+            NotificationTypes.DataProductDatasetNotification: lambda db, ref_id: [
                 owner.id for owner in ensure_dataset_exists(ref_id, db).owners
             ],
-            NotificationTypes.DataOutputDataset: lambda db, ref_id: [
+            NotificationTypes.DataOutputDatasetNotification: lambda db, ref_id: [
                 owner.id for owner in ensure_dataset_exists(ref_id, db).owners
             ],
-            NotificationTypes.DataProductMembership: lambda db, ref_id: [
+            NotificationTypes.DataProductMembershipNotification: lambda db, ref_id: [
                 membership.user_id
                 for membership in ensure_data_product_exists(ref_id, db).memberships
             ],
@@ -173,7 +173,7 @@ class NotificationInteractionService:
         if not receiving_ids:
             db.flush()
             notification_owner_ids = {
-                NotificationTypes.DataProductDataset: (
+                NotificationTypes.DataProductDatasetNotification: (
                     lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
                         db,
                         db.query(DataProductDatasetAssociationModel.dataset_id)
@@ -182,7 +182,7 @@ class NotificationInteractionService:
                         notification_type,
                     )
                 ),
-                NotificationTypes.DataOutputDataset: (
+                NotificationTypes.DataOutputDatasetNotification: (
                     lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
                         db,
                         db.query(DataOutputDatasetAssociationModel.dataset_id)
@@ -191,7 +191,7 @@ class NotificationInteractionService:
                         notification_type,
                     )
                 ),
-                NotificationTypes.DataProductMembership: (
+                NotificationTypes.DataProductMembershipNotification: (
                     lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
                         db,
                         db.query(DataProductMembershipModel.data_product_id)

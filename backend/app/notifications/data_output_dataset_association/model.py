@@ -12,5 +12,5 @@ class DataOutputDatasetNotification(Notification):
     )
     data_output_dataset: Mapped["DataOutputDatasetAssociation"] = relationship()
     __mapper_args__ = {
-        "polymorphic_identity": "DataOutputDataset",
+        "polymorphic_identity": "DataOutputDatasetNotification",
     }

@@ -49,7 +49,7 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
         assert (
             response.json()[0]["notification"]["configuration_type"]
-            == "DataProductDataset"
+            == "DataProductDatasetNotification"
         )
         assert response.json()[0]["notification"]["data_product_dataset"][
             "data_product_id"
@@ -76,7 +76,7 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
         assert (
             response.json()[0]["notification"]["configuration_type"]
-            == "DataOutputDataset"
+            == "DataOutputDatasetNotification"
         )
         assert response.json()[0]["notification"]["data_output_dataset"][
             "data_output_id"
@@ -104,7 +104,7 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
         assert (
             response.json()[0]["notification"]["configuration_type"]
-            == "DataProductMembership"
+            == "DataProductMembershipNotification"
         )
         assert response.json()[0]["notification"]["data_product_membership"][
             "data_product_id"
@@ -224,7 +224,7 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert (
             response.json()[0]["notification"]["configuration_type"]
-            == "DataProductDataset"
+            == "DataProductDatasetNotification"
         )
         assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
             link.id
@@ -257,7 +257,7 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert (
             response.json()[0]["notification"]["configuration_type"]
-            == "DataProductDataset"
+            == "DataProductDatasetNotification"
         )
         assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
             link.id
@@ -288,7 +288,7 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert (
             response.json()[0]["notification"]["configuration_type"]
-            == "DataOutputDataset"
+            == "DataOutputDatasetNotification"
         )
         assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
             link.id
@@ -319,7 +319,7 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert (
             response.json()[0]["notification"]["configuration_type"]
-            == "DataOutputDataset"
+            == "DataOutputDatasetNotification"
         )
         assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
             link.id
@@ -354,7 +354,7 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert (
             response.json()[0]["notification"]["configuration_type"]
-            == "DataProductMembership"
+            == "DataProductMembershipNotification"
         )
         assert response.json()[0]["notification"]["data_product_membership"][
             "id"
@@ -389,7 +389,7 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert (
             response.json()[0]["notification"]["configuration_type"]
-            == "DataProductMembership"
+            == "DataProductMembershipNotification"
         )
         assert response.json()[0]["notification"]["data_product_membership"][
             "id"

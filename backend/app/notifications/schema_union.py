@@ -30,25 +30,33 @@ Notifications = Union[
 ]
 
 NotificationMap = {
-    NotificationTypes.DataProductMembership: DataProductMembershipNotification,
-    NotificationTypes.DataProductDataset: DataProductDatasetNotification,
-    NotificationTypes.DataOutputDataset: DataOutputDatasetNotification,
+    NotificationTypes.DataProductMembershipNotification: (
+        DataProductMembershipNotification
+    ),
+    NotificationTypes.DataProductDatasetNotification: (DataProductDatasetNotification),
+    NotificationTypes.DataOutputDatasetNotification: (DataOutputDatasetNotification),
 }
 
 NotificationModelMap = {
-    NotificationTypes.DataProductMembership: DataProductMembershipNotificationModel,
-    NotificationTypes.DataProductDataset: DataProductDatasetNotificationModel,
-    NotificationTypes.DataOutputDataset: DataOutputDatasetNotificationModel,
+    NotificationTypes.DataProductMembershipNotification: (
+        DataProductMembershipNotificationModel
+    ),
+    NotificationTypes.DataProductDatasetNotification: (
+        DataProductDatasetNotificationModel
+    ),
+    NotificationTypes.DataOutputDatasetNotification: (
+        DataOutputDatasetNotificationModel
+    ),
 }
 
 NotificationForeignKeyMap = {
-    NotificationTypes.DataProductDataset: (
+    NotificationTypes.DataProductDatasetNotification: (
         Notification.__table__.c.data_product_dataset_id
     ),
-    NotificationTypes.DataOutputDataset: (
+    NotificationTypes.DataOutputDatasetNotification: (
         Notification.__table__.c.data_output_dataset_id
     ),
-    NotificationTypes.DataProductMembership: (
+    NotificationTypes.DataProductMembershipNotification: (
         Notification.__table__.c.data_product_membership_id
     ),
 }

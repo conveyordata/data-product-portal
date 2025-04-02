@@ -18,7 +18,7 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
     let link, description, navigatePath, date, author;
 
     switch (userNotification.notification.configuration_type) {
-        case NotificationTypes.DataProductDataset:
+        case NotificationTypes.DataProductDatasetNotification:
             link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
             description = (
                 <Typography.Text>
@@ -47,7 +47,7 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
                 userNotification.notification.data_product_dataset.requested_by.last_name;
             break;
 
-        case NotificationTypes.DataOutputDataset:
+        case NotificationTypes.DataOutputDatasetNotification:
             link = createDataOutputIdPath(
                 userNotification.notification.data_output_dataset.data_output_id,
                 userNotification.notification.data_output_dataset.data_output.owner_id,
@@ -79,7 +79,7 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
                 userNotification.notification.data_output_dataset.requested_by.last_name;
             break;
 
-        case NotificationTypes.DataProductMembership:
+        case NotificationTypes.DataProductMembershipNotification:
             link = createDataProductIdPath(userNotification.notification.data_product_membership.data_product_id);
             description = (
                 <Typography.Text>

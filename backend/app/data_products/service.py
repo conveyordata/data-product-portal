@@ -163,7 +163,7 @@ class DataProductService:
 
         if hasattr(data_product, "id") and data_product.id:
             NotificationInteractionService().redirect_pending_requests(
-                db, data_product.id, NotificationTypes.DataProductMembership
+                db, data_product.id, NotificationTypes.DataProductMembershipNotification
             )
         return data_product
 
@@ -207,20 +207,22 @@ class DataProductService:
             )
         for membership in data_product.memberships:
             NotificationInteractionService().remove_notification_relations(
-                db, membership.id, NotificationTypes.DataProductMembership
+                db, membership.id, NotificationTypes.DataProductMembershipNotification
             )
             db.refresh(membership)
         data_product.memberships = []
         for dataset_link in data_product.dataset_links:
             NotificationInteractionService().remove_notification_relations(
-                db, dataset_link.id, NotificationTypes.DataProductDataset
+                db, dataset_link.id, NotificationTypes.DataProductDatasetNotification
             )
             db.refresh(dataset_link)
         data_product.dataset_links = []
         for output in data_product.data_outputs:
             for output_dataset_link in output.dataset_links:
                 NotificationInteractionService().remove_notification_relations(
-                    db, output_dataset_link.id, NotificationTypes.DataOutputDataset
+                    db,
+                    output_dataset_link.id,
+                    NotificationTypes.DataOutputDatasetNotification,
                 )
                 db.refresh(output_dataset_link)
             output.dataset_links = []
@@ -271,7 +273,7 @@ class DataProductService:
         db.refresh(data_product)
 
         NotificationInteractionService().redirect_pending_requests(
-            db, data_product.id, NotificationTypes.DataProductMembership
+            db, data_product.id, NotificationTypes.DataProductMembershipNotification
         )
 
         db.flush()
@@ -354,7 +356,7 @@ class DataProductService:
             db.flush()
             db.refresh(dataset_link)
             NotificationInteractionService().create_notification_relations(
-                db, dataset_link.id, NotificationTypes.DataProductDataset
+                db, dataset_link.id, NotificationTypes.DataProductDatasetNotification
             )
 
         db.commit()
@@ -409,7 +411,9 @@ class DataProductService:
             )
 
         NotificationInteractionService().remove_notification_relations(
-            db, data_product_dataset.id, NotificationTypes.DataProductDataset
+            db,
+            data_product_dataset.id,
+            NotificationTypes.DataProductDatasetNotification,
         )
         db.refresh(data_product_dataset)
         data_product.dataset_links.remove(data_product_dataset)

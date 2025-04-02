@@ -12,5 +12,5 @@ class DataOutputDatasetNotificationFactory(factory.alchemy.SQLAlchemyModelFactor
         model = DataOutputDatasetNotification
 
     id = factory.Faker("uuid4")
-    configuration_type = NotificationTypes.DataOutputDataset.value
+    configuration_type = NotificationTypes.DataOutputDatasetNotification.value
     data_output_dataset = factory.SubFactory(DataOutputDatasetAssociationFactory)

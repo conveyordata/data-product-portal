@@ -107,10 +107,16 @@ class DatasetService:
 
         if hasattr(dataset, "id") and dataset.id:
             NotificationInteractionService().redirect_pending_requests(
-                db, dataset.id, NotificationTypes.DataProductDataset, owner_ids
+                db,
+                dataset.id,
+                NotificationTypes.DataProductDatasetNotification,
+                owner_ids,
             )
             NotificationInteractionService().redirect_pending_requests(
-                db, dataset.id, NotificationTypes.DataOutputDataset, owner_ids
+                db,
+                dataset.id,
+                NotificationTypes.DataOutputDatasetNotification,
+                owner_ids,
             )
         return dataset
 
@@ -148,13 +154,15 @@ class DatasetService:
         dataset.owners = []
         for data_product_link in dataset.data_product_links:
             NotificationInteractionService().remove_notification_relations(
-                db, data_product_link.id, NotificationTypes.DataProductDataset
+                db,
+                data_product_link.id,
+                NotificationTypes.DataProductDatasetNotification,
             )
             db.refresh(data_product_link)
         dataset.data_product_links = []
         for data_output_link in dataset.data_output_links:
             NotificationInteractionService().remove_notification_relations(
-                db, data_output_link.id, NotificationTypes.DataOutputDataset
+                db, data_output_link.id, NotificationTypes.DataOutputDatasetNotification
             )
             db.refresh(data_output_link)
         dataset.data_output_links = []
@@ -210,10 +218,10 @@ class DatasetService:
         db.refresh(dataset)
 
         NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, NotificationTypes.DataProductDataset
+            db, dataset.id, NotificationTypes.DataProductDatasetNotification
         )
         NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, NotificationTypes.DataOutputDataset
+            db, dataset.id, NotificationTypes.DataOutputDatasetNotification
         )
         db.commit()
         RefreshInfrastructureLambda().trigger()
@@ -240,10 +248,10 @@ class DatasetService:
         db.refresh(dataset)
 
         NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, NotificationTypes.DataProductDataset
+            db, dataset.id, NotificationTypes.DataProductDatasetNotification
         )
         NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, NotificationTypes.DataOutputDataset
+            db, dataset.id, NotificationTypes.DataOutputDatasetNotification
         )
         db.commit()
         RefreshInfrastructureLambda().trigger()

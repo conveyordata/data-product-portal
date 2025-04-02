@@ -132,7 +132,7 @@ class DataOutputService:
         self.ensure_owner(authenticated_user, data_output, db)
         for dataset_link in data_output.dataset_links:
             NotificationInteractionService().remove_notification_relations(
-                db, dataset_link.id, NotificationTypes.DataOutputDataset
+                db, dataset_link.id, NotificationTypes.DataOutputDatasetNotification
             )
             db.refresh(dataset_link)
         data_output.dataset_links = []
@@ -189,7 +189,7 @@ class DataOutputService:
             db.flush()
             db.refresh(dataset_link)
             NotificationInteractionService().create_notification_relations(
-                db, dataset_link.id, NotificationTypes.DataOutputDataset
+                db, dataset_link.id, NotificationTypes.DataOutputDatasetNotification
             )
 
         db.commit()
@@ -243,7 +243,7 @@ class DataOutputService:
                 detail=f"Data product dataset for data output {id} not found",
             )
         NotificationInteractionService().remove_notification_relations(
-            db, data_output_dataset.id, NotificationTypes.DataOutputDataset
+            db, data_output_dataset.id, NotificationTypes.DataOutputDatasetNotification
         )
         db.refresh(data_output_dataset)
         data_output.dataset_links.remove(data_output_dataset)

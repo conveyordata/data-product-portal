@@ -38,7 +38,7 @@ class DataProductDatasetService:
         NotificationInteractionService().update_interactions_by_reference(
             db,
             current_link.id,
-            NotificationTypes.DataProductDataset,
+            NotificationTypes.DataProductDatasetNotification,
             [current_link.requested_by_id],
         )
 
@@ -62,7 +62,7 @@ class DataProductDatasetService:
         NotificationInteractionService().update_interactions_by_reference(
             db,
             current_link.id,
-            NotificationTypes.DataProductDataset,
+            NotificationTypes.DataProductDatasetNotification,
             [current_link.requested_by_id],
         )
 
@@ -75,7 +75,7 @@ class DataProductDatasetService:
         linked_data_product = current_link.data_product
         data_product = ensure_data_product_exists(linked_data_product.id, db)
         NotificationInteractionService().remove_notification_relations(
-            db, current_link.id, NotificationTypes.DataProductDataset
+            db, current_link.id, NotificationTypes.DataProductDatasetNotification
         )
         db.refresh(current_link)
         data_product.dataset_links.remove(current_link)

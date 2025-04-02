@@ -12,7 +12,7 @@ from app.notifications.schema import Notification
 class DataProductMembershipNotification(Notification):
     data_product_membership_id: UUID
     data_product_membership: DataProductMembershipGet
-    configuration_type: Literal[NotificationTypes.DataProductMembership]
+    configuration_type: Literal[NotificationTypes.DataProductMembershipNotification]
 
     class Meta:
         orm_model = DataProductMembershipNotificationModel

@@ -12,7 +12,7 @@ from app.notifications.schema import Notification
 class DataOutputDatasetNotification(Notification):
     data_output_dataset_id: UUID
     data_output_dataset: DataOutputDatasetAssociation
-    configuration_type: Literal[NotificationTypes.DataOutputDataset]
+    configuration_type: Literal[NotificationTypes.DataOutputDatasetNotification]
 
     class Meta:
         orm_model = DataOutputDatasetNotificationModel

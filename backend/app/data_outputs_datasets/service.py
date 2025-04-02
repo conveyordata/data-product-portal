@@ -49,7 +49,7 @@ class DataOutputDatasetService:
         NotificationInteractionService().update_interactions_by_reference(
             db,
             current_link.id,
-            NotificationTypes.DataOutputDataset,
+            NotificationTypes.DataOutputDatasetNotification,
             [current_link.requested_by_id],
         )
 
@@ -78,7 +78,7 @@ class DataOutputDatasetService:
         NotificationInteractionService().update_interactions_by_reference(
             db,
             current_link.id,
-            NotificationTypes.DataOutputDataset,
+            NotificationTypes.DataOutputDatasetNotification,
             [current_link.requested_by_id],
         )
 
@@ -101,7 +101,7 @@ class DataOutputDatasetService:
         linked_data_output = current_link.data_output
         data_output = ensure_data_output_exists(linked_data_output.id, db)
         NotificationInteractionService().remove_notification_relations(
-            db, current_link.id, NotificationTypes.DataOutputDataset
+            db, current_link.id, NotificationTypes.DataOutputDatasetNotification
         )
         db.refresh(current_link)
         data_output.dataset_links.remove(current_link)

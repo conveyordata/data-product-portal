@@ -12,7 +12,7 @@ from app.notifications.schema import Notification
 class DataProductDatasetNotification(Notification):
     data_product_dataset_id: UUID
     data_product_dataset: DataProductDatasetAssociation
-    configuration_type: Literal[NotificationTypes.DataProductDataset]
+    configuration_type: Literal[NotificationTypes.DataProductDatasetNotification]
 
     class Meta:
         orm_model = DataProductDatasetNotificationModel

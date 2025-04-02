@@ -4,9 +4,9 @@ import { DataProductMembershipContract } from '../data-product-membership';
 import { UserContract } from '../users';
 
 export enum NotificationTypes {
-    DataProductDataset = 'DataProductDataset',
-    DataOutputDataset = 'DataOutputDataset',
-    DataProductMembership = 'DataProductMembership',
+    DataProductDatasetNotification = 'DataProductDatasetNotification',
+    DataOutputDatasetNotification = 'DataOutputDatasetNotification',
+    DataProductMembershipNotification = 'DataProductMembershipNotification',
 }
 
 export interface NotificationModel {
@@ -25,19 +25,19 @@ export type Notification =
     | DataProductMembershipNotification;
 
 export interface DataProductDatasetNotification {
-    configuration_type: NotificationTypes.DataProductDataset;
+    configuration_type: NotificationTypes.DataProductDatasetNotification;
     data_product_dataset_id: string;
     data_product_dataset: DataProductDatasetContract;
 }
 
 export interface DataOutputDatasetNotification {
-    configuration_type: NotificationTypes.DataOutputDataset;
+    configuration_type: NotificationTypes.DataOutputDatasetNotification;
     data_output_dataset_id: string;
     data_output_dataset: DataOutputDatasetContract;
 }
 
 export interface DataProductMembershipNotification {
-    configuration_type: NotificationTypes.DataProductMembership;
+    configuration_type: NotificationTypes.DataProductMembershipNotification;
     data_product_membership_id: string;
     data_product_membership: DataProductMembershipContract;
 }

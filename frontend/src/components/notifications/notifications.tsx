@@ -29,7 +29,7 @@ export function Notifications() {
         let link, description, navigatePath;
 
         switch (userNotification.notification.configuration_type) {
-            case NotificationTypes.DataProductDataset:
+            case NotificationTypes.DataProductDatasetNotification:
                 link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
                 switch (userNotification.notification.data_product_dataset.status) {
                     case DataProductDatasetLinkStatus.Pending:
@@ -78,7 +78,7 @@ export function Notifications() {
                         description = (
                             <Typography.Text>
                                 {t('{{name}}, denied your request made on behalf of data output', {
-                                    name: userNotification.notification.data_product_dataset.approved_by?.first_name,
+                                    name: userNotification.notification.data_product_dataset.denied_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
                                     {userNotification.notification.data_product_dataset.data_product.name}
@@ -102,7 +102,7 @@ export function Notifications() {
                 );
                 break;
 
-            case NotificationTypes.DataOutputDataset:
+            case NotificationTypes.DataOutputDatasetNotification:
                 link = createDataOutputIdPath(
                     userNotification.notification.data_output_dataset.data_output_id,
                     userNotification.notification.data_output_dataset.data_output.owner_id,
@@ -154,7 +154,7 @@ export function Notifications() {
                         description = (
                             <Typography.Text>
                                 {t('{{name}}, denied your request made on behalf of data output', {
-                                    name: userNotification.notification.data_output_dataset.approved_by?.first_name,
+                                    name: userNotification.notification.data_output_dataset.denied_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
                                     {userNotification.notification.data_output_dataset.data_output.name}
@@ -178,7 +178,7 @@ export function Notifications() {
                 );
                 break;
 
-            case NotificationTypes.DataProductMembership:
+            case NotificationTypes.DataProductMembershipNotification:
                 link = createDataProductIdPath(userNotification.notification.data_product_membership.data_product_id);
                 switch (userNotification.notification.data_product_membership.status) {
                     case DataProductMembershipStatus.Pending:
@@ -211,7 +211,7 @@ export function Notifications() {
                         description = (
                             <Typography.Text>
                                 {t('{{name}} denied your request to join the data product', {
-                                    name: userNotification.notification.data_product_membership.approved_by?.first_name,
+                                    name: userNotification.notification.data_product_membership.denied_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
                                     {userNotification.notification.data_product_membership.data_product.name}
