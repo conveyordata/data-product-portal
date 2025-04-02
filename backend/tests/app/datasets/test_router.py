@@ -7,6 +7,7 @@ from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.data_product_setting import DataProductSettingFactory
 from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
 
+from app.core.helpers.namespace import NamespaceValidityType
 from app.datasets.enums import DatasetAccessType
 
 ENDPOINT = "/api/datasets"
@@ -353,6 +354,61 @@ class TestDatasetsRouter:
         assert response.status_code == 200
         assert len(response.json()) == 1
 
+    def test_get_namespace_suggestion_subsitution(self, client):
+        name = "test with spaces"
+        response = self.get_namespace_suggestion(client, name)
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["namespace"] == "test-with-spaces"
+        assert body["available"] is True
+
+    def test_get_namespace_suggestion_not_available(self, client):
+        namespace = "test"
+        DatasetFactory(namespace=namespace)
+        response = self.get_namespace_suggestion(client, namespace)
+        body = response.json()
+        assert response.status_code == 200
+        assert body["namespace"] == namespace
+        assert body["available"] is False
+
+    def test_get_namespace_length_limits(self, client):
+        response = self.get_namespace_length_limits(client)
+        assert response.status_code == 200
+        assert response.json()["max_length"] > 1
+
+    def test_validate_namespace(self, client):
+        namespace = "test"
+        response = self.validate_namespace(client, namespace)
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID.value
+
+    def test_validate_namespace_invalid_characters(self, client):
+        namespace = "!"
+        response = self.validate_namespace(client, namespace)
+        assert response.status_code == 200
+        assert (
+            response.json()["validity"]
+            == NamespaceValidityType.INVALID_CHARACTERS.value
+        )
+
+    def test_validate_namespace_invalid_length(self, client):
+        namespace = "a" * 256
+        response = self.validate_namespace(client, namespace)
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH.value
+
+    def test_validate_namespace_duplicate(self, client):
+        namespace = "test"
+        DatasetFactory(namespace=namespace)
+        response = self.validate_namespace(client, namespace)
+        assert response.status_code == 200
+        assert (
+            response.json()["validity"]
+            == NamespaceValidityType.DUPLICATE_NAMESPACE.value
+        )
+
     @staticmethod
     def create_default_dataset(client, default_dataset_payload):
         return client.post(ENDPOINT, json=default_dataset_payload)
@@ -385,3 +441,15 @@ class TestDatasetsRouter:
     @staticmethod
     def add_user_to_dataset(client, user_id, dataset_id):
         return client.post(f"{ENDPOINT}/{dataset_id}/user/{user_id}")
+
+    @staticmethod
+    def get_namespace_suggestion(client, name):
+        return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
+
+    @staticmethod
+    def validate_namespace(client, namespace):
+        return client.get(f"{ENDPOINT}/validate_namespace?namespace={namespace}")
+
+    @staticmethod
+    def get_namespace_length_limits(client):
+        return client.get(f"{ENDPOINT}/namespace_length_limits")

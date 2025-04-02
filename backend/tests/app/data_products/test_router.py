@@ -17,6 +17,7 @@ from tests.factories.environment import EnvironmentFactory
 from tests.factories.lifecycle import LifecycleFactory
 from tests.factories.platform import PlatformFactory
 
+from app.core.helpers.namespace import NamespaceValidityType
 from app.data_product_memberships.enums import DataProductUserRole
 
 ENDPOINT = "/api/data_products"
@@ -326,6 +327,61 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json() == "test_1.com"
 
+    def test_get_namespace_suggestion_subsitution(self, client):
+        name = "test with spaces"
+        response = self.get_namespace_suggestion(client, name)
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["namespace"] == "test-with-spaces"
+        assert body["available"] is True
+
+    def test_get_namespace_suggestion_not_available(self, client):
+        namespace = "test"
+        DataProductFactory(namespace=namespace)
+        response = self.get_namespace_suggestion(client, namespace)
+        body = response.json()
+        assert response.status_code == 200
+        assert body["namespace"] == namespace
+        assert body["available"] is False
+
+    def test_get_namespace_length_limits(self, client):
+        response = self.get_namespace_length_limits(client)
+        assert response.status_code == 200
+        assert response.json()["max_length"] > 1
+
+    def test_validate_namespace(self, client):
+        namespace = "test"
+        response = self.validate_namespace(client, namespace)
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID.value
+
+    def test_validate_namespace_invalid_characters(self, client):
+        namespace = "!"
+        response = self.validate_namespace(client, namespace)
+        assert response.status_code == 200
+        assert (
+            response.json()["validity"]
+            == NamespaceValidityType.INVALID_CHARACTERS.value
+        )
+
+    def test_validate_namespace_invalid_length(self, client):
+        namespace = "a" * 256
+        response = self.validate_namespace(client, namespace)
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH.value
+
+    def test_validate_namespace_duplicate(self, client):
+        namespace = "test"
+        DataProductFactory(namespace=namespace)
+        response = self.validate_namespace(client, namespace)
+        assert response.status_code == 200
+        assert (
+            response.json()["validity"]
+            == NamespaceValidityType.DUPLICATE_NAMESPACE.value
+        )
+
     @staticmethod
     def create_data_product(client, default_data_product_payload):
         return client.post(ENDPOINT, json=default_data_product_payload)
@@ -362,3 +418,15 @@ class TestDataProductsRouter:
     @staticmethod
     def get_conveyor_ide_url(client, data_product_id):
         return client.get(f"{ENDPOINT}/{data_product_id}/conveyor_ide_url")
+
+    @staticmethod
+    def get_namespace_suggestion(client, name):
+        return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
+
+    @staticmethod
+    def validate_namespace(client, namespace):
+        return client.get(f"{ENDPOINT}/validate_namespace?namespace={namespace}")
+
+    @staticmethod
+    def get_namespace_length_limits(client):
+        return client.get(f"{ENDPOINT}/namespace_length_limits")
