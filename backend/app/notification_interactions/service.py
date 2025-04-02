@@ -1,7 +1,7 @@
 from typing import Iterable
 from uuid import UUID
 
-from sqlalchemy import asc
+from sqlalchemy import asc, delete, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
@@ -48,9 +48,12 @@ class NotificationInteractionService:
         db.commit() should be used after using this function.
 
         """
-        db.query(NotificationInteraction).filter(
-            NotificationInteraction.notification_id == notification_id
-        ).delete(synchronize_session=False)
+
+        db.execute(
+            delete(NotificationInteraction).where(
+                NotificationInteraction.notification_id == notification_id
+            )
+        )
 
         for user_id in user_ids:
             new_interaction = NotificationInteraction(
@@ -74,9 +77,9 @@ class NotificationInteractionService:
         """
         notification_cls = NotificationModelMap[notification_type]
         key_attribute = NotificationForeignKeyMap.get(notification_type)
-        notification_id = (
-            db.query(notification_cls.id).filter(key_attribute == reference_id).scalar()
-        )
+        notification_id = db.scalars(
+            select(notification_cls.id).where(key_attribute == reference_id)
+        ).one_or_none()
         if notification_id:
             self.reset_interactions_for_notification(db, notification_id, user_ids)
 
@@ -90,19 +93,18 @@ class NotificationInteractionService:
         """
         notification_cls = NotificationModelMap[notification_type]
         key_attribute = NotificationForeignKeyMap.get(notification_type)
-        notifications_to_delete = (
-            db.query(notification_cls).filter(key_attribute == reference_id).all()
-        )
-        if notifications_to_delete:
-            db.query(NotificationInteraction).filter(
-                NotificationInteraction.notification_id.in_(
-                    [n.id for n in notifications_to_delete]
+        notification_ids_to_delete = db.scalars(
+            select(notification_cls.id).where(key_attribute == reference_id)
+        ).all()
+        if notification_ids_to_delete:
+            db.execute(
+                delete(NotificationInteraction).where(
+                    NotificationInteraction.notification_id.in_(
+                        notification_ids_to_delete
+                    )
                 )
-            ).delete(synchronize_session=False)
-
-            db.query(notification_cls).filter(key_attribute == reference_id).delete(
-                synchronize_session=False
             )
+            db.execute(delete(notification_cls).where(key_attribute == reference_id))
             db.flush()
 
     def get_owner_ids_via_reference_parent_id(
