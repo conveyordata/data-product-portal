@@ -1,4 +1,4 @@
-import { Checkbox, type CheckboxChangeEvent, Flex, Table, type TableColumnType,Typography } from 'antd';
+import { Checkbox, type CheckboxChangeEvent, Flex, Table, type TableColumnType, Typography } from 'antd';
 import { type ReactElement, useCallback, useMemo } from 'react';
 
 import QuestionTooltip from '@/components/tooltip/question-tooltip';
