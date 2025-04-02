@@ -13,9 +13,9 @@ import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-produ
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
-    useGetNamespaceLengthLimitsQuery,
-    useLazyGetNamespaceSuggestionQuery,
-    useLazyValidateNamespaceQuery,
+    useGetDatasetNamespaceLengthLimitsQuery,
+    useLazyGetDatasetNamespaceSuggestionQuery,
+    useLazyValidateDatasetNamespaceQuery,
     useRemoveDatasetMutation,
     useUpdateDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
@@ -85,9 +85,9 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
     const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
     const [fetchNamespace, { data: namespaceSuggestion, isFetching: isFetchingNamespaceSuggestion }] =
-        useLazyGetNamespaceSuggestionQuery();
-    const [validateNamespace] = useLazyValidateNamespaceQuery();
-    const { data: namespaceLengthLimits } = useGetNamespaceLengthLimitsQuery();
+        useLazyGetDatasetNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateDatasetNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetDatasetNamespaceLengthLimitsQuery();
 
     const [form] = Form.useForm<DatasetCreateFormSchema>();
     const datasetNameValue = Form.useWatch('name', form);

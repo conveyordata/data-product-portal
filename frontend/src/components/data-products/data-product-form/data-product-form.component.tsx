@@ -13,9 +13,9 @@ import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-ty
 import {
     useCreateDataProductMutation,
     useGetDataProductByIdQuery,
-    useGetNamespaceLengthLimitsQuery,
-    useLazyGetNamespaceSuggestionQuery,
-    useLazyValidateNamespaceQuery,
+    useGetDataProductNamespaceLengthLimitsQuery,
+    useLazyGetDataProductNamespaceSuggestionQuery,
+    useLazyValidateDataProductNamespaceQuery,
     useRemoveDataProductMutation,
     useUpdateDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -65,9 +65,9 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
     const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
     const [fetchNamespace, { data: namespaceSuggestion, isFetching: isFetchingNamespaceSuggestion }] =
-        useLazyGetNamespaceSuggestionQuery();
-    const [validateNamespace] = useLazyValidateNamespaceQuery();
-    const { data: namespaceLengthLimits } = useGetNamespaceLengthLimitsQuery();
+        useLazyGetDataProductNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateDataProductNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetDataProductNamespaceLengthLimitsQuery();
 
     const [form] = Form.useForm<DataProductCreateFormSchema>();
     const dataProductNameValue = Form.useWatch('name', form);

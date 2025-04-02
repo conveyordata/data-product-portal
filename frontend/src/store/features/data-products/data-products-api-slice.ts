@@ -201,21 +201,21 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             },
             invalidatesTags: (_, __, { dataProductId }) => [{ type: TagTypes.DataProduct as const, id: dataProductId }],
         }),
-        validateNamespace: builder.query<NamespaceValidationResponse, string>({
+        validateDataProductNamespace: builder.query<NamespaceValidationResponse, string>({
             query: (namespace) => ({
                 url: ApiUrl.DataProductNamespaceValidation,
                 method: 'GET',
                 params: { namespace: namespace },
             }),
         }),
-        getNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
+        getDataProductNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
             query: (name) => ({
                 url: ApiUrl.DataProductNamespaceSuggestion,
                 method: 'GET',
                 params: { name: name },
             }),
         }),
-        getNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
+        getDataProductNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
             query: () => ({
                 url: ApiUrl.DataProductNamespaceLimits,
                 method: 'GET',
@@ -240,7 +240,7 @@ export const {
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
-    useLazyGetNamespaceSuggestionQuery,
-    useLazyValidateNamespaceQuery,
-    useGetNamespaceLengthLimitsQuery,
+    useLazyGetDataProductNamespaceSuggestionQuery,
+    useLazyValidateDataProductNamespaceQuery,
+    useGetDataProductNamespaceLengthLimitsQuery,
 } = dataProductsApiSlice;

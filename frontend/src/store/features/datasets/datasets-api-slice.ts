@@ -150,21 +150,21 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        validateNamespace: builder.query<NamespaceValidationResponse, string>({
+        validateDatasetNamespace: builder.query<NamespaceValidationResponse, string>({
             query: (namespace) => ({
                 url: ApiUrl.DatasetNamespaceValidation,
                 method: 'GET',
                 params: { namespace: namespace },
             }),
         }),
-        getNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
+        getDatasetNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
             query: (name) => ({
                 url: ApiUrl.DatasetNamespaceSuggestion,
                 method: 'GET',
                 params: { name: name },
             }),
         }),
-        getNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
+        getDatasetNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
             query: () => ({
                 url: ApiUrl.DatasetNamespaceLimits,
                 method: 'GET',
@@ -185,7 +185,7 @@ export const {
     useAddUserToDatasetMutation,
     useRemoveUserFromDatasetMutation,
     useGetDatasetGraphDataQuery,
-    useLazyGetNamespaceSuggestionQuery,
-    useLazyValidateNamespaceQuery,
-    useGetNamespaceLengthLimitsQuery,
+    useLazyGetDatasetNamespaceSuggestionQuery,
+    useLazyValidateDatasetNamespaceQuery,
+    useGetDatasetNamespaceLengthLimitsQuery,
 } = datasetsApiSlice;
