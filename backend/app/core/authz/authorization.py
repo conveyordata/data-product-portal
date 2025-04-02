@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections.abc import Callable
 from pathlib import Path
 from typing import Sequence, Type, TypeAlias, Union, cast
@@ -15,6 +15,7 @@ from app.data_outputs.model import DataOutput
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_memberships.model import DataProductMembership
 from app.data_products.model import DataProduct
+from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database import database
 from app.database.database import get_db_session
 from app.datasets.model import Dataset
@@ -32,9 +33,12 @@ class SubjectResolver(ABC):
     model: Model = None
 
     @classmethod
-    @abstractmethod
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        pass
+        if (result := request.query_params.get(key)) is not None:
+            return cast(str, result)
+        if (result := request.path_params.get(key)) is not None:
+            return cast(str, result)
+        return cls.DEFAULT
 
     @classmethod
     def resolve_domain(
@@ -53,13 +57,9 @@ class SubjectResolver(ABC):
 class DataProductResolver(SubjectResolver):
     model: Model = DataProduct
 
-    @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        if (result := request.query_params.get(key)) is not None:
-            return cast(str, result)
-        if (result := request.path_params.get(key)) is not None:
-            return cast(str, result)
-        return cls.DEFAULT
+
+class DatasetResolver(SubjectResolver):
+    model: Model = Dataset
 
 
 class DataOutputResolver(SubjectResolver):
@@ -106,6 +106,23 @@ class DataOutputDatasetAssociationResolver(SubjectResolver):
             ).one_or_none()
             if data_output_dataset:
                 return data_output_dataset.dataset_id
+        return cls.DEFAULT
+
+
+class DataProductDatasetAssociationResolver(SubjectResolver):
+    model: Model = Dataset
+
+    @classmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        obj = DataProductResolver.resolve(request, key, db)
+        if obj != cls.DEFAULT:
+            data_product_dataset = db.scalars(
+                select(DataProductDatasetAssociation).where(
+                    DataProductDatasetAssociation.id == obj
+                )
+            ).one_or_none()
+            if data_product_dataset:
+                return data_product_dataset.dataset_id
         return cls.DEFAULT
 
 

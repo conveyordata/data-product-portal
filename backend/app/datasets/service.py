@@ -14,6 +14,7 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema import (
+    Dataset,
     DatasetAboutUpdate,
     DatasetCreateUpdate,
     DatasetStatusUpdate,
@@ -113,17 +114,19 @@ class DatasetService:
         return tags
 
     def create_dataset(
-        self, dataset: DatasetCreateUpdate, db: Session
-    ) -> dict[str, UUID]:
-        dataset = self._update_owners(dataset, db)
-        dataset_schema = dataset.parse_pydantic_schema()
+        self,
+        dataset: DatasetCreateUpdate,
+        db: Session,
+    ) -> Dataset:
+        new_dataset: Dataset = self._update_owners(dataset, db)
+        dataset_schema = new_dataset.parse_pydantic_schema()
         tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
         model = DatasetModel(**dataset_schema, tags=tags)
+
         db.add(model)
         db.commit()
         RefreshInfrastructureLambda().trigger()
-
-        return {"id": model.id}
+        return model
 
     def remove_dataset(self, id: UUID, db: Session) -> None:
         dataset = db.get(

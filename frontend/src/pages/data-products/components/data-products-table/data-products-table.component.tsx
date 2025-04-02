@@ -42,7 +42,7 @@ export function DataProductsTable() {
     );
     const { data: access } = useCheckAccessQuery(
         {
-            action: AuthorizationAction.GLOBAL_CREATE_DATAPRODUCT,
+            action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT,
         },
         { skip: !currentUser },
     );
