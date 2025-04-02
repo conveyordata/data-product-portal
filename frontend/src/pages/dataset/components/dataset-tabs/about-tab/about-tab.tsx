@@ -24,7 +24,7 @@ export function AboutTab({ datasetId }: Props) {
     const { data: edit_access } = useCheckAccessQuery(
         {
             object_id: datasetId,
-            action: AuthorizationAction.DATASET_UPDATE_PROPERTIES,
+            action: AuthorizationAction.DATASET__UPDATE_PROPERTIES,
         },
         { skip: !datasetId },
     );

@@ -40,7 +40,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const { data: access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_READ_INTEGRATIONS,
+            action: AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS,
         },
         {
             skip: !dataProductId,
