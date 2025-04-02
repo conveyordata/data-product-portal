@@ -6,7 +6,7 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.core.helpers.namespace import (
+from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
     NamespaceValidation,

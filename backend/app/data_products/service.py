@@ -17,7 +17,7 @@ from app.core.aws.boto3_clients import get_client
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.core.email.send_mail import send_mail
-from app.core.helpers.namespace import (
+from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
     NamespaceValidation,

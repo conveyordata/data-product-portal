@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.helpers.namespace import (
+from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
     NamespaceValidation,

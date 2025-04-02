@@ -17,7 +17,7 @@ from tests.factories.environment import EnvironmentFactory
 from tests.factories.lifecycle import LifecycleFactory
 from tests.factories.platform import PlatformFactory
 
-from app.core.helpers.namespace import NamespaceValidityType
+from app.core.namespace.validation import NamespaceValidityType
 from app.data_product_memberships.enums import DataProductUserRole
 
 ENDPOINT = "/api/data_products"

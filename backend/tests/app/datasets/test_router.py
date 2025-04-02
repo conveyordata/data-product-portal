@@ -7,7 +7,7 @@ from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.data_product_setting import DataProductSettingFactory
 from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
 
-from app.core.helpers.namespace import NamespaceValidityType
+from app.core.namespace.validation import NamespaceValidityType
 from app.datasets.enums import DatasetAccessType
 
 ENDPOINT = "/api/datasets"

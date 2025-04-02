@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization, DataProductResolver
-from app.core.helpers.namespace import (
+from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
     NamespaceValidation,
