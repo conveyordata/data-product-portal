@@ -74,7 +74,9 @@ class NotificationInteractionService:
 
         """
         notification_cls = NotificationModelMap[notification_type]
-        key_attribute = NotificationForeignKeyMap.get(notification_type)
+        key_attribute = getattr(
+            notification_cls, NotificationForeignKeyMap[notification_type]
+        )
         notification_id = db.scalars(
             select(notification_cls.id).where(key_attribute == reference_id)
         ).one_or_none()
@@ -90,7 +92,9 @@ class NotificationInteractionService:
 
         """
         notification_cls = NotificationModelMap[notification_type]
-        key_attribute = NotificationForeignKeyMap.get(notification_type)
+        key_attribute = getattr(
+            notification_cls, NotificationForeignKeyMap[notification_type]
+        )
         notification_ids_to_delete = db.scalars(
             select(notification_cls.id).where(key_attribute == reference_id)
         ).all()

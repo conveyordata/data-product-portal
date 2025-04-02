@@ -20,7 +20,6 @@ from app.notifications.data_product_membership.model import (
 from app.notifications.data_product_membership.schema import (
     DataProductMembershipNotification,
 )
-from app.notifications.model import Notification
 from app.notifications.notification_types import NotificationTypes
 
 Notifications = Union[
@@ -50,15 +49,9 @@ NotificationModelMap = {
 }
 
 NotificationForeignKeyMap = {
-    NotificationTypes.DataProductDatasetNotification: (
-        Notification.__table__.c.data_product_dataset_id
-    ),
-    NotificationTypes.DataOutputDatasetNotification: (
-        Notification.__table__.c.data_output_dataset_id
-    ),
-    NotificationTypes.DataProductMembershipNotification: (
-        Notification.__table__.c.data_product_membership_id
-    ),
+    NotificationTypes.DataProductDatasetNotification: "data_product_dataset_id",
+    NotificationTypes.DataOutputDatasetNotification: "data_output_dataset_id",
+    NotificationTypes.DataProductMembershipNotification: "data_product_membership_id",
 }
 
 NotificationConfiguration = Annotated[

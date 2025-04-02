@@ -124,8 +124,7 @@ class NotificationService:
 
         """
         notification_cls = NotificationModelMap[notification_type]
-        key_attribute = NotificationForeignKeyMap.get(notification_type)
-        key_attribute = NotificationForeignKeyMap[notification_type].name
+        key_attribute = NotificationForeignKeyMap[notification_type]
         notification = notification_cls(**{key_attribute: reference_id})
         db.add(notification)
         db.flush()
