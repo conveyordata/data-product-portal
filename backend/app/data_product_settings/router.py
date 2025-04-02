@@ -3,6 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.authz.actions import AuthorizationAction
+from app.core.authz.authorization import Authorization, DataProductResolver
 from app.data_product_settings.schema import (
     DataProductSetting,
     DataProductSettingCreate,
@@ -22,7 +24,17 @@ def get_data_products_settings(
     return DataProductSettingService().get_data_product_settings(db)
 
 
-@router.post("", dependencies=[Depends(only_for_admin)])
+@router.post(
+    "",
+    dependencies=[
+        Depends(only_for_admin),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+            )
+        ),
+    ],
+)
 def create_data_product_setting(
     setting: DataProductSettingCreate,
     db: Session = Depends(get_db_session),
@@ -32,7 +44,14 @@ def create_data_product_setting(
 
 @router.put(
     "/{id}",
-    dependencies=[Depends(only_for_admin)],
+    dependencies=[
+        Depends(only_for_admin),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+            )
+        ),
+    ],
 )
 def update_data_product_setting(
     id: UUID,
@@ -42,7 +61,17 @@ def update_data_product_setting(
     return DataProductSettingService().update_data_product_setting(id, setting, db)
 
 
-@router.delete("/{id}", dependencies=[Depends(only_for_admin)])
+@router.delete(
+    "/{id}",
+    dependencies=[
+        Depends(only_for_admin),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+            )
+        ),
+    ],
+)
 def delete_data_product_setting(
     id: UUID,
     db: Session = Depends(get_db_session),

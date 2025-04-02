@@ -9,6 +9,7 @@ from tests.factories.data_products_datasets import DataProductDatasetAssociation
 
 from app.core.namespace.validation import NamespaceValidityType
 from app.datasets.enums import DatasetAccessType
+from app.roles.service import RoleService
 
 ENDPOINT = "/api/datasets"
 
@@ -33,10 +34,15 @@ def dataset_payload():
 class TestDatasetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_dataset(self, dataset_payload, client):
+    def test_create_dataset(self, session, dataset_payload, client):
+        RoleService(db=session).initialize_prototype_roles()
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
+
+    def test_create_dataset_no_owner_role(self, dataset_payload, client):
+        created_dataset = self.create_default_dataset(client, dataset_payload)
+        assert created_dataset.status_code == 400
 
     def test_create_dataset_no_owners(self, dataset_payload, client):
         create_payload = deepcopy(dataset_payload)

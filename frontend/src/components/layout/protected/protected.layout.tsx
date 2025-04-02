@@ -9,7 +9,7 @@ import { ApplicationPaths } from '@/types/navigation';
 const ProtectedRoute = () => {
     const currentUser = useSelector(selectCurrentUser);
     const { data: access } = useCheckAccessQuery({
-        action: AuthorizationAction.GLOBAL_UPDATE_CONFIGURATION,
+        action: AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION,
     });
     const canAccess = access?.access || false;
     return currentUser?.is_admin || canAccess ? <Outlet /> : <Navigate to={ApplicationPaths.Home} replace />;
