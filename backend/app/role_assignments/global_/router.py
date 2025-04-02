@@ -79,12 +79,6 @@ def decide_assignment(
             detail="This assignment was already decided",
         )
 
-    if request.decision is DecisionStatus.APPROVED and original.role_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Cannot approve a request that does not have a role assignment",
-        )
-
     assignment = service.update_assignment(
         UpdateRoleAssignment(id=id, decision=request.decision)
     )

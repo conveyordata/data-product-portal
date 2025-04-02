@@ -182,7 +182,7 @@ class TestGlobalRoleAssignmentsRouter:
         )
 
         response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/role", json={"role_id": str(admin.id)}
+            f"{ENDPOINT}/{assignment.id}/role", json={"role_id": "admin"}
         )
         assert response.status_code == 200
         data = response.json()
