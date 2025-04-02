@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
@@ -32,59 +33,53 @@ class NotificationService:
     def get_data_product_membership_notification_pending_ids(
         self, db: Session, data_product_id: UUID
     ) -> list[UUID]:
-        return [
-            notification.id
-            for notification in db.query(DataProductMembershipNotification)
+        return db.scalars(
+            select(DataProductMembershipNotification.id)
             .join(
                 DataProductMembership,
                 DataProductMembership.id
                 == DataProductMembershipNotification.data_product_membership_id,
             )
-            .filter(
+            .where(
                 DataProductMembership.status
-                == DataProductMembershipStatus.PENDING_APPROVAL
+                == DataProductMembershipStatus.PENDING_APPROVAL,
+                DataProductMembership.data_product_id == data_product_id,
             )
-            .filter(DataProductMembership.data_product_id == data_product_id)
-            .all()
-        ]
+        ).all()
 
     def get_data_output_dataset_notification_pending_ids(
         self, db: Session, dataset_id: UUID
     ) -> list[UUID]:
-        return [
-            notification.id
-            for notification in db.query(DataOutputDatasetNotification)
+        return db.scalars(
+            select(DataOutputDatasetNotification.id)
             .join(
                 DataOutputDatasetAssociation,
                 DataOutputDatasetAssociation.id
                 == DataOutputDatasetNotification.data_output_dataset_id,
             )
-            .filter(
+            .where(
                 DataOutputDatasetAssociation.status
-                == DataOutputDatasetLinkStatus.PENDING_APPROVAL
+                == DataOutputDatasetLinkStatus.PENDING_APPROVAL,
+                DataOutputDatasetAssociation.dataset_id == dataset_id,
             )
-            .filter(DataOutputDatasetAssociation.dataset_id == dataset_id)
-            .all()
-        ]
+        ).all()
 
     def get_data_product_dataset_notification_pending_ids(
         self, db: Session, dataset_id: UUID
     ) -> list[UUID]:
-        return [
-            notification.id
-            for notification in db.query(DataProductDatasetNotification)
+        return db.scalars(
+            select(DataProductDatasetNotification.id)
             .join(
                 DataProductDatasetAssociation,
                 DataProductDatasetAssociation.id
                 == DataProductDatasetNotification.data_product_dataset_id,
             )
-            .filter(
+            .where(
                 DataProductDatasetAssociation.status
-                == DataProductDatasetLinkStatus.PENDING_APPROVAL
+                == DataProductDatasetLinkStatus.PENDING_APPROVAL,
+                DataProductDatasetAssociation.dataset_id == dataset_id,
             )
-            .filter(DataProductDatasetAssociation.dataset_id == dataset_id)
-            .all()
-        ]
+        ).all()
 
     def get_pending_notifications_by_reference(
         self,
