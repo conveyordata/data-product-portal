@@ -32,7 +32,7 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
     const { data: accept_access } = useCheckAccessQuery(
         {
             object_id: datasetId,
-            action: AuthorizationAction.DATASET_APPROVE_DATA_OUTPUT_LINK_REQUEST,
+            action: AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
         },
         {
             skip: !datasetId,
@@ -41,7 +41,7 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
     const { data: revoke_access } = useCheckAccessQuery(
         {
             object_id: datasetId,
-            action: AuthorizationAction.DATASET_REVOKE_DATA_OUTPUT_LINK,
+            action: AuthorizationAction.DATASET__REVOKE_DATA_OUTPUT_LINK,
         },
         {
             skip: !datasetId,

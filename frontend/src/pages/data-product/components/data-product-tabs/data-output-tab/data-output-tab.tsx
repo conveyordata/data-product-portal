@@ -46,7 +46,7 @@ export function DataOutputTab({ dataProductId }: Props) {
     const { data: access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_CREATE_DATA_OUTPUT,
+            action: AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
         },
         { skip: !dataProductId },
     );

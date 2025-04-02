@@ -35,7 +35,7 @@ export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Pr
     const { data: remove_access } = useCheckAccessQuery(
         {
             object_id: datasetId,
-            action: AuthorizationAction.DATASET_DELETE_USER,
+            action: AuthorizationAction.DATASET__DELETE_USER,
         },
         { skip: !datasetId },
     );
