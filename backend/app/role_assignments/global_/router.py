@@ -107,9 +107,6 @@ def modify_assigned_role(
     assignment = service.update_assignment(UpdateRoleAssignment(id=id, role_id=role_id))
 
     if assignment.decision is DecisionStatus.APPROVED:
-        assert (
-            original_role is not None
-        ), "Decision status can only be approved when the role is set"
         background_tasks.add_task(
             tasks.swap_assignment,
             AuthAssignment.from_global(assignment).with_previous(original_role),
