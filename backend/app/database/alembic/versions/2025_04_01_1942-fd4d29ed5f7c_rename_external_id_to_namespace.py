@@ -1,7 +1,7 @@
 """Rename external_id to namespace
 
 Revision ID: fd4d29ed5f7c
-Revises: 269e6dbd565c
+Revises: c9b48c675202
 Create Date: 2025-04-01 19:42:03.285296
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "fd4d29ed5f7c"
-down_revision: Union[str, None] = "269e6dbd565c"
+down_revision: Union[str, None] = "c9b48c675202"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
