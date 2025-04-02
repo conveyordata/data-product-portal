@@ -307,7 +307,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 form={form}
                                 identifiers={identifiers}
                                 sourceAligned={sourceAligned}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 mode={mode}
                                 dataProductId={dataProductId}
                             />
@@ -317,7 +317,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <RedshiftDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );
@@ -326,7 +326,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <GlueDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         ); //mode={mode} dataProductId={dataProductId} />;
@@ -335,7 +335,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <DatabricksDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         ); //mode={mode} dataProductId={dataProductId} />;
@@ -344,7 +344,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <SnowflakeDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );
