@@ -5,6 +5,7 @@ import { useCallback, useMemo } from 'react';
 import QuestionTooltip from '@/components/tooltip/question-tooltip';
 import type { RoleScope } from '@/pages/roles/roles.page';
 import { useGetRolesQuery, useUpdateRoleMutation } from '@/store/features/roles/roles-api-slice';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { RoleContract } from '@/types/roles';
 
 import styles from './roles-table.module.scss';
@@ -147,7 +148,7 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 101,
+                    id: AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION,
                     name: 'Manage configuration',
                     description: 'Allows modifying the configuration options of this installation',
                 },
@@ -158,13 +159,13 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 102,
+                    id: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT,
                     name: 'Create Data Product',
                     description: 'Allows the creation of a Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: 103,
+                    id: AuthorizationAction.GLOBAL__CREATE_DATASET,
                     name: 'Create Dataset',
                     description: 'Allows the creation of a Dataset',
                 },
@@ -175,15 +176,32 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 104,
+                    id: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
                     name: 'Request Data Product access',
                     description: 'Allows requesting access to a Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: 105,
+                    id: AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS,
                     name: 'Request Dataset access',
                     description: 'Allows requesting access to a Dataset',
+                },
+                {
+                    type: 'Group',
+                    id: 'Manage Users',
+                    name: 'Manage Users',
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__CREATE_USER,
+                    name: 'Create User',
+                    description: 'Allows the creation of a new user',
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__DELETE_USER,
+                    name: 'Delete User',
+                    description: 'Allows the deletion of a user',
                 },
             ];
             break;
@@ -196,25 +214,25 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 301,
+                    id: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
                     name: 'Manage general properties',
                     description: 'Allows modifying properties such as labels and the description of a Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: 302,
+                    id: AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS,
                     name: 'Manage settings',
                     description: 'Allows changing the settings of a Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: 303,
+                    id: AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS,
                     name: 'Manage status',
                     description: 'Allows changing the status of a Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: 304,
+                    id: AuthorizationAction.DATA_PRODUCT__DELETE,
                     name: 'Delete Data Product',
                     description: 'Allows the role to delete the Data Product',
                 },
@@ -225,25 +243,25 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 305,
+                    id: AuthorizationAction.DATA_PRODUCT__CREATE_USER,
                     name: 'Add User',
                     description: 'Allows adding a user as member to this Data Product and assigning a role',
                 },
                 {
                     type: 'Instance',
-                    id: 307,
+                    id: AuthorizationAction.DATA_PRODUCT__DELETE_USER,
                     name: 'Remove User',
                     description: 'Allows removing a user as member from this Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: 306,
+                    id: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
                     name: 'Modify User',
                     description: 'Allows changing the role of a member of the Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: 308,
+                    id: AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
                     name: 'Review access request',
                     description: 'Allows accepting or rejecting an access request made for the Data Product',
                 },
@@ -254,25 +272,25 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 309,
+                    id: AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
                     name: 'Add Data Output',
                     description: 'Allows adding a Data Output to this Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: 311,
+                    id: AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
                     name: 'Remove and unlink Data Output',
                     description: 'Allows removing a Data Output from this Data Product and unlinking it from a Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: 310,
+                    id: AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
                     name: 'Modify Data Output',
                     description: 'Allows modifying the details of a Data Output of this Data Product',
                 },
                 {
                     type: 'Instance',
-                    id: 312,
+                    id: AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
                     name: 'Request Data Output Link',
                     description: 'Allows to request that a Data Output of Data Product gets linked to a Dataset',
                 },
@@ -283,13 +301,13 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 313,
+                    id: AuthorizationAction.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
                     name: 'Request Access to Dataset',
                     description: 'Allows to request read access to a Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: 314,
+                    id: AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
                     name: 'Remove Access to Dataset',
                     description: 'Allows to remove read access to a Dataset',
                 },
@@ -300,7 +318,7 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 315,
+                    id: AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS,
                     name: 'Access Integrations',
                     description: 'Allows the role to see and access Integrations of the Data Product',
                 },
@@ -315,25 +333,25 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 401,
+                    id: AuthorizationAction.DATASET__UPDATE_PROPERTIES,
                     name: 'Manage general properties',
                     description: 'Allows modifying properties such as labels and the description of a Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: 402,
+                    id: AuthorizationAction.DATASET__UPDATE_SETTINGS,
                     name: 'Manage settings',
                     description: 'Allows changing the settings of a Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: 403,
+                    id: AuthorizationAction.DATASET__UPDATE_STATUS,
                     name: 'Manage status',
                     description: 'Allows changing the status of a Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: 404,
+                    id: AuthorizationAction.DATASET__DELETE,
                     name: 'Delete Dataset',
                     description: 'Allows the role to delete the Dataset',
                 },
@@ -356,13 +374,13 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 406,
+                    id: AuthorizationAction.DATASET__UPDATE_USER,
                     name: 'Modify User',
                     description: 'Allows changing the role of a member of the Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: 408,
+                    id: AuthorizationAction.DATASET__APPROVE_USER_REQUEST,
                     name: 'Review access request',
                     description: 'Allows approving or rejecting an access request made for the Dataset',
                 },
@@ -373,13 +391,13 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 409,
+                    id: AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
                     name: 'Accept Data Output link',
                     description: 'Allows accepting a request to link a Data Output to the Dataset',
                 },
                 {
                     type: 'Instance',
-                    id: 410,
+                    id: AuthorizationAction.DATASET__REVOKE_DATA_OUTPUT_LINK,
                     name: 'Remove Data Output link',
                     description: 'Allows unlinking Data Outputs from the Dataset',
                 },
@@ -390,13 +408,13 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 411,
+                    id: AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                     name: 'Approve Data Product Access',
                     description: 'Allows the role to accept or reject a read access request from a data product',
                 },
                 {
                     type: 'Instance',
-                    id: 412,
+                    id: AuthorizationAction.DATASET__REVOKE_DATAPRODUCT_ACCESS,
                     name: 'Revoke Data Product Access',
                     description: 'Allows the role to revoke read access from a data product again',
                 },
@@ -407,7 +425,7 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
                 {
                     type: 'Instance',
-                    id: 413,
+                    id: AuthorizationAction.DATASET__READ_INTEGRATIONS,
                     name: 'Access Integrations',
                     description: 'Allows the role to see and access Integrations of the Dataset',
                 },
