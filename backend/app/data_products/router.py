@@ -4,12 +4,16 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz.actions import AuthorizationAction
+from app.core.authz.authorization import Authorization, DataProductResolver
 from app.core.helpers.namespace import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
     NamespaceValidation,
 )
+from app.data_outputs.schema import DataOutputCreateRequest
 from app.data_outputs.schema_get import DataOutputGet
+from app.data_outputs.service import DataOutputService
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.service import DataProductSettingService
 from app.data_products.schema import (
@@ -105,7 +109,14 @@ def create_data_product(
             },
         }
     },
-    dependencies=[Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER]))],
+    dependencies=[
+        Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__DELETE, DataProductResolver
+            )
+        ),
+    ],
 )
 def remove_data_product(
     id: UUID,
@@ -130,6 +141,38 @@ def update_data_product(
     id: UUID, data_product: DataProductUpdate, db: Session = Depends(get_db_session)
 ):
     return DataProductService().update_data_product(id, data_product, db)
+
+
+@router.post(
+    "/{id}/data_output",
+    responses={
+        200: {
+            "description": "DataOutput successfully created",
+            "content": {
+                "application/json": {
+                    "example": {"id": "random id of the new data_output"}
+                }
+            },
+        },
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                DataProductResolver,
+            )
+        )
+    ],
+)
+def create_data_output(
+    id: UUID,
+    data_output: DataOutputCreateRequest,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> dict[str, UUID]:
+    return DataOutputService().create_data_output(
+        id, data_output, db, authenticated_user
+    )
 
 
 @router.put(

@@ -17,6 +17,7 @@ export enum ApiUrl {
     DataProductLifecycle = '/api/data_product_lifecycles',
     DataProductLifecycleGet = '/api/data_product_lifecycles/:lifecycleId',
     DataProductSetting = '/api/data_product_settings',
+    DataProductOutputCreate = '/api/data_products/:dataProductId/data_output',
     DataProductSettingGet = '/api/data_product_settings/:settingId',
     DataProductSettingValue = '/api/data_products/:dataProductId/settings/:dataProductSettingId',
     DataProductSignInUrl = '/api/data_products/:dataProductId/signin_url',
@@ -74,7 +75,7 @@ export enum ApiUrl {
     PlatformServiceConfigById = '/api/platforms/configs/:configId',
     Version = '/api/version',
     ThemeSettings = '/api/theme_settings',
-    AccessCheck = '/api/access/check',
+    AccessCheck = '/api/authz/access/check',
 }
 
 export type DynamicPathParams =

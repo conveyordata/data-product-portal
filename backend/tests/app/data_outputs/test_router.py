@@ -185,7 +185,11 @@ class TestDataOutputsRouter:
 
     @staticmethod
     def create_data_output(client, default_data_output_payload):
-        return client.post(ENDPOINT, json=default_data_output_payload)
+        return client.post(
+            f"/api/data_products/"
+            f"{default_data_output_payload.get('owner_id')}/data_output",
+            json=default_data_output_payload,
+        )
 
     @staticmethod
     def get_data_output_by_id(client, data_output_id):

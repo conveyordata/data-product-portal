@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/roles", tags=["roles"])
 
 
 @router.get("/{scope}")
-def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> list[Role]:
+def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> Sequence[Role]:
     return RoleService(db).get_roles(scope)
 
 

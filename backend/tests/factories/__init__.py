@@ -16,6 +16,8 @@ from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
 from .platform_service_config import PlatformServiceConfigFactory
 from .role import RoleFactory
+from .role_assignment_data_product import DataProductRoleAssignmentFactory
+from .role_assignment_dataset import DatasetRoleAssignmentFactory
 from .s3_data_output import S3DataOutputFactory
 from .tags import TagFactory
 from .theme_settings import ThemeSettingsFactory
@@ -29,7 +31,9 @@ factories = [
     DataProductSettingFactory,
     DataProductTypeFactory,
     DataProductDatasetAssociationFactory,
+    DataProductRoleAssignmentFactory,
     DatasetFactory,
+    DatasetRoleAssignmentFactory,
     DomainFactory,
     EnvPlatformConfigFactory,
     EnvPlatformServiceConfigFactory,

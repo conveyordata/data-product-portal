@@ -22,6 +22,8 @@ type Props = {
     isCurrentDatasetOwner: boolean;
     isLoading?: boolean;
     isDisabled?: boolean;
+    canApproveNew?: boolean;
+    canRevokeNew?: boolean;
 };
 
 export const getDatasetDataProductsColumns = ({
@@ -33,6 +35,8 @@ export const getDatasetDataProductsColumns = ({
     isDisabled,
     isLoading,
     isCurrentDatasetOwner,
+    canApproveNew,
+    canRevokeNew,
 }: Props): TableColumnsType<DataProductLink> => {
     const sorter = new Sorter<DataProductLink>();
     return [
@@ -92,7 +96,11 @@ export const getDatasetDataProductsColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                <Button
+                                    loading={isLoading}
+                                    disabled={isLoading || (!canApproveNew && isDisabled)}
+                                    type={'link'}
+                                >
                                     {t('Accept')}
                                 </Button>
                             </Popconfirm>
@@ -108,7 +116,11 @@ export const getDatasetDataProductsColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                <Button
+                                    loading={isLoading}
+                                    disabled={isLoading || (!canApproveNew && isDisabled)}
+                                    type={'link'}
+                                >
                                     {t('Reject')}
                                 </Button>
                             </Popconfirm>
@@ -129,7 +141,11 @@ export const getDatasetDataProductsColumns = ({
                             okButtonProps={{ loading: isLoading }}
                             autoAdjustOverflow={true}
                         >
-                            <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                            <Button
+                                loading={isLoading}
+                                disabled={isLoading || (!canRevokeNew && isDisabled)}
+                                type={'link'}
+                            >
                                 {t('Revoke Access')}
                             </Button>
                         </Popconfirm>

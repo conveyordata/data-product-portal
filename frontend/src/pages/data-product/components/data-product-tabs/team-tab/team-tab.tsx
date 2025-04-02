@@ -8,9 +8,11 @@ import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useAddDataProductMembershipMutation } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
@@ -52,6 +54,16 @@ export function TeamTab({ dataProductId }: Props) {
     }, [dataProduct?.memberships, searchTerm]);
     const dataProductUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
 
+    const { data: access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT_CREATE_USER,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canAddUserNew = access?.access || false;
+
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;
 
@@ -85,7 +97,7 @@ export function TeamTab({ dataProductId }: Props) {
                     placeholder={t('Search users by email or name')}
                     actionButton={
                         <Button
-                            disabled={!isDataProductOwner}
+                            disabled={!(canAddUserNew || isDataProductOwner)}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}

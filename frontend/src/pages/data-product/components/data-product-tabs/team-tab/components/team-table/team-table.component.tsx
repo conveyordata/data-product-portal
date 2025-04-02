@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useDenyMembershipAccessMutation,
     useGrantMembershipAccessMutation,
@@ -13,6 +14,7 @@ import {
 } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
 import { UserContract } from '@/types/users';
 import { getDoesUserHaveAnyDataProductMembership } from '@/utils/data-product-user-role.helper.ts';
@@ -38,6 +40,32 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         useRemoveMembershipAccessMutation();
     const [grantMembershipAccess] = useGrantMembershipAccessMutation();
     const [denyMembershipAccess] = useDenyMembershipAccessMutation();
+
+    const { data: edit_access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT_UPDATE_USER,
+        },
+        { skip: !dataProductId },
+    );
+    const { data: approve_access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT_APPROVE_USER_REQUEST,
+        },
+        { skip: !dataProductId },
+    );
+    const { data: remove_access } = useCheckAccessQuery(
+        {
+            object_id: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT_DELETE_USER,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canApproveUserNew = approve_access?.access || false;
+    const canEditUserNew = edit_access?.access || false;
+    const canRemoveUserNew = remove_access?.access || false;
 
     const handleRemoveUserAccess = useCallback(
         async (membershipId: string) => {
@@ -103,6 +131,9 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
             hasCurrentUserMembership: getDoesUserHaveAnyDataProductMembership(currentUser.id, dataProductUsers),
             onRejectMembershipRequest: handleDenyAccessToDataProduct,
             onAcceptMembershipRequest: handleGrantAccessToDataProduct,
+            canEdit: canEditUserNew,
+            canRemove: canRemoveUserNew,
+            canApprove: canApproveUserNew,
         });
     }, [
         t,
@@ -116,6 +147,9 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         handleDenyAccessToDataProduct,
         handleGrantAccessToDataProduct,
         isCurrentUserDataProductOwner,
+        canEditUserNew,
+        canRemoveUserNew,
+        canApproveUserNew,
     ]);
 
     if (!dataProduct) return null;
