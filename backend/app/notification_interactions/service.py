@@ -48,13 +48,11 @@ class NotificationInteractionService:
         db.commit() should be used after using this function.
 
         """
-
         db.execute(
             delete(NotificationInteraction).where(
                 NotificationInteraction.notification_id == notification_id
             )
         )
-
         for user_id in user_ids:
             new_interaction = NotificationInteraction(
                 notification_id=notification_id,
@@ -218,64 +216,57 @@ class NotificationInteractionService:
     def get_user_notification_interactions(
         self, db: Session, authenticated_user: User
     ) -> list[NotificationInteractionGet]:
-        return (
-            db.query(NotificationInteraction)
+        return db.scalars(
+            select(NotificationInteraction)
             .options(
                 joinedload(NotificationInteraction.notification),
                 joinedload(NotificationInteraction.user),
             )
-            .filter(NotificationInteraction.user_id == authenticated_user.id)
+            .where(NotificationInteraction.user_id == authenticated_user.id)
             .order_by(asc(NotificationInteraction.last_seen))
-            .all()
-        )
+        ).all()
 
     def get_user_action_notification_interactions(
         self, db: Session, authenticated_user: User
     ) -> list[NotificationInteractionGet]:
-        data_product_dataset_notification_ids = (
-            db.query(DataProductDatasetNotification.id)
-            .options(joinedload(DataProductDatasetNotification.data_product_dataset))
-            .filter(
+        data_product_dataset_notification_ids = db.scalars(
+            select(DataProductDatasetNotification.id).where(
                 DataProductDatasetNotification.data_product_dataset.has(
                     DataProductDatasetAssociationModel.status
                     == DataProductDatasetLinkStatus.PENDING_APPROVAL
                 )
             )
-        )
+        ).all()
 
-        data_output_dataset_notification_ids = (
-            db.query(DataOutputDatasetNotification.id)
-            .options(joinedload(DataOutputDatasetNotification.data_output_dataset))
-            .filter(
+        data_output_dataset_notification_ids = db.scalars(
+            select(DataOutputDatasetNotification.id).where(
                 DataOutputDatasetNotification.data_output_dataset.has(
                     DataOutputDatasetAssociationModel.status
                     == DataOutputDatasetLinkStatus.PENDING_APPROVAL
                 )
             )
-        )
+        ).all()
 
-        data_product_membership_notification_ids = (
-            db.query(DataProductMembershipNotification.id)
-            .options(
-                joinedload(DataProductMembershipNotification.data_product_membership)
-            )
-            .filter(
+        data_product_membership_notification_ids = db.scalars(
+            select(DataProductMembershipNotification.id).where(
                 DataProductMembershipNotification.data_product_membership.has(
                     DataProductMembershipModel.status
                     == DataProductMembershipStatus.PENDING_APPROVAL
                 )
             )
-        )
+        ).all()
 
-        notification_ids = data_product_dataset_notification_ids.union(
+        notification_ids = set(data_product_dataset_notification_ids).union(
             data_output_dataset_notification_ids,
             data_product_membership_notification_ids,
         )
 
-        return (
-            db.query(NotificationInteraction)
+        return db.scalars(
+            select(NotificationInteraction)
             .options(joinedload(NotificationInteraction.notification))
-            .filter(NotificationInteraction.user_id == authenticated_user.id)
-            .filter(NotificationInteraction.notification_id.in_(notification_ids))
+            .where(
+                NotificationInteraction.user_id == authenticated_user.id,
+                NotificationInteraction.notification_id.in_(notification_ids),
+            )
             .order_by(asc(NotificationInteraction.last_seen))
-        )
+        ).all()
