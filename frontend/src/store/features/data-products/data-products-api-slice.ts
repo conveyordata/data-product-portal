@@ -240,7 +240,6 @@ export const {
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
-    useValidateNamespaceQuery,
     useLazyGetNamespaceSuggestionQuery,
     useLazyValidateNamespaceQuery,
     useGetNamespaceLengthLimitsQuery,

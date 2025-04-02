@@ -100,7 +100,7 @@ def default_dataset_payload() -> dict[str, Any]:
     return {
         "name": "Test Dataset",
         "description": "Test Description",
-        "external_id": "test-dataset",
+        "namespace": "test-dataset",
         "tags": [],
         "owners": [str(user.id)],
         "access_type": DatasetAccessType.RESTRICTED,

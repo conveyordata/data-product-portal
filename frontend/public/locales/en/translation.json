@@ -110,7 +110,7 @@
     "Failed to delete dataset, please try again later": "Failed to delete dataset, please try again later",
     "The name of your dataset": "The name of your dataset",
     "Please input the name of the dataset": "Please input the name of the dataset",
-    "The external ID of the dataset": "The external ID of the dataset",
+    "The namespace of the dataset": "The namespace of the dataset",
     "The owners of the dataset": "The owners of the dataset",
     "Please select at least one owner for the dataset": "Please select at least one owner for the dataset",
     "Please select the domain of the dataset": "Please select the domain of the dataset",
@@ -524,5 +524,7 @@
     "The namespace of the data product must be unique": "The namespace of the data product must be unique",
     "Namespace is too long": "Namespace is too long",
     "Namespace contains invalid characters": "Namespace contains invalid characters",
-    "Unknown namespace validation error": "Unknown namespace validation error"
+    "Unknown namespace validation error": "Unknown namespace validation error",
+    "Please input the namespace of the dataset": "Please input the namespace of the dataset",
+    "The namespace of the dataset must be unique": "The namespace of the dataset must be unique"
 }

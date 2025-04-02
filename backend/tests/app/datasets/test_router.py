@@ -19,7 +19,7 @@ def dataset_payload():
     return {
         "name": "Test Dataset",
         "description": "Test Description",
-        "external_id": "test-dataset",
+        "namespace": "test-dataset",
         "tag_ids": [],
         "owners": [
             str(user.id),
@@ -69,7 +69,7 @@ class TestDatasetsRouter:
         ds = DatasetFactory()
         update_payload = {
             "name": "new_name",
-            "external_id": "new_external_id",
+            "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
             "access_type": "public",
@@ -85,7 +85,7 @@ class TestDatasetsRouter:
         ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
         update_payload = {
             "name": "new_name",
-            "external_id": "new_external_id",
+            "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
@@ -102,7 +102,7 @@ class TestDatasetsRouter:
         ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
         update_payload = {
             "name": "new_name",
-            "external_id": "new_external_id",
+            "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
             "access_type": "public",
@@ -188,7 +188,7 @@ class TestDatasetsRouter:
     def test_update_dataset_with_invalid_dataset_id(self, client):
         update_payload = {
             "name": "new_name",
-            "external_id": "new_external_id",
+            "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
             "access_type": "public",
