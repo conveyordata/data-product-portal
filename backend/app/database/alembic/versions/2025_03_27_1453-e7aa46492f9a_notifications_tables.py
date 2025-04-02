@@ -28,21 +28,7 @@ def upgrade() -> None:
         "notifications",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("configuration_type", sa.Enum(NotificationTypes)),
-        sa.Column(
-            "data_product_membership_id",
-            UUID(as_uuid=True),
-            sa.ForeignKey("data_product_memberships.id"),
-        ),
-        sa.Column(
-            "data_product_dataset_id",
-            UUID(as_uuid=True),
-            sa.ForeignKey("data_products_datasets.id"),
-        ),
-        sa.Column(
-            "data_output_dataset_id",
-            UUID(as_uuid=True),
-            sa.ForeignKey("data_outputs_datasets.id"),
-        ),
+        sa.Column("reference_id", UUID(as_uuid=True), nullable=False),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),

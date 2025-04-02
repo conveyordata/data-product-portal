@@ -19,86 +19,86 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
 
     switch (userNotification.notification.configuration_type) {
         case NotificationTypes.DataProductDatasetNotification:
-            link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
+            link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
             description = (
                 <Typography.Text>
                     {t('Made a request for read access to the')}{' '}
                     <Link
                         onClick={(e) => e.stopPropagation()}
-                        to={createDatasetIdPath(userNotification.notification.data_product_dataset.dataset_id)}
+                        to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
                     >
-                        {userNotification.notification.data_product_dataset.dataset.name}
+                        {userNotification.notification.reference.dataset.name}
                     </Link>{' '}
                     {t('dataset, on behalf of the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {userNotification.notification.data_product_dataset.data_product.name}
+                        {userNotification.notification.reference.data_product.name}
                     </Link>{' '}
                     {t('data product.')}
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(
-                userNotification.notification.data_product_dataset.dataset_id,
+                userNotification.notification.reference.dataset_id,
                 DatasetTabKeys.DataProduct,
             );
-            date = userNotification.notification.data_product_dataset.requested_on;
+            date = userNotification.notification.reference.requested_on;
             author =
-                userNotification.notification.data_product_dataset.requested_by.first_name +
+                userNotification.notification.reference.requested_by.first_name +
                 ' ' +
-                userNotification.notification.data_product_dataset.requested_by.last_name;
+                userNotification.notification.reference.requested_by.last_name;
             break;
 
         case NotificationTypes.DataOutputDatasetNotification:
             link = createDataOutputIdPath(
-                userNotification.notification.data_output_dataset.data_output_id,
-                userNotification.notification.data_output_dataset.data_output.owner_id,
+                userNotification.notification.reference.data_output_id,
+                userNotification.notification.reference.data_output.owner_id,
             );
             description = (
                 <Typography.Text>
                     {t('Made a request for a link to the')}{' '}
                     <Link
                         onClick={(e) => e.stopPropagation()}
-                        to={createDatasetIdPath(userNotification.notification.data_output_dataset.dataset_id)}
+                        to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
                     >
-                        {userNotification.notification.data_output_dataset.dataset.name}
+                        {userNotification.notification.reference.dataset.name}
                     </Link>{' '}
                     {t('dataset, on behalf of the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {userNotification.notification.data_output_dataset.data_output.name}
+                        {userNotification.notification.reference.data_output.name}
                     </Link>{' '}
                     {t('data output.')}
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(
-                userNotification.notification.data_output_dataset.dataset_id,
+                userNotification.notification.reference.dataset_id,
                 DatasetTabKeys.DataOutput,
             );
-            date = userNotification.notification.data_output_dataset.requested_on;
+            date = userNotification.notification.reference.requested_on;
             author =
-                userNotification.notification.data_output_dataset.requested_by.first_name +
+                userNotification.notification.reference.requested_by.first_name +
                 ' ' +
-                userNotification.notification.data_output_dataset.requested_by.last_name;
+                userNotification.notification.reference.requested_by.last_name;
             break;
 
         case NotificationTypes.DataProductMembershipNotification:
-            link = createDataProductIdPath(userNotification.notification.data_product_membership.data_product_id);
+            link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
             description = (
                 <Typography.Text>
                     {t('Made a request to join the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {userNotification.notification.data_product_membership.data_product.name}
+                        {userNotification.notification.reference.data_product.name}
                     </Link>{' '}
                     {t('data product team.')}
                 </Typography.Text>
             );
             navigatePath = createDataProductIdPath(
-                userNotification.notification.data_product_membership.data_product_id,
+                userNotification.notification.reference.data_product_id,
                 DataProductTabKeys.Team,
             );
-            date = userNotification.notification.data_product_membership.requested_on;
+            date = userNotification.notification.reference.requested_on;
             author =
-                userNotification.notification.data_product_membership.user.first_name +
+                userNotification.notification.reference.user.first_name +
                 ' ' +
-                userNotification.notification.data_product_membership.user.last_name;
+                userNotification.notification.reference.user.last_name;
             break;
 
         default:

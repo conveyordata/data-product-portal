@@ -19,6 +19,8 @@ export interface NotificationModel {
     last_interaction: string | null;
 }
 
+export type NotificationObject = DataProductMembershipContract | DataProductDatasetContract | DataOutputDatasetContract;
+
 export type Notification =
     | DataProductDatasetNotification
     | DataOutputDatasetNotification
@@ -26,18 +28,21 @@ export type Notification =
 
 export interface DataProductDatasetNotification {
     configuration_type: NotificationTypes.DataProductDatasetNotification;
-    data_product_dataset_id: string;
-    data_product_dataset: DataProductDatasetContract;
+    id: string;
+    reference_id: string;
+    reference: DataProductDatasetContract;
 }
 
 export interface DataOutputDatasetNotification {
     configuration_type: NotificationTypes.DataOutputDatasetNotification;
-    data_output_dataset_id: string;
-    data_output_dataset: DataOutputDatasetContract;
+    id: string;
+    reference_id: string;
+    reference: DataOutputDatasetContract;
 }
 
 export interface DataProductMembershipNotification {
     configuration_type: NotificationTypes.DataProductMembershipNotification;
-    data_product_membership_id: string;
-    data_product_membership: DataProductMembershipContract;
+    id: string;
+    reference_id: string;
+    reference: DataProductMembershipContract;
 }

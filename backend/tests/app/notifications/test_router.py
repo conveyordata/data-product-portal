@@ -51,16 +51,16 @@ class TestNotificationsRouter:
             response.json()[0]["notification"]["configuration_type"]
             == "DataProductDatasetNotification"
         )
-        assert response.json()[0]["notification"]["data_product_dataset"][
+        assert response.json()[0]["notification"]["reference"][
             "data_product_id"
         ] == str(membership.data_product.id)
         assert (
-            response.json()[0]["notification"]["data_product_dataset"]["status"]
+            response.json()[0]["notification"]["reference"]["status"]
             == "pending_approval"
         )
-        assert response.json()[0]["notification"]["data_product_dataset"][
-            "requested_by"
-        ]["id"] == str(owner.id)
+        assert response.json()[0]["notification"]["reference"]["requested_by"][
+            "id"
+        ] == str(owner.id)
 
         all_notifications = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert response.json() == all_notifications.json()
@@ -78,16 +78,16 @@ class TestNotificationsRouter:
             response.json()[0]["notification"]["configuration_type"]
             == "DataOutputDatasetNotification"
         )
-        assert response.json()[0]["notification"]["data_output_dataset"][
-            "data_output_id"
-        ] == str(data_output.id)
+        assert response.json()[0]["notification"]["reference"]["data_output_id"] == str(
+            data_output.id
+        )
         assert (
-            response.json()[0]["notification"]["data_output_dataset"]["status"]
+            response.json()[0]["notification"]["reference"]["status"]
             == "pending_approval"
         )
-        assert response.json()[0]["notification"]["data_output_dataset"][
-            "requested_by"
-        ]["id"] == str(owner.id)
+        assert response.json()[0]["notification"]["reference"]["requested_by"][
+            "id"
+        ] == str(owner.id)
 
         all_notifications = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert response.json() == all_notifications.json()
@@ -106,16 +106,16 @@ class TestNotificationsRouter:
             response.json()[0]["notification"]["configuration_type"]
             == "DataProductMembershipNotification"
         )
-        assert response.json()[0]["notification"]["data_product_membership"][
+        assert response.json()[0]["notification"]["reference"][
             "data_product_id"
         ] == str(owner_membership.data_product.id)
         assert (
-            response.json()[0]["notification"]["data_product_membership"]["status"]
+            response.json()[0]["notification"]["reference"]["status"]
             == "pending_approval"
         )
-        assert response.json()[0]["notification"]["data_product_membership"]["user"][
-            "id"
-        ] == str(user_id)
+        assert response.json()[0]["notification"]["reference"]["user"]["id"] == str(
+            user_id
+        )
 
         all_notifications = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert response.json() == all_notifications.json()
@@ -132,7 +132,7 @@ class TestNotificationsRouter:
         )
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["data_product_dataset"][
+        assert response.json()[0]["notification"]["reference"][
             "data_product_id"
         ] == str(membership.data_product.id)
 
@@ -144,7 +144,7 @@ class TestNotificationsRouter:
         response = self.add_user_to_dataset(client, owner.id, ds.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["data_product_dataset"][
+        assert response.json()[0]["notification"]["reference"][
             "data_product_id"
         ] == str(membership.data_product.id)
 
@@ -157,9 +157,9 @@ class TestNotificationsRouter:
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["data_output_dataset"][
-            "data_output_id"
-        ] == str(data_output.id)
+        assert response.json()[0]["notification"]["reference"]["data_output_id"] == str(
+            data_output.id
+        )
 
         response = self.delete_dataset_user(client, owner.id, ds.id)
         assert response.status_code == 200
@@ -169,9 +169,9 @@ class TestNotificationsRouter:
         response = self.add_user_to_dataset(client, owner.id, ds.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["data_output_dataset"][
-            "data_output_id"
-        ] == str(data_output.id)
+        assert response.json()[0]["notification"]["reference"]["data_output_id"] == str(
+            data_output.id
+        )
 
     def test_change_notification_ownership_data_product_membership(self, client):
         owner_membership = DataProductMembershipFactory(
@@ -186,7 +186,7 @@ class TestNotificationsRouter:
         )
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["data_product_membership"][
+        assert response.json()[0]["notification"]["reference"][
             "data_product_id"
         ] == str(owner_membership.data_product.id)
 
@@ -200,7 +200,7 @@ class TestNotificationsRouter:
         )
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["data_product_membership"][
+        assert response.json()[0]["notification"]["reference"][
             "data_product_id"
         ] == str(owner_membership.data_product.id)
 
@@ -213,9 +213,7 @@ class TestNotificationsRouter:
             requested_by=requester,
         )
         NotificationInteractionFactory(
-            notification=DataProductDatasetNotificationFactory(
-                data_product_dataset=link
-            ),
+            notification=DataProductDatasetNotificationFactory(reference_id=link.id),
             user=requester,
         )
         response = self.approve_default_data_product_dataset_link(client, link.id)
@@ -226,16 +224,11 @@ class TestNotificationsRouter:
             response.json()[0]["notification"]["configuration_type"]
             == "DataProductDatasetNotification"
         )
-        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
-            link.id
-        )
-        assert (
-            response.json()[0]["notification"]["data_product_dataset"]["status"]
-            == "approved"
-        )
-        assert response.json()[0]["notification"]["data_product_dataset"][
-            "requested_by"
-        ]["id"] == str(requester.id)
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
+        assert response.json()[0]["notification"]["reference"]["status"] == "approved"
+        assert response.json()[0]["notification"]["reference"]["requested_by"][
+            "id"
+        ] == str(requester.id)
 
     def test_deny_data_product_dataset(self, client):
         requester = UserFactory(external_id="sub")
@@ -246,9 +239,7 @@ class TestNotificationsRouter:
             requested_by=requester,
         )
         NotificationInteractionFactory(
-            notification=DataProductDatasetNotificationFactory(
-                data_product_dataset=link
-            ),
+            notification=DataProductDatasetNotificationFactory(reference_id=link.id),
             user=requester,
         )
         response = self.deny_default_data_product_dataset_link(client, link.id)
@@ -259,16 +250,11 @@ class TestNotificationsRouter:
             response.json()[0]["notification"]["configuration_type"]
             == "DataProductDatasetNotification"
         )
-        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
-            link.id
-        )
-        assert (
-            response.json()[0]["notification"]["data_product_dataset"]["status"]
-            == "denied"
-        )
-        assert response.json()[0]["notification"]["data_product_dataset"][
-            "requested_by"
-        ]["id"] == str(requester.id)
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
+        assert response.json()[0]["notification"]["reference"]["status"] == "denied"
+        assert response.json()[0]["notification"]["reference"]["requested_by"][
+            "id"
+        ] == str(requester.id)
 
     def test_approve_data_output_dataset(self, client):
         requester = UserFactory(external_id="sub")
@@ -279,7 +265,7 @@ class TestNotificationsRouter:
             requested_by=requester,
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
             user=requester,
         )
         response = self.approve_default_data_output_dataset_link(client, link.id)
@@ -290,16 +276,11 @@ class TestNotificationsRouter:
             response.json()[0]["notification"]["configuration_type"]
             == "DataOutputDatasetNotification"
         )
-        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
-            link.id
-        )
-        assert (
-            response.json()[0]["notification"]["data_output_dataset"]["status"]
-            == "approved"
-        )
-        assert response.json()[0]["notification"]["data_output_dataset"][
-            "requested_by"
-        ]["id"] == str(requester.id)
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
+        assert response.json()[0]["notification"]["reference"]["status"] == "approved"
+        assert response.json()[0]["notification"]["reference"]["requested_by"][
+            "id"
+        ] == str(requester.id)
 
     def test_deny_data_output_dataset(self, client):
         requester = UserFactory(external_id="sub")
@@ -310,7 +291,7 @@ class TestNotificationsRouter:
             requested_by=requester,
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
             user=requester,
         )
         response = self.deny_default_data_output_dataset_link(client, link.id)
@@ -321,16 +302,11 @@ class TestNotificationsRouter:
             response.json()[0]["notification"]["configuration_type"]
             == "DataOutputDatasetNotification"
         )
-        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
-            link.id
-        )
-        assert (
-            response.json()[0]["notification"]["data_output_dataset"]["status"]
-            == "denied"
-        )
-        assert response.json()[0]["notification"]["data_output_dataset"][
-            "requested_by"
-        ]["id"] == str(requester.id)
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
+        assert response.json()[0]["notification"]["reference"]["status"] == "denied"
+        assert response.json()[0]["notification"]["reference"]["requested_by"][
+            "id"
+        ] == str(requester.id)
 
     def test_approve_data_product_membership(self, client):
         requester = UserFactory(external_id="sub")
@@ -344,7 +320,7 @@ class TestNotificationsRouter:
         )
         NotificationInteractionFactory(
             notification=DataProductMembershipNotificationFactory(
-                data_product_membership=membership_request
+                reference_id=membership_request.id
             ),
             user=requester,
         )
@@ -356,16 +332,13 @@ class TestNotificationsRouter:
             response.json()[0]["notification"]["configuration_type"]
             == "DataProductMembershipNotification"
         )
-        assert response.json()[0]["notification"]["data_product_membership"][
-            "id"
-        ] == str(membership_request.id)
-        assert (
-            response.json()[0]["notification"]["data_product_membership"]["status"]
-            == "approved"
+        assert response.json()[0]["notification"]["reference"]["id"] == str(
+            membership_request.id
         )
-        assert response.json()[0]["notification"]["data_product_membership"]["user"][
-            "id"
-        ] == str(requester.id)
+        assert response.json()[0]["notification"]["reference"]["status"] == "approved"
+        assert response.json()[0]["notification"]["reference"]["user"]["id"] == str(
+            requester.id
+        )
 
     def test_deny_data_product_membership(self, client):
         requester = UserFactory(external_id="sub")
@@ -379,7 +352,7 @@ class TestNotificationsRouter:
         )
         NotificationInteractionFactory(
             notification=DataProductMembershipNotificationFactory(
-                data_product_membership=membership_request
+                reference_id=membership_request.id
             ),
             user=requester,
         )
@@ -391,16 +364,13 @@ class TestNotificationsRouter:
             response.json()[0]["notification"]["configuration_type"]
             == "DataProductMembershipNotification"
         )
-        assert response.json()[0]["notification"]["data_product_membership"][
-            "id"
-        ] == str(membership_request.id)
-        assert (
-            response.json()[0]["notification"]["data_product_membership"]["status"]
-            == "denied"
+        assert response.json()[0]["notification"]["reference"]["id"] == str(
+            membership_request.id
         )
-        assert response.json()[0]["notification"]["data_product_membership"]["user"][
-            "id"
-        ] == str(requester.id)
+        assert response.json()[0]["notification"]["reference"]["status"] == "denied"
+        assert response.json()[0]["notification"]["reference"]["user"]["id"] == str(
+            requester.id
+        )
 
     def test_delete_parent_dataset_data_product_dataset(self, client):
         owner = UserFactory(external_id="sub")
@@ -410,15 +380,11 @@ class TestNotificationsRouter:
             status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
         )
         NotificationInteractionFactory(
-            notification=DataProductDatasetNotificationFactory(
-                data_product_dataset=link
-            ),
+            notification=DataProductDatasetNotificationFactory(reference_id=link.id),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
-            link.id
-        )
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -432,13 +398,11 @@ class TestNotificationsRouter:
             status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
-            link.id
-        )
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -451,15 +415,11 @@ class TestNotificationsRouter:
             data_product=(DataProductMembershipFactory(user=owner).data_product),
         )
         NotificationInteractionFactory(
-            notification=DataProductDatasetNotificationFactory(
-                data_product_dataset=link
-            ),
+            notification=DataProductDatasetNotificationFactory(reference_id=link.id),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
-            link.id
-        )
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
         response = self.delete_data_product(client, link.data_product.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -474,13 +434,11 @@ class TestNotificationsRouter:
             ),
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
-            link.id
-        )
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
         response = self.delete_data_product(client, link.data_output.owner.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -494,14 +452,14 @@ class TestNotificationsRouter:
         )
         NotificationInteractionFactory(
             notification=DataProductMembershipNotificationFactory(
-                data_product_membership=membership
+                reference_id=membership.id
             ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["data_product_membership"][
-            "id"
-        ] == str(membership.id)
+        assert response.json()[0]["notification"]["reference"]["id"] == str(
+            membership.id
+        )
         response = self.delete_data_product(client, membership.data_product.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -516,13 +474,11 @@ class TestNotificationsRouter:
             ),
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
-            link.id
-        )
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
         response = self.delete_data_output(client, link.data_output.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -537,9 +493,7 @@ class TestNotificationsRouter:
             status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
         )
         NotificationInteractionFactory(
-            notification=DataProductDatasetNotificationFactory(
-                data_product_dataset=link
-            ),
+            notification=DataProductDatasetNotificationFactory(reference_id=link.id),
             user=old_owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -548,9 +502,7 @@ class TestNotificationsRouter:
         assert response.status_code == 200
 
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
-            link.id
-        )
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
 
     def test_change_dataset_owners_data_output_dataset(self, client):
         old_owner = UserFactory()
@@ -561,7 +513,7 @@ class TestNotificationsRouter:
             status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(data_output_dataset=link),
+            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
             user=old_owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -570,9 +522,7 @@ class TestNotificationsRouter:
         assert response.status_code == 200
 
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
-            link.id
-        )
+        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
 
     def test_change_data_product_owners_data_product_membership(self, client):
         old_owner = UserFactory()
@@ -589,7 +539,7 @@ class TestNotificationsRouter:
         )
         NotificationInteractionFactory(
             notification=DataProductMembershipNotificationFactory(
-                data_product_membership=membership
+                reference_id=membership.id
             ),
             user=old_owner,
         )
@@ -600,9 +550,9 @@ class TestNotificationsRouter:
         )
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["data_product_membership"][
-            "id"
-        ] == str(membership.id)
+        assert response.json()[0]["notification"]["reference"]["id"] == str(
+            membership.id
+        )
 
     @staticmethod
     def request_data_product_dataset_link(client, data_product_id, dataset_id):

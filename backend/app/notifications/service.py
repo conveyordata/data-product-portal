@@ -11,21 +11,8 @@ from app.data_product_memberships.enums import (
 from app.data_product_memberships.model import DataProductMembership
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
-from app.notifications.data_output_dataset_association.model import (
-    DataOutputDatasetNotification,
-)
-from app.notifications.data_product_dataset_association.model import (
-    DataProductDatasetNotification,
-)
-from app.notifications.data_product_membership.model import (
-    DataProductMembershipNotification,
-)
 from app.notifications.model import Notification
 from app.notifications.notification_types import NotificationTypes
-from app.notifications.schema_union import (
-    NotificationForeignKeyMap,
-    NotificationModelMap,
-)
 
 
 class NotificationService:
@@ -34,13 +21,14 @@ class NotificationService:
         self, db: Session, data_product_id: UUID
     ) -> list[UUID]:
         return db.scalars(
-            select(DataProductMembershipNotification.id)
+            select(Notification.id)
             .join(
                 DataProductMembership,
-                DataProductMembership.id
-                == DataProductMembershipNotification.data_product_membership_id,
+                DataProductMembership.id == Notification.reference_id,
             )
             .where(
+                Notification.configuration_type
+                == NotificationTypes.DataProductMembershipNotification,
                 DataProductMembership.status
                 == DataProductMembershipStatus.PENDING_APPROVAL,
                 DataProductMembership.data_product_id == data_product_id,
@@ -51,13 +39,14 @@ class NotificationService:
         self, db: Session, dataset_id: UUID
     ) -> list[UUID]:
         return db.scalars(
-            select(DataOutputDatasetNotification.id)
+            select(Notification.id)
             .join(
                 DataOutputDatasetAssociation,
-                DataOutputDatasetAssociation.id
-                == DataOutputDatasetNotification.data_output_dataset_id,
+                DataOutputDatasetAssociation.id == Notification.reference_id,
             )
             .where(
+                Notification.configuration_type
+                == NotificationTypes.DataOutputDatasetNotification,
                 DataOutputDatasetAssociation.status
                 == DataOutputDatasetLinkStatus.PENDING_APPROVAL,
                 DataOutputDatasetAssociation.dataset_id == dataset_id,
@@ -68,13 +57,14 @@ class NotificationService:
         self, db: Session, dataset_id: UUID
     ) -> list[UUID]:
         return db.scalars(
-            select(DataProductDatasetNotification.id)
+            select(Notification.id)
             .join(
                 DataProductDatasetAssociation,
-                DataProductDatasetAssociation.id
-                == DataProductDatasetNotification.data_product_dataset_id,
+                DataProductDatasetAssociation.id == Notification.reference_id,
             )
             .where(
+                Notification.configuration_type
+                == NotificationTypes.DataProductDatasetNotification,
                 DataProductDatasetAssociation.status
                 == DataProductDatasetLinkStatus.PENDING_APPROVAL,
                 DataProductDatasetAssociation.dataset_id == dataset_id,
@@ -123,9 +113,9 @@ class NotificationService:
         db.commit() should be used after using this function.
 
         """
-        notification_cls = NotificationModelMap[notification_type]
-        key_attribute = NotificationForeignKeyMap[notification_type]
-        notification = notification_cls(**{key_attribute: reference_id})
+        notification = Notification(
+            reference_id=reference_id, configuration_type=notification_type
+        )
         db.add(notification)
         db.flush()
         db.refresh(notification)
