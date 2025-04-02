@@ -11,6 +11,7 @@ from app.core.helpers.namespace import (
     NamespaceSuggestion,
     NamespaceValidation,
     NamespaceValidator,
+    NamespaceValidityType,
 )
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_product_lifecycles.model import (
@@ -124,6 +125,16 @@ class DatasetService:
     def create_dataset(
         self, dataset: DatasetCreateUpdate, db: Session
     ) -> dict[str, UUID]:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                dataset.namespace, db
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
         dataset = self._update_owners(dataset, db)
         dataset_schema = dataset.parse_pydantic_schema()
         tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))

@@ -43,6 +43,26 @@ class TestDatasetsRouter:
         created_dataset = self.create_default_dataset(client, create_payload)
         assert created_dataset.status_code == 422
 
+    def test_create_dataset_duplicate_namespace(self, dataset_payload, client):
+        DatasetFactory(namespace=dataset_payload["namespace"])
+
+        created_dataset = self.create_default_dataset(client, dataset_payload)
+        assert created_dataset.status_code == 400
+
+    def test_create_dataset_invalid_characters_namespace(self, dataset_payload, client):
+        create_payload = deepcopy(dataset_payload)
+        create_payload["namespace"] = "!"
+
+        created_dataset = self.create_default_dataset(client, create_payload)
+        assert created_dataset.status_code == 400
+
+    def test_create_dataset_invalid_length_namespace(self, dataset_payload, client):
+        create_payload = deepcopy(dataset_payload)
+        create_payload["namespace"] = "a" * 256
+
+        created_dataset = self.create_default_dataset(client, create_payload)
+        assert created_dataset.status_code == 400
+
     def test_get_datasets(self, client):
         ds = DatasetFactory()
         response = client.get(ENDPOINT)

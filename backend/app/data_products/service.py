@@ -22,6 +22,7 @@ from app.core.helpers.namespace import (
     NamespaceSuggestion,
     NamespaceValidation,
     NamespaceValidator,
+    NamespaceValidityType,
 )
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_get import DataOutputGet
@@ -203,6 +204,16 @@ class DataProductService:
     def create_data_product(
         self, data_product: DataProductCreate, db: Session, authenticated_user: User
     ) -> dict[str, UUID]:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                data_product.namespace, db
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
         data_product = self._update_users(data_product, db)
         data_product_schema = data_product.parse_pydantic_schema()
         tags = self._get_tags(db, data_product_schema.pop("tag_ids", []))

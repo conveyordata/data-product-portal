@@ -32,7 +32,7 @@ def payload():
     return {
         "name": "Data Product Name",
         "description": "Updated Data Product Description",
-        "namespace": "Updated Data Product External ID",
+        "namespace": "namespace",
         "tag_ids": [str(tag.id)],
         "type_id": str(data_product_type.id),
         "memberships": [
@@ -73,6 +73,26 @@ class TestDataProductsRouter:
 
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 422
+
+    def test_create_data_product_duplicate_namespace(self, payload, client):
+        DataProductFactory(namespace=payload["namespace"])
+
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 400
+
+    def test_create_data_product_invalid_characters_namespace(self, payload, client):
+        create_payload = deepcopy(payload)
+        create_payload["namespace"] = "!"
+
+        created_data_product = self.create_data_product(client, create_payload)
+        assert created_data_product.status_code == 400
+
+    def test_create_data_product_invalid_length_namespace(self, payload, client):
+        create_payload = deepcopy(payload)
+        create_payload["namespace"] = "a" * 256
+
+        created_data_product = self.create_data_product(client, create_payload)
+        assert created_data_product.status_code == 400
 
     def test_get_data_products(self, client):
         data_product = DataProductFactory()
