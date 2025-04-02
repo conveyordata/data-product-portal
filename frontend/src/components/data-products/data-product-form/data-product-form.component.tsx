@@ -1,10 +1,10 @@
 import { EditOutlined } from '@ant-design/icons';
 import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
-import { debounce } from 'lodash';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
+import { useDebouncedCallback } from 'use-debounce';
 
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
@@ -187,13 +187,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     };
 
-    const fetchNamespaceDebounced = useMemo(
-        () =>
-            debounce((name: string) => {
-                fetchNamespace(name);
-            }, DEBOUNCE),
-        [fetchNamespace],
-    );
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
