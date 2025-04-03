@@ -7,7 +7,7 @@ from app.notifications.model import (
 from app.notifications.notification_types import NotificationTypes
 
 
-class DataOutputDatasetNotificationFactory(factory.alchemy.SQLAlchemyModelFactory):
+class NotificationFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Notification
 
