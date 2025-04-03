@@ -24,7 +24,7 @@ NotificationMap = {
     NotificationTypes.DataProductMembershipNotification: (DataProductMembershipModel),
 }
 
-NotificationUnion = Union[
+NotificationReferenceUnion = Union[
     DataProductMembershipGet,
     DataProductDatasetAssociation,
     DataOutputDatasetAssociation,
