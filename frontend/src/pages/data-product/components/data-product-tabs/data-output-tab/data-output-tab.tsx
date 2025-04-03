@@ -78,7 +78,11 @@ export function DataOutputTab({ dataProductId }: Props) {
                     }
                 />
 
-                <DataOutputTable dataProductId={dataProductId} dataOutputs={filteredDataOutputs} />
+                <DataOutputTable
+                    dataProductId={dataProductId}
+                    dataOutputs={filteredDataOutputs}
+                    isCurrentUserDataProductOwner={isDataProductOwner}
+                />
             </Flex>
             {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </>
