@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
@@ -10,21 +11,8 @@ from app.data_product_memberships.enums import (
 from app.data_product_memberships.model import DataProductMembership
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
-from app.notifications.data_output_dataset_association.model import (
-    DataOutputDatasetNotification,
-)
-from app.notifications.data_product_dataset_association.model import (
-    DataProductDatasetNotification,
-)
-from app.notifications.data_product_membership.model import (
-    DataProductMembershipNotification,
-)
 from app.notifications.model import Notification
 from app.notifications.notification_types import NotificationTypes
-from app.notifications.schema_union import (
-    NotificationForeignKeyMap,
-    NotificationModelMap,
-)
 
 
 class NotificationService:
@@ -32,59 +20,56 @@ class NotificationService:
     def get_data_product_membership_notification_pending_ids(
         self, db: Session, data_product_id: UUID
     ) -> list[UUID]:
-        return [
-            notification.id
-            for notification in db.query(DataProductMembershipNotification)
+        return db.scalars(
+            select(Notification.id)
             .join(
                 DataProductMembership,
-                DataProductMembership.id
-                == DataProductMembershipNotification.data_product_membership_id,
+                DataProductMembership.id == Notification.reference_id,
             )
-            .filter(
+            .where(
+                Notification.configuration_type
+                == NotificationTypes.DataProductMembershipNotification,
                 DataProductMembership.status
-                == DataProductMembershipStatus.PENDING_APPROVAL
+                == DataProductMembershipStatus.PENDING_APPROVAL,
+                DataProductMembership.data_product_id == data_product_id,
             )
-            .filter(DataProductMembership.data_product_id == data_product_id)
-            .all()
-        ]
+        ).all()
 
     def get_data_output_dataset_notification_pending_ids(
         self, db: Session, dataset_id: UUID
     ) -> list[UUID]:
-        return [
-            notification.id
-            for notification in db.query(DataOutputDatasetNotification)
+        return db.scalars(
+            select(Notification.id)
             .join(
                 DataOutputDatasetAssociation,
-                DataOutputDatasetAssociation.id
-                == DataOutputDatasetNotification.data_output_dataset_id,
+                DataOutputDatasetAssociation.id == Notification.reference_id,
             )
-            .filter(
+            .where(
+                Notification.configuration_type
+                == NotificationTypes.DataOutputDatasetNotification,
                 DataOutputDatasetAssociation.status
-                == DataOutputDatasetLinkStatus.PENDING_APPROVAL
+                == DataOutputDatasetLinkStatus.PENDING_APPROVAL,
+                DataOutputDatasetAssociation.dataset_id == dataset_id,
             )
-            .filter(DataOutputDatasetAssociation.dataset_id == dataset_id)
-            .all()
-        ]
+        ).all()
 
     def get_data_product_dataset_notification_pending_ids(
         self, db: Session, dataset_id: UUID
     ) -> list[UUID]:
-        return [
-            notification.id
-            for notification in db.query(DataProductDatasetNotification)
+        return db.scalars(
+            select(Notification.id)
             .join(
                 DataProductDatasetAssociation,
-                DataProductDatasetAssociation.id
-                == DataProductDatasetNotification.data_product_dataset_id,
+                DataProductDatasetAssociation.id == Notification.reference_id,
             )
-            .filter(
+            .where(
+                Notification.configuration_type
+                == NotificationTypes.DataProductDatasetNotification,
                 DataProductDatasetAssociation.status
-                == DataProductDatasetLinkStatus.PENDING_APPROVAL
+                == DataProductDatasetLinkStatus.PENDING_APPROVAL,
+                DataProductDatasetAssociation.dataset_id == dataset_id,
             )
-            .filter(DataProductDatasetAssociation.dataset_id == dataset_id)
-            .all()
-        ]
+        ).all()
 
     def get_pending_notifications_by_reference(
         self,
@@ -101,13 +86,13 @@ class NotificationService:
 
         """
         notification_function_map = {
-            NotificationTypes.DataProductDataset: (
+            NotificationTypes.DataProductDatasetNotification: (
                 self.get_data_product_dataset_notification_pending_ids
             ),
-            NotificationTypes.DataOutputDataset: (
+            NotificationTypes.DataOutputDatasetNotification: (
                 self.get_data_output_dataset_notification_pending_ids
             ),
-            NotificationTypes.DataProductMembership: (
+            NotificationTypes.DataProductMembershipNotification: (
                 self.get_data_product_membership_notification_pending_ids
             ),
         }
@@ -128,10 +113,9 @@ class NotificationService:
         db.commit() should be used after using this function.
 
         """
-        notification_cls = NotificationModelMap[notification_type]
-        key_attribute = NotificationForeignKeyMap.get(notification_type)
-        key_attribute = NotificationForeignKeyMap[notification_type].name
-        notification = notification_cls(**{key_attribute: reference_id})
+        notification = Notification(
+            reference_id=reference_id, configuration_type=notification_type
+        )
         db.add(notification)
         db.flush()
         db.refresh(notification)

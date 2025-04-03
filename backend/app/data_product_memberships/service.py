@@ -66,7 +66,7 @@ class DataProductMembershipService:
             NotificationInteractionService().create_notification_relations(
                 db,
                 data_product_membership.id,
-                NotificationTypes.DataProductMembership,
+                NotificationTypes.DataProductMembershipNotification,
                 owner_ids,
             )
 
@@ -132,7 +132,7 @@ class DataProductMembershipService:
         NotificationInteractionService().update_interactions_by_reference(
             db,
             data_product_membership.id,
-            NotificationTypes.DataProductMembership,
+            NotificationTypes.DataProductMembershipNotification,
             [data_product_membership.requested_by_id],
         )
 
@@ -140,7 +140,7 @@ class DataProductMembershipService:
             NotificationInteractionService().redirect_pending_requests(
                 db,
                 data_product_membership.data_product_id,
-                NotificationTypes.DataProductMembership,
+                NotificationTypes.DataProductMembershipNotification,
             )
 
         db.commit()
@@ -179,7 +179,7 @@ class DataProductMembershipService:
         NotificationInteractionService().update_interactions_by_reference(
             db,
             data_product_membership.id,
-            NotificationTypes.DataProductMembership,
+            NotificationTypes.DataProductMembershipNotification,
             [data_product_membership.requested_by_id],
         )
 
@@ -212,7 +212,9 @@ class DataProductMembershipService:
             )
 
         NotificationInteractionService().remove_notification_relations(
-            db, data_product_membership.id, NotificationTypes.DataProductMembership
+            db,
+            data_product_membership.id,
+            NotificationTypes.DataProductMembershipNotification,
         )
 
         db.refresh(data_product_membership)
@@ -222,7 +224,7 @@ class DataProductMembershipService:
         if redirection_needed:
             db.refresh(data_product)
             NotificationInteractionService().redirect_pending_requests(
-                db, data_product.id, NotificationTypes.DataProductMembership
+                db, data_product.id, NotificationTypes.DataProductMembershipNotification
             )
 
         db.commit()
@@ -258,7 +260,7 @@ class DataProductMembershipService:
 
         if data_product_membership.role == DataProductUserRole.OWNER:
             NotificationInteractionService().redirect_pending_requests(
-                db, data_product.id, NotificationTypes.DataProductMembership
+                db, data_product.id, NotificationTypes.DataProductMembershipNotification
             )
 
         db.commit()
@@ -301,7 +303,7 @@ class DataProductMembershipService:
 
         if data_product_membership.status == DataProductMembershipStatus.APPROVED:
             NotificationInteractionService().redirect_pending_requests(
-                db, data_product.id, NotificationTypes.DataProductMembership
+                db, data_product.id, NotificationTypes.DataProductMembershipNotification
             )
 
         db.commit()

@@ -30,16 +30,16 @@ export function Notifications() {
         let link, description, navigatePath;
 
         switch (userNotification.notification.configuration_type) {
-            case NotificationTypes.DataProductDataset:
-                link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
-                switch (userNotification.notification.data_product_dataset.status) {
+            case NotificationTypes.DataProductDatasetNotification:
+                link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
+                switch (userNotification.notification.reference.status) {
                     case DataProductDatasetLinkStatus.Approved:
                         description = (
                             <div className={styles.notification}>
                                 <div className={styles.notificationHeader}>
                                     <div className={styles.notificationTitle}>
                                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                            {userNotification.notification.data_product_dataset.data_product.name}
+                                            {userNotification.notification.reference.data_product.name}
                                         </Link>{' '}
                                         <Typography.Text className={styles.notificationMessage}>
                                             {t('data product:')}
@@ -47,10 +47,8 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {userNotification.notification.data_product_dataset.approved_on
-                                            ? formatDateToNow(
-                                                  userNotification.notification.data_product_dataset.approved_on,
-                                              )
+                                        {userNotification.notification.reference.approved_on
+                                            ? formatDateToNow(userNotification.notification.reference.approved_on)
                                             : undefined}
                                     </Tag>
                                     <ExportOutlined />
@@ -61,11 +59,9 @@ export function Notifications() {
                                         {t('Read access granted to dataset:')}{' '}
                                         <Link
                                             onClick={(e) => e.stopPropagation()}
-                                            to={createDatasetIdPath(
-                                                userNotification.notification.data_product_dataset.dataset_id,
-                                            )}
+                                            to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
                                         >
-                                            {userNotification.notification.data_product_dataset.dataset.name}
+                                            {userNotification.notification.reference.dataset.name}
                                         </Link>
                                     </Typography.Text>
                                 </div>
@@ -78,7 +74,7 @@ export function Notifications() {
                                 <div className={styles.notificationHeader}>
                                     <div>
                                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                            {userNotification.notification.data_product_dataset.data_product.name}
+                                            {userNotification.notification.reference.data_product.name}
                                         </Link>{' '}
                                         <Typography.Text className={styles.notificationMessage}>
                                             {t('data product:')}
@@ -86,10 +82,8 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {userNotification.notification.data_product_dataset.denied_on
-                                            ? formatDateToNow(
-                                                  userNotification.notification.data_product_dataset.denied_on,
-                                              )
+                                        {userNotification.notification.reference.denied_on
+                                            ? formatDateToNow(userNotification.notification.reference.denied_on)
                                             : undefined}
                                     </Tag>
                                     <ExportOutlined />
@@ -100,11 +94,9 @@ export function Notifications() {
                                         {t('Read access denied to dataset:')}{' '}
                                         <Link
                                             onClick={(e) => e.stopPropagation()}
-                                            to={createDatasetIdPath(
-                                                userNotification.notification.data_product_dataset.dataset_id,
-                                            )}
+                                            to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
                                         >
-                                            {userNotification.notification.data_product_dataset.dataset.name}
+                                            {userNotification.notification.reference.dataset.name}
                                         </Link>
                                     </Typography.Text>
                                 </div>
@@ -113,24 +105,24 @@ export function Notifications() {
                         break;
                 }
                 navigatePath = createDatasetIdPath(
-                    userNotification.notification.data_product_dataset.dataset_id,
+                    userNotification.notification.reference.dataset_id,
                     DatasetTabKeys.DataProduct,
                 );
                 break;
 
-            case NotificationTypes.DataOutputDataset:
+            case NotificationTypes.DataOutputDatasetNotification:
                 link = createDataOutputIdPath(
-                    userNotification.notification.data_output_dataset.data_output_id,
-                    userNotification.notification.data_output_dataset.data_output.owner_id,
+                    userNotification.notification.reference.data_output_id,
+                    userNotification.notification.reference.data_output.owner_id,
                 );
-                switch (userNotification.notification.data_output_dataset.status) {
+                switch (userNotification.notification.reference.status) {
                     case DataOutputDatasetLinkStatus.Approved:
                         description = (
                             <div className={styles.notification}>
                                 <div className={styles.notificationHeader}>
                                     <div>
                                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                            {userNotification.notification.data_output_dataset.data_output.name}
+                                            {userNotification.notification.reference.data_output.name}
                                         </Link>{' '}
                                         <Typography.Text className={styles.notificationMessage}>
                                             {t('data output:')}
@@ -138,10 +130,8 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {userNotification.notification.data_output_dataset.approved_on
-                                            ? formatDateToNow(
-                                                  userNotification.notification.data_output_dataset.approved_on,
-                                              )
+                                        {userNotification.notification.reference.approved_on
+                                            ? formatDateToNow(userNotification.notification.reference.approved_on)
                                             : undefined}
                                     </Tag>
                                     <ExportOutlined />
@@ -152,11 +142,9 @@ export function Notifications() {
                                         {t('Linking approved for dataset:')}{' '}
                                         <Link
                                             onClick={(e) => e.stopPropagation()}
-                                            to={createDatasetIdPath(
-                                                userNotification.notification.data_output_dataset.dataset_id,
-                                            )}
+                                            to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
                                         >
-                                            {userNotification.notification.data_output_dataset.dataset.name}
+                                            {userNotification.notification.reference.dataset.name}
                                         </Link>
                                     </Typography.Text>
                                 </div>
@@ -169,7 +157,7 @@ export function Notifications() {
                                 <div className={styles.notificationHeader}>
                                     <div>
                                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                            {userNotification.notification.data_output_dataset.data_output.name}
+                                            {userNotification.notification.reference.data_output.name}
                                         </Link>{' '}
                                         <Typography.Text className={styles.notificationMessage}>
                                             {t('data output:')}
@@ -177,10 +165,8 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {userNotification.notification.data_output_dataset.denied_on
-                                            ? formatDateToNow(
-                                                  userNotification.notification.data_output_dataset.denied_on,
-                                              )
+                                        {userNotification.notification.reference.denied_on
+                                            ? formatDateToNow(userNotification.notification.reference.denied_on)
                                             : undefined}
                                     </Tag>
                                     <ExportOutlined />
@@ -191,11 +177,9 @@ export function Notifications() {
                                         {t('Linking denied for dataset:')}{' '}
                                         <Link
                                             onClick={(e) => e.stopPropagation()}
-                                            to={createDatasetIdPath(
-                                                userNotification.notification.data_output_dataset.dataset_id,
-                                            )}
+                                            to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
                                         >
-                                            {userNotification.notification.data_output_dataset.dataset.name}
+                                            {userNotification.notification.reference.dataset.name}
                                         </Link>
                                     </Typography.Text>
                                 </div>
@@ -204,21 +188,21 @@ export function Notifications() {
                         break;
                 }
                 navigatePath = createDatasetIdPath(
-                    userNotification.notification.data_output_dataset.dataset_id,
+                    userNotification.notification.reference.dataset_id,
                     DatasetTabKeys.DataOutput,
                 );
                 break;
 
-            case NotificationTypes.DataProductMembership:
-                link = createDataProductIdPath(userNotification.notification.data_product_membership.data_product_id);
-                switch (userNotification.notification.data_product_membership.status) {
+            case NotificationTypes.DataProductMembershipNotification:
+                link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
+                switch (userNotification.notification.reference.status) {
                     case DataProductMembershipStatus.Approved:
                         description = (
                             <div className={styles.notification}>
                                 <div className={styles.notificationHeader}>
                                     <div>
                                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                            {userNotification.notification.data_product_membership.data_product.name}
+                                            {userNotification.notification.reference.data_product.name}
                                         </Link>{' '}
                                         <Typography.Text className={styles.notificationMessage}>
                                             {t('data product:')}
@@ -226,10 +210,8 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {userNotification.notification.data_product_membership.approved_on
-                                            ? formatDateToNow(
-                                                  userNotification.notification.data_product_membership.approved_on,
-                                              )
+                                        {userNotification.notification.reference.approved_on
+                                            ? formatDateToNow(userNotification.notification.reference.approved_on)
                                             : undefined}
                                     </Tag>
                                     <ExportOutlined />
@@ -238,7 +220,7 @@ export function Notifications() {
                                 <div className={styles.notificationContent}>
                                     <Typography.Text className={styles.notificationMessage}>
                                         {t('You have been granted the role of {{role}}', {
-                                            role: userNotification.notification.data_product_membership.role,
+                                            role: userNotification.notification.reference.role,
                                         })}{' '}
                                     </Typography.Text>
                                 </div>
@@ -251,7 +233,7 @@ export function Notifications() {
                                 <div className={styles.notificationHeader}>
                                     <div>
                                         <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                            {userNotification.notification.data_product_membership.data_product.name}
+                                            {userNotification.notification.reference.data_product.name}
                                         </Link>{' '}
                                         <Typography.Text className={styles.notificationMessage}>
                                             {t('data product:')}
@@ -259,10 +241,8 @@ export function Notifications() {
                                     </div>
 
                                     <Tag color="blue" className={styles.timestampTag}>
-                                        {userNotification.notification.data_product_membership.denied_on
-                                            ? formatDateToNow(
-                                                  userNotification.notification.data_product_membership.denied_on,
-                                              )
+                                        {userNotification.notification.reference.denied_on
+                                            ? formatDateToNow(userNotification.notification.reference.denied_on)
                                             : undefined}
                                     </Tag>
                                     <ExportOutlined />
@@ -271,7 +251,7 @@ export function Notifications() {
                                 <div className={styles.notificationContent}>
                                     <Typography.Text className={styles.notificationMessage}>
                                         {t('You have been denied the role of {{role}}', {
-                                            role: userNotification.notification.data_product_membership.role,
+                                            role: userNotification.notification.reference.role,
                                         })}{' '}
                                     </Typography.Text>
                                 </div>
@@ -280,7 +260,7 @@ export function Notifications() {
                         break;
                 }
                 navigatePath = createDataProductIdPath(
-                    userNotification.notification.data_product_membership.data_product_id,
+                    userNotification.notification.reference.data_product_id,
                     DataProductTabKeys.Team,
                 );
                 break;

@@ -4,9 +4,9 @@ import { DataProductMembershipContract } from '../data-product-membership';
 import { UserContract } from '../users';
 
 export enum NotificationTypes {
-    DataProductDataset = 'DataProductDataset',
-    DataOutputDataset = 'DataOutputDataset',
-    DataProductMembership = 'DataProductMembership',
+    DataProductDatasetNotification = 'DataProductDatasetNotification',
+    DataOutputDatasetNotification = 'DataOutputDatasetNotification',
+    DataProductMembershipNotification = 'DataProductMembershipNotification',
 }
 
 export interface NotificationModel {
@@ -19,25 +19,30 @@ export interface NotificationModel {
     last_interaction: string | null;
 }
 
+export type NotificationObject = DataProductMembershipContract | DataProductDatasetContract | DataOutputDatasetContract;
+
 export type Notification =
     | DataProductDatasetNotification
     | DataOutputDatasetNotification
     | DataProductMembershipNotification;
 
 export interface DataProductDatasetNotification {
-    configuration_type: NotificationTypes.DataProductDataset;
-    data_product_dataset_id: string;
-    data_product_dataset: DataProductDatasetContract;
+    configuration_type: NotificationTypes.DataProductDatasetNotification;
+    id: string;
+    reference_id: string;
+    reference: DataProductDatasetContract;
 }
 
 export interface DataOutputDatasetNotification {
-    configuration_type: NotificationTypes.DataOutputDataset;
-    data_output_dataset_id: string;
-    data_output_dataset: DataOutputDatasetContract;
+    configuration_type: NotificationTypes.DataOutputDatasetNotification;
+    id: string;
+    reference_id: string;
+    reference: DataOutputDatasetContract;
 }
 
 export interface DataProductMembershipNotification {
-    configuration_type: NotificationTypes.DataProductMembership;
-    data_product_membership_id: string;
-    data_product_membership: DataProductMembershipContract;
+    configuration_type: NotificationTypes.DataProductMembershipNotification;
+    id: string;
+    reference_id: string;
+    reference: DataProductMembershipContract;
 }
