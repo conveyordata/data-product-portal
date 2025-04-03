@@ -1,11 +1,5 @@
-from tests.factories.data_output_dataset_notification import (
-    DataOutputDatasetNotificationFactory,
-)
-from tests.factories.data_product_dataset_notification import (
-    DataProductDatasetNotificationFactory,
-)
-from tests.factories.data_product_membership_notification import (
-    DataProductMembershipNotificationFactory,
+from tests.factories.notification import (
+    NotificationFactory,
 )
 from tests.factories.notification_interaction import NotificationInteractionFactory
 
@@ -37,14 +31,11 @@ from .user import UserFactory
 factories = [
     DataOutputFactory,
     DataOutputDatasetAssociationFactory,
-    DataOutputDatasetNotificationFactory,
     DataProductFactory,
     DataProductMembershipFactory,
-    DataProductMembershipNotificationFactory,
     DataProductSettingFactory,
     DataProductTypeFactory,
     DataProductDatasetAssociationFactory,
-    DataProductDatasetNotificationFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
@@ -62,6 +53,7 @@ factories = [
     UserFactory,
     ThemeSettingsFactory,
     NotificationInteractionFactory,
+    NotificationFactory,
 ]
 
 for factory_model in factories:

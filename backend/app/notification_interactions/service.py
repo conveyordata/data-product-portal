@@ -175,27 +175,33 @@ class NotificationInteractionService:
                 NotificationTypes.DataProductDatasetNotification: (
                     lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
                         db,
-                        db.query(DataProductDatasetAssociationModel.dataset_id)
-                        .filter(DataProductDatasetAssociationModel.id == ref_id)
-                        .scalar(),
+                        db.scalars(
+                            select(DataProductDatasetAssociationModel.dataset_id).where(
+                                DataProductDatasetAssociationModel.id == ref_id
+                            )
+                        ).one_or_none(),
                         notification_type,
                     )
                 ),
                 NotificationTypes.DataOutputDatasetNotification: (
                     lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
                         db,
-                        db.query(DataOutputDatasetAssociationModel.dataset_id)
-                        .filter(DataOutputDatasetAssociationModel.id == ref_id)
-                        .scalar(),
+                        db.scalars(
+                            select(DataOutputDatasetAssociationModel.dataset_id).where(
+                                DataOutputDatasetAssociationModel.id == ref_id
+                            )
+                        ).one_or_none(),
                         notification_type,
                     )
                 ),
                 NotificationTypes.DataProductMembershipNotification: (
                     lambda db, ref_id: self.get_owner_ids_via_reference_parent_id(
                         db,
-                        db.query(DataProductMembershipModel.data_product_id)
-                        .filter(DataProductMembershipModel.id == ref_id)
-                        .scalar(),
+                        db.scalars(
+                            select(DataProductMembershipModel.data_product_id).where(
+                                DataProductMembershipModel.id == ref_id
+                            )
+                        ).one_or_none(),
                         notification_type,
                     )
                 ),

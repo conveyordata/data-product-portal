@@ -4,17 +4,11 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_output_dataset_notification import (
-    DataOutputDatasetNotificationFactory,
-)
 from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
-from tests.factories.data_product_dataset_notification import (
-    DataProductDatasetNotificationFactory,
-)
-from tests.factories.data_product_membership_notification import (
-    DataProductMembershipNotificationFactory,
-)
 from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
+from tests.factories.notification import (
+    NotificationFactory,
+)
 from tests.factories.notification_interaction import NotificationInteractionFactory
 
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
@@ -24,6 +18,7 @@ from app.data_product_memberships.enums import (
 )
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.enums import DatasetAccessType
+from app.notifications.notification_types import NotificationTypes
 
 NOTIFICATIONS_ENDPOINT = "/api/notifications"
 DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"
@@ -213,7 +208,10 @@ class TestNotificationsRouter:
             requested_by=requester,
         )
         NotificationInteractionFactory(
-            notification=DataProductDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataProductDatasetNotification,
+                reference_id=link.id,
+            ),
             user=requester,
         )
         response = self.approve_default_data_product_dataset_link(client, link.id)
@@ -239,7 +237,10 @@ class TestNotificationsRouter:
             requested_by=requester,
         )
         NotificationInteractionFactory(
-            notification=DataProductDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataProductDatasetNotification,
+                reference_id=link.id,
+            ),
             user=requester,
         )
         response = self.deny_default_data_product_dataset_link(client, link.id)
@@ -265,7 +266,10 @@ class TestNotificationsRouter:
             requested_by=requester,
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataOutputDatasetNotification,
+                reference_id=link.id,
+            ),
             user=requester,
         )
         response = self.approve_default_data_output_dataset_link(client, link.id)
@@ -291,7 +295,10 @@ class TestNotificationsRouter:
             requested_by=requester,
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataOutputDatasetNotification,
+                reference_id=link.id,
+            ),
             user=requester,
         )
         response = self.deny_default_data_output_dataset_link(client, link.id)
@@ -319,8 +326,9 @@ class TestNotificationsRouter:
             requested_by_id=str(requester.id),
         )
         NotificationInteractionFactory(
-            notification=DataProductMembershipNotificationFactory(
-                reference_id=membership_request.id
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataProductMembershipNotification,
+                reference_id=membership_request.id,
             ),
             user=requester,
         )
@@ -351,8 +359,9 @@ class TestNotificationsRouter:
             requested_by_id=str(requester.id),
         )
         NotificationInteractionFactory(
-            notification=DataProductMembershipNotificationFactory(
-                reference_id=membership_request.id
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataProductMembershipNotification,
+                reference_id=membership_request.id,
             ),
             user=requester,
         )
@@ -380,7 +389,10 @@ class TestNotificationsRouter:
             status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
         )
         NotificationInteractionFactory(
-            notification=DataProductDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataProductDatasetNotification,
+                reference_id=link.id,
+            ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -398,7 +410,10 @@ class TestNotificationsRouter:
             status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataOutputDatasetNotification,
+                reference_id=link.id,
+            ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -415,7 +430,10 @@ class TestNotificationsRouter:
             data_product=(DataProductMembershipFactory(user=owner).data_product),
         )
         NotificationInteractionFactory(
-            notification=DataProductDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataProductDatasetNotification,
+                reference_id=link.id,
+            ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -434,7 +452,10 @@ class TestNotificationsRouter:
             ),
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataOutputDatasetNotification,
+                reference_id=link.id,
+            ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -451,8 +472,9 @@ class TestNotificationsRouter:
             data_product=(DataProductMembershipFactory(user=owner).data_product),
         )
         NotificationInteractionFactory(
-            notification=DataProductMembershipNotificationFactory(
-                reference_id=membership.id
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataProductMembershipNotification,
+                reference_id=membership.id,
             ),
             user=owner,
         )
@@ -474,7 +496,10 @@ class TestNotificationsRouter:
             ),
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataOutputDatasetNotification,
+                reference_id=link.id,
+            ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -493,7 +518,10 @@ class TestNotificationsRouter:
             status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
         )
         NotificationInteractionFactory(
-            notification=DataProductDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataProductDatasetNotification,
+                reference_id=link.id,
+            ),
             user=old_owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -513,7 +541,10 @@ class TestNotificationsRouter:
             status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
         )
         NotificationInteractionFactory(
-            notification=DataOutputDatasetNotificationFactory(reference_id=link.id),
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataOutputDatasetNotification,
+                reference_id=link.id,
+            ),
             user=old_owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -538,8 +569,9 @@ class TestNotificationsRouter:
             data_product=membership.data_product,
         )
         NotificationInteractionFactory(
-            notification=DataProductMembershipNotificationFactory(
-                reference_id=membership.id
+            notification=NotificationFactory(
+                configuration_type=NotificationTypes.DataProductMembershipNotification,
+                reference_id=membership.id,
             ),
             user=old_owner,
         )
