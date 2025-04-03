@@ -1,7 +1,7 @@
 from typing import Iterable
 from uuid import UUID
 
-from sqlalchemy import asc, delete, select
+from sqlalchemy import and_, asc, delete, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
@@ -20,20 +20,8 @@ from app.data_products_datasets.model import (
 from app.datasets.model import ensure_dataset_exists
 from app.notification_interactions.model import NotificationInteraction
 from app.notification_interactions.schema_get import NotificationInteractionGet
-from app.notifications.data_output_dataset_association.model import (
-    DataOutputDatasetNotification,
-)
-from app.notifications.data_product_dataset_association.model import (
-    DataProductDatasetNotification,
-)
-from app.notifications.data_product_membership.model import (
-    DataProductMembershipNotification,
-)
+from app.notifications.model import Notification
 from app.notifications.notification_types import NotificationTypes
-from app.notifications.schema_union import (
-    NotificationForeignKeyMap,
-    NotificationModelMap,
-)
 from app.notifications.service import NotificationService
 from app.users.schema import User
 
@@ -73,12 +61,13 @@ class NotificationInteractionService:
         db.commit() should be used after using this function.
 
         """
-        notification_cls = NotificationModelMap[notification_type]
-        key_attribute = getattr(
-            notification_cls, NotificationForeignKeyMap[notification_type]
-        )
         notification_id = db.scalars(
-            select(notification_cls.id).where(key_attribute == reference_id)
+            select(Notification.id).where(
+                and_(
+                    Notification.reference_id == reference_id,
+                    Notification.configuration_type == notification_type,
+                )
+            )
         ).one_or_none()
         if notification_id:
             self.reset_interactions_for_notification(db, notification_id, user_ids)
@@ -91,22 +80,28 @@ class NotificationInteractionService:
         db.commit() should be used after using this function.
 
         """
-        notification_cls = NotificationModelMap[notification_type]
-        key_attribute = getattr(
-            notification_cls, NotificationForeignKeyMap[notification_type]
-        )
-        notification_ids_to_delete = db.scalars(
-            select(notification_cls.id).where(key_attribute == reference_id)
-        ).all()
-        if notification_ids_to_delete:
+        notification_id = db.scalars(
+            select(Notification.id).where(
+                and_(
+                    Notification.reference_id == reference_id,
+                    Notification.configuration_type == notification_type,
+                )
+            )
+        ).one_or_none()
+        if notification_id:
             db.execute(
                 delete(NotificationInteraction).where(
-                    NotificationInteraction.notification_id.in_(
-                        notification_ids_to_delete
+                    NotificationInteraction.notification_id == notification_id
+                )
+            )
+            db.execute(
+                delete(Notification).where(
+                    and_(
+                        Notification.reference_id == reference_id,
+                        Notification.configuration_type == notification_type,
                     )
                 )
             )
-            db.execute(delete(notification_cls).where(key_attribute == reference_id))
             db.flush()
 
     def get_owner_ids_via_reference_parent_id(
@@ -234,28 +229,49 @@ class NotificationInteractionService:
         self, db: Session, authenticated_user: User
     ) -> list[NotificationInteractionGet]:
         data_product_dataset_notification_ids = db.scalars(
-            select(DataProductDatasetNotification.id).where(
-                DataProductDatasetNotification.data_product_dataset.has(
+            select(Notification.id)
+            .join(
+                DataProductDatasetAssociationModel,
+                DataProductDatasetAssociationModel.id == Notification.reference_id,
+            )
+            .where(
+                and_(
+                    Notification.configuration_type
+                    == NotificationTypes.DataProductDatasetNotification,
                     DataProductDatasetAssociationModel.status
-                    == DataProductDatasetLinkStatus.PENDING_APPROVAL
+                    == DataProductDatasetLinkStatus.PENDING_APPROVAL,
                 )
             )
         ).all()
 
         data_output_dataset_notification_ids = db.scalars(
-            select(DataOutputDatasetNotification.id).where(
-                DataOutputDatasetNotification.data_output_dataset.has(
+            select(Notification.id)
+            .join(
+                DataOutputDatasetAssociationModel,
+                DataOutputDatasetAssociationModel.id == Notification.reference_id,
+            )
+            .where(
+                and_(
+                    Notification.configuration_type
+                    == NotificationTypes.DataOutputDatasetNotification,
                     DataOutputDatasetAssociationModel.status
-                    == DataOutputDatasetLinkStatus.PENDING_APPROVAL
+                    == DataOutputDatasetLinkStatus.PENDING_APPROVAL,
                 )
             )
         ).all()
 
         data_product_membership_notification_ids = db.scalars(
-            select(DataProductMembershipNotification.id).where(
-                DataProductMembershipNotification.data_product_membership.has(
+            select(Notification.id)
+            .join(
+                DataProductMembershipModel,
+                DataProductMembershipModel.id == Notification.reference_id,
+            )
+            .where(
+                and_(
+                    Notification.configuration_type
+                    == NotificationTypes.DataProductMembershipNotification,
                     DataProductMembershipModel.status
-                    == DataProductMembershipStatus.PENDING_APPROVAL
+                    == DataProductMembershipStatus.PENDING_APPROVAL,
                 )
             )
         ).all()

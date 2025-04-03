@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from app.notifications.schema_union import NotificationConfiguration
+from app.notifications.schema import Notification
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -10,7 +10,7 @@ from app.users.schema import User
 class NotificationInteractionGet(ORMModel):
     id: UUID
     notification_id: UUID
-    notification: NotificationConfiguration
+    notification: Notification
     user_id: UUID
     user: User
     last_seen: Optional[datetime]
