@@ -1,12 +1,12 @@
-import { Checkbox, type CheckboxChangeEvent, Flex, Table, Typography } from 'antd';
-import type { ColumnType } from 'antd/es/table/interface';
-import { useCallback, useMemo } from 'react';
+import { Checkbox, type CheckboxChangeEvent, Flex, Table, type TableColumnType, Typography } from 'antd';
+import { type ReactElement, useCallback, useMemo } from 'react';
 
 import QuestionTooltip from '@/components/tooltip/question-tooltip';
 import type { RoleScope } from '@/pages/roles/roles.page';
 import { useGetRolesQuery, useUpdateRoleMutation } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { RoleContract } from '@/types/roles';
+import { Prototype } from '@/types/roles/role.contract';
 
 import styles from './roles-table.module.scss';
 
@@ -34,18 +34,52 @@ type PermissionGroup = PermissionBase & {
 
 type Permission = PermissionInstance | PermissionGroup;
 
+function prototypePrecedence(role_a: RoleContract, role_b: RoleContract) {
+    const a = role_a.prototype;
+    const b = role_b.prototype;
+
+    if (a === b) {
+        return 0;
+    }
+    if (a === Prototype.ADMIN) {
+        return -1;
+    }
+    if (b === Prototype.ADMIN) {
+        return 1;
+    }
+    if (a === Prototype.EVERYONE) {
+        return -1;
+    }
+    if (b === Prototype.EVERYONE) {
+        return 1;
+    }
+    if (a === Prototype.OWNER) {
+        return -1;
+    }
+    if (b === Prototype.OWNER) {
+        return 1;
+    }
+    return 0;
+}
+
 type RolesTableProps = {
     scope: RoleScope;
 };
 export function RolesTable({ scope }: RolesTableProps) {
-    const { data: roles = [], isFetching } = useGetRolesQuery(scope);
+    const { data: rawRoles = [], isFetching } = useGetRolesQuery(scope);
     const [updateRole, { isLoading }] = useUpdateRoleMutation();
 
+    const roles = useMemo(() => {
+        const data = [...rawRoles];
+        data.sort(prototypePrecedence);
+        return [...data];
+    }, [rawRoles]);
     const permissions = useMemo(() => determinePermissionsForScope(scope, roles), [roles, scope]);
 
     const handleCheckboxChange = useCallback(
-        (record: PermissionInstance, key: string, checked: boolean) => {
-            const role = roles.find((role) => role.name === key)!;
+        (record: PermissionInstance, id: string, checked: boolean) => {
+            console.log(record, id, checked);
+            const role = roles.find((role) => role.id === id)!;
 
             const permissions = [...role.permissions];
             if (checked && !permissions.includes(record.id)) {
@@ -78,36 +112,44 @@ export function RolesTable({ scope }: RolesTableProps) {
         }
     };
 
-    const renderCheckbox = (key: string) => (value: boolean, record: Permission) => {
+    const renderCheckbox = (id: string) => (value: boolean, record: Permission) => {
         if (record.type === 'Instance') {
-            return (
-                <Flex justify={'center'}>
+            const role = roles.find((role) => role.id === id)!;
+
+            let checkbox: ReactElement;
+            if (role.prototype === Prototype.ADMIN) {
+                // Admin permissions cannot be changed
+                checkbox = <Checkbox checked={true} disabled />;
+            } else {
+                checkbox = (
                     <Checkbox
                         checked={value}
                         onChange={(e: CheckboxChangeEvent) =>
-                            handleCheckboxChange(record as PermissionInstance, key, e.target.checked)
+                            handleCheckboxChange(record as PermissionInstance, id, e.target.checked)
                         }
                     />
-                </Flex>
-            );
+                );
+            }
+
+            return <Flex justify={'center'}>{checkbox}</Flex>;
         }
     };
 
-    const createColumn = (title: string, description: string): ColumnType<Permission> => {
+    const createColumn = (title: string, id: string, description: string): TableColumnType<Permission> => {
         return {
             title: (
                 <QuestionTooltip title={description}>
                     <Text>{title}</Text>
                 </QuestionTooltip>
             ),
-            dataIndex: ['access', title],
-            render: renderCheckbox(title),
+            dataIndex: ['access', id],
+            render: renderCheckbox(id),
         };
     };
 
-    const roleColumns = roles.map((role) => createColumn(role.name, role.description));
+    const roleColumns = roles.map((role) => createColumn(role.name, role.id, role.description));
 
-    const columns: ColumnType<Permission>[] = [
+    const columns: TableColumnType<Permission>[] = [
         {
             dataIndex: 'permission',
             fixed: 'left',
@@ -434,7 +476,7 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
     }
 
     const determineAccess = (permission: number) => {
-        return Object.fromEntries(roles.map((role) => [role.name, role.permissions.includes(permission)]));
+        return Object.fromEntries(roles.map((role) => [role.id, role.permissions.includes(permission)]));
     };
 
     for (const permission of permissions) {

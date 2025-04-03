@@ -2,7 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 from tests.factories import RoleFactory
 
-from app.roles.schema import Role
+from app.roles.schema import Prototype, Role, Scope
+from app.roles.service import ADMIN_UUID
 
 ENDPOINT = "/api/roles"
 
@@ -63,6 +64,39 @@ class TestRolesRouter:
         assert data["scope"] == role.scope
         assert data["description"] == "updated_description"
         assert data["permissions"] == [101, 102]
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_admin_role(self, client: TestClient):
+        admin: Role = RoleFactory(
+            scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID
+        )
+        illegal = client.patch(
+            ENDPOINT,
+            json={
+                "id": str(admin.id),
+                "permissions": [101, 102],
+            },
+        )
+        assert illegal.status_code == 403
+        assert (
+            illegal.json()["detail"]
+            == "You cannot change the permissions of the admin role"
+        )
+
+        legal = client.patch(
+            ENDPOINT,
+            json={
+                "id": str(admin.id),
+                "description": "admins can have a custom description",
+            },
+        )
+        assert legal.status_code == 200
+
+        data = legal.json()
+        assert data["id"] == str(admin.id)
+        assert data["name"] == admin.name
+        assert data["scope"] == admin.scope
+        assert data["description"] == "admins can have a custom description"
 
     @pytest.mark.usefixtures("admin")
     def test_delete_role(self, client: TestClient):

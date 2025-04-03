@@ -59,6 +59,10 @@ begin
     TRUNCATE TABLE public.data_product_types CASCADE;
     TRUNCATE TABLE public.domains CASCADE;
     TRUNCATE TABLE public.tags CASCADE;
+    TRUNCATE TABLE public.roles CASCADE;
+    TRUNCATE TABLE public.role_assignments_global CASCADE;
+    TRUNCATE TABLE public.role_assignments_data_product CASCADE;
+    TRUNCATE TABLE public.role_assignments_dataset CASCADE;
 
     -- PLATFORMS
     SELECT id FROM public.platforms WHERE name = 'AWS' INTO returned_platform_id;
@@ -115,7 +119,6 @@ begin
     INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at, is_admin) VALUES ('john.doe@dataminded.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', 'john.doe@dataminded.com', 'John', 'Doe', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, true) returning id INTO john_id;
 
     -- ROLES
-    INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('bdcc7a42-22b0-4028-ab2a-d48b10685a94', 'Admin', 'global', 0, 'Administrators have blanket permissions', ARRAY [101, 102, 103, 104, 105], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('f80c101c-345c-4d5b-9524-57c55bd12d2d', 'Everyone', 'global', 1, 'This is the role that is used as fallback for users that don''t have another role', ARRAY [104, 105], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '1 seconds'), NULL, NULL);
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('e43b6f7a-e776-49b2-9b51-117d8644d971', 'Owner', 'data_product', 2, 'The owner of a Data Product', ARRAY [301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 313, 314, 315], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('18e67286-92aa-449a-ba46-ac26eb0de21d', 'Solution Architect', 'data_product', 0, 'The Solution Architect for a Data Product', ARRAY [303, 309, 310, 311, 312, 313, 314], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '1 seconds'), NULL, NULL);
