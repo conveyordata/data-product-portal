@@ -50,7 +50,7 @@ def get_data_products():
         datasets = []
         for dataset_link in data_product.get("dataset_links"):
             if dataset_link.get("status") == "approved":
-                datasets.append(dataset_link.get("dataset").get("external_id"))
+                datasets.append(dataset_link.get("dataset").get("namespace"))
 
         members = {}
         for member in data_product.get("memberships"):
@@ -58,7 +58,7 @@ def get_data_products():
             role = "admin" if member.get("role") == "owner" else "member"
             members[member.get("user").get("email")] = role
 
-        data_products_export[data_product.get("external_id")] = {
+        data_products_export[data_product.get("namespace")] = {
             "description": data_product.get("description"),
             "read_datasets": datasets,
             "users": members,
@@ -87,7 +87,7 @@ def get_datasets():
         for owner in dataset.get("owners"):
             owners.append(owner.get("email"))
 
-        datasets_export[dataset.get("external_id")] = {
+        datasets_export[dataset.get("namespace")] = {
             "data_outputs": [
                 data_output_link.get("data_output").get("external_id")
                 for data_output_link in dataset.get("data_output_links")
