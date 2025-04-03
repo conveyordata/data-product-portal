@@ -212,7 +212,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     errors:
                         !namespaceSuggestion || namespaceSuggestion?.available
                             ? []
-                            : [t('The namespace of the data product must be unique')],
+                            : [t('This namespace is already in use')],
                 },
             ]);
         }
@@ -279,7 +279,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                                         return Promise.resolve();
                                     }
 
-                                    const validationResponse = await validateNamespace(value).unwrap();
+                                    const validationResponse = await validateNamespace(value.toLowerCase()).unwrap();
 
                                     switch (validationResponse.validity) {
                                         case ValidationType.VALID:
@@ -291,9 +291,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                                                 new Error(t('Namespace contains invalid characters')),
                                             );
                                         case ValidationType.DUPLICATE_NAMESPACE:
-                                            return Promise.reject(
-                                                new Error(t('The namespace of the data product must be unique')),
-                                            );
+                                            return Promise.reject(new Error(t('This namespace is already in use')));
                                         default:
                                             return Promise.reject(new Error(t('Unknown namespace validation error')));
                                     }
@@ -301,7 +299,15 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                             },
                         ]}
                     >
-                        <Input disabled={!canEditNamespace} showCount maxLength={namespaceLengthLimits?.max_length} />
+                        <Input
+                            disabled={!canEditNamespace}
+                            showCount
+                            maxLength={namespaceLengthLimits?.max_length}
+                            onChange={(e) => {
+                                const lowerCaseValue = e.target.value.toLowerCase();
+                                form.setFieldValue('namespace', lowerCaseValue);
+                            }}
+                        />
                     </Form.Item>
                     <Button disabled={mode === 'edit'} onClick={() => setCanEditNamespace((prevState) => !prevState)}>
                         <EditOutlined />

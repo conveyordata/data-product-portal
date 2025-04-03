@@ -34,7 +34,9 @@ class NamespaceValidator:
         self.model = model
 
     def _namespace_from_name(self, name: str) -> str:
-        namespace = name.strip().lower().replace(" ", "-")
+        namespace = re.sub(
+            r"[^a-z0-9+=,.@_-]", "", name.lower().replace(" ", "-")
+        ).strip("-")
         return namespace[: settings.NAMESPACE_MAX_LENGTH]
 
     def _is_unique(
@@ -64,7 +66,7 @@ class NamespaceValidator:
     ) -> NamespaceValidation:
         if not (len(namespace) <= self.max_length):
             validity = NamespaceValidityType.INVALID_LENGTH
-        elif not re.match(r"^[A-Za-z0-9+=,.@_-]+$", namespace):
+        elif not re.match(r"^[a-z0-9+=,.@_-]+$", namespace):
             validity = NamespaceValidityType.INVALID_CHARACTERS
         elif not self._is_unique(namespace, db):
             validity = NamespaceValidityType.DUPLICATE_NAMESPACE
