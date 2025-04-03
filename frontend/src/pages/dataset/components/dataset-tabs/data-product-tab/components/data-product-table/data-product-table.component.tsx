@@ -34,7 +34,7 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
     const { data: access } = useCheckAccessQuery(
         {
             object_id: datasetId,
-            action: AuthorizationAction.DATASET_APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            action: AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
         },
         {
             skip: !datasetId,
@@ -44,7 +44,7 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
     const { data: revoke_access } = useCheckAccessQuery(
         {
             object_id: datasetId,
-            action: AuthorizationAction.DATASET_REVOKE_DATAPRODUCT_ACCESS,
+            action: AuthorizationAction.DATASET__REVOKE_DATAPRODUCT_ACCESS,
         },
         { skip: !datasetId },
     );

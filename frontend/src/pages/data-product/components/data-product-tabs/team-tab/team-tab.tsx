@@ -57,7 +57,7 @@ export function TeamTab({ dataProductId }: Props) {
     const { data: access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_CREATE_USER,
+            action: AuthorizationAction.DATA_PRODUCT__CREATE_USER,
         },
         { skip: !dataProductId },
     );
