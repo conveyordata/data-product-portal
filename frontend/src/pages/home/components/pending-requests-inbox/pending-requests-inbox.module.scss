@@ -20,10 +20,10 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 }
 
 .list-item {
+    position: relative;
     background-color: globals.$quaternary-color-fill;
     border: 1px solid globals.$border-color-secondary;
     border-radius: globals.$border-radius-sm;
-    padding: unset !important;
     transition: border-color 0.3s;
     cursor: pointer;
 
@@ -33,12 +33,6 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     }
     margin: 0;
     margin-bottom: globals.$spacing-regular;
-    height: globals.$icon-size-extra-large;
-    .item-card {
-        height: 100%;
-        padding: globals.$spacing-xs;
-        padding-left: globals.$spacing-m;
-    }
 }
 
 .section-title {
@@ -81,4 +75,64 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 
 .search-bar {
     width: 50%;
+}
+
+.description-core {
+    color: globals.$color-text;
+}
+
+.top-row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    padding-left: 0;
+}
+
+.left-column {
+    width: 100%;
+    display: flex;
+    justify-content: baseline;
+    gap: globals.$spacing-m;
+}
+
+.right-column {
+    position: absolute;
+    top: 4px;
+    right: 0;
+    width: 50%;
+    margin-left: globals.$spacing-ml;
+    height: 100%;
+}
+
+.color-mark {
+    border-top: 1px solid globals.$border-color-secondary;
+}
+
+.flex {
+    width: 100%;
+}
+
+.item-container {
+    width: 100%;
+}
+
+.user-badge {
+    display: flex;
+    justify-content: start;
+    padding: globals.$spacing-m;
+    padding-top: 0;
+    padding-bottom: globals.$spacing-xl;
+}
+
+.second-section {
+    height: 100%;
+    width: 100%;
+    margin-left: globals.$spacing-xxl;
+}
+
+.type-indicator {
+    height: 100%;
+    background-color: globals.$secondary-color-fill;
+    padding: globals.$spacing-xs;
 }

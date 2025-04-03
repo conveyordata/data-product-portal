@@ -1,11 +1,13 @@
 import { DownOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Dropdown, List, Menu, Space, Typography } from 'antd';
+import { Avatar, Badge, Button, Col, Dropdown, Flex, List, Menu, Row, Space, theme, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
 import { formatDate } from '@/utils/date.helper.ts';
+import { ListPaginationConfig } from '@/types/shared/lists';
+import { useTranslation } from 'react-i18next';
 
 type PendingActionItem = {
     key: string;
@@ -13,14 +15,22 @@ type PendingActionItem = {
     navigatePath: string;
     date: string;
     author: string;
+    initials: string;
+    message: ReactNode;
+    color: string;
 };
 
 type DataProductListProps = {
     isFetching: boolean;
     pendingActionItems: PendingActionItem[];
+    pagination: ListPaginationConfig;
 };
 
-export const PendingRequestsList = ({ isFetching, pendingActionItems }: DataProductListProps) => {
+const COL_SPAN = 12;
+
+export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination }: DataProductListProps) => {
+    const { t } = useTranslation();
+
     const navigate = useNavigate();
 
     if (isFetching) return <LoadingSpinner />;
@@ -37,45 +47,59 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems }: DataProd
         <List
             dataSource={pendingActionItems}
             className={styles.antList}
+            pagination={{
+                ...pagination,
+                className: styles.antListPagination,
+            }}
             renderItem={(item) => {
                 const formattedDate = item.date ? formatDate(item.date) : undefined;
                 return (
                     <>
-                        <Space size={0} className={styles.listItemTopInfo}>
-                            <Space align="center">
-                                <UserOutlined />
-                                <Typography.Text>{item.author}</Typography.Text>
-                            </Space>
-                            <Space>
-                                <Typography.Text type="secondary">{formattedDate}</Typography.Text>
-                            </Space>
-                        </Space>
                         <List.Item
                             key={item.key}
                             className={styles.listItem}
                             onClick={() => handleItemClick(item.navigatePath)}
                         >
-                            <List.Item.Meta className={styles.itemCard} description={item.description} />
-                            <div>
-                                <Dropdown
-                                    trigger={['click']}
-                                    placement="bottomRight"
-                                    dropdownRender={() => (
-                                        <Menu>
-                                            <Menu.Item key="accept">Accept</Menu.Item>
-                                            <Menu.Item key="deny">Deny</Menu.Item>
-                                        </Menu>
-                                    )}
-                                >
-                                    <Button
-                                        icon={<DownOutlined />}
-                                        className={styles.actionOptions}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                        }}
-                                    ></Button>
-                                </Dropdown>
+                            <div className={styles.userBadge}>
+                                <Badge showZero={false} color={item.color} size="default">
+                                    <Avatar style={{ backgroundColor: item.color }} className={styles.avatar}>
+                                        {item.initials || <UserOutlined />}
+                                    </Avatar>
+                                </Badge>
                             </div>
+                            <Flex vertical={true} className={styles.flex} align="flex-start">
+                                <Flex className={styles.itemContainer}>
+                                    <Col span={COL_SPAN} className={styles.leftColumn}>
+                                        <div className={styles.topRow}>
+                                            <Typography.Text>
+                                                <strong className={styles.descriptionCore}>{item.author}</strong>,{' '}
+                                                {item.description}
+                                            </Typography.Text>
+                                            <Typography.Text type="secondary">{formattedDate}</Typography.Text>{' '}
+                                        </div>
+                                    </Col>
+                                    <div className={styles.rightColumn}>
+                                        <Flex justify="end">
+                                            <div className={styles.typeIndicator}>
+                                                <Typography.Text type="secondary">
+                                                    {t('Originating from: Data Product')}
+                                                </Typography.Text>{' '}
+                                            </div>
+                                            <div
+                                                className={styles.colorMark}
+                                                style={{
+                                                    borderColor: item.color,
+                                                    boxShadow: `0 -4px 0 0 ${item.color}`,
+                                                }}
+                                            >
+                                                <Button type={'link'}>{t('Accept')}</Button>
+                                                <Button type={'link'}>{t('Deny')}</Button>
+                                            </div>
+                                        </Flex>
+                                    </div>
+                                </Flex>
+                                <Typography.Text>{item.message}</Typography.Text>
+                            </Flex>
                         </List.Item>
 
                         <div />

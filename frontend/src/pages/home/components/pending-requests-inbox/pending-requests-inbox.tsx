@@ -1,4 +1,4 @@
-import { Badge, Col, Flex, Form, Pagination, Row, Typography } from 'antd';
+import { Badge, Flex, Form, Pagination, theme, Typography } from 'antd';
 import { TFunction } from 'i18next';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,31 +17,38 @@ import { NotificationModel, NotificationTypes } from '@/types/notifications/noti
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
 
-const ROW_GUTTER = 96;
-const COL_SPAN = 12;
+const createPendingItem = (userNotification: NotificationModel, t: TFunction, colors: string[]) => {
+    let link, description, navigatePath, date, author, initials, message, color;
 
-const createPendingItem = (userNotification: NotificationModel, t: TFunction) => {
-    let link, description, navigatePath, date, author;
+    function getInitials(firstName: string, lastName: string) {
+        return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
+    }
 
     switch (userNotification.notification.configuration_type) {
         case NotificationTypes.DataProductDatasetNotification:
             link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
             description = (
-                <Typography.Text className="description">
-                    {t('Requests read access to the')}{' '}
+                <Typography.Text>
+                    {t('requests')} <strong className={styles.descriptionCore}>{t('read access')}</strong>{' '}
+                    {t('to the dataset:')}{' '}
                     <Link
                         onClick={(e) => e.stopPropagation()}
                         to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
                     >
-                        {userNotification.notification.reference.dataset.name}
-                    </Link>{' '}
-                    {t('dataset, for the')}{' '}
+                        <strong>{userNotification.notification.reference.dataset.name}</strong>
+                    </Link>
+                </Typography.Text>
+            );
+            message = (
+                <Typography.Text>
+                    {t('Accepting will grant read access to the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
                         {userNotification.notification.reference.data_product.name}
                     </Link>{' '}
                     {t('data product.')}{' '}
                 </Typography.Text>
             );
+            color = colors[0];
             navigatePath = createDatasetIdPath(
                 userNotification.notification.reference.dataset_id,
                 DatasetTabKeys.DataProduct,
@@ -51,6 +58,10 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
                 userNotification.notification.reference.requested_by.first_name +
                 ' ' +
                 userNotification.notification.reference.requested_by.last_name;
+            initials = getInitials(
+                userNotification.notification.reference.requested_by.first_name,
+                userNotification.notification.reference.requested_by.last_name,
+            );
             break;
 
         case NotificationTypes.DataOutputDatasetNotification:
@@ -59,7 +70,19 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
                 userNotification.notification.reference.data_output.owner_id,
             );
             description = (
-                <Typography.Text className="description">
+                <Typography.Text>
+                    {t('Requests to create a link with the')}{' '}
+                    <Link
+                        onClick={(e) => e.stopPropagation()}
+                        to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
+                    >
+                        {userNotification.notification.reference.dataset.name}
+                    </Link>{' '}
+                    {t('dataset')}
+                </Typography.Text>
+            );
+            message = (
+                <Typography.Text>
                     {t('Requests to create a link with the')}{' '}
                     <Link
                         onClick={(e) => e.stopPropagation()}
@@ -74,6 +97,7 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
                     {t('data output.')}
                 </Typography.Text>
             );
+            color = colors[1];
             navigatePath = createDatasetIdPath(
                 userNotification.notification.reference.dataset_id,
                 DatasetTabKeys.DataOutput,
@@ -83,6 +107,10 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
                 userNotification.notification.reference.requested_by.first_name +
                 ' ' +
                 userNotification.notification.reference.requested_by.last_name;
+            initials = getInitials(
+                userNotification.notification.reference.requested_by.first_name,
+                userNotification.notification.reference.requested_by.last_name,
+            );
             break;
 
         case NotificationTypes.DataProductMembershipNotification:
@@ -96,6 +124,16 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
                     {t('data product team.')}
                 </Typography.Text>
             );
+            message = (
+                <Typography.Text>
+                    {t('Requests to join the')}{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={link}>
+                        {userNotification.notification.reference.data_product.name}
+                    </Link>{' '}
+                    {t('data product team.')}
+                </Typography.Text>
+            );
+            color = colors[2];
             navigatePath = createDataProductIdPath(
                 userNotification.notification.reference.data_product_id,
                 DataProductTabKeys.Team,
@@ -105,6 +143,10 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
                 userNotification.notification.reference.user.first_name +
                 ' ' +
                 userNotification.notification.reference.user.last_name;
+            initials = getInitials(
+                userNotification.notification.reference.user.first_name,
+                userNotification.notification.reference.user.last_name,
+            );
             break;
 
         default:
@@ -117,6 +159,9 @@ const createPendingItem = (userNotification: NotificationModel, t: TFunction) =>
         navigatePath: navigatePath,
         date: date,
         author: author,
+        initials: initials,
+        message: message,
+        color: color,
     };
 };
 
@@ -124,12 +169,17 @@ export function PendingRequestsInbox() {
     const { t } = useTranslation();
     const currentUser = useSelector(selectCurrentUser);
     const [searchForm] = Form.useForm();
+    const {
+        token: { colorSuccess, colorWarning, colorError },
+    } = theme.useToken();
 
     const { data: pendingActions, isFetching } = useGetPendingActionNotificationsQuery();
 
+    const colors = [colorSuccess, colorWarning, colorError];
+
     const pendingItems = useMemo(() => {
         const userNotifications = pendingActions?.map((userNotification) =>
-            createPendingItem({ ...userNotification }, t),
+            createPendingItem({ ...userNotification }, t, colors),
         );
         if (!userNotifications) {
             return [];
@@ -149,17 +199,6 @@ export function PendingRequestsInbox() {
     const onPaginationChange = (current: number, pageSize: number) => {
         handlePaginationChange({ current, pageSize });
     };
-
-    const pageStart = (pagination.current - 1) * pagination.pageSize;
-    const pageEnd = pagination.current * pagination.pageSize;
-    const currentPageItems = pendingItems.slice(pageStart, pageEnd);
-
-    const midIndex =
-        currentPageItems.length > Math.ceil(pagination.pageSize / 2)
-            ? Math.ceil(pagination.pageSize / 2)
-            : currentPageItems.length;
-    const firstListItems = currentPageItems.slice(0, midIndex);
-    const secondListItems = currentPageItems.slice(midIndex);
 
     if (pendingItems.length == 0 && isFetching == false) {
         return (
@@ -188,19 +227,15 @@ export function PendingRequestsInbox() {
                         total={pendingItems.length}
                         onChange={onPaginationChange}
                         size="small"
-                        hideOnSinglePage={true}
                     />
                 </div>
             </div>
             <div className={styles.contentSecondary}>
-                <Row gutter={ROW_GUTTER}>
-                    <Col span={COL_SPAN}>
-                        <PendingRequestsList pendingActionItems={firstListItems} isFetching={isFetching} />
-                    </Col>
-                    <Col span={COL_SPAN}>
-                        <PendingRequestsList pendingActionItems={secondListItems} isFetching={isFetching} />
-                    </Col>
-                </Row>
+                <PendingRequestsList
+                    pendingActionItems={pendingItems}
+                    isFetching={isFetching}
+                    pagination={pagination}
+                />
             </div>
         </div>
     );
