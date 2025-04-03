@@ -2,7 +2,7 @@ import re
 from enum import Enum
 
 from pydantic import BaseModel
-from sqlalchemy import exists
+from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
 from app.settings import settings
@@ -44,7 +44,7 @@ class NamespaceValidator:
         namespace: str,
         db: Session,
     ) -> bool:
-        return not db.query(exists().where(self.model.namespace == namespace)).scalar()
+        return not db.scalar(select(exists().where(self.model.namespace == namespace)))
 
     def namespace_suggestion(
         self,
