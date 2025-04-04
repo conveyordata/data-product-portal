@@ -5,15 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import (
-    Authorization,
-    DataOutputResolver,
-)
-from app.data_outputs.schema import (
-    DataOutput,
-    DataOutputStatusUpdate,
-    DataOutputUpdate,
-)
+from app.core.authz.authorization import Authorization, DataOutputResolver
+from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
+from app.data_outputs.schema import DataOutput, DataOutputStatusUpdate, DataOutputUpdate
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.dependencies import only_data_output_owners
@@ -26,6 +20,16 @@ router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
 @router.get("")
 def get_data_outputs(db: Session = Depends(get_db_session)) -> list[DataOutput]:
     return DataOutputService().get_data_outputs(db)
+
+
+@router.get("/namespace_suggestion")
+def get_data_output_namespace_suggestion(name: str) -> NamespaceSuggestion:
+    return DataOutputService().data_output_namespace_suggestion(name)
+
+
+@router.get("/namespace_length_limits")
+def get_data_output_namespace_length_limits() -> NamespaceLengthLimits:
+    return DataOutputService().data_output_namespace_length_limits()
 
 
 @router.get("/{id}")

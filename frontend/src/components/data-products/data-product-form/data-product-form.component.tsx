@@ -64,8 +64,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
     const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
-    const [fetchNamespace, { data: namespaceSuggestion, isFetching: isFetchingNamespaceSuggestion }] =
-        useLazyGetDataProductNamespaceSuggestionQuery();
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductNamespaceSuggestionQuery();
     const [validateNamespace] = useLazyValidateDataProductNamespaceQuery();
     const { data: namespaceLengthLimits } = useGetDataProductNamespaceLengthLimitsQuery();
 
@@ -204,19 +203,10 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
-            form.setFields([
-                {
-                    name: 'namespace',
-                    value: namespaceSuggestion?.namespace,
-                    validating: isFetchingNamespaceSuggestion,
-                    errors:
-                        !namespaceSuggestion || namespaceSuggestion?.available
-                            ? []
-                            : [t('This namespace is already in use')],
-                },
-            ]);
+            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditNamespace, namespaceSuggestion, isFetchingNamespaceSuggestion, t]);
+    }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
     useEffect(() => {
         if (currentDataProduct && mode === 'edit') {
@@ -272,10 +262,13 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                         validateFirst
                         validateDebounce={DEBOUNCE}
                         rules={[
-                            { required: true, message: t('Please input the namespace of the data product') },
+                            {
+                                required: canEditNamespace,
+                                message: t('Please input the namespace of the data product'),
+                            },
                             {
                                 validator: async (_, value) => {
-                                    if (mode === 'edit') {
+                                    if (mode === 'edit' || (!canEditNamespace && !value)) {
                                         return Promise.resolve();
                                     }
 

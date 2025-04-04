@@ -340,16 +340,6 @@ class TestDataProductsRouter:
 
         assert response.status_code == 200
         assert body["namespace"] == "test-with-spaces"
-        assert body["available"] is True
-
-    def test_get_namespace_suggestion_not_available(self, client):
-        namespace = "test"
-        DataProductFactory(namespace=namespace)
-        response = self.get_namespace_suggestion(client, namespace)
-        body = response.json()
-        assert response.status_code == 200
-        assert body["namespace"] == namespace
-        assert body["available"] is False
 
     def test_get_namespace_length_limits(self, client):
         response = self.get_namespace_length_limits(client)
@@ -387,6 +377,67 @@ class TestDataProductsRouter:
             response.json()["validity"]
             == NamespaceValidityType.DUPLICATE_NAMESPACE.value
         )
+
+    def test_validate_data_output_namespace(self, client):
+        namespace = "test"
+        data_product = DataProductFactory()
+        response = self.validate_data_output_namespace(
+            client, namespace, data_product.id
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID.value
+
+    def test_validate_data_output_namespace_invalid_characters(self, client):
+        namespace = "!"
+        data_product = DataProductFactory()
+        response = self.validate_data_output_namespace(
+            client, namespace, data_product.id
+        )
+
+        assert response.status_code == 200
+        assert (
+            response.json()["validity"]
+            == NamespaceValidityType.INVALID_CHARACTERS.value
+        )
+
+    def test_validate_data_output_namespace_invalid_length(self, client):
+        namespace = "a" * 256
+        data_product = DataProductFactory()
+        response = self.validate_data_output_namespace(
+            client, namespace, data_product.id
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH.value
+
+    def test_validate_data_output_namespace_duplicate(self, client):
+        namespace = "test"
+        data_product = DataProductFactory()
+        DataOutputFactory(owner=data_product, namespace=namespace)
+        response = self.validate_data_output_namespace(
+            client, namespace, data_product.id
+        )
+
+        assert response.status_code == 200
+        assert (
+            response.json()["validity"]
+            == NamespaceValidityType.DUPLICATE_NAMESPACE.value
+        )
+
+    def test_validate_data_output_namespace_duplicate_scoped_to_data_product(
+        self, client
+    ):
+        namespace = "test"
+        data_product = DataProductFactory()
+        other_data_product = DataProductFactory()
+        DataOutputFactory(owner=data_product, namespace=namespace)
+        response = self.validate_data_output_namespace(
+            client, namespace, other_data_product.id
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID.value
 
     @staticmethod
     def create_data_product(client, default_data_product_payload):
@@ -436,3 +487,10 @@ class TestDataProductsRouter:
     @staticmethod
     def get_namespace_length_limits(client):
         return client.get(f"{ENDPOINT}/namespace_length_limits")
+
+    @staticmethod
+    def validate_data_output_namespace(client, namespace, data_product_id):
+        return client.get(
+            f"{ENDPOINT}/{data_product_id}/data_output"
+            f"/validate_namespace?namespace={namespace}"
+        )

@@ -367,16 +367,6 @@ class TestDatasetsRouter:
 
         assert response.status_code == 200
         assert body["namespace"] == "test-with-spaces"
-        assert body["available"] is True
-
-    def test_get_namespace_suggestion_not_available(self, client):
-        namespace = "test"
-        DatasetFactory(namespace=namespace)
-        response = self.get_namespace_suggestion(client, namespace)
-        body = response.json()
-        assert response.status_code == 200
-        assert body["namespace"] == namespace
-        assert body["available"] is False
 
     def test_get_namespace_length_limits(self, client):
         response = self.get_namespace_length_limits(client)

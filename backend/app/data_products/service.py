@@ -18,6 +18,7 @@ from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLamb
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.core.email.send_mail import send_mail
 from app.core.namespace.validation import (
+    DataOutputNamespaceValidator,
     NamespaceLengthLimits,
     NamespaceSuggestion,
     NamespaceValidation,
@@ -73,6 +74,7 @@ from app.users.schema import User
 class DataProductService:
     def __init__(self):
         self.namespace_validator = NamespaceValidator(DataProductModel)
+        self.data_output_namespace_validator = DataOutputNamespaceValidator()
 
     def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
         data_product: DataProductGet = (
@@ -657,10 +659,15 @@ class DataProductService:
     ) -> NamespaceValidation:
         return self.namespace_validator.validate_namespace(namespace, db)
 
-    def data_product_namespace_suggestion(
-        self, name: str, db: Session
-    ) -> NamespaceSuggestion:
-        return self.namespace_validator.namespace_suggestion(name, db)
+    def data_product_namespace_suggestion(self, name: str) -> NamespaceSuggestion:
+        return self.namespace_validator.namespace_suggestion(name)
 
     def data_product_namespace_length_limits(self) -> NamespaceLengthLimits:
         return self.namespace_validator.namespace_length_limits()
+
+    def validate_data_output_namespace(
+        self, namespace: str, data_product_id: UUID, db: Session
+    ) -> NamespaceValidation:
+        return self.data_output_namespace_validator.validate_namespace(
+            namespace, db, data_product_id
+        )

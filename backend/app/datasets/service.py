@@ -318,7 +318,7 @@ class DatasetService:
     def dataset_namespace_suggestion(
         self, name: str, db: Session
     ) -> NamespaceSuggestion:
-        return self.namespace_validator.namespace_suggestion(name, db)
+        return self.namespace_validator.namespace_suggestion(name)
 
     def dataset_namespace_length_limits(self) -> NamespaceLengthLimits:
         return self.namespace_validator.namespace_length_limits()

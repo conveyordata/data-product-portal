@@ -201,17 +201,8 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {
-            form.setFields([
-                {
-                    name: 'namespace',
-                    value: namespaceSuggestion?.namespace,
-                    validating: isFetchingNamespaceSuggestion,
-                    errors:
-                        !namespaceSuggestion || namespaceSuggestion?.available
-                            ? []
-                            : [t('This namespace is already in use')],
-                },
-            ]);
+            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.validateFields(['namespace']);
         }
     }, [form, mode, canEditNamespace, namespaceSuggestion, isFetchingNamespaceSuggestion, t]);
 
@@ -269,10 +260,10 @@ export function DatasetForm({ mode, datasetId }: Props) {
                         validateFirst
                         validateDebounce={DEBOUNCE}
                         rules={[
-                            { required: true, message: t('Please input the namespace of the dataset') },
+                            { required: canEditNamespace, message: t('Please input the namespace of the dataset') },
                             {
                                 validator: async (_, value) => {
-                                    if (mode === 'edit') {
+                                    if (mode === 'edit' || (!canEditNamespace && !value)) {
                                         return Promise.resolve();
                                     }
 

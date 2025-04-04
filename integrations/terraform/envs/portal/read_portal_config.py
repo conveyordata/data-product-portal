@@ -89,7 +89,7 @@ def get_datasets():
 
         datasets_export[dataset.get("namespace")] = {
             "data_outputs": [
-                data_output_link.get("data_output").get("external_id")
+                data_output_link.get("data_output").get("namespace")
                 for data_output_link in dataset.get("data_output_links")
                 if data_output_link.get("status") == "approved"
             ],
@@ -119,11 +119,11 @@ def get_data_outputs():
         ).json()
         verify_response(platform_service)
 
-        data_outputs_export[data_output_info.get("external_id")] = {
+        data_outputs_export[data_output_info.get("namespace")] = {
             platform_service.get("service")
             .get("name")
             .lower(): data_output_info.get("configuration"),
-            "owner": data_output_info.get("owner").get("external_id"),
+            "owner": data_output_info.get("owner").get("namespace"),
         }
 
     with open(

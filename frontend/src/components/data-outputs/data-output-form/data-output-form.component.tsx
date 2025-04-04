@@ -1,3 +1,4 @@
+import { EditOutlined } from '@ant-design/icons';
 import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +9,7 @@ import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constant
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import {
     useGetDataOutputByIdQuery,
+    useGetDataOutputNamespaceLengthLimitsQuery,
     useRemoveDataOutputMutation,
     useUpdateDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
@@ -50,6 +52,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const canFillInForm = canEditForm;
     const isLoading = isFetchingInitialValues || isFetchingTags;
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+    const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
 
     const handleDeleteDataProduct = async () => {
         if (canEditForm && currentDataOutput) {
@@ -109,7 +112,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     useEffect(() => {
         if (currentDataOutput) {
             form.setFieldsValue({
-                owner_id: currentDataOutput.owner_id,
+                namespace: currentDataOutput.namespace,
                 name: currentDataOutput.name,
                 description: currentDataOutput.description,
                 tag_ids: currentDataOutput.tags.map((tag) => tag.id),
@@ -143,6 +146,21 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             >
                 <Input />
             </Form.Item>
+            <Form.Item<DataOutputCreateFormSchema>
+                label={t('Namespace')}
+                tooltip={t('The namespace of the data output')}
+                required
+            >
+                <Space.Compact direction="horizontal" className={styles.namespace}>
+                    <Form.Item name={'namespace'} noStyle>
+                        <Input disabled showCount maxLength={namespaceLengthLimits?.max_length} />
+                    </Form.Item>
+                    <Button disabled>
+                        <EditOutlined />
+                    </Button>
+                </Space.Compact>
+            </Form.Item>
+
             <Form.Item<DataOutputCreateFormSchema>
                 name={'description'}
                 label={t('Description')}

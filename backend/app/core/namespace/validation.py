@@ -1,10 +1,12 @@
 import re
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
-from sqlalchemy import exists, select
+from sqlalchemy import UUID, and_, exists, select
 from sqlalchemy.orm import Session
 
+from app.data_outputs.model import DataOutput
 from app.settings import settings
 
 
@@ -21,7 +23,6 @@ class NamespaceValidation(BaseModel):
 
 class NamespaceSuggestion(BaseModel):
     namespace: str
-    available: bool
 
 
 class NamespaceLengthLimits(BaseModel):
@@ -40,35 +41,31 @@ class NamespaceValidator:
         return namespace[: settings.NAMESPACE_MAX_LENGTH]
 
     def _is_unique(
-        self,
-        namespace: str,
-        db: Session,
+        self, namespace: str, db: Session, scope: Optional[UUID] = None
     ) -> bool:
         return not db.scalar(select(exists().where(self.model.namespace == namespace)))
 
     def namespace_suggestion(
         self,
         name: str,
-        db: Session,
     ) -> NamespaceSuggestion:
         namespace = self._namespace_from_name(name)
-        availability = self._is_unique(namespace, db)
 
         return NamespaceSuggestion(
             namespace=namespace,
-            available=availability,
         )
 
     def validate_namespace(
         self,
         namespace: str,
         db: Session,
+        scope: UUID = None,
     ) -> NamespaceValidation:
         if not (len(namespace) <= self.max_length):
             validity = NamespaceValidityType.INVALID_LENGTH
         elif not re.match(r"^[a-z0-9+=,.@_-]+$", namespace):
             validity = NamespaceValidityType.INVALID_CHARACTERS
-        elif not self._is_unique(namespace, db):
+        elif not self._is_unique(namespace, db, scope):
             validity = NamespaceValidityType.DUPLICATE_NAMESPACE
         else:
             validity = NamespaceValidityType.VALID
@@ -80,4 +77,32 @@ class NamespaceValidator:
     ) -> NamespaceLengthLimits:
         return NamespaceLengthLimits(
             max_length=self.max_length,
+        )
+
+
+class DataOutputNamespaceValidator(NamespaceValidator):
+    def __init__(self):
+        super().__init__(model=DataOutput)
+
+    def _is_unique(
+        self,
+        namespace: str,
+        db: Session,
+        data_product_id: Optional[UUID] = None,
+    ) -> bool:
+        if data_product_id is None:
+            raise ValueError(
+                "DataOutputNamespaceValidator requires a data product ID "
+                "to check uniqueness with the data product as scope"
+            )
+
+        return not db.scalar(
+            select(
+                exists().where(
+                    and_(
+                        DataOutput.namespace == namespace,
+                        DataOutput.owner_id == data_product_id,
+                    )
+                )
+            )
         )

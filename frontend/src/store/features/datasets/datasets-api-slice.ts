@@ -154,14 +154,14 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
             query: (namespace) => ({
                 url: ApiUrl.DatasetNamespaceValidation,
                 method: 'GET',
-                params: { namespace: namespace },
+                params: { namespace },
             }),
         }),
         getDatasetNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
             query: (name) => ({
                 url: ApiUrl.DatasetNamespaceSuggestion,
                 method: 'GET',
-                params: { name: name },
+                params: { name },
             }),
         }),
         getDatasetNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({

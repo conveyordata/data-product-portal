@@ -49,21 +49,19 @@ def get_data_products(db: Session = Depends(get_db_session)) -> list[DataProduct
 
 
 @router.get("/namespace_suggestion")
-async def get_data_product_namespace_suggestion(
-    name: str, db: Session = Depends(get_db_session)
-) -> NamespaceSuggestion:
-    return DataProductService().data_product_namespace_suggestion(name, db)
+def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
+    return DataProductService().data_product_namespace_suggestion(name)
 
 
 @router.get("/validate_namespace")
-async def validate_data_product_namespace(
+def validate_data_product_namespace(
     namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
     return DataProductService().validate_data_product_namespace(namespace, db)
 
 
 @router.get("/namespace_length_limits")
-async def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
+def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
     return DataProductService().data_product_namespace_length_limits()
 
 
@@ -229,6 +227,13 @@ def create_data_output(
     return DataOutputService().create_data_output(
         id, data_output, db, authenticated_user
     )
+
+
+@router.get("/{id}/data_output/validate_namespace")
+async def validate_data_output_namespace(
+    id: UUID, namespace: str, db: Session = Depends(get_db_session)
+) -> NamespaceValidation:
+    return DataProductService().validate_data_output_namespace(namespace, id, db)
 
 
 @router.put(

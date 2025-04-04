@@ -11,7 +11,6 @@ export interface NamespaceValidationResponse {
 
 export interface NamespaceSuggestionResponse {
     namespace: string;
-    available: boolean;
 }
 
 export interface NamespaceLengthLimitsResponse {
