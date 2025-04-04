@@ -17,7 +17,7 @@ export enum DataOutputStatus {
 
 export interface DataOutputContract {
     id: string;
-    external_id: string;
+    namespace: string;
     description: string;
     name: string;
     status: DataOutputStatus;

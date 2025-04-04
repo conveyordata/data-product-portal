@@ -14,7 +14,7 @@ class DataOutputFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     name = factory.Faker("word")
-    external_id = "external_id"
+    namespace = "namespace"
     description = factory.Faker("text", max_nb_chars=20)
     status = DataOutputStatus.ACTIVE.value
 

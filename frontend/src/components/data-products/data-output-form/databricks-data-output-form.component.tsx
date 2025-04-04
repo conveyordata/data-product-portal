@@ -7,11 +7,11 @@ import { DatabricksDataOutput, DataOutputConfiguration, DataOutputCreateFormSche
 type Props = {
     sourceAligned: boolean;
     identifiers: string[] | undefined;
-    external_id: string;
+    namespace: string;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
-export function DatabricksDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
+export function DatabricksDataOutputForm({ form, identifiers, namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
     const entireCatalog = Form.useWatch('entire_catalog', form);
     const catalogValue = Form.useWatch('catalog', form);
@@ -23,13 +23,13 @@ export function DatabricksDataOutputForm({ form, identifiers, external_id, sourc
     useEffect(() => {
         let catalogOptionsList = identifiers; //TODO
         if (!sourceAligned) {
-            catalogOptionsList = [external_id];
-            form.setFieldsValue({ catalog: external_id });
+            catalogOptionsList = [namespace];
+            form.setFieldsValue({ catalog: namespace });
         } else {
             form.setFieldsValue({ catalog: undefined });
         }
         catalogOptions.current = (catalogOptionsList ?? []).map((catalog) => ({ label: catalog, value: catalog }));
-    }, [external_id, form, identifiers, sourceAligned]);
+    }, [namespace, form, identifiers, sourceAligned]);
 
     useEffect(() => {
         let result = catalogValue;

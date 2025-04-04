@@ -5,11 +5,17 @@ import {
     DataProductSettingContract,
     DataProductSettingCreateRequest,
     DataProductSettingCreateResponse,
+    DataProductSettingScope,
 } from '@/types/data-product-setting';
 import {
     DataProductSettingValueCreateRequest,
     DataProductSettingValueCreateResponse,
 } from '@/types/data-product-setting/data-product-setting-create';
+import {
+    NamespaceLengthLimitsResponse,
+    NamespaceSuggestionResponse,
+    NamespaceValidationResponse,
+} from '@/types/namespace/namespace';
 
 export const dataProductSettingTags: string[] = [TagTypes.DataProductSetting];
 export const dataProductSettingsApiSlice = baseApiSlice
@@ -94,6 +100,29 @@ export const dataProductSettingsApiSlice = baseApiSlice
                 }),
                 invalidatesTags: [{ type: TagTypes.DataProductSetting as const, id: STATIC_TAG_ID.LIST }],
             }),
+            getDataProductSettingNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
+                query: (name) => ({
+                    url: ApiUrl.DataProductSettingNamespaceSuggestion,
+                    method: 'GET',
+                    params: { name },
+                }),
+            }),
+            getDataProductSettingNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
+                query: () => ({
+                    url: ApiUrl.DataProductSettingNamespaceLimits,
+                    method: 'GET',
+                }),
+            }),
+            validateDataProductSettingNamespace: builder.query<
+                NamespaceValidationResponse,
+                { namespace: string; scope: DataProductSettingScope }
+            >({
+                query: ({ namespace, scope }) => ({
+                    url: ApiUrl.DataProductSettingNamespaceValidation,
+                    method: 'GET',
+                    params: { namespace, scope },
+                }),
+            }),
         }),
         overrideExisting: false,
     });
@@ -107,4 +136,7 @@ export const {
     useUpdateDataProductSettingMutation,
     useCreateDataProductSettingMutation,
     useGetAllDataProductSettingsQuery,
+    useLazyValidateDataProductSettingNamespaceQuery,
+    useGetDataProductSettingNamespaceLengthLimitsQuery,
+    useLazyGetDataProductSettingNamespaceSuggestionQuery,
 } = dataProductSettingsApiSlice;

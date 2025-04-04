@@ -22,7 +22,7 @@ class DataProductGet(ORMModel):
     name: str
     description: str
     about: Optional[str]
-    external_id: str
+    namespace: str
     tags: list[Tag]
     status: DataProductStatus
     lifecycle: Optional[DataProductLifeCycle]

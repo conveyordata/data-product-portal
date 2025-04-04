@@ -6,7 +6,7 @@ from app.shared.schema import ORMModel
 
 class BaseDataProduct(ORMModel):
     name: str
-    external_id: str
+    namespace: str
     description: str
     type_id: UUID
     about: Optional[str] = None

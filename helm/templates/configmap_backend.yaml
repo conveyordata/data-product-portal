@@ -44,6 +44,7 @@ data:
   {{- if .Values.webhook.secret }}
   WEBHOOK_SECRET: {{ .Values.webhook.secret }}
   {{- end }}
+  NAMESPACE_MAX_LENGTH: {{ .Values.namespace_max_length }}
 kind: ConfigMap
 metadata:
   name: {{ include "data-product-portal.fullname" . }}

@@ -143,7 +143,7 @@ class OnlyWithProductAccess:
                 ).one()
             elif data_product_name:
                 data_product = db.scalars(
-                    select(DataProductModel).filter_by(external_id=data_product_name)
+                    select(DataProductModel).filter_by(namespace=data_product_name)
                 ).one()
             else:
                 raise HTTPException(

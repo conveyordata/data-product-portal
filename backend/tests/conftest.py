@@ -80,7 +80,7 @@ def default_data_product_payload() -> dict[str, Any]:
     return {
         "name": "Test Data Product",
         "description": "Test Description",
-        "external_id": "test-data_product",
+        "namespace": "test-data_product",
         "tags": [],
         "type_id": str(data_product_type.id),
         "memberships": [
@@ -100,7 +100,7 @@ def default_dataset_payload() -> dict[str, Any]:
     return {
         "name": "Test Dataset",
         "description": "Test Description",
-        "external_id": "test-dataset",
+        "namespace": "test-dataset",
         "tags": [],
         "owners": [str(user.id)],
         "access_type": DatasetAccessType.RESTRICTED,

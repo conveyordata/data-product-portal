@@ -27,7 +27,7 @@ def ensure_data_output_exists(data_output_id: UUID, db: Session) -> DataOutputSc
 class DataOutput(Base, BaseORM):
     __tablename__ = "data_outputs"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    external_id = Column(String)
+    namespace = Column(String)
     name = Column(String)
     description = Column(String)
     status: DataOutputStatus = Column(Enum(DataOutputStatus))

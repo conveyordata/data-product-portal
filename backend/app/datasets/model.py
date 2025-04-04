@@ -39,7 +39,7 @@ def ensure_dataset_exists(dataset_id: UUID, db: Session) -> DatasetSchema:
 class Dataset(Base, BaseORM):
     __tablename__ = "datasets"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    external_id = Column(String)
+    namespace = Column(String)
     name = Column(String)
     description = Column(String)
     about = Column(String)

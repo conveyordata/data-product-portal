@@ -5,6 +5,12 @@ from sqlalchemy.orm import Session
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization, DataProductResolver
+from app.core.namespace.validation import (
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidation,
+)
+from app.data_product_settings.enums import DataProductSettingScope
 from app.data_product_settings.schema import (
     DataProductSetting,
     DataProductSettingCreate,
@@ -40,6 +46,27 @@ def create_data_product_setting(
     db: Session = Depends(get_db_session),
 ):
     return DataProductSettingService().create_data_product_setting(setting, db)
+
+
+@router.get("/namespace_suggestion")
+def get_data_product_settings_namespace_suggestion(name: str) -> NamespaceSuggestion:
+    return DataProductSettingService().data_product_settings_namespace_suggestion(name)
+
+
+@router.get("/validate_namespace")
+def validate_data_product_settings_namespace(
+    namespace: str,
+    scope: DataProductSettingScope,
+    db: Session = Depends(get_db_session),
+) -> NamespaceValidation:
+    return DataProductSettingService().validate_data_product_settings_namespace(
+        namespace, scope, db
+    )
+
+
+@router.get("/namespace_length_limits")
+def get_data_product_settings_namespace_length_limits() -> NamespaceLengthLimits:
+    return DataProductSettingService().data_product_settings_namespace_length_limits()
 
 
 @router.put(

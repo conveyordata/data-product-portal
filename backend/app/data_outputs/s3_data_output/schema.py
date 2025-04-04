@@ -17,7 +17,7 @@ class S3DataOutput(BaseDataOutputConfiguration):
 
     def validate_configuration(self, data_product: BaseDataProduct):
         # TODO
-        # if not self.suffix.startswith(data_product.external_id):
+        # if not self.suffix.startswith(data_product.namespace):
         #     raise ValueError("Invalid suffix specified")
         pass
 

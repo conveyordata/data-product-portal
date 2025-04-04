@@ -37,7 +37,7 @@ export interface DatasetContract {
     data_output_links: DataOutputLink[];
     access_type: DatasetAccess;
     domain: DomainContract;
-    external_id: string;
+    namespace: string;
     data_product_settings: DataProductSettingValueContract[];
 }
 

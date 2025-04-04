@@ -26,7 +26,7 @@ function filterDataOutputs(data_outputs: DataOutputsGetContract, searchTerm: str
         data_outputs.filter(
             (data_output) =>
                 data_output?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                data_output?.external_id?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+                data_output?.namespace?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }

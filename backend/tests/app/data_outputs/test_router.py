@@ -20,7 +20,7 @@ def data_output_payload():
     return {
         "name": "Data Output Name",
         "description": "Updated Data Output Description",
-        "external_id": "Updated Data Output External ID",
+        "namespace": "namespace-updated",
         "sourceAligned": True,
         "configuration": {
             "bucket": "test",
@@ -44,7 +44,7 @@ def data_output_payload_not_owner():
     return {
         "name": "Data Output Name",
         "description": "Updated Data Output Description",
-        "external_id": "Updated Data Output External ID",
+        "namespace": "Updated Data Output External ID",
         "sourceAligned": True,
         "configuration": {
             "bucket": "test",
@@ -183,6 +183,19 @@ class TestDataOutputsRouter:
                     "type": "dataProductNode",
                 }
 
+    def test_get_namespace_suggestion_subsitution(self, client):
+        name = "test with spaces"
+        response = self.get_namespace_suggestion(client, name)
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["namespace"] == "test-with-spaces"
+
+    def test_get_namespace_length_limits(self, client):
+        response = self.get_namespace_length_limits(client)
+        assert response.status_code == 200
+        assert response.json()["max_length"] > 1
+
     @staticmethod
     def create_data_output(client, default_data_output_payload):
         return client.post(
@@ -206,3 +219,11 @@ class TestDataOutputsRouter:
     @staticmethod
     def update_data_output_status(client, status, data_output_id):
         return client.put(f"{ENDPOINT}/{data_output_id}/status", json=status)
+
+    @staticmethod
+    def get_namespace_suggestion(client, name):
+        return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
+
+    @staticmethod
+    def get_namespace_length_limits(client):
+        return client.get(f"{ENDPOINT}/namespace_length_limits")

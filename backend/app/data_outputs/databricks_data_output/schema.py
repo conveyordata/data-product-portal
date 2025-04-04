@@ -32,7 +32,7 @@ class DatabricksDataOutput(BaseDataOutputConfiguration):
 
     def validate_configuration(self, data_product: BaseDataProduct):
         # If product aligned
-        if not self.catalog.startswith(data_product.external_id):
+        if not self.catalog.startswith(data_product.namespace):
             raise ValueError("Invalid catalog specified")
 
     def on_create(self):

@@ -31,7 +31,7 @@ export interface DataProductContract {
     memberships: DataProductMembershipContract[];
     domain: DomainContract;
     domain_id: string;
-    external_id: string;
+    namespace: string;
     data_outputs: DataOutputsGetContract;
     data_product_settings: DataProductSettingValueContract[];
 }

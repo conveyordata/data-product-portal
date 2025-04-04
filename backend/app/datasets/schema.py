@@ -13,7 +13,7 @@ from app.users.schema import User
 
 class BaseDataset(ORMModel):
     name: str
-    external_id: str
+    namespace: str
     description: str
     access_type: DatasetAccessType
     about: Optional[str] = None
