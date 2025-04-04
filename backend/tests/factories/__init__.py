@@ -1,3 +1,8 @@
+from tests.factories.notification import (
+    NotificationFactory,
+)
+from tests.factories.notification_interaction import NotificationInteractionFactory
+
 from .. import test_session
 from .data_output import DataOutputFactory
 from .data_outputs_datasets import DataOutputDatasetAssociationFactory
@@ -49,6 +54,8 @@ factories = [
     TagFactory,
     UserFactory,
     ThemeSettingsFactory,
+    NotificationInteractionFactory,
+    NotificationFactory,
 ]
 
 for factory_model in factories:

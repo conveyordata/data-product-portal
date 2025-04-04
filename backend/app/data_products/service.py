@@ -43,7 +43,6 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
-from app.data_products_datasets.schema import DataProductDatasetAssociationCreate
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema import Dataset
@@ -54,6 +53,8 @@ from app.environments.model import Environment as EnvironmentModel
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.notification_interactions.service import NotificationInteractionService
+from app.notifications.notification_types import NotificationTypes
 from app.platforms.model import Platform as PlatformModel
 from app.settings import settings
 from app.tags.model import Tag as TagModel
@@ -160,27 +161,10 @@ class DataProductService:
                     role=membership.role,
                 )
             )
-        return data_product
 
-    def _update_datasets(
-        self,
-        data_product: DataProductCreate,
-        db: Session,
-        authenticated_user: User,
-        dataset_links: list[DataProductDatasetAssociationCreate] = [],
-    ) -> DataProductCreate:
-        if not dataset_links:
-            dataset_links = data_product.dataset_links
-        data_product.dataset_links = []
-        for dataset in dataset_links:
-            dataset_model = ensure_dataset_exists(dataset.dataset_id, db)
-            data_product.dataset_links.append(
-                DataProductDatasetModel(
-                    dataset_id=dataset_model.id,
-                    status=DataProductDatasetLinkStatus.PENDING_APPROVAL,
-                    requested_by_id=authenticated_user.id,
-                    requested_on=datetime.now(tz=pytz.utc),
-                )
+        if hasattr(data_product, "id") and data_product.id:
+            NotificationInteractionService().redirect_pending_requests(
+                db, data_product.id, NotificationTypes.DataProductMembershipNotification
             )
         return data_product
 
@@ -226,9 +210,26 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data Product {id} not found",
             )
+        for membership in data_product.memberships:
+            NotificationInteractionService().remove_notification_relations(
+                db, membership.id, NotificationTypes.DataProductMembershipNotification
+            )
+            db.refresh(membership)
         data_product.memberships = []
+        for dataset_link in data_product.dataset_links:
+            NotificationInteractionService().remove_notification_relations(
+                db, dataset_link.id, NotificationTypes.DataProductDatasetNotification
+            )
+            db.refresh(dataset_link)
         data_product.dataset_links = []
         for output in data_product.data_outputs:
+            for output_dataset_link in output.dataset_links:
+                NotificationInteractionService().remove_notification_relations(
+                    db,
+                    output_dataset_link.id,
+                    NotificationTypes.DataOutputDatasetNotification,
+                )
+                db.refresh(output_dataset_link)
             output.dataset_links = []
             db.delete(output)
         db.delete(data_product)
@@ -273,6 +274,16 @@ class DataProductService:
         for membership in memberships_to_remove:
             data_product.memberships.remove(membership)
 
+        db.flush()
+        db.refresh(data_product)
+
+        NotificationInteractionService().redirect_pending_requests(
+            db, data_product.id, NotificationTypes.DataProductMembershipNotification
+        )
+
+        db.flush()
+        db.refresh(data_product)
+
     def update_data_product(
         self, id: UUID, data_product: DataProductUpdate, db: Session
     ):
@@ -282,22 +293,6 @@ class DataProductService:
         for k, v in update_data_product.items():
             if k == "memberships":
                 self._update_memberships(current_data_product, v, db)
-            elif k == "dataset_links":
-                current_data_product.dataset_links = []
-                for dataset in v:
-                    dataset_model = ensure_dataset_exists(dataset.dataset_id, db)
-                    dataset = DataProductDatasetModel(
-                        dataset_id=dataset_model.id,
-                        data_product_id=current_data_product.id,
-                        status=dataset.status,
-                        requested_by=dataset.requested_by,
-                        requested_on=dataset.requested_on,
-                        approved_by=dataset.approved_by,
-                        approved_on=dataset.approved_on,
-                        denied_by=dataset.denied_by,
-                        denied_on=dataset.denied_on,
-                    )
-                    current_data_product.dataset_links.append(dataset)
             elif k == "tag_ids":
                 new_tags = self._get_tags(db, v)
                 current_data_product.tags = new_tags
@@ -398,6 +393,13 @@ class DataProductService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.dataset_links.append(dataset_link)
+        if dataset_link.status == DataProductDatasetLinkStatus.PENDING_APPROVAL:
+            db.flush()
+            db.refresh(dataset_link)
+            NotificationInteractionService().create_notification_relations(
+                db, dataset_link.id, NotificationTypes.DataProductDatasetNotification
+            )
+
         db.commit()
         db.refresh(data_product)
         RefreshInfrastructureLambda().trigger()
@@ -423,6 +425,13 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data product {id} not found",
             )
+
+        NotificationInteractionService().remove_notification_relations(
+            db,
+            data_product_dataset.id,
+            NotificationTypes.DataProductDatasetNotification,
+        )
+        db.refresh(data_product_dataset)
         data_product.dataset_links.remove(data_product_dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()
