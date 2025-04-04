@@ -1,13 +1,13 @@
-import { CheckOutlined, CloseOutlined, DownOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Badge, Button, Col, Dropdown, Flex, List, Menu, Row, Space, theme, Typography } from 'antd';
+import { CheckOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Badge, Button, Col, Flex, List, Typography } from 'antd';
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
-import { formatDate } from '@/utils/date.helper.ts';
 import { ListPaginationConfig } from '@/types/shared/lists';
-import { useTranslation } from 'react-i18next';
+import { formatDate } from '@/utils/date.helper.ts';
 
 type PendingActionItem = {
     key: string;

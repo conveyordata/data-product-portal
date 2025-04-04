@@ -1,5 +1,6 @@
-import { Tag, Col, Typography, Space, Flex, Badge } from 'antd';
+import { Badge, Col, Flex, Tag, Typography } from 'antd';
 import { useState } from 'react';
+
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
 
 interface SelectableTabProps {

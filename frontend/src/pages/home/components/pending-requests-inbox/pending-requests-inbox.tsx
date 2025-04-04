@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Col, Flex, Form, Input, Pagination, Row, Select, Space, theme, Typography } from 'antd';
+import { Badge, Col, Flex, Form, Pagination, theme, Typography } from 'antd';
 import { TFunction } from 'i18next';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -202,15 +202,15 @@ export function PendingRequestsInbox() {
         token: { colorSuccess, colorWarning, colorError },
     } = theme.useToken();
 
-    const colors: { [key in NotificationTypes]: string } = {
-        [NotificationTypes.DataProductDatasetNotification]: colorSuccess,
-        [NotificationTypes.DataOutputDatasetNotification]: colorWarning,
-        [NotificationTypes.DataProductMembershipNotification]: colorError,
-    };
-
     const { data: pendingActions, isFetching } = useGetPendingActionNotificationsQuery();
 
     const pendingItems = useMemo(() => {
+        const colors = {
+            [NotificationTypes.DataProductDatasetNotification]: colorSuccess,
+            [NotificationTypes.DataOutputDatasetNotification]: colorWarning,
+            [NotificationTypes.DataProductMembershipNotification]: colorError,
+        };
+
         const userNotifications = pendingActions?.map((userNotification) =>
             createPendingItem({ ...userNotification }, t, colors),
         );
@@ -225,7 +225,7 @@ export function PendingRequestsInbox() {
                 }
                 return new Date(a.date).getTime() - new Date(b.date).getTime();
             });
-    }, [pendingActions, t]);
+    }, [pendingActions, t, colorError, colorSuccess, colorWarning]);
 
     const { pagination, handlePaginationChange } = useListPagination({});
 
