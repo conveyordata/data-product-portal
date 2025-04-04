@@ -7,6 +7,7 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 .pagination {
     margin-left: auto;
     margin-top: auto;
+    margin-bottom: globals.$spacing-s;
 }
 
 .menu-item {

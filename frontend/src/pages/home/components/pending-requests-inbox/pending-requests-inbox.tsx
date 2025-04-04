@@ -1,6 +1,6 @@
 import { Badge, Col, Flex, Form, Pagination, theme, Typography } from 'antd';
 import { TFunction } from 'i18next';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
@@ -23,7 +23,7 @@ const createPendingItem = (
     t: TFunction,
     colors: { [key in NotificationTypes]: string },
 ) => {
-    let link, description, navigatePath, date, author, initials, message, color, origin;
+    let link, description, navigatePath, date, author, initials, message, color, origin, type;
 
     function getInitials(firstName: string, lastName: string) {
         return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
@@ -31,6 +31,7 @@ const createPendingItem = (
 
     switch (userNotification.notification.configuration_type) {
         case NotificationTypes.DataProductDatasetNotification:
+            type = NotificationTypes.DataProductDatasetNotification;
             link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
             description = (
                 <Typography.Text>
@@ -80,6 +81,7 @@ const createPendingItem = (
             break;
 
         case NotificationTypes.DataOutputDatasetNotification:
+            type = NotificationTypes.DataOutputDatasetNotification;
             link = createDataOutputIdPath(
                 userNotification.notification.reference.data_output_id,
                 userNotification.notification.reference.data_output.owner_id,
@@ -132,6 +134,7 @@ const createPendingItem = (
             break;
 
         case NotificationTypes.DataProductMembershipNotification:
+            type = NotificationTypes.DataProductMembershipNotification;
             link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
             description = (
                 <Typography.Text>
@@ -191,6 +194,7 @@ const createPendingItem = (
         message: message,
         color: color,
         origin: origin,
+        type: type,
     };
 };
 
@@ -201,14 +205,15 @@ export function PendingRequestsInbox() {
     const {
         token: { colorSuccess, colorWarning, colorError },
     } = theme.useToken();
+    const [selectedTypes, setSelectedTypes] = useState<Set<NotificationTypes>>(new Set());
 
     const { data: pendingActions, isFetching } = useGetPendingActionNotificationsQuery();
 
     const pendingItems = useMemo(() => {
         const colors = {
-            [NotificationTypes.DataProductDatasetNotification]: colorSuccess,
-            [NotificationTypes.DataOutputDatasetNotification]: colorWarning,
-            [NotificationTypes.DataProductMembershipNotification]: colorError,
+            [NotificationTypes.DataProductDatasetNotification]: colorWarning,
+            [NotificationTypes.DataOutputDatasetNotification]: colorError,
+            [NotificationTypes.DataProductMembershipNotification]: colorSuccess,
         };
 
         const userNotifications = pendingActions?.map((userNotification) =>
@@ -227,10 +232,23 @@ export function PendingRequestsInbox() {
             });
     }, [pendingActions, t, colorError, colorSuccess, colorWarning]);
 
-    const { pagination, handlePaginationChange } = useListPagination({});
+    const { pagination, handlePaginationChange, resetPagination } = useListPagination({});
 
     const onPaginationChange = (current: number, pageSize: number) => {
         handlePaginationChange({ current, pageSize });
+    };
+
+    const handleTabChange = (type: NotificationTypes, selected: boolean) => {
+        resetPagination();
+        setSelectedTypes((prev) => {
+            const newSet = new Set(prev);
+            if (selected) {
+                newSet.add(type);
+            } else {
+                newSet.delete(type);
+            }
+            return newSet;
+        });
     };
 
     if (pendingItems.length == 0 && isFetching == false) {
@@ -246,6 +264,9 @@ export function PendingRequestsInbox() {
         );
     }
 
+    const slicedPendingActionItems =
+        selectedTypes.size === 0 ? pendingItems : pendingItems.filter((item) => selectedTypes.has(item.type));
+
     return (
         <div className={styles.requestsInbox}>
             <div className={styles.sectionTitle}>
@@ -256,14 +277,32 @@ export function PendingRequestsInbox() {
                     </Typography.Title>
                 </Col>
                 <Col span={12} className={styles.topRightColumn}>
-                    <SelectableTab title="Team Requests" requestsCount={9} color={colorSuccess} />
-                    <SelectableTab title="Data Output" requestsCount={1} color={colorWarning} />
-                    <SelectableTab title="Data Products" requestsCount={4} color={colorError} />
+                    <SelectableTab
+                        type={NotificationTypes.DataProductMembershipNotification}
+                        title="Team Requests"
+                        requestsCount={9}
+                        color={colorSuccess}
+                        onSelectChange={handleTabChange}
+                    />
+                    <SelectableTab
+                        type={NotificationTypes.DataOutputDatasetNotification}
+                        title="Data Output"
+                        requestsCount={1}
+                        color={colorError}
+                        onSelectChange={handleTabChange}
+                    />
+                    <SelectableTab
+                        type={NotificationTypes.DataProductDatasetNotification}
+                        title="Data Products"
+                        requestsCount={4}
+                        color={colorWarning}
+                        onSelectChange={handleTabChange}
+                    />
                     <div className={styles.pagination}>
                         <Pagination
                             current={pagination.current}
                             pageSize={pagination.pageSize}
-                            total={pendingItems.length}
+                            total={slicedPendingActionItems.length}
                             onChange={onPaginationChange}
                             size="small"
                         />
@@ -273,7 +312,7 @@ export function PendingRequestsInbox() {
 
             <div className={styles.contentSecondary}>
                 <PendingRequestsList
-                    pendingActionItems={pendingItems}
+                    pendingActionItems={slicedPendingActionItems}
                     isFetching={isFetching}
                     pagination={pagination}
                 />

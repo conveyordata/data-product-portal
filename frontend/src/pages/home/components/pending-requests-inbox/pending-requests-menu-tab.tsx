@@ -2,16 +2,18 @@ import { Badge, Col, Flex, Tag, Typography } from 'antd';
 import { useState } from 'react';
 
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
+import { NotificationTypes } from '@/types/notifications/notification.contract';
 
 interface SelectableTabProps {
+    type: NotificationTypes;
     title: string;
     requestsCount: number;
     color: string;
-    defaultSelected?: boolean;
+    onSelectChange?: (type: NotificationTypes, selected: boolean) => void;
 }
 
-export const SelectableTab = ({ title, requestsCount, color, defaultSelected = false }: SelectableTabProps) => {
-    const [selected, setSelected] = useState(defaultSelected);
+export const SelectableTab = ({ type, title, requestsCount, color, onSelectChange }: SelectableTabProps) => {
+    const [selected, setSelected] = useState(false);
 
     return (
         <Col>
@@ -21,7 +23,10 @@ export const SelectableTab = ({ title, requestsCount, color, defaultSelected = f
                 }}
                 className={`${styles.menuItem} ${selected ? styles.menuItemActive : ''}`}
                 checked={selected}
-                onChange={(checked) => setSelected(checked)}
+                onChange={(checked) => {
+                    setSelected(checked);
+                    onSelectChange?.(type, checked);
+                }}
             >
                 <Flex vertical>
                     <Typography.Text strong style={{ whiteSpace: 'nowrap' }}>
