@@ -1,38 +1,48 @@
-import { Button, Checkbox, Form, Input, InputNumber, Select } from 'antd';
+import { EditOutlined } from '@ant-design/icons';
+import { Button, Checkbox, Form, Input, InputNumber, Select, Space } from 'antd';
 import { TFunction } from 'i18next';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useCreateDataProductSettingMutation,
+    useGetDataProductSettingNamespaceLengthLimitsQuery,
+    useLazyGetDataProductSettingNamespaceSuggestionQuery,
+    useLazyValidateDataProductSettingNamespaceQuery,
     useUpdateDataProductSettingMutation,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { DataProductSettingContract } from '@/types/data-product-setting';
-import { generateExternalIdFromName } from '@/utils/external-id.helper';
+import {
+    DataProductSettingContract,
+    DataProductSettingScope,
+    DataProductSettingType,
+} from '@/types/data-product-setting';
+import { ValidationType } from '@/types/namespace/namespace';
 
 import styles from './data-product-settings-table.module.scss';
 
 const { Option } = Select;
 
 type Mode = 'create' | 'edit';
-type Scope = 'dataproduct' | 'dataset';
-type SettingType = 'checkbox' | 'tags' | 'input';
+
+const DEBOUNCE = 500;
 
 interface CreateSettingModalProps {
     onClose: () => void;
     t: TFunction;
     isOpen: boolean;
     mode: Mode;
-    scope: Scope;
+    scope: DataProductSettingScope;
     initial?: DataProductSettingContract;
 }
 
 interface DataProductSettingValueForm {
     name: string;
+    namespace: string;
     id: string;
     tooltip: string;
-    type: 'checkbox' | 'tags' | 'input';
+    type: DataProductSettingType;
     default: boolean | string | string[];
     category: string;
     order: number;
@@ -45,7 +55,7 @@ interface SettingsFormText {
     submitButtonText: string;
 }
 
-const createText = (t: TFunction, scope: Scope, mode: Mode): SettingsFormText => {
+const createText = (t: TFunction, scope: DataProductSettingScope, mode: Mode): SettingsFormText => {
     if (mode === 'create') {
         if (scope === 'dataproduct') {
             return {
@@ -81,7 +91,7 @@ const createText = (t: TFunction, scope: Scope, mode: Mode): SettingsFormText =>
     }
 };
 
-const typeFormItem = (type: SettingType) => {
+const typeFormItem = (type: DataProductSettingType) => {
     switch (type) {
         case 'checkbox':
             return <Checkbox defaultChecked />;
@@ -107,7 +117,7 @@ const parseInitialDefaultValue = (initial: DataProductSettingContract) => {
     }
 };
 
-const initialDefaultValue = (type: SettingType) => {
+const initialDefaultValue = (type: DataProductSettingType) => {
     switch (type) {
         case 'checkbox':
             return true;
@@ -124,7 +134,13 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
     const [form] = Form.useForm();
     const [createDataProductSetting] = useCreateDataProductSettingMutation();
     const [updateDataProductSetting] = useUpdateDataProductSettingMutation();
-    const typeValue = Form.useWatch<SettingType>('type', form);
+    const typeValue = Form.useWatch<DataProductSettingType>('type', form);
+    const nameValue = Form.useWatch<string>('name', form);
+
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductSettingNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateDataProductSettingNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetDataProductSettingNamespaceLengthLimitsQuery();
+    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
     const initialValues = useMemo(() => {
         if (initial) {
@@ -148,12 +164,10 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
     const handleFinish = async (values: DataProductSettingValueForm) => {
         try {
             if (mode === 'create') {
-                console.log(values);
                 const newSetting: DataProductSettingContract = {
                     ...values,
                     default: values.default.toString(),
                     scope: scope,
-                    external_id: generateExternalIdFromName(values.name),
                     order: values.order,
                 };
                 await createDataProductSetting(newSetting);
@@ -173,6 +187,28 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
             dispatchMessage({ content: variableText.errorMessage, type: 'error' });
         }
     };
+
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFields([
+                {
+                    name: 'namespace',
+                    validating: true,
+                    errors: [],
+                },
+            ]);
+            fetchNamespaceDebounced(nameValue ?? '');
+        }
+    }, [mode, form, canEditNamespace, nameValue, fetchNamespaceDebounced]);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.validateFields(['namespace']);
+        }
+    }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
     return (
         <FormModal
@@ -215,7 +251,68 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 >
                     <Input />
                 </Form.Item>
+                <Form.Item label={t('Namespace')} required>
+                    <Space.Compact direction="horizontal" className={styles.namespace}>
+                        <Form.Item
+                            name={'namespace'}
+                            noStyle
+                            hasFeedback
+                            validateFirst
+                            validateDebounce={DEBOUNCE}
+                            rules={[
+                                {
+                                    required: canEditNamespace,
+                                    message: t('Please input the namespace of the setting'),
+                                },
+                                {
+                                    validator: async (_, value) => {
+                                        if (mode === 'edit' || (!canEditNamespace && !value)) {
+                                            return Promise.resolve();
+                                        }
 
+                                        const validationResponse = await validateNamespace({
+                                            namespace: value.toLowerCase(),
+                                            scope,
+                                        }).unwrap();
+
+                                        switch (validationResponse.validity) {
+                                            case ValidationType.VALID:
+                                                return Promise.resolve();
+                                            case ValidationType.INVALID_LENGTH:
+                                                return Promise.reject(new Error(t('Namespace is too long')));
+                                            case ValidationType.INVALID_CHARACTERS:
+                                                return Promise.reject(
+                                                    new Error(t('Namespace contains invalid characters')),
+                                                );
+                                            case ValidationType.DUPLICATE_NAMESPACE:
+                                                return Promise.reject(new Error(t('This namespace is already in use')));
+                                            default:
+                                                return Promise.reject(
+                                                    new Error(t('Unknown namespace validation error')),
+                                                );
+                                        }
+                                    },
+                                },
+                            ]}
+                        >
+                            <Input
+                                disabled={!canEditNamespace}
+                                showCount
+                                maxLength={namespaceLengthLimits?.max_length}
+                                onChange={(e) => {
+                                    const lowerCaseValue = e.target.value.toLowerCase();
+                                    form.setFieldValue('namespace', lowerCaseValue);
+                                }}
+                            />
+                        </Form.Item>
+                        <Button
+                            disabled={mode === 'edit'}
+                            onClick={() => setCanEditNamespace((prevState) => !prevState)}
+                        >
+                            <EditOutlined />
+                        </Button>
+                    </Space.Compact>
+                </Form.Item>
                 <Form.Item
                     name="tooltip"
                     label={t('Tooltip')}

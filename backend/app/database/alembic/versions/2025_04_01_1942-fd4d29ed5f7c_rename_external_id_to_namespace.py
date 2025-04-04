@@ -21,9 +21,11 @@ def upgrade() -> None:
     op.alter_column("data_products", "external_id", new_column_name="namespace")
     op.alter_column("datasets", "external_id", new_column_name="namespace")
     op.alter_column("data_outputs", "external_id", new_column_name="namespace")
+    op.alter_column("data_product_settings", "external_id", new_column_name="namespace")
 
 
 def downgrade() -> None:
     op.alter_column("data_products", "namespace", new_column_name="external_id")
     op.alter_column("datasets", "namespace", new_column_name="external_id")
     op.alter_column("data_outputs", "namespace", new_column_name="external_id")
+    op.alter_column("data_product_settings", "namespace", new_column_name="external_id")

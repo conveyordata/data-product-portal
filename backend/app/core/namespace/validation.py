@@ -7,10 +7,12 @@ from sqlalchemy import UUID, and_, exists, select
 from sqlalchemy.orm import Session
 
 from app.data_outputs.model import DataOutput
+from app.data_product_settings.enums import DataProductSettingScope
+from app.data_product_settings.model import DataProductSetting
 from app.settings import settings
 
 
-class NamespaceValidityType(Enum):
+class NamespaceValidityType(str, Enum):
     VALID = "VALID"
     INVALID_LENGTH = "INVALID_LENGTH"
     INVALID_CHARACTERS = "INVALID_CHARACTERS"
@@ -41,7 +43,10 @@ class NamespaceValidator:
         return namespace[: settings.NAMESPACE_MAX_LENGTH]
 
     def _is_unique(
-        self, namespace: str, db: Session, scope: Optional[UUID] = None
+        self,
+        namespace: str,
+        db: Session,
+        scope: Optional[UUID | DataProductSettingScope] = None,
     ) -> bool:
         return not db.scalar(select(exists().where(self.model.namespace == namespace)))
 
@@ -59,7 +64,7 @@ class NamespaceValidator:
         self,
         namespace: str,
         db: Session,
-        scope: UUID = None,
+        scope: Optional[UUID | Enum] = None,
     ) -> NamespaceValidation:
         if not (len(namespace) <= self.max_length):
             validity = NamespaceValidityType.INVALID_LENGTH
@@ -102,6 +107,34 @@ class DataOutputNamespaceValidator(NamespaceValidator):
                     and_(
                         DataOutput.namespace == namespace,
                         DataOutput.owner_id == data_product_id,
+                    )
+                )
+            )
+        )
+
+
+class DataProductSettingNamespaceValidator(NamespaceValidator):
+    def __init__(self):
+        super().__init__(model=DataProductSetting)
+
+    def _is_unique(
+        self,
+        namespace: str,
+        db: Session,
+        scope: Optional[DataProductSettingScope] = None,
+    ) -> bool:
+        if scope is None:
+            raise ValueError(
+                "DataProductSettingNamespaceValidator requires "
+                "a scope to determine uniqueness"
+            )
+
+        return not db.scalar(
+            select(
+                exists().where(
+                    and_(
+                        DataProductSetting.namespace == namespace,
+                        DataProductSetting.scope == scope,
                     )
                 )
             )

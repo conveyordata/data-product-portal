@@ -351,32 +351,26 @@ class TestDataProductsRouter:
         response = self.validate_namespace(client, namespace)
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.VALID.value
+        assert response.json()["validity"] == NamespaceValidityType.VALID
 
     def test_validate_namespace_invalid_characters(self, client):
         namespace = "!"
         response = self.validate_namespace(client, namespace)
         assert response.status_code == 200
-        assert (
-            response.json()["validity"]
-            == NamespaceValidityType.INVALID_CHARACTERS.value
-        )
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_CHARACTERS
 
     def test_validate_namespace_invalid_length(self, client):
         namespace = "a" * 256
         response = self.validate_namespace(client, namespace)
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH.value
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH
 
     def test_validate_namespace_duplicate(self, client):
         namespace = "test"
         DataProductFactory(namespace=namespace)
         response = self.validate_namespace(client, namespace)
         assert response.status_code == 200
-        assert (
-            response.json()["validity"]
-            == NamespaceValidityType.DUPLICATE_NAMESPACE.value
-        )
+        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
 
     def test_validate_data_output_namespace(self, client):
         namespace = "test"
@@ -386,7 +380,7 @@ class TestDataProductsRouter:
         )
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.VALID.value
+        assert response.json()["validity"] == NamespaceValidityType.VALID
 
     def test_validate_data_output_namespace_invalid_characters(self, client):
         namespace = "!"
@@ -396,10 +390,7 @@ class TestDataProductsRouter:
         )
 
         assert response.status_code == 200
-        assert (
-            response.json()["validity"]
-            == NamespaceValidityType.INVALID_CHARACTERS.value
-        )
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_CHARACTERS
 
     def test_validate_data_output_namespace_invalid_length(self, client):
         namespace = "a" * 256
@@ -409,7 +400,7 @@ class TestDataProductsRouter:
         )
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH.value
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH
 
     def test_validate_data_output_namespace_duplicate(self, client):
         namespace = "test"
@@ -420,10 +411,7 @@ class TestDataProductsRouter:
         )
 
         assert response.status_code == 200
-        assert (
-            response.json()["validity"]
-            == NamespaceValidityType.DUPLICATE_NAMESPACE.value
-        )
+        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
 
     def test_validate_data_output_namespace_duplicate_scoped_to_data_product(
         self, client
@@ -437,7 +425,7 @@ class TestDataProductsRouter:
         )
 
         assert response.status_code == 200
-        assert response.json()["validity"] == NamespaceValidityType.VALID.value
+        assert response.json()["validity"] == NamespaceValidityType.VALID
 
     @staticmethod
     def create_data_product(client, default_data_product_payload):

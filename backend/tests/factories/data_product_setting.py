@@ -8,7 +8,7 @@ class DataProductSettingFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = DataProductSetting
 
     id = factory.Faker("uuid4")
-    external_id = "external_id"
+    namespace = "namespace"
     tooltip = factory.Faker("text", max_nb_chars=20)
     name = factory.Faker("word")
     type = "checkbox"
