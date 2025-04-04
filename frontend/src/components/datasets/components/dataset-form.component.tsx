@@ -1,12 +1,12 @@
-import { EditOutlined } from '@ant-design/icons';
 import { Button, CheckboxOptionType, Form, FormProps, Input, Popconfirm, Radio, Select, Space, Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 
+import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
@@ -24,7 +24,6 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { DatasetAccess, DatasetCreateFormSchema, DatasetCreateRequest, DatasetUpdateRequest } from '@/types/dataset';
-import { ValidationType } from '@/types/namespace/namespace';
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { getDatasetOwnerIds, getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
@@ -221,6 +220,11 @@ export function DatasetForm({ mode, datasetId }: Props) {
         }
     }, [currentDataset, mode, form]);
 
+    const validateNamespaceCallback = useCallback(
+        (namespace: string) => validateNamespace(namespace).unwrap(),
+        [validateNamespace],
+    );
+
     return (
         <Form<DatasetCreateFormSchema>
             form={form}
@@ -247,61 +251,15 @@ export function DatasetForm({ mode, datasetId }: Props) {
             >
                 <Input />
             </Form.Item>
-            <Form.Item<DatasetCreateFormSchema>
-                label={t('Namespace')}
+            <NamespaceFormItem
+                form={form}
                 tooltip={t('The namespace of the dataset')}
-                required
-            >
-                <Space.Compact direction="horizontal" className={styles.namespace}>
-                    <Form.Item
-                        name={'namespace'}
-                        noStyle
-                        hasFeedback
-                        validateFirst
-                        validateDebounce={DEBOUNCE}
-                        rules={[
-                            { required: canEditNamespace, message: t('Please input the namespace of the dataset') },
-                            {
-                                validator: async (_, value) => {
-                                    if (mode === 'edit' || (!canEditNamespace && !value)) {
-                                        return Promise.resolve();
-                                    }
-
-                                    const validationResponse = await validateNamespace(value.toLowerCase()).unwrap();
-
-                                    switch (validationResponse.validity) {
-                                        case ValidationType.VALID:
-                                            return Promise.resolve();
-                                        case ValidationType.INVALID_LENGTH:
-                                            return Promise.reject(new Error(t('Namespace is too long')));
-                                        case ValidationType.INVALID_CHARACTERS:
-                                            return Promise.reject(
-                                                new Error(t('Namespace contains invalid characters')),
-                                            );
-                                        case ValidationType.DUPLICATE_NAMESPACE:
-                                            return Promise.reject(new Error(t('This namespace is already in use')));
-                                        default:
-                                            return Promise.reject(new Error(t('Unknown namespace validation error')));
-                                    }
-                                },
-                            },
-                        ]}
-                    >
-                        <Input
-                            disabled={!canEditNamespace}
-                            showCount
-                            maxLength={namespaceLengthLimits?.max_length}
-                            onChange={(e) => {
-                                const lowerCaseValue = e.target.value.toLowerCase();
-                                form.setFieldValue('namespace', lowerCaseValue);
-                            }}
-                        />
-                    </Form.Item>
-                    <Button disabled={mode === 'edit'} onClick={() => setCanEditNamespace((prevState) => !prevState)}>
-                        <EditOutlined />
-                    </Button>
-                </Space.Compact>
-            </Form.Item>
+                max_length={namespaceLengthLimits?.max_length}
+                editToggleDisabled={mode === 'edit'}
+                canEditNamespace={canEditNamespace}
+                toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                validateNamespace={validateNamespaceCallback}
+            />
             <Form.Item<DatasetCreateFormSchema>
                 name={'owners'}
                 label={t('Owners')}

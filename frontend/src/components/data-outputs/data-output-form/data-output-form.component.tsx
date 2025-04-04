@@ -1,10 +1,10 @@
-import { EditOutlined } from '@ant-design/icons';
 import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 
+import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import {
@@ -146,21 +146,13 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             >
                 <Input />
             </Form.Item>
-            <Form.Item<DataOutputCreateFormSchema>
-                label={t('Namespace')}
+            <NamespaceFormItem
+                form={form}
                 tooltip={t('The namespace of the data output')}
-                required
-            >
-                <Space.Compact direction="horizontal" className={styles.namespace}>
-                    <Form.Item name={'namespace'} noStyle>
-                        <Input disabled showCount maxLength={namespaceLengthLimits?.max_length} />
-                    </Form.Item>
-                    <Button disabled>
-                        <EditOutlined />
-                    </Button>
-                </Space.Compact>
-            </Form.Item>
-
+                max_length={namespaceLengthLimits?.max_length}
+                editToggleDisabled
+                canEditNamespace={false}
+            />
             <Form.Item<DataOutputCreateFormSchema>
                 name={'description'}
                 label={t('Description')}

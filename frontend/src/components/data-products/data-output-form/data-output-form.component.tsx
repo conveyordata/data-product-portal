@@ -1,12 +1,12 @@
-import { EditOutlined } from '@ant-design/icons';
-import { Button, Form, type FormInstance, type FormProps, Input, Select, Space } from 'antd';
+import { Form, type FormInstance, type FormProps, Input, Select, Space } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { type RefObject, useEffect, useMemo, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
+import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import {
@@ -24,7 +24,6 @@ import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import type { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
 import { DataOutputStatus } from '@/types/data-output/data-output.contract';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
-import { ValidationType } from '@/types/namespace/namespace';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { getDataPlatforms } from '@/utils/data-platforms';
@@ -221,6 +220,11 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         { label: t('Source aligned'), value: true },
     ];
 
+    const validateNamespaceCallback = useCallback(
+        (namespace: string) => validateNamespace({ dataProductId, namespace }).unwrap(),
+        [validateNamespace, dataProductId],
+    );
+
     return (
         <Form
             form={form}
@@ -247,67 +251,14 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             >
                 <Input />
             </Form.Item>
-            <Form.Item<DataOutputCreateFormSchema>
-                label={t('Namespace')}
+            <NamespaceFormItem
+                form={form}
                 tooltip={t('The namespace of the data output')}
-                required
-            >
-                <Space.Compact direction="horizontal" className={styles.namespace}>
-                    <Form.Item
-                        name={'namespace'}
-                        noStyle
-                        hasFeedback
-                        validateFirst
-                        validateDebounce={DEBOUNCE}
-                        rules={[
-                            {
-                                required: canEditNamespace,
-                                message: t('Please input the namespace of the data output'),
-                            },
-                            {
-                                validator: async (_, value) => {
-                                    if (!canEditNamespace && !value) {
-                                        return Promise.resolve();
-                                    }
-
-                                    const validationResponse = await validateNamespace({
-                                        dataProductId,
-                                        namespace: value.toLowerCase(),
-                                    }).unwrap();
-
-                                    switch (validationResponse.validity) {
-                                        case ValidationType.VALID:
-                                            return Promise.resolve();
-                                        case ValidationType.INVALID_LENGTH:
-                                            return Promise.reject(new Error(t('Namespace is too long')));
-                                        case ValidationType.INVALID_CHARACTERS:
-                                            return Promise.reject(
-                                                new Error(t('Namespace contains invalid characters')),
-                                            );
-                                        case ValidationType.DUPLICATE_NAMESPACE:
-                                            return Promise.reject(new Error(t('This namespace is already in use')));
-                                        default:
-                                            return Promise.reject(new Error(t('Unknown namespace validation error')));
-                                    }
-                                },
-                            },
-                        ]}
-                    >
-                        <Input
-                            disabled={!canEditNamespace}
-                            showCount
-                            maxLength={namespaceLengthLimits?.max_length}
-                            onChange={(e) => {
-                                const lowerCaseValue = e.target.value.toLowerCase();
-                                form.setFieldValue('namespace', lowerCaseValue);
-                            }}
-                        />
-                    </Form.Item>
-                    <Button onClick={() => setCanEditNamespace((prevState) => !prevState)}>
-                        <EditOutlined />
-                    </Button>
-                </Space.Compact>
-            </Form.Item>
+                max_length={namespaceLengthLimits?.max_length}
+                canEditNamespace={canEditNamespace}
+                toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                validateNamespace={validateNamespaceCallback}
+            />
             <Form.Item<DataOutputCreateFormSchema>
                 name={'description'}
                 label={t('Description')}

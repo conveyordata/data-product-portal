@@ -1,10 +1,10 @@
-import { EditOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input, InputNumber, Select, Space } from 'antd';
+import { Button, Checkbox, Form, Input, InputNumber, Select } from 'antd';
 import { TFunction } from 'i18next';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
+import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import {
     useCreateDataProductSettingMutation,
     useGetDataProductSettingNamespaceLengthLimitsQuery,
@@ -18,7 +18,6 @@ import {
     DataProductSettingScope,
     DataProductSettingType,
 } from '@/types/data-product-setting';
-import { ValidationType } from '@/types/namespace/namespace';
 
 import styles from './data-product-settings-table.module.scss';
 
@@ -210,6 +209,11 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
         }
     }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
+    const validateNamespaceCallback = useCallback(
+        (namespace: string) => validateNamespace({ namespace, scope }).unwrap(),
+        [validateNamespace, scope],
+    );
+
     return (
         <FormModal
             isOpen={isOpen}
@@ -251,68 +255,15 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 >
                     <Input />
                 </Form.Item>
-                <Form.Item label={t('Namespace')} required>
-                    <Space.Compact direction="horizontal" className={styles.namespace}>
-                        <Form.Item
-                            name={'namespace'}
-                            noStyle
-                            hasFeedback
-                            validateFirst
-                            validateDebounce={DEBOUNCE}
-                            rules={[
-                                {
-                                    required: canEditNamespace,
-                                    message: t('Please input the namespace of the setting'),
-                                },
-                                {
-                                    validator: async (_, value) => {
-                                        if (mode === 'edit' || (!canEditNamespace && !value)) {
-                                            return Promise.resolve();
-                                        }
-
-                                        const validationResponse = await validateNamespace({
-                                            namespace: value.toLowerCase(),
-                                            scope,
-                                        }).unwrap();
-
-                                        switch (validationResponse.validity) {
-                                            case ValidationType.VALID:
-                                                return Promise.resolve();
-                                            case ValidationType.INVALID_LENGTH:
-                                                return Promise.reject(new Error(t('Namespace is too long')));
-                                            case ValidationType.INVALID_CHARACTERS:
-                                                return Promise.reject(
-                                                    new Error(t('Namespace contains invalid characters')),
-                                                );
-                                            case ValidationType.DUPLICATE_NAMESPACE:
-                                                return Promise.reject(new Error(t('This namespace is already in use')));
-                                            default:
-                                                return Promise.reject(
-                                                    new Error(t('Unknown namespace validation error')),
-                                                );
-                                        }
-                                    },
-                                },
-                            ]}
-                        >
-                            <Input
-                                disabled={!canEditNamespace}
-                                showCount
-                                maxLength={namespaceLengthLimits?.max_length}
-                                onChange={(e) => {
-                                    const lowerCaseValue = e.target.value.toLowerCase();
-                                    form.setFieldValue('namespace', lowerCaseValue);
-                                }}
-                            />
-                        </Form.Item>
-                        <Button
-                            disabled={mode === 'edit'}
-                            onClick={() => setCanEditNamespace((prevState) => !prevState)}
-                        >
-                            <EditOutlined />
-                        </Button>
-                    </Space.Compact>
-                </Form.Item>
+                <NamespaceFormItem
+                    form={form}
+                    tooltip={t('The namespace of the setting')}
+                    max_length={namespaceLengthLimits?.max_length}
+                    editToggleDisabled={mode === 'edit'}
+                    canEditNamespace={canEditNamespace}
+                    toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                    validateNamespace={validateNamespaceCallback}
+                />
                 <Form.Item
                     name="tooltip"
                     label={t('Tooltip')}
