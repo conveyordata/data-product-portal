@@ -284,7 +284,17 @@ export function Notifications() {
     const items: MenuProps['items'] = [
         {
             type: 'group',
-            label: notificationItems?.length > 0 ? null : t('No notifications available'),
+            label: (
+                <div className={styles.notificationTitlebar}>
+                    <Flex>
+                        <Typography.Title level={4}>Notifications</Typography.Title>{' '}
+                        <Badge count={3} color="gray" size="small" />
+                    </Flex>
+                    <Button type="link" value="pendingRequests">
+                        <strong>View actions</strong> <Badge count={92} color="gray" size="small" />
+                    </Button>
+                </div>
+            ),
             children: notificationItems,
         },
     ];

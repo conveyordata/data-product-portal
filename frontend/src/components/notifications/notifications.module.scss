@@ -44,3 +44,10 @@
     width: 100%;
     display: block;
 }
+
+.notification-titlebar {
+    display: flex;
+    justify-content: space-between;
+    margin-left: globals.$spacing-s;
+    border-bottom: 2px solid globals.$border-color-secondary;
+}
