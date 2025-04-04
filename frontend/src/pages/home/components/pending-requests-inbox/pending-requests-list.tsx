@@ -1,4 +1,4 @@
-import { DownOutlined, UserOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, DownOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Button, Col, Dropdown, Flex, List, Menu, Row, Space, theme, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router';
@@ -18,6 +18,7 @@ type PendingActionItem = {
     initials: string;
     message: ReactNode;
     color: string;
+    origin: ReactNode;
 };
 
 type DataProductListProps = {
@@ -80,9 +81,10 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                                     </Col>
                                     <div className={styles.rightColumn}>
                                         <Flex justify="end">
-                                            <div className={styles.typeIndicator}>
-                                                <Typography.Text type="secondary">
-                                                    {t('Originating from: Data Product')}
+                                            <div className={styles.topContainer}>
+                                                <div className={styles.lineDiv} />
+                                                <Typography.Text className={styles.typeIndicator} type="secondary">
+                                                    {t('Originating from:')} {item.origin}
                                                 </Typography.Text>{' '}
                                             </div>
                                             <div
@@ -92,8 +94,8 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                                                     boxShadow: `0 -4px 0 0 ${item.color}`,
                                                 }}
                                             >
-                                                <Button type={'link'}>{t('Accept')}</Button>
-                                                <Button type={'link'}>{t('Deny')}</Button>
+                                                <Button className={styles.resolveButton} icon={<CheckOutlined />} />
+                                                <Button className={styles.resolveButton} icon={<CloseOutlined />} />
                                             </div>
                                         </Flex>
                                     </div>

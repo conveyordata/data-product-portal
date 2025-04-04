@@ -5,7 +5,31 @@ $landing-banner-height: 260px;
 $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgba(3, 79, 165, 0.1) 45.13%);
 
 .pagination {
+    margin-left: auto;
+    margin-top: auto;
+}
+
+.menu-item {
+    padding: globals.$spacing-xs;
+    border-radius: 0;
+    background-color: globals.$quaternary-color-fill;
+}
+
+.menu-item-active {
+    background-color: globals.$border-color-secondary;
+
+    &:hover {
+        background-color: globals.$border-color-secondary;
+    }
+}
+
+.top-right-column {
+    display: flex;
+    margin-right: auto;
     padding-bottom: globals.$spacing-m;
+    width: 100%;
+    margin-left: globals.$spacing-xxl;
+    padding-right: globals.$spacing-xxl;
 }
 
 .requests-info {
@@ -39,7 +63,6 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: globals.$spacing-regular;
 }
 
 .ant-list .ant-list-pagination {
@@ -106,7 +129,9 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 }
 
 .color-mark {
+    display: flex;
     border-top: 1px solid globals.$border-color-secondary;
+    background-color: globals.$secondary-color-fill;
 }
 
 .flex {
@@ -132,7 +157,25 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 }
 
 .type-indicator {
+    white-space: nowrap;
+    border-right: globals.$spacing-s solid globals.$quaternary-color-fill;
     height: 100%;
     background-color: globals.$secondary-color-fill;
     padding: globals.$spacing-xs;
+}
+
+.resolve-button {
+    border-radius: 0;
+}
+
+.top-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-left: globals.$spacing-xxl;
+}
+
+.line-div {
+    box-shadow: 0 +2px 0 0 globals.$border-color-secondary;
+    width: 100%;
 }
