@@ -41,11 +41,26 @@ def get_data_products():
     verify_response(data_products)
 
     data_products_export = {}
+    data_products_settings = {}
     for data_product_info in data_products:
         data_product = session.get(
             f"{API_HOST}/api/data_products/{data_product_info.get('id')}"
         ).json()
         verify_response(data_product)
+
+        if data_product.get("data_product_settings") != []:
+            data_products_settings[data_product.get("external_id")] = {"services": {}}
+
+            for setting in data_product.get("data_product_settings"):
+                data_products_settings[data_product.get("external_id")][
+                    "services"
+                ].update(
+                    {
+                        setting.get("data_product_setting").get("external_id"): [
+                            setting.get("value")
+                        ]
+                    }
+                )
 
         datasets = []
         for dataset_link in data_product.get("dataset_links"):
@@ -71,6 +86,12 @@ def get_data_products():
     ) as f:
         yaml.dump(data_products_export, f, allow_unicode=True)
 
+    with open(
+        os.path.join(FOLDER, "config", "data_product_glossary", "create_users.yaml"),
+        "w",
+    ) as f:
+        yaml.dump(data_products_settings, f, allow_unicode=True)
+
 
 def get_datasets():
     datasets = session.get(f"{API_HOST}/api/datasets").json()
@@ -89,7 +110,9 @@ def get_datasets():
 
         datasets_export[dataset.get("external_id")] = {
             "data_outputs": [
-                data_output_link.get("data_output").get("external_id")
+                f"{data_output_link.get("data_output")
+                   .get("owner").get("external_id")}/"
+                f"{data_output_link.get("data_output").get("external_id")}"
                 for data_output_link in dataset.get("data_output_links")
                 if data_output_link.get("status") == "approved"
             ],
@@ -119,11 +142,15 @@ def get_data_outputs():
         ).json()
         verify_response(platform_service)
 
-        data_outputs_export[data_output_info.get("external_id")] = {
+        data_outputs_export[
+            f"{data_output_info.get("owner").get("external_id")}/"
+            f"{data_output_info.get("external_id")}"
+        ] = {
             platform_service.get("service")
             .get("name")
             .lower(): data_output_info.get("configuration"),
             "owner": data_output_info.get("owner").get("external_id"),
+            "name": data_output_info.get("external_id"),
         }
 
     with open(
