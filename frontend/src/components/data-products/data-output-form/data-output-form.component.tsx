@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import {
     useCreateDataOutputMutation,
@@ -225,8 +225,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         <Form
             form={form}
             ref={formRef}
-            labelCol={FORM_GRID_WRAPPER_COLS}
-            wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
             onFinish={onSubmit}
             onFinishFailed={onSubmitFailed}

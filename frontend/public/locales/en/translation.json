@@ -526,5 +526,6 @@
     "Unknown namespace validation error": "Unknown namespace validation error",
     "Please input the namespace of the dataset": "Please input the namespace of the dataset",
     "This namespace is already in use": "This namespace is already in use",
-    "Please input the namespace of the setting": "Please input the namespace of the setting"
+    "Please input the namespace of the setting": "Please input the namespace of the setting",
+    "Please input the namespace of the data output": "Please input the namespace of the data output"
 }
