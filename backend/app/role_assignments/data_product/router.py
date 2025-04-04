@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.database.database import get_db_session
-from app.role_assignments import tasks
+from app.role_assignments.data_product import tasks
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     DecideRoleAssignment,
@@ -15,8 +15,8 @@ from app.role_assignments.data_product.schema import (
     UpdateRoleAssignment,
 )
 from app.role_assignments.data_product.service import RoleAssignmentService
+from app.role_assignments.data_product.tasks import AuthAssignment
 from app.role_assignments.enums import DecisionStatus
-from app.role_assignments.tasks import AuthAssignment
 from app.users.model import User
 
 router = APIRouter(prefix="/data_product")
