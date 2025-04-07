@@ -1,3 +1,7 @@
+---
+sidebar_position: -1
+---
+
 # Welcome to the Data Product Portal Docs
 
 **Data Product Portal** is an open-source platform for discovering, organizing, and managing data products within your organization.
@@ -19,7 +23,7 @@ Whether you're a data engineer, product owner, or business analyst, this portal 
 
 ## 📦 Open Source & Contributions
 
-This project is developed at [Conveyor](https://www.conveyordata.io) and is fully open-source.
+This project is developed at [Conveyor](https://conveyordata.com) and is fully open-source.
 
 👉 [GitHub Repo](https://github.com/conveyordata/data-product-portal)
 
@@ -29,4 +33,4 @@ We welcome contributions, ideas, and bug reports!
 
 ## 🚀 Ready to get started?
 
-Head to [Quickstart](./getting-started/quickstart.md) to run the portal locally in minutes!
+Head to [Quickstart](./getting-started/quickstart) to run the portal locally in minutes!

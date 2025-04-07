@@ -1,23 +1,131 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
-
-.heroBanner {
+/* General Layout */
+.hero {
   padding: 4rem 0;
+  background-color: var(--ifm-hero-background-color);
   text-align: center;
-  position: relative;
-  overflow: hidden;
+  color: var(--ifm-hero-text-color);
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+.heroTitle {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.heroSubtitle {
+  font-size: 1.5rem;
+  color: var(--ifm-color-secondary-darkest);
+  margin: 0 auto 2rem;
+  max-width: 700px;
+  line-height: 1.6;
 }
 
 .buttons {
+  margin-top: 2rem;
+}
+
+.cta {
+  background-color: var(--ifm-color-primary);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+
+.cta:hover {
+  background-color: #2b6cb0;
+}
+
+/* Sections */
+.section {
+  padding: 4rem 1rem;
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.sectionText {
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+  color: var(--ifm-color-content-secondary);
+}
+
+
+/* Features Grid */
+.features {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.featureCard {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  padding: 2rem;
+  width: 300px;
+  text-align: left;
+  transition: transform 0.2s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+}
+
+.featureTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c5282;
+  margin-bottom: 0.5rem;
+}
+
+.featureDescription {
+  color: #4a5568;
+  font-size: 0.95rem;
+}
+
+/* Links Grid */
+.linkGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.linkCard {
+  background: #f7fafc;
+  border-radius: 0.5rem;
+  padding: 1rem 1.5rem;
+  color: #2b6cb0;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid #cbd5e0;
+  transition: background-color 0.3s ease;
+}
+
+.linkCard:hover {
+  background-color: #e2e8f0;
+}
+
+/* GitHub Stats */
+.statsGrid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.statsGrid img {
+  max-height: 28px;
 }
