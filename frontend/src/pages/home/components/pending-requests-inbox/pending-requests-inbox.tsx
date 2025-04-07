@@ -294,7 +294,7 @@ export function PendingRequestsInbox() {
             <div className={styles.sectionTitle}>
                 <Col span={12}>
                     <Typography.Title level={3}>
-                        {t('Pending Requests')}{' '}
+                        {t('Pending Requests')}
                         <Badge count={pendingItems.length} color="gray" className={styles.requestsInfo} />
                     </Typography.Title>
                 </Col>
