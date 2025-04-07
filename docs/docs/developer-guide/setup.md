@@ -36,7 +36,7 @@ See the [frontend](./frontend) for frontend-specific instructions.
 
 The Data Product Portal ships with default integrations for many modern platform technologies.
 
-For details, check the integrations folder.
+For details, check the [integrations](./integrations) documentation.
 
 These integrations demonstrate how to translate the portal configuration into real implementations for your data platform.
 
