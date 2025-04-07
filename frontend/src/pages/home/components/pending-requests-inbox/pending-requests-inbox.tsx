@@ -1,15 +1,13 @@
-import { Badge, Col, Flex, Form, Pagination, theme, Typography } from 'antd';
+import { CheckCircleOutlined } from '@ant-design/icons';
+import { Badge, Col, Empty, Flex, Pagination, theme, Typography } from 'antd';
 import { TFunction } from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
 
-import { Searchbar } from '@/components/form';
 import { useListPagination } from '@/hooks/use-list-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useGetPendingActionNotificationsQuery } from '@/store/features/notifications/notifications-api-slice';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 import { NotificationModel, NotificationTypes } from '@/types/notifications/notification.contract';
@@ -200,8 +198,6 @@ const createPendingItem = (
 
 export function PendingRequestsInbox() {
     const { t } = useTranslation();
-    const currentUser = useSelector(selectCurrentUser);
-    const [searchForm] = Form.useForm();
     const {
         token: { colorSuccess, colorWarning, colorError },
     } = theme.useToken();
@@ -277,14 +273,19 @@ export function PendingRequestsInbox() {
 
     if (pendingItems.length == 0 && isFetching == false) {
         return (
-            <Flex className={styles.backgroundImage}>
-                <Typography.Title level={2}>
-                    {t('Welcome back, {{name}}', { name: currentUser?.first_name })}
+            <div className={styles.requestsInbox}>
+                <Typography.Title level={1} className={styles.welcomeContent}>
+                    {t('Welcome back')}
                 </Typography.Title>
-                <div className={styles.searchBar}>
-                    <Searchbar form={searchForm} placeholder={t('Search for data products and datasets by name')} />
-                </div>
-            </Flex>
+                <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={
+                        <Typography.Text>
+                            <CheckCircleOutlined /> {t(`You have no requests to handle.`)}
+                        </Typography.Text>
+                    }
+                ></Empty>
+            </div>
         );
     }
 
