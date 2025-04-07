@@ -305,7 +305,7 @@ export function Notifications() {
                         <Badge count={notificationItemCount} color="gray" size="small" />
                     </Flex>
                     <Button type="link" value="pendingRequests" onClick={handleRedirectHome}>
-                        <strong>View requests</strong> <Badge count={92} color="gray" size="small" />
+                        <strong> {t('View requests')}</strong> <Badge count={92} color="gray" size="small" />
                     </Button>
                 </div>
             ),

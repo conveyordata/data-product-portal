@@ -302,21 +302,21 @@ export function PendingRequestsInbox() {
                     <Flex className={styles.filterBar} gap={0}>
                         <SelectableTab
                             type={NotificationTypes.DataProductMembershipNotification}
-                            title="Team Request"
+                            title={t('Team Request')}
                             requestsCount={itemCountByType[NotificationTypes.DataProductMembershipNotification]}
                             color={colorError}
                             onSelectChange={handleTabChange}
                         />
                         <SelectableTab
                             type={NotificationTypes.DataOutputDatasetNotification}
-                            title="Data Output"
+                            title={t('Data Output')}
                             requestsCount={itemCountByType[NotificationTypes.DataOutputDatasetNotification]}
                             color={colorInfo}
                             onSelectChange={handleTabChange}
                         />
                         <SelectableTab
                             type={NotificationTypes.DataProductDatasetNotification}
-                            title="Data Product"
+                            title={t('Data Product')}
                             requestsCount={itemCountByType[NotificationTypes.DataProductDatasetNotification]}
                             color={colorWarning}
                             onSelectChange={handleTabChange}
