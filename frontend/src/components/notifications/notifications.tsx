@@ -281,6 +281,16 @@ export function Notifications() {
         return notificationCreatedItems ?? [];
     }, [notifications, createItem, navigate, t]);
 
+    const notificationItemCount = useMemo(() => {
+        let count = 0;
+        notificationItems.forEach((item) => {
+            if (item) {
+                count++;
+            }
+        });
+        return count;
+    }, [notificationItems]);
+
     const items: MenuProps['items'] = [
         {
             type: 'group',
@@ -288,7 +298,7 @@ export function Notifications() {
                 <div className={styles.notificationTitlebar}>
                     <Flex>
                         <Typography.Title level={4}>Notifications</Typography.Title>{' '}
-                        <Badge count={3} color="gray" size="small" />
+                        <Badge count={notificationItemCount} color="gray" size="small" />
                     </Flex>
                     <Button type="link" value="pendingRequests">
                         <strong>View actions</strong> <Badge count={92} color="gray" size="small" />
