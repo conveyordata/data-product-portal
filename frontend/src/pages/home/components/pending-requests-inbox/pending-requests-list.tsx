@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
+import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
 import { ListPaginationConfig } from '@/types/shared/lists';
@@ -37,7 +38,7 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
     if (isFetching) return <LoadingSpinner />;
 
     if (!pendingActionItems || pendingActionItems.length === 0) {
-        return;
+        return <EmptyList description={t(`No requests available.`)} />;
     }
 
     const handleItemClick = (navigatePath: string) => {
