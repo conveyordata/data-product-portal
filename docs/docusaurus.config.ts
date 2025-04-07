@@ -6,7 +6,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Data Product Portal',
-  tagline: 'User documentation for integrators, admins and users',
+  tagline: 'Open-source data product marketplace and process tool',
   favicon: 'img/favicon.svg',
 
   // Set the production url of your site here
@@ -74,13 +74,7 @@ const config: Config = {
         src: 'img/favicon.svg',
       },
       items: [
-        {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Tutorial',
-        },
-        {to: '/blog', label: 'Blog', position: 'left'},
+        {to: '/docs/intro', label: 'Docs', position: 'left'},
         {
           href: 'https://github.com/conveyordata/data-product-portal',
           label: 'GitHub',
@@ -94,46 +88,23 @@ const config: Config = {
         {
           title: 'Docs',
           items: [
-            {
-              label: 'Tutorial',
-              to: '/docs/intro',
-            },
+            { label: 'Getting Started', to: '/docs/getting-started/quickstart' },
+            { label: 'User Guide', to: '/docs/user-guide/overview' },
           ],
         },
         {
           title: 'Community',
           items: [
-            // {
-            //   label: 'Stack Overflow',
-            //   href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-            // },
-            // {
-            //   label: 'Discord',
-            //   href: 'https://discordapp.com/invite/docusaurus',
-            // },
-            // {
-            //   label: 'X',
-            //   href: 'https://x.com/docusaurus',
-            // },
-            {
-              label: "Slack",
-              href: "test"
-            }
+            { label: 'GitHub Issues', href: 'https://github.com/conveyordata/data-product-portal/issues' },
           ],
         },
-        // {
-        //   title: 'More',
-        //   items: [
-        //     {
-        //       label: 'Blog',
-        //       to: '/blog',
-        //     },
-        //     {
-        //       label: 'GitHub',
-        //       href: 'https://github.com/facebook/docusaurus',
-        //     },
-        //   ],
-        // },
+        {
+          title: 'More',
+          items: [
+            { label: 'Changelog', to: '/docs/changelog' },
+            { label: 'Roadmap', to: '/docs/roadmap' },
+          ],
+        },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Dataminded. Built with Docusaurus.`,
     },
