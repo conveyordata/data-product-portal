@@ -1,6 +1,6 @@
 import { Badge, Col, Flex, Form, Pagination, theme, Typography } from 'antd';
 import { TFunction } from 'i18next';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
@@ -222,17 +222,10 @@ export function PendingRequestsInbox() {
         if (!userNotifications) {
             return [];
         }
-        return userNotifications
-            .filter((item) => item !== null)
-            .sort((a, b) => {
-                if (!a?.date || !b?.date) {
-                    return 0;
-                }
-                return new Date(a.date).getTime() - new Date(b.date).getTime();
-            });
+        return userNotifications.filter((item) => item !== null);
     }, [pendingActions, t, colorError, colorSuccess, colorWarning]);
 
-    const { pagination, handlePaginationChange, resetPagination } = useListPagination({});
+    const { pagination, handlePaginationChange, resetPagination, handleTotalChange } = useListPagination({});
 
     const onPaginationChange = (current: number, pageSize: number) => {
         handlePaginationChange({ current, pageSize });
@@ -251,6 +244,21 @@ export function PendingRequestsInbox() {
         });
     };
 
+    const slicedPendingActionItems = useMemo(() => {
+        return (
+            selectedTypes.size === 0 ? pendingItems : pendingItems.filter((item) => selectedTypes.has(item.type))
+        ).sort((a, b) => {
+            if (!a?.date || !b?.date) {
+                return 0;
+            }
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
+    }, [pendingItems, selectedTypes]);
+
+    useEffect(() => {
+        handleTotalChange(slicedPendingActionItems.length);
+    }, [slicedPendingActionItems.length, handleTotalChange]);
+
     if (pendingItems.length == 0 && isFetching == false) {
         return (
             <Flex className={styles.backgroundImage}>
@@ -263,9 +271,6 @@ export function PendingRequestsInbox() {
             </Flex>
         );
     }
-
-    const slicedPendingActionItems =
-        selectedTypes.size === 0 ? pendingItems : pendingItems.filter((item) => selectedTypes.has(item.type));
 
     return (
         <div className={styles.requestsInbox}>
