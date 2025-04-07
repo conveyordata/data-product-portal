@@ -64,31 +64,29 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                         >
                             <div className={styles.userBadge}>
                                 <Badge showZero={false} color={item.color} size="default">
-                                    <Avatar style={{ backgroundColor: item.color }} className={styles.avatar}>
+                                    <Avatar style={{ backgroundColor: item.color }}>
                                         {item.initials || <UserOutlined />}
                                     </Avatar>
                                 </Badge>
                             </div>
                             <Flex vertical={true} className={styles.flex} align="flex-start">
-                                <Flex className={styles.itemContainer}>
-                                    <Col span={COL_SPAN} className={styles.leftColumn}>
-                                        <div className={styles.topRow}>
+                                <div className={styles.itemContainer}>
+                                    <Col span={COL_SPAN}>
+                                        <Flex vertical>
                                             <Typography.Text>
-                                                <strong className={styles.descriptionCore}>{item.author}</strong>,{' '}
-                                                {item.description}
+                                                <strong>{item.author}</strong>, {item.description}
                                             </Typography.Text>
-                                            <Typography.Text type="secondary">{formattedDate}</Typography.Text>{' '}
-                                        </div>
+                                            <Typography.Text type="secondary">{formattedDate}</Typography.Text>
+                                        </Flex>
                                     </Col>
                                     <div className={styles.rightColumn}>
                                         <Flex justify="end">
-                                            <div className={styles.topContainer}>
+                                            <Flex>
                                                 <Typography.Text className={styles.typeIndicator} type="secondary">
                                                     {t('Originating from:')} {item.origin}
                                                 </Typography.Text>{' '}
-                                            </div>
+                                            </Flex>
                                             <div
-                                                className={styles.colorMark}
                                                 style={{
                                                     borderColor: item.color,
                                                     boxShadow: `0 -4px 0 0 ${item.color}`,
@@ -99,7 +97,7 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                                             </div>
                                         </Flex>
                                     </div>
-                                </Flex>
+                                </div>
                                 <Typography.Text>{item.message}</Typography.Text>
                             </Flex>
                         </List.Item>

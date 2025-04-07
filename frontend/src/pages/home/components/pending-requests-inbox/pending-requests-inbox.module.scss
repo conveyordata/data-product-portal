@@ -46,17 +46,6 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     padding-right: globals.$spacing-xxl;
 }
 
-.requests-info {
-    margin-left: globals.$spacing-s;
-    padding-bottom: globals.$spacing-xs;
-}
-
-.list-item-top-info {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-}
-
 .list-item {
     position: relative;
     background-color: globals.$quaternary-color-fill;
@@ -83,26 +72,6 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     display: none !important;
 }
 
-.action-options {
-    background: transparent !important;
-    border: none !important;
-}
-
-.background-image {
-    background: url('~@/assets/background/landing-background-green.svg') no-repeat center center;
-    background-size: cover;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    flex: 0.4;
-    min-height: $landing-banner-height;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    gap: globals.$spacing-regular;
-}
-
 .requests-inbox {
     margin-left: globals.$spacing-xxl;
     margin-right: globals.$spacing-xxl;
@@ -110,32 +79,9 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     padding-top: globals.$spacing-s;
 }
 
-.search-bar {
-    width: 50%;
-}
-
 .welcome-content {
     display: flex;
     justify-content: center;
-}
-
-.description-core {
-    color: globals.$color-text;
-}
-
-.top-row {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    padding-left: 0;
-}
-
-.left-column {
-    width: 100%;
-    display: flex;
-    justify-content: baseline;
-    gap: globals.$spacing-m;
 }
 
 .right-column {
@@ -147,12 +93,6 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     height: 100%;
 }
 
-.color-mark {
-    display: flex;
-    border-top: 1px solid globals.$border-color-secondary;
-    background-color: globals.$secondary-color-fill;
-}
-
 .flex {
     width: 100%;
 }
@@ -162,17 +102,9 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 }
 
 .user-badge {
-    display: flex;
-    justify-content: start;
     padding: globals.$spacing-m;
-    padding-top: 0;
+    padding-top: globals.$spacing-s;
     padding-bottom: globals.$spacing-xl;
-}
-
-.second-section {
-    height: 100%;
-    width: 100%;
-    margin-left: globals.$spacing-xxl;
 }
 
 .type-indicator {
@@ -186,11 +118,4 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 
 .resolve-button {
     border-radius: 0;
-}
-
-.top-container {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-left: globals.$spacing-xxl;
 }
