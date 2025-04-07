@@ -6,6 +6,11 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization, DataProductResolver
+from app.core.namespace.validation import (
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidation,
+)
 from app.data_outputs.schema import DataOutputCreateRequest
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs.service import DataOutputService
@@ -41,6 +46,23 @@ router = APIRouter(prefix="/data_products", tags=["data_products"])
 @router.get("")
 def get_data_products(db: Session = Depends(get_db_session)) -> list[DataProductsGet]:
     return DataProductService().get_data_products(db)
+
+
+@router.get("/namespace_suggestion")
+def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
+    return DataProductService().data_product_namespace_suggestion(name)
+
+
+@router.get("/validate_namespace")
+def validate_data_product_namespace(
+    namespace: str, db: Session = Depends(get_db_session)
+) -> NamespaceValidation:
+    return DataProductService().validate_data_product_namespace(namespace, db)
+
+
+@router.get("/namespace_length_limits")
+def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
+    return DataProductService().data_product_namespace_length_limits()
 
 
 @router.get("/user/{user_id}")
@@ -205,6 +227,13 @@ def create_data_output(
     return DataOutputService().create_data_output(
         id, data_output, db, authenticated_user
     )
+
+
+@router.get("/{id}/data_output/validate_namespace")
+async def validate_data_output_namespace(
+    id: UUID, namespace: str, db: Session = Depends(get_db_session)
+) -> NamespaceValidation:
+    return DataProductService().validate_data_output_namespace(namespace, id, db)
 
 
 @router.put(

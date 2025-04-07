@@ -1,16 +1,21 @@
 import { Button, CheckboxOptionType, Form, FormProps, Input, Popconfirm, Radio, Select, Space, Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
+import { useDebouncedCallback } from 'use-debounce';
 
+import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
+    useGetDatasetNamespaceLengthLimitsQuery,
+    useLazyGetDatasetNamespaceSuggestionQuery,
+    useLazyValidateDatasetNamespaceQuery,
     useRemoveDatasetMutation,
     useUpdateDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
@@ -22,7 +27,6 @@ import { DatasetAccess, DatasetCreateFormSchema, DatasetCreateRequest, DatasetUp
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { getDatasetOwnerIds, getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
 import styles from './dataset-form.module.scss';
@@ -33,6 +37,8 @@ type Props = {
 };
 
 const { TextArea } = Input;
+
+const DEBOUNCE = 500;
 
 const getAccessTypeOptions = (t: TFunction) => {
     return [
@@ -77,8 +83,15 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
     const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
+    const [fetchNamespace, { data: namespaceSuggestion, isFetching: isFetchingNamespaceSuggestion }] =
+        useLazyGetDatasetNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateDatasetNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetDatasetNamespaceLengthLimitsQuery();
+
     const [form] = Form.useForm<DatasetCreateFormSchema>();
     const datasetNameValue = Form.useWatch('name', form);
+
+    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
     const canEditForm = Boolean(
         mode === 'edit' &&
@@ -100,7 +113,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
             if (mode === 'create') {
                 const request: DatasetCreateRequest = {
                     name: values.name,
-                    external_id: values.external_id,
+                    namespace: values.namespace,
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
@@ -120,7 +133,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
                 const request: DatasetUpdateRequest = {
                     name: values.name,
-                    external_id: values.external_id,
+                    namespace: values.namespace,
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids,
@@ -170,16 +183,32 @@ export function DatasetForm({ mode, datasetId }: Props) {
         }
     };
 
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
+
     useEffect(() => {
-        if (mode === 'create') {
-            form.setFieldsValue({ external_id: generateExternalIdFromName(datasetNameValue ?? '') });
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFields([
+                {
+                    name: 'namespace',
+                    validating: true,
+                    errors: [],
+                },
+            ]);
+            fetchNamespaceDebounced(datasetNameValue ?? '');
         }
-    }, [datasetNameValue, form, mode]);
+    }, [mode, form, canEditNamespace, datasetNameValue, fetchNamespaceDebounced]);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.validateFields(['namespace']);
+        }
+    }, [form, mode, canEditNamespace, namespaceSuggestion, isFetchingNamespaceSuggestion, t]);
 
     useEffect(() => {
         if (currentDataset && mode === 'edit') {
             form.setFieldsValue({
-                external_id: currentDataset.external_id,
+                namespace: currentDataset.namespace,
                 name: currentDataset.name,
                 description: currentDataset.description,
                 access_type: currentDataset.access_type,
@@ -190,6 +219,11 @@ export function DatasetForm({ mode, datasetId }: Props) {
             });
         }
     }, [currentDataset, mode, form]);
+
+    const validateNamespaceCallback = useCallback(
+        (namespace: string) => validateNamespace(namespace).unwrap(),
+        [validateNamespace],
+    );
 
     return (
         <Form<DatasetCreateFormSchema>
@@ -217,15 +251,15 @@ export function DatasetForm({ mode, datasetId }: Props) {
             >
                 <Input />
             </Form.Item>
-            {/*Disabled field that will render an external ID everytime the name changes*/}
-            <Form.Item<DatasetCreateFormSchema>
-                required
-                name={'external_id'}
-                label={t('External ID')}
-                tooltip={t('The external ID of the dataset')}
-            >
-                <Input disabled />
-            </Form.Item>
+            <NamespaceFormItem
+                form={form}
+                tooltip={t('The namespace of the dataset')}
+                max_length={namespaceLengthLimits?.max_length}
+                editToggleDisabled={mode === 'edit'}
+                canEditNamespace={canEditNamespace}
+                toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                validateNamespace={validateNamespaceCallback}
+            />
             <Form.Item<DatasetCreateFormSchema>
                 name={'owners'}
                 label={t('Owners')}

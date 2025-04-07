@@ -86,7 +86,7 @@
     "The name of your data product": "The name of your data product",
     "Please input the name of the data product": "Please input the name of the data product",
     "External ID": "External ID",
-    "The external ID of the data product": "The external ID of the data product",
+    "The namespace of the data product": "The namespace of the data product",
     "Owners": "Owners",
     "The owners of the data product": "The owners of the data product",
     "Please select at least one owner for the data product": "Please select at least one owner for the data product",
@@ -110,7 +110,7 @@
     "Failed to delete dataset, please try again later": "Failed to delete dataset, please try again later",
     "The name of your dataset": "The name of your dataset",
     "Please input the name of the dataset": "Please input the name of the dataset",
-    "The external ID of the dataset": "The external ID of the dataset",
+    "The namespace of the dataset": "The namespace of the dataset",
     "The owners of the dataset": "The owners of the dataset",
     "Please select at least one owner for the dataset": "Please select at least one owner for the dataset",
     "Please select the domain of the dataset": "Please select the domain of the dataset",
@@ -518,5 +518,11 @@
     "Restricted datasets are visible to everyone but require permission to use": "Restricted datasets are visible to everyone but require permission to use",
     "Private datasets are only visible to owners and users with access": "Private datasets are only visible to owners and users with access",
     "Private": "Private",
-    "{{Type}} access": "{{Type}} access"
+    "{{Type}} access": "{{Type}} access",
+    "Namespace": "Namespace",
+    "Namespace is too long": "Namespace is too long",
+    "Namespace contains invalid characters": "Namespace contains invalid characters",
+    "Unknown namespace validation error": "Unknown namespace validation error",
+    "This namespace is already in use": "This namespace is already in use",
+    "Please input a namespace": "Please input a namespace"
 }

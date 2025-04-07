@@ -11,7 +11,7 @@ from app.tags.schema import Tag
 class DataOutputCreateRequest(ORMModel):
     name: str
     description: str
-    external_id: str
+    namespace: str
 
     platform_id: UUID
     service_id: UUID
@@ -39,7 +39,7 @@ class DataOutput(ORMModel):
     id: UUID
     name: str
     description: str
-    external_id: str
+    namespace: str
     platform_id: UUID
     service_id: UUID
     owner: BaseDataProductGet
