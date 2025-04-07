@@ -119,3 +119,8 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 .resolve-button {
     border-radius: 0;
 }
+
+.requests-info {
+    padding-left: globals.$spacing-xs;
+    padding-bottom: globals.$spacing-xs;
+}
