@@ -1,5 +1,5 @@
-import { DataOutputDatasetContract } from '../data-output-dataset';
-import { DataProductDatasetContract } from '../data-product-dataset';
+import { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '../data-output-dataset';
+import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '../data-product-dataset';
 import { DataProductMembershipContract } from '../data-product-membership';
 import { UserContract } from '../users';
 
@@ -46,3 +46,8 @@ export interface DataProductMembershipNotification {
     reference_id: string;
     reference: DataProductMembershipContract;
 }
+
+export type ActionResolveRequest =
+    | { type: NotificationTypes.DataOutputDatasetNotification; request: DataOutputDatasetLinkRequest }
+    | { type: NotificationTypes.DataProductDatasetNotification; request: DataProductDatasetLinkRequest }
+    | { type: NotificationTypes.DataProductMembershipNotification; request: string };

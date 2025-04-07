@@ -7,9 +7,7 @@ import { useNavigate } from 'react-router';
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
-import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
-import { NotificationTypes } from '@/types/notifications/notification.contract';
+import { ActionResolveRequest } from '@/types/notifications/notification.contract';
 import { ListPaginationConfig } from '@/types/shared/lists';
 import { formatDate } from '@/utils/date.helper.ts';
 
@@ -23,20 +21,15 @@ type PendingActionItem = {
     message: ReactNode;
     color: string;
     origin: ReactNode;
-    request: Request;
+    request: ActionResolveRequest;
 };
-
-type Request =
-    | { type: NotificationTypes.DataOutputDatasetNotification; request: DataOutputDatasetLinkRequest }
-    | { type: NotificationTypes.DataProductDatasetNotification; request: DataProductDatasetLinkRequest }
-    | { type: NotificationTypes.DataProductMembershipNotification; request: string };
 
 type DataProductListProps = {
     isFetching: boolean;
     pendingActionItems: PendingActionItem[];
     pagination: ListPaginationConfig;
-    onAccept: (request: Request) => void;
-    onReject: (request: Request) => void;
+    onAccept: (request: ActionResolveRequest) => void;
+    onReject: (request: ActionResolveRequest) => void;
 };
 
 const COL_SPAN = 12;

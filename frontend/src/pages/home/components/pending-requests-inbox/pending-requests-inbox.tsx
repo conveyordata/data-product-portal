@@ -1,16 +1,35 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
 import { Badge, Col, Empty, Flex, Pagination, theme, Typography } from 'antd';
 import { TFunction } from 'i18next';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import { useListPagination } from '@/hooks/use-list-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+import {
+    useApproveDataOutputLinkMutation,
+    useRejectDataOutputLinkMutation,
+} from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
+import {
+    useDenyMembershipAccessMutation,
+    useGrantMembershipAccessMutation,
+} from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
+import {
+    useApproveDataProductLinkMutation,
+    useRejectDataProductLinkMutation,
+} from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useGetPendingActionNotificationsQuery } from '@/store/features/notifications/notifications-api-slice';
+import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
+import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { NotificationModel, NotificationTypes } from '@/types/notifications/notification.contract';
+import {
+    ActionResolveRequest,
+    NotificationModel,
+    NotificationTypes,
+} from '@/types/notifications/notification.contract';
 
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
@@ -226,6 +245,109 @@ export function PendingRequestsInbox() {
 
     const { data: pendingActions, isFetching } = useGetPendingActionNotificationsQuery();
 
+    const [approveDataProductLink] = useApproveDataProductLinkMutation();
+    const [rejectDataProductLink] = useRejectDataProductLinkMutation();
+    const [approveDataOutputLink] = useApproveDataOutputLinkMutation();
+    const [rejectDataOutputLink] = useRejectDataOutputLinkMutation();
+    const [grantMembershipAccess] = useGrantMembershipAccessMutation();
+    const [denyMembershipAccess] = useDenyMembershipAccessMutation();
+
+    const handleAcceptDataProductDatasetLink = useCallback(
+        async (request: DataProductDatasetLinkRequest) => {
+            try {
+                await approveDataProductLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset request has been successfully approved'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to approve data product dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [approveDataProductLink, t],
+    );
+
+    const handleRejectDataProductDatasetLink = useCallback(
+        async (request: DataProductDatasetLinkRequest) => {
+            try {
+                await rejectDataProductLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset access request has been successfully rejected'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to reject data product dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [rejectDataProductLink, t],
+    );
+
+    const handleAcceptDataOutputDatasetLink = useCallback(
+        async (request: DataOutputDatasetLinkRequest) => {
+            try {
+                await approveDataOutputLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset request has been successfully approved'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to approve data output dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [approveDataOutputLink, t],
+    );
+
+    const handleRejectDataOutputDatasetLink = useCallback(
+        async (request: DataOutputDatasetLinkRequest) => {
+            try {
+                await rejectDataOutputLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset access request has been successfully rejected'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to reject data output dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [rejectDataOutputLink, t],
+    );
+
+    const handleGrantAccessToDataProduct = useCallback(
+        async (membershipId: string) => {
+            try {
+                await grantMembershipAccess({ membershipId }).unwrap();
+                dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
+            }
+        },
+        [grantMembershipAccess, t],
+    );
+
+    const handleDenyAccessToDataProduct = useCallback(
+        async (membershipId: string) => {
+            try {
+                await denyMembershipAccess({ membershipId }).unwrap();
+                dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
+            }
+        },
+        [denyMembershipAccess, t],
+    );
+
     const pendingItems = useMemo(() => {
         const colors = {
             [NotificationTypes.DataProductDatasetNotification]: colorWarning,
@@ -310,11 +432,31 @@ export function PendingRequestsInbox() {
         );
     }
 
-    const handleAccept = (request: unknown) => {
-        alert(JSON.stringify(request, null, 2));
+    const handleAccept = (request: ActionResolveRequest) => {
+        switch (request.type) {
+            case NotificationTypes.DataProductDatasetNotification:
+                handleAcceptDataProductDatasetLink(request.request);
+                break;
+            case NotificationTypes.DataOutputDatasetNotification:
+                handleAcceptDataOutputDatasetLink(request.request);
+                break;
+            case NotificationTypes.DataProductMembershipNotification:
+                handleGrantAccessToDataProduct(request.request);
+                break;
+        }
     };
-    const handleDeny = (request: unknown) => {
-        alert(JSON.stringify(request, null, 2));
+    const handleDeny = (request: ActionResolveRequest) => {
+        switch (request.type) {
+            case NotificationTypes.DataProductDatasetNotification:
+                handleRejectDataProductDatasetLink(request.request);
+                break;
+            case NotificationTypes.DataOutputDatasetNotification:
+                handleRejectDataOutputDatasetLink(request.request);
+                break;
+            case NotificationTypes.DataProductMembershipNotification:
+                handleDenyAccessToDataProduct(request.request);
+                break;
+        }
     };
 
     return (
