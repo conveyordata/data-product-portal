@@ -7,7 +7,10 @@ import { Link, type NavigateFunction, useNavigate } from 'react-router';
 
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { useGetNotificationsQuery } from '@/store/features/notifications/notifications-api-slice';
+import {
+    useGetNotificationsQuery,
+    useGetPendingActionNotificationsQuery,
+} from '@/store/features/notifications/notifications-api-slice';
 import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { DataProductMembershipStatus } from '@/types/data-product-membership';
@@ -25,6 +28,7 @@ export function Notifications() {
     const navigate = useNavigate();
 
     const { data: notifications } = useGetNotificationsQuery();
+    const { data: pendingActions } = useGetPendingActionNotificationsQuery();
 
     const createItem = useCallback((userNotification: NotificationModel, navigate: NavigateFunction, t: TFunction) => {
         let link, description, navigatePath;
@@ -285,15 +289,9 @@ export function Notifications() {
         return notificationCreatedItems ?? [];
     }, [notifications, createItem, navigate, t]);
 
-    const notificationItemCount = useMemo(() => {
-        let count = 0;
-        notificationItems.forEach((item) => {
-            if (item) {
-                count++;
-            }
-        });
-        return count;
-    }, [notificationItems]);
+    const notificationItemCount = useMemo(() => notificationItems?.length || 0, [notificationItems]);
+
+    const requestItemCount = useMemo(() => pendingActions?.length || 0, [pendingActions]);
 
     const items: MenuProps['items'] = [
         {
@@ -304,9 +302,12 @@ export function Notifications() {
                         <Typography.Title level={4}>Notifications</Typography.Title>{' '}
                         <Badge count={notificationItemCount} color="gray" size="small" />
                     </Flex>
-                    <Button type="link" value="pendingRequests" onClick={handleRedirectHome}>
-                        <strong> {t('View requests')}</strong> <Badge count={92} color="gray" size="small" />
-                    </Button>
+                    {requestItemCount != 0 && (
+                        <Button type="link" value="pendingRequests" onClick={handleRedirectHome}>
+                            <strong> {t('View requests')}</strong>
+                            <Badge count={requestItemCount} color="gray" size="small" />
+                        </Button>
+                    )}
                 </div>
             ),
             children: notificationItems,
@@ -316,7 +317,7 @@ export function Notifications() {
     return (
         <Flex>
             <Badge
-                count={notificationItems?.length}
+                count={notificationItemCount + requestItemCount}
                 showZero={false}
                 color={colorPrimary}
                 style={{ fontSize: 10 }}
