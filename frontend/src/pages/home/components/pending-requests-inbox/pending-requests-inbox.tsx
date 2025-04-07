@@ -21,7 +21,7 @@ const createPendingItem = (
     t: TFunction,
     colors: { [key in NotificationTypes]: string },
 ) => {
-    let link, description, navigatePath, date, author, initials, message, color, origin, type;
+    let link, description, navigatePath, date, author, initials, message, color, origin, type, request;
 
     function getInitials(firstName: string, lastName: string) {
         return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
@@ -76,6 +76,14 @@ const createPendingItem = (
                 userNotification.notification.reference.requested_by.first_name,
                 userNotification.notification.reference.requested_by.last_name,
             );
+            request = {
+                type: NotificationTypes.DataProductDatasetNotification as NotificationTypes.DataProductDatasetNotification,
+                request: {
+                    id: userNotification.notification.reference.id,
+                    data_product_id: userNotification.notification.reference.data_product_id,
+                    dataset_id: userNotification.notification.reference.dataset_id,
+                },
+            };
             break;
 
         case NotificationTypes.DataOutputDatasetNotification:
@@ -129,6 +137,14 @@ const createPendingItem = (
                 userNotification.notification.reference.requested_by.first_name,
                 userNotification.notification.reference.requested_by.last_name,
             );
+            request = {
+                type: NotificationTypes.DataOutputDatasetNotification as NotificationTypes.DataOutputDatasetNotification,
+                request: {
+                    id: userNotification.notification.reference.id,
+                    data_output_id: userNotification.notification.reference.data_output_id,
+                    dataset_id: userNotification.notification.reference.dataset_id,
+                },
+            };
             break;
 
         case NotificationTypes.DataProductMembershipNotification:
@@ -176,6 +192,10 @@ const createPendingItem = (
                 userNotification.notification.reference.user.first_name,
                 userNotification.notification.reference.user.last_name,
             );
+            request = {
+                type: NotificationTypes.DataProductMembershipNotification as NotificationTypes.DataProductMembershipNotification,
+                request: userNotification.notification.reference.id,
+            };
             break;
 
         default:
@@ -193,6 +213,7 @@ const createPendingItem = (
         color: color,
         origin: origin,
         type: type,
+        request: request,
     };
 };
 
@@ -289,6 +310,13 @@ export function PendingRequestsInbox() {
         );
     }
 
+    const handleAccept = (request: unknown) => {
+        alert(JSON.stringify(request, null, 2));
+    };
+    const handleDeny = (request: unknown) => {
+        alert(JSON.stringify(request, null, 2));
+    };
+
     return (
         <div className={styles.requestsInbox}>
             <div className={styles.sectionTitle}>
@@ -340,6 +368,12 @@ export function PendingRequestsInbox() {
                     pendingActionItems={slicedPendingActionItems}
                     isFetching={isFetching}
                     pagination={pagination}
+                    onAccept={(item) => {
+                        handleAccept(item);
+                    }}
+                    onReject={(item) => {
+                        handleDeny(item);
+                    }}
                 />
             </div>
         </div>
