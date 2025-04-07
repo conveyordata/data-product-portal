@@ -3,8 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization, DataProductResolver
+from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -36,7 +35,7 @@ def get_data_products_settings(
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],
@@ -75,7 +74,7 @@ def get_data_product_settings_namespace_length_limits() -> NamespaceLengthLimits
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],
@@ -94,7 +93,7 @@ def update_data_product_setting(
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],

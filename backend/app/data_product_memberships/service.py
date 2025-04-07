@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Sequence
 from uuid import UUID
 
 import emailgen
@@ -267,3 +268,6 @@ class DataProductMembershipService:
             .order_by(asc(DataProductMembership.requested_on))
             .all()
         )
+
+    def list_memberships(self, db: Session) -> Sequence[DataProductMembership]:
+        return db.query(DataProductMembership).all()

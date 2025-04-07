@@ -83,7 +83,7 @@ class RoleService:
         and only create the missing ones.
         """
 
-        if self._find_prototype(Scope.GLOBAL, Prototype.ADMIN) is None:
+        if self.find_prototype(Scope.GLOBAL, Prototype.ADMIN) is None:
             model = RoleModel(
                 id=ADMIN_UUID,
                 scope=Scope.GLOBAL,
@@ -95,7 +95,7 @@ class RoleService:
             self.db.add(model)
             self.db.commit()
 
-        if self._find_prototype(Scope.GLOBAL, Prototype.EVERYONE) is None:
+        if self.find_prototype(Scope.GLOBAL, Prototype.EVERYONE) is None:
             self.create_role(
                 CreateRole(
                     name="everyone",
@@ -111,7 +111,7 @@ class RoleService:
                 prototype=Prototype.EVERYONE,
             )
 
-        if self._find_prototype(Scope.DATASET, Prototype.OWNER) is None:
+        if self.find_prototype(Scope.DATASET, Prototype.OWNER) is None:
             self.create_role(
                 CreateRole(
                     name="owner",
@@ -136,7 +136,7 @@ class RoleService:
                 prototype=Prototype.OWNER,
             )
 
-        if self._find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER) is None:
+        if self.find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER) is None:
             self.create_role(
                 CreateRole(
                     name="owner",
@@ -163,7 +163,7 @@ class RoleService:
                 prototype=Prototype.OWNER,
             )
 
-    def _find_prototype(self, scope: Scope, prototype: Prototype) -> Optional[Role]:
+    def find_prototype(self, scope: Scope, prototype: Prototype) -> Optional[Role]:
         return self.db.scalars(
             select(RoleModel)
             .where(RoleModel.scope == scope)

@@ -4,8 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization, DataProductResolver
+from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -100,7 +99,7 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
     dependencies=[
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT, DataProductResolver
+                Action.GLOBAL__CREATE_DATAPRODUCT, DataProductResolver
             )
         )
     ],
@@ -159,9 +158,7 @@ def create_data_product(
     dependencies=[
         Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
         Depends(
-            Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__DELETE, DataProductResolver
-            )
+            Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
         ),
     ],
 )
@@ -186,7 +183,7 @@ def remove_data_product(
         Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
+                Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
             )
         ),
     ],
@@ -212,7 +209,7 @@ def update_data_product(
     dependencies=[
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__CREATE_DATA_OUTPUT,
                 DataProductResolver,
             )
         )
@@ -250,7 +247,7 @@ async def validate_data_output_namespace(
         Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
+                Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
             )
         ),
     ],
@@ -277,7 +274,7 @@ def update_data_product_about(
         Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS, DataProductResolver
+                Action.DATA_PRODUCT__UPDATE_STATUS, DataProductResolver
             )
         ),
     ],
@@ -310,7 +307,7 @@ def update_data_product_status(
         Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
                 DataProductResolver,
             )
         ),
@@ -348,7 +345,7 @@ def link_dataset_to_data_product(
         Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
                 DataProductResolver,
             )
         ),
@@ -368,7 +365,7 @@ def unlink_dataset_from_data_product(
         Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
             )
         ),
     ],
@@ -383,7 +380,7 @@ def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) 
         Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
             )
         ),
     ],
@@ -405,7 +402,7 @@ def get_signin_url(
         Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
             )
         ),
     ],
@@ -420,7 +417,7 @@ def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str
         Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
             )
         ),
     ],
@@ -453,7 +450,7 @@ def get_graph_data(
         Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS, DataProductResolver
+                Action.DATA_PRODUCT__UPDATE_SETTINGS, DataProductResolver
             )
         ),
     ],

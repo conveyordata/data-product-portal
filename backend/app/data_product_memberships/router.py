@@ -4,8 +4,8 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import (
+from app.core.authz import (
+    Action,
     Authorization,
     DataProductMembershipResolver,
     DataProductResolver,
@@ -32,7 +32,7 @@ router = APIRouter(
         Depends(OnlyWithProductAccessDataProductID([DataProductUserRole.OWNER])),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__CREATE_USER,
+                Action.DATA_PRODUCT__CREATE_USER,
                 DataProductResolver,
                 object_id="data_product_id",
             )
@@ -55,7 +55,7 @@ def create_data_product_membership(
     dependencies=[
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
+                Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
                 DataProductResolver,
                 object_id="data_product_id",
             )
@@ -80,7 +80,7 @@ def request_data_product_membership(
         Depends(only_product_membership_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
                 DataProductMembershipResolver,
             )
         ),
@@ -102,7 +102,7 @@ def approve_data_product_membership(
         Depends(only_product_membership_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
                 DataProductMembershipResolver,
             )
         ),
@@ -124,7 +124,7 @@ def deny_data_product_membership(
         Depends(only_product_membership_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__DELETE_USER,
+                Action.DATA_PRODUCT__DELETE_USER,
                 DataProductMembershipResolver,
             )
         ),
@@ -156,7 +156,7 @@ def remove_data_product_membership(
         Depends(only_product_membership_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
+                Action.DATA_PRODUCT__UPDATE_USER,
                 DataProductMembershipResolver,
             )
         ),
