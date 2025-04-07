@@ -244,6 +244,22 @@ export function PendingRequestsInbox() {
         });
     };
 
+    const itemCountByType = useMemo(() => {
+        const counts: { [key in NotificationTypes]: number } = {
+            [NotificationTypes.DataProductDatasetNotification]: 0,
+            [NotificationTypes.DataOutputDatasetNotification]: 0,
+            [NotificationTypes.DataProductMembershipNotification]: 0,
+        };
+
+        pendingItems.forEach((item) => {
+            if (item) {
+                counts[item.type]++;
+            }
+        });
+
+        return counts;
+    }, [pendingItems]);
+
     const slicedPendingActionItems = useMemo(() => {
         return (
             selectedTypes.size === 0 ? pendingItems : pendingItems.filter((item) => selectedTypes.has(item.type))
@@ -286,21 +302,21 @@ export function PendingRequestsInbox() {
                         <SelectableTab
                             type={NotificationTypes.DataProductMembershipNotification}
                             title="Team Request"
-                            requestsCount={9}
+                            requestsCount={itemCountByType[NotificationTypes.DataProductMembershipNotification]}
                             color={colorSuccess}
                             onSelectChange={handleTabChange}
                         />
                         <SelectableTab
                             type={NotificationTypes.DataOutputDatasetNotification}
                             title="Data Output"
-                            requestsCount={1}
+                            requestsCount={itemCountByType[NotificationTypes.DataOutputDatasetNotification]}
                             color={colorError}
                             onSelectChange={handleTabChange}
                         />
                         <SelectableTab
                             type={NotificationTypes.DataProductDatasetNotification}
                             title="Data Product"
-                            requestsCount={4}
+                            requestsCount={itemCountByType[NotificationTypes.DataProductDatasetNotification]}
                             color={colorWarning}
                             onSelectChange={handleTabChange}
                         />

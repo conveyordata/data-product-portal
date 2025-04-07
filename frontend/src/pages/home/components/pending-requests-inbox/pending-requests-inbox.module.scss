@@ -10,6 +10,12 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     margin-bottom: globals.$spacing-s;
 }
 
+.tab-items-count {
+    font-size: globals.$font-size-sm;
+    margin-left: globals.$spacing-xs;
+    margin-top: -(globals.$column-gap-xxs);
+}
+
 .menu-item {
     padding: globals.$spacing-xs;
     margin: 0;

@@ -30,7 +30,10 @@ export const SelectableTab = ({ type, title, requestsCount, color, onSelectChang
             >
                 <Flex vertical>
                     <Typography.Text>
-                        {title} <Badge count={requestsCount} color="gray" size="small" />
+                        <div>
+                            {title}
+                            <Badge count={requestsCount} color="gray" size="small" className={styles.tabItemsCount} />
+                        </div>
                     </Typography.Text>
                 </Flex>
             </Tag.CheckableTag>
