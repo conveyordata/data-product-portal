@@ -56,8 +56,11 @@ Visit http://localhost:8080
 
 You should see the **Data Product Portal** UI!
 
-> ⚠️ **Warning**
-> The Docker setup will **drop and recreate the PostgreSQL database** on startup. Do not connect this setup to any live production database.
+:::danger[Warning]
+
+The Docker setup will **drop and recreate the PostgreSQL database** on startup. Do not connect this setup to any live production database.
+
+:::
 
 ### Limited Functionality
 
