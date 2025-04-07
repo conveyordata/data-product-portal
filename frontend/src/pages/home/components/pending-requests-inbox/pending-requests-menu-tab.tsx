@@ -29,7 +29,7 @@ export const SelectableTab = ({ type, title, requestsCount, color, onSelectChang
                 }}
             >
                 <Flex vertical>
-                    <Typography.Text strong style={{ whiteSpace: 'nowrap' }}>
+                    <Typography.Text>
                         {title} <Badge count={requestsCount} color="gray" size="small" />
                     </Typography.Text>
                 </Flex>

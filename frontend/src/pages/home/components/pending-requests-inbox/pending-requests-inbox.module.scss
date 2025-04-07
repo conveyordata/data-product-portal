@@ -12,8 +12,9 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 
 .menu-item {
     padding: globals.$spacing-xs;
+    margin: 0;
     border-radius: 0;
-    background-color: globals.$quaternary-color-fill;
+    background-color: transparent;
 }
 
 .menu-item-active {
@@ -22,6 +23,12 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     &:hover {
         background-color: globals.$border-color-secondary;
     }
+}
+
+.filter-bar {
+    background-color: globals.$quaternary-color-fill;
+    border: 1px solid globals.$border-color-secondary;
+    border-radius: globals.$border-radius-sm;
 }
 
 .top-right-column {

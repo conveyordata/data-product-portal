@@ -277,27 +277,30 @@ export function PendingRequestsInbox() {
                     </Typography.Title>
                 </Col>
                 <Col span={12} className={styles.topRightColumn}>
-                    <SelectableTab
-                        type={NotificationTypes.DataProductMembershipNotification}
-                        title="Team Requests"
-                        requestsCount={9}
-                        color={colorSuccess}
-                        onSelectChange={handleTabChange}
-                    />
-                    <SelectableTab
-                        type={NotificationTypes.DataOutputDatasetNotification}
-                        title="Data Output"
-                        requestsCount={1}
-                        color={colorError}
-                        onSelectChange={handleTabChange}
-                    />
-                    <SelectableTab
-                        type={NotificationTypes.DataProductDatasetNotification}
-                        title="Data Products"
-                        requestsCount={4}
-                        color={colorWarning}
-                        onSelectChange={handleTabChange}
-                    />
+                    <Flex className={styles.filterBar} gap={0}>
+                        <SelectableTab
+                            type={NotificationTypes.DataProductMembershipNotification}
+                            title="Team Request"
+                            requestsCount={9}
+                            color={colorSuccess}
+                            onSelectChange={handleTabChange}
+                        />
+                        <SelectableTab
+                            type={NotificationTypes.DataOutputDatasetNotification}
+                            title="Data Output"
+                            requestsCount={1}
+                            color={colorError}
+                            onSelectChange={handleTabChange}
+                        />
+                        <SelectableTab
+                            type={NotificationTypes.DataProductDatasetNotification}
+                            title="Data Product"
+                            requestsCount={4}
+                            color={colorWarning}
+                            onSelectChange={handleTabChange}
+                        />
+                    </Flex>
+
                     <div className={styles.pagination}>
                         <Pagination
                             current={pagination.current}
