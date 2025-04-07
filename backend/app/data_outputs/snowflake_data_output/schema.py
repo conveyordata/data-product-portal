@@ -32,7 +32,7 @@ class SnowflakeDataOutput(BaseDataOutputConfiguration):
 
     def validate_configuration(self, data_product: BaseDataProduct):
         # If product aligned
-        if not self.database.startswith(data_product.external_id):
+        if not self.database.startswith(data_product.namespace):
             raise ValueError("Invalid database specified")
 
     def on_create(self):

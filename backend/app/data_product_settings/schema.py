@@ -18,7 +18,7 @@ class DataProductSettingCreate(ORMModel):
     category: str
     type: DataProductSettingType
     tooltip: str
-    external_id: str
+    namespace: str
     name: str
     default: str
     order: int = 100

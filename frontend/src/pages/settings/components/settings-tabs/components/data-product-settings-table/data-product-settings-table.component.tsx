@@ -10,14 +10,14 @@ import {
     useRemoveDataProductSettingMutation,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataProductSettingContract } from '@/types/data-product-setting';
+import { DataProductSettingContract, DataProductSettingScope } from '@/types/data-product-setting';
 
 import styles from './data-product-settings-table.module.scss';
-import { getDataProductTableColumns } from './data-product-settings-table-columns.tsx';
+import { getDataProductSettingsTableColumns } from './data-product-settings-table-columns.tsx';
 import { CreateSettingModal } from './new-data-product-setting-modal.component.tsx';
 
 type Props = {
-    scope: 'dataproduct' | 'dataset';
+    scope: DataProductSettingScope;
 };
 
 export function DataProductSettingsTable({ scope }: Props) {
@@ -69,7 +69,7 @@ export function DataProductSettingsTable({ scope }: Props) {
     };
 
     const columns = useMemo(
-        () => getDataProductTableColumns({ t, handleEdit, handleRemove }),
+        () => getDataProductSettingsTableColumns({ t, handleEdit, handleRemove }),
         [t, handleEdit, handleRemove],
     );
 
