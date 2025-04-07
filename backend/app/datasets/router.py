@@ -5,8 +5,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization, DatasetResolver
+from app.core.authz import Action, Authorization, DatasetResolver
 from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
 from app.datasets.schema import (
@@ -74,11 +73,7 @@ def get_user_datasets(
         },
     },
     dependencies=[
-        Depends(
-            Authorization.enforce(
-                AuthorizationAction.GLOBAL__CREATE_DATASET, DatasetResolver
-            )
-        ),
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATASET, DatasetResolver)),
     ],
 )
 def create_dataset(
@@ -131,9 +126,7 @@ def create_dataset(
     },
     dependencies=[
         Depends(only_dataset_owners),
-        Depends(
-            Authorization.enforce(AuthorizationAction.DATASET__DELETE, DatasetResolver)
-        ),
+        Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
     ],
 )
 def remove_dataset(id: UUID, db: Session = Depends(get_db_session)):
@@ -153,9 +146,7 @@ def remove_dataset(id: UUID, db: Session = Depends(get_db_session)):
     dependencies=[
         Depends(only_dataset_owners),
         Depends(
-            Authorization.enforce(
-                AuthorizationAction.DATASET__UPDATE_PROPERTIES, DatasetResolver
-            )
+            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
         ),
     ],
 )
@@ -178,9 +169,7 @@ def update_dataset(
     dependencies=[
         Depends(only_dataset_owners),
         Depends(
-            Authorization.enforce(
-                AuthorizationAction.DATASET__UPDATE_PROPERTIES, DatasetResolver
-            )
+            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
         ),
     ],
 )
@@ -202,11 +191,7 @@ def update_dataset_about(
     },
     dependencies=[
         Depends(only_dataset_owners),
-        Depends(
-            Authorization.enforce(
-                AuthorizationAction.DATASET__UPDATE_STATUS, DatasetResolver
-            )
-        ),
+        Depends(Authorization.enforce(Action.DATASET__UPDATE_STATUS, DatasetResolver)),
     ],
 )
 def update_dataset_status(
@@ -233,11 +218,7 @@ def update_dataset_status(
     },
     dependencies=[
         Depends(only_dataset_owners),
-        Depends(
-            Authorization.enforce(
-                AuthorizationAction.DATASET__CREATE_USER, DatasetResolver
-            )
-        ),
+        Depends(Authorization.enforce(Action.DATASET__CREATE_USER, DatasetResolver)),
     ],
 )
 def add_user_to_dataset(
@@ -266,11 +247,7 @@ def add_user_to_dataset(
     },
     dependencies=[
         Depends(only_dataset_owners),
-        Depends(
-            Authorization.enforce(
-                AuthorizationAction.DATASET__DELETE_USER, DatasetResolver
-            )
-        ),
+        Depends(Authorization.enforce(Action.DATASET__DELETE_USER, DatasetResolver)),
     ],
 )
 def remove_user_from_dataset(
@@ -293,9 +270,7 @@ def get_graph_data(
     dependencies=[
         Depends(only_dataset_owners),
         Depends(
-            Authorization.enforce(
-                AuthorizationAction.DATASET__UPDATE_SETTINGS, DatasetResolver
-            )
+            Authorization.enforce(Action.DATASET__UPDATE_SETTINGS, DatasetResolver)
         ),
     ],
 )

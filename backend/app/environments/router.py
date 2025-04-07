@@ -4,8 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization, DataProductResolver
+from app.core.authz import Action, Authorization, DataProductResolver
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
 from app.environment_platform_configurations.schema import (
@@ -52,7 +51,7 @@ def get_environment_configs(
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],
@@ -72,7 +71,7 @@ def get_environment_configs_by_id(
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],
@@ -107,7 +106,7 @@ def get_environment_platform_service_config_for_all_envs(
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],

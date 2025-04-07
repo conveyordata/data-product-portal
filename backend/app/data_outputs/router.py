@@ -4,11 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import (
-    Authorization,
-    DataOutputResolver,
-)
+from app.core.authz import Action, Authorization, DataOutputResolver
 from app.data_outputs.schema import (
     DataOutput,
     DataOutputStatusUpdate,
@@ -47,7 +43,7 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
         Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__DELETE_DATA_OUTPUT,
                 DataOutputResolver,
             )
         ),
@@ -75,7 +71,7 @@ def remove_data_output(
         Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
                 DataOutputResolver,
             )
         ),
@@ -101,7 +97,7 @@ def update_data_output(
         Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
                 DataOutputResolver,
             )
         ),
@@ -135,7 +131,7 @@ def update_data_output_status(
         Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
                 DataOutputResolver,
             )
         ),
@@ -173,7 +169,7 @@ def link_dataset_to_data_output(
         Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
                 DataOutputResolver,
             )
         ),
