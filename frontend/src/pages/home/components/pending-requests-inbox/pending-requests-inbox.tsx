@@ -199,7 +199,7 @@ const createPendingItem = (
 export function PendingRequestsInbox() {
     const { t } = useTranslation();
     const {
-        token: { colorSuccess, colorWarning, colorError },
+        token: { colorWarning, colorInfo, colorError },
     } = theme.useToken();
     const [selectedTypes, setSelectedTypes] = useState<Set<NotificationTypes>>(new Set());
 
@@ -208,8 +208,8 @@ export function PendingRequestsInbox() {
     const pendingItems = useMemo(() => {
         const colors = {
             [NotificationTypes.DataProductDatasetNotification]: colorWarning,
-            [NotificationTypes.DataOutputDatasetNotification]: colorError,
-            [NotificationTypes.DataProductMembershipNotification]: colorSuccess,
+            [NotificationTypes.DataOutputDatasetNotification]: colorInfo,
+            [NotificationTypes.DataProductMembershipNotification]: colorError,
         };
 
         const userNotifications = pendingActions?.map((userNotification) =>
@@ -219,7 +219,7 @@ export function PendingRequestsInbox() {
             return [];
         }
         return userNotifications.filter((item) => item !== null);
-    }, [pendingActions, t, colorError, colorSuccess, colorWarning]);
+    }, [pendingActions, t, colorInfo, colorError, colorWarning]);
 
     const { pagination, handlePaginationChange, resetPagination, handleTotalChange } = useListPagination({});
 
@@ -304,14 +304,14 @@ export function PendingRequestsInbox() {
                             type={NotificationTypes.DataProductMembershipNotification}
                             title="Team Request"
                             requestsCount={itemCountByType[NotificationTypes.DataProductMembershipNotification]}
-                            color={colorSuccess}
+                            color={colorError}
                             onSelectChange={handleTabChange}
                         />
                         <SelectableTab
                             type={NotificationTypes.DataOutputDatasetNotification}
                             title="Data Output"
                             requestsCount={itemCountByType[NotificationTypes.DataOutputDatasetNotification]}
-                            color={colorError}
+                            color={colorInfo}
                             onSelectChange={handleTabChange}
                         />
                         <SelectableTab
