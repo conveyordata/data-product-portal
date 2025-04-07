@@ -176,6 +176,7 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 }
 
 .type-indicator {
+    margin-left: auto;
     white-space: nowrap;
     border-right: globals.$spacing-s solid globals.$quaternary-color-fill;
     height: 100%;
@@ -192,9 +193,4 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     justify-content: space-between;
     width: 100%;
     margin-left: globals.$spacing-xxl;
-}
-
-.line-div {
-    box-shadow: 0 +2px 0 0 globals.$border-color-secondary;
-    width: 100%;
 }

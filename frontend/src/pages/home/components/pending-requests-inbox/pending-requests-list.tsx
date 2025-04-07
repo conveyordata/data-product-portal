@@ -83,7 +83,6 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                                     <div className={styles.rightColumn}>
                                         <Flex justify="end">
                                             <div className={styles.topContainer}>
-                                                <div className={styles.lineDiv} />
                                                 <Typography.Text className={styles.typeIndicator} type="secondary">
                                                     {t('Originating from:')} {item.origin}
                                                 </Typography.Text>{' '}
