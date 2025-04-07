@@ -20,7 +20,7 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className={styles.cta}
-            to="/docs/intro">
+            to="/docs/user-guide/overview">
             Get Started
           </Link>
         </div>
