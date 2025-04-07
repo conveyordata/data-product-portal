@@ -276,6 +276,10 @@ export function Notifications() {
         };
     }, []);
 
+    const handleRedirectHome = () => {
+        navigate('/');
+    };
+
     const notificationItems = useMemo(() => {
         const notificationCreatedItems = notifications?.map((action) => createItem({ ...action }, navigate, t));
         return notificationCreatedItems ?? [];
@@ -300,8 +304,8 @@ export function Notifications() {
                         <Typography.Title level={4}>Notifications</Typography.Title>{' '}
                         <Badge count={notificationItemCount} color="gray" size="small" />
                     </Flex>
-                    <Button type="link" value="pendingRequests">
-                        <strong>View actions</strong> <Badge count={92} color="gray" size="small" />
+                    <Button type="link" value="pendingRequests" onClick={handleRedirectHome}>
+                        <strong>View requests</strong> <Badge count={92} color="gray" size="small" />
                     </Button>
                 </div>
             ),
