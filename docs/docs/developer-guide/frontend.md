@@ -22,7 +22,7 @@ import TabItem from '@theme/TabItem';
 
 All configuration values for this project are read from a `config.local.js` file in the frontend folder.
 
-Check out [`config.docker.js`](../config.docker.js) to see required/optional fields.
+Check out [`config.docker.js`](https://github.com/conveyordata/data-product-portal/tree/main/frontend/config.docker.js) to see required/optional fields.
 
 #### Minimal example:
 

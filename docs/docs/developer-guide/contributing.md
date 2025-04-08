@@ -73,7 +73,7 @@ Create a personal fork of the project on GitHub.
 
 ### 2. Set Up Local Development
 
-Follow the [development setup guide](./README.md#local-development) to prepare your environment.
+Follow the [backend](./backend) and [frontend](./frontend) setup guide to prepare your environment.
 
 ### 3. Create a Branch
 
