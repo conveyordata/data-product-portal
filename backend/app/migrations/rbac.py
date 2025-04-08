@@ -30,12 +30,15 @@ from app.role_assignments.dataset.service import (
 from app.role_assignments.dataset.tasks import AuthAssignment as DatasetAuthAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_ import tasks as global_tasks
+from app.role_assignments.global_.model import GlobalRoleAssignment
 from app.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
 )
 from app.role_assignments.global_.tasks import AuthAssignment as GlobalAuthAssignment
+from app.roles.model import Role
 from app.roles.schema import CreateRole, Prototype, Scope
 from app.roles.service import RoleService
+from app.users.model import User as UserModel
 from app.users.schema import User
 
 
@@ -52,16 +55,22 @@ async def migrate():
 def transfer_product_memberships(db: Session):
     memberships = DataProductMembershipService().list_memberships(db)
 
-    owner_role = RoleService(db).find_prototype(Scope.DATASET, Prototype.OWNER)
+    owner_role = RoleService(db).find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER)
     assert owner_role is not None
-    member_role = RoleService(db).create_role(
-        CreateRole(
-            name="Member",
-            scope=Scope.DATASET,
-            description="A member of the dataset",
-            permissions=[],
+
+    # Create the member role if it doesn't exist
+    member_role = db.scalars(
+        select(Role).filter_by(name="Member", scope=Scope.DATA_PRODUCT)
+    ).one_or_none()
+    if member_role is None:
+        member_role = RoleService(db).create_role(
+            CreateRole(
+                name="Member",
+                scope=Scope.DATA_PRODUCT,
+                description="A member of the data product",
+                permissions=[],
+            )
         )
-    )
 
     for membership in memberships:
         role_id = (
@@ -98,23 +107,44 @@ def map_decision(
 
 
 def transfer_dataset_memberships(db: Session):
-    role_id = RoleService(db).find_prototype(Scope.DATASET, Prototype.OWNER)
+    role = RoleService(db).find_prototype(Scope.DATASET, Prototype.OWNER)
+    role_id = None
+    if role:
+        role_id = role.id
     datasets = db.scalars(select(Dataset)).all()
     for dataset in datasets:
         for owner in dataset.owners:
-            DatasetRoleAssignment(
-                dataset_id=dataset.id,
-                user_id=owner,
-                role_id=role_id,
-                decision=DecisionStatus.APPROVED,
-                requested_on=dataset.updated_on,
-                decided_on=dataset.updated_on,
+            db.add(
+                DatasetRoleAssignment(
+                    dataset_id=dataset.id,
+                    user_id=owner.id,
+                    role_id=role_id,
+                    decision=DecisionStatus.APPROVED,
+                    requested_on=dataset.updated_on,
+                    decided_on=dataset.updated_on,
+                )
             )
+    db.commit()
 
 
 def transfer_global_memberships(db: Session):
-    # Admin flag in users table
-    pass
+    role = RoleService(db).find_prototype(Scope.GLOBAL, Prototype.ADMIN)
+    role_id = None
+    if role:
+        role_id = role.id
+    users = db.scalars(select(UserModel)).all()
+    for user in users:
+        if user.is_admin:
+            db.add(
+                GlobalRoleAssignment(
+                    user_id=user.id,
+                    role_id=role_id,
+                    decision=DecisionStatus.APPROVED,
+                    requested_on=user.updated_on,
+                    decided_on=user.updated_on,
+                )
+            )
+    db.commit()
 
 
 async def sync_casbin(db: Session):
