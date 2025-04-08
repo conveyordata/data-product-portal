@@ -7,11 +7,11 @@ import { DataOutputConfiguration, DataOutputCreateFormSchema, RedshiftDataOutput
 type Props = {
     sourceAligned: boolean;
     identifiers: string[] | undefined;
-    external_id: string;
+    namespace: string;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
-export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
+export function RedshiftDataOutputForm({ form, identifiers, namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
     const entireSchema = Form.useWatch('entire_schema', form);
     const databaseOptionsRef = useRef((identifiers ?? []).map((database) => ({ label: database, value: database })));
@@ -22,8 +22,8 @@ export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceA
     useEffect(() => {
         let databaseOptionsList = identifiers;
         if (!sourceAligned) {
-            databaseOptionsList = [external_id];
-            form.setFieldsValue({ database: external_id });
+            databaseOptionsList = [namespace];
+            form.setFieldsValue({ database: namespace });
         } else {
             form.setFieldsValue({ database: undefined });
         }
@@ -31,7 +31,7 @@ export function RedshiftDataOutputForm({ form, identifiers, external_id, sourceA
             label: database,
             value: database,
         }));
-    }, [sourceAligned, identifiers, external_id, form]);
+    }, [sourceAligned, identifiers, namespace, form]);
 
     useEffect(() => {
         let result = databaseValue;

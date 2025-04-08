@@ -44,21 +44,21 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     const { data: edit_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_UPDATE_USER,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
         },
         { skip: !dataProductId },
     );
     const { data: approve_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_APPROVE_USER_REQUEST,
+            action: AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
         },
         { skip: !dataProductId },
     );
     const { data: remove_access } = useCheckAccessQuery(
         {
             object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_DELETE_USER,
+            action: AuthorizationAction.DATA_PRODUCT__DELETE_USER,
         },
         { skip: !dataProductId },
     );

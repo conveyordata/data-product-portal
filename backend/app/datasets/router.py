@@ -6,6 +6,11 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
+from app.core.namespace.validation import (
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidation,
+)
 from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
 from app.datasets.schema import (
@@ -36,6 +41,25 @@ def get_datasets(
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsGet]:
     return DatasetService().get_datasets(db, user)
+
+
+@router.get("/namespace_suggestion")
+async def get_dataset_namespace_suggestion(
+    name: str, db: Session = Depends(get_db_session)
+) -> NamespaceSuggestion:
+    return DatasetService().dataset_namespace_suggestion(name, db)
+
+
+@router.get("/validate_namespace")
+async def validate_dataset_namespace(
+    namespace: str, db: Session = Depends(get_db_session)
+) -> NamespaceValidation:
+    return DatasetService().validate_dataset_namespace(namespace, db)
+
+
+@router.get("/namespace_length_limits")
+async def get_dataset_namespace_length_limits() -> NamespaceLengthLimits:
+    return DatasetService().dataset_namespace_length_limits()
 
 
 @router.get("/{id}")

@@ -1,6 +1,7 @@
 export type {
     DataProductSettingContract,
     DataProductSettingModel,
+    DataProductSettingScope,
     DataProductSettingType,
     DataProductSettingValueContract,
     DataProductSettingValueForm,
