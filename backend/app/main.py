@@ -65,7 +65,7 @@ async def lifespan(_: FastAPI):
 
     # Initialize Casbin
     await Authorization.initialize()
-
+    # await migrate()
     yield
 
 
