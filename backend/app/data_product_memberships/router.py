@@ -165,10 +165,12 @@ def remove_data_product_membership(
 def update_data_product_role(
     id: UUID,
     membership_role: DataProductUserRole,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductMembershipService().update_data_product_membership_role(
-        id, membership_role, db
+        id, membership_role, db, background_tasks, authenticated_user
     )
 
 
