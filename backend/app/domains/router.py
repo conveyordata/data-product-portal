@@ -3,8 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization, DataProductResolver
+from app.core.authz import Action, Authorization, DataProductResolver
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
 from app.domains.schema_create import DomainCreate, DomainUpdate
@@ -38,7 +37,7 @@ def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> DomainGet:
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],
@@ -55,7 +54,7 @@ def create_domain(
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],
@@ -72,7 +71,7 @@ def update_domain(
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],
@@ -87,7 +86,7 @@ def remove_domain(id: UUID, db: Session = Depends(get_db_session)):
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],
