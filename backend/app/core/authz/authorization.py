@@ -29,6 +29,7 @@ class Authorization(metaclass=Singleton):
     async def initialize(cls) -> "Authorization":
         model_location = Path(__file__).parent / "rbac_model.conf"
         enforcer = await cls._construct_enforcer(str(model_location))
+        await enforcer.load_policy()
         return cls(enforcer)
 
     @staticmethod
@@ -86,7 +87,6 @@ class Authorization(metaclass=Singleton):
         """Creates or updates the permissions for the chosen role."""
         enforcer: AsyncEnforcer = self._enforcer
         await enforcer.remove_filtered_policy(0, role_id)
-        await enforcer.save_policy()
         policies = [(role_id, str(action)) for action in actions]
         await enforcer.add_policies(policies)
 
