@@ -1,24 +1,56 @@
 @use '@/styles/globals';
 
 $item-card-width: 360px;
+$landing-banner-height: 260px;
+$landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgba(3, 79, 165, 0.1) 45.13%);
 
-.requests-list-container {
-    margin-top: globals.$spacing-m;
+.pagination {
+    margin-left: auto;
+    margin-top: auto;
+    margin-bottom: globals.$spacing-s;
 }
 
-.list-item-top-info {
-    width: 100%;
+.tab-items-count {
+    font-size: globals.$font-size-sm;
+    margin-left: globals.$spacing-xs;
+    margin-top: -(globals.$column-gap-xxs);
+}
+
+.menu-item {
+    padding: globals.$spacing-xs;
+    margin: 0;
+    border-radius: 0;
+    background-color: transparent;
+}
+
+.menu-item-active {
+    background-color: globals.$border-color-secondary;
+
+    &:hover {
+        background-color: globals.$border-color-secondary;
+    }
+}
+
+.filter-bar {
+    background-color: globals.$quaternary-color-fill;
+    border: 1px solid globals.$border-color-secondary;
+    border-radius: globals.$border-radius-sm;
+}
+
+.top-right-column {
     display: flex;
-    justify-content: space-between;
+    margin-right: auto;
+    padding-bottom: globals.$spacing-m;
+    width: 100%;
+    margin-left: globals.$spacing-xxl;
+    padding-right: globals.$spacing-xxl;
 }
 
 .list-item {
-    width: 100%;
+    position: relative;
     background-color: globals.$quaternary-color-fill;
     border: 1px solid globals.$border-color-secondary;
-    border-radius: globals.$border-radius-lg;
-    padding: unset !important;
-    margin-bottom: globals.$spacing-m;
+    border-radius: globals.$border-radius-sm;
     transition: border-color 0.3s;
     cursor: pointer;
 
@@ -26,19 +58,8 @@ $item-card-width: 360px;
         border-color: globals.$primary-color-border-hover;
         transition: border-color 0.3s;
     }
-
-    .item-card {
-        width: 100% !important;
-        display: flex;
-        align-items: center !important;
-        height: 100%;
-        padding: globals.$spacing-m globals.$spacing-l;
-        min-width: $item-card-width;
-    }
-}
-
-.section {
-    height: 100%;
+    margin: 0;
+    margin-bottom: globals.$spacing-regular;
 }
 
 .section-title {
@@ -47,22 +68,59 @@ $item-card-width: 360px;
     align-items: center;
 }
 
-.action-container {
-    margin-left: auto;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.date-section {
-    display: flex;
-    flex-direction: column;
-}
-
 .ant-list .ant-list-pagination {
     display: none !important;
 }
 
-.requestsInfo {
-    padding-left: globals.$spacing-xs;
+.requests-inbox {
+    margin-left: globals.$spacing-xxl;
+    margin-right: globals.$spacing-xxl;
+    margin-top: globals.$spacing-xl;
+    padding-top: globals.$spacing-s;
+}
+
+.welcome-content {
+    display: flex;
+    justify-content: center;
+}
+
+.right-column {
+    position: absolute;
+    top: 4px;
+    right: 0;
+    width: 50%;
+    margin-left: globals.$spacing-ml;
+    height: 100%;
+}
+
+.flex {
+    width: 100%;
+}
+
+.item-container {
+    width: 100%;
+}
+
+.user-badge {
+    padding: globals.$spacing-m;
+    padding-top: globals.$spacing-xs;
+    margin-bottom: auto;
+}
+
+.type-indicator {
+    margin-left: auto;
+    white-space: nowrap;
+    border-right: globals.$spacing-s solid globals.$quaternary-color-fill;
+    height: 100%;
+    background-color: globals.$secondary-color-fill;
+    padding: globals.$spacing-xs;
+}
+
+.resolve-button {
+    border-radius: 0;
+}
+
+.requests-info {
+    padding-left: globals.$spacing-s;
+    padding-bottom: globals.$spacing-xs;
 }

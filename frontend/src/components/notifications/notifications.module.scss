@@ -4,3 +4,50 @@
     height: globals.$circle-icon-button-size !important;
     width: globals.$circle-icon-button-size !important;
 }
+
+.notification {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.notification-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: end;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: globals.$spacing-s;
+}
+.notification-info {
+    margin-right: auto;
+}
+.notification-message {
+    margin-right: auto;
+}
+
+.timestamp-tag {
+    margin: 0;
+    margin-left: auto;
+}
+
+.notificationTitle {
+    margin-right: globals.$spacing-xl;
+    padding-right: globals.$spacing-xs;
+}
+.notificationItem {
+    width: 100%;
+    display: block;
+}
+
+.notification-titlebar {
+    display: flex;
+    justify-content: space-between;
+    margin-left: globals.$spacing-s;
+    border-bottom: 2px solid globals.$border-color-secondary;
+}

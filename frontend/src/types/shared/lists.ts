@@ -1,3 +1,6 @@
-import { GetProp, ListProps } from 'antd';
+import { PaginationConfig } from 'antd/es/pagination';
 
-export type ListPaginationConfig = Exclude<GetProp<ListProps<unknown>, 'pagination'>, boolean>;
+export interface ListPaginationConfig extends PaginationConfig {
+    current: number;
+    pageSize: number;
+}

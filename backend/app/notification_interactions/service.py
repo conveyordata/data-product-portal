@@ -218,19 +218,6 @@ class NotificationInteractionService:
         )
         self.reset_interactions_for_notification(db, notification.id, receiving_ids)
 
-    def get_user_notification_interactions(
-        self, db: Session, authenticated_user: User
-    ) -> list[NotificationInteractionGet]:
-        return db.scalars(
-            select(NotificationInteraction)
-            .options(
-                joinedload(NotificationInteraction.notification),
-                joinedload(NotificationInteraction.user),
-            )
-            .where(NotificationInteraction.user_id == authenticated_user.id)
-            .order_by(asc(NotificationInteraction.last_seen))
-        ).all()
-
     def get_user_action_notification_interactions(
         self, db: Session, authenticated_user: User
     ) -> list[NotificationInteractionGet]:
@@ -278,6 +265,72 @@ class NotificationInteractionService:
                     == NotificationTypes.DataProductMembershipNotification,
                     DataProductMembershipModel.status
                     == DataProductMembershipStatus.PENDING_APPROVAL,
+                )
+            )
+        ).all()
+
+        notification_ids = set(data_product_dataset_notification_ids).union(
+            data_output_dataset_notification_ids,
+            data_product_membership_notification_ids,
+        )
+
+        return db.scalars(
+            select(NotificationInteraction)
+            .options(joinedload(NotificationInteraction.notification))
+            .where(
+                NotificationInteraction.user_id == authenticated_user.id,
+                NotificationInteraction.notification_id.in_(notification_ids),
+            )
+            .order_by(asc(NotificationInteraction.last_seen))
+        ).all()
+
+    def get_user_non_action_notification_interactions(
+        self, db: Session, authenticated_user: User
+    ) -> list[NotificationInteractionGet]:
+        data_product_dataset_notification_ids = db.scalars(
+            select(Notification.id)
+            .join(
+                DataProductDatasetAssociationModel,
+                DataProductDatasetAssociationModel.id == Notification.reference_id,
+            )
+            .where(
+                and_(
+                    Notification.configuration_type
+                    == NotificationTypes.DataProductDatasetNotification,
+                    DataProductDatasetAssociationModel.status
+                    != DataProductDatasetLinkStatus.PENDING_APPROVAL,
+                )
+            )
+        ).all()
+
+        data_output_dataset_notification_ids = db.scalars(
+            select(Notification.id)
+            .join(
+                DataOutputDatasetAssociationModel,
+                DataOutputDatasetAssociationModel.id == Notification.reference_id,
+            )
+            .where(
+                and_(
+                    Notification.configuration_type
+                    == NotificationTypes.DataOutputDatasetNotification,
+                    DataOutputDatasetAssociationModel.status
+                    != DataOutputDatasetLinkStatus.PENDING_APPROVAL,
+                )
+            )
+        ).all()
+
+        data_product_membership_notification_ids = db.scalars(
+            select(Notification.id)
+            .join(
+                DataProductMembershipModel,
+                DataProductMembershipModel.id == Notification.reference_id,
+            )
+            .where(
+                and_(
+                    Notification.configuration_type
+                    == NotificationTypes.DataProductMembershipNotification,
+                    DataProductMembershipModel.status
+                    != DataProductMembershipStatus.PENDING_APPROVAL,
                 )
             )
         ).all()
