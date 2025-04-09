@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -11,6 +12,7 @@ from app.core.authz import (
     DataProductResolver,
 )
 from app.data_product_memberships.enums import DataProductUserRole
+from app.data_product_memberships.model import DataProductMembership
 from app.data_product_memberships.schema import DataProductMembershipCreate
 from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_product_memberships.service import DataProductMembershipService
@@ -19,6 +21,13 @@ from app.dependencies import (
     OnlyWithProductAccessDataProductID,
     only_product_membership_owners,
 )
+from app.role_assignments.data_product.router import (
+    list_assignments,
+    modify_assigned_role,
+)
+from app.role_assignments.data_product.schema import ModifyRoleAssignment
+from app.roles.model import Role
+from app.roles.schema import Scope
 from app.users.schema import User
 
 router = APIRouter(
@@ -169,9 +178,26 @@ def update_data_product_role(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductMembershipService().update_data_product_membership_role(
-        id, membership_role, db, background_tasks, authenticated_user
+    old_membership = db.scalar(select(DataProductMembership).filter_by(id=id))
+    old_role = old_membership.role.name.lower()
+    updated_id = DataProductMembershipService().update_data_product_membership_role(
+        id, membership_role, db
     )
+    roles = list_assignments(
+        old_membership.data_product_id, old_membership.user_id, db, authenticated_user
+    )
+    for role in roles:
+        if role.role.name.lower() == old_role:
+            new_role = db.scalar(
+                select(Role)
+                .filter_by(scope=Scope.DATA_PRODUCT)
+                .filter(func.lower(Role.name) == membership_role.name.lower())
+            )
+            request = ModifyRoleAssignment(role_id=new_role.id)
+            modify_assigned_role(
+                role.id, request, background_tasks, db, authenticated_user
+            )
+    return {"id": updated_id}
 
 
 @router.get("/actions")

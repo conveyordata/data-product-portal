@@ -5,7 +5,7 @@ from uuid import UUID
 import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy import asc, func, select
+from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
@@ -20,13 +20,6 @@ from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
-from app.role_assignments.data_product.router import (
-    list_assignments,
-    modify_assigned_role,
-)
-from app.role_assignments.data_product.schema import ModifyRoleAssignment
-from app.roles.model import Role
-from app.roles.schema import Scope
 from app.settings import settings
 from app.users.model import ensure_user_exists
 from app.users.schema import User
@@ -219,8 +212,6 @@ class DataProductMembershipService:
         id: UUID,
         membership_role: DataProductUserRole,
         db: Session,
-        background_tasks: BackgroundTasks,
-        authenticated_user: User,
     ):
         data_product_membership = db.get(DataProductMembership, id)
         if data_product_membership is None:
@@ -246,21 +237,6 @@ class DataProductMembershipService:
                     f"Cannot remove the last owner from data product {data_product.id}"
                 ),
             )
-
-        roles = list_assignments(
-            data_product.id, data_product_membership.user_id, db, authenticated_user
-        )
-        for role in roles:
-            if role.role.name.lower() == data_product_membership.role.name.lower():
-                new_role = db.scalar(
-                    select(Role)
-                    .filter_by(scope=Scope.DATA_PRODUCT)
-                    .filter(func.lower(Role.name) == membership_role.name.lower())
-                )
-                request = ModifyRoleAssignment(role_id=new_role.id)
-                modify_assigned_role(
-                    role.id, request, background_tasks, db, authenticated_user
-                )
 
         data_product_membership.role = membership_role
         db.commit()
