@@ -56,8 +56,6 @@ class Authorization(metaclass=Singleton):
                 return
             obj = resolver.resolve(request, object_id, db)
             dom = resolver.resolve_domain(db, obj)
-            print(user.id, dom, obj, action)
-            print(cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action))
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
