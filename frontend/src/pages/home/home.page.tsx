@@ -19,11 +19,7 @@ export function Home() {
     return (
         <div className={styles.container}>
             <div className={styles.content}>
-                <Row gutter={ROW_GUTTER}>
-                    <Col span={COL_SPAN * 2}>
-                        <PendingRequestsInbox />
-                    </Col>
-                </Row>
+                <PendingRequestsInbox />
             </div>
 
             <div className={styles.contentSecondary}>
