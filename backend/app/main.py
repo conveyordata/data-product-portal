@@ -6,10 +6,10 @@ from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.authorization.service import AuthorizationService
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.authz.authorization import Authorization
@@ -18,10 +18,7 @@ from app.core.logging.logger import logger
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.webhook import call_webhook
 from app.database.database import get_db_session
-from app.roles.model import Role as RoleModel
-from app.roles.schema import Prototype
 from app.roles.service import RoleService
-from app.roles.tasks import AuthRole, sync_role
 from app.settings import settings
 from app.shared.router import router
 
@@ -66,16 +63,13 @@ async def lifespan(_: FastAPI):
 
     # Create mandatory roles
     await RoleService(db=db).initialize_prototype_roles()
-    roles = db.scalars(select(RoleModel)).all()
+
     # Initialize Casbin
-    await Authorization.initialize()
-    for role in roles:
-        if role.prototype == Prototype.EVERYONE:
-            await Authorization().sync_everyone_role_permissions(
-                actions=role.permissions
-            )
-        else:
-            await sync_role(AuthRole.from_role(role))
+    authorizer = await Authorization.initialize()
+
+    # Ensure all roles are present in Casbin
+    await AuthorizationService(db, authorizer).reload_enforcer()
+
     yield
 
 

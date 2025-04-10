@@ -9,7 +9,6 @@ from app.core.authz.actions import AuthorizationAction
 from app.database.database import ensure_exists
 from app.roles.model import Role as RoleModel
 from app.roles.schema import CreateRole, Prototype, Role, Scope, UpdateRole
-from app.roles.tasks import sync_role
 
 ADMIN_UUID = UUID(int=0)
 
@@ -21,12 +20,11 @@ class RoleService:
     def get_role(self, role_id: UUID) -> RoleModel:
         return ensure_exists(role_id, self.db, RoleModel)
 
-    def get_roles(self, scope: Scope) -> Sequence[Role]:
-        return self.db.scalars(
-            select(RoleModel)
-            .where(RoleModel.scope == scope)
-            .order_by(RoleModel.created_on)
-        ).all()
+    def get_roles(self, scope: Optional[Scope] = None) -> Sequence[Role]:
+        query = select(RoleModel)
+        if scope:
+            query = query.where(RoleModel.scope == scope)
+        return self.db.scalars(query.order_by(RoleModel.created_on)).all()
 
     def create_role(
         self, role: CreateRole, *, prototype: Prototype = Prototype.CUSTOM
@@ -97,7 +95,7 @@ class RoleService:
             self.db.commit()
 
         if self.find_prototype(Scope.GLOBAL, Prototype.EVERYONE) is None:
-            role = self.create_role(
+            self.create_role(
                 CreateRole(
                     name="everyone",
                     scope=Scope.GLOBAL,
@@ -111,10 +109,9 @@ class RoleService:
                 ),
                 prototype=Prototype.EVERYONE,
             )
-            await sync_role(role)
 
         if self.find_prototype(Scope.DATASET, Prototype.OWNER) is None:
-            role = self.create_role(
+            self.create_role(
                 CreateRole(
                     name="owner",
                     scope=Scope.DATASET,
@@ -137,10 +134,9 @@ class RoleService:
                 ),
                 prototype=Prototype.OWNER,
             )
-            await sync_role(role)
 
         if self.find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER) is None:
-            role = self.create_role(
+            self.create_role(
                 CreateRole(
                     name="owner",
                     scope=Scope.DATA_PRODUCT,
@@ -165,7 +161,6 @@ class RoleService:
                 ),
                 prototype=Prototype.OWNER,
             )
-            await sync_role(role)
 
     def find_prototype(self, scope: Scope, prototype: Prototype) -> Optional[Role]:
         return self.db.scalars(

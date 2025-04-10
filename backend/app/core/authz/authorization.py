@@ -57,6 +57,7 @@ class Authorization(metaclass=Singleton):
                 return
             obj = resolver.resolve(request, object_id, db)
             dom = resolver.resolve_domain(db, obj)
+
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
@@ -87,9 +88,9 @@ class Authorization(metaclass=Singleton):
         """Creates or updates the permissions for the chosen role."""
         enforcer: AsyncEnforcer = self._enforcer
         await enforcer.remove_filtered_policy(0, role_id)
+
         policies = [(role_id, str(action)) for action in actions]
         await enforcer.add_policies(policies)
-
         self._after_update()
 
     async def sync_everyone_role_permissions(
