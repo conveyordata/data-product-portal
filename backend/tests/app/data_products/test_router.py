@@ -51,7 +51,7 @@ def payload():
 class TestDataProductsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    async def test_create_data_product(self, payload, client, session):
+    def test_create_data_product(self, payload, client, session):
         RoleService(db=session).initialize_prototype_roles()
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization
+from app.core.authz import Action, Authorization
 from app.roles.schema import Role, Scope
 
 
@@ -11,7 +10,7 @@ class _AuthRole:
 
     id: str
     scope: Scope
-    permissions: list[AuthorizationAction]
+    permissions: list[Action]
 
 
 class AuthRole(_AuthRole):
