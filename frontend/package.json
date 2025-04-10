@@ -35,7 +35,7 @@
     "@tiptap/pm": "^2.11.7",
     "@tiptap/react": "^2.11.7",
     "@tiptap/starter-kit": "^2.11.7",
-    "@xyflow/react": "^12.5.4",
+    "@xyflow/react": "^12.5.5",
     "antd": "^5.24.6",
     "axios": "^1.8.4",
     "clsx": "^2.1.1",
@@ -54,9 +54,9 @@
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.1",
-    "@typescript-eslint/eslint-plugin": "^8.29.0",
-    "@typescript-eslint/parser": "^8.29.0",
+    "@types/react-dom": "^19.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
     "@vitejs/plugin-react": "^4.3.4",
     "axios-mock-adapter": "^2.1.0",
     "eslint": "^8.57.1",
@@ -70,9 +70,12 @@
     "msw": "^2.7.3",
     "prettier": "3.5.3",
     "sass": "^1.86.3",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "vite": "^6.2.5",
     "vite-plugin-svgr": "^4.3.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-musl": "^4.39.0"
   },
   "volta": {
     "node": "20.12.2"
