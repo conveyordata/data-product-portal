@@ -51,9 +51,8 @@ def payload():
 class TestDataProductsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    @pytest.mark.asyncio(loop_scope="session")
     async def test_create_data_product(self, payload, client, session):
-        await RoleService(db=session).initialize_prototype_roles()
+        RoleService(db=session).initialize_prototype_roles()
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()

@@ -34,9 +34,8 @@ def dataset_payload():
 class TestDatasetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_create_dataset(self, session, dataset_payload, client):
-        await RoleService(db=session).initialize_prototype_roles()
+    def test_create_dataset(self, session, dataset_payload, client):
+        RoleService(db=session).initialize_prototype_roles()
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()

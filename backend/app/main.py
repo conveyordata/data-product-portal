@@ -62,13 +62,13 @@ async def lifespan(_: FastAPI):
     db: Session = next(get_db_session())
 
     # Create mandatory roles
-    await RoleService(db=db).initialize_prototype_roles()
+    RoleService(db=db).initialize_prototype_roles()
 
     # Initialize Casbin
-    authorizer = await Authorization.initialize()
+    await Authorization.initialize()
 
     # Ensure all roles are present in Casbin
-    await AuthorizationService(db, authorizer).reload_enforcer()
+    await AuthorizationService(db).reload_enforcer()
 
     yield
 

@@ -76,7 +76,7 @@ class RoleService:
         result.sort()
         return result
 
-    async def initialize_prototype_roles(self) -> None:
+    def initialize_prototype_roles(self) -> None:
         """Initializes the roles that are expected to be present in other parts of the
         application. This function will first check which roles are already present,
         and only create the missing ones.
