@@ -362,6 +362,8 @@
     "No recent activity": "No recent activity",
     "Your Datasets": "Your Datasets",
     "Welcome back, {{name}}": "Welcome back, {{name}}",
+    "Welcome back": "Welcome back",
+    "You have no requests to handle.": "You have no requests to handle.",
     "Search for data products and datasets by name": "Search for data products and datasets by name",
     "Platform Service Configuration updated successfully": "Platform Service Configuration updated successfully",
     "Invalid config format": "Invalid config format",
