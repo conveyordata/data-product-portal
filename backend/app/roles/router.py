@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
-from app.migrations import rbac
 from app.roles.auth import AuthRole
 from app.roles.schema import CreateRole, Role, Scope, UpdateRole
 from app.roles.service import RoleService
@@ -39,14 +38,6 @@ def create_role(
     role: Role = RoleService(db).create_role(request)
     background_tasks.add_task(AuthRole(role).sync)
     return role
-
-
-@router.post("/migrate")
-def migrate(background_tasks: BackgroundTasks):
-    """
-    Migrate all roles to the new format.
-    """
-    background_tasks.add_task(rbac.migrate)
 
 
 @router.patch(
