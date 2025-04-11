@@ -1,0 +1,77 @@
+version: '3'
+
+vars:
+  VERSION_FILE: VERSION
+  BACKEND_VERSION_FILE: backend/VERSION
+  HELM_CHART: helm/Chart.yaml
+  HELM_VALUES: helm/values.yaml
+  DOCS_CONFIG: docs/docusaurus.config.ts
+
+tasks:
+  bump:version:
+    desc: "Bump version and update all references"
+    cmds:
+      - |
+        echo "New version: {{.CLI_ARGS}}"
+        echo "{{.CLI_ARGS}}" > {{.VERSION_FILE}}
+        cp {{.VERSION_FILE}} {{.BACKEND_VERSION_FILE}}
+        sed -i '' "s/^version:.*/version: {{.CLI_ARGS}}/" {{.HELM_CHART}}
+        sed -i '' "s/^  tag:.*/  tag: {{.CLI_ARGS}}/" {{.HELM_VALUES}}
+
+  docusaurus:version:
+    desc: "Run Docusaurus versioning"
+    cmds:
+      - cd docs && npm run docusaurus docs:version {{.CLI_ARGS}}
+
+  docusaurus:update-config:
+    desc: "Update docusaurus.config.ts with new version"
+    cmds:
+      - |
+        node -e '
+        const fs = require("fs");
+        const file = "{{.DOCS_CONFIG}}";
+        const config = fs.readFileSync(file, "utf-8");
+        const currentVersion = config.match(/Latest \((.*?)\)/)?.[1];
+        const newVersion = "{{.CLI_ARGS}}";
+        const updated = config
+          .replace(/Latest \((.*?)\)/, `Latest (${newVersion})`)
+          .replace(/versions:\s*{/, match => {
+            const newEntry = `  "${newVersion}": {\n    label: "${newVersion}",\n    path: "${newVersion}"\n  },\n`;
+            return `${match}\n${newEntry}`;
+          });
+        fs.writeFileSync(file, updated);
+        '
+
+  docusaurus:build:
+    desc: "Build Docusaurus"
+    cmds:
+      - cd docs && npm run build
+
+  release:commit:
+    desc: "Commit and push the version bump"
+    cmds:
+      - git add .
+      - 'git commit -m "chore: release {{.CLI_ARGS}}"'
+      - git push origin HEAD
+
+  release:pr:
+    desc: "Open PR (requires gh CLI)"
+    cmds:
+      - gh pr create --fill --title "Release {{.CLI_ARGS}}" --body "Automated release for {{.CLI_ARGS}}"
+
+  release:post:
+    desc: "Tag and deploy docs after merge"
+    cmds:
+      - git tag {{.CLI_ARGS}}
+      - git push --tags
+      - aws s3 sync docs/build/ s3://{{.S3_DOCS_BUCKET}} --delete
+
+  release:
+    desc: "Release process"
+    cmds:
+      - task: bump:version
+      - task: docusaurus:version
+      - task: docusaurus:update-config
+      - task: docusaurus:build
+      - task: release:commit
+      - task: release:pr
