@@ -17,7 +17,7 @@ This guide provides an overview of the contribution workflow—from opening an i
 
 To get an overview of the project structure and purpose, read the full documentation.
 
-Before making any changes, check what types of contributions are currently accepted.
+Before making any changes, please check first what types of contributions are currently accepted.
 
 ---
 
