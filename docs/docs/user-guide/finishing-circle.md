@@ -8,7 +8,8 @@ We can now create and manage new **Data Products** using **Datasets**
 
 ### Using Datasets in New Data Products
 
-Once you have datasets available, you can use them as **inputs** for creating new data products. This allows you to build on top of existing data and extend its usage within your organization.
+Once you have datasets available, you can use them as **inputs** for creating new data products.
+This allows you to build on top of existing data and extend its usage within your organization.
 
 ### How to Use Datasets in a Data Product
 
