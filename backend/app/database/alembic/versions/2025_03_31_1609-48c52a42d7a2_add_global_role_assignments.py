@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column("role_id", sa.UUID, sa.ForeignKey("roles.id"), nullable=False),
         sa.Column(
             "decision",
-            sa.Enum(DecisionStatus),
+            sa.Enum(DecisionStatus, create_type=False),
             default=DecisionStatus.PENDING,
             nullable=False,
         ),
