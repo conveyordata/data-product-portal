@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from ..auth import (
-    ResourceAuthAssignment,
-)
+from ..auth import ResourceAuthAssignment
 from .schema import RoleAssignment
 
 
