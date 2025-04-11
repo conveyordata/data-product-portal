@@ -3,8 +3,10 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
+from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_settings.model import DataProductSettingValue
 from app.data_products.schema import DataProduct as DataProductSchema
@@ -19,6 +21,7 @@ if TYPE_CHECKING:
     from app.data_product_lifecycles.model import DataProductLifecycle
     from app.data_product_types.model import DataProductType
     from app.domains.model import Domain
+    from app.users.model import User
 
 
 def ensure_data_product_exists(data_product_id: UUID, db: Session) -> DataProductSchema:
@@ -73,3 +76,11 @@ class DataProduct(Base, BaseORM):
         back_populates="owner",
         cascade="all, delete-orphan",
     )
+
+    @hybrid_property
+    def owners(self) -> list["User"]:
+        return [
+            membership.user
+            for membership in self.memberships
+            if membership.role == DataProductUserRole.OWNER
+        ]

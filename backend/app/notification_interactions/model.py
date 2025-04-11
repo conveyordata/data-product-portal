@@ -4,10 +4,11 @@ from sqlalchemy import UUID, Column, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
-from app.notifications.model import Notification
 
 if TYPE_CHECKING:
     from app.users.model import User
+    from app.notifications.model import Notification
+
 
 import uuid
 

@@ -15,8 +15,7 @@ from app.data_products_datasets.model import (
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.notification_interactions.service import NotificationInteractionService
-from app.notifications.notification_types import NotificationTypes
+from app.notifications.model import NotificationFactory
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -34,14 +33,7 @@ class DataProductDatasetService:
         current_link.status = DataProductDatasetLinkStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
-
-        NotificationInteractionService().update_interactions_by_reference(
-            db,
-            current_link.id,
-            NotificationTypes.DataProductDatasetNotification,
-            [current_link.requested_by_id],
-        )
-
+        NotificationFactory.createDataProductDatasetApproved(db, current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
@@ -58,14 +50,7 @@ class DataProductDatasetService:
         current_link.status = DataProductDatasetLinkStatus.DENIED
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
-
-        NotificationInteractionService().update_interactions_by_reference(
-            db,
-            current_link.id,
-            NotificationTypes.DataProductDatasetNotification,
-            [current_link.requested_by_id],
-        )
-
+        NotificationFactory.createDataProductDatasetDenied(db, current_link)
         db.commit()
 
     def remove_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
@@ -74,10 +59,8 @@ class DataProductDatasetService:
         ensure_dataset_exists(dataset.id, db)
         linked_data_product = current_link.data_product
         data_product = ensure_data_product_exists(linked_data_product.id, db)
-        NotificationInteractionService().remove_notification_relations(
-            db, current_link.id, NotificationTypes.DataProductDatasetNotification
-        )
         db.refresh(current_link)
+        current_link.remove_notifications(db)
         data_product.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()

@@ -52,8 +52,7 @@ from app.environments.model import Environment as EnvironmentModel
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.notification_interactions.service import NotificationInteractionService
-from app.notifications.notification_types import NotificationTypes
+from app.notifications.model import NotificationFactory
 from app.platforms.model import Platform as PlatformModel
 from app.settings import settings
 from app.tags.model import Tag as TagModel
@@ -160,11 +159,6 @@ class DataProductService:
                     role=membership.role,
                 )
             )
-
-        if hasattr(data_product, "id") and data_product.id:
-            NotificationInteractionService().redirect_pending_requests(
-                db, data_product.id, NotificationTypes.DataProductMembershipNotification
-            )
         return data_product
 
     def _get_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
@@ -206,25 +200,17 @@ class DataProductService:
                 detail=f"Data Product {id} not found",
             )
         for membership in data_product.memberships:
-            NotificationInteractionService().remove_notification_relations(
-                db, membership.id, NotificationTypes.DataProductMembershipNotification
-            )
             db.refresh(membership)
+            membership.remove_notifications(db)
         data_product.memberships = []
         for dataset_link in data_product.dataset_links:
-            NotificationInteractionService().remove_notification_relations(
-                db, dataset_link.id, NotificationTypes.DataProductDatasetNotification
-            )
             db.refresh(dataset_link)
+            dataset_link.remove_notifications(db)
         data_product.dataset_links = []
         for output in data_product.data_outputs:
             for output_dataset_link in output.dataset_links:
-                NotificationInteractionService().remove_notification_relations(
-                    db,
-                    output_dataset_link.id,
-                    NotificationTypes.DataOutputDatasetNotification,
-                )
                 db.refresh(output_dataset_link)
+                output_dataset_link.remove_notifications(db)
             output.dataset_links = []
             db.delete(output)
         db.delete(data_product)
@@ -268,16 +254,6 @@ class DataProductService:
         ]
         for membership in memberships_to_remove:
             data_product.memberships.remove(membership)
-
-        db.flush()
-        db.refresh(data_product)
-
-        NotificationInteractionService().redirect_pending_requests(
-            db, data_product.id, NotificationTypes.DataProductMembershipNotification
-        )
-
-        db.flush()
-        db.refresh(data_product)
 
     def update_data_product(
         self, id: UUID, data_product: DataProductUpdate, db: Session
@@ -353,11 +329,8 @@ class DataProductService:
         )
         data_product.dataset_links.append(dataset_link)
         if dataset_link.status == DataProductDatasetLinkStatus.PENDING_APPROVAL:
-            db.flush()
             db.refresh(dataset_link)
-            NotificationInteractionService().create_notification_relations(
-                db, dataset_link.id, NotificationTypes.DataProductDatasetNotification
-            )
+            NotificationFactory.createDataOutputDatasetRequested(db, dataset_link)
 
         db.commit()
         db.refresh(data_product)
@@ -410,12 +383,8 @@ class DataProductService:
                 detail=f"Data product dataset for data product {id} not found",
             )
 
-        NotificationInteractionService().remove_notification_relations(
-            db,
-            data_product_dataset.id,
-            NotificationTypes.DataProductDatasetNotification,
-        )
         db.refresh(data_product_dataset)
+        data_product_dataset.remove_notifications(db)
         data_product.dataset_links.remove(data_product_dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()

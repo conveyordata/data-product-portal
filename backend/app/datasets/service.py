@@ -22,8 +22,6 @@ from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.notification_interactions.service import NotificationInteractionService
-from app.notifications.notification_types import NotificationTypes
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User, ensure_user_exists
@@ -104,20 +102,6 @@ class DatasetService:
         for owner in owner_ids:
             user = ensure_user_exists(owner, db)
             dataset.owners.append(user)
-
-        if hasattr(dataset, "id") and dataset.id:
-            NotificationInteractionService().redirect_pending_requests(
-                db,
-                dataset.id,
-                NotificationTypes.DataProductDatasetNotification,
-                owner_ids,
-            )
-            NotificationInteractionService().redirect_pending_requests(
-                db,
-                dataset.id,
-                NotificationTypes.DataOutputDatasetNotification,
-                owner_ids,
-            )
         return dataset
 
     def _fetch_tags(self, db: Session, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
@@ -153,18 +137,14 @@ class DatasetService:
             )
         dataset.owners = []
         for data_product_link in dataset.data_product_links:
-            NotificationInteractionService().remove_notification_relations(
-                db,
-                data_product_link.id,
-                NotificationTypes.DataProductDatasetNotification,
-            )
             db.refresh(data_product_link)
+            data_product_link.remove_notifications(db)
+
         dataset.data_product_links = []
         for data_output_link in dataset.data_output_links:
-            NotificationInteractionService().remove_notification_relations(
-                db, data_output_link.id, NotificationTypes.DataOutputDatasetNotification
-            )
             db.refresh(data_output_link)
+            data_output_link.remove_notifications(db)
+
         dataset.data_output_links = []
         dataset.tags = []
         db.delete(dataset)
@@ -214,15 +194,6 @@ class DatasetService:
             )
 
         dataset.owners.append(user)
-        db.flush()
-        db.refresh(dataset)
-
-        NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, NotificationTypes.DataProductDatasetNotification
-        )
-        NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, NotificationTypes.DataOutputDatasetNotification
-        )
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
@@ -244,15 +215,6 @@ class DatasetService:
             )
 
         dataset.owners.remove(user)
-        db.flush()
-        db.refresh(dataset)
-
-        NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, NotificationTypes.DataProductDatasetNotification
-        )
-        NotificationInteractionService().redirect_pending_requests(
-            db, dataset.id, NotificationTypes.DataOutputDatasetNotification
-        )
         db.commit()
         RefreshInfrastructureLambda().trigger()
 

@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
@@ -55,7 +55,18 @@ class DataProductMembership(Base, BaseORM):
     denied_by: Mapped["User"] = relationship(
         foreign_keys=[denied_by_id], back_populates="denied_memberships"
     )
+    notifications = relationship(
+        "DataProductMembershipNotification",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        back_populates="data_product_membership",
+    )
     denied_on = Column(DateTime(timezone=False))
     __table_args__ = (
         UniqueConstraint("data_product_id", "user_id", name="unique_data_product_user"),
     )
+
+    def remove_notifications(self, db: Session):
+        for notification in self.notifications:
+            db.delete(notification)
+        self.notifications.clear()

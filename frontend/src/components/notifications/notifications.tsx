@@ -26,191 +26,212 @@ export function Notifications() {
     const { data: notifications } = useGetNotificationsQuery();
 
     const createItem = useCallback((userNotification: NotificationModel, navigate: NavigateFunction, t: TFunction) => {
-        let link, description, navigatePath;
+        let link, description, navigatePath, received;
 
-        switch (userNotification.notification.configuration_type) {
+        switch (userNotification.notification.notification_type) {
             case NotificationTypes.DataProductDatasetNotification:
-                link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
-                switch (userNotification.notification.reference.status) {
+                link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
+                switch (userNotification.notification.notification_origin) {
                     case DataProductDatasetLinkStatus.Pending:
                         description = (
                             <Typography.Text>
                                 {t('{{name}}, on behalf of data product', {
-                                    name: userNotification.notification.reference.requested_by?.first_name,
+                                    name: userNotification.notification.data_product_dataset.requested_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.reference.data_product.name}
+                                    {userNotification.notification.data_product_dataset.data_product.name}
                                 </Link>{' '}
-                                {t('requests read access to dataset')}{' '}
+                                {t('requested read access to dataset')}{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_product_dataset.dataset_id,
+                                    )}
                                 >
-                                    {userNotification.notification.reference.dataset.name}
+                                    {userNotification.notification.data_product_dataset.dataset.name}
                                 </Link>
                             </Typography.Text>
                         );
+                        received = userNotification.notification.data_product_dataset.requested_on;
                         break;
                     case DataProductDatasetLinkStatus.Approved:
                         description = (
                             <Typography.Text>
                                 {t('{{name}}, approved your request made on behalf of data output', {
-                                    name: userNotification.notification.reference.approved_by?.first_name,
+                                    name: userNotification.notification.data_product_dataset.approved_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.reference.data_product.name}
+                                    {userNotification.notification.data_product_dataset.data_product.name}
                                 </Link>{' '}
                                 {t('for read access to dataset')}{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_product_dataset.dataset_id,
+                                    )}
                                 >
-                                    {userNotification.notification.reference.dataset.name}
+                                    {userNotification.notification.data_product_dataset.dataset.name}
                                 </Link>
                             </Typography.Text>
                         );
+                        received = userNotification.notification.data_product_dataset.approved_on;
                         break;
                     case DataProductDatasetLinkStatus.Denied:
                         description = (
                             <Typography.Text>
                                 {t('{{name}}, denied your request made on behalf of data output', {
-                                    name: userNotification.notification.reference.denied_by?.first_name,
+                                    name: userNotification.notification.data_product_dataset.denied_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.reference.data_product.name}
+                                    {userNotification.notification.data_product_dataset.data_product.name}
                                 </Link>{' '}
                                 {t('for read access to dataset')}{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_product_dataset.dataset_id,
+                                    )}
                                 >
-                                    {userNotification.notification.reference.dataset.name}
+                                    {userNotification.notification.data_product_dataset.dataset.name}
                                 </Link>
                             </Typography.Text>
                         );
+                        received = userNotification.notification.data_product_dataset.denied_on;
                         break;
                 }
                 navigatePath = createDatasetIdPath(
-                    userNotification.notification.reference.dataset_id,
+                    userNotification.notification.data_product_dataset.dataset_id,
                     DatasetTabKeys.DataProduct,
                 );
                 break;
 
             case NotificationTypes.DataOutputDatasetNotification:
                 link = createDataOutputIdPath(
-                    userNotification.notification.reference.data_output_id,
-                    userNotification.notification.reference.data_output.owner_id,
+                    userNotification.notification.data_output_dataset.data_output_id,
+                    userNotification.notification.data_output_dataset.data_output.owner_id,
                 );
-                switch (userNotification.notification.reference.status) {
+                switch (userNotification.notification.notification_origin) {
                     case DataOutputDatasetLinkStatus.Pending:
                         description = (
                             <Typography.Text>
                                 {t('{{name}}, on behalf of data output', {
-                                    name: userNotification.notification.reference.requested_by?.first_name,
+                                    name: userNotification.notification.data_output_dataset.requested_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.reference.data_output.name}
+                                    {userNotification.notification.data_output_dataset.data_output.name}
                                 </Link>{' '}
-                                {t('requests a link to dataset')}{' '}
+                                {t('requested a link to dataset')}{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_output_dataset.dataset_id,
+                                    )}
                                 >
-                                    {userNotification.notification.reference.dataset.name}
+                                    {userNotification.notification.data_output_dataset.dataset.name}
                                 </Link>
                             </Typography.Text>
                         );
+                        received = userNotification.notification.data_output_dataset.requested_on;
                         break;
                     case DataOutputDatasetLinkStatus.Approved:
                         description = (
                             <Typography.Text>
                                 {t('{{name}}, approved your request made on behalf of data output', {
-                                    name: userNotification.notification.reference.approved_by?.first_name,
+                                    name: userNotification.notification.data_output_dataset.approved_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.reference.data_output.name}
+                                    {userNotification.notification.data_output_dataset.data_output.name}
                                 </Link>{' '}
                                 {t('for a link to dataset')}{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_output_dataset.dataset_id,
+                                    )}
                                 >
-                                    {userNotification.notification.reference.dataset.name}
+                                    {userNotification.notification.data_output_dataset.dataset.name}
                                 </Link>
                             </Typography.Text>
                         );
+                        received = userNotification.notification.data_output_dataset.approved_on;
                         break;
                     case DataOutputDatasetLinkStatus.Denied:
                         description = (
                             <Typography.Text>
                                 {t('{{name}}, denied your request made on behalf of data output', {
-                                    name: userNotification.notification.reference.denied_by?.first_name,
+                                    name: userNotification.notification.data_output_dataset.denied_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.reference.data_output.name}
+                                    {userNotification.notification.data_output_dataset.data_output.name}
                                 </Link>{' '}
                                 {t('for a link to dataset')}{' '}
                                 <Link
                                     onClick={(e) => e.stopPropagation()}
-                                    to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
+                                    to={createDatasetIdPath(
+                                        userNotification.notification.data_output_dataset.dataset_id,
+                                    )}
                                 >
-                                    {userNotification.notification.reference.dataset.name}
+                                    {userNotification.notification.data_output_dataset.dataset.name}
                                 </Link>
                             </Typography.Text>
                         );
+                        received = userNotification.notification.data_output_dataset.denied_on;
                         break;
                 }
                 navigatePath = createDatasetIdPath(
-                    userNotification.notification.reference.dataset_id,
+                    userNotification.notification.data_output_dataset.dataset_id,
                     DatasetTabKeys.DataOutput,
                 );
                 break;
 
             case NotificationTypes.DataProductMembershipNotification:
-                link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
-                switch (userNotification.notification.reference.status) {
+                link = createDataProductIdPath(userNotification.notification.data_product_membership.data_product_id);
+                switch (userNotification.notification.notification_origin) {
                     case DataProductMembershipStatus.Pending:
                         description = (
                             <Typography.Text>
-                                {t('{{name}} would like to join the data product', {
-                                    name: userNotification.notification.reference.user?.first_name,
+                                {t('{{name}} made a request to join the data product', {
+                                    name: userNotification.notification.data_product_membership.user?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.reference.data_product.name}
+                                    {userNotification.notification.data_product_membership.data_product.name}
                                 </Link>{' '}
                                 {t('team')}{' '}
                             </Typography.Text>
                         );
+                        received = userNotification.notification.data_product_membership.requested_on;
                         break;
                     case DataProductMembershipStatus.Approved:
                         description = (
                             <Typography.Text>
                                 {t('{{name}} approved your request to join the data product', {
-                                    name: userNotification.notification.reference.approved_by?.first_name,
+                                    name: userNotification.notification.data_product_membership.approved_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.reference.data_product.name}
+                                    {userNotification.notification.data_product_membership.data_product.name}
                                 </Link>{' '}
                                 {t('team')}{' '}
                             </Typography.Text>
                         );
+                        received = userNotification.notification.data_product_membership.approved_on;
                         break;
                     case DataProductMembershipStatus.Denied:
                         description = (
                             <Typography.Text>
                                 {t('{{name}} denied your request to join the data product', {
-                                    name: userNotification.notification.reference.denied_by?.first_name,
+                                    name: userNotification.notification.data_product_membership.denied_by?.first_name,
                                 })}{' '}
                                 <Link onClick={(e) => e.stopPropagation()} to={link}>
-                                    {userNotification.notification.reference.data_product.name}
+                                    {userNotification.notification.data_product_membership.data_product.name}
                                 </Link>{' '}
                                 {t('team')}{' '}
                             </Typography.Text>
                         );
+                        received = userNotification.notification.data_product_membership.denied_on;
                         break;
                 }
                 navigatePath = createDataProductIdPath(
-                    userNotification.notification.reference.data_product_id,
+                    userNotification.notification.data_product_membership.data_product_id,
                     DataProductTabKeys.Team,
                 );
                 break;
@@ -224,18 +245,24 @@ export function Notifications() {
             label: <Flex>{description}</Flex>,
             extra: <ExportOutlined />,
             onClick: () => navigate(navigatePath),
+            received: received,
         };
     }, []);
 
     const notificationItems = useMemo(() => {
-        const notificationCreatedItems = notifications?.map((action) => createItem({ ...action }, navigate, t));
-        return notificationCreatedItems ?? [];
+        const notificationCreatedItems = notifications?.map((action) => createItem({ ...action }, navigate, t)) ?? [];
+        return notificationCreatedItems.sort((a, b) => {
+            if (!a?.received || !b?.received) {
+                return 0;
+            }
+            return new Date(b.received).getTime() - new Date(a.received).getTime();
+        });
     }, [notifications, createItem, navigate, t]);
 
     const items: MenuProps['items'] = [
         {
             type: 'group',
-            label: notificationItems?.length > 0 ? t('Pending actions') : t('No pending actions'),
+            label: notificationItems?.length > 0 ? t('Notifications') : t('No notifications available'),
             children: notificationItems,
         },
     ];
