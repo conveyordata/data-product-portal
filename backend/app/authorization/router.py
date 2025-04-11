@@ -5,8 +5,7 @@ from fastapi import APIRouter, Depends
 
 from app.authorization.schema import AccessResponse
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization
+from app.core.authz import Action, Authorization
 from app.users.schema import User
 
 router = APIRouter(prefix="/authz", tags=["authz"])
@@ -24,7 +23,7 @@ router = APIRouter(prefix="/authz", tags=["authz"])
     },
 )
 def check_access(
-    action: AuthorizationAction,
+    action: Action,
     resource: Optional[UUID] = None,
     domain: Optional[UUID] = None,
     user: User = Depends(get_authenticated_user),
