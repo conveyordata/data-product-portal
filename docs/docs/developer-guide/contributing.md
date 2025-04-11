@@ -27,7 +27,7 @@ Before making any changes, please check first what types of contributions are cu
 
 Issues help us track bugs, feature requests, and general improvements.
 
-- If an issue has the `triage` label, it hasn't been reviewed yet—please wait before starting work on it.
+- If an issue has the `triage` label, it hasn't been reviewed yet. Please wait before starting work on it.
 - You can search for existing issues on our [GitHub Issues page](https://github.com/conveyordata/data-product-portal/issues).
 
 ### 🌐 Translations
