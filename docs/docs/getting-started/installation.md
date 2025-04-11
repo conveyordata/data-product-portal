@@ -43,7 +43,9 @@ Update your `values.yaml` to match your environment. By default, images will use
 
 #### Host
 
-A dedicated hostname is required for running a production setup of Portal. Both the backend and the frontend components need this as an environment variable to ensure communication between the services is possible. Adjust the **host** value in the `values.yaml`
+A dedicated hostname is required for running a production setup of Portal.
+Both the backend and the frontend components need this as an environment variable to ensure communication between the services is possible.
+Adjust the **host** value in the `values.yaml`
 
 #### Ingress
 
