@@ -45,6 +45,15 @@ pytest-cov = "^6.1.1"
 pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
 
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+poethepoet = "^0.33.1"
+
+[tool.poe.tasks]
+test = "pytest -v tests/"
+coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
 
 [build-system]
 requires = ["poetry-core"]
