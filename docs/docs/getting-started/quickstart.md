@@ -64,7 +64,8 @@ The Docker setup will **drop and recreate the PostgreSQL database** on startup. 
 
 ### Limited Functionality
 
-The Docker setup is meant for evaluation and exploration. Most integrations are disabled by default. If you'd like to test integrations (e.g., *OIDC*, *Conveyor*, *AWS*), you must install the necessary dependencies and update your configuration accordingly.
+The Docker setup is meant for evaluation and exploration. Most integrations are disabled by default.
+If you'd like to test integrations (e.g., *OIDC*, *Conveyor*, *AWS*), you must install the necessary dependencies and update your configuration accordingly.
 
 ---
 
