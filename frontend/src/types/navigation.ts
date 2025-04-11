@@ -5,6 +5,7 @@ import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-ta
 export enum ApplicationPaths {
     Home = '/',
     DataProducts = '/data-products',
+    Documentation = '/documentation',
     DataProduct = '/data-products/:dataProductId',
     DataProductNew = '/data-products/new',
     DataProductEdit = '/data-products/:dataProductId/edit',
