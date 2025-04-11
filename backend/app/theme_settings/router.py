@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization, DataProductResolver
+from app.core.authz import Action, Authorization, DataProductResolver
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
 
@@ -23,7 +22,7 @@ def get_settings(db: Session = Depends(get_db_session)) -> ThemeSettings:
         Depends(only_for_admin),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
             )
         ),
     ],

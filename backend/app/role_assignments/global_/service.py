@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.database import ensure_exists
+from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.model import GlobalRoleAssignment
 from app.role_assignments.global_.schema import (
     RoleAssignment,
@@ -23,10 +24,14 @@ class RoleAssignmentService:
     def get_assignment(self, id_: UUID) -> RoleAssignment:
         return ensure_exists(id_, self.db, GlobalRoleAssignment)
 
-    def list_assignments(self, *, user_id: Optional[UUID]) -> Sequence[RoleAssignment]:
+    def list_assignments(
+        self, *, user_id: Optional[UUID], decision: Optional[DecisionStatus] = None
+    ) -> Sequence[RoleAssignment]:
         query = select(GlobalRoleAssignment)
         if user_id is not None:
             query = query.where(GlobalRoleAssignment.user_id == user_id)
+        if decision is not None:
+            query = query.where(GlobalRoleAssignment.decision == decision)
 
         return self.db.scalars(query).all()
 

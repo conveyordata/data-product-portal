@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import (
+from app.core.authz import (
+    Action,
     Authorization,
     DataProductDatasetAssociationResolver,
 )
@@ -26,7 +26,7 @@ router = APIRouter(
         Depends(only_dataproduct_dataset_link_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                 DataProductDatasetAssociationResolver,
             )
         ),
@@ -48,7 +48,7 @@ def approve_data_product_link(
         Depends(only_dataproduct_dataset_link_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                 DataProductDatasetAssociationResolver,
             )
         ),
@@ -70,7 +70,7 @@ def deny_data_product_link(
         Depends(only_dataproduct_dataset_link_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+                Action.DATASET__REVOKE_DATAPRODUCT_ACCESS,
                 DataProductDatasetAssociationResolver,
             )
         ),

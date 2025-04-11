@@ -1,16 +1,18 @@
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import (
+from app.core.authz import (
+    Action,
     Authorization,
     DataProductMembershipResolver,
     DataProductResolver,
 )
 from app.data_product_memberships.enums import DataProductUserRole
+from app.data_product_memberships.model import DataProductMembership
 from app.data_product_memberships.schema import DataProductMembershipCreate
 from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_product_memberships.service import DataProductMembershipService
@@ -19,6 +21,13 @@ from app.dependencies import (
     OnlyWithProductAccessDataProductID,
     only_product_membership_owners,
 )
+from app.role_assignments.data_product.router import (
+    list_assignments,
+    modify_assigned_role,
+)
+from app.role_assignments.data_product.schema import ModifyRoleAssignment
+from app.roles.model import Role
+from app.roles.schema import Scope
 from app.users.schema import User
 
 router = APIRouter(
@@ -32,7 +41,7 @@ router = APIRouter(
         Depends(OnlyWithProductAccessDataProductID([DataProductUserRole.OWNER])),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__CREATE_USER,
+                Action.DATA_PRODUCT__CREATE_USER,
                 DataProductResolver,
                 object_id="data_product_id",
             )
@@ -55,7 +64,7 @@ def create_data_product_membership(
     dependencies=[
         Depends(
             Authorization.enforce(
-                AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
+                Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
                 DataProductResolver,
                 object_id="data_product_id",
             )
@@ -80,7 +89,7 @@ def request_data_product_membership(
         Depends(only_product_membership_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
                 DataProductMembershipResolver,
             )
         ),
@@ -102,7 +111,7 @@ def approve_data_product_membership(
         Depends(only_product_membership_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
                 DataProductMembershipResolver,
             )
         ),
@@ -124,7 +133,7 @@ def deny_data_product_membership(
         Depends(only_product_membership_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__DELETE_USER,
+                Action.DATA_PRODUCT__DELETE_USER,
                 DataProductMembershipResolver,
             )
         ),
@@ -156,7 +165,7 @@ def remove_data_product_membership(
         Depends(only_product_membership_owners),
         Depends(
             Authorization.enforce(
-                AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
+                Action.DATA_PRODUCT__UPDATE_USER,
                 DataProductMembershipResolver,
             )
         ),
@@ -165,11 +174,30 @@ def remove_data_product_membership(
 def update_data_product_role(
     id: UUID,
     membership_role: DataProductUserRole,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductMembershipService().update_data_product_membership_role(
+    old_membership = db.scalar(select(DataProductMembership).filter_by(id=id))
+    old_role = old_membership.role.name.lower()
+    updated_id = DataProductMembershipService().update_data_product_membership_role(
         id, membership_role, db
     )
+    roles = list_assignments(
+        old_membership.data_product_id, old_membership.user_id, db, authenticated_user
+    )
+    for role in roles:
+        if role.role.name.lower() == old_role:
+            new_role = db.scalar(
+                select(Role)
+                .filter_by(scope=Scope.DATA_PRODUCT)
+                .filter(func.lower(Role.name) == membership_role.name.lower())
+            )
+            request = ModifyRoleAssignment(role_id=new_role.id)
+            modify_assigned_role(
+                role.id, request, background_tasks, db, authenticated_user
+            )
+    return {"id": updated_id}
 
 
 @router.get("/actions")

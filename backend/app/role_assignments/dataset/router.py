@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.database.database import get_db_session
-from app.role_assignments.dataset import tasks
+from app.role_assignments.dataset.auth import DatasetAuthAssignment
 from app.role_assignments.dataset.schema import (
     CreateRoleAssignment,
     DecideRoleAssignment,
@@ -15,7 +15,6 @@ from app.role_assignments.dataset.schema import (
     UpdateRoleAssignment,
 )
 from app.role_assignments.dataset.service import RoleAssignmentService
-from app.role_assignments.dataset.tasks import AuthAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.users.schema import User
 
@@ -53,9 +52,7 @@ def delete_assignment(
     assignment = RoleAssignmentService(db=db, user=user).delete_assignment(id)
 
     if assignment.decision is DecisionStatus.APPROVED:
-        background_tasks.add_task(
-            tasks.remove_assignment, AuthAssignment.from_dataset(assignment)
-        )
+        background_tasks.add_task(DatasetAuthAssignment(assignment).remove)
     return None
 
 
@@ -87,9 +84,7 @@ def decide_assignment(
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
-        background_tasks.add_task(
-            tasks.add_assignment, AuthAssignment.from_dataset(assignment)
-        )
+        background_tasks.add_task(DatasetAuthAssignment(assignment).add)
 
     return assignment
 
@@ -103,19 +98,15 @@ def modify_assigned_role(
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
-    original_role = service.get_assignment(id).role_id
+    original = service.get_assignment(id)
 
     assignment = service.update_assignment(
         UpdateRoleAssignment(id=id, role_id=request.role_id)
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
-        assert (
-            original_role is not None
-        ), "Decision status can only be approved when the role is set"
         background_tasks.add_task(
-            tasks.swap_assignment,
-            AuthAssignment.from_dataset(assignment).with_previous(original_role),
+            DatasetAuthAssignment(assignment, previous=original).swap
         )
 
     return assignment

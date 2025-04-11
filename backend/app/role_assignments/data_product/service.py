@@ -12,6 +12,7 @@ from app.role_assignments.data_product.schema import (
     RoleAssignment,
     UpdateRoleAssignment,
 )
+from app.role_assignments.enums import DecisionStatus
 from app.users.schema import User
 
 
@@ -24,7 +25,11 @@ class RoleAssignmentService:
         return ensure_exists(id_, self.db, DataProductRoleAssignment)
 
     def list_assignments(
-        self, *, data_product_id: Optional[UUID], user_id: Optional[UUID]
+        self,
+        *,
+        data_product_id: Optional[UUID],
+        user_id: Optional[UUID],
+        decision: Optional[DecisionStatus] = None,
     ) -> Sequence[RoleAssignment]:
         query = select(DataProductRoleAssignment)
         if data_product_id is not None:
@@ -33,6 +38,8 @@ class RoleAssignmentService:
             )
         if user_id is not None:
             query = query.where(DataProductRoleAssignment.user_id == user_id)
+        if decision is not None:
+            query = query.where(DataProductRoleAssignment.decision == decision)
 
         return self.db.scalars(query).all()
 

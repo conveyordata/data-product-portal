@@ -1,6 +1,8 @@
 from tests.factories import (
     DataProductFactory,
     DataProductMembershipFactory,
+    DataProductRoleAssignmentFactory,
+    RoleFactory,
     UserFactory,
 )
 
@@ -8,6 +10,7 @@ from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
     DataProductUserRole,
 )
+from app.roles.schema import Prototype, Scope
 
 MEMBERSHIPS_ENDPOINT = "/api/data_product_memberships"
 
@@ -96,6 +99,29 @@ class TestDataProductMembershipsRouter:
             role=DataProductUserRole.MEMBER.value,
         )
 
+        response = self.update_data_product_membership_user_role(
+            client, membership.id, DataProductUserRole.OWNER.value
+        )
+        assert response.status_code == 200
+
+    def test_update_data_product_membership_role_with_assignments(self, client):
+        user = UserFactory()
+        owner_membership = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        )
+        membership = DataProductMembershipFactory(
+            data_product=owner_membership.data_product,
+            user=user,
+            role=DataProductUserRole.OWNER.value,
+        )
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER, name="owner"
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=owner_membership.data_product.id,
+        )
         response = self.update_data_product_membership_user_role(
             client, membership.id, DataProductUserRole.OWNER.value
         )
