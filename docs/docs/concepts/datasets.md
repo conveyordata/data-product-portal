@@ -4,7 +4,7 @@ title: 🔷 Datasets
 sidebar_position: 3
 ---
 
-# 🔹 Datasets
+# 🔷 Datasets
 
 **Datasets** are logical groupings of **Data Outputs** that serve as the primary unit of data access and sharing in the portal.
 
