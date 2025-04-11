@@ -1,6 +1,6 @@
 ---
 id: datasets
-title: 🔹 Datasets
+title: 🔷 Datasets
 sidebar_position: 3
 ---
 
