@@ -36,7 +36,7 @@ tasks:
         const updated = config
           .replace(/Latest \((.*?)\)/, `Latest (${newVersion})`)
           .replace(/versions:\s*{/, match => {
-            const newEntry = `  "${newVersion}": {\n    label: "${newVersion}",\n    path: "${newVersion}"\n  },\n`;
+            const newEntry = `\t\t\t\t\t\t\t"${newVersion}": {\n\t\t\t\t\t\t\t\tlabel: "${newVersion}",\n\t\t\t\t\t\t\tpath: "${newVersion}"\n\t\t\t\t\t\t\t},`;
             return `${match}\n${newEntry}`;
           });
         fs.writeFileSync(file, updated);
