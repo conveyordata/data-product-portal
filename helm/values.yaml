@@ -162,4 +162,4 @@ tolerations: []
 
 affinity: {}
 
-namespace_max_length: 64
+namespace_max_length: "!!string 64"
