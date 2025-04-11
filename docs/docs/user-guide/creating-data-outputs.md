@@ -30,7 +30,8 @@ Data Outputs are linked to and owned by a single **Data Product**.
 
 ### Alignment
 
-**Product aligned** Data Outputs are the default option. These Data Outputs are created within the namespace of the parent **Data Product** and have the correct, restricted permissions.
+**Product aligned** Data Outputs are the default option.
+These Data Outputs are created within the namespace of the parent **Data Product** and have the correct, restricted permissions.
 
 **Source aligned** Data Outputs need to be explicitly approved by **Data Product Portal** administrators.
 These can represent powerful ingestion **Data Outputs** that ingest from shared sources into different **Data Products** or **Datasets**.
