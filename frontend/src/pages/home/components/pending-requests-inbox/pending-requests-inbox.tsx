@@ -1,4 +1,5 @@
-import { Badge, Pagination, Typography } from 'antd';
+import { CheckCircleOutlined } from '@ant-design/icons';
+import { Badge, Empty, Pagination, Typography } from 'antd';
 import { TFunction } from 'i18next';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -135,6 +136,24 @@ export function PendingRequestsInbox() {
     const onPaginationChange = (current: number, pageSize: number) => {
         handlePaginationChange({ current, pageSize });
     };
+
+    if (pendingItems.length == 0 && isFetching == false) {
+        return (
+            <div className={styles.requestsInbox}>
+                <Typography.Title level={1} className={styles.welcomeContent}>
+                    {t('Welcome back')}
+                </Typography.Title>
+                <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={
+                        <Typography.Text>
+                            <CheckCircleOutlined /> {t(`You have no requests to handle.`)}
+                        </Typography.Text>
+                    }
+                ></Empty>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.section}>
