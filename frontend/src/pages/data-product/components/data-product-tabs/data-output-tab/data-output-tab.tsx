@@ -45,13 +45,13 @@ export function DataOutputTab({ dataProductId }: Props) {
 
     const { data: access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
+            resource: dataProductId,
             action: AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
         },
         { skip: !dataProductId },
     );
 
-    const canCreateDataOutputNew = access?.access || false;
+    const canCreateDataOutputNew = access?.allowed || false;
 
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;

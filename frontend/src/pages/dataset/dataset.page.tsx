@@ -39,12 +39,12 @@ export function Dataset() {
     );
     const { data: access } = useCheckAccessQuery(
         {
-            object_id: datasetId,
+            resource: datasetId,
             action: AuthorizationAction.DATASET__UPDATE_PROPERTIES,
         },
         { skip: !datasetId },
     );
-    const canEditNew = access?.access || false;
+    const canEditNew = access?.allowed || false;
 
     function navigateToDatasetEditPage() {
         if (canEditNew || (isDatasetOwner && datasetId)) {

@@ -11,7 +11,7 @@ const ProtectedRoute = () => {
     const { data: access } = useCheckAccessQuery({
         action: AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION,
     });
-    const canAccess = access?.access || false;
+    const canAccess = access?.allowed || false;
     return currentUser?.is_admin || canAccess ? <Outlet /> : <Navigate to={ApplicationPaths.Home} replace />;
 };
 

@@ -31,24 +31,20 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
 
     const { data: accept_access } = useCheckAccessQuery(
         {
-            object_id: datasetId,
+            resource: datasetId,
             action: AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
         },
-        {
-            skip: !datasetId,
-        },
+        { skip: !datasetId },
     );
     const { data: revoke_access } = useCheckAccessQuery(
         {
-            object_id: datasetId,
+            resource: datasetId,
             action: AuthorizationAction.DATASET__REVOKE_DATA_OUTPUT_LINK,
         },
-        {
-            skip: !datasetId,
-        },
+        { skip: !datasetId },
     );
-    const canAcceptNew = accept_access?.access || false;
-    const canRevokeNew = revoke_access?.access || false;
+    const canAcceptNew = accept_access?.allowed || false;
+    const canRevokeNew = revoke_access?.allowed || false;
 
     const handleRemoveDatasetFromDataOutput = useCallback(
         async (dataOutputId: string, name: string, datasetLinkId: string) => {

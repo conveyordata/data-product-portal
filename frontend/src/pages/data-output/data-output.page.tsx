@@ -42,12 +42,12 @@ export function DataOutput() {
 
     const { data: edit_access } = useCheckAccessQuery(
         {
-            object_id: dataProduct?.id,
+            resource: dataProduct?.id,
             action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
         },
         { skip: !dataProduct },
     );
-    const canEditNew = edit_access?.access || false;
+    const canEditNew = edit_access?.allowed || false;
 
     function navigateToEditPage() {
         if ((canEditNew || isCurrentDataOutputOwner) && dataOutputId && dataOutput && !isLoading) {

@@ -37,12 +37,10 @@ export function DatasetsTable() {
         { skip: !currentUser },
     );
     const { data: access } = useCheckAccessQuery(
-        {
-            action: AuthorizationAction.GLOBAL__CREATE_DATASET,
-        },
+        { action: AuthorizationAction.GLOBAL__CREATE_DATASET },
         { skip: !currentUser },
     );
-    const canCreateDataset = access?.access || false;
+    const canCreateDataset = access?.allowed || false;
     const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);

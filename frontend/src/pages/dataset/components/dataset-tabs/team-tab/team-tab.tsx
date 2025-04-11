@@ -49,12 +49,12 @@ export function TeamTab({ datasetId }: Props) {
     const datasetOwnerIds = dataset?.owners.map((owner) => owner.id) ?? [];
     const { data: access } = useCheckAccessQuery(
         {
-            object_id: datasetId,
+            resource: datasetId,
             action: AuthorizationAction.DATASET__CREATE_USER,
         },
         { skip: !datasetId },
     );
-    const canAddNew = access?.access || false;
+    const canAddNew = access?.allowed || false;
 
     const filteredUsers = useMemo(() => {
         return filterUsers(dataset?.owners ?? [], searchTerm);

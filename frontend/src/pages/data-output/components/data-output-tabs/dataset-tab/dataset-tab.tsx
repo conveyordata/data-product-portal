@@ -44,12 +44,12 @@ export function DatasetTab({ dataOutputId }: Props) {
     });
     const { data: access } = useCheckAccessQuery(
         {
-            object_id: dataProduct?.id,
+            resource: dataProduct?.id,
             action: AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
         },
         { skip: !dataProduct },
     );
-    const canAddDatasetNew = access?.access || false;
+    const canAddDatasetNew = access?.allowed || false;
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 

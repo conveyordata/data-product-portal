@@ -47,21 +47,21 @@ export function DataProductSettings({ id, scope }: Props) {
 
     const { data: product_access } = useCheckAccessQuery(
         {
-            object_id: id,
+            resource: id,
             action: AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS,
         },
         { skip: !id || scope !== 'dataproduct' },
     );
     const { data: dataset_access } = useCheckAccessQuery(
         {
-            object_id: id,
+            resource: id,
             action: AuthorizationAction.DATASET__UPDATE_SETTINGS,
         },
         { skip: !id || scope !== 'dataset' },
     );
 
-    const canUpdateProductSettingNew = product_access?.access || scope === 'dataset';
-    const canUpdateDatasetSettingNew = dataset_access?.access || scope === 'dataproduct';
+    const canUpdateProductSettingNew = product_access?.allowed || scope === 'dataset';
+    const canUpdateDatasetSettingNew = dataset_access?.allowed || scope === 'dataproduct';
 
     const [updateDataProductSetting] = useCreateDataProductSettingValueMutation();
     const [updateDatasetSetting] = useCreateDatasetSettingValueMutation();
