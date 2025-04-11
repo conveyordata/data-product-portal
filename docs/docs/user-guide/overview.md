@@ -9,7 +9,8 @@ title: Getting Started
 
 ## Introduction
 
-Welcome to the **Data Product Portal**! In this guide, we'll walk you through the process of using the portal to build, manage, and share data products. Whether you're a data product owner or a member of a data team, this guide will help you get started quickly.
+Welcome to the **Data Product Portal**! In this guide, we'll walk you through the process of using the portal to build, manage, and share data products.
+Whether you're a data product owner or a member of a data team, this guide will help you get started quickly.
 
 :::info
 
