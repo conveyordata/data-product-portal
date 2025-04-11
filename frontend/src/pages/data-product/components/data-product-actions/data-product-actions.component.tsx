@@ -39,7 +39,7 @@ export function DataProductActions({ dataProductId }: Props) {
         useGetDataProductDatabricksWorkspaceUrlMutation();
     const { data: access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
+            resource: dataProductId,
             action: AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS,
         },
         {
@@ -55,7 +55,7 @@ export function DataProductActions({ dataProductId }: Props) {
         dataProduct?.memberships,
     );
     const canAccessDataProductData = getCanUserAccessDataProductData(user?.id, dataProduct?.memberships);
-    const canAccessNew = access?.access || false;
+    const canAccessNew = access?.allowed || false;
 
     async function handleAccessToData(environment: string, dataPlatform: DataPlatform) {
         switch (dataPlatform) {

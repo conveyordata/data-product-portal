@@ -33,22 +33,20 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
 
     const { data: access } = useCheckAccessQuery(
         {
-            object_id: datasetId,
+            resource: datasetId,
             action: AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
         },
-        {
-            skip: !datasetId,
-        },
+        { skip: !datasetId },
     );
-    const canApproveNew = access?.access || false;
+    const canApproveNew = access?.allowed || false;
     const { data: revoke_access } = useCheckAccessQuery(
         {
-            object_id: datasetId,
+            resource: datasetId,
             action: AuthorizationAction.DATASET__REVOKE_DATAPRODUCT_ACCESS,
         },
         { skip: !datasetId },
     );
-    const canRevokeNew = revoke_access?.access || false;
+    const canRevokeNew = revoke_access?.allowed || false;
 
     const handleRemoveDatasetFromDataProduct = useCallback(
         async (dataProductId: string, name: string, datasetLinkId: string) => {

@@ -23,12 +23,12 @@ export function AboutTab({ datasetId }: Props) {
 
     const { data: edit_access } = useCheckAccessQuery(
         {
-            object_id: datasetId,
+            resource: datasetId,
             action: AuthorizationAction.DATASET__UPDATE_PROPERTIES,
         },
         { skip: !datasetId },
     );
-    const canEditNew = edit_access?.access || false;
+    const canEditNew = edit_access?.allowed || false;
 
     if (isFetching) {
         return <LoadingSpinner />;

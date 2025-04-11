@@ -56,13 +56,13 @@ export function TeamTab({ dataProductId }: Props) {
 
     const { data: access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
+            resource: dataProductId,
             action: AuthorizationAction.DATA_PRODUCT__CREATE_USER,
         },
         { skip: !dataProductId },
     );
 
-    const canAddUserNew = access?.access || false;
+    const canAddUserNew = access?.allowed || false;
 
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;

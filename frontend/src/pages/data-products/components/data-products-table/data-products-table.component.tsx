@@ -41,12 +41,10 @@ export function DataProductsTable() {
         { skip: !currentUser },
     );
     const { data: access } = useCheckAccessQuery(
-        {
-            action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT,
-        },
+        { action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT },
         { skip: !currentUser },
     );
-    const canCreateDataProduct = access?.access || false;
+    const canCreateDataProduct = access?.allowed || false;
     const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);

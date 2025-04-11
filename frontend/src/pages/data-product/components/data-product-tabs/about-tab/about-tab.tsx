@@ -25,13 +25,13 @@ export function AboutTab({ dataProductId }: Props) {
     const [updateDataProductAbout, { isLoading }] = useUpdateDataProductAboutMutation();
     const { data: edit_access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
+            resource: dataProductId,
             action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
         },
         { skip: !dataProductId },
     );
 
-    const canEditNew = edit_access?.access || false;
+    const canEditNew = edit_access?.allowed || false;
     if (isFetching) {
         return <LoadingSpinner />;
     }

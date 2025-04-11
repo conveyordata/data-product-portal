@@ -34,12 +34,12 @@ export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Pr
 
     const { data: remove_access } = useCheckAccessQuery(
         {
-            object_id: datasetId,
+            resource: datasetId,
             action: AuthorizationAction.DATASET__DELETE_USER,
         },
         { skip: !datasetId },
     );
-    const canRemoveNew = remove_access?.access || false;
+    const canRemoveNew = remove_access?.allowed || false;
     const handleRemoveUserAccess = useCallback(
         async (userId: string) => {
             try {

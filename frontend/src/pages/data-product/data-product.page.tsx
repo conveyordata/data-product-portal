@@ -32,13 +32,13 @@ export function DataProduct() {
     const navigate = useNavigate();
     const { data: edit_access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
+            resource: dataProductId,
             action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
         },
         { skip: !dataProductId },
     );
 
-    const canEditProduct = edit_access?.access || false;
+    const canEditProduct = edit_access?.allowed || false;
 
     const dataProductTypeIcon = useMemo(() => {
         return getDataProductTypeIcon(dataProduct?.type?.icon_key);
