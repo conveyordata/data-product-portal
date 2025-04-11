@@ -37,7 +37,8 @@ If the **Dataset** is created successfully you will navigate automatically to th
 We encourage strongly to write a proper *About* page as this is the first encounter users will have with your **Dataset**.
 Interesting things to include here are SLA's, contract specifications and an overview of the data one can expect.
 
-On this page you can find all of the information regarding your **Dataset**. This includes the current team, as well as which **Data Products** provide data to this **Dataset** (via their **Data Outputs**) and which **Data Products** consume data from this **Dataset**.
+On this page you can find all of the information regarding your **Dataset**.
+This includes the current team, as well as which **Data Products** provide data to this **Dataset** (via their **Data Outputs**) and which **Data Products** consume data from this **Dataset**.
 
 You can also interact with the various enabled **tools and integrations**.
 
