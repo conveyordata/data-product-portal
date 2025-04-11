@@ -7,7 +7,9 @@ title: Creating Data Products
 
 ## What is a Data Product?
 
-A **Data Product** is a scoped data initiative with a clear objective, driven by a data product owner. It includes data outputs and datasets, and it follows governance processes to ensure compliance with your organization's standards. For more information have a look at the [Data Product](../concepts/data-products) concept.
+A **Data Product** is a scoped data initiative with a clear objective, driven by a data product owner.
+It includes data outputs and datasets, and it follows governance processes to ensure compliance with your organization's standards.
+For more information have a look at the [Data Product](../concepts/data-products) concept.
 
 ## How to Create a Data Product
 
