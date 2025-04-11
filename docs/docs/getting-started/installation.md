@@ -59,7 +59,7 @@ To enable **AWS integrations**, link this with **IRSA** ([IAM Roles for Service 
 #### OIDC
 
 Enable OIDC by supplying credentials via `values.yaml`. You’ll need:
-- A configured OIDC provider (e.g., AWS Cognito)
+- A configured OIDC provider (e.g., [AWS Cognito](https://aws.amazon.com/cognito/))
 - Client ID and secret
 
 Linking with OIDC is recommended. If OIDC is not configured all of the users will be authenticated as the default *John Doe* making actual use cases very difficult.
