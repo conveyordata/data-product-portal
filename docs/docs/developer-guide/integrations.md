@@ -9,7 +9,8 @@ sidebar_position: 5
 
 The Data Product Portal helps you organize the process of building data products at scale in a self-service manner.
 
-Most organizations leverage cloud data platform technologies like **AWS**, **Azure**, **Databricks**, **Snowflake**, etc., and this portal integrates with those platforms to streamline development workflows and governance.
+Most organizations leverage cloud data platform technologies like **AWS**, **Azure**, **Databricks**, **Snowflake**, etc.
+This portal integrates with those platforms to streamline development workflows and governance.
 
 ![A high-level representation of how to integrate the Data Product Portal](./img/img.png)
 
