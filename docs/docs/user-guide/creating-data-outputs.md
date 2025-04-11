@@ -49,4 +49,5 @@ On this page you can find technical information on your **Data Output** dependin
 
 ---
 
-Congratulations! Now that you have created your first **Data Output** you have your own dedicated place to store the data you want to share with the rest of the organization from your **Data Product**. Sharing happens through **Datasets**, so let's move on and create a new **Dataset**.
+Congratulations! Now that you have created your first **Data Output** you have your own dedicated place to store the data you want to share with the rest of the organization from your **Data Product**.
+Sharing happens through **Datasets**, so let's move on and create a new **Dataset**.
