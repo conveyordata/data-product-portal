@@ -8,11 +8,15 @@ const config: Config = {
   title: 'Data Product Portal',
   tagline: 'Open-source data product marketplace and process tool',
   favicon: 'img/favicon.svg',
+  future: {
+    'experimental_faster': true
+  },
 
   // Set the production url of your site here
   url: 'https://data-product-portal.docs.com',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
+  // baseUrl: '/documentation',
   baseUrl: '/',
 
   // GitHub pages deployment config.
@@ -44,6 +48,17 @@ const config: Config = {
           // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/conveyordata/data-product-portal/tree/main/docs/',
+            versions: {
+              current: {
+                label: "Latest (0.2.13)",
+                path: "/",
+                banner: 'none'
+              },
+              '0.2.13': {
+                label: '0.2.13',
+                path: '0.2.13',
+              },
+            },
         },
         blog: {
           showReadingTime: true,
@@ -81,6 +96,10 @@ const config: Config = {
         {
           href: 'https://github.com/conveyordata/data-product-portal',
           label: 'GitHub',
+          position: 'right',
+        },
+        {
+          type: 'docsVersionDropdown',
           position: 'right',
         },
       ],
