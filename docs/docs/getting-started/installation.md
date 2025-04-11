@@ -53,7 +53,8 @@ Ingress is enabled by default. You must provide correct annotations for your pla
 
 #### Service Account
 
-A default Kubernetes service account is included. To enable **AWS integrations**, link this with **IRSA** (IAM Roles for Service Accounts).
+A default Kubernetes service account is included.
+To enable **AWS integrations**, link this with **IRSA** ([IAM Roles for Service Accounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)).
 
 #### OIDC
 
