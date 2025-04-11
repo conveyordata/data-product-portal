@@ -31,7 +31,7 @@ For more information have a look at the [Data Product](../concepts/data-products
 
 If the **Data Product** is created successfully you will navigate automatically to the detailed page.
 
-We encourage strongly to write a proper *About* page as this is the first encounter users will have with your **Data Product**.
+We strongly encourage you to write a proper *About* page as this is the first encounter users will have with your **Data Product**.
 Interesting things to include here are SLA's, contract specifications and an overview of the data one can expect.
 
 On this page you can find all of the information regarding your **Data Product**. This includes the current team, status, domain and type.
