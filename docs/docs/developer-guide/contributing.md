@@ -61,7 +61,8 @@ If you've found a bug or want to suggest a feature or improvement:
 
 ### Solving an Existing Issue
 
-Browse our [open issues](https://github.com/conveyordata/data-product-portal/issues) to find something interesting to work on. Feel free to comment or assign yourself if it's unclaimed.
+Browse our [open issues](https://github.com/conveyordata/data-product-portal/issues) to find something interesting to work on.
+Feel free to comment or assign yourself if it's unclaimed.
 
 ---
 
