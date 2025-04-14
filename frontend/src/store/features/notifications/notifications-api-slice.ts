@@ -10,6 +10,7 @@ export const notificationsTags: string[] = [
     TagTypes.DataOutput,
     TagTypes.Dataset,
     TagTypes.DataProduct,
+    TagTypes.Notifications,
 ];
 
 export const notificationsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: notificationsTags }).injectEndpoints({
@@ -26,21 +27,15 @@ export const notificationsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.Notifications as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        getPendingActionNotifications: builder.query<NotificationModel[], void>({
-            query: () => ({
-                url: buildUrl(ApiUrl.PendingActionsNotifications, {}),
-                method: 'GET',
+        removeNotification: builder.mutation<void, string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.NotificationDelete, { notificationId: id }),
+                method: 'DELETE',
             }),
-            providesTags: () => [
-                { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
-            ],
+            invalidatesTags: [{ type: TagTypes.Notifications as const, id: STATIC_TAG_ID.LIST }],
         }),
     }),
     overrideExisting: false,
@@ -48,4 +43,4 @@ export const notificationsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetNotificationsQuery, useGetPendingActionNotificationsQuery } = notificationsApiSlice;
+export const { useGetNotificationsQuery, useRemoveNotificationMutation } = notificationsApiSlice;

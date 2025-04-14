@@ -1,4 +1,4 @@
-import { BellOutlined, ExportOutlined } from '@ant-design/icons';
+import { BellOutlined } from '@ant-design/icons';
 import { Badge, Button, Dropdown, Flex, type MenuProps, Space, theme, Typography } from 'antd';
 import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
@@ -9,7 +9,11 @@ import { Link, type NavigateFunction, useNavigate } from 'react-router';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
-import { useGetNotificationsQuery } from '@/store/features/notifications/notifications-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import {
+    useGetNotificationsQuery,
+    useRemoveNotificationMutation,
+} from '@/store/features/notifications/notifications-api-slice';
 import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { DataProductMembershipStatus } from '@/types/data-product-membership';
@@ -28,6 +32,19 @@ export function Notifications() {
     const currentUser = useSelector(selectCurrentUser);
 
     const { data: notifications } = useGetNotificationsQuery();
+    const [removeNotification] = useRemoveNotificationMutation();
+
+    const handleRemoveNotification = useCallback(
+        async (notificationId: string) => {
+            try {
+                await removeNotification(notificationId).unwrap();
+                dispatchMessage({ content: t('Notification has been removed'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to remove notification'), type: 'error' });
+            }
+        },
+        [removeNotification, t],
+    );
 
     const createItem = useCallback(
         (
@@ -35,6 +52,7 @@ export function Notifications() {
             navigate: NavigateFunction,
             t: TFunction,
             currentUser: UserContract | null,
+            handleRemoveNotification: (id: string) => void,
         ) => {
             let link, description, navigatePath;
 
@@ -54,7 +72,7 @@ export function Notifications() {
                                         <Link onClick={(e) => e.stopPropagation()} to={link}>
                                             {userNotification.notification.data_product_dataset.data_product.name}
                                         </Link>{' '}
-                                        {t('data output for read access to the')}{' '}
+                                        {t('data product for read access to the')}{' '}
                                         <Link
                                             onClick={(e) => e.stopPropagation()}
                                             to={createDatasetIdPath(
@@ -67,7 +85,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 ) : (
                                     <Typography.Text>
-                                        {t('The data output', {
+                                        {t('The data product', {
                                             name: userNotification.notification.data_product_dataset.approved_by
                                                 ?.first_name,
                                         })}{' '}
@@ -99,7 +117,7 @@ export function Notifications() {
                                         <Link onClick={(e) => e.stopPropagation()} to={link}>
                                             {userNotification.notification.data_product_dataset.data_product.name}
                                         </Link>{' '}
-                                        {t('data output for read access to the')}{' '}
+                                        {t('data product for read access to the')}{' '}
                                         <Link
                                             onClick={(e) => e.stopPropagation()}
                                             to={createDatasetIdPath(
@@ -112,7 +130,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 ) : (
                                     <Typography.Text>
-                                        {t('The data output', {
+                                        {t('The data product', {
                                             name: userNotification.notification.data_product_dataset.denied_by
                                                 ?.first_name,
                                         })}{' '}
@@ -315,7 +333,7 @@ export function Notifications() {
             return {
                 key: userNotification.id,
                 label: <Flex>{description}</Flex>,
-                extra: <ExportOutlined />,
+                extra: <Button onClick={() => handleRemoveNotification(userNotification.id)}>{t('Hide')}</Button>,
                 onClick: () => navigate(navigatePath),
             };
         },
@@ -324,10 +342,10 @@ export function Notifications() {
 
     const notificationItems = useMemo(() => {
         const notificationCreatedItems = notifications?.map((action) =>
-            createItem({ ...action }, navigate, t, currentUser),
+            createItem({ ...action }, navigate, t, currentUser, handleRemoveNotification),
         );
         return notificationCreatedItems ?? [];
-    }, [notifications, createItem, navigate, t, currentUser]);
+    }, [notifications, createItem, navigate, t, currentUser, handleRemoveNotification]);
 
     const items: MenuProps['items'] = [
         {
