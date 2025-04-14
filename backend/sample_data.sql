@@ -191,13 +191,13 @@ begin
 
     --- NOTIFICATIONS (INCOMPLETE)
     INSERT INTO public.notifications (id, notification_type, notification_origin, data_product_dataset_id, data_output_dataset_id, data_product_membership_id, created_on, updated_on, deleted_at) VALUES ('d3b3c6e2-4d5a-4e8d-92a3-8f9f70a5c9b1', 'DataProductDatasetNotification', 'APPROVED', '0658e52e-b69e-4787-b7b1-df215d75329c', NULL, NULL, timezone('utc', CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.notification_interactions (id, notification_id, user_id, last_seen, last_interaction, created_on, updated_on, deleted_at) VALUES ('b7d2e5f8-9a6c-4f3a-b5b8-3c1e2d7f6e9d', 'd3b3c6e2-4d5a-4e8d-92a3-8f9f70a5c9b1', john_id, NULL, NULL, timezone('utc', CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.notification_interactions (id, notification_id, user_id, created_on, updated_on, deleted_at) VALUES ('b7d2e5f8-9a6c-4f3a-b5b8-3c1e2d7f6e9d', 'd3b3c6e2-4d5a-4e8d-92a3-8f9f70a5c9b1', john_id, timezone('utc', CURRENT_TIMESTAMP), NULL, NULL);
 
     INSERT INTO public.notifications (id, notification_type, notification_origin, data_product_dataset_id, data_output_dataset_id, data_product_membership_id, created_on, updated_on, deleted_at) VALUES ('a9d1f2e4-5c3b-4f8e-9d2c-7e1a6b4f8910', 'DataProductMembershipNotification','APPROVED',NULL, NULL, 'c9e06816-e026-4495-aa0b-ed02419a4767', timezone('utc', CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.notification_interactions (id, notification_id, user_id, last_seen, last_interaction, created_on, updated_on, deleted_at) VALUES ('3e6f2b19-8c4d-47e1-b2a5-9d7f8c6e1234', 'a9d1f2e4-5c3b-4f8e-9d2c-7e1a6b4f8910', john_id, NULL, NULL, timezone('utc', CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.notification_interactions (id, notification_id, user_id, created_on, updated_on, deleted_at) VALUES ('3e6f2b19-8c4d-47e1-b2a5-9d7f8c6e1234', 'a9d1f2e4-5c3b-4f8e-9d2c-7e1a6b4f8910', john_id, timezone('utc', CURRENT_TIMESTAMP), NULL, NULL);
 
     INSERT INTO public.notifications (id, notification_type, notification_origin, data_product_dataset_id, data_output_dataset_id, data_product_membership_id, created_on, updated_on, deleted_at) VALUES ('5bef46c3-9302-419d-9547-f826a0ab9b0f', 'DataOutputDatasetNotification','APPROVED', NULL, '90238525-841a-4e50-9387-9dc8ebbf8fe8',NULL, timezone('utc', CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.notification_interactions (id, notification_id, user_id, last_seen, last_interaction, created_on, updated_on, deleted_at) VALUES ('a71be10e-25b5-4898-ad28-35b7e9d90a02', '5bef46c3-9302-419d-9547-f826a0ab9b0f', john_id, NULL, NULL, timezone('utc', CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.notification_interactions (id, notification_id, user_id, created_on, updated_on, deleted_at) VALUES ('a71be10e-25b5-4898-ad28-35b7e9d90a02', '5bef46c3-9302-419d-9547-f826a0ab9b0f', john_id, timezone('utc', CURRENT_TIMESTAMP), NULL, NULL);
 
     --- DATA PRODUCT SETTINGS
     INSERT INTO public.data_product_settings (id, external_id, name, "default", "order", type, tooltip, category, scope) VALUES ('e12ec335-d7a4-4e27-8225-b66da70f3158', 'iam_role', 'IAM service accounts', 'false', '100', 'CHECKBOX', 'Generate IAM access credentials for this data product', 'AWS', 'DATAPRODUCT');

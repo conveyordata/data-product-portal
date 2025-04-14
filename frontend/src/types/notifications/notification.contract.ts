@@ -15,8 +15,6 @@ export interface NotificationModel {
     notification: Notification;
     user_id: string;
     user: UserContract;
-    last_seen: string | null;
-    last_interaction: string | null;
 }
 
 export type NotificationObject = DataProductMembershipContract | DataProductDatasetContract | DataOutputDatasetContract;

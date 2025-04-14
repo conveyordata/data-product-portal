@@ -62,8 +62,6 @@ def upgrade() -> None:
             sa.ForeignKey("notifications.id"),
         ),
         sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id")),
-        sa.Column("last_seen", sa.DateTime, nullable=True),
-        sa.Column("last_interaction", sa.DateTime, nullable=True),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),

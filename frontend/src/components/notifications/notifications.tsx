@@ -66,7 +66,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 ) : (
                                     <Typography.Text>
-                                        {t('Data output', {
+                                        {t('The data output', {
                                             name: userNotification.notification.data_product_dataset.approved_by
                                                 ?.first_name,
                                         })}{' '}
@@ -110,7 +110,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 ) : (
                                     <Typography.Text>
-                                        {t('Data output', {
+                                        {t('The data output', {
                                             name: userNotification.notification.data_product_dataset.denied_by
                                                 ?.first_name,
                                         })}{' '}
@@ -167,7 +167,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 ) : (
                                     <Typography.Text>
-                                        {t('Data output', {
+                                        {t('The data output', {
                                             name: userNotification.notification.data_output_dataset.approved_by
                                                 ?.first_name,
                                         })}{' '}
@@ -211,7 +211,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 ) : (
                                     <Typography.Text>
-                                        {t('Data output', {
+                                        {t('The data output', {
                                             name: userNotification.notification.data_output_dataset.approved_by
                                                 ?.first_name,
                                         })}{' '}
@@ -326,14 +326,10 @@ export function Notifications() {
     );
 
     const notificationItems = useMemo(() => {
-        const notificationCreatedItems =
-            notifications?.map((action) => createItem({ ...action }, navigate, t, currentUser)) ?? [];
-        return notificationCreatedItems.sort((a, b) => {
-            if (!a?.received || !b?.received) {
-                return 0;
-            }
-            return new Date(b.received).getTime() - new Date(a.received).getTime();
-        });
+        const notificationCreatedItems = notifications?.map((action) =>
+            createItem({ ...action }, navigate, t, currentUser),
+        );
+        return notificationCreatedItems ?? [];
     }, [notifications, createItem, navigate, t, currentUser]);
 
     const items: MenuProps['items'] = [
