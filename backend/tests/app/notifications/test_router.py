@@ -4,20 +4,24 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
-from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
-from tests.factories.notification import (
-    NotificationFactory,
+from tests.factories.data_output_dataset_notification import (
+    DataOutputDatasetNotificationFactory,
 )
+from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
+from tests.factories.data_product_dataset_notification import (
+    DataProductDatasetNotificationFactory,
+)
+from tests.factories.data_product_membership_notification import (
+    DataProductMembershipNotificationFactory,
+)
+from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
 from tests.factories.notification_interaction import NotificationInteractionFactory
 
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
-    DataProductUserRole,
 )
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
-from app.datasets.enums import DatasetAccessType
 from app.notifications.notification_types import NotificationTypes
 
 NOTIFICATIONS_ENDPOINT = "/api/notifications"
@@ -31,372 +35,186 @@ DATA_OUTPUTS_DATASETS_ENDPOINT = "/api/data_output_dataset_links"
 
 class TestNotificationsRouter:
 
-    def test_get_pending_actions_data_product_dataset(self, client):
-        owner = UserFactory(external_id="sub")
-        membership = DataProductMembershipFactory(user=owner)
-        ds = DatasetFactory(owners=[owner], access_type=DatasetAccessType.RESTRICTED)
+    def test_get_approved_notifications_data_product_dataset(self, client):
+        owner = UserFactory(external_id="sub", is_admin=True)
+        data_product_dataset_link = DataProductDatasetAssociationFactory(
+            requested_by=owner, status=DataProductDatasetLinkStatus.PENDING_APPROVAL
+        )
 
-        response = self.request_data_product_dataset_link(
-            client, membership.data_product_id, ds.id
+        response = self.approve_default_data_product_dataset_link(
+            client, data_product_dataset_link.id
         )
         assert response.status_code == 200
 
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert (
-            response.json()[0]["notification"]["configuration_type"]
+            response.json()[0]["notification"]["notification_type"]
             == "DataProductDatasetNotification"
         )
-        assert response.json()[0]["notification"]["reference"][
+        assert response.json()[0]["notification"]["data_product_dataset"][
             "data_product_id"
-        ] == str(membership.data_product.id)
+        ] == str(data_product_dataset_link.data_product.id)
         assert (
-            response.json()[0]["notification"]["reference"]["status"]
-            == "pending_approval"
+            response.json()[0]["notification"]["data_product_dataset"]["status"]
+            == "approved"
         )
-        assert response.json()[0]["notification"]["reference"]["requested_by"][
+        assert response.json()[0]["notification"]["data_product_dataset"][
+            "requested_by"
+        ]["id"] == str(owner.id)
+
+    def test_get_approved_notifications_data_output_dataset(self, client):
+        owner = UserFactory(external_id="sub", is_admin=True)
+        data_output_dataset_link = DataOutputDatasetAssociationFactory(
+            requested_by=owner, status=DataOutputDatasetLinkStatus.PENDING_APPROVAL
+        )
+
+        response = self.approve_default_data_output_dataset_link(
+            client, data_output_dataset_link.id
+        )
+        assert response.status_code == 200
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert (
+            response.json()[0]["notification"]["notification_type"]
+            == "DataOutputDatasetNotification"
+        )
+        assert response.json()[0]["notification"]["data_output_dataset"][
+            "data_output_id"
+        ] == str(data_output_dataset_link.data_output.id)
+        assert (
+            response.json()[0]["notification"]["data_output_dataset"]["status"]
+            == "approved"
+        )
+        assert response.json()[0]["notification"]["data_output_dataset"][
+            "requested_by"
+        ]["id"] == str(owner.id)
+
+    def test_get_approved_notifications_data_product_membership(self, client):
+        owner = UserFactory(external_id="sub", is_admin=True)
+        data_product_membership_link = DataProductMembershipFactory(
+            user=owner, status=DataProductMembershipStatus.PENDING_APPROVAL
+        )
+
+        response = self.approve_data_product_membership(
+            client, data_product_membership_link.id
+        )
+        assert response.status_code == 200
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert (
+            response.json()[0]["notification"]["notification_type"]
+            == "DataProductMembershipNotification"
+        )
+        assert response.json()[0]["notification"]["data_product_membership"][
+            "data_product_id"
+        ] == str(data_product_membership_link.data_product.id)
+        assert (
+            response.json()[0]["notification"]["data_product_membership"]["status"]
+            == "approved"
+        )
+        assert response.json()[0]["notification"]["data_product_membership"]["user"][
             "id"
         ] == str(owner.id)
 
-        all_notifications = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json() == all_notifications.json()
+    def test_get_denied_notifications_data_product_dataset(self, client):
+        owner = UserFactory(external_id="sub", is_admin=True)
+        data_product_dataset_link = DataProductDatasetAssociationFactory(
+            requested_by=owner, status=DataProductDatasetLinkStatus.PENDING_APPROVAL
+        )
 
-    def test_get_pending_actions_data_output_dataset(self, client):
-        owner = UserFactory(external_id="sub")
-        membership = DataProductMembershipFactory(user=owner)
-        data_output = DataOutputFactory(owner=membership.data_product)
-        ds = DatasetFactory(owners=[owner])
-
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        response = self.deny_default_data_product_dataset_link(
+            client, data_product_dataset_link.id
+        )
         assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert (
-            response.json()[0]["notification"]["configuration_type"]
+            response.json()[0]["notification"]["notification_type"]
+            == "DataProductDatasetNotification"
+        )
+        assert response.json()[0]["notification"]["data_product_dataset"][
+            "data_product_id"
+        ] == str(data_product_dataset_link.data_product.id)
+        assert (
+            response.json()[0]["notification"]["data_product_dataset"]["status"]
+            == "denied"
+        )
+        assert response.json()[0]["notification"]["data_product_dataset"][
+            "requested_by"
+        ]["id"] == str(owner.id)
+
+    def test_get_denied_notifications_data_output_dataset(self, client):
+        owner = UserFactory(external_id="sub", is_admin=True)
+        data_output_dataset_link = DataOutputDatasetAssociationFactory(
+            requested_by=owner, status=DataOutputDatasetLinkStatus.PENDING_APPROVAL
+        )
+
+        response = self.deny_default_data_output_dataset_link(
+            client, data_output_dataset_link.id
+        )
+        assert response.status_code == 200
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert (
+            response.json()[0]["notification"]["notification_type"]
             == "DataOutputDatasetNotification"
         )
-        assert response.json()[0]["notification"]["reference"]["data_output_id"] == str(
-            data_output.id
-        )
+        assert response.json()[0]["notification"]["data_output_dataset"][
+            "data_output_id"
+        ] == str(data_output_dataset_link.data_output.id)
         assert (
-            response.json()[0]["notification"]["reference"]["status"]
-            == "pending_approval"
+            response.json()[0]["notification"]["data_output_dataset"]["status"]
+            == "denied"
         )
-        assert response.json()[0]["notification"]["reference"]["requested_by"][
+        assert response.json()[0]["notification"]["data_output_dataset"][
+            "requested_by"
+        ]["id"] == str(owner.id)
+
+    def test_get_denied_notifications_data_product_membership(self, client):
+        owner = UserFactory(external_id="sub", is_admin=True)
+        data_product_membership_link = DataProductMembershipFactory(
+            user=owner, status=DataProductMembershipStatus.PENDING_APPROVAL
+        )
+
+        response = self.deny_data_product_membership(
+            client, data_product_membership_link.id
+        )
+        assert response.status_code == 200
+
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert (
+            response.json()[0]["notification"]["notification_type"]
+            == "DataProductMembershipNotification"
+        )
+        assert response.json()[0]["notification"]["data_product_membership"][
+            "data_product_id"
+        ] == str(data_product_membership_link.data_product.id)
+        assert (
+            response.json()[0]["notification"]["data_product_membership"]["status"]
+            == "denied"
+        )
+        assert response.json()[0]["notification"]["data_product_membership"]["user"][
             "id"
         ] == str(owner.id)
-
-        all_notifications = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json() == all_notifications.json()
-
-    def test_get_pending_actions_data_product_membership(self, client):
-        owner_membership = DataProductMembershipFactory(
-            user=UserFactory(external_id="sub")
-        )
-        user_id = UserFactory().id
-        response = self.request_data_product_membership(
-            client, user_id, owner_membership.data_product.id
-        )
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert (
-            response.json()[0]["notification"]["configuration_type"]
-            == "DataProductMembershipNotification"
-        )
-        assert response.json()[0]["notification"]["reference"][
-            "data_product_id"
-        ] == str(owner_membership.data_product.id)
-        assert (
-            response.json()[0]["notification"]["reference"]["status"]
-            == "pending_approval"
-        )
-        assert response.json()[0]["notification"]["reference"]["user"]["id"] == str(
-            user_id
-        )
-
-        all_notifications = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json() == all_notifications.json()
-
-    def test_change_notification_ownership_data_product_dataset(self, client):
-        owner = UserFactory(external_id="sub", is_admin=True)
-        membership = DataProductMembershipFactory(user=owner)
-        ds = DatasetFactory(
-            owners=[owner, UserFactory()], access_type=DatasetAccessType.RESTRICTED
-        )
-
-        response = self.request_data_product_dataset_link(
-            client, membership.data_product_id, ds.id
-        )
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["reference"][
-            "data_product_id"
-        ] == str(membership.data_product.id)
-
-        response = self.delete_dataset_user(client, owner.id, ds.id)
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json() == []
-
-        response = self.add_user_to_dataset(client, owner.id, ds.id)
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["reference"][
-            "data_product_id"
-        ] == str(membership.data_product.id)
-
-    def test_change_notification_ownership_data_output_dataset(self, client):
-        owner = UserFactory(external_id="sub", is_admin=True)
-        membership = DataProductMembershipFactory(user=owner)
-        data_output = DataOutputFactory(owner=membership.data_product)
-        ds = DatasetFactory(owners=[owner, UserFactory()])
-
-        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["reference"]["data_output_id"] == str(
-            data_output.id
-        )
-
-        response = self.delete_dataset_user(client, owner.id, ds.id)
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json() == []
-
-        response = self.add_user_to_dataset(client, owner.id, ds.id)
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["reference"]["data_output_id"] == str(
-            data_output.id
-        )
-
-    def test_change_notification_ownership_data_product_membership(self, client):
-        owner_membership = DataProductMembershipFactory(
-            user=UserFactory(external_id="sub", is_admin=True)
-        )
-        DataProductMembershipFactory(
-            data_product=owner_membership.data_product, user=UserFactory()
-        )
-
-        response = self.request_data_product_membership(
-            client, UserFactory().id, owner_membership.data_product.id
-        )
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["reference"][
-            "data_product_id"
-        ] == str(owner_membership.data_product.id)
-
-        response = self.remove_data_product_membership(client, owner_membership.id)
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json() == []
-
-        response = self.create_data_product_owner_membership(
-            client, owner_membership.user.id, owner_membership.data_product.id
-        )
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}/actions")
-        assert response.json()[0]["notification"]["reference"][
-            "data_product_id"
-        ] == str(owner_membership.data_product.id)
-
-    def test_approve_data_product_dataset(self, client):
-        requester = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[requester])
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds,
-            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
-            requested_by=requester,
-        )
-        NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataProductDatasetNotification,
-                reference_id=link.id,
-            ),
-            user=requester,
-        )
-        response = self.approve_default_data_product_dataset_link(client, link.id)
-        assert response.status_code == 200
-
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert (
-            response.json()[0]["notification"]["configuration_type"]
-            == "DataProductDatasetNotification"
-        )
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
-        assert response.json()[0]["notification"]["reference"]["status"] == "approved"
-        assert response.json()[0]["notification"]["reference"]["requested_by"][
-            "id"
-        ] == str(requester.id)
-
-    def test_deny_data_product_dataset(self, client):
-        requester = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[requester])
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds,
-            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
-            requested_by=requester,
-        )
-        NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataProductDatasetNotification,
-                reference_id=link.id,
-            ),
-            user=requester,
-        )
-        response = self.deny_default_data_product_dataset_link(client, link.id)
-        assert response.status_code == 200
-
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert (
-            response.json()[0]["notification"]["configuration_type"]
-            == "DataProductDatasetNotification"
-        )
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
-        assert response.json()[0]["notification"]["reference"]["status"] == "denied"
-        assert response.json()[0]["notification"]["reference"]["requested_by"][
-            "id"
-        ] == str(requester.id)
-
-    def test_approve_data_output_dataset(self, client):
-        requester = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[requester])
-        link = DataOutputDatasetAssociationFactory(
-            dataset=ds,
-            status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
-            requested_by=requester,
-        )
-        NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataOutputDatasetNotification,
-                reference_id=link.id,
-            ),
-            user=requester,
-        )
-        response = self.approve_default_data_output_dataset_link(client, link.id)
-        assert response.status_code == 200
-
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert (
-            response.json()[0]["notification"]["configuration_type"]
-            == "DataOutputDatasetNotification"
-        )
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
-        assert response.json()[0]["notification"]["reference"]["status"] == "approved"
-        assert response.json()[0]["notification"]["reference"]["requested_by"][
-            "id"
-        ] == str(requester.id)
-
-    def test_deny_data_output_dataset(self, client):
-        requester = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[requester])
-        link = DataOutputDatasetAssociationFactory(
-            dataset=ds,
-            status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
-            requested_by=requester,
-        )
-        NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataOutputDatasetNotification,
-                reference_id=link.id,
-            ),
-            user=requester,
-        )
-        response = self.deny_default_data_output_dataset_link(client, link.id)
-        assert response.status_code == 200
-
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert (
-            response.json()[0]["notification"]["configuration_type"]
-            == "DataOutputDatasetNotification"
-        )
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
-        assert response.json()[0]["notification"]["reference"]["status"] == "denied"
-        assert response.json()[0]["notification"]["reference"]["requested_by"][
-            "id"
-        ] == str(requester.id)
-
-    def test_approve_data_product_membership(self, client):
-        requester = UserFactory(external_id="sub")
-        owner_membership = DataProductMembershipFactory(user=requester)
-        membership_request = DataProductMembershipFactory(
-            data_product=owner_membership.data_product,
-            user=requester,
-            role=DataProductUserRole.MEMBER.value,
-            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
-            requested_by_id=str(requester.id),
-        )
-        NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataProductMembershipNotification,
-                reference_id=membership_request.id,
-            ),
-            user=requester,
-        )
-        response = self.approve_data_product_membership(client, membership_request.id)
-        assert response.status_code == 200
-
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert (
-            response.json()[0]["notification"]["configuration_type"]
-            == "DataProductMembershipNotification"
-        )
-        assert response.json()[0]["notification"]["reference"]["id"] == str(
-            membership_request.id
-        )
-        assert response.json()[0]["notification"]["reference"]["status"] == "approved"
-        assert response.json()[0]["notification"]["reference"]["user"]["id"] == str(
-            requester.id
-        )
-
-    def test_deny_data_product_membership(self, client):
-        requester = UserFactory(external_id="sub")
-        owner_membership = DataProductMembershipFactory(user=requester)
-        membership_request = DataProductMembershipFactory(
-            data_product=owner_membership.data_product,
-            user=requester,
-            role=DataProductUserRole.MEMBER.value,
-            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
-            requested_by_id=str(requester.id),
-        )
-        NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataProductMembershipNotification,
-                reference_id=membership_request.id,
-            ),
-            user=requester,
-        )
-        response = self.deny_data_product_membership(client, membership_request.id)
-        assert response.status_code == 200
-
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert (
-            response.json()[0]["notification"]["configuration_type"]
-            == "DataProductMembershipNotification"
-        )
-        assert response.json()[0]["notification"]["reference"]["id"] == str(
-            membership_request.id
-        )
-        assert response.json()[0]["notification"]["reference"]["status"] == "denied"
-        assert response.json()[0]["notification"]["reference"]["user"]["id"] == str(
-            requester.id
-        )
 
     def test_delete_parent_dataset_data_product_dataset(self, client):
         owner = UserFactory(external_id="sub")
         ds = DatasetFactory(owners=[owner])
         link = DataProductDatasetAssociationFactory(
             dataset=ds,
-            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
+            status=DataProductDatasetLinkStatus.APPROVED.value,
         )
         NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataProductDatasetNotification,
-                reference_id=link.id,
+            notification=DataProductDatasetNotificationFactory(
+                notification_type=NotificationTypes.DataProductDatasetNotification,
+                data_product_dataset=link,
             ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
+        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
+            link.id
+        )
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -407,17 +225,19 @@ class TestNotificationsRouter:
         ds = DatasetFactory(owners=[owner])
         link = DataOutputDatasetAssociationFactory(
             dataset=ds,
-            status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
+            status=DataOutputDatasetLinkStatus.APPROVED.value,
         )
         NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataOutputDatasetNotification,
-                reference_id=link.id,
+            notification=DataOutputDatasetNotificationFactory(
+                notification_type=NotificationTypes.DataOutputDatasetNotification,
+                data_output_dataset=link,
             ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
+        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
+            link.id
+        )
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -426,18 +246,20 @@ class TestNotificationsRouter:
     def test_delete_parent_data_product_data_product_dataset(self, client):
         owner = UserFactory(external_id="sub")
         link = DataProductDatasetAssociationFactory(
-            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
+            status=DataProductDatasetLinkStatus.APPROVED.value,
             data_product=(DataProductMembershipFactory(user=owner).data_product),
         )
         NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataProductDatasetNotification,
-                reference_id=link.id,
+            notification=DataProductDatasetNotificationFactory(
+                notification_type=NotificationTypes.DataProductDatasetNotification,
+                data_product_dataset=link,
             ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
+        assert response.json()[0]["notification"]["data_product_dataset"]["id"] == str(
+            link.id
+        )
         response = self.delete_data_product(client, link.data_product.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -446,20 +268,22 @@ class TestNotificationsRouter:
     def test_delete_parent_data_product_data_output_dataset(self, client):
         owner = UserFactory(external_id="sub")
         link = DataOutputDatasetAssociationFactory(
-            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
+            status=DataProductDatasetLinkStatus.APPROVED.value,
             data_output=DataOutputFactory(
                 owner=(DataProductMembershipFactory(user=owner).data_product)
             ),
         )
         NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataOutputDatasetNotification,
-                reference_id=link.id,
+            notification=DataOutputDatasetNotificationFactory(
+                notification_type=NotificationTypes.DataOutputDatasetNotification,
+                data_output_dataset=link,
             ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
+        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
+            link.id
+        )
         response = self.delete_data_product(client, link.data_output.owner.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -468,20 +292,20 @@ class TestNotificationsRouter:
     def test_delete_parent_data_product_data_product_membership(self, client):
         owner = UserFactory(external_id="sub")
         membership = DataProductMembershipFactory(
-            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
+            status=DataProductMembershipStatus.APPROVED.value,
             data_product=(DataProductMembershipFactory(user=owner).data_product),
         )
         NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataProductMembershipNotification,
-                reference_id=membership.id,
+            notification=DataProductMembershipNotificationFactory(
+                notification_type=NotificationTypes.DataProductMembershipNotification,
+                data_product_membership=membership,
             ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["reference"]["id"] == str(
-            membership.id
-        )
+        assert response.json()[0]["notification"]["data_product_membership"][
+            "id"
+        ] == str(membership.id)
         response = self.delete_data_product(client, membership.data_product.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
@@ -490,143 +314,26 @@ class TestNotificationsRouter:
     def test_delete_parent_data_output_data_output_dataset(self, client):
         owner = UserFactory(external_id="sub")
         link = DataOutputDatasetAssociationFactory(
-            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
+            status=DataProductDatasetLinkStatus.APPROVED.value,
             data_output=DataOutputFactory(
                 owner=(DataProductMembershipFactory(user=owner).data_product)
             ),
         )
         NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataOutputDatasetNotification,
-                reference_id=link.id,
+            notification=DataOutputDatasetNotificationFactory(
+                notification_type=NotificationTypes.DataOutputDatasetNotification,
+                data_output_dataset=link,
             ),
             user=owner,
         )
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
+        assert response.json()[0]["notification"]["data_output_dataset"]["id"] == str(
+            link.id
+        )
         response = self.delete_data_output(client, link.data_output.id)
         assert response.status_code == 200
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert response.json() == []
-
-    def test_change_dataset_owners_data_product_dataset(self, client):
-        old_owner = UserFactory()
-        new_owner = UserFactory(external_id="sub", is_admin=True)
-        ds = DatasetFactory(owners=[old_owner])
-        link = DataProductDatasetAssociationFactory(
-            dataset=ds,
-            status=DataProductDatasetLinkStatus.PENDING_APPROVAL.value,
-        )
-        NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataProductDatasetNotification,
-                reference_id=link.id,
-            ),
-            user=old_owner,
-        )
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json() == []
-        response = self.add_user_to_dataset(client, new_owner.id, ds.id)
-        assert response.status_code == 200
-
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
-
-    def test_change_dataset_owners_data_output_dataset(self, client):
-        old_owner = UserFactory()
-        new_owner = UserFactory(external_id="sub", is_admin=True)
-        ds = DatasetFactory(owners=[old_owner])
-        link = DataOutputDatasetAssociationFactory(
-            dataset=ds,
-            status=DataOutputDatasetLinkStatus.PENDING_APPROVAL.value,
-        )
-        NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataOutputDatasetNotification,
-                reference_id=link.id,
-            ),
-            user=old_owner,
-        )
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json() == []
-        response = self.add_user_to_dataset(client, new_owner.id, ds.id)
-        assert response.status_code == 200
-
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["reference"]["id"] == str(link.id)
-
-    def test_change_data_product_owners_data_product_membership(self, client):
-        old_owner = UserFactory()
-        new_owner = UserFactory(external_id="sub", is_admin=True)
-        membership = DataProductMembershipFactory(
-            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
-            data_product=(DataProductMembershipFactory(user=old_owner).data_product),
-        )
-        membership_new_owner = DataProductMembershipFactory(
-            status=DataProductMembershipStatus.APPROVED.value,
-            role=DataProductUserRole.MEMBER.value,
-            user=new_owner,
-            data_product=membership.data_product,
-        )
-        NotificationInteractionFactory(
-            notification=NotificationFactory(
-                configuration_type=NotificationTypes.DataProductMembershipNotification,
-                reference_id=membership.id,
-            ),
-            user=old_owner,
-        )
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json() == []
-        response = self.update_data_product_membership_user_role(
-            client, membership_new_owner.id, DataProductUserRole.OWNER.value
-        )
-        assert response.status_code == 200
-        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        assert response.json()[0]["notification"]["reference"]["id"] == str(
-            membership.id
-        )
-
-    @staticmethod
-    def request_data_product_dataset_link(client, data_product_id, dataset_id):
-        return client.post(
-            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/dataset/{dataset_id}"
-        )
-
-    @staticmethod
-    def request_data_output_dataset_link(client, data_output_id, dataset_id):
-        return client.post(
-            f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}/dataset/{dataset_id}"
-        )
-
-    @staticmethod
-    def request_data_product_membership(client, user_id, data_product_id):
-        return client.post(
-            f"{MEMBERSHIPS_ENDPOINT}/request?user_id={str(user_id)}"
-            f"&data_product_id={str(data_product_id)}"
-        )
-
-    @staticmethod
-    def delete_dataset_user(client, user_id, dataset_id):
-        return client.delete(f"{DATASET_ENDPOINT}/{dataset_id}/user/{user_id}")
-
-    @staticmethod
-    def add_user_to_dataset(client, user_id, dataset_id):
-        return client.post(f"{DATASET_ENDPOINT}/{dataset_id}/user/{user_id}")
-
-    @staticmethod
-    def remove_data_product_membership(client, membership_id):
-        return client.post(f"{MEMBERSHIPS_ENDPOINT}/{membership_id}/remove")
-
-    @staticmethod
-    def create_data_product_owner_membership(client, user_id, data_product_id):
-        data = {
-            "role": DataProductUserRole.OWNER.value,
-            "user_id": str(user_id),
-        }
-        return client.post(
-            f"{MEMBERSHIPS_ENDPOINT}/create?data_product_id={str(data_product_id)}",
-            json=data,
-        )
 
     @staticmethod
     def approve_default_data_product_dataset_link(client, link_id):
@@ -663,9 +370,3 @@ class TestNotificationsRouter:
     @staticmethod
     def delete_data_output(client, data_output_id):
         return client.delete(f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}")
-
-    @staticmethod
-    def update_data_product_membership_user_role(client, membership_id, new_role):
-        return client.put(
-            f"{MEMBERSHIPS_ENDPOINT}/{membership_id}/role?membership_role={new_role}"
-        )

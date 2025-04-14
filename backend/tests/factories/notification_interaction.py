@@ -1,9 +1,7 @@
 import factory
-from tests.factories.notification import (
-    NotificationFactory,
-)
 
 from app.notification_interactions.model import NotificationInteraction
+from app.notifications.model import DataProductDatasetNotification
 
 from .user import UserFactory
 
@@ -14,4 +12,4 @@ class NotificationInteractionFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     user = factory.SubFactory(UserFactory)
-    notification = factory.SubFactory(NotificationFactory)
+    notification = factory.SubFactory(DataProductDatasetNotification)
