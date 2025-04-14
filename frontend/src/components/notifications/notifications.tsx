@@ -36,7 +36,7 @@ export function Notifications() {
             t: TFunction,
             currentUser: UserContract | null,
         ) => {
-            let link, description, navigatePath, received;
+            let link, description, navigatePath;
 
             switch (userNotification.notification.notification_type) {
                 case NotificationTypes.DataProductDatasetNotification:
@@ -86,7 +86,6 @@ export function Notifications() {
                                         {t('dataset')}
                                     </Typography.Text>
                                 );
-                            received = userNotification.notification.data_product_dataset.approved_on;
                             break;
                         case DataProductDatasetLinkStatus.Denied:
                             description =
@@ -132,7 +131,6 @@ export function Notifications() {
                                         {t('dataset')}
                                     </Typography.Text>
                                 );
-                            received = userNotification.notification.data_product_dataset.denied_on;
                             break;
                     }
                     navigatePath = createDatasetIdPath(
@@ -191,7 +189,6 @@ export function Notifications() {
                                         {t('dataset')}
                                     </Typography.Text>
                                 );
-                            received = userNotification.notification.data_output_dataset.approved_on;
                             break;
                         case DataOutputDatasetLinkStatus.Denied:
                             description =
@@ -237,7 +234,6 @@ export function Notifications() {
                                         {t('dataset')}
                                     </Typography.Text>
                                 );
-                            received = userNotification.notification.data_output_dataset.denied_on;
                             break;
                     }
                     navigatePath = createDatasetIdPath(
@@ -277,7 +273,6 @@ export function Notifications() {
                                         {t('data product')}
                                     </Typography.Text>
                                 );
-                            received = userNotification.notification.data_product_membership.approved_on;
                             break;
                         case DataProductMembershipStatus.Denied:
                             description =
@@ -305,7 +300,6 @@ export function Notifications() {
                                         {t('data product')}
                                     </Typography.Text>
                                 );
-                            received = userNotification.notification.data_product_membership.denied_on;
                             break;
                     }
                     navigatePath = createDataProductIdPath(
@@ -323,7 +317,6 @@ export function Notifications() {
                 label: <Flex>{description}</Flex>,
                 extra: <ExportOutlined />,
                 onClick: () => navigate(navigatePath),
-                received: received,
             };
         },
         [],
