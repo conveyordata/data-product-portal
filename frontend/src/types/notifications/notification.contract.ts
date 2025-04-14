@@ -1,6 +1,14 @@
-import { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '../data-output-dataset';
-import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '../data-product-dataset';
-import { DataProductMembershipContract } from '../data-product-membership';
+import {
+    DataOutputDatasetContract,
+    DataOutputDatasetLinkRequest,
+    DataOutputDatasetLinkStatus,
+} from '../data-output-dataset';
+import {
+    DataProductDatasetContract,
+    DataProductDatasetLinkRequest,
+    DataProductDatasetLinkStatus,
+} from '../data-product-dataset';
+import { DataProductMembershipContract, DataProductMembershipStatus } from '../data-product-membership';
 import { UserContract } from '../users';
 
 export enum NotificationTypes {
@@ -15,8 +23,6 @@ export interface NotificationModel {
     notification: Notification;
     user_id: string;
     user: UserContract;
-    last_seen: string | null;
-    last_interaction: string | null;
 }
 
 export type NotificationObject = DataProductMembershipContract | DataProductDatasetContract | DataOutputDatasetContract;
@@ -27,24 +33,27 @@ export type Notification =
     | DataProductMembershipNotification;
 
 export interface DataProductDatasetNotification {
-    configuration_type: NotificationTypes.DataProductDatasetNotification;
+    notification_type: NotificationTypes.DataProductDatasetNotification;
+    notification_origin: DataProductDatasetLinkStatus;
     id: string;
-    reference_id: string;
-    reference: DataProductDatasetContract;
+    data_product_dataset_id: string;
+    data_product_dataset: DataProductDatasetContract;
 }
 
 export interface DataOutputDatasetNotification {
-    configuration_type: NotificationTypes.DataOutputDatasetNotification;
+    notification_type: NotificationTypes.DataOutputDatasetNotification;
+    notification_origin: DataOutputDatasetLinkStatus;
     id: string;
-    reference_id: string;
-    reference: DataOutputDatasetContract;
+    data_output_dataset_id: string;
+    data_output_dataset: DataOutputDatasetContract;
 }
 
 export interface DataProductMembershipNotification {
-    configuration_type: NotificationTypes.DataProductMembershipNotification;
+    notification_type: NotificationTypes.DataProductMembershipNotification;
+    notification_origin: DataProductMembershipStatus;
     id: string;
-    reference_id: string;
-    reference: DataProductMembershipContract;
+    data_product_membership_id: string;
+    data_product_membership: DataProductMembershipContract;
 }
 
 export type ActionResolveRequest =

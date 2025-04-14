@@ -1,5 +1,3 @@
-from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from app.shared.schema import ORMModel
@@ -11,5 +9,3 @@ class NotificationInteraction(ORMModel):
     notification_id: UUID
     user_id: UUID
     user: User
-    last_seen: Optional[datetime]
-    last_interaction: Optional[datetime]

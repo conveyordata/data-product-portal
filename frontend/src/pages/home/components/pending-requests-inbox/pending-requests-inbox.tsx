@@ -10,55 +10,51 @@ import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/d
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import {
     useApproveDataOutputLinkMutation,
+    useGetDataOutputDatasetPendingActionsQuery,
     useRejectDataOutputLinkMutation,
 } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
 import {
     useDenyMembershipAccessMutation,
+    useGetDataProductMembershipPendingActionsQuery,
     useGrantMembershipAccessMutation,
 } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
 import {
     useApproveDataProductLinkMutation,
+    useGetDataProductDatasetPendingActionsQuery,
     useRejectDataProductLinkMutation,
 } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { useGetPendingActionNotificationsQuery } from '@/store/features/notifications/notifications-api-slice';
-import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
+import { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
+import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
+import { DataProductMembershipContract } from '@/types/data-product-membership';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import {
-    ActionResolveRequest,
-    NotificationModel,
-    NotificationTypes,
-} from '@/types/notifications/notification.contract';
+import { ActionResolveRequest, NotificationTypes } from '@/types/notifications/notification.contract';
 
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
 import { SelectableTab } from './pending-requests-menu-tab';
 
-const createPendingItem = (
-    userNotification: NotificationModel,
-    t: TFunction,
-    colors: { [key in NotificationTypes]: string },
-) => {
+type PendingAction =
+    | ({ type: NotificationTypes.DataProductDatasetNotification } & DataProductDatasetContract)
+    | ({ type: NotificationTypes.DataOutputDatasetNotification } & DataOutputDatasetContract)
+    | ({ type: NotificationTypes.DataProductMembershipNotification } & DataProductMembershipContract);
+
+const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key in NotificationTypes]: string }) => {
     let link, description, navigatePath, date, author, initials, message, color, origin, type, request;
 
     function getInitials(firstName: string, lastName: string) {
         return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
     }
 
-    switch (userNotification.notification.configuration_type) {
+    switch (action.type) {
         case NotificationTypes.DataProductDatasetNotification:
-            type = NotificationTypes.DataProductDatasetNotification;
-            link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
+            link = createDataProductIdPath(action.data_product_id);
             description = (
                 <Typography.Text>
                     {t('requests')} <strong className={styles.descriptionCore}>{t('read access')}</strong>{' '}
                     {t('to the dataset:')}{' '}
-                    <Link
-                        onClick={(e) => e.stopPropagation()}
-                        to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
-                    >
-                        <strong>{userNotification.notification.reference.dataset.name}</strong>
+                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                        <strong>{action.dataset.name}</strong>
                     </Link>
                 </Typography.Text>
             );
@@ -66,7 +62,7 @@ const createPendingItem = (
                 <Typography.Text>
                     {t('Accepting will grant access to the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {userNotification.notification.reference.data_product.name}
+                        {action.data_product.name}
                     </Link>{' '}
                     {t('data product.')}{' '}
                 </Typography.Text>
@@ -82,44 +78,28 @@ const createPendingItem = (
                     {t('Data Product')}
                 </Typography.Text>
             );
-            navigatePath = createDatasetIdPath(
-                userNotification.notification.reference.dataset_id,
-                DatasetTabKeys.DataProduct,
-            );
-            date = userNotification.notification.reference.requested_on;
-            author =
-                userNotification.notification.reference.requested_by.first_name +
-                ' ' +
-                userNotification.notification.reference.requested_by.last_name;
-            initials = getInitials(
-                userNotification.notification.reference.requested_by.first_name,
-                userNotification.notification.reference.requested_by.last_name,
-            );
+            navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
+            date = action.requested_on;
+            author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
+            initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
             request = {
                 type: NotificationTypes.DataProductDatasetNotification as NotificationTypes.DataProductDatasetNotification,
                 request: {
-                    id: userNotification.notification.reference.id,
-                    data_product_id: userNotification.notification.reference.data_product_id,
-                    dataset_id: userNotification.notification.reference.dataset_id,
+                    id: action.id,
+                    data_product_id: action.data_product_id,
+                    dataset_id: action.dataset_id,
                 },
             };
             break;
 
         case NotificationTypes.DataOutputDatasetNotification:
-            type = NotificationTypes.DataOutputDatasetNotification;
-            link = createDataOutputIdPath(
-                userNotification.notification.reference.data_output_id,
-                userNotification.notification.reference.data_output.owner_id,
-            );
+            link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
             description = (
                 <Typography.Text>
                     {t('requests')} <strong className={styles.descriptionCore}>{t('creation of a link')}</strong>{' '}
                     {t('towards the dataset:')}{' '}
-                    <Link
-                        onClick={(e) => e.stopPropagation()}
-                        to={createDatasetIdPath(userNotification.notification.reference.dataset_id)}
-                    >
-                        <strong>{userNotification.notification.reference.dataset.name}</strong>
+                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                        <strong>{action.dataset.name}</strong>
                     </Link>{' '}
                 </Typography.Text>
             );
@@ -127,7 +107,7 @@ const createPendingItem = (
                 <Typography.Text>
                     {t('Accepting will create a link to the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {userNotification.notification.reference.data_output.name}
+                        {action.data_output.name}
                     </Link>{' '}
                     {t('data output.')}
                 </Typography.Text>
@@ -143,47 +123,37 @@ const createPendingItem = (
                     {t('Data Output')}
                 </Typography.Text>
             );
-            navigatePath = createDatasetIdPath(
-                userNotification.notification.reference.dataset_id,
-                DatasetTabKeys.DataOutput,
-            );
-            date = userNotification.notification.reference.requested_on;
-            author =
-                userNotification.notification.reference.requested_by.first_name +
-                ' ' +
-                userNotification.notification.reference.requested_by.last_name;
-            initials = getInitials(
-                userNotification.notification.reference.requested_by.first_name,
-                userNotification.notification.reference.requested_by.last_name,
-            );
+            navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
+            date = action.requested_on;
+            author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
+            initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
             request = {
                 type: NotificationTypes.DataOutputDatasetNotification as NotificationTypes.DataOutputDatasetNotification,
                 request: {
-                    id: userNotification.notification.reference.id,
-                    data_output_id: userNotification.notification.reference.data_output_id,
-                    dataset_id: userNotification.notification.reference.dataset_id,
+                    id: action.id,
+                    data_output_id: action.data_output_id,
+                    dataset_id: action.dataset_id,
                 },
             };
             break;
 
         case NotificationTypes.DataProductMembershipNotification:
-            type = NotificationTypes.DataProductMembershipNotification;
-            link = createDataProductIdPath(userNotification.notification.reference.data_product_id);
+            link = createDataProductIdPath(action.data_product_id);
             description = (
                 <Typography.Text>
                     {t('requests to ')} <strong className={styles.descriptionCore}>{t('join the team')}</strong>{' '}
                     {t('of the data product:')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        <strong>{userNotification.notification.reference.data_product.name}</strong>
+                        <strong>{action.data_product.name}</strong>
                     </Link>
                 </Typography.Text>
             );
             message = (
                 <Typography.Text>
                     {t('Accepting will grant the role of {{role}} to {{firstName}} {{lastName}}.', {
-                        role: userNotification.notification.reference.role,
-                        firstName: userNotification.notification.reference.user.first_name,
-                        lastName: userNotification.notification.reference.user.last_name,
+                        role: action.role,
+                        firstName: action.user.first_name,
+                        lastName: action.user.last_name,
                     })}
                 </Typography.Text>
             );
@@ -198,22 +168,13 @@ const createPendingItem = (
                     {t('Person')}
                 </Typography.Text>
             );
-            navigatePath = createDataProductIdPath(
-                userNotification.notification.reference.data_product_id,
-                DataProductTabKeys.Team,
-            );
-            date = userNotification.notification.reference.requested_on;
-            author =
-                userNotification.notification.reference.user.first_name +
-                ' ' +
-                userNotification.notification.reference.user.last_name;
-            initials = getInitials(
-                userNotification.notification.reference.user.first_name,
-                userNotification.notification.reference.user.last_name,
-            );
+            navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
+            date = action.requested_on;
+            author = action.user.first_name + ' ' + action.user.last_name;
+            initials = getInitials(action.user.first_name, action.user.last_name);
             request = {
                 type: NotificationTypes.DataProductMembershipNotification as NotificationTypes.DataProductMembershipNotification,
-                request: userNotification.notification.reference.id,
+                request: action.id,
             };
             break;
 
@@ -222,7 +183,7 @@ const createPendingItem = (
     }
 
     return {
-        key: userNotification.id,
+        key: type + action.id,
         description: description,
         navigatePath: navigatePath,
         date: date,
@@ -231,7 +192,7 @@ const createPendingItem = (
         message: message,
         color: color,
         origin: origin,
-        type: type,
+        type: action.type,
         request: request,
     };
 };
@@ -242,8 +203,6 @@ export function PendingRequestsInbox() {
         token: { colorWarning, colorInfo, colorError },
     } = theme.useToken();
     const [selectedTypes, setSelectedTypes] = useState<Set<NotificationTypes>>(new Set());
-
-    const { data: pendingActions, isFetching } = useGetPendingActionNotificationsQuery();
 
     const [approveDataProductLink] = useApproveDataProductLinkMutation();
     const [rejectDataProductLink] = useRejectDataProductLinkMutation();
@@ -348,21 +307,49 @@ export function PendingRequestsInbox() {
         [denyMembershipAccess, t],
     );
 
+    const { data: pendingActionsDatasets, isFetching: isFetchingPendingActionsDatasets } =
+        useGetDataProductDatasetPendingActionsQuery();
+    const { data: pendingActionsDataOutputs, isFetching: isFetchingPendingActionsDataOutputs } =
+        useGetDataOutputDatasetPendingActionsQuery();
+    const { data: pendingActionsDataProducts, isFetching: isFetchingPendingActionsDataProducts } =
+        useGetDataProductMembershipPendingActionsQuery();
+
+    const isFetching =
+        isFetchingPendingActionsDatasets || isFetchingPendingActionsDataOutputs || isFetchingPendingActionsDataProducts;
+
     const pendingItems = useMemo(() => {
         const colors = {
             [NotificationTypes.DataProductDatasetNotification]: colorWarning,
             [NotificationTypes.DataOutputDatasetNotification]: colorInfo,
             [NotificationTypes.DataProductMembershipNotification]: colorError,
         };
-
-        const userNotifications = pendingActions?.map((userNotification) =>
-            createPendingItem({ ...userNotification }, t, colors),
+        const datasets = pendingActionsDatasets?.map((action) =>
+            createPendingItem({ ...action, type: NotificationTypes.DataProductDatasetNotification }, t, colors),
         );
-        if (!userNotifications) {
-            return [];
-        }
-        return userNotifications.filter((item) => item !== null);
-    }, [pendingActions, t, colorInfo, colorError, colorWarning]);
+        const dataOutputs = pendingActionsDataOutputs?.map((action) =>
+            createPendingItem({ ...action, type: NotificationTypes.DataOutputDatasetNotification }, t, colors),
+        );
+        const dataProducts = pendingActionsDataProducts?.map((action) =>
+            createPendingItem({ ...action, type: NotificationTypes.DataProductMembershipNotification }, t, colors),
+        );
+
+        return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])]
+            .filter((item) => item !== null)
+            .sort((a, b) => {
+                if (!a?.date || !b?.date) {
+                    return 0;
+                }
+                return new Date(a.date).getTime() - new Date(b.date).getTime();
+            });
+    }, [
+        pendingActionsDatasets,
+        pendingActionsDataOutputs,
+        pendingActionsDataProducts,
+        t,
+        colorError,
+        colorInfo,
+        colorWarning,
+    ]);
 
     const { pagination, handlePaginationChange, resetPagination, handleTotalChange } = useListPagination({});
 
@@ -389,15 +376,8 @@ export function PendingRequestsInbox() {
             [NotificationTypes.DataOutputDatasetNotification]: 0,
             [NotificationTypes.DataProductMembershipNotification]: 0,
         };
-
-        pendingItems.forEach((item) => {
-            if (item) {
-                counts[item.type]++;
-            }
-        });
-
         return counts;
-    }, [pendingItems]);
+    }, []);
 
     const slicedPendingActionItems = useMemo(() => {
         return (
