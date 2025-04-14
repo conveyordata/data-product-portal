@@ -10,6 +10,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import utcnow
@@ -29,7 +30,7 @@ def upgrade() -> None:
         sa.Column("role_id", sa.UUID, sa.ForeignKey("roles.id"), nullable=False),
         sa.Column(
             "decision",
-            sa.Enum(DecisionStatus),
+            postgresql.ENUM(DecisionStatus, create_type=False),
             default=DecisionStatus.PENDING,
             nullable=False,
         ),
