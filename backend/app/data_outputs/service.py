@@ -26,7 +26,6 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
 from app.graph.graph import Graph
-from app.notifications.model import NotificationFactory
 from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
@@ -130,7 +129,6 @@ class DataOutputService:
             )
         self.ensure_owner(authenticated_user, data_output, db)
         for dataset_link in data_output.dataset_links:
-            db.refresh(dataset_link)
             dataset_link.remove_notifications(db)
         data_output.dataset_links = []
         db.delete(data_output)
@@ -181,11 +179,6 @@ class DataOutputService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_output.dataset_links.append(dataset_link)
-
-        if dataset_link.status == DataOutputDatasetLinkStatus.PENDING_APPROVAL:
-            db.refresh(dataset_link)
-            NotificationFactory.createDataOutputDatasetRequested(db, dataset_link)
-
         db.commit()
         db.refresh(data_output)
         RefreshInfrastructureLambda().trigger()
@@ -236,7 +229,6 @@ class DataOutputService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data output {id} not found",
             )
-        db.refresh(data_output_dataset)
         data_output_dataset.remove_notifications(db)
         data_output.dataset_links.remove(data_output_dataset)
         db.commit()

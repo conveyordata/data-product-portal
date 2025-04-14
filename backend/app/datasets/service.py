@@ -137,12 +137,10 @@ class DatasetService:
             )
         dataset.owners = []
         for data_product_link in dataset.data_product_links:
-            db.refresh(data_product_link)
             data_product_link.remove_notifications(db)
 
         dataset.data_product_links = []
         for data_output_link in dataset.data_output_links:
-            db.refresh(data_output_link)
             data_output_link.remove_notifications(db)
 
         dataset.data_output_links = []

@@ -90,12 +90,16 @@ class DataProductMembershipNotification(Notification):
 
 class NotificationFactory:
     @staticmethod
-    def createDataProductDatasetApproved(
-        db: Session, data_product_dataset: DataProductDatasetAssociation
+    def createDataProductDatasetNotification(
+        db: Session, data_product_dataset: DataProductDatasetAssociation, approved: bool
     ):
         notification = DataProductDatasetNotification(
             notification_type=NotificationTypes.DataProductDatasetNotification,
-            notification_origin=DataProductDatasetLinkStatus.APPROVED,
+            notification_origin=(
+                DataProductDatasetLinkStatus.APPROVED
+                if approved
+                else DataProductDatasetLinkStatus.DENIED
+            ),
             data_product_dataset_id=data_product_dataset.id,
         )
         receivers = list(
@@ -114,52 +118,16 @@ class NotificationFactory:
         db.add(notification)
 
     @staticmethod
-    def createDataProductDatasetDenied(
-        db: Session, data_product_dataset: DataProductDatasetAssociation
-    ):
-        notification = DataProductDatasetNotification(
-            notification_type=NotificationTypes.DataProductDatasetNotification,
-            notification_origin=DataProductDatasetLinkStatus.DENIED,
-            data_product_dataset_id=data_product_dataset.id,
-        )
-        receivers = list(
-            {
-                owner.id: owner
-                for owner in (
-                    data_product_dataset.dataset.owners
-                    + [data_product_dataset.requested_by]
-                )
-            }.values()
-        )
-        notification.notification_interactions = [
-            NotificationInteraction(user=receiver, notification=notification)
-            for receiver in receivers
-        ]
-        db.add(notification)
-
-    @staticmethod
-    def createDataProductDatasetRequested(
-        db: Session, data_product_dataset: DataProductDatasetAssociation
-    ):
-        notification = DataProductDatasetNotification(
-            notification_type=NotificationTypes.DataProductDatasetNotification,
-            notification_origin=DataProductDatasetLinkStatus.APPROVED,
-            data_product_dataset_id=data_product_dataset.id,
-        )
-        receivers = data_product_dataset.dataset.owners
-        notification.notification_interactions = [
-            NotificationInteraction(user=receiver, notification=notification)
-            for receiver in receivers
-        ]
-        db.add(notification)
-
-    @staticmethod
-    def createDataOutputDatasetApproved(
-        db: Session, data_output_dataset: DataOutputDatasetAssociation
+    def createDataOutputDatasetNotification(
+        db: Session, data_output_dataset: DataOutputDatasetAssociation, approved: bool
     ):
         notification = DataOutputDatasetNotification(
             notification_type=NotificationTypes.DataOutputDatasetNotification,
-            notification_origin=DataOutputDatasetLinkStatus.APPROVED,
+            notification_origin=(
+                DataOutputDatasetLinkStatus.APPROVED
+                if approved
+                else DataOutputDatasetLinkStatus.DENIED
+            ),
             data_output_dataset_id=data_output_dataset.id,
         )
         receivers = list(
@@ -178,52 +146,16 @@ class NotificationFactory:
         db.add(notification)
 
     @staticmethod
-    def createDataOutputDatasetDenied(
-        db: Session, data_output_dataset: DataOutputDatasetAssociation
-    ):
-        notification = DataOutputDatasetNotification(
-            notification_type=NotificationTypes.DataOutputDatasetNotification,
-            notification_origin=DataOutputDatasetLinkStatus.DENIED,
-            data_output_dataset_id=data_output_dataset.id,
-        )
-        receivers = list(
-            {
-                owner.id: owner
-                for owner in (
-                    data_output_dataset.dataset.owners
-                    + [data_output_dataset.requested_by]
-                )
-            }.values()
-        )
-        notification.notification_interactions = [
-            NotificationInteraction(user=receiver, notification=notification)
-            for receiver in receivers
-        ]
-        db.add(notification)
-
-    @staticmethod
-    def createDataOutputDatasetRequested(
-        db: Session, data_output_dataset: DataOutputDatasetAssociation
-    ):
-        notification = DataOutputDatasetNotification(
-            notification_type=NotificationTypes.DataOutputDatasetNotification,
-            notification_origin=DataOutputDatasetLinkStatus.PENDING_APPROVAL,
-            data_output_dataset_id=data_output_dataset.id,
-        )
-        receivers = data_output_dataset.dataset.owners
-        notification.notification_interactions = [
-            NotificationInteraction(user=receiver, notification=notification)
-            for receiver in receivers
-        ]
-        db.add(notification)
-
-    @staticmethod
-    def createDataProductMembershipApproved(
-        db: Session, data_product_membership: DataProductMembership
+    def createDataProductMembershipNotification(
+        db: Session, data_product_membership: DataProductMembership, approved: bool
     ):
         notification = DataProductMembershipNotification(
             notification_type=NotificationTypes.DataProductMembershipNotification,
-            notification_origin=DataProductMembershipStatus.APPROVED,
+            notification_origin=(
+                DataProductMembershipStatus.APPROVED
+                if approved
+                else DataProductMembershipStatus.DENIED
+            ),
             data_product_membership_id=data_product_membership.id,
         )
         receivers = list(
@@ -235,46 +167,6 @@ class NotificationFactory:
                 )
             }.values()
         )
-        notification.notification_interactions = [
-            NotificationInteraction(user=receiver, notification=notification)
-            for receiver in receivers
-        ]
-        db.add(notification)
-
-    @staticmethod
-    def createDataProductMembershipDenied(
-        db: Session, data_product_membership: DataProductMembership
-    ):
-        notification = DataProductMembershipNotification(
-            notification_type=NotificationTypes.DataProductMembershipNotification,
-            notification_origin=DataProductMembershipStatus.DENIED,
-            data_product_membership_id=data_product_membership.id,
-        )
-        receivers = list(
-            {
-                owner.id: owner
-                for owner in (
-                    data_product_membership.data_product.owners
-                    + [data_product_membership.user]
-                )
-            }.values()
-        )
-        notification.notification_interactions = [
-            NotificationInteraction(user=receiver, notification=notification)
-            for receiver in receivers
-        ]
-        db.add(notification)
-
-    @staticmethod
-    def createDataProductMembershipRequested(
-        db: Session, data_product_membership: DataProductMembership
-    ):
-        notification = DataProductMembershipNotification(
-            notification_type=NotificationTypes.DataProductMembershipNotification,
-            notification_origin=DataProductDatasetLinkStatus.PENDING_APPROVAL,
-            data_product_membership_id=data_product_membership.id,
-        )
-        receivers = data_product_membership.data_product.owners
         notification.notification_interactions = [
             NotificationInteraction(user=receiver, notification=notification)
             for receiver in receivers

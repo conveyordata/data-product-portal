@@ -49,13 +49,6 @@ class DataProductMembershipService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.memberships.append(data_product_membership)
-        if (
-            data_product_membership.status
-            == DataProductMembershipStatus.PENDING_APPROVAL
-        ):
-            NotificationFactory.createDataProductMembershipRequested(
-                db, data_product_membership
-            )
         db.commit()
         db.refresh(data_product_membership)
 
@@ -118,8 +111,8 @@ class DataProductMembershipService:
         data_product_membership.approved_by_id = authenticated_user.id
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
 
-        NotificationFactory.createDataProductMembershipApproved(
-            db, data_product_membership
+        NotificationFactory.createDataProductMembershipNotification(
+            db, data_product_membership, True
         )
 
         db.commit()
@@ -155,8 +148,8 @@ class DataProductMembershipService:
         data_product_membership.denied_by_id = authenticated_user.id
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
 
-        NotificationFactory.createDataProductMembershipDenied(
-            db, data_product_membership
+        NotificationFactory.createDataProductMembershipNotification(
+            db, data_product_membership, False
         )
 
         db.commit()
@@ -187,10 +180,8 @@ class DataProductMembershipService:
                 ),
             )
 
-        db.refresh(data_product_membership)
         data_product_membership.remove_notifications(db)
         data_product.memberships.remove(data_product_membership)
-
         db.commit()
         RefreshInfrastructureLambda().trigger()
 

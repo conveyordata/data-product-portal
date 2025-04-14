@@ -33,7 +33,7 @@ class DataProductDatasetService:
         current_link.status = DataProductDatasetLinkStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        NotificationFactory.createDataProductDatasetApproved(db, current_link)
+        NotificationFactory.createDataProductDatasetNotification(db, current_link, True)
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
@@ -50,7 +50,9 @@ class DataProductDatasetService:
         current_link.status = DataProductDatasetLinkStatus.DENIED
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        NotificationFactory.createDataProductDatasetDenied(db, current_link)
+        NotificationFactory.createDataProductDatasetNotification(
+            db, current_link, False
+        )
         db.commit()
 
     def remove_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
@@ -59,7 +61,6 @@ class DataProductDatasetService:
         ensure_dataset_exists(dataset.id, db)
         linked_data_product = current_link.data_product
         data_product = ensure_data_product_exists(linked_data_product.id, db)
-        db.refresh(current_link)
         current_link.remove_notifications(db)
         data_product.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()

@@ -52,7 +52,6 @@ from app.environments.model import Environment as EnvironmentModel
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.notifications.model import NotificationFactory
 from app.platforms.model import Platform as PlatformModel
 from app.settings import settings
 from app.tags.model import Tag as TagModel
@@ -200,16 +199,13 @@ class DataProductService:
                 detail=f"Data Product {id} not found",
             )
         for membership in data_product.memberships:
-            db.refresh(membership)
             membership.remove_notifications(db)
         data_product.memberships = []
         for dataset_link in data_product.dataset_links:
-            db.refresh(dataset_link)
             dataset_link.remove_notifications(db)
         data_product.dataset_links = []
         for output in data_product.data_outputs:
             for output_dataset_link in output.dataset_links:
-                db.refresh(output_dataset_link)
                 output_dataset_link.remove_notifications(db)
             output.dataset_links = []
             db.delete(output)
@@ -328,10 +324,6 @@ class DataProductService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.dataset_links.append(dataset_link)
-        if dataset_link.status == DataProductDatasetLinkStatus.PENDING_APPROVAL:
-            db.refresh(dataset_link)
-            NotificationFactory.createDataOutputDatasetRequested(db, dataset_link)
-
         db.commit()
         db.refresh(data_product)
         RefreshInfrastructureLambda().trigger()
@@ -383,7 +375,6 @@ class DataProductService:
                 detail=f"Data product dataset for data product {id} not found",
             )
 
-        db.refresh(data_product_dataset)
         data_product_dataset.remove_notifications(db)
         data_product.dataset_links.remove(data_product_dataset)
         db.commit()
