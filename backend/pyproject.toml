@@ -6,7 +6,7 @@ authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.13"
 python-dotenv = "^1.1.0"
 fastapi = "0.115.12"
 gunicorn = "^23.0.0"
@@ -34,6 +34,7 @@ casbin = "^1.41.0"
 casbin-async-sqlalchemy-adapter = "^1.7.0"
 asyncpg = "^0.30.0"
 cachetools = "^5.5.2"
+greenlet = "^3.1.0"
 
 [tool.poetry.group.test]
 optional = true
