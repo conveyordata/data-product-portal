@@ -4,12 +4,13 @@ from uuid import UUID
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_products_datasets.schema import DataProductDatasetAssociation
-from app.notifications.notification_types import NotificationTypes
+from app.notifications.enums import NotificationOrigins, NotificationTypes
 from app.shared.schema import ORMModel
 
 
 class NotificationBase(ORMModel):
     id: UUID
+    notification_origin: NotificationOrigins
 
 
 class DataProductDatasetNotification(NotificationBase):

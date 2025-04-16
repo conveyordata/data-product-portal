@@ -22,7 +22,7 @@ from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
 )
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
-from app.notifications.notification_types import NotificationTypes
+from app.notifications.enums import NotificationTypes
 
 NOTIFICATIONS_ENDPOINT = "/api/notifications"
 DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"

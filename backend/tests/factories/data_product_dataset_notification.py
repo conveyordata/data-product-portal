@@ -1,10 +1,10 @@
 import factory
 from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
 
+from app.notifications.enums import NotificationOrigins, NotificationTypes
 from app.notifications.model import (
     DataProductDatasetNotification,
 )
-from app.notifications.notification_types import NotificationTypes
 
 
 class DataProductDatasetNotificationFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -13,4 +13,5 @@ class DataProductDatasetNotificationFactory(factory.alchemy.SQLAlchemyModelFacto
 
     id = factory.Faker("uuid4")
     notification_type = NotificationTypes.DataProductDatasetNotification.value
+    notification_origin = NotificationOrigins.APPROVED.value
     data_product_dataset = factory.SubFactory(DataProductDatasetAssociationFactory)

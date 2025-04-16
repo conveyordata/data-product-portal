@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects.postgresql import UUID
 
-from app.notifications.notification_types import NotificationTypes
+from app.notifications.enums import NotificationOrigins, NotificationTypes
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
@@ -28,6 +28,7 @@ def upgrade() -> None:
         "notifications",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("notification_type", sa.Enum(NotificationTypes)),
+        sa.Column("notification_origin", sa.Enum(NotificationOrigins)),
         sa.Column(
             "data_product_dataset_id",
             UUID(as_uuid=True),
@@ -69,4 +70,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("notification_interactions")
-    op.drop_table("notification_configurations")
+    op.drop_table("notifications")

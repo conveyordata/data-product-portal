@@ -14,11 +14,8 @@ import {
     useGetNotificationsQuery,
     useRemoveNotificationMutation,
 } from '@/store/features/notifications/notifications-api-slice';
-import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
-import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
-import { DataProductMembershipStatus } from '@/types/data-product-membership';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { NotificationModel, NotificationTypes } from '@/types/notifications/notification.contract';
+import { NotificationModel, NotificationOrigins, NotificationTypes } from '@/types/notifications/notification.contract';
 import { UserContract } from '@/types/users';
 
 import styles from './notifications.module.scss';
@@ -59,8 +56,8 @@ export function Notifications() {
             switch (userNotification.notification.notification_type) {
                 case NotificationTypes.DataProductDatasetNotification:
                     link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
-                    switch (userNotification.notification.data_product_dataset.status) {
-                        case DataProductDatasetLinkStatus.Approved:
+                    switch (userNotification.notification.notification_origin) {
+                        case NotificationOrigins.Approved:
                             description =
                                 currentUser?.id ===
                                 userNotification.notification.data_product_dataset.requested_by.id ? (
@@ -105,7 +102,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 );
                             break;
-                        case DataProductDatasetLinkStatus.Denied:
+                        case NotificationOrigins.Denied:
                             description =
                                 currentUser?.id ===
                                 userNotification.notification.data_product_dataset.requested_by.id ? (
@@ -162,8 +159,8 @@ export function Notifications() {
                         userNotification.notification.data_output_dataset.data_output_id,
                         userNotification.notification.data_output_dataset.data_output.owner_id,
                     );
-                    switch (userNotification.notification.data_output_dataset.status) {
-                        case DataOutputDatasetLinkStatus.Approved:
+                    switch (userNotification.notification.notification_origin) {
+                        case NotificationOrigins.Approved:
                             description =
                                 currentUser?.id ===
                                 userNotification.notification.data_output_dataset.requested_by.id ? (
@@ -208,7 +205,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 );
                             break;
-                        case DataOutputDatasetLinkStatus.Denied:
+                        case NotificationOrigins.Denied:
                             description =
                                 currentUser?.id ===
                                 userNotification.notification.data_output_dataset.requested_by.id ? (
@@ -264,8 +261,8 @@ export function Notifications() {
                     link = createDataProductIdPath(
                         userNotification.notification.data_product_membership.data_product_id,
                     );
-                    switch (userNotification.notification.data_product_membership.status) {
-                        case DataProductMembershipStatus.Approved:
+                    switch (userNotification.notification.notification_origin) {
+                        case NotificationOrigins.Approved:
                             description =
                                 currentUser?.id === userNotification.notification.data_product_membership.user.id ? (
                                     <Typography.Text>
@@ -292,7 +289,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 );
                             break;
-                        case DataProductMembershipStatus.Denied:
+                        case NotificationOrigins.Denied:
                             description =
                                 currentUser?.id === userNotification.notification.data_product_membership.user.id ? (
                                     <Typography.Text>

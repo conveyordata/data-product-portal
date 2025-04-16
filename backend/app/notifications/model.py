@@ -9,7 +9,7 @@ from app.data_product_memberships.model import DataProductMembership
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base
 from app.notification_interactions.model import NotificationInteraction
-from app.notifications.notification_types import NotificationTypes
+from app.notifications.enums import NotificationOrigins, NotificationTypes
 from app.shared.model import BaseORM
 
 
@@ -21,6 +21,9 @@ class Notification(Base, BaseORM):
         "NotificationInteraction",
         back_populates="notification",
         cascade="all, delete-orphan",
+    )
+    notification_origin: Mapped[NotificationOrigins] = mapped_column(
+        Enum(NotificationOrigins), nullable=False
     )
     __mapper_args__ = {
         "polymorphic_on": "notification_type",
