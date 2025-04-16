@@ -28,7 +28,6 @@ def upgrade() -> None:
         "notifications",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("notification_type", sa.Enum(NotificationTypes)),
-        sa.Column("notification_origin", sa.String),
         sa.Column(
             "data_product_dataset_id",
             UUID(as_uuid=True),

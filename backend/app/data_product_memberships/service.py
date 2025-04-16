@@ -112,7 +112,7 @@ class DataProductMembershipService:
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
 
         NotificationFactory.createDataProductMembershipNotification(
-            db, data_product_membership, True
+            db, data_product_membership
         )
 
         db.commit()
@@ -149,7 +149,7 @@ class DataProductMembershipService:
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
 
         NotificationFactory.createDataProductMembershipNotification(
-            db, data_product_membership, False
+            db, data_product_membership
         )
 
         db.commit()

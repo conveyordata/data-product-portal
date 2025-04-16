@@ -1,7 +1,6 @@
 import factory
 from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
 
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.notifications.model import (
     DataOutputDatasetNotification,
 )
@@ -14,5 +13,4 @@ class DataOutputDatasetNotificationFactory(factory.alchemy.SQLAlchemyModelFactor
 
     id = factory.Faker("uuid4")
     notification_type = NotificationTypes.DataOutputDatasetNotification.value
-    notification_origin = DataOutputDatasetLinkStatus.APPROVED
     data_output_dataset = factory.SubFactory(DataOutputDatasetAssociationFactory)

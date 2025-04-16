@@ -4,11 +4,8 @@ from sqlalchemy import Column, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
-from app.data_product_memberships.enums import DataProductMembershipStatus
 from app.data_product_memberships.model import DataProductMembership
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base
 from app.notification_interactions.model import NotificationInteraction
@@ -37,9 +34,6 @@ class DataProductDatasetNotification(Notification):
         ForeignKey("data_products_datasets.id", ondelete="CASCADE"),
         nullable=False,
     )
-    notification_origin: Mapped[DataProductDatasetLinkStatus] = mapped_column(
-        Enum(DataProductDatasetLinkStatus), nullable=False, use_existing_column=True
-    )
     data_product_dataset: Mapped["DataProductDatasetAssociation"] = relationship(
         "DataProductDatasetAssociation",
         back_populates="notifications",
@@ -55,9 +49,6 @@ class DataOutputDatasetNotification(Notification):
         "data_output_dataset_id",
         ForeignKey("data_outputs_datasets.id", ondelete="CASCADE"),
         nullable=False,
-    )
-    notification_origin: Mapped[DataOutputDatasetLinkStatus] = mapped_column(
-        Enum(DataOutputDatasetLinkStatus), nullable=False, use_existing_column=True
     )
     data_output_dataset: Mapped["DataOutputDatasetAssociation"] = relationship(
         "DataOutputDatasetAssociation",
@@ -75,9 +66,6 @@ class DataProductMembershipNotification(Notification):
         ForeignKey("data_product_memberships.id", ondelete="CASCADE"),
         nullable=False,
     )
-    notification_origin: Mapped[DataProductMembershipStatus] = mapped_column(
-        Enum(DataProductMembershipStatus), nullable=False, use_existing_column=True
-    )
     data_product_membership: Mapped["DataProductMembership"] = relationship(
         "DataProductMembership",
         back_populates="notifications",
@@ -91,15 +79,10 @@ class DataProductMembershipNotification(Notification):
 class NotificationFactory:
     @staticmethod
     def createDataProductDatasetNotification(
-        db: Session, data_product_dataset: DataProductDatasetAssociation, approved: bool
+        db: Session, data_product_dataset: DataProductDatasetAssociation
     ):
         notification = DataProductDatasetNotification(
             notification_type=NotificationTypes.DataProductDatasetNotification,
-            notification_origin=(
-                DataProductDatasetLinkStatus.APPROVED
-                if approved
-                else DataProductDatasetLinkStatus.DENIED
-            ),
             data_product_dataset_id=data_product_dataset.id,
         )
         receivers = list(
@@ -119,15 +102,10 @@ class NotificationFactory:
 
     @staticmethod
     def createDataOutputDatasetNotification(
-        db: Session, data_output_dataset: DataOutputDatasetAssociation, approved: bool
+        db: Session, data_output_dataset: DataOutputDatasetAssociation
     ):
         notification = DataOutputDatasetNotification(
             notification_type=NotificationTypes.DataOutputDatasetNotification,
-            notification_origin=(
-                DataOutputDatasetLinkStatus.APPROVED
-                if approved
-                else DataOutputDatasetLinkStatus.DENIED
-            ),
             data_output_dataset_id=data_output_dataset.id,
         )
         receivers = list(
@@ -147,15 +125,10 @@ class NotificationFactory:
 
     @staticmethod
     def createDataProductMembershipNotification(
-        db: Session, data_product_membership: DataProductMembership, approved: bool
+        db: Session, data_product_membership: DataProductMembership
     ):
         notification = DataProductMembershipNotification(
             notification_type=NotificationTypes.DataProductMembershipNotification,
-            notification_origin=(
-                DataProductMembershipStatus.APPROVED
-                if approved
-                else DataProductMembershipStatus.DENIED
-            ),
             data_product_membership_id=data_product_membership.id,
         )
         receivers = list(

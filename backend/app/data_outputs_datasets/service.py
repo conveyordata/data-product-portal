@@ -44,7 +44,7 @@ class DataOutputDatasetService:
         current_link.status = DataOutputDatasetLinkStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        NotificationFactory.createDataOutputDatasetNotification(db, current_link, True)
+        NotificationFactory.createDataOutputDatasetNotification(db, current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
@@ -66,7 +66,7 @@ class DataOutputDatasetService:
         current_link.status = DataOutputDatasetLinkStatus.DENIED
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        NotificationFactory.createDataOutputDatasetNotification(db, current_link, False)
+        NotificationFactory.createDataOutputDatasetNotification(db, current_link)
         db.commit()
 
     def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):

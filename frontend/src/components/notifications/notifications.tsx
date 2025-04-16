@@ -59,7 +59,7 @@ export function Notifications() {
             switch (userNotification.notification.notification_type) {
                 case NotificationTypes.DataProductDatasetNotification:
                     link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
-                    switch (userNotification.notification.notification_origin) {
+                    switch (userNotification.notification.data_product_dataset.status) {
                         case DataProductDatasetLinkStatus.Approved:
                             description =
                                 currentUser?.id ===
@@ -162,7 +162,7 @@ export function Notifications() {
                         userNotification.notification.data_output_dataset.data_output_id,
                         userNotification.notification.data_output_dataset.data_output.owner_id,
                     );
-                    switch (userNotification.notification.notification_origin) {
+                    switch (userNotification.notification.data_output_dataset.status) {
                         case DataOutputDatasetLinkStatus.Approved:
                             description =
                                 currentUser?.id ===
@@ -264,7 +264,7 @@ export function Notifications() {
                     link = createDataProductIdPath(
                         userNotification.notification.data_product_membership.data_product_id,
                     );
-                    switch (userNotification.notification.notification_origin) {
+                    switch (userNotification.notification.data_product_membership.status) {
                         case DataProductMembershipStatus.Approved:
                             description =
                                 currentUser?.id === userNotification.notification.data_product_membership.user.id ? (
