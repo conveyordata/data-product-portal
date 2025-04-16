@@ -335,6 +335,114 @@ class TestNotificationsRouter:
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert response.json() == []
 
+    def test_delete_own_notification_data_product_dataset(self, client):
+        owner = UserFactory(external_id="sub")
+        link = DataProductDatasetAssociationFactory(
+            status=DataProductDatasetLinkStatus.APPROVED.value,
+        )
+        notification = NotificationInteractionFactory(
+            notification=DataProductDatasetNotificationFactory(
+                notification_type=NotificationTypes.DataProductDatasetNotification,
+                data_product_dataset=link,
+            ),
+            user=owner,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert len(response.json()) == 1
+        response = self.delete_notification(client, notification.id)
+        assert response.status_code == 200
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == []
+
+    def test_delete_other_user_notification_data_product_dataset(self, client):
+        other = UserFactory()
+        link = DataProductDatasetAssociationFactory(
+            status=DataProductDatasetLinkStatus.APPROVED.value,
+        )
+        notification = NotificationInteractionFactory(
+            notification=DataProductDatasetNotificationFactory(
+                notification_type=NotificationTypes.DataProductDatasetNotification,
+                data_product_dataset=link,
+            ),
+            user=other,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert len(response.json()) == 0
+        response = self.delete_notification(client, notification.id)
+        assert response.status_code == 403
+
+    def test_delete_own_notification_data_output_dataset(self, client):
+        owner = UserFactory(external_id="sub")
+        link = DataOutputDatasetAssociationFactory(
+            status=DataOutputDatasetLinkStatus.APPROVED.value,
+        )
+        notification = NotificationInteractionFactory(
+            notification=DataOutputDatasetNotificationFactory(
+                notification_type=NotificationTypes.DataOutputDatasetNotification,
+                data_output_dataset=link,
+            ),
+            user=owner,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert len(response.json()) == 1
+        response = self.delete_notification(client, notification.id)
+        assert response.status_code == 200
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == []
+
+    def test_delete_other_user_notification_data_output_dataset(self, client):
+        other = UserFactory()
+        link = DataOutputDatasetAssociationFactory(
+            status=DataOutputDatasetLinkStatus.APPROVED.value,
+        )
+        notification = NotificationInteractionFactory(
+            notification=DataOutputDatasetNotificationFactory(
+                notification_type=NotificationTypes.DataOutputDatasetNotification,
+                data_output_dataset=link,
+            ),
+            user=other,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert len(response.json()) == 0
+        response = self.delete_notification(client, notification.id)
+        assert response.status_code == 403
+
+    def test_delete_own_notification_data_product_membership(self, client):
+        owner = UserFactory(external_id="sub")
+        link = DataProductMembershipFactory(
+            status=DataProductMembershipStatus.APPROVED.value,
+        )
+        notification = NotificationInteractionFactory(
+            notification=DataProductMembershipNotificationFactory(
+                notification_type=NotificationTypes.DataProductMembershipNotification,
+                data_product_membership=link,
+            ),
+            user=owner,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert len(response.json()) == 1
+        response = self.delete_notification(client, notification.id)
+        assert response.status_code == 200
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json() == []
+
+    def test_delete_other_user_notification_data_product_membership(self, client):
+        other = UserFactory()
+        link = DataProductMembershipFactory(
+            status=DataProductMembershipStatus.APPROVED.value,
+        )
+        notification = NotificationInteractionFactory(
+            notification=DataProductMembershipNotificationFactory(
+                notification_type=NotificationTypes.DataProductMembershipNotification,
+                data_product_membership=link,
+            ),
+            user=other,
+        )
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert len(response.json()) == 0
+        response = self.delete_notification(client, notification.id)
+        assert response.status_code == 403
+
     @staticmethod
     def approve_default_data_product_dataset_link(client, link_id):
         return client.post(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/approve/{link_id}")
@@ -370,3 +478,7 @@ class TestNotificationsRouter:
     @staticmethod
     def delete_data_output(client, data_output_id):
         return client.delete(f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}")
+
+    @staticmethod
+    def delete_notification(client, notification_id):
+        return client.delete(f"{NOTIFICATIONS_ENDPOINT}/{notification_id}")
