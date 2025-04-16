@@ -334,9 +334,9 @@ export function PendingRequestsInbox() {
 
     const pendingItems = useMemo(() => {
         const colors = {
-            [NotificationTypes.DataProductDatasetNotification]: colorInfo,
-            [NotificationTypes.DataOutputDatasetNotification]: colorInfo,
-            [NotificationTypes.DataProductMembershipNotification]: colorInfoActive,
+            [NotificationTypes.DataProductDatasetNotification]: colorInfoActive,
+            [NotificationTypes.DataOutputDatasetNotification]: colorInfoActive,
+            [NotificationTypes.DataProductMembershipNotification]: colorInfo,
         };
         const datasets = pendingActionsDatasets?.map((action) =>
             createPendingItem({ ...action, type: NotificationTypes.DataProductDatasetNotification }, t, colors),
