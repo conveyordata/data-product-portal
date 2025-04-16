@@ -54,20 +54,21 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
             link = createDataProductIdPath(action.data_product_id);
             description = (
                 <Typography.Text>
-                    {t('requests')} <strong className={styles.descriptionCore}>{t('read access')}</strong>{' '}
-                    {t('to the dataset:')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        <strong>{action.dataset.name}</strong>
+                    {t('Request for')} <strong className={styles.descriptionCore}>{t('read access')}</strong>{' '}
+                    {t('from the data product')}{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={link}>
+                        <strong>{action.data_product.name}</strong>
                     </Link>
+                    {t(' :')}
                 </Typography.Text>
             );
             message = (
                 <Typography.Text>
-                    {t('Accepting will grant access to the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {action.data_product.name}
+                    {t('Accepting will grant the data product read access on the')}{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                        {action.dataset.name}
                     </Link>{' '}
-                    {t('data product.')}{' '}
+                    {t('dataset.')}
                 </Typography.Text>
             );
             color = colors[NotificationTypes.DataProductDatasetNotification];
@@ -78,7 +79,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     }}
                     strong
                 >
-                    {t('Dataset')}
+                    {t('{{name}} Dataset', { name: action.dataset.name })}
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
@@ -100,20 +101,21 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
             link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
             description = (
                 <Typography.Text>
-                    {t('requests')} <strong className={styles.descriptionCore}>{t('creation of a link')}</strong>{' '}
-                    {t('towards the dataset:')}{' '}
+                    {t('Request for')} <strong className={styles.descriptionCore}>{t('the creation of a link')}</strong>{' '}
+                    {t('coming from the data output')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        <strong>{action.dataset.name}</strong>
-                    </Link>{' '}
+                        <strong>{action.data_output.name}</strong>
+                    </Link>
+                    {t(' :')}
                 </Typography.Text>
             );
             message = (
                 <Typography.Text>
-                    {t('Accepting will create a link to the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {action.data_output.name}
+                    {t('Accepting will create a link from the data output to the')}{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                        {action.dataset.name}
                     </Link>{' '}
-                    {t('data output.')}
+                    {t('dataset.')}
                 </Typography.Text>
             );
             color = colors[NotificationTypes.DataOutputDatasetNotification];
@@ -124,7 +126,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     }}
                     strong
                 >
-                    {t('Dataset')}
+                    {t('{{name}} Dataset', { name: action.dataset.name })}
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
@@ -146,20 +148,27 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
             link = createDataProductIdPath(action.data_product_id);
             description = (
                 <Typography.Text>
-                    {t('requests to ')} <strong className={styles.descriptionCore}>{t('join the team')}</strong>{' '}
-                    {t('of the data product:')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        <strong>{action.data_product.name}</strong>
+                    {t('Request for ')} <strong className={styles.descriptionCore}>{t('team membership')}</strong>{' '}
+                    {t('from')}{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={'/'}>
+                        <strong>
+                            {action.user.first_name} {action.user.last_name}
+                        </strong>
                     </Link>
+                    {t(' :')}
                 </Typography.Text>
             );
             message = (
                 <Typography.Text>
-                    {t('Accepting will grant the role of {{role}} to {{firstName}} {{lastName}}.', {
+                    {t('Accepting will grant the user the role of {{role}} in the ', {
                         role: action.role,
                         firstName: action.user.first_name,
                         lastName: action.user.last_name,
                     })}
+                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.data_product_id)}>
+                        {action.data_product.name}
+                    </Link>{' '}
+                    {t('data product.')}
                 </Typography.Text>
             );
             color = colors[NotificationTypes.DataProductMembershipNotification];
@@ -170,7 +179,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     }}
                     strong
                 >
-                    {t('Data Product')}
+                    {t('{{name}} Data Product', { name: action.data_product.name })}
                 </Typography.Text>
             );
             navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);

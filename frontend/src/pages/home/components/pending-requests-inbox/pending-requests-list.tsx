@@ -1,5 +1,5 @@
 import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Badge, Button, Col, Flex, List, Typography } from 'antd';
+import { Avatar, Badge, Button, Flex, List, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -30,8 +30,6 @@ type DataProductListProps = {
     onAccept: (request: ActionResolveRequest) => void;
     onReject: (request: ActionResolveRequest) => void;
 };
-
-const COL_SPAN = 12;
 
 export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, onReject }: DataProductListProps) => {
     const { t } = useTranslation();
@@ -72,14 +70,12 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                             </div>
                             <Flex vertical={true} className={styles.flex} align="flex-start">
                                 <div className={styles.itemContainer}>
-                                    <Col span={COL_SPAN}>
-                                        <Flex vertical>
-                                            <Typography.Text>
-                                                <strong>{item.author}</strong>, {item.description}
-                                            </Typography.Text>
-                                            <Typography.Text type="secondary">{formattedDate}</Typography.Text>
-                                        </Flex>
-                                    </Col>
+                                    <Flex vertical>
+                                        <Typography.Text>{item.description}</Typography.Text>
+                                        <Typography.Text type="secondary">
+                                            by {item.author}, {formattedDate}
+                                        </Typography.Text>
+                                    </Flex>
                                     <div className={styles.rightColumn}>
                                         <Flex justify="flex-end">
                                             <Flex className={styles.typeIndicator}>
