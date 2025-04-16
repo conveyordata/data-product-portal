@@ -8,7 +8,7 @@ vars:
   DOCS_CONFIG: docs/docusaurus.config.ts
 
 tasks:
-  bump:version:
+  bump:version-file:
     desc: "Bump version and update all references"
     cmds:
       - |
@@ -66,12 +66,18 @@ tasks:
       - git push --tags
       - aws s3 sync docs/build/ s3://{{.S3_DOCS_BUCKET}} --delete
 
-  release:
-    desc: "Release process"
+  bump-docs:
+    desc: "Bump docs version, execute on minor releases e.g. bump-docs 0.2.x"
     cmds:
-      - task: bump:version
       - task: docusaurus:version
       - task: docusaurus:update-config
       - task: docusaurus:build
+      - task: release:commit
+      - task: release:pr
+
+  bump-version:
+    desc: "Generic version bump without docs, execute on all releases, e.g. bump-version 0.2.0"
+    cmds:
+      - task: bump:version-file
       - task: release:commit
       - task: release:pr
