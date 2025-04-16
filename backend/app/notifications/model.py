@@ -1,3 +1,4 @@
+import itertools
 import uuid
 
 from sqlalchemy import Column, Enum, ForeignKey
@@ -85,17 +86,17 @@ class NotificationFactory:
             notification_type=NotificationTypes.DataProductDatasetNotification,
             data_product_dataset_id=data_product_dataset.id,
         )
-        receivers = list(
-            {
-                owner.id: owner
-                for owner in (
-                    data_product_dataset.dataset.owners
-                    + [data_product_dataset.requested_by]
+        receivers = set(
+            owner.id
+            for owner in (
+                itertools.chain(
+                    data_product_dataset.dataset.owners,
+                    [data_product_dataset.requested_by],
                 )
-            }.values()
+            )
         )
         notification.notification_interactions = [
-            NotificationInteraction(user=receiver, notification=notification)
+            NotificationInteraction(user_id=receiver, notification=notification)
             for receiver in receivers
         ]
         db.add(notification)
@@ -108,17 +109,17 @@ class NotificationFactory:
             notification_type=NotificationTypes.DataOutputDatasetNotification,
             data_output_dataset_id=data_output_dataset.id,
         )
-        receivers = list(
-            {
-                owner.id: owner
-                for owner in (
-                    data_output_dataset.dataset.owners
-                    + [data_output_dataset.requested_by]
+        receivers = set(
+            owner.id
+            for owner in (
+                itertools.chain(
+                    data_output_dataset.dataset.owners,
+                    [data_output_dataset.requested_by],
                 )
-            }.values()
+            )
         )
         notification.notification_interactions = [
-            NotificationInteraction(user=receiver, notification=notification)
+            NotificationInteraction(user_id=receiver, notification=notification)
             for receiver in receivers
         ]
         db.add(notification)
@@ -131,17 +132,17 @@ class NotificationFactory:
             notification_type=NotificationTypes.DataProductMembershipNotification,
             data_product_membership_id=data_product_membership.id,
         )
-        receivers = list(
-            {
-                owner.id: owner
-                for owner in (
-                    data_product_membership.data_product.owners
-                    + [data_product_membership.user]
+        receivers = set(
+            owner.id
+            for owner in (
+                itertools.chain(
+                    data_product_membership.data_product.owners,
+                    [data_product_membership.user],
                 )
-            }.values()
+            )
         )
         notification.notification_interactions = [
-            NotificationInteraction(user=receiver, notification=notification)
+            NotificationInteraction(user_id=receiver, notification=notification)
             for receiver in receivers
         ]
         db.add(notification)
