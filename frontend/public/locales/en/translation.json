@@ -1,7 +1,6 @@
 {
     "by {{author}} on {{date}}": "by {{author}} on {{date}}",
     "No requests available.": "No requests available.",
-    "Originating from:": "Originating from:",
     "Logo": "Data Product Portal",
     "Data Product Portal": "Data Product Portal",
     "Nodes": "Nodes",
@@ -261,6 +260,7 @@
     "Data Output Owners": "Data Output Owners",
     "Value": "Value",
     "Color": "Color",
+    "All Requests": "All Requests",
     "Is Default": "Is Default",
     "Are you sure you want to delete the data product lifecycle? This will remove the lifecycle from all the data products and return them to default": "Are you sure you want to delete the data product lifecycle? This will remove the lifecycle from all the data products and return them to default",
     "Data product lifecycle updated successfully": "Data product lifecycle updated successfully",

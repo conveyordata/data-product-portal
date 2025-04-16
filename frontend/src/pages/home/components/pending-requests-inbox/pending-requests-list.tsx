@@ -1,11 +1,10 @@
-import { CheckOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Button, Col, Flex, List, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
 import { ActionResolveRequest } from '@/types/notifications/notification.contract';
 import { ListPaginationConfig } from '@/types/shared/lists';
@@ -22,10 +21,10 @@ type PendingActionItem = {
     color: string;
     origin: ReactNode;
     request: ActionResolveRequest;
+    icon: ReactNode;
 };
 
 type DataProductListProps = {
-    isFetching: boolean;
     pendingActionItems: PendingActionItem[];
     pagination: ListPaginationConfig;
     onAccept: (request: ActionResolveRequest) => void;
@@ -34,18 +33,10 @@ type DataProductListProps = {
 
 const COL_SPAN = 12;
 
-export const PendingRequestsList = ({
-    isFetching,
-    pendingActionItems,
-    pagination,
-    onAccept,
-    onReject,
-}: DataProductListProps) => {
+export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, onReject }: DataProductListProps) => {
     const { t } = useTranslation();
 
     const navigate = useNavigate();
-
-    if (isFetching) return <LoadingSpinner />;
 
     if (!pendingActionItems || pendingActionItems.length === 0) {
         return <EmptyList description={t(`No requests available.`)} />;
@@ -90,11 +81,12 @@ export const PendingRequestsList = ({
                                         </Flex>
                                     </Col>
                                     <div className={styles.rightColumn}>
-                                        <Flex justify="end">
-                                            <Flex>
-                                                <Typography.Text className={styles.typeIndicator} type="secondary">
-                                                    {t('Originating from:')} {item.origin}
-                                                </Typography.Text>{' '}
+                                        <Flex justify="flex-end">
+                                            <Flex className={styles.typeIndicator}>
+                                                <Typography.Text className={styles.tag} type="secondary">
+                                                    {item.icon}
+                                                    <Typography.Text>{item.origin}</Typography.Text>
+                                                </Typography.Text>
                                             </Flex>
                                             <div
                                                 style={{
@@ -104,20 +96,22 @@ export const PendingRequestsList = ({
                                             >
                                                 <Button
                                                     className={styles.resolveButton}
-                                                    icon={<CheckOutlined />}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         onAccept(item.request);
                                                     }}
-                                                />
+                                                >
+                                                    {t('Accept')}
+                                                </Button>
                                                 <Button
                                                     className={styles.resolveButton}
-                                                    icon={<CloseOutlined />}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         onReject(item.request);
                                                     }}
-                                                />
+                                                >
+                                                    {t('Reject')}
+                                                </Button>
                                             </div>
                                         </Flex>
                                     </div>

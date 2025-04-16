@@ -5,9 +5,15 @@ $landing-banner-height: 260px;
 $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgba(3, 79, 165, 0.1) 45.13%);
 
 .pagination {
-    margin-left: auto;
-    margin-top: auto;
-    margin-bottom: globals.$spacing-s;
+    position: static;
+
+    @media (min-width: 1380px) {
+        position: absolute;
+    }
+    top: 0;
+    right: 0;
+    padding-right: globals.$spacing-xxl;
+    padding-top: globals.$spacing-regular;
 }
 
 .tab-items-count {
@@ -38,9 +44,9 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 }
 
 .top-right-column {
+    position: relative;
     display: flex;
-    margin-right: auto;
-    padding-bottom: globals.$spacing-m;
+    padding-bottom: 0;
     width: 100%;
     margin-left: globals.$spacing-xxl;
     padding-right: globals.$spacing-xxl;
@@ -60,6 +66,11 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     }
     margin: 0;
     margin-bottom: globals.$spacing-regular;
+}
+
+.tag {
+    display: flex;
+    gap: globals.$spacing-xs;
 }
 
 .section-title {
@@ -108,16 +119,22 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 }
 
 .type-indicator {
+    display: flex;
     margin-left: auto;
     white-space: nowrap;
-    border-right: globals.$spacing-s solid globals.$quaternary-color-fill;
+    justify-content: space-between;
     height: 100%;
     background-color: globals.$secondary-color-fill;
     padding: globals.$spacing-xs;
+    padding-right: globals.$spacing-m;
 }
 
 .resolve-button {
     border-radius: 0;
+    color: globals.$color-text !important;
+    &:hover {
+        color: globals.$info-color !important;
+    }
 }
 
 .requests-info {

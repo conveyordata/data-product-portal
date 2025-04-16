@@ -1,10 +1,12 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
-import { Badge, Col, Empty, Flex, Pagination, theme, Typography } from 'antd';
+import { Badge, Col, Empty, Pagination, theme, Typography } from 'antd';
 import { TFunction } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
+import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { useListPagination } from '@/hooks/use-list-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
@@ -32,7 +34,7 @@ import { ActionResolveRequest, NotificationTypes } from '@/types/notifications/n
 
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
-import { SelectableTab } from './pending-requests-menu-tab';
+import { SelectableTabs } from './pending-requests-menu-tab';
 
 type PendingAction =
     | ({ type: NotificationTypes.DataProductDatasetNotification } & DataProductDatasetContract)
@@ -40,7 +42,7 @@ type PendingAction =
     | ({ type: NotificationTypes.DataProductMembershipNotification } & DataProductMembershipContract);
 
 const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key in NotificationTypes]: string }) => {
-    let link, description, navigatePath, date, author, initials, message, color, origin, type, request;
+    let link, description, navigatePath, date, author, initials, message, color, origin, type, request, icon;
 
     function getInitials(firstName: string, lastName: string) {
         return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
@@ -48,6 +50,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
 
     switch (action.type) {
         case NotificationTypes.DataProductDatasetNotification:
+            icon = <DatasetOutlined />;
             link = createDataProductIdPath(action.data_product_id);
             description = (
                 <Typography.Text>
@@ -75,7 +78,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     }}
                     strong
                 >
-                    {t('Data Product')}
+                    {t('Dataset')}
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
@@ -93,6 +96,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
             break;
 
         case NotificationTypes.DataOutputDatasetNotification:
+            icon = <DatasetOutlined color="" />;
             link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
             description = (
                 <Typography.Text>
@@ -120,7 +124,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     }}
                     strong
                 >
-                    {t('Data Output')}
+                    {t('Dataset')}
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
@@ -138,6 +142,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
             break;
 
         case NotificationTypes.DataProductMembershipNotification:
+            icon = <DataProductOutlined />;
             link = createDataProductIdPath(action.data_product_id);
             description = (
                 <Typography.Text>
@@ -165,7 +170,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     }}
                     strong
                 >
-                    {t('Person')}
+                    {t('Data Product')}
                 </Typography.Text>
             );
             navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
@@ -194,13 +199,14 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
         origin: origin,
         type: action.type,
         request: request,
+        icon: icon,
     };
 };
 
 export function PendingRequestsInbox() {
     const { t } = useTranslation();
     const {
-        token: { colorWarning, colorInfo, colorError },
+        token: { colorInfo, colorInfoActive },
     } = theme.useToken();
     const [selectedTypes, setSelectedTypes] = useState<Set<NotificationTypes>>(new Set());
 
@@ -319,9 +325,9 @@ export function PendingRequestsInbox() {
 
     const pendingItems = useMemo(() => {
         const colors = {
-            [NotificationTypes.DataProductDatasetNotification]: colorWarning,
+            [NotificationTypes.DataProductDatasetNotification]: colorInfo,
             [NotificationTypes.DataOutputDatasetNotification]: colorInfo,
-            [NotificationTypes.DataProductMembershipNotification]: colorError,
+            [NotificationTypes.DataProductMembershipNotification]: colorInfoActive,
         };
         const datasets = pendingActionsDatasets?.map((action) =>
             createPendingItem({ ...action, type: NotificationTypes.DataProductDatasetNotification }, t, colors),
@@ -341,15 +347,7 @@ export function PendingRequestsInbox() {
                 }
                 return new Date(a.date).getTime() - new Date(b.date).getTime();
             });
-    }, [
-        pendingActionsDatasets,
-        pendingActionsDataOutputs,
-        pendingActionsDataProducts,
-        t,
-        colorError,
-        colorInfo,
-        colorWarning,
-    ]);
+    }, [pendingActionsDatasets, pendingActionsDataOutputs, pendingActionsDataProducts, t, colorInfo, colorInfoActive]);
 
     const { pagination, handlePaginationChange, resetPagination, handleTotalChange } = useListPagination({});
 
@@ -357,27 +355,10 @@ export function PendingRequestsInbox() {
         handlePaginationChange({ current, pageSize });
     };
 
-    const handleTabChange = (type: NotificationTypes, selected: boolean) => {
+    const handleTabChange = (types: Set<NotificationTypes>) => {
         resetPagination();
-        setSelectedTypes((prev) => {
-            const newSet = new Set(prev);
-            if (selected) {
-                newSet.add(type);
-            } else {
-                newSet.delete(type);
-            }
-            return newSet;
-        });
+        setSelectedTypes(types);
     };
-
-    const itemCountByType = useMemo(() => {
-        const counts: { [key in NotificationTypes]: number } = {
-            [NotificationTypes.DataProductDatasetNotification]: 0,
-            [NotificationTypes.DataOutputDatasetNotification]: 0,
-            [NotificationTypes.DataProductMembershipNotification]: 0,
-        };
-        return counts;
-    }, []);
 
     const slicedPendingActionItems = useMemo(() => {
         return (
@@ -439,40 +420,19 @@ export function PendingRequestsInbox() {
         }
     };
 
+    if (isFetching) return <LoadingSpinner />;
+
     return (
         <div className={styles.requestsInbox}>
             <div className={styles.sectionTitle}>
                 <Col span={12}>
                     <Typography.Title level={3}>
                         {t('Pending Requests')}
-                        <Badge count={pendingItems.length} color="gray" className={styles.requestsInfo} />
+                        <Badge count={slicedPendingActionItems.length} color="gray" className={styles.requestsInfo} />
                     </Typography.Title>
                 </Col>
                 <Col span={12} className={styles.topRightColumn}>
-                    <Flex className={styles.filterBar} gap={0}>
-                        <SelectableTab
-                            type={NotificationTypes.DataProductMembershipNotification}
-                            title={t('Team Request')}
-                            requestsCount={itemCountByType[NotificationTypes.DataProductMembershipNotification]}
-                            color={colorError}
-                            onSelectChange={handleTabChange}
-                        />
-                        <SelectableTab
-                            type={NotificationTypes.DataOutputDatasetNotification}
-                            title={t('Data Output')}
-                            requestsCount={itemCountByType[NotificationTypes.DataOutputDatasetNotification]}
-                            color={colorInfo}
-                            onSelectChange={handleTabChange}
-                        />
-                        <SelectableTab
-                            type={NotificationTypes.DataProductDatasetNotification}
-                            title={t('Data Product')}
-                            requestsCount={itemCountByType[NotificationTypes.DataProductDatasetNotification]}
-                            color={colorWarning}
-                            onSelectChange={handleTabChange}
-                        />
-                    </Flex>
-
+                    <SelectableTabs onSelectChange={handleTabChange} />
                     <div className={styles.pagination}>
                         <Pagination
                             current={pagination.current}
@@ -488,7 +448,6 @@ export function PendingRequestsInbox() {
             <div className={styles.contentSecondary}>
                 <PendingRequestsList
                     pendingActionItems={slicedPendingActionItems}
-                    isFetching={isFetching}
                     pagination={pagination}
                     onAccept={(item) => {
                         handleAccept(item);

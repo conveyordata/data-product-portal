@@ -1,42 +1,71 @@
-import { Badge, Col, Flex, Tag, Typography } from 'antd';
+import { AppstoreOutlined } from '@ant-design/icons';
+import { Tabs } from 'antd';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
+import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { NotificationTypes } from '@/types/notifications/notification.contract';
 
-interface SelectableTabProps {
-    type: NotificationTypes;
-    title: string;
-    requestsCount: number;
-    color: string;
-    onSelectChange?: (type: NotificationTypes, selected: boolean) => void;
+export type CustomTabKey = 'all' | 'dataProduct' | 'dataset';
+
+interface SelectableTabsProps {
+    onSelectChange?: (types: Set<NotificationTypes>) => void;
 }
 
-export const SelectableTab = ({ type, title, requestsCount, color, onSelectChange }: SelectableTabProps) => {
-    const [selected, setSelected] = useState(false);
+export const SelectableTabs = ({ onSelectChange }: SelectableTabsProps) => {
+    const { t } = useTranslation();
+
+    const [activeKey, setActiveKey] = useState<CustomTabKey>('all');
+
+    const handleChange = (key: string) => {
+        const typedKey = key as CustomTabKey;
+        setActiveKey(typedKey);
+
+        const typesSet = new Set<NotificationTypes>();
+
+        if (typedKey === 'all') {
+            Object.values(NotificationTypes).forEach((type) => typesSet.add(type));
+        } else {
+            if (typedKey === 'dataProduct') {
+                typesSet.add(NotificationTypes.DataProductMembershipNotification);
+            } else if (typedKey === 'dataset') {
+                typesSet.add(NotificationTypes.DataOutputDatasetNotification);
+                typesSet.add(NotificationTypes.DataProductDatasetNotification);
+            }
+        }
+
+        onSelectChange?.(typesSet);
+    };
+
+    const items = [
+        {
+            key: 'all',
+            icon: <AppstoreOutlined />,
+            title: t('All Requests'),
+        },
+        {
+            key: 'dataset',
+            icon: <DatasetOutlined />,
+            title: t('Dataset'),
+        },
+        {
+            key: 'dataProduct',
+            icon: <DataProductOutlined />,
+            title: t('Data Product'),
+        },
+    ];
 
     return (
-        <Col>
-            <Tag.CheckableTag
-                style={{
-                    borderBottom: selected ? `5px solid ${color}` : '5px solid transparent',
-                }}
-                className={`${styles.menuItem} ${selected ? styles.menuItemActive : ''}`}
-                checked={selected}
-                onChange={(checked) => {
-                    setSelected(checked);
-                    onSelectChange?.(type, checked);
-                }}
-            >
-                <Flex vertical>
-                    <Typography.Text>
-                        <div>
-                            {title}
-                            <Badge count={requestsCount} color="gray" size="small" className={styles.tabItemsCount} />
-                        </div>
-                    </Typography.Text>
-                </Flex>
-            </Tag.CheckableTag>
-        </Col>
+        <Tabs
+            activeKey={activeKey}
+            onChange={handleChange}
+            style={{ width: '100%' }}
+            items={items.map(({ key, title, icon }) => ({
+                key,
+                label: title,
+                icon,
+                children: null,
+            }))}
+        />
     );
 };
