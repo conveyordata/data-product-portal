@@ -66,3 +66,14 @@ $item-card-width: 360px;
 .requestsInfo {
     padding-left: globals.$spacing-xs;
 }
+
+.requests-inbox {
+    margin-left: globals.$spacing-xxl;
+    margin-right: globals.$spacing-xxl;
+    padding-top: globals.$spacing-s;
+}
+
+.welcome-content {
+    display: flex;
+    justify-content: center;
+}
