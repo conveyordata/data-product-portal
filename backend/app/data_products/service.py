@@ -198,15 +198,9 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data Product {id} not found",
             )
-        for membership in data_product.memberships:
-            membership.remove_notifications(db)
         data_product.memberships = []
-        for dataset_link in data_product.dataset_links:
-            dataset_link.remove_notifications(db)
         data_product.dataset_links = []
         for output in data_product.data_outputs:
-            for output_dataset_link in output.dataset_links:
-                output_dataset_link.remove_notifications(db)
             output.dataset_links = []
             db.delete(output)
         db.delete(data_product)
@@ -374,8 +368,6 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data product {id} not found",
             )
-
-        data_product_dataset.remove_notifications(db)
         data_product.dataset_links.remove(data_product_dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()

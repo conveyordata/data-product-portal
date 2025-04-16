@@ -128,8 +128,6 @@ class DataOutputService:
                 detail=f"Data Output {id} not found",
             )
         self.ensure_owner(authenticated_user, data_output, db)
-        for dataset_link in data_output.dataset_links:
-            dataset_link.remove_notifications(db)
         data_output.dataset_links = []
         db.delete(data_output)
         db.commit()
@@ -229,7 +227,6 @@ class DataOutputService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data output {id} not found",
             )
-        data_output_dataset.remove_notifications(db)
         data_output.dataset_links.remove(data_output_dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()

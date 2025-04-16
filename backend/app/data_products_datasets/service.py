@@ -59,7 +59,6 @@ class DataProductDatasetService:
         ensure_dataset_exists(dataset.id, db)
         linked_data_product = current_link.data_product
         data_product = ensure_data_product_exists(linked_data_product.id, db)
-        current_link.remove_notifications(db)
         data_product.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()

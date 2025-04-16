@@ -136,13 +136,7 @@ class DatasetService:
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
             )
         dataset.owners = []
-        for data_product_link in dataset.data_product_links:
-            data_product_link.remove_notifications(db)
-
         dataset.data_product_links = []
-        for data_output_link in dataset.data_output_links:
-            data_output_link.remove_notifications(db)
-
         dataset.data_output_links = []
         dataset.tags = []
         db.delete(dataset)

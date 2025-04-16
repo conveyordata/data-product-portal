@@ -31,19 +31,19 @@ def upgrade() -> None:
         sa.Column(
             "data_product_dataset_id",
             UUID(as_uuid=True),
-            sa.ForeignKey("data_products_datasets.id"),
+            sa.ForeignKey("data_products_datasets.id", ondelete="CASCADE"),
             nullable=True,
         ),
         sa.Column(
             "data_output_dataset_id",
             UUID(as_uuid=True),
-            sa.ForeignKey("data_outputs_datasets.id"),
+            sa.ForeignKey("data_outputs_datasets.id", ondelete="CASCADE"),
             nullable=True,
         ),
         sa.Column(
             "data_product_membership_id",
             UUID(as_uuid=True),
-            sa.ForeignKey("data_product_memberships.id"),
+            sa.ForeignKey("data_product_memberships.id", ondelete="CASCADE"),
             nullable=True,
         ),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
@@ -58,7 +58,7 @@ def upgrade() -> None:
         sa.Column(
             "notification_id",
             UUID(as_uuid=True),
-            sa.ForeignKey("notifications.id"),
+            sa.ForeignKey("notifications.id", ondelete="CASCADE"),
         ),
         sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id")),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),

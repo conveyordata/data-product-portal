@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.database.database import Base
@@ -63,8 +63,3 @@ class DataProductDatasetAssociation(Base, BaseORM):
             "data_product_id", "dataset_id", name="unique_data_product_dataset"
         ),
     )
-
-    def remove_notifications(self, db: Session):
-        for notification in self.notifications:
-            db.delete(notification)
-        self.notifications.clear()

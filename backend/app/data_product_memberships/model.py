@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
@@ -65,8 +65,3 @@ class DataProductMembership(Base, BaseORM):
     __table_args__ = (
         UniqueConstraint("data_product_id", "user_id", name="unique_data_product_user"),
     )
-
-    def remove_notifications(self, db: Session):
-        for notification in self.notifications:
-            db.delete(notification)
-        self.notifications.clear()

@@ -179,8 +179,6 @@ class DataProductMembershipService:
                     f"Cannot remove the last owner from data product {data_product.id}"
                 ),
             )
-
-        data_product_membership.remove_notifications(db)
         data_product.memberships.remove(data_product_membership)
         db.commit()
         RefreshInfrastructureLambda().trigger()

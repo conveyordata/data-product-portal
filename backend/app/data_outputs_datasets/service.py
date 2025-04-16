@@ -85,7 +85,6 @@ class DataOutputDatasetService:
             )
         linked_data_output = current_link.data_output
         data_output = ensure_data_output_exists(linked_data_output.id, db)
-        current_link.remove_notifications(db)
         data_output.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()
