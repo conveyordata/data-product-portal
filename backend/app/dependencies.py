@@ -119,7 +119,7 @@ async def only_product_membership_owners(
         )
 
 
-async def only_notification_interaction_owner(
+def only_notification_interaction_owner(
     id: UUID,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
