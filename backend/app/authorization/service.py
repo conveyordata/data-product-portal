@@ -36,6 +36,7 @@ class AuthorizationService:
 
     def _clear_casbin_table(self):
         self.db.execute(delete(CasbinRule))
+        self.db.commit()
 
     async def _sync_roles(self):
         service = RoleService(self.db)
