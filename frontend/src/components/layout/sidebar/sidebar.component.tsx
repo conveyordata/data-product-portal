@@ -42,7 +42,9 @@ export const Sidebar = () => {
         },
         {
             label: (
-                <a href={`https://d33vpinjygaq6n.cloudfront.net/docs/${version?.version}/intro`}>
+                <a
+                    href={`https://d33vpinjygaq6n.cloudfront.net/docs/${version?.version.split('.').slice(0, 2).join('.')}.x/intro`}
+                >
                     {t('Documentation')}
                 </a>
             ),
