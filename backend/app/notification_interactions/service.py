@@ -1,11 +1,21 @@
+import itertools
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.data_outputs_datasets.model import DataOutputDatasetAssociation
+from app.data_product_memberships.model import DataProductMembership
+from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.notification_interactions.model import NotificationInteraction
 from app.notification_interactions.schema_get import NotificationInteractionGet
+from app.notifications.model import (
+    DataOutputDatasetNotification,
+    DataProductDatasetNotification,
+    DataProductMembershipNotification,
+)
+from app.notifications.notification_types import NotificationTypes
 from app.users.schema import User
 
 
@@ -43,3 +53,69 @@ class NotificationInteractionService:
             )
         db.delete(notification_interaction)
         db.commit()
+
+    def create_data_product_dataset_notifications(
+        self, db: Session, data_product_dataset: DataProductDatasetAssociation
+    ):
+        notification = DataProductDatasetNotification(
+            notification_type=NotificationTypes.DataProductDatasetNotification,
+            data_product_dataset_id=data_product_dataset.id,
+        )
+        receivers = set(
+            owner.id
+            for owner in (
+                itertools.chain(
+                    data_product_dataset.dataset.owners,
+                    [data_product_dataset.requested_by],
+                )
+            )
+        )
+        notification.notification_interactions = [
+            NotificationInteraction(user_id=receiver, notification=notification)
+            for receiver in receivers
+        ]
+        db.add(notification)
+
+    def create_data_output_dataset_notifications(
+        self, db: Session, data_output_dataset: DataOutputDatasetAssociation
+    ):
+        notification = DataOutputDatasetNotification(
+            notification_type=NotificationTypes.DataOutputDatasetNotification,
+            data_output_dataset_id=data_output_dataset.id,
+        )
+        receivers = set(
+            owner.id
+            for owner in (
+                itertools.chain(
+                    data_output_dataset.dataset.owners,
+                    [data_output_dataset.requested_by],
+                )
+            )
+        )
+        notification.notification_interactions = [
+            NotificationInteraction(user_id=receiver, notification=notification)
+            for receiver in receivers
+        ]
+        db.add(notification)
+
+    def create_data_product_membership_notifications(
+        self, db: Session, data_product_membership: DataProductMembership
+    ):
+        notification = DataProductMembershipNotification(
+            notification_type=NotificationTypes.DataProductMembershipNotification,
+            data_product_membership_id=data_product_membership.id,
+        )
+        receivers = set(
+            owner.id
+            for owner in (
+                itertools.chain(
+                    data_product_membership.data_product.owners,
+                    [data_product_membership.user],
+                )
+            )
+        )
+        notification.notification_interactions = [
+            NotificationInteraction(user_id=receiver, notification=notification)
+            for receiver in receivers
+        ]
+        db.add(notification)

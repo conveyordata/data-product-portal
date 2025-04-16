@@ -1,9 +1,8 @@
-import itertools
 import uuid
 
 from sqlalchemy import Column, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_memberships.model import DataProductMembership
@@ -75,74 +74,3 @@ class DataProductMembershipNotification(Notification):
     __mapper_args__ = {
         "polymorphic_identity": "DataProductMembershipNotification",
     }
-
-
-class NotificationFactory:
-    @staticmethod
-    def createDataProductDatasetNotification(
-        db: Session, data_product_dataset: DataProductDatasetAssociation
-    ):
-        notification = DataProductDatasetNotification(
-            notification_type=NotificationTypes.DataProductDatasetNotification,
-            data_product_dataset_id=data_product_dataset.id,
-        )
-        receivers = set(
-            owner.id
-            for owner in (
-                itertools.chain(
-                    data_product_dataset.dataset.owners,
-                    [data_product_dataset.requested_by],
-                )
-            )
-        )
-        notification.notification_interactions = [
-            NotificationInteraction(user_id=receiver, notification=notification)
-            for receiver in receivers
-        ]
-        db.add(notification)
-
-    @staticmethod
-    def createDataOutputDatasetNotification(
-        db: Session, data_output_dataset: DataOutputDatasetAssociation
-    ):
-        notification = DataOutputDatasetNotification(
-            notification_type=NotificationTypes.DataOutputDatasetNotification,
-            data_output_dataset_id=data_output_dataset.id,
-        )
-        receivers = set(
-            owner.id
-            for owner in (
-                itertools.chain(
-                    data_output_dataset.dataset.owners,
-                    [data_output_dataset.requested_by],
-                )
-            )
-        )
-        notification.notification_interactions = [
-            NotificationInteraction(user_id=receiver, notification=notification)
-            for receiver in receivers
-        ]
-        db.add(notification)
-
-    @staticmethod
-    def createDataProductMembershipNotification(
-        db: Session, data_product_membership: DataProductMembership
-    ):
-        notification = DataProductMembershipNotification(
-            notification_type=NotificationTypes.DataProductMembershipNotification,
-            data_product_membership_id=data_product_membership.id,
-        )
-        receivers = set(
-            owner.id
-            for owner in (
-                itertools.chain(
-                    data_product_membership.data_product.owners,
-                    [data_product_membership.user],
-                )
-            )
-        )
-        notification.notification_interactions = [
-            NotificationInteraction(user_id=receiver, notification=notification)
-            for receiver in receivers
-        ]
-        db.add(notification)
