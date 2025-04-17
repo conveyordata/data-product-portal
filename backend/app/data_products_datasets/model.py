@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.database.database import Base
+from app.notifications.model import DataProductDatasetNotification
 
 if TYPE_CHECKING:
     from app.users.model import User
@@ -53,7 +54,7 @@ class DataProductDatasetAssociation(Base, BaseORM):
     )
     denied_on = Column(DateTime(timezone=False))
     notifications = relationship(
-        "DataProductDatasetNotification",
+        DataProductDatasetNotification,
         cascade="all, delete-orphan",
         passive_deletes=True,
         back_populates="data_product_dataset",

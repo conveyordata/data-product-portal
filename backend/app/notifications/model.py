@@ -1,12 +1,15 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.data_outputs_datasets.model import DataOutputDatasetAssociation
-from app.data_product_memberships.model import DataProductMembership
-from app.data_products_datasets.model import DataProductDatasetAssociation
+if TYPE_CHECKING:
+    from app.data_outputs_datasets.model import DataOutputDatasetAssociation
+    from app.data_product_memberships.model import DataProductMembership
+    from app.data_products_datasets.model import DataProductDatasetAssociation
+
 from app.database.database import Base
 from app.notification_interactions.model import NotificationInteraction
 from app.notifications.enums import NotificationOrigins, NotificationTypes
