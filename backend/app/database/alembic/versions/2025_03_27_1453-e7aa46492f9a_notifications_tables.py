@@ -6,6 +6,7 @@ Create Date: 2025-03-27 14:53:15.943060
 
 """
 
+from enum import Enum
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -13,8 +14,14 @@ from alembic import op
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.notifications.enums import NotificationTypes
-from app.role_assignments.enums import DecisionStatus
 from app.shared.model import utcnow
+
+
+class NotificationOrigins(str, Enum):
+    PENDING_APPROVAL = "pending_approval"
+    APPROVED = "approved"
+    DENIED = "denied"
+
 
 # revision identifiers, used by Alembic.
 revision: str = "e7aa46492f9a"
@@ -29,7 +36,7 @@ def upgrade() -> None:
         "notifications",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("notification_type", sa.Enum(NotificationTypes)),
-        sa.Column("notification_origin", sa.Enum(DecisionStatus)),
+        sa.Column("notification_origin", sa.Enum(NotificationOrigins)),
         sa.Column(
             "data_product_dataset_id",
             UUID(as_uuid=True),

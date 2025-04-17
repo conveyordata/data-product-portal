@@ -6,6 +6,7 @@ Create Date: 2024-04-17 17:15:55.096655
 
 """
 
+from enum import Enum
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -20,8 +21,20 @@ from app.data_product_types.enums import DataProductIconKey
 from app.data_products.status import DataProductStatus
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
-from app.role_assignments.enums import DecisionStatus
 from app.shared.model import utcnow
+
+
+class DataProductDatasetLinkStatus(str, Enum):
+    PENDING_APPROVAL = "pending_approval"
+    APPROVED = "approved"
+    DENIED = "denied"
+
+
+class DataProductMembershipStatus(str, Enum):
+    APPROVED = "approved"
+    PENDING_APPROVAL = "pending_approval"
+    DENIED = "denied"
+
 
 # revision identifiers, used by Alembic.
 revision: str = "4c40a4ff5a7f"
@@ -160,8 +173,8 @@ def upgrade() -> None:
         ),
         sa.Column(
             "status",
-            sa.Enum(DecisionStatus),
-            default=DecisionStatus.PENDING,
+            sa.Enum(DataProductMembershipStatus),
+            default=DataProductMembershipStatus.PENDING_APPROVAL,
         ),
         sa.Column("requested_by_id", UUID, sa.ForeignKey("users.id")),
         sa.Column("requested_on", sa.DateTime(timezone=False), server_default=utcnow()),
@@ -182,8 +195,8 @@ def upgrade() -> None:
         sa.Column("dataset_id", UUID(as_uuid=True), sa.ForeignKey("datasets.id")),
         sa.Column(
             "status",
-            sa.Enum(DecisionStatus),
-            default=DecisionStatus.PENDING,
+            sa.Enum(DataProductDatasetLinkStatus),
+            default=DataProductDatasetLinkStatus.PENDING_APPROVAL,
         ),
         sa.Column("requested_by_id", UUID),
         sa.Column("requested_on", sa.DateTime(timezone=False), server_default=utcnow()),

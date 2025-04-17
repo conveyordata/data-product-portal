@@ -6,6 +6,7 @@ Create Date: 2024-07-23 11:18:30.435296
 
 """
 
+from enum import Enum
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -13,8 +14,14 @@ from alembic import op
 from sqlalchemy import UUID
 
 from app.data_outputs.status import DataOutputStatus
-from app.role_assignments.enums import DecisionStatus
 from app.shared.model import utcnow
+
+
+class DataOutputDatasetLinkStatus(str, Enum):
+    PENDING_APPROVAL = "pending_approval"
+    APPROVED = "approved"
+    DENIED = "denied"
+
 
 # revision identifiers, used by Alembic.
 revision: str = "5477aa0d86f0"
@@ -67,8 +74,8 @@ def upgrade() -> None:
         sa.Column("dataset_id", UUID(as_uuid=True), sa.ForeignKey("datasets.id")),
         sa.Column(
             "status",
-            sa.Enum(DecisionStatus),
-            default=DecisionStatus.PENDING,
+            sa.Enum(DataOutputDatasetLinkStatus),
+            default=DataOutputDatasetLinkStatus.PENDING_APPROVAL,
         ),
         sa.Column("requested_by_id", UUID),
         sa.Column("requested_on", sa.DateTime(timezone=False), server_default=utcnow()),
