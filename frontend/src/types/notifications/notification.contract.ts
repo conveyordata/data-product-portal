@@ -9,17 +9,19 @@ export enum NotificationTypes {
     DataProductMembershipNotification = 'DataProductMembershipNotification',
 }
 
+export enum NotificationOrigins {
+    Pending = 'pending_approval',
+    Approved = 'approved',
+    Denied = 'denied',
+}
+
 export interface NotificationModel {
     id: string;
     notification_id: string;
     notification: Notification;
     user_id: string;
     user: UserContract;
-    last_seen: string | null;
-    last_interaction: string | null;
 }
-
-export type NotificationObject = DataProductMembershipContract | DataProductDatasetContract | DataOutputDatasetContract;
 
 export type Notification =
     | DataProductDatasetNotification
@@ -27,22 +29,25 @@ export type Notification =
     | DataProductMembershipNotification;
 
 export interface DataProductDatasetNotification {
-    configuration_type: NotificationTypes.DataProductDatasetNotification;
+    notification_type: NotificationTypes.DataProductDatasetNotification;
+    notification_origin: NotificationOrigins;
     id: string;
-    reference_id: string;
-    reference: DataProductDatasetContract;
+    data_product_dataset_id: string;
+    data_product_dataset: DataProductDatasetContract;
 }
 
 export interface DataOutputDatasetNotification {
-    configuration_type: NotificationTypes.DataOutputDatasetNotification;
+    notification_type: NotificationTypes.DataOutputDatasetNotification;
+    notification_origin: NotificationOrigins;
     id: string;
-    reference_id: string;
-    reference: DataOutputDatasetContract;
+    data_output_dataset_id: string;
+    data_output_dataset: DataOutputDatasetContract;
 }
 
 export interface DataProductMembershipNotification {
-    configuration_type: NotificationTypes.DataProductMembershipNotification;
+    notification_type: NotificationTypes.DataProductMembershipNotification;
+    notification_origin: NotificationOrigins;
     id: string;
-    reference_id: string;
-    reference: DataProductMembershipContract;
+    data_product_membership_id: string;
+    data_product_membership: DataProductMembershipContract;
 }

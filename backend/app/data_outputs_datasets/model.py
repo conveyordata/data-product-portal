@@ -52,6 +52,12 @@ class DataOutputDatasetAssociation(Base, BaseORM):
         foreign_keys=[denied_by_id], back_populates="denied_dataoutputs"
     )
     denied_on = Column(DateTime(timezone=False))
+    notifications = relationship(
+        "DataOutputDatasetNotification",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        back_populates="data_output_dataset",
+    )
     __table_args__ = (
         UniqueConstraint(
             "data_output_id", "dataset_id", name="unique_data_output_dataset"

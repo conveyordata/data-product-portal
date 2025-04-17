@@ -16,7 +16,6 @@ from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.notification_interactions.service import NotificationInteractionService
-from app.notifications.notification_types import NotificationTypes
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -45,14 +44,9 @@ class DataOutputDatasetService:
         current_link.status = DataOutputDatasetLinkStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
-
-        NotificationInteractionService().update_interactions_by_reference(
-            db,
-            current_link.id,
-            NotificationTypes.DataOutputDatasetNotification,
-            [current_link.requested_by_id],
+        NotificationInteractionService().create_data_output_dataset_notifications(
+            db, current_link
         )
-
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
@@ -74,14 +68,9 @@ class DataOutputDatasetService:
         current_link.status = DataOutputDatasetLinkStatus.DENIED
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
-
-        NotificationInteractionService().update_interactions_by_reference(
-            db,
-            current_link.id,
-            NotificationTypes.DataOutputDatasetNotification,
-            [current_link.requested_by_id],
+        NotificationInteractionService().create_data_output_dataset_notifications(
+            db, current_link
         )
-
         db.commit()
 
     def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
@@ -100,10 +89,6 @@ class DataOutputDatasetService:
             )
         linked_data_output = current_link.data_output
         data_output = ensure_data_output_exists(linked_data_output.id, db)
-        NotificationInteractionService().remove_notification_relations(
-            db, current_link.id, NotificationTypes.DataOutputDatasetNotification
-        )
-        db.refresh(current_link)
         data_output.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()

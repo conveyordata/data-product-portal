@@ -55,6 +55,12 @@ class DataProductMembership(Base, BaseORM):
     denied_by: Mapped["User"] = relationship(
         foreign_keys=[denied_by_id], back_populates="denied_memberships"
     )
+    notifications = relationship(
+        "DataProductMembershipNotification",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        back_populates="data_product_membership",
+    )
     denied_on = Column(DateTime(timezone=False))
     __table_args__ = (
         UniqueConstraint("data_product_id", "user_id", name="unique_data_product_user"),

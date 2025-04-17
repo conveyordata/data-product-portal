@@ -1,5 +1,3 @@
-from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from app.notifications.schema import Notification
@@ -13,5 +11,3 @@ class NotificationInteractionGet(ORMModel):
     notification: Notification
     user_id: UUID
     user: User
-    last_seen: Optional[datetime]
-    last_interaction: Optional[datetime]

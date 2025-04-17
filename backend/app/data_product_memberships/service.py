@@ -20,7 +20,6 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
 from app.notification_interactions.service import NotificationInteractionService
-from app.notifications.notification_types import NotificationTypes
 from app.settings import settings
 from app.users.model import ensure_user_exists
 from app.users.schema import User
@@ -50,26 +49,6 @@ class DataProductMembershipService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.memberships.append(data_product_membership)
-
-        db.flush()
-        db.refresh(data_product_membership)
-        owners = [
-            User.model_validate(owner)
-            for owner in DataProductService().get_owners(data_product_id, db)
-        ]
-
-        if (
-            data_product_membership.status
-            == DataProductMembershipStatus.PENDING_APPROVAL
-        ):
-            owner_ids = [owner.id for owner in owners]
-            NotificationInteractionService().create_notification_relations(
-                db,
-                data_product_membership.id,
-                NotificationTypes.DataProductMembershipNotification,
-                owner_ids,
-            )
-
         db.commit()
         db.refresh(data_product_membership)
 
@@ -79,7 +58,10 @@ class DataProductMembershipService:
             + str(data_product_id)
             + "#team"
         )
-
+        owners = [
+            User.model_validate(owner)
+            for owner in DataProductService().get_owners(data_product_id, db)
+        ]
         action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
         action.add_row(
             [
@@ -129,19 +111,9 @@ class DataProductMembershipService:
         data_product_membership.approved_by_id = authenticated_user.id
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
 
-        NotificationInteractionService().update_interactions_by_reference(
-            db,
-            data_product_membership.id,
-            NotificationTypes.DataProductMembershipNotification,
-            [data_product_membership.requested_by_id],
+        NotificationInteractionService().create_data_product_membership_notifications(
+            db, data_product_membership
         )
-
-        if data_product_membership.role == DataProductUserRole.OWNER:
-            NotificationInteractionService().redirect_pending_requests(
-                db,
-                data_product_membership.data_product_id,
-                NotificationTypes.DataProductMembershipNotification,
-            )
 
         db.commit()
         db.refresh(data_product_membership)
@@ -176,11 +148,8 @@ class DataProductMembershipService:
         data_product_membership.denied_by_id = authenticated_user.id
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
 
-        NotificationInteractionService().update_interactions_by_reference(
-            db,
-            data_product_membership.id,
-            NotificationTypes.DataProductMembershipNotification,
-            [data_product_membership.requested_by_id],
+        NotificationInteractionService().create_data_product_membership_notifications(
+            db, data_product_membership
         )
 
         db.commit()
@@ -210,23 +179,7 @@ class DataProductMembershipService:
                     f"Cannot remove the last owner from data product {data_product.id}"
                 ),
             )
-
-        NotificationInteractionService().remove_notification_relations(
-            db,
-            data_product_membership.id,
-            NotificationTypes.DataProductMembershipNotification,
-        )
-
-        db.refresh(data_product_membership)
-        redirection_needed = data_product_membership.role == DataProductUserRole.OWNER
         data_product.memberships.remove(data_product_membership)
-
-        if redirection_needed:
-            db.refresh(data_product)
-            NotificationInteractionService().redirect_pending_requests(
-                db, data_product.id, NotificationTypes.DataProductMembershipNotification
-            )
-
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
@@ -257,11 +210,6 @@ class DataProductMembershipService:
             approved_on=datetime.now(tz=pytz.utc),
         )
         data_product.memberships.append(data_product_membership)
-
-        if data_product_membership.role == DataProductUserRole.OWNER:
-            NotificationInteractionService().redirect_pending_requests(
-                db, data_product.id, NotificationTypes.DataProductMembershipNotification
-            )
 
         db.commit()
         db.refresh(data_product_membership)
@@ -300,12 +248,6 @@ class DataProductMembershipService:
             )
 
         data_product_membership.role = membership_role
-
-        if data_product_membership.status == DataProductMembershipStatus.APPROVED:
-            NotificationInteractionService().redirect_pending_requests(
-                db, data_product.id, NotificationTypes.DataProductMembershipNotification
-            )
-
         db.commit()
         db.refresh(data_product_membership)
         RefreshInfrastructureLambda().trigger()
