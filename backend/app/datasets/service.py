@@ -160,7 +160,6 @@ class DatasetService:
             )
         dataset.owners = []
         dataset.data_product_links = []
-        dataset.data_output_links = []
         dataset.tags = []
         db.delete(dataset)
 
