@@ -7,9 +7,9 @@ from tests.factories import (
 )
 
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
+from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype, Scope
 
 MEMBERSHIPS_ENDPOINT = "/api/data_product_memberships"
@@ -51,7 +51,7 @@ class TestDataProductMembershipsRouter:
             data_product=owner_membership.data_product,
             user=user,
             role=DataProductUserRole.MEMBER.value,
-            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
+            status=DecisionStatus.PENDING.value,
             requested_by_id=str(user.id),
         )
 
@@ -67,7 +67,7 @@ class TestDataProductMembershipsRouter:
             data_product=owner_membership.data_product,
             user=user,
             role=DataProductUserRole.MEMBER.value,
-            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
+            status=DecisionStatus.PENDING.value,
             requested_by_id=str(user.id),
         )
 
@@ -150,7 +150,7 @@ class TestDataProductMembershipsRouter:
         assert response.json()[0]["data_product_id"] == str(
             owner_membership.data_product.id
         )
-        assert response.json()[0]["status"] == "pending_approval"
+        assert response.json()[0]["status"] == "pending"
 
     @staticmethod
     def create_secondary_membership(client, user_id, data_product_id):

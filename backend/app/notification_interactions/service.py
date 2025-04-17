@@ -10,7 +10,7 @@ from app.data_product_memberships.model import DataProductMembership
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.notification_interactions.model import NotificationInteraction
 from app.notification_interactions.schema_get import NotificationInteractionGet
-from app.notifications.enums import NotificationOrigins, NotificationTypes
+from app.notifications.enums import NotificationTypes
 from app.notifications.model import (
     DataOutputDatasetNotification,
     DataProductDatasetNotification,
@@ -59,7 +59,7 @@ class NotificationInteractionService:
     ):
         notification = DataProductDatasetNotification(
             notification_type=NotificationTypes.DataProductDatasetNotification,
-            notification_origin=NotificationOrigins(data_product_dataset.status),
+            notification_origin=data_product_dataset.status,
             data_product_dataset_id=data_product_dataset.id,
         )
         receivers = set(
@@ -82,7 +82,7 @@ class NotificationInteractionService:
     ):
         notification = DataOutputDatasetNotification(
             notification_type=NotificationTypes.DataOutputDatasetNotification,
-            notification_origin=NotificationOrigins(data_output_dataset.status),
+            notification_origin=data_output_dataset.status,
             data_output_dataset_id=data_output_dataset.id,
         )
         receivers = set(
@@ -105,7 +105,7 @@ class NotificationInteractionService:
     ):
         notification = DataProductMembershipNotification(
             notification_type=NotificationTypes.DataProductMembershipNotification,
-            notification_origin=NotificationOrigins(data_product_membership.status),
+            notification_origin=data_product_membership.status,
             data_product_membership_id=data_product_membership.id,
         )
         receivers = set(

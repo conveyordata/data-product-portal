@@ -27,12 +27,10 @@ from app.core.namespace.validation import (
 )
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_get import DataOutputGet
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
 from app.data_product_memberships.model import DataProductMembership
@@ -47,7 +45,6 @@ from app.data_products.schema import (
     DataProductUpdate,
 )
 from app.data_products.schema_get import DataProductGet, DataProductsGet
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
@@ -62,6 +59,7 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
+from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
@@ -147,7 +145,7 @@ class DataProductService:
             )
             .filter(
                 DataProductModel.memberships.any(
-                    user_id=user_id, status=DataProductMembershipStatus.APPROVED
+                    user_id=user_id, status=DecisionStatus.APPROVED
                 )
             )
             .order_by(asc(DataProductModel.name))
@@ -202,7 +200,7 @@ class DataProductService:
         model = DataProductModel(**data_product_schema, tags=tags)
 
         for membership in model.memberships:
-            membership.status = DataProductMembershipStatus.APPROVED
+            membership.status = DecisionStatus.APPROVED
             membership.requested_by_id = authenticated_user.id
             membership.requested_on = datetime.now(tz=pytz.utc)
             membership.approved_by_id = authenticated_user.id
@@ -239,7 +237,7 @@ class DataProductService:
         return DataProductMembership(
             user_id=user.id,
             role=role,
-            status=DataProductMembershipStatus.APPROVED,
+            status=DecisionStatus.APPROVED,
             requested_by_id=user.id,
             requested_on=datetime.now(tz=pytz.utc),
             approved_by_id=user.id,
@@ -355,7 +353,7 @@ class DataProductService:
         if dataset.id in [
             link.dataset_id
             for link in data_product.dataset_links
-            if link.status != DataProductDatasetLinkStatus.DENIED
+            if link.status != DecisionStatus.DENIED
         ]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -369,9 +367,9 @@ class DataProductService:
             )
 
         approval_status = (
-            DataProductDatasetLinkStatus.PENDING_APPROVAL
+            DecisionStatus.PENDING
             if dataset.access_type != DatasetAccessType.PUBLIC
-            else DataProductDatasetLinkStatus.APPROVED
+            else DecisionStatus.APPROVED
         )
 
         dataset_link = DataProductDatasetModel(
@@ -537,8 +535,7 @@ class DataProductService:
                     id=f"{upstream_datasets.id}-{product.id}",
                     target=product.id,
                     source=upstream_datasets.id,
-                    animated=upstream_datasets.status
-                    == DataProductDatasetLinkStatus.APPROVED,
+                    animated=upstream_datasets.status == DecisionStatus.APPROVED,
                 )
             )
 
@@ -581,7 +578,7 @@ class DataProductService:
                             target=f"{downstream_datasets.dataset_id}_2",
                             source=data_output.id,
                             animated=downstream_datasets.status
-                            == DataOutputDatasetLinkStatus.APPROVED,
+                            == DecisionStatus.APPROVED,
                         )
                     )
                     if level >= 3:
@@ -609,7 +606,7 @@ class DataProductService:
                                     target=f"{downstream_dps.id}_3",
                                     source=f"{downstream_datasets.dataset.id}_2",
                                     animated=downstream_dps.status
-                                    == DataProductDatasetLinkStatus.APPROVED,
+                                    == DecisionStatus.APPROVED,
                                 )
                             )
 

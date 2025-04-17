@@ -14,14 +14,13 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.core.auth.device_flows.schema import DeviceFlowStatus
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
 from app.data_product_types.enums import DataProductIconKey
 from app.data_products.status import DataProductStatus
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
+from app.role_assignments.enums import DecisionStatus
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
@@ -161,8 +160,8 @@ def upgrade() -> None:
         ),
         sa.Column(
             "status",
-            sa.Enum(DataProductMembershipStatus),
-            default=DataProductMembershipStatus.PENDING_APPROVAL,
+            sa.Enum(DecisionStatus),
+            default=DecisionStatus.PENDING,
         ),
         sa.Column("requested_by_id", UUID, sa.ForeignKey("users.id")),
         sa.Column("requested_on", sa.DateTime(timezone=False), server_default=utcnow()),
@@ -183,8 +182,8 @@ def upgrade() -> None:
         sa.Column("dataset_id", UUID(as_uuid=True), sa.ForeignKey("datasets.id")),
         sa.Column(
             "status",
-            sa.Enum(DataProductDatasetLinkStatus),
-            default=DataProductDatasetLinkStatus.PENDING_APPROVAL,
+            sa.Enum(DecisionStatus),
+            default=DecisionStatus.PENDING,
         ),
         sa.Column("requested_by_id", UUID),
         sa.Column("requested_on", sa.DateTime(timezone=False), server_default=utcnow()),

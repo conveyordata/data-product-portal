@@ -1,5 +1,5 @@
 import { DataOutputContract } from '@/types/data-output';
-import { DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
+import { DecisionStatus } from '@/types/roles';
 import { UserContract } from '@/types/users';
 
 import { DatasetContract } from '../dataset';
@@ -10,7 +10,7 @@ export type DataOutputDatasetContract = {
     dataset_id: string;
     data_output: DataOutputContract;
     dataset: DatasetContract;
-    status: DataOutputDatasetLinkStatus;
+    status: DecisionStatus;
     requested_by: UserContract;
     denied_by: UserContract | null;
     approved_by: UserContract | null;

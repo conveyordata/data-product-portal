@@ -13,7 +13,7 @@ from alembic import op
 from sqlalchemy import UUID
 
 from app.data_outputs.status import DataOutputStatus
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.role_assignments.enums import DecisionStatus
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
@@ -67,8 +67,8 @@ def upgrade() -> None:
         sa.Column("dataset_id", UUID(as_uuid=True), sa.ForeignKey("datasets.id")),
         sa.Column(
             "status",
-            sa.Enum(DataOutputDatasetLinkStatus),
-            default=DataOutputDatasetLinkStatus.PENDING_APPROVAL,
+            sa.Enum(DecisionStatus),
+            default=DecisionStatus.PENDING,
         ),
         sa.Column("requested_by_id", UUID),
         sa.Column("requested_on", sa.DateTime(timezone=False), server_default=utcnow()),
