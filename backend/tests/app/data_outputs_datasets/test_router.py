@@ -69,7 +69,7 @@ class TestDataOutputsDatasetsRouter:
     def test_approve_data_output_link(self, client):
         ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
         link = DataOutputDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING.value
+            dataset=ds, status=DecisionStatus.PENDING
         )
         response = self.approve_default_data_output_dataset_link(client, link.id)
         assert response.status_code == 200
@@ -78,7 +78,7 @@ class TestDataOutputsDatasetsRouter:
     def test_approve_data_output_link_by_admin(self, client):
         ds = DatasetFactory()
         link = DataOutputDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING.value
+            dataset=ds, status=DecisionStatus.PENDING
         )
 
         response = self.approve_default_data_output_dataset_link(client, link.id)
@@ -87,7 +87,7 @@ class TestDataOutputsDatasetsRouter:
     def test_not_owner_cannot_approved_link(self, client):
         ds = DatasetFactory()
         link = DataOutputDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING.value
+            dataset=ds, status=DecisionStatus.PENDING
         )
 
         response = self.approve_default_data_output_dataset_link(client, link.id)
@@ -99,7 +99,7 @@ class TestDataOutputsDatasetsRouter:
     def test_deny_data_output_link(self, client):
         ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
         link = DataOutputDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING.value
+            dataset=ds, status=DecisionStatus.PENDING
         )
         response = self.deny_default_data_output_dataset_link(client, link.id)
         assert response.status_code == 200
@@ -108,7 +108,7 @@ class TestDataOutputsDatasetsRouter:
     def test_deny_data_output_link_by_admin(self, client):
         ds = DatasetFactory()
         link = DataOutputDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING.value
+            dataset=ds, status=DecisionStatus.PENDING
         )
 
         response = self.deny_default_data_output_dataset_link(client, link.id)
@@ -117,7 +117,7 @@ class TestDataOutputsDatasetsRouter:
     def test_not_owner_cannot_deny_link(self, client):
         ds = DatasetFactory()
         link = DataOutputDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING.value
+            dataset=ds, status=DecisionStatus.PENDING
         )
 
         response = self.deny_default_data_output_dataset_link(client, link.id)

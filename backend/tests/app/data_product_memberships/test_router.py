@@ -51,7 +51,7 @@ class TestDataProductMembershipsRouter:
             data_product=owner_membership.data_product,
             user=user,
             role=DataProductUserRole.MEMBER.value,
-            status=DecisionStatus.PENDING.value,
+            status=DecisionStatus.PENDING,
             requested_by_id=str(user.id),
         )
 
@@ -67,7 +67,7 @@ class TestDataProductMembershipsRouter:
             data_product=owner_membership.data_product,
             user=user,
             role=DataProductUserRole.MEMBER.value,
-            status=DecisionStatus.PENDING.value,
+            status=DecisionStatus.PENDING,
             requested_by_id=str(user.id),
         )
 
