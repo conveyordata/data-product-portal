@@ -8,11 +8,17 @@ from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.email.send_mail import send_mail
+from app.core.namespace.validation import (
+    DataOutputNamespaceValidator,
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+)
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs.schema import (
     DataOutput,
     DataOutputCreate,
+    DataOutputCreateRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
@@ -33,6 +39,9 @@ from app.users.schema import User
 
 
 class DataOutputService:
+    def __init__(self):
+        self.namespace_validator = DataOutputNamespaceValidator()
+
     def ensure_member(
         self, authenticated_user: User, data_output: DataOutputCreate, db: Session
     ):
@@ -93,8 +102,15 @@ class DataOutputService:
         return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
 
     def create_data_output(
-        self, data_output: DataOutputCreate, db: Session, authenticated_user: User
+        self,
+        id: UUID,
+        data_output: DataOutputCreateRequest,
+        db: Session,
+        authenticated_user: User,
     ) -> dict[str, UUID]:
+        data_output = DataOutputCreate(
+            **data_output.parse_pydantic_schema(), owner_id=id
+        )
         self.ensure_member(authenticated_user, data_output, db)
 
         if data_output.sourceAligned:
@@ -257,3 +273,9 @@ class DataOutputService:
                 node.isMain = True
 
         return graph
+
+    def data_output_namespace_suggestion(self, name: str) -> NamespaceSuggestion:
+        return self.namespace_validator.namespace_suggestion(name)
+
+    def data_output_namespace_length_limits(self) -> NamespaceLengthLimits:
+        return self.namespace_validator.namespace_length_limits()

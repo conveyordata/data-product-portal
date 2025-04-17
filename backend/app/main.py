@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.authorization.service import AuthorizationService
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.authz.authorization import Authorization
@@ -65,6 +66,9 @@ async def lifespan(_: FastAPI):
 
     # Initialize Casbin
     await Authorization.initialize()
+
+    # Ensure all roles are present in Casbin
+    await AuthorizationService(db).reload_enforcer()
 
     yield
 

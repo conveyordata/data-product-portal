@@ -1,14 +1,23 @@
 import { Form, type FormInstance, type FormProps, Input, Select, Space } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { type RefObject, useEffect, useMemo, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
+import { useDebouncedCallback } from 'use-debounce';
 
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
+import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
-import { useCreateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import {
+    useCreateDataOutputMutation,
+    useGetDataOutputNamespaceLengthLimitsQuery,
+    useLazyGetDataOutputNamespaceSuggestionQuery,
+} from '@/store/features/data-outputs/data-outputs-api-slice';
+import {
+    useGetDataProductByIdQuery,
+    useLazyValidateDataOutputNamespaceQuery,
+} from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
@@ -18,7 +27,6 @@ import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { getDataPlatforms } from '@/utils/data-platforms';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 
 import styles from './data-output-form.module.scss';
@@ -34,6 +42,8 @@ type Props = {
     dataProductId: string;
     modalCallbackOnSubmit: () => void;
 };
+
+const DEBOUNCE = 500;
 
 export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit }: Props) {
     const { t } = useTranslation();
@@ -51,8 +61,13 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const [form] = Form.useForm();
     const sourceAligned = Form.useWatch('is_source_aligned', form);
-    const dataProductNameValue = Form.useWatch('name', form);
+    const dataOutputNameValue = Form.useWatch('name', form);
     const isLoading = isCreating || isCreating || isFetchingInitialValues || isFetchingTags;
+
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataOutputNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateDataOutputNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
+    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
 
@@ -100,7 +115,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 }
                 const request: DataOutputCreate = {
                     name: values.name,
-                    external_id: generateExternalIdFromName(values.name ?? ''),
+                    namespace: values.namespace,
                     description: values.description,
                     configuration: config,
                     platform_id: platformConfig!.filter(
@@ -111,12 +126,11 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
                             config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase(),
                     )[0].service.id,
-                    owner_id: dataProductId,
                     sourceAligned: sourceAligned === undefined ? false : sourceAligned,
                     status: DataOutputStatus.Active,
                     tag_ids: values.tag_ids ?? [],
                 };
-                await createDataOutput(request).unwrap();
+                await createDataOutput({ id: dataProductId, dataOutput: request }).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
                 navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
@@ -179,26 +193,42 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         }
     };
 
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
+
     useEffect(() => {
-        if (mode === 'create') {
-            form.setFieldsValue({
-                external_id: generateExternalIdFromName(dataProductNameValue ?? ''),
-                owner: currentDataProduct?.name,
-            });
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFields([
+                {
+                    name: 'namespace',
+                    validating: true,
+                    errors: [],
+                },
+            ]);
+            fetchNamespaceDebounced(dataOutputNameValue ?? '');
         }
-    }, [currentDataProduct?.name, dataProductNameValue, form, mode]);
+    }, [mode, form, canEditNamespace, dataOutputNameValue, fetchNamespaceDebounced]);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.validateFields(['namespace']);
+        }
+    }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
     const options = [
         { label: t('Product aligned'), value: false },
         { label: t('Source aligned'), value: true },
     ];
 
+    const validateNamespaceCallback = useCallback(
+        (namespace: string) => validateNamespace({ dataProductId, namespace }).unwrap(),
+        [validateNamespace, dataProductId],
+    );
+
     return (
         <Form
             form={form}
             ref={formRef}
-            labelCol={FORM_GRID_WRAPPER_COLS}
-            wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
             onFinish={onSubmit}
             onFinishFailed={onSubmitFailed}
@@ -221,6 +251,14 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             >
                 <Input />
             </Form.Item>
+            <NamespaceFormItem
+                form={form}
+                tooltip={t('The namespace of the data output')}
+                max_length={namespaceLengthLimits?.max_length}
+                canEditNamespace={canEditNamespace}
+                toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                validateNamespace={validateNamespaceCallback}
+            />
             <Form.Item<DataOutputCreateFormSchema>
                 name={'description'}
                 label={t('Description')}
@@ -308,7 +346,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 form={form}
                                 identifiers={identifiers}
                                 sourceAligned={sourceAligned}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 mode={mode}
                                 dataProductId={dataProductId}
                             />
@@ -318,7 +356,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <RedshiftDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );
@@ -327,7 +365,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <GlueDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         ); //mode={mode} dataProductId={dataProductId} />;
@@ -336,7 +374,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <DatabricksDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         ); //mode={mode} dataProductId={dataProductId} />;
@@ -345,7 +383,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <SnowflakeDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );

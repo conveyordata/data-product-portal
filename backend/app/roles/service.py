@@ -10,6 +10,8 @@ from app.database.database import ensure_exists
 from app.roles.model import Role as RoleModel
 from app.roles.schema import CreateRole, Prototype, Role, Scope, UpdateRole
 
+ADMIN_UUID = UUID(int=0)
+
 
 class RoleService:
     def __init__(self, db: Session):
@@ -18,12 +20,11 @@ class RoleService:
     def get_role(self, role_id: UUID) -> RoleModel:
         return ensure_exists(role_id, self.db, RoleModel)
 
-    def get_roles(self, scope: Scope) -> Sequence[Role]:
-        return self.db.scalars(
-            select(RoleModel)
-            .where(RoleModel.scope == scope)
-            .order_by(RoleModel.created_on)
-        ).all()
+    def get_roles(self, scope: Optional[Scope] = None) -> Sequence[Role]:
+        query = select(RoleModel)
+        if scope:
+            query = query.where(RoleModel.scope == scope)
+        return self.db.scalars(query.order_by(RoleModel.created_on)).all()
 
     def create_role(
         self, role: CreateRole, *, prototype: Prototype = Prototype.CUSTOM
@@ -35,17 +36,27 @@ class RoleService:
         self.db.commit()
         return model
 
-    def update_role(self, role: UpdateRole) -> Role:
-        db_role = self.get_role(role.id)
-        updated_role = role.model_dump(exclude_unset=True)
+    def update_role(self, request: UpdateRole) -> Role:
+        role = self.get_role(request.id)
+        update = request.model_dump(exclude_unset=True)
 
-        for k, v in updated_role.items():
+        if (
+            Scope(role.scope) is Scope.GLOBAL
+            and Prototype(role.prototype) is Prototype.ADMIN
+            and "permissions" in update.keys()
+        ):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                detail="You cannot change the permissions of the admin role",
+            )
+
+        for k, v in update.items():
             if k == "permissions":
                 v = self._canonical_permissions(v)
-            setattr(db_role, k, v) if v else None
+            setattr(role, k, v) if v else None
 
         self.db.commit()
-        return db_role
+        return role
 
     def delete_role(self, id_: UUID) -> Role:
         role = self.get_role(id_)
@@ -70,7 +81,20 @@ class RoleService:
         application. This function will first check which roles are already present,
         and only create the missing ones.
         """
-        if self._find_prototype(Scope.GLOBAL, Prototype.EVERYONE) is None:
+
+        if self.find_prototype(Scope.GLOBAL, Prototype.ADMIN) is None:
+            model = RoleModel(
+                id=ADMIN_UUID,
+                scope=Scope.GLOBAL,
+                prototype=Prototype.ADMIN,
+                name="Admin",
+                description="Administrators have blanket permissions",
+                permissions=[],
+            )
+            self.db.add(model)
+            self.db.commit()
+
+        if self.find_prototype(Scope.GLOBAL, Prototype.EVERYONE) is None:
             self.create_role(
                 CreateRole(
                     name="everyone",
@@ -86,7 +110,7 @@ class RoleService:
                 prototype=Prototype.EVERYONE,
             )
 
-        if self._find_prototype(Scope.DATASET, Prototype.OWNER) is None:
+        if self.find_prototype(Scope.DATASET, Prototype.OWNER) is None:
             self.create_role(
                 CreateRole(
                     name="owner",
@@ -111,7 +135,7 @@ class RoleService:
                 prototype=Prototype.OWNER,
             )
 
-        if self._find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER) is None:
+        if self.find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER) is None:
             self.create_role(
                 CreateRole(
                     name="owner",
@@ -138,7 +162,7 @@ class RoleService:
                 prototype=Prototype.OWNER,
             )
 
-    def _find_prototype(self, scope: Scope, prototype: Prototype) -> Optional[Role]:
+    def find_prototype(self, scope: Scope, prototype: Prototype) -> Optional[Role]:
         return self.db.scalars(
             select(RoleModel)
             .where(RoleModel.scope == scope)

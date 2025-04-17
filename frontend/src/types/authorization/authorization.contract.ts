@@ -1,9 +1,9 @@
 export type AccessRequest = {
-    object_id?: string;
-    domain?: string;
     action: number;
+    resource?: string;
+    domain?: string;
 };
 
 export type AccessResponse = {
-    access: boolean;
+    allowed: boolean;
 };

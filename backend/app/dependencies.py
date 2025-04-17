@@ -22,10 +22,13 @@ from app.data_products_datasets.model import (
 from app.database.database import get_db_session
 from app.datasets.model import Dataset as DatasetModel
 from app.notification_interactions.model import NotificationInteraction
+from app.settings import settings
 from app.users.schema import User
 
 
 async def only_for_admin(authenticated_user: User = Depends(get_authenticated_user)):
+    if settings.AUTHORIZER_ENABLED:
+        return
     if not authenticated_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -38,6 +41,8 @@ def only_dataset_owners(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
+    if settings.AUTHORIZER_ENABLED:
+        return
     try:
         dataset = db.scalars(select(DatasetModel).filter_by(id=id)).one()
     except NoResultFound:
@@ -56,6 +61,8 @@ async def only_dataproduct_dataset_link_owners(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
+    if settings.AUTHORIZER_ENABLED:
+        return
     current_link = db.get(DataProductDatasetAssociationModel, id)
     if not current_link:
         raise HTTPException(
@@ -77,6 +84,8 @@ async def only_data_output_owners(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
+    if settings.AUTHORIZER_ENABLED:
+        return
     data_output = db.get(DataOutputModel, id)
     if not data_output:
         raise HTTPException(
@@ -93,6 +102,8 @@ async def only_product_membership_owners(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
+    if settings.AUTHORIZER_ENABLED:
+        return
     try:
         membership = db.scalars(
             select(DataProductMembershipModel).filter_by(id=id)
@@ -157,6 +168,8 @@ class OnlyWithProductAccess:
         authenticated_user: User = Depends(get_authenticated_user),
         db: Session = Depends(get_db_session),
     ) -> None:
+        if settings.AUTHORIZER_ENABLED:
+            return
         if data_product_id:
             id = data_product_id
         try:
@@ -166,7 +179,7 @@ class OnlyWithProductAccess:
                 ).one()
             elif data_product_name:
                 data_product = db.scalars(
-                    select(DataProductModel).filter_by(external_id=data_product_name)
+                    select(DataProductModel).filter_by(namespace=data_product_name)
                 ).one()
             else:
                 raise HTTPException(

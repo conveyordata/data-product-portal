@@ -43,29 +43,29 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
 
     const { data: edit_access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_UPDATE_USER,
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
         },
         { skip: !dataProductId },
     );
     const { data: approve_access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_APPROVE_USER_REQUEST,
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
         },
         { skip: !dataProductId },
     );
     const { data: remove_access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_DELETE_USER,
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__DELETE_USER,
         },
         { skip: !dataProductId },
     );
 
-    const canApproveUserNew = approve_access?.access || false;
-    const canEditUserNew = edit_access?.access || false;
-    const canRemoveUserNew = remove_access?.access || false;
+    const canApproveUserNew = approve_access?.allowed || false;
+    const canEditUserNew = edit_access?.allowed || false;
+    const canRemoveUserNew = remove_access?.allowed || false;
 
     const handleRemoveUserAccess = useCallback(
         async (membershipId: string) => {

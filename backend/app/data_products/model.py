@@ -32,7 +32,7 @@ class DataProduct(Base, BaseORM):
     __tablename__ = "data_products"
     id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
-    external_id = Column(String)
+    namespace = Column(String)
     description = Column(String)
     about = Column(String)
     memberships: Mapped[list["DataProductMembership"]] = relationship(

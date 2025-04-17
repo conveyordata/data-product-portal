@@ -45,13 +45,13 @@ export function DatasetTab({ dataProductId }: Props) {
 
     const { data: access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_REQUEST_DATASET_ACCESS,
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
         },
         { skip: !dataProductId },
     );
 
-    const canCreateDatasetNew = access?.access || false;
+    const canCreateDatasetNew = access?.allowed || false;
 
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;

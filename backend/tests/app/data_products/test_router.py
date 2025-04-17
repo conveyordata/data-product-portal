@@ -17,7 +17,9 @@ from tests.factories.environment import EnvironmentFactory
 from tests.factories.lifecycle import LifecycleFactory
 from tests.factories.platform import PlatformFactory
 
+from app.core.namespace.validation import NamespaceValidityType
 from app.data_product_memberships.enums import DataProductUserRole
+from app.roles.service import RoleService
 
 ENDPOINT = "/api/data_products"
 
@@ -32,7 +34,7 @@ def payload():
     return {
         "name": "Data Product Name",
         "description": "Updated Data Product Description",
-        "external_id": "Updated Data Product External ID",
+        "namespace": "namespace",
         "tag_ids": [str(tag.id)],
         "type_id": str(data_product_type.id),
         "memberships": [
@@ -49,10 +51,15 @@ def payload():
 class TestDataProductsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_data_product(self, payload, client):
+    def test_create_data_product(self, payload, client, session):
+        RoleService(db=session).initialize_prototype_roles()
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
+
+    def test_create_data_product_no_owner_role(self, payload, client):
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 400
 
     def test_create_data_product_no_members(self, payload, client):
         create_payload = deepcopy(payload)
@@ -73,6 +80,26 @@ class TestDataProductsRouter:
 
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 422
+
+    def test_create_data_product_duplicate_namespace(self, payload, client):
+        DataProductFactory(namespace=payload["namespace"])
+
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 400
+
+    def test_create_data_product_invalid_characters_namespace(self, payload, client):
+        create_payload = deepcopy(payload)
+        create_payload["namespace"] = "!"
+
+        created_data_product = self.create_data_product(client, create_payload)
+        assert created_data_product.status_code == 400
+
+    def test_create_data_product_invalid_length_namespace(self, payload, client):
+        create_payload = deepcopy(payload)
+        create_payload["namespace"] = "a" * 256
+
+        created_data_product = self.create_data_product(client, create_payload)
+        assert created_data_product.status_code == 400
 
     def test_get_data_products(self, client):
         data_product = DataProductFactory()
@@ -272,7 +299,7 @@ class TestDataProductsRouter:
             f"{ENDPOINT}/{data_product.id}/role?environment=production"
         )
         assert response.status_code == 200
-        assert response.json() == env.context.replace("{{}}", data_product.external_id)
+        assert response.json() == env.context.replace("{{}}", data_product.namespace)
 
     def test_get_signin_url_not_implemented(self, client):
         EnvironmentFactory(name="production")
@@ -305,6 +332,100 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 200
         assert response.json() == "test_1.com"
+
+    def test_get_namespace_suggestion_subsitution(self, client):
+        name = "test with spaces"
+        response = self.get_namespace_suggestion(client, name)
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["namespace"] == "test-with-spaces"
+
+    def test_get_namespace_length_limits(self, client):
+        response = self.get_namespace_length_limits(client)
+        assert response.status_code == 200
+        assert response.json()["max_length"] > 1
+
+    def test_validate_namespace(self, client):
+        namespace = "test"
+        response = self.validate_namespace(client, namespace)
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID
+
+    def test_validate_namespace_invalid_characters(self, client):
+        namespace = "!"
+        response = self.validate_namespace(client, namespace)
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_CHARACTERS
+
+    def test_validate_namespace_invalid_length(self, client):
+        namespace = "a" * 256
+        response = self.validate_namespace(client, namespace)
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH
+
+    def test_validate_namespace_duplicate(self, client):
+        namespace = "test"
+        DataProductFactory(namespace=namespace)
+        response = self.validate_namespace(client, namespace)
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
+
+    def test_validate_data_output_namespace(self, client):
+        namespace = "test"
+        data_product = DataProductFactory()
+        response = self.validate_data_output_namespace(
+            client, namespace, data_product.id
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID
+
+    def test_validate_data_output_namespace_invalid_characters(self, client):
+        namespace = "!"
+        data_product = DataProductFactory()
+        response = self.validate_data_output_namespace(
+            client, namespace, data_product.id
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_CHARACTERS
+
+    def test_validate_data_output_namespace_invalid_length(self, client):
+        namespace = "a" * 256
+        data_product = DataProductFactory()
+        response = self.validate_data_output_namespace(
+            client, namespace, data_product.id
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH
+
+    def test_validate_data_output_namespace_duplicate(self, client):
+        namespace = "test"
+        data_product = DataProductFactory()
+        DataOutputFactory(owner=data_product, namespace=namespace)
+        response = self.validate_data_output_namespace(
+            client, namespace, data_product.id
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
+
+    def test_validate_data_output_namespace_duplicate_scoped_to_data_product(
+        self, client
+    ):
+        namespace = "test"
+        data_product = DataProductFactory()
+        other_data_product = DataProductFactory()
+        DataOutputFactory(owner=data_product, namespace=namespace)
+        response = self.validate_data_output_namespace(
+            client, namespace, other_data_product.id
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID
 
     @staticmethod
     def create_data_product(client, default_data_product_payload):
@@ -342,3 +463,22 @@ class TestDataProductsRouter:
     @staticmethod
     def get_conveyor_ide_url(client, data_product_id):
         return client.get(f"{ENDPOINT}/{data_product_id}/conveyor_ide_url")
+
+    @staticmethod
+    def get_namespace_suggestion(client, name):
+        return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
+
+    @staticmethod
+    def validate_namespace(client, namespace):
+        return client.get(f"{ENDPOINT}/validate_namespace?namespace={namespace}")
+
+    @staticmethod
+    def get_namespace_length_limits(client):
+        return client.get(f"{ENDPOINT}/namespace_length_limits")
+
+    @staticmethod
+    def validate_data_output_namespace(client, namespace, data_product_id):
+        return client.get(
+            f"{ENDPOINT}/{data_product_id}/data_output"
+            f"/validate_namespace?namespace={namespace}"
+        )

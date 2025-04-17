@@ -10,6 +10,10 @@ export function isDataProductEditPage(path: string, dataProductId: string) {
     );
 }
 
+export function isDatasetEditPage(path: string, datasetId: string) {
+    return getDynamicRoutePath(ApplicationPaths.DatasetEdit, DynamicPathParams.DatasetId, datasetId) === path;
+}
+
 export function isDataOutputEditPage(path: string, dataOutputId: string, dataProductId: string) {
     return (
         getDynamicRoutePath(ApplicationPaths.DataOutputEdit, DynamicPathParams.DataOutputId, dataOutputId).replace(

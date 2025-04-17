@@ -54,6 +54,9 @@ class Settings(BaseSettings):
     AUTHORIZER_ENABLED: bool = False
     AUTHORIZER_CACHE_SIZE: int = 128
 
+    # Namespace validation
+    NAMESPACE_MAX_LENGTH: int = 64
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"

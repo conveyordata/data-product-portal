@@ -83,7 +83,7 @@ if settings.OIDC_ENABLED:
         ).one_or_none()
         if not result:
             return authorize_user(token, db)
-        return result.User
+        return result
 
 else:
 

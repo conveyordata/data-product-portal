@@ -6,6 +6,13 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.namespace.validation import (
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidation,
+    NamespaceValidator,
+    NamespaceValidityType,
+)
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
@@ -14,6 +21,7 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema import (
+    Dataset,
     DatasetAboutUpdate,
     DatasetCreateUpdate,
     DatasetStatusUpdate,
@@ -28,6 +36,9 @@ from app.users.model import User, ensure_user_exists
 
 
 class DatasetService:
+    def __init__(self):
+        self.namespace_validator = NamespaceValidator(DatasetModel)
+
     def get_dataset(self, id: UUID, db: Session, user: User) -> DatasetGet:
         dataset = db.get(
             DatasetModel,
@@ -113,17 +124,29 @@ class DatasetService:
         return tags
 
     def create_dataset(
-        self, dataset: DatasetCreateUpdate, db: Session
-    ) -> dict[str, UUID]:
-        dataset = self._update_owners(dataset, db)
-        dataset_schema = dataset.parse_pydantic_schema()
+        self,
+        dataset: DatasetCreateUpdate,
+        db: Session,
+    ) -> Dataset:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                dataset.namespace, db
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
+        new_dataset: Dataset = self._update_owners(dataset, db)
+        dataset_schema = new_dataset.parse_pydantic_schema()
         tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
         model = DatasetModel(**dataset_schema, tags=tags)
+
         db.add(model)
         db.commit()
         RefreshInfrastructureLambda().trigger()
-
-        return {"id": model.id}
+        return model
 
     def remove_dataset(self, id: UUID, db: Session) -> None:
         dataset = db.get(
@@ -287,3 +310,16 @@ class DatasetService:
                     )
                 )
         return Graph(nodes=set(nodes), edges=set(edges))
+
+    def validate_dataset_namespace(
+        self, namespace: str, db: Session
+    ) -> NamespaceValidation:
+        return self.namespace_validator.validate_namespace(namespace, db)
+
+    def dataset_namespace_suggestion(
+        self, name: str, db: Session
+    ) -> NamespaceSuggestion:
+        return self.namespace_validator.namespace_suggestion(name)
+
+    def dataset_namespace_length_limits(self) -> NamespaceLengthLimits:
+        return self.namespace_validator.namespace_length_limits()

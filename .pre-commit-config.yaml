@@ -64,9 +64,11 @@ repos:
       language: script
     - id: prettier
       name: prettier
+      exclude: ^docs/
       entry: bash -c "cd frontend && npm run format"
       language: node
     - id: lint
       name: lint
+      exclude: ^docs/
       entry: bash -c "cd frontend && npm run lint"
       language: node
