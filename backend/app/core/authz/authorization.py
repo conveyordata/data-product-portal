@@ -1,26 +1,22 @@
 from collections.abc import Callable
 from pathlib import Path
-from typing import Sequence, Type, TypeAlias, Union, cast
+from typing import Sequence, cast
 
 import casbin_async_sqlalchemy_adapter as sqlalchemy_adapter
 from cachetools import Cache, LRUCache, cachedmethod
 from casbin import AsyncEnforcer
 from fastapi import Depends, HTTPException, Request, status
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.data_products.model import DataProduct
 from app.database import database
 from app.database.database import get_db_session
-from app.datasets.model import Dataset
 from app.settings import settings
 from app.users.schema import User
 from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
-
-Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], None]
+from .resolvers import SubjectResolver
 
 
 class Authorization(metaclass=Singleton):
@@ -33,6 +29,7 @@ class Authorization(metaclass=Singleton):
     async def initialize(cls) -> "Authorization":
         model_location = Path(__file__).parent / "rbac_model.conf"
         enforcer = await cls._construct_enforcer(str(model_location))
+        await enforcer.load_policy()
         return cls(enforcer)
 
     @staticmethod
@@ -47,7 +44,8 @@ class Authorization(metaclass=Singleton):
     def enforce(
         cls,
         action: AuthorizationAction,
-        model: Model = None,
+        resolver: type[SubjectResolver],
+        *,
         object_id: str = "id",
     ) -> Callable[[Request, User, Session], None]:
         def inner(
@@ -55,8 +53,10 @@ class Authorization(metaclass=Singleton):
             user: User = Depends(get_authenticated_user),
             db: Session = Depends(get_db_session),
         ) -> None:
-            obj = cls.resolve_parameter(request, object_id)
-            dom = cls.resolve_domain(db, model, obj)
+            if not settings.AUTHORIZER_ENABLED:
+                return
+            obj = resolver.resolve(request, object_id, db)
+            dom = resolver.resolve_domain(db, obj)
 
             if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
                 raise HTTPException(
@@ -65,29 +65,6 @@ class Authorization(metaclass=Singleton):
                 )
 
         return inner
-
-    @staticmethod
-    def resolve_parameter(request: Request, key: str, default: str = "*") -> str:
-        if (result := request.query_params.get(key)) is not None:
-            return cast(str, result)
-        if (result := request.path_params.get(key)) is not None:
-            return cast(str, result)
-
-        return default
-
-    @staticmethod
-    def resolve_domain(
-        db: Session,
-        model: Model,
-        id_: str,
-        default: str = "*",
-    ) -> str:
-        if id_ == default or model is None:
-            return default
-        domain = db.scalars(
-            select(model.domain_id).where(model.id == id_)
-        ).one_or_none()
-        return default if domain is None else str(domain)
 
     @cachedmethod(lambda self: self._cache)
     def has_access(
@@ -114,7 +91,6 @@ class Authorization(metaclass=Singleton):
 
         policies = [(role_id, str(action)) for action in actions]
         await enforcer.add_policies(policies)
-
         self._after_update()
 
     async def sync_everyone_role_permissions(

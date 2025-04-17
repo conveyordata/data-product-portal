@@ -10,10 +10,12 @@ import { useQuickFilter } from '@/hooks/use-quick-filter';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductTableColumns } from '@/pages/data-products/components/data-products-table/data-products-table-columns.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetAllDataProductsQuery,
     useGetUserDataProductsQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataProductsGetContract } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import { SearchForm } from '@/types/shared';
@@ -38,6 +40,11 @@ export function DataProductsTable() {
         currentUser?.id || '',
         { skip: !currentUser },
     );
+    const { data: access } = useCheckAccessQuery(
+        { action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT },
+        { skip: !currentUser },
+    );
+    const canCreateDataProduct = access?.allowed || false;
     const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -93,7 +100,11 @@ export function DataProductsTable() {
                 </Form>
                 <Space>
                     <Link to={ApplicationPaths.DataProductNew}>
-                        <Button className={styles.formButton} type={'primary'}>
+                        <Button
+                            className={styles.formButton}
+                            type={'primary'}
+                            disabled={!(canCreateDataProduct || true)}
+                        >
                             {t('Create Data Product')}
                         </Button>
                     </Link>

@@ -2,12 +2,14 @@ import { Flex, Table, TableColumnsType } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
     useApproveDataProductLinkMutation,
     useRejectDataProductLinkMutation,
     useRemoveDataProductDatasetLinkMutation,
 } from '@/store/features/data-products-datasets/data-products-datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { DataProductLink } from '@/types/dataset';
 
@@ -28,6 +30,23 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
     const [rejectDataProductLink, { isLoading: isRejectingLink }] = useRejectDataProductLinkMutation();
     const [removeDatasetFromDataProduct, { isLoading: isRemovingDatasetFromDataProduct }] =
         useRemoveDataProductDatasetLinkMutation();
+
+    const { data: access } = useCheckAccessQuery(
+        {
+            resource: datasetId,
+            action: AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+        },
+        { skip: !datasetId },
+    );
+    const canApproveNew = access?.allowed || false;
+    const { data: revoke_access } = useCheckAccessQuery(
+        {
+            resource: datasetId,
+            action: AuthorizationAction.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+        },
+        { skip: !datasetId },
+    );
+    const canRevokeNew = revoke_access?.allowed || false;
 
     const handleRemoveDatasetFromDataProduct = useCallback(
         async (dataProductId: string, name: string, datasetLinkId: string) => {
@@ -91,6 +110,8 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
             isDisabled: !isCurrentDatasetOwner,
             isLoading: isRemovingDatasetFromDataProduct || isRejectingLink || isApprovingLink,
             isCurrentDatasetOwner,
+            canApproveNew,
+            canRevokeNew,
             onRejectDataProductDatasetLink: handleRejectDataProductDatasetLink,
             onAcceptDataProductDatasetLink: handleAcceptDataProductDatasetLink,
         });
@@ -102,6 +123,8 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
         isRemovingDatasetFromDataProduct,
         isRejectingLink,
         isApprovingLink,
+        canApproveNew,
+        canRevokeNew,
         handleRejectDataProductDatasetLink,
         handleAcceptDataProductDatasetLink,
     ]);

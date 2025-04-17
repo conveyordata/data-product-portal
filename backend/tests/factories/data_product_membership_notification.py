@@ -1,11 +1,10 @@
 import factory
 from tests.factories.data_product_membership import DataProductMembershipFactory
 
-from app.data_product_memberships.enums import DataProductMembershipStatus
+from app.notifications.enums import NotificationOrigins, NotificationTypes
 from app.notifications.model import (
     DataProductMembershipNotification,
 )
-from app.notifications.notification_types import NotificationTypes
 
 
 class DataProductMembershipNotificationFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -14,5 +13,5 @@ class DataProductMembershipNotificationFactory(factory.alchemy.SQLAlchemyModelFa
 
     id = factory.Faker("uuid4")
     notification_type = NotificationTypes.DataProductMembershipNotification.value
-    notification_origin = DataProductMembershipStatus.APPROVED
+    notification_origin = NotificationOrigins.APPROVED.value
     data_product_membership = factory.SubFactory(DataProductMembershipFactory)

@@ -26,7 +26,7 @@ function filterDataOutputs(data_outputs: DataOutputsGetContract, searchTerm: str
         data_outputs.filter(
             (data_output) =>
                 data_output?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                data_output?.external_id?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+                data_output?.namespace?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }
@@ -45,13 +45,13 @@ export function DataOutputTab({ dataProductId }: Props) {
 
     const { data: access } = useCheckAccessQuery(
         {
-            object_id: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT_CREATE_DATA_OUTPUT,
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
         },
         { skip: !dataProductId },
     );
 
-    const canCreateDataOutputNew = access?.access || false;
+    const canCreateDataOutputNew = access?.allowed || false;
 
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;
@@ -78,7 +78,11 @@ export function DataOutputTab({ dataProductId }: Props) {
                     }
                 />
 
-                <DataOutputTable dataProductId={dataProductId} dataOutputs={filteredDataOutputs} />
+                <DataOutputTable
+                    dataProductId={dataProductId}
+                    dataOutputs={filteredDataOutputs}
+                    isCurrentUserDataProductOwner={isDataProductOwner}
+                />
             </Flex>
             {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </>

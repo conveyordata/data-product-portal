@@ -23,7 +23,7 @@ class AuthService:
                     break
         data_product_id = (
             db.query(DataProductModel)
-            .get_one(DataProductModel.external_id, data_product_name)
+            .get_one(DataProductModel.namespace, data_product_name)
             .id
         )
         role_arn = DataProductService().get_data_product_role_arn(

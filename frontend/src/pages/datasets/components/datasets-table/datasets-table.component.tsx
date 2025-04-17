@@ -9,7 +9,9 @@ import { useQuickFilter } from '@/hooks/use-quick-filter.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { getDatasetTableColumns } from '@/pages/datasets/components/datasets-table/datasets-table-columns.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DatasetsGetContract } from '@/types/dataset';
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import { SearchForm } from '@/types/shared';
@@ -34,6 +36,11 @@ export function DatasetsTable() {
         currentUser?.id || '',
         { skip: !currentUser },
     );
+    const { data: access } = useCheckAccessQuery(
+        { action: AuthorizationAction.GLOBAL__CREATE_DATASET },
+        { skip: !currentUser },
+    );
+    const canCreateDataset = access?.allowed || false;
     const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -79,7 +86,7 @@ export function DatasetsTable() {
                 </Form>
                 <Space>
                     <Link to={ApplicationPaths.DatasetNew}>
-                        <Button className={styles.formButton} type={'primary'}>
+                        <Button className={styles.formButton} type={'primary'} disabled={!(canCreateDataset || true)}>
                             {t('Create Dataset')}
                         </Button>
                     </Link>

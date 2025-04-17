@@ -141,3 +141,14 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     padding-left: globals.$spacing-s;
     padding-bottom: globals.$spacing-xs;
 }
+
+.requests-inbox {
+    margin-left: globals.$spacing-xxl;
+    margin-right: globals.$spacing-xxl;
+    padding-top: globals.$spacing-s;
+}
+
+.welcome-content {
+    display: flex;
+    justify-content: center;
+}

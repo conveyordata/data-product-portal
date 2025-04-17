@@ -80,7 +80,7 @@ def default_data_product_payload() -> dict[str, Any]:
     return {
         "name": "Test Data Product",
         "description": "Test Description",
-        "external_id": "test-data_product",
+        "namespace": "test-data_product",
         "tags": [],
         "type_id": str(data_product_type.id),
         "memberships": [
@@ -100,7 +100,7 @@ def default_dataset_payload() -> dict[str, Any]:
     return {
         "name": "Test Dataset",
         "description": "Test Description",
-        "external_id": "test-dataset",
+        "namespace": "test-dataset",
         "tags": [],
         "owners": [str(user.id)],
         "access_type": DatasetAccessType.RESTRICTED,
@@ -127,6 +127,8 @@ async def authorizer() -> AsyncGenerator[Authorization, None]:
     yield await Authorization.initialize()
 
 
-@pytest.fixture(scope="session", autouse=True)
-def enable_authorizer() -> None:
+@pytest.fixture
+def enable_authorizer():
     settings.AUTHORIZER_ENABLED = True
+    yield
+    settings.AUTHORIZER_ENABLED = False

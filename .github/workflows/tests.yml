@@ -50,7 +50,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Run image
         uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
@@ -113,9 +113,9 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
       with:
-        python-version: "3.12"
+        python-version: "3.13"
     - name: Setup Node.js
-      uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
       with:
         node-version-file: frontend/package.json
         cache: 'npm'

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Sequence
 from uuid import UUID
 
 import emailgen
@@ -19,7 +20,7 @@ from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
-from app.notifications.model import NotificationFactory
+from app.notification_interactions.service import NotificationInteractionService
 from app.settings import settings
 from app.users.model import ensure_user_exists
 from app.users.schema import User
@@ -111,8 +112,8 @@ class DataProductMembershipService:
         data_product_membership.approved_by_id = authenticated_user.id
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
 
-        NotificationFactory.createDataProductMembershipNotification(
-            db, data_product_membership, True
+        NotificationInteractionService().create_data_product_membership_notifications(
+            db, data_product_membership
         )
 
         db.commit()
@@ -148,8 +149,8 @@ class DataProductMembershipService:
         data_product_membership.denied_by_id = authenticated_user.id
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
 
-        NotificationFactory.createDataProductMembershipNotification(
-            db, data_product_membership, False
+        NotificationInteractionService().create_data_product_membership_notifications(
+            db, data_product_membership
         )
 
         db.commit()
@@ -180,7 +181,6 @@ class DataProductMembershipService:
                 ),
             )
 
-        data_product_membership.remove_notifications(db)
         data_product.memberships.remove(data_product_membership)
         db.commit()
         RefreshInfrastructureLambda().trigger()
@@ -212,7 +212,6 @@ class DataProductMembershipService:
             approved_on=datetime.now(tz=pytz.utc),
         )
         data_product.memberships.append(data_product_membership)
-
         db.commit()
         db.refresh(data_product_membership)
         RefreshInfrastructureLambda().trigger()
@@ -279,3 +278,6 @@ class DataProductMembershipService:
             .order_by(asc(DataProductMembership.requested_on))
             .all()
         )
+
+    def list_memberships(self, db: Session) -> Sequence[DataProductMembership]:
+        return db.query(DataProductMembership).all()

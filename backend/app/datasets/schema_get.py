@@ -29,7 +29,7 @@ class DataOutputLink(DataOutputDatasetAssociation):
 
 class DatasetGet(ORMModel):
     id: UUID
-    external_id: str
+    namespace: str
     name: str
     description: str
     owners: Annotated[list[User], MinLen(1)]

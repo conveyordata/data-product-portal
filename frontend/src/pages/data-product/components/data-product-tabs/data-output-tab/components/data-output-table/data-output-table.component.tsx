@@ -16,11 +16,12 @@ import styles from './data-output-table.module.scss';
 import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
 
 type Props = {
+    isCurrentUserDataProductOwner: boolean;
     dataProductId: string;
     dataOutputs: DataOutputsGetContract;
 };
 
-export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
+export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, dataOutputs }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
@@ -69,10 +70,10 @@ export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
             },
             onRemoveDataOutput: handleRemoveDataOutput,
             onRemoveDatasetFromDataOutput: handleRemoveDatasetFromDataOutput,
-            //isDisabled: !isCurrentDataProductOwner,
+            isDisabled: !isCurrentUserDataProductOwner,
             //isLoading: () => {},//isRemovingDataOutputFromDataProduct,
         });
-    }, [t, handleRemoveDataOutput, handleRemoveDatasetFromDataOutput, handleOpen]);
+    }, [t, handleRemoveDataOutput, handleRemoveDatasetFromDataOutput, handleOpen, isCurrentUserDataProductOwner]);
 
     if (!dataProduct) return null;
 

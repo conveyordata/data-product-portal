@@ -10,6 +10,7 @@ from sqlalchemy_utils.functions import create_database, database_exists, drop_da
 from app.core.helpers.local import add_additional_env_vars
 
 add_additional_env_vars()
+
 from app.database.database import get_url  # noqa: E402
 from app.seed import seed_db  # noqa: E402
 

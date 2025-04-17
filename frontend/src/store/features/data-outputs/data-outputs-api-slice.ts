@@ -11,6 +11,7 @@ import {
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import { DataOutputUpdateRequest, DataOutputUpdateResponse } from '@/types/data-output/data-output-update.contract';
 import { GraphContract } from '@/types/graph/graph-contract';
+import { NamespaceLengthLimitsResponse, NamespaceSuggestionResponse } from '@/types/namespace/namespace';
 
 import { baseApiSlice } from '../api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
@@ -46,15 +47,15 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        createDataOutput: builder.mutation<DataOutputCreateResponse, DataOutputCreate>({
-            query: (dataOutput) => ({
-                url: ApiUrl.DataOutputs,
+        createDataOutput: builder.mutation<DataOutputCreateResponse, { id: string; dataOutput: DataOutputCreate }>({
+            query: ({ id, dataOutput }) => ({
+                url: buildUrl(ApiUrl.DataProductOutputCreate, { dataProductId: id }),
                 method: 'POST',
                 data: dataOutput,
             }),
             invalidatesTags: (_, _error, arg) => [
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.DataProduct as const, id: arg.owner_id },
+                { type: TagTypes.DataProduct as const, id: arg.id },
                 { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
             ],
             // invalidatesTags: (_, _error, arg) => [
@@ -147,6 +148,19 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
+        getDataOutputNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
+            query: (name) => ({
+                url: ApiUrl.DataOutputNamespaceSuggestion,
+                method: 'GET',
+                params: { name },
+            }),
+        }),
+        getDataOutputNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
+            query: () => ({
+                url: ApiUrl.DataOutputNamespaceLimits,
+                method: 'GET',
+            }),
+        }),
     }),
 
     overrideExisting: false,
@@ -161,4 +175,6 @@ export const {
     useRemoveDataOutputMutation,
     useRequestDatasetAccessForDataOutputMutation,
     useGetDataOutputGraphDataQuery,
+    useGetDataOutputNamespaceLengthLimitsQuery,
+    useLazyGetDataOutputNamespaceSuggestionQuery,
 } = dataOutputsApiSlice;

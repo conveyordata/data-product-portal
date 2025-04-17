@@ -6,7 +6,10 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.data_product_memberships.enums import DataProductUserRole
+from app.data_product_memberships.enums import (
+    DataProductMembershipStatus,
+    DataProductUserRole,
+)
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_settings.model import DataProductSettingValue
 from app.data_products.schema import DataProduct as DataProductSchema
@@ -32,7 +35,7 @@ class DataProduct(Base, BaseORM):
     __tablename__ = "data_products"
     id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
-    external_id = Column(String)
+    namespace = Column(String)
     description = Column(String)
     about = Column(String)
     memberships: Mapped[list["DataProductMembership"]] = relationship(
@@ -82,5 +85,8 @@ class DataProduct(Base, BaseORM):
         return [
             membership.user
             for membership in self.memberships
-            if membership.role == DataProductUserRole.OWNER
+            if (
+                membership.role == DataProductUserRole.OWNER
+                and membership.status == DataProductMembershipStatus.APPROVED
+            )
         ]
