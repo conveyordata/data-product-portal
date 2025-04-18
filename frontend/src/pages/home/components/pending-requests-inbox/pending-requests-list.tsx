@@ -1,5 +1,5 @@
 import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Badge, Button, Flex, List, Typography } from 'antd';
+import { Avatar, Button, Flex, List, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -53,71 +53,64 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                 className: styles.antListPagination,
             }}
             renderItem={(item) => {
-                const formattedDate = item.date ? formatDate(item.date) : undefined;
+                const formattedDate = item.date ? formatDate(item.date) : '';
                 return (
-                    <>
-                        <List.Item
-                            key={item.key}
-                            className={styles.listItem}
-                            onClick={() => handleItemClick(item.navigatePath)}
-                        >
-                            <div className={styles.userBadge}>
-                                <Badge showZero={false} color={item.color} size="default">
-                                    <Avatar style={{ backgroundColor: item.color }}>
-                                        {item.initials || <UserOutlined />}
-                                    </Avatar>
-                                </Badge>
-                            </div>
-                            <Flex vertical={true} className={styles.flex} align="flex-start">
-                                <div className={styles.itemContainer}>
-                                    <Flex vertical>
-                                        <Typography.Text>{item.description}</Typography.Text>
-                                        <Typography.Text type="secondary">
-                                            by {item.author}, {formattedDate}
-                                        </Typography.Text>
-                                    </Flex>
-                                    <div className={styles.rightColumn}>
-                                        <Flex justify="flex-end">
-                                            <Flex className={styles.typeIndicator}>
-                                                <Typography.Text className={styles.tag} type="secondary">
-                                                    {item.icon}
-                                                    <Typography.Text>{item.origin}</Typography.Text>
-                                                </Typography.Text>
-                                            </Flex>
-                                            <div
-                                                style={{
-                                                    borderColor: item.color,
-                                                    boxShadow: `0 -4px 0 0 ${item.color}`,
-                                                }}
-                                            >
-                                                <Button
-                                                    className={styles.resolveButton}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onAccept(item.request);
-                                                    }}
-                                                >
-                                                    {t('Accept')}
-                                                </Button>
-                                                <Button
-                                                    className={styles.resolveButton}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onReject(item.request);
-                                                    }}
-                                                >
-                                                    {t('Reject')}
-                                                </Button>
-                                            </div>
-                                        </Flex>
-                                    </div>
-                                </div>
-                                <Typography.Text>{item.message}</Typography.Text>
+                    <List.Item
+                        key={item.key}
+                        className={styles.actionItem}
+                        onClick={() => handleItemClick(item.navigatePath)}
+                    >
+                        <List.Item.Meta
+                            avatar={
+                                <Avatar style={{ backgroundColor: item.color }} className={styles.avatar}>
+                                    {item.initials || <UserOutlined />}
+                                </Avatar>
+                            }
+                            title={
+                                <Flex vertical>
+                                    <Typography.Text>{item.description}</Typography.Text>
+                                    <Typography.Text type="secondary" style={{ fontWeight: 'normal' }}>
+                                        by {item.author}, {formattedDate}
+                                    </Typography.Text>
+                                </Flex>
+                            }
+                            description={<Typography.Text>{item.message}</Typography.Text>}
+                        />
+                        <Flex align="end" className={styles.actionsTopRight}>
+                            <Flex className={styles.typeIndicator}>
+                                <Typography.Text className={styles.tag} type="secondary">
+                                    {item.icon}
+                                    <Typography.Text>{item.origin}</Typography.Text>
+                                </Typography.Text>
                             </Flex>
-                        </List.Item>
 
-                        <div />
-                    </>
+                            <div
+                                style={{
+                                    borderColor: item.color,
+                                    boxShadow: `0 -4px 0 0 ${item.color}`,
+                                }}
+                            >
+                                <Button
+                                    className={styles.resolveButton}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onAccept(item.request);
+                                    }}
+                                >
+                                    {t('Accept')}
+                                </Button>
+                                <Button
+                                    className={styles.resolveButton}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onReject(item.request);
+                                    }}
+                                >
+                                    {t('Reject')}
+                                </Button>
+                            </div>
+                        </Flex>
+                    </List.Item>
                 );
             }}
         />

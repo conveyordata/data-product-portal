@@ -6,41 +6,18 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 
 .pagination {
     position: static;
-
-    @media (min-width: 1380px) {
-        position: absolute;
-    }
     top: 0;
     right: 0;
     padding-right: globals.$spacing-xxl;
     padding-top: globals.$spacing-regular;
-}
-
-.tab-items-count {
-    font-size: globals.$font-size-sm;
-    margin-left: globals.$spacing-xs;
-    margin-top: -(globals.$column-gap-xxs);
-}
-
-.menu-item {
-    padding: globals.$spacing-xs;
-    margin: 0;
-    border-radius: 0;
-    background-color: transparent;
-}
-
-.menu-item-active {
-    background-color: globals.$border-color-secondary;
-
-    &:hover {
-        background-color: globals.$border-color-secondary;
+    @media (min-width: 1380px) {
+        position: absolute;
     }
 }
 
-.filter-bar {
-    background-color: globals.$quaternary-color-fill;
-    border: 1px solid globals.$border-color-secondary;
-    border-radius: globals.$border-radius-sm;
+.avatar {
+    margin-top: globals.$spacing-s;
+    margin-left: globals.$spacing-s;
 }
 
 .top-right-column {
@@ -52,7 +29,7 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     padding-right: globals.$spacing-xxl;
 }
 
-.list-item {
+.action-item {
     position: relative;
     background-color: globals.$quaternary-color-fill;
     border: 1px solid globals.$border-color-secondary;
@@ -64,8 +41,8 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
         border-color: globals.$primary-color-border-hover;
         transition: border-color 0.3s;
     }
-    margin: 0;
     margin-bottom: globals.$spacing-regular;
+    padding: globals.$spacing-m !important;
 }
 
 .tag {
@@ -95,34 +72,11 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     justify-content: center;
 }
 
-.right-column {
-    position: absolute;
-    top: 4px;
-    right: 0;
-    width: 50%;
-    margin-left: globals.$spacing-ml;
-    height: 100%;
-}
-
-.flex {
-    width: 100%;
-}
-
-.item-container {
-    width: 100%;
-}
-
-.user-badge {
-    padding: globals.$spacing-m;
-    padding-top: globals.$spacing-xs;
+.actions-top-right {
     margin-bottom: auto;
 }
 
 .type-indicator {
-    display: flex;
-    margin-left: auto;
-    white-space: nowrap;
-    justify-content: space-between;
     height: 100%;
     background-color: globals.$secondary-color-fill;
     padding: globals.$spacing-xs;
@@ -131,21 +85,12 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 
 .resolve-button {
     border-radius: 0;
-    color: globals.$color-text !important;
-    &:hover {
-        color: globals.$info-color !important;
-    }
+    width: calc((globals.$button-width) / 2 - (globals.$spacing-m) / 2);
 }
 
 .requests-info {
     padding-left: globals.$spacing-s;
     padding-bottom: globals.$spacing-xs;
-}
-
-.requests-inbox {
-    margin-left: globals.$spacing-xxl;
-    margin-right: globals.$spacing-xxl;
-    padding-top: globals.$spacing-s;
 }
 
 .welcome-content {
