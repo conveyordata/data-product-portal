@@ -1,16 +1,17 @@
 import { Badge, Button, Flex, Popconfirm, TableColumnsType } from 'antd';
-import styles from './data-output-table.module.scss';
-import { TFunction } from 'i18next';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import type { TFunction } from 'i18next';
+
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import { DataOutputsGetContract } from '@/types/data-output/data-outputs-get.contract';
-import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtitle/data-output-subtitle.component';
-import { createDataOutputIdPath } from '@/types/navigation';
-import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component';
-import i18n from '@/i18n';
+import { DataOutputsGetContract } from '@/types/data-output/data-outputs-get.contract';
+import { createDataOutputIdPath } from '@/types/navigation';
+import { getDataOutputIcon } from '@/utils/data-output-type.helper';
+import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
+
+import styles from './data-output-table.module.scss';
 
 type Props = {
     t: TFunction;
@@ -49,7 +50,7 @@ export const getDataProductDataOutputsColumns = ({
                             <Flex vertical>
                                 <Badge
                                     status={getBadgeStatus(status)}
-                                    text={getStatusLabel(status)}
+                                    text={getStatusLabel(t, status)}
                                     className={styles.noSelect}
                                 />
                             </Flex>
@@ -65,7 +66,7 @@ export const getDataProductDataOutputsColumns = ({
                 return (
                     <TableCellItem
                         icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
-                        text={i18n.t('linked to {{count}} datasets', { count: dataset_links.length })}
+                        text={t('linked to {{count}} datasets', { count: dataset_links.length })}
                     />
                 );
             },

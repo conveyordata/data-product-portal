@@ -50,11 +50,11 @@ class DataProductSettingValue(Base, BaseORM):
 class DataProductSetting(Base, BaseORM):
     __tablename__ = "data_product_settings"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    external_id = Column(String)
+    namespace = Column(String)
     name = Column(String)
     tooltip = Column(String)
     type = Column(Enum(DataProductSettingType))
-    divider = Column(String)
+    category = Column(String)
     default = Column(String)
     order = Column(Integer)
     scope = Column(Enum(DataProductSettingScope))

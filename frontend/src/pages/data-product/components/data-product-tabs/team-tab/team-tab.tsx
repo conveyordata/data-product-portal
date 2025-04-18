@@ -1,20 +1,24 @@
-import styles from './team-tab.module.scss';
 import { Button, Flex, Form } from 'antd';
-import { useTranslation } from 'react-i18next';
 import { useCallback, useMemo } from 'react';
-import { useModal } from '@/hooks/use-modal.tsx';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
-import { SearchForm } from '@/types/shared';
+
 import { Searchbar } from '@/components/form';
-import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
 import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
-import { UserContract } from '@/types/users';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useModal } from '@/hooks/use-modal.tsx';
+import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useAddDataProductMembershipMutation } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+import { SearchForm } from '@/types/shared';
+import { UserContract } from '@/types/users';
+import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
+
+import styles from './team-tab.module.scss';
 
 type Props = {
     dataProductId: string;
@@ -25,12 +29,14 @@ function filterUsers(users: DataProductUserMembership[], searchTerm: string) {
     if (!users) return [];
 
     return (
-        users.filter(
-            (membership) =>
-                membership?.user?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                membership?.user?.first_name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                membership?.user?.last_name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
-        ) ?? []
+        users.filter((membership) => {
+            const searchString = searchTerm.toLowerCase();
+            return (
+                membership?.user?.email?.toLowerCase()?.includes(searchString) ||
+                membership?.user?.first_name?.toLowerCase()?.includes(searchString) ||
+                membership?.user?.last_name?.toLowerCase()?.includes(searchString)
+            );
+        }) ?? []
     );
 }
 
@@ -48,11 +54,21 @@ export function TeamTab({ dataProductId }: Props) {
     }, [dataProduct?.memberships, searchTerm]);
     const dataProductUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
 
+    const { data: access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__CREATE_USER,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canAddUserNew = access?.allowed || false;
+
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;
 
         return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct?.id, user?.id]);
+    }, [dataProduct, user]);
 
     const handleGrantAccessToDataProduct = useCallback(
         async (user: UserContract) => {
@@ -81,7 +97,7 @@ export function TeamTab({ dataProductId }: Props) {
                     placeholder={t('Search users by email or name')}
                     actionButton={
                         <Button
-                            disabled={!isDataProductOwner}
+                            disabled={!(canAddUserNew || isDataProductOwner)}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}

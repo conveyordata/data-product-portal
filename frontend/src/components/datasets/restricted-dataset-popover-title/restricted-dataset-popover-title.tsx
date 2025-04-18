@@ -1,5 +1,5 @@
-import { useTranslation } from 'react-i18next';
 import { Space, Typography, TypographyProps } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
     name: string;

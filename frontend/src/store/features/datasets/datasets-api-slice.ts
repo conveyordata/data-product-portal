@@ -1,7 +1,6 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
 import {
     DatasetContract,
     DatasetCreateRequest,
@@ -9,7 +8,13 @@ import {
     DatasetUpdateRequest,
     DatasetUpdateResponse,
 } from '@/types/dataset';
+import { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
 import { GraphContract } from '@/types/graph/graph-contract';
+import {
+    NamespaceLengthLimitsResponse,
+    NamespaceSuggestionResponse,
+    NamespaceValidationResponse,
+} from '@/types/namespace/namespace';
 
 export const datasetTags: string[] = [TagTypes.Dataset, TagTypes.UserDatasets, TagTypes.DataProduct];
 
@@ -145,6 +150,26 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
+        validateDatasetNamespace: builder.query<NamespaceValidationResponse, string>({
+            query: (namespace) => ({
+                url: ApiUrl.DatasetNamespaceValidation,
+                method: 'GET',
+                params: { namespace },
+            }),
+        }),
+        getDatasetNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
+            query: (name) => ({
+                url: ApiUrl.DatasetNamespaceSuggestion,
+                method: 'GET',
+                params: { name },
+            }),
+        }),
+        getDatasetNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
+            query: () => ({
+                url: ApiUrl.DatasetNamespaceLimits,
+                method: 'GET',
+            }),
+        }),
     }),
     overrideExisting: false,
 });
@@ -160,4 +185,7 @@ export const {
     useAddUserToDatasetMutation,
     useRemoveUserFromDatasetMutation,
     useGetDatasetGraphDataQuery,
+    useLazyGetDatasetNamespaceSuggestionQuery,
+    useLazyValidateDatasetNamespaceQuery,
+    useGetDatasetNamespaceLengthLimitsQuery,
 } = datasetsApiSlice;

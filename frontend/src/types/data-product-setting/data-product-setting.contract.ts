@@ -1,16 +1,18 @@
 import { DataProductContract } from '../data-product';
 
 export type DataProductSettingType = 'checkbox' | 'tags' | 'input';
+export type DataProductSettingScope = 'dataproduct' | 'dataset';
 
 export interface DataProductSettingContract {
     order: number;
     id: string;
+    namespace: string;
     name: string;
     tooltip: string;
     default: string;
     type: DataProductSettingType;
-    divider: string;
-    scope: 'dataproduct' | 'dataset';
+    category: string;
+    scope: DataProductSettingScope;
 }
 
 export interface DataProductSettingModel extends DataProductSettingContract {}

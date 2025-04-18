@@ -5,5 +5,5 @@ from app.graph.node import Node
 
 
 class Graph(BaseModel):
-    edges: list[Edge]
-    nodes: list[Node]
+    edges: set[Edge]
+    nodes: set[Node]

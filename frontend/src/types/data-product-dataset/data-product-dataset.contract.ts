@@ -1,7 +1,8 @@
-import { UserContract } from '@/types/users';
 import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
-import { DatasetContract } from '../dataset';
+import { UserContract } from '@/types/users';
+
 import { DataProductContract } from '../data-product';
+import { DatasetContract } from '../dataset';
 
 export type DataProductDatasetContract = {
     id: string;

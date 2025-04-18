@@ -1,10 +1,11 @@
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
-import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabs.tsx';
+import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 
 export enum ApplicationPaths {
     Home = '/',
     DataProducts = '/data-products',
+    Documentation = '/documentation',
     DataProduct = '/data-products/:dataProductId',
     DataProductNew = '/data-products/new',
     DataProductEdit = '/data-products/:dataProductId/edit',
@@ -25,7 +26,7 @@ export enum ApplicationPaths {
     EnvironmentConfig = '/environments/configs/:envConfigId',
     EnvironmentConfigNew = '/environments/:environmentId/new',
     EnvironmentNew = '/environments/new',
-    DataProductSettings = '/data-product-settings',
+    Settings = '/settings',
     DataProductLifecycles = '/data-product-lifecycles',
     RoleConfiguration = '/configuration/roles',
 }
@@ -36,13 +37,12 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.DataProduct,
     ApplicationPaths.DataProductNew,
     ApplicationPaths.DataProductEdit,
-    ApplicationPaths.DataProductSettings,
+    ApplicationPaths.Settings,
     ApplicationPaths.Datasets,
     ApplicationPaths.Dataset,
     ApplicationPaths.AuditLogs,
     ApplicationPaths.DataOutput,
     ApplicationPaths.DataOutputEdit,
-    // ApplicationPaths.Settings,
     ApplicationPaths.PlatformsConfigs,
     ApplicationPaths.PlatformServiceConfig,
     ApplicationPaths.PlatformServiceConfigNew,
@@ -107,5 +107,5 @@ export enum ApplicationPageTitles {
     Datasets = 'Datasets',
     Dataset = 'Dataset',
     AuditLogs = 'Audit Logs',
-    // Settings = 'Settings',
+    Settings = 'Settings',
 }

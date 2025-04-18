@@ -1,23 +1,27 @@
-import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { Edge, Node, Position, XYPosition } from 'reactflow';
-import { useEffect } from 'react';
+import '@xyflow/react/dist/base.css';
+
+import type { Edge, Node, XYPosition } from '@xyflow/react';
+import { Position, ReactFlowProvider } from '@xyflow/react';
 import { Button, Flex, theme } from 'antd';
-import styles from './explorer.module.scss';
-import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
-import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
-import 'reactflow/dist/base.css';
-import { Link } from 'react-router-dom';
-import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { greenThemeConfig } from '@/theme/antd-theme';
-import { NodeContract, EdgeContract } from '@/types/graph/graph-contract.ts';
-import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
-import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabs.tsx';
+import { Link } from 'react-router';
+
+import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
+import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
+import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
+import { greenThemeConfig } from '@/theme/antd-theme';
+import type { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts';
+import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
+
+import styles from './explorer.module.scss';
 
 const { getDesignToken } = theme;
 
@@ -106,6 +110,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
             default:
                 break;
         }
+
         return {
             id: node.id,
             position: defaultNodePosition,
@@ -122,7 +127,8 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
         };
     });
 }
-export function Explorer({ id, type }: Props) {
+
+function InternalExplorer({ id, type }: Props) {
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
@@ -145,17 +151,17 @@ export function Explorer({ id, type }: Props) {
     }
 
     const { data: graph, isFetching } = graphDataQuery;
-    const generateGraph = () => {
+    const generateGraph = useCallback(() => {
         if (graph) {
             const nodes = parseNodes(graph.nodes, defaultNodePosition);
             const edges = parseEdges(graph.edges);
             setNodesAndEdges(nodes, edges);
         }
-    };
+    }, [defaultNodePosition, graph, setNodesAndEdges]);
 
     useEffect(() => {
         generateGraph();
-    }, [graph]);
+    }, [generateGraph]);
 
     if (isFetching) {
         return <LoadingSpinner />;
@@ -171,10 +177,18 @@ export function Explorer({ id, type }: Props) {
                 onEdgesChange={onEdgesChange}
                 editorProps={{
                     draggable: false,
-                    edgesUpdatable: false,
+                    edgesReconnectable: false,
                     nodesConnectable: false,
                 }}
             />
         </Flex>
+    );
+}
+
+export function Explorer(props: Props) {
+    return (
+        <ReactFlowProvider>
+            <InternalExplorer {...props} />
+        </ReactFlowProvider>
     );
 }

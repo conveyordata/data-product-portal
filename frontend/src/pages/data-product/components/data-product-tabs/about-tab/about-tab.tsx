@@ -1,14 +1,17 @@
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
+import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetDataProductByIdQuery,
     useUpdateDataProductAboutMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { getCanUserAccessDataProductData } from '@/utils/data-product-user-role.helper.ts';
 
 type Props = {
@@ -20,7 +23,15 @@ export function AboutTab({ dataProductId }: Props) {
     const { data: dataProduct, isFetching } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataProductAbout, { isLoading }] = useUpdateDataProductAboutMutation();
+    const { data: edit_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
+        },
+        { skip: !dataProductId },
+    );
 
+    const canEditNew = edit_access?.allowed || false;
     if (isFetching) {
         return <LoadingSpinner />;
     }
@@ -33,7 +44,7 @@ export function AboutTab({ dataProductId }: Props) {
         getCanUserAccessDataProductData(currentUser?.id, dataProduct?.memberships) || Boolean(currentUser?.is_admin);
 
     async function handleSubmit(content: string) {
-        if (canEdit) {
+        if (canEdit || canEditNew) {
             try {
                 await updateDataProductAbout({ dataProductId: dataProductId, about: content }).unwrap();
                 dispatchMessage({ content: t('About section successfully updated'), type: 'success' });

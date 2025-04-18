@@ -1,8 +1,10 @@
-import styles from './history-tab.module.scss';
 import { Flex, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+
+import styles from './history-tab.module.scss';
 
 type Props = {
     dataProductId: string;

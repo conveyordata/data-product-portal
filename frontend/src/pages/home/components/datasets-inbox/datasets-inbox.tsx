@@ -1,15 +1,17 @@
-import { useTranslation } from 'react-i18next';
-import styles from './datasets-inbox.module.scss';
+import { PartitionOutlined, TeamOutlined } from '@ant-design/icons';
 import { Button, Tabs, Typography } from 'antd';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
-import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
+
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { PartitionOutlined, TeamOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { DatasetList } from '@/pages/home/components/datasets-inbox/datasets-list.tsx';
+import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
+import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 import { getItemFromLocalStorage, LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
-import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
-import { DatasetList } from '@/pages/home/components/datasets-inbox/datasets-list.tsx';
+
+import styles from './datasets-inbox.module.scss';
 
 type Props = {
     userId: string;
@@ -56,7 +58,7 @@ export function DatasetsInbox({ userId }: Props) {
                 />
             ),
         }),
-        [datasets, lastVisitedDatasets],
+        [filteredLastVisitedDatasets, isFetching, lastVisitedDatasets, t],
     );
 
     const owned: DatasetInboxTab = useMemo(
@@ -72,7 +74,7 @@ export function DatasetsInbox({ userId }: Props) {
             ),
             icon: <TeamOutlined />,
         }),
-        [sortedOwnedDatasets, userDatasets],
+        [isFetchingOwnedDatasets, lastVisitedDatasets, sortedOwnedDatasets, t],
     );
 
     const items: DatasetInboxTab[] = useMemo(() => [lastViewed, owned], [lastViewed, owned]);

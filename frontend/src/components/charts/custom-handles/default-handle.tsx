@@ -1,4 +1,5 @@
-import { Handle, HandleProps } from 'reactflow';
+import { Handle, type HandleProps } from '@xyflow/react';
+
 import styles from './default-handle.module.scss';
 
 export const DefaultHandle = ({ id, position, type, ...props }: HandleProps) => {

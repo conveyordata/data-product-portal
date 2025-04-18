@@ -1,5 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
+import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
+import { DataOutputsGetContract } from '@/types/data-output';
 import {
     DataProductContract,
     DataProductCreate,
@@ -18,9 +20,12 @@ import {
     DataProductUpdateRequest,
     DataProductUpdateResponse,
 } from '@/types/data-product';
-import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DataOutputsGetContract } from '@/types/data-output';
 import { GraphContract } from '@/types/graph/graph-contract';
+import {
+    NamespaceLengthLimitsResponse,
+    NamespaceSuggestionResponse,
+    NamespaceValidationResponse,
+} from '@/types/namespace/namespace';
 
 export const dataProductTags: string[] = [
     TagTypes.DataProduct,
@@ -196,6 +201,36 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             },
             invalidatesTags: (_, __, { dataProductId }) => [{ type: TagTypes.DataProduct as const, id: dataProductId }],
         }),
+        validateDataProductNamespace: builder.query<NamespaceValidationResponse, string>({
+            query: (namespace) => ({
+                url: ApiUrl.DataProductNamespaceValidation,
+                method: 'GET',
+                params: { namespace },
+            }),
+        }),
+        getDataProductNamespaceSuggestion: builder.query<NamespaceSuggestionResponse, string>({
+            query: (name) => ({
+                url: ApiUrl.DataProductNamespaceSuggestion,
+                method: 'GET',
+                params: { name },
+            }),
+        }),
+        getDataProductNamespaceLengthLimits: builder.query<NamespaceLengthLimitsResponse, void>({
+            query: () => ({
+                url: ApiUrl.DataProductNamespaceLimits,
+                method: 'GET',
+            }),
+        }),
+        validateDataOutputNamespace: builder.query<
+            NamespaceValidationResponse,
+            { dataProductId: string; namespace: string }
+        >({
+            query: ({ dataProductId, namespace }) => ({
+                url: buildUrl(ApiUrl.DataProductDataOutputNamespaceValidation, { dataProductId }),
+                method: 'GET',
+                params: { namespace },
+            }),
+        }),
     }),
     overrideExisting: false,
 });
@@ -215,4 +250,8 @@ export const {
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
+    useLazyGetDataProductNamespaceSuggestionQuery,
+    useLazyValidateDataProductNamespaceQuery,
+    useGetDataProductNamespaceLengthLimitsQuery,
+    useLazyValidateDataOutputNamespaceQuery,
 } = dataProductsApiSlice;

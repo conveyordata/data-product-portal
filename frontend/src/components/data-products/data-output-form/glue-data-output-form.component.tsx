@@ -1,32 +1,35 @@
-import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
+import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DataOutputConfiguration, DataOutputCreateFormSchema, GlueDataOutput } from '@/types/data-output';
-import { useEffect } from 'react';
+
+import type { DataOutputConfiguration, DataOutputCreateFormSchema, GlueDataOutput } from '@/types/data-output';
 
 type Props = {
     sourceAligned: boolean;
     identifiers: string[] | undefined;
-    external_id: string;
+    namespace: string;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
-export function GlueDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
+export function GlueDataOutputForm({ form, identifiers, namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
     const entireSchema = Form.useWatch('entire_schema', form);
-    let databaseOptions = (identifiers ?? []).map((database) => ({ label: database, value: database }));
     const databaseValue = Form.useWatch('database', form);
     const suffixValue = Form.useWatch('database_suffix', form);
     const tableValue = Form.useWatch('table', form);
+
+    const databaseOptions = useRef((identifiers ?? []).map((database) => ({ label: database, value: database })));
+
     useEffect(() => {
         let databaseOptionsList = identifiers;
         if (!sourceAligned) {
-            databaseOptionsList = [external_id];
-            form.setFieldsValue({ database: external_id });
+            databaseOptionsList = [namespace];
+            form.setFieldsValue({ database: namespace });
         } else {
             form.setFieldsValue({ database: undefined });
         }
-        databaseOptions = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
-    }, [sourceAligned]);
+        databaseOptions.current = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
+    }, [namespace, form, identifiers, sourceAligned]);
 
     useEffect(() => {
         let result = databaseValue;
@@ -44,7 +47,7 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
         }
 
         form.setFieldsValue({ result: result });
-    }, [databaseValue, sourceAligned, suffixValue, tableValue, entireSchema]);
+    }, [databaseValue, sourceAligned, suffixValue, tableValue, entireSchema, form]);
 
     return (
         <div>
@@ -70,7 +73,7 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
                     }}
                     disabled={!sourceAligned}
                     maxCount={1}
-                    options={databaseOptions}
+                    options={databaseOptions.current}
                 />
             </Form.Item>
             <Form.Item<GlueDataOutput & { temp_suffix: string }>

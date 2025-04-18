@@ -1,14 +1,16 @@
 import { Badge, Button, Flex, Popconfirm, TableColumnsType } from 'antd';
-import styles from './data-output-table.module.scss';
 import { TFunction } from 'i18next';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
-import { DataOutputLink } from '@/types/dataset';
-import { getDataOutputIcon } from '@/utils/data-output-type.helper';
-import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { DataOutputDatasetLinkRequest, DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
+import { DataOutputLink } from '@/types/dataset';
+import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
+import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
+
+import styles from './data-output-table.module.scss';
 
 type Props = {
     t: TFunction;
@@ -18,6 +20,8 @@ type Props = {
     isCurrentDatasetOwner: boolean;
     isLoading?: boolean;
     isDisabled?: boolean;
+    canAcceptNew?: boolean;
+    canRevokeNew?: boolean;
 };
 
 export const getDatasetDataProductsColumns = ({
@@ -28,6 +32,8 @@ export const getDatasetDataProductsColumns = ({
     isDisabled,
     isLoading,
     isCurrentDatasetOwner,
+    canAcceptNew,
+    canRevokeNew,
 }: Props): TableColumnsType<DataOutputLink> => {
     return [
         {
@@ -53,7 +59,7 @@ export const getDatasetDataProductsColumns = ({
                         subtitle={
                             <Badge
                                 status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(status)}
+                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -80,7 +86,7 @@ export const getDatasetDataProductsColumns = ({
                         subtitle={
                             <Badge
                                 status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(status)}
+                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -109,7 +115,11 @@ export const getDatasetDataProductsColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                <Button
+                                    loading={isLoading}
+                                    disabled={isLoading || (!canAcceptNew && isDisabled)}
+                                    type={'link'}
+                                >
                                     {t('Accept')}
                                 </Button>
                             </Popconfirm>
@@ -125,7 +135,11 @@ export const getDatasetDataProductsColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                <Button
+                                    loading={isLoading}
+                                    disabled={isLoading || (!canAcceptNew && isDisabled)}
+                                    type={'link'}
+                                >
                                     {t('Reject')}
                                 </Button>
                             </Popconfirm>
@@ -146,7 +160,11 @@ export const getDatasetDataProductsColumns = ({
                             okButtonProps={{ loading: isLoading }}
                             autoAdjustOverflow={true}
                         >
-                            <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                            <Button
+                                loading={isLoading}
+                                disabled={isLoading || (!canRevokeNew && isDisabled)}
+                                type={'link'}
+                            >
                                 {t('Revoke Access')}
                             </Button>
                         </Popconfirm>

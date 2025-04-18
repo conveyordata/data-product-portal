@@ -1,22 +1,24 @@
 import { Button, Form, List, Typography } from 'antd';
+import { TFunction } from 'i18next';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
+import { DatasetTitle } from '@/components/datasets/dataset-title/dataset-title';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import {
     useGetDataProductByIdQuery,
     useRequestDatasetAccessForDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DatasetsGetContract } from '@/types/dataset';
-import { useCallback, useMemo } from 'react';
-import { SearchForm } from '@/types/shared';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { DatasetLink } from '@/types/data-product';
-import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { TFunction } from 'i18next';
+import { DatasetAccess, DatasetsGetContract } from '@/types/dataset';
+import { SearchForm } from '@/types/shared';
+
 import styles from './add-dataset-popup.module.scss';
-import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title.tsx';
 
 type Props = {
     onClose: () => void;
@@ -42,8 +44,8 @@ const getIsRestrictedDataset = (dataset: DatasetsGetContract[0]) => {
     return dataset?.access_type === 'restricted';
 };
 
-const getActionButtonText = (isRestricted: boolean, t: TFunction) => {
-    return isRestricted ? t('Request Access') : t('Add Dataset');
+const getActionButtonText = (accessType: DatasetAccess, t: TFunction) => {
+    return accessType === DatasetAccess.Public ? t('Add Dataset') : t('Request Access');
 };
 
 export function AddDatasetPopup({ onClose, isOpen, dataProductId }: Props) {
@@ -94,21 +96,15 @@ export function AddDatasetPopup({ onClose, isOpen, dataProductId }: Props) {
                 renderItem={(item) => {
                     const icon = <CustomSvgIconLoader iconComponent={datasetBorderIcon} />;
                     const isRestrictedDataset = getIsRestrictedDataset(item);
-                    const actionButtonText = getActionButtonText(isRestrictedDataset, t);
+                    const actionButtonText = getActionButtonText(item.access_type, t);
                     return (
                         <List.Item key={item.id}>
                             <TableCellAvatar
                                 icon={icon}
-                                title={
-                                    isRestrictedDataset ? (
-                                        <RestrictedDatasetTitle name={item.name} hasPopover />
-                                    ) : (
-                                        item.name
-                                    )
-                                }
+                                title={<DatasetTitle name={item.name} accessType={item.access_type} hasPopover />}
                                 subtitle={
                                     <Typography.Link className={styles.noCursorPointer}>
-                                        {item.business_area.name}
+                                        {item.domain.name}
                                     </Typography.Link>
                                 }
                             />

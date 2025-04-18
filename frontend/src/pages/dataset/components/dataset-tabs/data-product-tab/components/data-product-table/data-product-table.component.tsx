@@ -1,16 +1,20 @@
 import { Flex, Table, TableColumnsType } from 'antd';
-import { useMemo } from 'react';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import styles from './data-product-table.module.scss';
-import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';
-import { DataProductLink } from '@/types/dataset';
+
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
     useApproveDataProductLinkMutation,
     useRejectDataProductLinkMutation,
     useRemoveDataProductDatasetLinkMutation,
 } from '@/store/features/data-products-datasets/data-products-datasets-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
+import { DataProductLink } from '@/types/dataset';
+
+import styles from './data-product-table.module.scss';
+import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';
 
 type Props = {
     isCurrentDatasetOwner: boolean;
@@ -27,50 +31,76 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
     const [removeDatasetFromDataProduct, { isLoading: isRemovingDatasetFromDataProduct }] =
         useRemoveDataProductDatasetLinkMutation();
 
-    const handleRemoveDatasetFromDataProduct = async (dataProductId: string, name: string, datasetLinkId: string) => {
-        try {
-            await removeDatasetFromDataProduct({ datasetId, dataProductId, datasetLinkId }).unwrap();
-            dispatchMessage({
-                content: t('Dataset {{name}} has been removed from data product', { name }),
-                type: 'success',
-            });
-        } catch (_error) {
-            dispatchMessage({
-                content: t('Failed to remove dataset from data product'),
-                type: 'error',
-            });
-        }
-    };
+    const { data: access } = useCheckAccessQuery(
+        {
+            resource: datasetId,
+            action: AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+        },
+        { skip: !datasetId },
+    );
+    const canApproveNew = access?.allowed || false;
+    const { data: revoke_access } = useCheckAccessQuery(
+        {
+            resource: datasetId,
+            action: AuthorizationAction.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+        },
+        { skip: !datasetId },
+    );
+    const canRevokeNew = revoke_access?.allowed || false;
 
-    const handleAcceptDataProductDatasetLink = async (request: DataProductDatasetLinkRequest) => {
-        try {
-            await approveDataProductLink(request).unwrap();
-            dispatchMessage({
-                content: t('Dataset request has been successfully approved'),
-                type: 'success',
-            });
-        } catch (_error) {
-            dispatchMessage({
-                content: t('Failed to approve data product dataset link'),
-                type: 'error',
-            });
-        }
-    };
+    const handleRemoveDatasetFromDataProduct = useCallback(
+        async (dataProductId: string, name: string, datasetLinkId: string) => {
+            try {
+                await removeDatasetFromDataProduct({ datasetId, dataProductId, datasetLinkId }).unwrap();
+                dispatchMessage({
+                    content: t('Dataset {{name}} has been removed from data product', { name }),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to remove dataset from data product'),
+                    type: 'error',
+                });
+            }
+        },
+        [datasetId, removeDatasetFromDataProduct, t],
+    );
 
-    const handleRejectDataProductDatasetLink = async (request: DataProductDatasetLinkRequest) => {
-        try {
-            await rejectDataProductLink(request).unwrap();
-            dispatchMessage({
-                content: t('Dataset access request has been successfully rejected'),
-                type: 'success',
-            });
-        } catch (_error) {
-            dispatchMessage({
-                content: t('Failed to reject data product dataset link'),
-                type: 'error',
-            });
-        }
-    };
+    const handleAcceptDataProductDatasetLink = useCallback(
+        async (request: DataProductDatasetLinkRequest) => {
+            try {
+                await approveDataProductLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset request has been successfully approved'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to approve data product dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [approveDataProductLink, t],
+    );
+
+    const handleRejectDataProductDatasetLink = useCallback(
+        async (request: DataProductDatasetLinkRequest) => {
+            try {
+                await rejectDataProductLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset access request has been successfully rejected'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to reject data product dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [rejectDataProductLink, t],
+    );
 
     const columns: TableColumnsType<DataProductLink> = useMemo(() => {
         return getDatasetDataProductsColumns({
@@ -80,10 +110,24 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
             isDisabled: !isCurrentDatasetOwner,
             isLoading: isRemovingDatasetFromDataProduct || isRejectingLink || isApprovingLink,
             isCurrentDatasetOwner,
+            canApproveNew,
+            canRevokeNew,
             onRejectDataProductDatasetLink: handleRejectDataProductDatasetLink,
             onAcceptDataProductDatasetLink: handleAcceptDataProductDatasetLink,
         });
-    }, [datasetId, t, dataProducts, isCurrentDatasetOwner]);
+    }, [
+        handleRemoveDatasetFromDataProduct,
+        t,
+        dataProducts,
+        isCurrentDatasetOwner,
+        isRemovingDatasetFromDataProduct,
+        isRejectingLink,
+        isApprovingLink,
+        canApproveNew,
+        canRevokeNew,
+        handleRejectDataProductDatasetLink,
+        handleAcceptDataProductDatasetLink,
+    ]);
 
     return (
         <Flex className={styles.datasetListContainer}>

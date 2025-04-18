@@ -1,13 +1,17 @@
-import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
-import { CustomDropdownItemProps } from '@/types/shared';
+import { Flex } from 'antd';
+import { TFunction } from 'i18next';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import collibraLogo from '@/assets/icons/collibra-logo.svg?react';
 import datahubLogo from '@/assets/icons/datahub-logo.svg?react';
-import { useTranslation } from 'react-i18next';
-import { useMemo } from 'react';
-import { TFunction } from 'i18next';
+import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
+import { DataPlatform, DataPlatforms } from '@/types/data-platform';
+import { CustomDropdownItemProps } from '@/types/shared';
+
 import styles from './dataset-actions.module.scss';
-import { Flex } from 'antd';
-import { DataPlatforms, DataPlatform } from '@/types/data-platform';
+// import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+// import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 
 type Props = {
     datasetId: string;
@@ -31,6 +35,17 @@ export function DatasetActions({ datasetId, isCurrentDatasetOwner }: Props) {
         // Todo - implement endpoints to allow for dataset data access
         // All tiles are currently disabled
     }
+
+    // const { data: access } = useCheckAccessQuery(
+    //     {
+    //         object_id: datasetId,
+    //         action: AuthorizationAction.DATASET_READ_INTEGRATIONS,
+    //     },
+    //     {
+    //         skip: !datasetId,
+    //     },
+    // );
+    // const canAccessNew = access?.access || false;
 
     return (
         <Flex vertical className={styles.actionsContainer}>

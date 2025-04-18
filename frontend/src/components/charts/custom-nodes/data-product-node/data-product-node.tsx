@@ -1,10 +1,11 @@
-import { NodeProps, Position } from 'reactflow';
-import { DataProductIcon } from '@/types/data-product-type';
-import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
-import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
-import { ReactNode } from 'react';
+import type { Node, NodeProps, Position } from '@xyflow/react';
+import type { ReactNode } from 'react';
 
-export type DataProductNodeProps = {
+import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
+import type { DataProductIcon } from '@/types/data-product-type';
+import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
+
+export type DataProductNodeProps = Node<{
     id: string;
     name: string;
     icon_key: DataProductIcon;
@@ -13,7 +14,7 @@ export type DataProductNodeProps = {
     targetHandlePosition?: Position;
     sourceHandlePosition?: Position;
     isActive?: boolean;
-};
+}>;
 
 export function DataProductNode({
     data: { name, id, icon_key, isMainNode, nodeToolbarActions, targetHandlePosition, sourceHandlePosition, isActive },

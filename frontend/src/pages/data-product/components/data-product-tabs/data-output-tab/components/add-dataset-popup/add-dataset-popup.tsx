@@ -1,21 +1,24 @@
 import { Button, Form, List, Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DatasetsGetContract } from '@/types/dataset';
+import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
-import { SearchForm } from '@/types/shared';
-import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
-import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+import { useTranslation } from 'react-i18next';
+
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import { DataProductDatasetLinkPopup } from '@/components/data-products/data-product-dataset-link-popup/data-product-dataset-link-popup.component.tsx';
+import { DatasetTitle } from '@/components/datasets/dataset-title/dataset-title';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { TFunction } from 'i18next';
-import styles from './add-dataset-popup.module.scss';
-import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
+import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import {
     useGetDataOutputByIdQuery,
     useRequestDatasetAccessForDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
+import { DatasetsGetContract } from '@/types/dataset';
+import { SearchForm } from '@/types/shared';
+
+import styles from './add-dataset-popup.module.scss';
 
 type Props = {
     onClose: () => void;
@@ -69,8 +72,9 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                 dispatchMessage({ content: t('Failed to link dataset to data output'), type: 'error' });
             }
         },
-        [dataOutputId, t, requestDatasetAccessForDataOutput],
+        [requestDatasetAccessForDataOutput, dataOutputId, t, onClose],
     );
+
     return (
         <DataProductDatasetLinkPopup
             onClose={onClose}
@@ -92,10 +96,10 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                         <List.Item key={item.id}>
                             <TableCellAvatar
                                 icon={icon}
-                                title={item.name}
+                                title={<DatasetTitle name={item.name} accessType={item.access_type} hasPopover />}
                                 subtitle={
                                     <Typography.Link className={styles.noCursorPointer}>
-                                        {item.business_area.name}
+                                        {item.domain.name}
                                     </Typography.Link>
                                 }
                             />

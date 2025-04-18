@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 from app.data_products.schema_base_get import BaseDataProductGet
@@ -34,11 +35,11 @@ class DataProductDatasetAssociation(BaseDataProductDatasetAssociation):
     data_product: BaseDataProductGet
     status: DataProductDatasetLinkStatus
     requested_by: User
-    denied_by: User | None
-    approved_by: User | None
+    denied_by: Optional[User]
+    approved_by: Optional[User]
     requested_on: datetime
-    denied_on: datetime | None
-    approved_on: datetime | None
+    denied_on: Optional[datetime]
+    approved_on: Optional[datetime]
 
 
 class DatasetDataProductLink(DataProductDatasetAssociation):

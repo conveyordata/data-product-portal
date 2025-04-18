@@ -1,25 +1,28 @@
-import { Button, Form, FormProps, Input, Popconfirm, Select, Space } from 'antd';
-import { useTranslation } from 'react-i18next';
-import styles from './data-output-form.module.scss';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
+
+import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import {
     useGetDataOutputByIdQuery,
+    useGetDataOutputNamespaceLengthLimitsQuery,
     useRemoveDataOutputMutation,
     useUpdateDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
-import TextArea from 'antd/es/input/TextArea';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
-import { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
+import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
+import { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
+import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
+
+import styles from './data-output-form.module.scss';
 
 type Props = {
     mode: 'edit';
@@ -31,9 +34,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const navigate = useNavigate();
     const { data: currentDataOutput, isFetching: isFetchingInitialValues } = useGetDataOutputByIdQuery(
         dataOutputId || '',
-        {
-            skip: !dataOutputId,
-        },
+        { skip: !dataOutputId },
     );
     const { data: dataProduct } = useGetDataProductByIdQuery(currentDataOutput?.owner.id ?? '', {
         skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
@@ -41,7 +42,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
-    const [archiveDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
+    const [deleteDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
     const canEditForm = Boolean(
         dataProduct &&
@@ -51,16 +52,17 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const canFillInForm = canEditForm;
     const isLoading = isFetchingInitialValues || isFetchingTags;
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+    const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
 
-    const handleArchiveDataProduct = async () => {
+    const handleDeleteDataProduct = async () => {
         if (canEditForm && currentDataOutput) {
             try {
-                await archiveDataOutput(currentDataOutput?.id).unwrap();
-                dispatchMessage({ content: t('Data output archived successfully'), type: 'success' });
+                await deleteDataOutput(currentDataOutput?.id).unwrap();
+                dispatchMessage({ content: t('Data output deleted successfully'), type: 'success' });
                 navigate(createDataProductIdPath(dataProduct!.id));
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to archive data output, please try again later'),
+                    content: t('Failed to delete data output, please try again later'),
                     type: 'error',
                 });
             }
@@ -110,13 +112,13 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     useEffect(() => {
         if (currentDataOutput) {
             form.setFieldsValue({
-                owner_id: currentDataOutput.owner_id,
+                namespace: currentDataOutput.namespace,
                 name: currentDataOutput.name,
                 description: currentDataOutput.description,
                 tag_ids: currentDataOutput.tags.map((tag) => tag.id),
             });
         }
-    }, [currentDataOutput, mode]);
+    }, [currentDataOutput, form, mode]);
 
     return (
         <Form
@@ -144,6 +146,13 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             >
                 <Input />
             </Form.Item>
+            <NamespaceFormItem
+                form={form}
+                tooltip={t('The namespace of the data output')}
+                max_length={namespaceLengthLimits?.max_length}
+                editToggleDisabled
+                canEditNamespace={false}
+            />
             <Form.Item<DataOutputCreateFormSchema>
                 name={'description'}
                 label={t('Description')}
@@ -159,7 +168,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     },
                 ]}
             >
-                <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <Input.TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
                 <Select
@@ -192,8 +201,8 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     </Button>
                     {canEditForm && (
                         <Popconfirm
-                            title={t('Are you sure you want to archive this data output?')}
-                            onConfirm={handleArchiveDataProduct}
+                            title={t('Are you sure you want to delete this data output?')}
+                            onConfirm={handleDeleteDataProduct}
                             okText={t('Yes')}
                             cancelText={t('No')}
                         >
@@ -204,7 +213,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                                 loading={isArchiving}
                                 disabled={isLoading}
                             >
-                                {t('Archive')}
+                                {t('Delete')}
                             </Button>
                         </Popconfirm>
                     )}

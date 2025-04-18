@@ -1,23 +1,27 @@
 import type { RadioChangeEvent, TableProps } from 'antd';
 import { Button, Flex, Form, Input, Space, Table, Typography } from 'antd';
-import styles from './data-products-table.module.scss';
-import { Link, useNavigate } from 'react-router-dom';
-import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
+import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router';
+
+import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter';
+import { useQuickFilter } from '@/hooks/use-quick-filter';
+import { useTablePagination } from '@/hooks/use-table-pagination';
+import { getDataProductTableColumns } from '@/pages/data-products/components/data-products-table/data-products-table-columns.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetAllDataProductsQuery,
     useGetUserDataProductsQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
-import { useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { getDataProductTableColumns } from '@/pages/data-products/components/data-products-table/data-products-table-columns.tsx';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataProductsGetContract } from '@/types/data-product';
+import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import { SearchForm } from '@/types/shared';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter.tsx';
-import { useQuickFilter } from '@/hooks/use-quick-filter.tsx';
-import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
-import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
+import { QuickFilterParticipation } from '@/types/shared/table-filters';
+
+import styles from './data-products-table.module.scss';
 
 function filterDataProducts(dataProducts: DataProductsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -36,6 +40,11 @@ export function DataProductsTable() {
         currentUser?.id || '',
         { skip: !currentUser },
     );
+    const { data: access } = useCheckAccessQuery(
+        { action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT },
+        { skip: !currentUser },
+    );
+    const canCreateDataProduct = access?.allowed || false;
     const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -54,9 +63,9 @@ export function DataProductsTable() {
         handlePaginationChange(pagination);
     };
 
-    function navigateToDataProduct(dataProductId: string) {
+    const navigateToDataProduct = (dataProductId: string) => {
         navigate(createDataProductIdPath(dataProductId));
-    }
+    };
 
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
         onQuickFilterChange(value);
@@ -71,7 +80,14 @@ export function DataProductsTable() {
                 handleTotalChange(userDataProducts.length);
             }
         }
-    }, [quickFilter, isFetching, isFetchingUserDataProducts]);
+    }, [
+        quickFilter,
+        isFetching,
+        isFetchingUserDataProducts,
+        handleTotalChange,
+        dataProducts.length,
+        userDataProducts.length,
+    ]);
 
     return (
         <Flex vertical className={styles.tableContainer}>
@@ -84,7 +100,11 @@ export function DataProductsTable() {
                 </Form>
                 <Space>
                     <Link to={ApplicationPaths.DataProductNew}>
-                        <Button className={styles.formButton} type={'primary'}>
+                        <Button
+                            className={styles.formButton}
+                            type={'primary'}
+                            disabled={!(canCreateDataProduct || true)}
+                        >
                             {t('Create Data Product')}
                         </Button>
                     </Link>
@@ -97,11 +117,9 @@ export function DataProductsTable() {
                     quickFilterOptions={quickFilterOptions}
                 />
                 <Table<DataProductsGetContract[0]>
-                    onRow={(record) => {
-                        return {
-                            onClick: () => navigateToDataProduct(record.id),
-                        };
-                    }}
+                    onRow={(record) => ({
+                        onClick: () => navigateToDataProduct(record.id),
+                    })}
                     className={styles.table}
                     columns={columns}
                     dataSource={filteredDataProducts}

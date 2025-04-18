@@ -3,6 +3,13 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.namespace.validation import (
+    DataProductSettingNamespaceValidator,
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidation,
+)
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.enums import DataProductSettingScope
 from app.data_product_settings.model import (
@@ -16,14 +23,14 @@ from app.data_product_settings.schema import (
     DataProductSettingUpdate,
     DataProductSettingValueCreate,
 )
-from app.dependencies import (
-    OnlyWithProductAccessDataProductID,
-    only_dataset_owners,
-)
+from app.dependencies import OnlyWithProductAccessDataProductID, only_dataset_owners
 from app.users.schema import User
 
 
 class DataProductSettingService:
+    def __init__(self):
+        self.namespace_validator = DataProductSettingNamespaceValidator()
+
     def get_data_product_settings(self, db: Session) -> list[DataProductSetting]:
         return (
             db.query(DataProductSettingModel)
@@ -75,6 +82,7 @@ class DataProductSettingService:
                 )
             db.add(DataProductSettingValueModel(**new_setting.parse_pydantic_schema()))
         db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def create_data_product_setting(
         self, setting: DataProductSetting, db: Session
@@ -96,3 +104,16 @@ class DataProductSettingService:
     def delete_data_product_setting(self, setting_id: UUID, db: Session):
         db.query(DataProductSettingModel).filter_by(id=setting_id).delete()
         db.commit()
+
+    def validate_data_product_settings_namespace(
+        self, namespace: str, scope: DataProductSettingScope, db: Session
+    ) -> NamespaceValidation:
+        return self.namespace_validator.validate_namespace(namespace, db, scope)
+
+    def data_product_settings_namespace_suggestion(
+        self, name: str
+    ) -> NamespaceSuggestion:
+        return self.namespace_validator.namespace_suggestion(name)
+
+    def data_product_settings_namespace_length_limits(self) -> NamespaceLengthLimits:
+        return self.namespace_validator.namespace_length_limits()

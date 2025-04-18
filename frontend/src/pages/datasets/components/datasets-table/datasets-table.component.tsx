@@ -1,19 +1,23 @@
-import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import styles from './datasets-table.module.scss';
 import { Button, Flex, Form, Input, RadioChangeEvent, Space, Table, TableProps, Typography } from 'antd';
-import { Link, useNavigate } from 'react-router-dom';
-import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getDatasetTableColumns } from '@/pages/datasets/components/datasets-table/datasets-table-columns.tsx';
-import { DatasetsGetContract } from '@/types/dataset';
-import { SearchForm } from '@/types/shared';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useSelector } from 'react-redux';
-import { useQuickFilter } from '@/hooks/use-quick-filter.tsx';
-import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
+import { Link, useNavigate } from 'react-router';
+
 import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter.tsx';
+import { useQuickFilter } from '@/hooks/use-quick-filter.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
+import { getDatasetTableColumns } from '@/pages/datasets/components/datasets-table/datasets-table-columns.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { DatasetsGetContract } from '@/types/dataset';
+import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
+import { SearchForm } from '@/types/shared';
+import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
+
+import styles from './datasets-table.module.scss';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -32,6 +36,11 @@ export function DatasetsTable() {
         currentUser?.id || '',
         { skip: !currentUser },
     );
+    const { data: access } = useCheckAccessQuery(
+        { action: AuthorizationAction.GLOBAL__CREATE_DATASET },
+        { skip: !currentUser },
+    );
+    const canCreateDataset = access?.allowed || false;
     const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -64,7 +73,7 @@ export function DatasetsTable() {
                 handleTotalChange(userDatasets.length);
             }
         }
-    }, [quickFilter, isFetching, isFetchingUserDatasets]);
+    }, [quickFilter, isFetching, isFetchingUserDatasets, handleTotalChange, datasets.length, userDatasets.length]);
 
     return (
         <Flex vertical className={styles.tableContainer}>
@@ -77,7 +86,7 @@ export function DatasetsTable() {
                 </Form>
                 <Space>
                     <Link to={ApplicationPaths.DatasetNew}>
-                        <Button className={styles.formButton} type={'primary'}>
+                        <Button className={styles.formButton} type={'primary'} disabled={!(canCreateDataset || true)}>
                             {t('Create Dataset')}
                         </Button>
                     </Link>

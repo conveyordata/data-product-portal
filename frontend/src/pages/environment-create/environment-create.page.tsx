@@ -1,7 +1,9 @@
-import styles from './environment-create.module.scss';
-import { Typography, Flex, Space } from 'antd';
+import { Flex, Space, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+
 import { EnvironmentCreateForm } from '@/components/environment/components/environment-create-form.component';
+
+import styles from './environment-create.module.scss';
 
 export function EnvironmentCreate() {
     const { t } = useTranslation();

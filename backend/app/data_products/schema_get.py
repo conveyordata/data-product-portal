@@ -3,7 +3,6 @@ from uuid import UUID
 
 from pydantic import Field, computed_field
 
-from app.business_areas.schema import BusinessArea
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_lifecycles.schema import DataProductLifeCycle
 from app.data_product_memberships.enums import DataProductMembershipStatus
@@ -13,6 +12,7 @@ from app.data_product_types.schema import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.schema import DatasetDataProductLink
+from app.domains.schema import Domain
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 
@@ -22,16 +22,17 @@ class DataProductGet(ORMModel):
     name: str
     description: str
     about: Optional[str]
-    external_id: str
+    namespace: str
     tags: list[Tag]
     status: DataProductStatus
     lifecycle: Optional[DataProductLifeCycle]
     dataset_links: list[DatasetDataProductLink]
     memberships: list[DataProductMembershipGet]
     type: DataProductType
-    business_area: BusinessArea
+    domain: Domain
     data_outputs: list[DataOutputGet]
     data_product_settings: list[DataProductSettingValue]
+    rolled_up_tags: set[Tag]
 
 
 class DataProductsGet(DataProductGet):
@@ -40,6 +41,7 @@ class DataProductsGet(DataProductGet):
     dataset_links: Annotated[list[DatasetDataProductLink], Field(exclude=True)]
     memberships: Annotated[list[DataProductMembershipGet], Field(exclude=True)]
     data_outputs: Annotated[list[DataOutputGet], Field(exclude=True)]
+    rolled_up_tags: Annotated[set[Tag], Field(exclude=True)] = set()
 
     @computed_field
     def user_count(self) -> int:

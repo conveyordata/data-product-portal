@@ -1,11 +1,12 @@
-import { Environment } from '@/types/environment';
-import { TFunction } from 'i18next';
 import { TableColumnsType } from 'antd';
-import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { TFunction } from 'i18next';
+
 import deleteIcon from '@/assets/icons/delete-button.svg?react';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import yesIcon from '@/assets/icons/yes-icon.svg?react';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { Environment } from '@/types/environment';
 
 const iconColumnWidth = 100;
 export const getEnvironmentTableColumns = ({ t }: { t: TFunction }): TableColumnsType<Environment> => [

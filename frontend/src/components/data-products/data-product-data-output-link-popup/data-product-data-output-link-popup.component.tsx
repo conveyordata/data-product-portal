@@ -1,9 +1,11 @@
-import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
-import { ReactNode, RefObject } from 'react';
-import styles from './data-product-data-output-link-popup.module.scss';
 import { Button, FormInstance, Space } from 'antd';
+import { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import { DataOutputCreateFormSchema } from '@/types/data-output';
+
+import styles from './data-product-data-output-link-popup.module.scss';
 
 type Props = {
     onClose: () => void;
@@ -15,6 +17,7 @@ type Props = {
 
 export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef, children }: Props) {
     const { t } = useTranslation();
+
     return (
         <FormModal
             title={title}

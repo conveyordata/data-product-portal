@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
     WEBHOOK_URL: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
+    WEBHOOK_SECRET: Optional[str] = None
 
     # Email templating and SMTP settings
     PORTAL_NAME: str = "Data Product Portal"
@@ -47,6 +48,14 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = "not-set"
     FROM_MAIL_ADDRESS: str = "noreply@dataproductportal.com"
     CORPORATION: str = "Dataminded"
+    EMAIL_BUTTON_COLOR: str = "#3B9672"
+
+    # Authorizer
+    AUTHORIZER_ENABLED: bool = False
+    AUTHORIZER_CACHE_SIZE: int = 128
+
+    # Namespace validation
+    NAMESPACE_MAX_LENGTH: int = 64
 
 
 class LogLevel(str, Enum):

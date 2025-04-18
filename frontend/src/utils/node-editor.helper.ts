@@ -1,5 +1,6 @@
-import { Edge, FitViewOptions, Node, Position } from 'reactflow';
 import Dagre from '@dagrejs/dagre';
+import type { Edge, FitViewOptions, Node } from '@xyflow/react';
+import { Position } from '@xyflow/react';
 
 export function getDagreDirection(direction: Position) {
     switch (direction) {

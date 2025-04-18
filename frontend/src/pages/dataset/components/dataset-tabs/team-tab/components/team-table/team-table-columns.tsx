@@ -1,5 +1,6 @@
-import { TFunction } from 'i18next';
 import { Button, Popconfirm, TableColumnsType } from 'antd';
+import { TFunction } from 'i18next';
+
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { UserContract } from '@/types/users';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -9,6 +10,7 @@ type Props = {
     onRemoveUserAccess: (userId: string) => void;
     isRemovingUser: boolean;
     canPerformTeamActions: (userId: string) => boolean;
+    canRemove?: boolean;
 };
 
 export const getDatasetTeamColumns = ({
@@ -16,6 +18,7 @@ export const getDatasetTeamColumns = ({
     onRemoveUserAccess,
     isRemovingUser,
     canPerformTeamActions,
+    canRemove,
 }: Props): TableColumnsType<UserContract> => {
     const sorter = new Sorter<UserContract>();
     return [
@@ -40,7 +43,7 @@ export const getDatasetTeamColumns = ({
             render: (_, user) => (
                 <Popconfirm
                     title={t('Remove User')}
-                    description={t('Are you sure you want to remove {{name}} from the data product?', {
+                    description={t('Are you sure you want to remove {{name}} from the dataset?', {
                         name: user.first_name,
                     })}
                     onConfirm={() => onRemoveUserAccess(user.id)}
@@ -52,7 +55,7 @@ export const getDatasetTeamColumns = ({
                 >
                     <Button
                         loading={isRemovingUser}
-                        disabled={isRemovingUser || !canPerformTeamActions(user.id)}
+                        disabled={isRemovingUser || !(canRemove || canPerformTeamActions(user.id))}
                         type={'link'}
                     >
                         {t('Remove')}

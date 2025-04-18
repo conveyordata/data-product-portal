@@ -1,5 +1,5 @@
-import { TagContract } from '@/types/tag';
 import { DataProductContract } from '@/types/data-product';
+import { TagContract } from '@/types/tag';
 
 export type DataProductsGetContract = (Omit<
     DataProductContract,
@@ -10,4 +10,5 @@ export type DataProductsGetContract = (Omit<
     dataset_count: number;
     data_outputs_count: number;
     tags: Omit<TagContract, 'id'>[];
+    rolled_up_tags: Omit<TagContract, 'id'>[];
 })[];

@@ -1,4 +1,5 @@
-from typing import Annotated
+from datetime import datetime
+from typing import Annotated, Optional
 from uuid import UUID
 
 from pydantic import Field
@@ -20,6 +21,11 @@ class DataProductMembershipGet(ORMModel):
     status: DataProductMembershipStatus
     user: User
     data_product: DataProduct
+    requested_on: datetime
+    approved_by: Optional[User]
+    approved_on: Optional[datetime]
+    denied_by: Optional[User]
+    denied_on: Optional[datetime]
 
 
 class DataProductMembershipsGet(DataProductMembershipGet):

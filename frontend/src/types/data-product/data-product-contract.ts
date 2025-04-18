@@ -1,16 +1,17 @@
-import { TagContract } from '@/types/tag';
-import { DataProductTypeContract } from '@/types/data-product-type';
-import { DataProductMembershipContract } from '@/types/data-product-membership';
-import { BusinessAreaContract } from '@/types/business-area';
-import { DatasetLink } from '@/types/data-product/dataset-link.contract.ts';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
-import { DataProductSettingCreateRequest, DataProductSettingValueContract } from '../data-product-setting';
-import { DataProductLifeCycleContract } from '../data-product-lifecycle/data-product-lifecycle.contract';
+import { DatasetLink } from '@/types/data-product/dataset-link.contract.ts';
+import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { DataProductMembershipContract } from '@/types/data-product-membership';
+import { DataProductTypeContract } from '@/types/data-product-type';
+import { DomainContract } from '@/types/domain';
+import { TagContract } from '@/types/tag';
+
+import { DataProductSettingValueContract } from '../data-product-setting';
 
 export enum DataProductStatus {
     Pending = 'pending',
     Active = 'active',
-    Archived = 'archived',
+    Deleted = 'deleted',
 }
 
 export interface DataProductContract {
@@ -26,10 +27,11 @@ export interface DataProductContract {
     dataset_links: DatasetLink[];
     tag_ids: string[];
     tags: TagContract[];
+    rolled_up_tags: TagContract[];
     memberships: DataProductMembershipContract[];
-    business_area: BusinessAreaContract;
-    business_area_id: string;
-    external_id: string;
+    domain: DomainContract;
+    domain_id: string;
+    namespace: string;
     data_outputs: DataOutputsGetContract;
     data_product_settings: DataProductSettingValueContract[];
 }

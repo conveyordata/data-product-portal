@@ -1,9 +1,11 @@
 import { Flex, Space, Typography } from 'antd';
-import styles from './data-product-edit.module.scss';
+import { useNavigate, useParams } from 'react-router';
+
 import { DataProductForm } from '@/components/data-products/data-product-form/data-product-form.component.tsx';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ApplicationPaths } from '@/types/navigation.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { ApplicationPaths } from '@/types/navigation.ts';
+
+import styles from './data-product-edit.module.scss';
 
 export function DataProductEdit() {
     const { dataProductId } = useParams();

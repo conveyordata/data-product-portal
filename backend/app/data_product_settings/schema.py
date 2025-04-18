@@ -15,10 +15,10 @@ from app.shared.schema import ORMModel
 
 
 class DataProductSettingCreate(ORMModel):
-    divider: str
+    category: str
     type: DataProductSettingType
     tooltip: str
-    external_id: str
+    namespace: str
     name: str
     default: str
     order: int = 100

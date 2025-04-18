@@ -17,6 +17,14 @@ from app.core.aws.boto3_clients import get_client
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.core.email.send_mail import send_mail
+from app.core.namespace.validation import (
+    DataOutputNamespaceValidator,
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidation,
+    NamespaceValidator,
+    NamespaceValidityType,
+)
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
@@ -43,9 +51,9 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
-from app.data_products_datasets.schema import DataProductDatasetAssociationCreate
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import ensure_dataset_exists
+from app.datasets.schema import Dataset
 from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
@@ -63,8 +71,12 @@ from app.users.schema import User
 
 
 class DataProductService:
+    def __init__(self):
+        self.namespace_validator = NamespaceValidator(DataProductModel)
+        self.data_output_namespace_validator = DataOutputNamespaceValidator()
+
     def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
-        data_product = (
+        data_product: DataProductGet = (
             db.query(DataProductModel)
             .options(
                 joinedload(DataProductModel.dataset_links),
@@ -79,10 +91,20 @@ class DataProductService:
             .first()
         )
 
+        rolled_up_tags = set()
+
         if not data_product:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
             )
+
+        for link in data_product.dataset_links:
+            rolled_up_tags.update(link.dataset.tags)
+            for output_link in link.dataset.data_output_links:
+                rolled_up_tags.update(output_link.data_output.tags)
+
+        data_product.rolled_up_tags = rolled_up_tags
+
         if not data_product.lifecycle:
             data_product.lifecycle = default_lifecycle
         return data_product
@@ -123,7 +145,11 @@ class DataProductService:
             .options(
                 joinedload(DataProductModel.memberships),
             )
-            .filter(DataProductModel.memberships.any(user_id=user_id))
+            .filter(
+                DataProductModel.memberships.any(
+                    user_id=user_id, status=DataProductMembershipStatus.APPROVED
+                )
+            )
             .order_by(asc(DataProductModel.name))
             .all()
         )
@@ -147,28 +173,6 @@ class DataProductService:
             )
         return data_product
 
-    def _update_datasets(
-        self,
-        data_product: DataProductCreate,
-        db: Session,
-        authenticated_user: User,
-        dataset_links: list[DataProductDatasetAssociationCreate] = [],
-    ) -> DataProductCreate:
-        if not dataset_links:
-            dataset_links = data_product.dataset_links
-        data_product.dataset_links = []
-        for dataset in dataset_links:
-            dataset_model = ensure_dataset_exists(dataset.dataset_id, db)
-            data_product.dataset_links.append(
-                DataProductDatasetModel(
-                    dataset_id=dataset_model.id,
-                    status=DataProductDatasetLinkStatus.PENDING_APPROVAL,
-                    requested_by_id=authenticated_user.id,
-                    requested_on=datetime.now(tz=pytz.utc),
-                )
-            )
-        return data_product
-
     def _get_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
         tags = []
         for tag_id in tag_ids:
@@ -177,24 +181,38 @@ class DataProductService:
         return tags
 
     def create_data_product(
-        self, data_product: DataProductCreate, db: Session, authenticated_user: User
-    ) -> dict[str, UUID]:
+        self,
+        data_product: DataProductCreate,
+        db: Session,
+        authenticated_user: User,
+    ) -> DataProduct:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                data_product.namespace, db
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
         data_product = self._update_users(data_product, db)
-        data_product = data_product.parse_pydantic_schema()
-        tags = self._get_tags(db, data_product.pop("tag_ids", []))
-        data_product = DataProductModel(**data_product, tags=tags)
-        for membership in data_product.memberships:
+        data_product_schema = data_product.parse_pydantic_schema()
+        tags = self._get_tags(db, data_product_schema.pop("tag_ids", []))
+        model = DataProductModel(**data_product_schema, tags=tags)
+
+        for membership in model.memberships:
             membership.status = DataProductMembershipStatus.APPROVED
             membership.requested_by_id = authenticated_user.id
             membership.requested_on = datetime.now(tz=pytz.utc)
             membership.approved_by_id = authenticated_user.id
             membership.approved_on = datetime.now(tz=pytz.utc)
 
-        db.add(data_product)
+        db.add(model)
         db.commit()
 
         RefreshInfrastructureLambda().trigger()
-        return {"id": data_product.id}
+        return model
 
     def remove_data_product(self, id: UUID, db: Session):
         data_product = db.get(
@@ -211,8 +229,8 @@ class DataProductService:
         data_product.dataset_links = []
         for output in data_product.data_outputs:
             output.dataset_links = []
-            output.delete()
-        data_product.delete()
+            db.delete(output)
+        db.delete(data_product)
         db.commit()
 
     def _create_new_membership(
@@ -254,11 +272,6 @@ class DataProductService:
         for membership in memberships_to_remove:
             data_product.memberships.remove(membership)
 
-        if not any(
-            m.role == DataProductUserRole.OWNER for m in data_product.memberships
-        ):
-            raise ValueError("At least one owner membership is required.")
-
     def update_data_product(
         self, id: UUID, data_product: DataProductUpdate, db: Session
     ):
@@ -268,22 +281,6 @@ class DataProductService:
         for k, v in update_data_product.items():
             if k == "memberships":
                 self._update_memberships(current_data_product, v, db)
-            elif k == "dataset_links":
-                current_data_product.dataset_links = []
-                for dataset in v:
-                    dataset_model = ensure_dataset_exists(dataset.dataset_id, db)
-                    dataset = DataProductDatasetModel(
-                        dataset_id=dataset_model.id,
-                        data_product_id=current_data_product.id,
-                        status=dataset.status,
-                        requested_by=dataset.requested_by,
-                        requested_on=dataset.requested_on,
-                        approved_by=dataset.approved_by,
-                        approved_on=dataset.approved_on,
-                        denied_by=dataset.denied_by,
-                        denied_on=dataset.denied_on,
-                    )
-                    current_data_product.dataset_links.append(dataset)
             elif k == "tag_ids":
                 new_tags = self._get_tags(db, v)
                 current_data_product.tags = new_tags
@@ -308,43 +305,13 @@ class DataProductService:
         current_data_product.status = data_product.status
         db.commit()
 
-    def link_dataset_to_data_product(
+    def _send_email_for_dataset_link(
         self,
-        id: UUID,
-        dataset_id: UUID,
+        dataset: Dataset,
+        data_product: DataProduct,
         authenticated_user: User,
-        db: Session,
         background_tasks: BackgroundTasks,
     ):
-        dataset = ensure_dataset_exists(dataset_id, db)
-        data_product = ensure_data_product_exists(id, db)
-
-        if dataset.id in [
-            link.dataset_id
-            for link in data_product.dataset_links
-            if link.status != DataProductDatasetLinkStatus.DENIED
-        ]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Dataset {dataset_id} already exists in data product {id}",
-            )
-        approval_status = (
-            DataProductDatasetLinkStatus.PENDING_APPROVAL
-            if dataset.access_type != DatasetAccessType.PUBLIC
-            else DataProductDatasetLinkStatus.APPROVED
-        )
-
-        dataset_link = DataProductDatasetModel(
-            dataset_id=dataset_id,
-            status=approval_status,
-            requested_by=authenticated_user,
-            requested_on=datetime.now(tz=pytz.utc),
-        )
-        data_product.dataset_links.append(dataset_link)
-        db.commit()
-        db.refresh(data_product)
-        RefreshInfrastructureLambda().trigger()
-
         url = (
             settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-product"
         )
@@ -373,6 +340,54 @@ class DataProductService:
             f"Action Required: {data_product.name} wants "
             f"to consume data from {dataset.name}",
         )
+
+    def link_dataset_to_data_product(
+        self,
+        id: UUID,
+        dataset_id: UUID,
+        authenticated_user: User,
+        db: Session,
+        background_tasks: BackgroundTasks,
+    ):
+        dataset = ensure_dataset_exists(dataset_id, db)
+        data_product = ensure_data_product_exists(id, db)
+
+        if dataset.id in [
+            link.dataset_id
+            for link in data_product.dataset_links
+            if link.status != DataProductDatasetLinkStatus.DENIED
+        ]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Dataset {dataset_id} already exists in data product {id}",
+            )
+
+        if not dataset.isVisibleToUser(authenticated_user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this private dataset",
+            )
+
+        approval_status = (
+            DataProductDatasetLinkStatus.PENDING_APPROVAL
+            if dataset.access_type != DatasetAccessType.PUBLIC
+            else DataProductDatasetLinkStatus.APPROVED
+        )
+
+        dataset_link = DataProductDatasetModel(
+            dataset_id=dataset_id,
+            status=approval_status,
+            requested_by=authenticated_user,
+            requested_on=datetime.now(tz=pytz.utc),
+        )
+        data_product.dataset_links.append(dataset_link)
+        db.commit()
+        db.refresh(data_product)
+        RefreshInfrastructureLambda().trigger()
+        if dataset.access_type != DatasetAccessType.PUBLIC:
+            self._send_email_for_dataset_link(
+                dataset, data_product, authenticated_user, background_tasks
+            )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID, db: Session):
@@ -401,8 +416,8 @@ class DataProductService:
             .get_one(EnvironmentModel.name, environment)
             .context
         )
-        external_id = db.get(DataProductModel, id).external_id
-        role_arn = environment_context.replace("{{}}", external_id)
+        namespace = db.get(DataProductModel, id).namespace
+        role_arn = environment_context.replace("{{}}", namespace)
         return role_arn
 
     def get_aws_temporary_credentials(
@@ -455,7 +470,7 @@ class DataProductService:
 
     def get_conveyor_ide_url(self, id: UUID, db: Session) -> str:
         data_product = db.get(DataProductModel, id)
-        return CONVEYOR_SERVICE.generate_ide_url(data_product.external_id)
+        return CONVEYOR_SERVICE.generate_ide_url(data_product.namespace)
 
     def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
         return db.query(DataOutputModel).filter(DataOutputModel.owner_id == id).all()
@@ -481,21 +496,19 @@ class DataProductService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for business"
-                    f"area {data_product.business_area.name}"
+                    "Workspace not configured for" f"domain {data_product.domain.name}"
                 ),
             )
 
         config = json.loads(config.config)["workspace_urls"]
-        if not str(data_product.business_area_id) in config:
+        if not str(data_product.domain_id) in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for business"
-                    f"area {data_product.business_area.name}"
+                    "Workspace not configured for" f"domain {data_product.domain.name}"
                 ),
             )
-        return config[str(data_product.business_area_id)]
+        return config[str(data_product.domain_id)]
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
         product = db.get(DataProductModel, id)
@@ -601,3 +614,21 @@ class DataProductService:
                             )
 
         return Graph(nodes=set(nodes), edges=set(edges))
+
+    def validate_data_product_namespace(
+        self, namespace: str, db: Session
+    ) -> NamespaceValidation:
+        return self.namespace_validator.validate_namespace(namespace, db)
+
+    def data_product_namespace_suggestion(self, name: str) -> NamespaceSuggestion:
+        return self.namespace_validator.namespace_suggestion(name)
+
+    def data_product_namespace_length_limits(self) -> NamespaceLengthLimits:
+        return self.namespace_validator.namespace_length_limits()
+
+    def validate_data_output_namespace(
+        self, namespace: str, data_product_id: UUID, db: Session
+    ) -> NamespaceValidation:
+        return self.data_output_namespace_validator.validate_namespace(
+            namespace, db, data_product_id
+        )

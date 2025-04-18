@@ -3,9 +3,9 @@ import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
 import {
     Environment,
-    EnvironmentCreateRequest,
     EnvironmentConfig,
     EnvironmentConfigCreateRequest,
+    EnvironmentCreateRequest,
 } from '@/types/environment';
 
 type CreateEnvironmentConfig = {

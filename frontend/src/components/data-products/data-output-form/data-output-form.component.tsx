@@ -1,29 +1,40 @@
-import { Form, FormInstance, FormProps, Input, Select, Space } from 'antd';
-import { useTranslation } from 'react-i18next';
-import styles from './data-output-form.module.scss';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
-import { RefObject, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createDataProductIdPath } from '@/types/navigation.ts';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { useCreateDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { DataPlatform, DataPlatforms } from '@/types/data-platform';
-import { getDataPlatforms } from '@/pages/data-product/components/data-product-actions/data-product-actions.component';
-import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
-import { CustomDropdownItemProps } from '@/types/shared';
-import { S3DataOutputForm } from './s3-data-output-form.component';
-import { GlueDataOutputForm } from './glue-data-output-form.component';
+import { Form, type FormInstance, type FormProps, Input, Select, Space } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { DataOutputStatus } from '@/types/data-output/data-output.contract';
+import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+import { useDebouncedCallback } from 'use-debounce';
+
+import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
+import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
+import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import {
+    useCreateDataOutputMutation,
+    useGetDataOutputNamespaceLengthLimitsQuery,
+    useLazyGetDataOutputNamespaceSuggestionQuery,
+} from '@/store/features/data-outputs/data-outputs-api-slice';
+import {
+    useGetDataProductByIdQuery,
+    useLazyValidateDataOutputNamespaceQuery,
+} from '@/store/features/data-products/data-products-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
-import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
-import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabs';
+import type { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
+import { DataOutputStatus } from '@/types/data-output/data-output.contract';
+import { DataPlatform, DataPlatforms } from '@/types/data-platform';
+import { createDataProductIdPath } from '@/types/navigation.ts';
+import type { CustomDropdownItemProps } from '@/types/shared';
+import { getDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
+
+import styles from './data-output-form.module.scss';
+import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
+import { GlueDataOutputForm } from './glue-data-output-form.component';
+import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
+import { S3DataOutputForm } from './s3-data-output-form.component';
+import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 
 type Props = {
     mode: 'create';
@@ -31,6 +42,8 @@ type Props = {
     dataProductId: string;
     modalCallbackOnSubmit: () => void;
 };
+
+const DEBOUNCE = 500;
 
 export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit }: Props) {
     const { t } = useTranslation();
@@ -48,8 +61,13 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
     const [form] = Form.useForm();
     const sourceAligned = Form.useWatch('is_source_aligned', form);
-    const dataProductNameValue = Form.useWatch('name', form);
+    const dataOutputNameValue = Form.useWatch('name', form);
     const isLoading = isCreating || isCreating || isFetchingInitialValues || isFetchingTags;
+
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataOutputNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateDataOutputNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
+    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
 
@@ -61,7 +79,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     platformConfig?.map((config) => config.platform.name).includes(platform.label)
                 );
             }),
-        [t, platformConfig, platformsLoading],
+        [t, platformConfig],
     );
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
@@ -70,21 +88,34 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             if (!platformsLoading) {
                 const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
                 switch (selectedConfiguration?.value) {
-                    case DataPlatforms.S3:
+                    case DataPlatforms.S3: {
                         config['configuration_type'] = 'S3DataOutput';
                         break;
-                    case DataPlatforms.Glue:
+                    }
+                    case DataPlatforms.Glue: {
                         config['configuration_type'] = 'GlueDataOutput';
                         break;
-                    case DataPlatforms.Databricks:
+                    }
+                    case DataPlatforms.Databricks: {
                         config['configuration_type'] = 'DatabricksDataOutput';
                         break;
-                    case DataPlatforms.Snowflake:
+                    }
+                    case DataPlatforms.Snowflake: {
                         config['configuration_type'] = 'SnowflakeDataOutput';
+                        break;
+                    }
+                    case DataPlatforms.Redshift: {
+                        config['configuration_type'] = 'RedshiftDataOutput';
+                        break;
+                    }
+                    default: {
+                        const errorMessage = 'Data output not configured correctly';
+                        dispatchMessage({ content: errorMessage, type: 'error' });
+                    }
                 }
                 const request: DataOutputCreate = {
                     name: values.name,
-                    external_id: generateExternalIdFromName(values.name ?? ''),
+                    namespace: values.namespace,
                     description: values.description,
                     configuration: config,
                     platform_id: platformConfig!.filter(
@@ -95,12 +126,11 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
                             config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase(),
                     )[0].service.id,
-                    owner_id: dataProductId,
                     sourceAligned: sourceAligned === undefined ? false : sourceAligned,
                     status: DataOutputStatus.Active,
                     tag_ids: values.tag_ids ?? [],
                 };
-                await createDataOutput(request).unwrap();
+                await createDataOutput({ id: dataProductId, dataOutput: request }).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
                 navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
@@ -163,25 +193,42 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         }
     };
 
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
+
     useEffect(() => {
-        if (mode === 'create') {
-            form.setFieldsValue({
-                external_id: generateExternalIdFromName(dataProductNameValue ?? ''),
-                owner: currentDataProduct?.name,
-            });
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFields([
+                {
+                    name: 'namespace',
+                    validating: true,
+                    errors: [],
+                },
+            ]);
+            fetchNamespaceDebounced(dataOutputNameValue ?? '');
         }
-    }, [dataProductNameValue]);
+    }, [mode, form, canEditNamespace, dataOutputNameValue, fetchNamespaceDebounced]);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.validateFields(['namespace']);
+        }
+    }, [form, mode, canEditNamespace, namespaceSuggestion]);
+
     const options = [
         { label: t('Product aligned'), value: false },
         { label: t('Source aligned'), value: true },
     ];
 
+    const validateNamespaceCallback = useCallback(
+        (namespace: string) => validateNamespace({ dataProductId, namespace }).unwrap(),
+        [validateNamespace, dataProductId],
+    );
+
     return (
         <Form
             form={form}
             ref={formRef}
-            labelCol={FORM_GRID_WRAPPER_COLS}
-            wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
             onFinish={onSubmit}
             onFinishFailed={onSubmitFailed}
@@ -204,6 +251,14 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             >
                 <Input />
             </Form.Item>
+            <NamespaceFormItem
+                form={form}
+                tooltip={t('The namespace of the data output')}
+                max_length={namespaceLengthLimits?.max_length}
+                canEditNamespace={canEditNamespace}
+                toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                validateNamespace={validateNamespaceCallback}
+            />
             <Form.Item<DataOutputCreateFormSchema>
                 name={'description'}
                 label={t('Description')}
@@ -260,17 +315,27 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             </Form.Item>
             <Form.Item hidden={selectedDataPlatform?.children?.length === 0}>
                 <Space wrap className={styles.radioButtonContainer}>
-                    {selectedDataPlatform?.children?.map((dataPlatform) => (
-                        <DataOutputPlatformTile<DataPlatform>
-                            key={dataPlatform.value}
-                            dataPlatform={dataPlatform}
-                            environments={[]}
-                            isDisabled={isLoading}
-                            isSelected={selectedConfiguration !== undefined && dataPlatform === selectedConfiguration}
-                            isLoading={isLoading}
-                            onTileClick={onConfigurationClick}
-                        />
-                    ))}
+                    {selectedDataPlatform?.children
+                        ?.filter((platform) => {
+                            return platformConfig?.some(
+                                (configObj) =>
+                                    configObj.platform.name === platform.label ||
+                                    configObj.service.name === platform.label,
+                            );
+                        })
+                        .map((dataPlatform) => (
+                            <DataOutputPlatformTile<DataPlatform>
+                                key={dataPlatform.value}
+                                dataPlatform={dataPlatform}
+                                environments={[]}
+                                isDisabled={isLoading}
+                                isSelected={
+                                    selectedConfiguration !== undefined && dataPlatform === selectedConfiguration
+                                }
+                                isLoading={isLoading}
+                                onTileClick={onConfigurationClick}
+                            />
+                        ))}
                 </Space>
             </Form.Item>
             {(() => {
@@ -281,9 +346,18 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 form={form}
                                 identifiers={identifiers}
                                 sourceAligned={sourceAligned}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 mode={mode}
                                 dataProductId={dataProductId}
+                            />
+                        );
+                    case DataPlatforms.Redshift:
+                        return (
+                            <RedshiftDataOutputForm
+                                identifiers={identifiers}
+                                form={form}
+                                namespace={currentDataProduct!.namespace}
+                                sourceAligned={sourceAligned}
                             />
                         );
                     case DataPlatforms.Glue:
@@ -291,7 +365,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <GlueDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         ); //mode={mode} dataProductId={dataProductId} />;
@@ -300,7 +374,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <DatabricksDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         ); //mode={mode} dataProductId={dataProductId} />;
@@ -309,7 +383,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <SnowflakeDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                external_id={currentDataProduct!.external_id}
+                                namespace={currentDataProduct!.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );

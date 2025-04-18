@@ -1,9 +1,10 @@
-import { isRouteErrorResponse, useNavigate, useRouteError } from 'react-router-dom';
 import { Button, Result } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { ApplicationPaths } from '@/types/navigation.ts';
-import { Logout } from '@/pages/auth/logout/logout-page.tsx';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { isRouteErrorResponse, useNavigate, useRouteError } from 'react-router';
+
+import { Logout } from '@/pages/auth/logout/logout-page.tsx';
+import { ApplicationPaths } from '@/types/navigation.ts';
 import { isDevMode } from '@/utils/env-mode.helper.ts';
 
 export function ErrorRootElement() {

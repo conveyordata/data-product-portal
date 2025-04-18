@@ -1,15 +1,17 @@
+import { FileSearchOutlined, HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Flex, Layout, Menu, type MenuProps, Space } from 'antd';
-import styles from './sidebar.module.scss';
-import { Link, useMatches } from 'react-router-dom';
-import { ApplicationPaths } from '@/types/navigation.ts';
-import { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
-import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
 import { useSelector } from 'react-redux';
+import { Link, useMatches } from 'react-router';
+
+import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
+import { DataProductOutlined, DatasetOutlined, ProductLogo } from '@/components/icons';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
-import clsx from 'clsx';
-import { DataProductOutlined, DatasetOutlined, ProductLogo } from '@/components/icons';
+import { ApplicationPaths } from '@/types/navigation.ts';
+
+import styles from './sidebar.module.scss';
 
 export const Sidebar = () => {
     const matches = useMatches();
@@ -29,7 +31,7 @@ export const Sidebar = () => {
             key: ApplicationPaths.DataProducts,
         },
         {
-            label: <Link to={ApplicationPaths.Datasets}>{t('Datasets')}</Link>,
+            label: <Link to={ApplicationPaths.Datasets}>{t('Marketplace')}</Link>,
             icon: <DatasetOutlined />,
             key: ApplicationPaths.Datasets,
         },
@@ -38,38 +40,26 @@ export const Sidebar = () => {
             icon: <UnorderedListOutlined />,
             key: ApplicationPaths.AuditLogs,
         },
+        {
+            label: (
+                <a
+                    href={`https://d33vpinjygaq6n.cloudfront.net/docs/${version?.version.split('.').slice(0, 2).join('.')}.x/intro`}
+                >
+                    {t('Documentation')}
+                </a>
+            ),
+            icon: <FileSearchOutlined />,
+            key: ApplicationPaths.Documentation,
+        },
     ];
 
     if (currentUser?.is_admin) {
         navigationMenuItems = [
             ...navigationMenuItems,
             {
-                label: t('Configure'),
+                label: <Link to={ApplicationPaths.Settings}>{t('Settings')}</Link>,
                 icon: <SettingOutlined />,
-                key: 'Configure',
-                children: [
-                    // {
-                    //     key: ApplicationPaths.PlatformsConfigs,
-                    //     label: (
-                    //         <span className={styles.subMenuTitle}>
-                    //             <Link to={ApplicationPaths.PlatformsConfigs}>{t('Platforms Configurations')}</Link>
-                    //         </span>
-                    //     ),
-                    // },
-                    // {
-                    //     key: ApplicationPaths.Environments,
-                    //     label: (
-                    //         <span className={styles.subMenuTitle}>
-                    //             <Link to={ApplicationPaths.Environments}>{t('Environments')}</Link>
-                    //         </span>
-                    //     ),
-                    // },
-                    {
-                        key: ApplicationPaths.DataProductSettings,
-                        label: <Link to={ApplicationPaths.DataProductSettings}>{t('Data Product Settings')}</Link>,
-                        icon: <SettingOutlined />,
-                    },
-                ],
+                key: 'Settings',
             },
         ];
     }

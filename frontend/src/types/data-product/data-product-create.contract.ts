@@ -1,11 +1,11 @@
-import { DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 import { DataProductContract } from '@/types/data-product/data-product-contract.ts';
+import { DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
 
 export type DataProductCreate = Pick<
     DataProductContract,
-    'name' | 'description' | 'type_id' | 'lifecycle_id' | 'business_area_id' | 'tag_ids'
+    'name' | 'description' | 'type_id' | 'lifecycle_id' | 'domain_id' | 'tag_ids'
 > & {
-    external_id: string;
+    namespace: string;
     memberships: DataProductUserMembershipCreateContract[];
 };
 

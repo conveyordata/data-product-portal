@@ -1,17 +1,21 @@
 import { Button, Flex, Form } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { DatasetTable } from './components/dataset-table/dataset-table.component.tsx';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
-import { SearchForm } from '@/types/shared';
-import styles from './dataset-tab.module.scss';
+
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
-import { AddDatasetPopup } from './components/add-dataset-popup/add-dataset-popup.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { DatasetLink } from '@/types/data-product';
+import { SearchForm } from '@/types/shared';
+import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
+
+import { AddDatasetPopup } from './components/add-dataset-popup/add-dataset-popup.tsx';
+import { DatasetTable } from './components/dataset-table/dataset-table.component.tsx';
+import styles from './dataset-tab.module.scss';
 
 type Props = {
     dataProductId: string;
@@ -39,11 +43,21 @@ export function DatasetTab({ dataProductId }: Props) {
         return filterDatasets(dataProduct?.dataset_links ?? [], searchTerm);
     }, [dataProduct?.dataset_links, searchTerm]);
 
+    const { data: access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canCreateDatasetNew = access?.allowed || false;
+
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;
 
         return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct?.id, user?.id]);
+    }, [dataProduct, user]);
 
     return (
         <>
@@ -54,7 +68,7 @@ export function DatasetTab({ dataProductId }: Props) {
                     form={searchForm}
                     actionButton={
                         <Button
-                            disabled={!isDataProductOwner}
+                            disabled={!(canCreateDatasetNew || isDataProductOwner)}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}

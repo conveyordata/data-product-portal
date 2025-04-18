@@ -1,21 +1,25 @@
 import { Flex, Table, TableColumnsType } from 'antd';
-import { UserContract } from '@/types/users';
-import { useMemo } from 'react';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import styles from './team-table.module.scss';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useDenyMembershipAccessMutation,
     useGrantMembershipAccessMutation,
     useRemoveMembershipAccessMutation,
     useUpdateMembershipRoleMutation,
 } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+import { UserContract } from '@/types/users';
 import { getDoesUserHaveAnyDataProductMembership } from '@/utils/data-product-user-role.helper.ts';
+
+import styles from './team-table.module.scss';
 
 type Props = {
     isCurrentUserDataProductOwner: boolean;
@@ -37,44 +41,82 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     const [grantMembershipAccess] = useGrantMembershipAccessMutation();
     const [denyMembershipAccess] = useDenyMembershipAccessMutation();
 
-    const handleRemoveUserAccess = async (membershipId: string) => {
-        try {
+    const { data: edit_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
+        },
+        { skip: !dataProductId },
+    );
+    const { data: approve_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+        },
+        { skip: !dataProductId },
+    );
+    const { data: remove_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__DELETE_USER,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canApproveUserNew = approve_access?.allowed || false;
+    const canEditUserNew = edit_access?.allowed || false;
+    const canRemoveUserNew = remove_access?.allowed || false;
+
+    const handleRemoveUserAccess = useCallback(
+        async (membershipId: string) => {
+            try {
+                if (!dataProduct) return;
+
+                await removeUserFromDataProduct({ membershipId }).unwrap();
+                dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
+            }
+        },
+        [dataProduct, removeUserFromDataProduct, t],
+    );
+
+    const handleGrantAccessToDataProduct = useCallback(
+        async (membershipId: string) => {
+            try {
+                await grantMembershipAccess({ membershipId }).unwrap();
+                dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
+            }
+        },
+        [grantMembershipAccess, t],
+    );
+
+    const handleDenyAccessToDataProduct = useCallback(
+        async (membershipId: string) => {
+            try {
+                await denyMembershipAccess({ membershipId }).unwrap();
+                dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
+            }
+        },
+        [denyMembershipAccess, t],
+    );
+
+    const handleRoleChange = useCallback(
+        async (role: DataProductMembershipRole, membershipId: string) => {
             if (!dataProduct) return;
-
-            await removeUserFromDataProduct({ membershipId }).unwrap();
-            dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
-        } catch (_error) {
-            dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
-        }
-    };
-
-    const handleGrantAccessToDataProduct = async (membershipId: string) => {
-        try {
-            await grantMembershipAccess({ membershipId }).unwrap();
-            dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
-        } catch (_error) {
-            dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
-        }
-    };
-
-    const handleDenyAccessToDataProduct = async (membershipId: string) => {
-        try {
-            await denyMembershipAccess({ membershipId }).unwrap();
-            dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
-        } catch (_error) {
-            dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
-        }
-    };
-
-    const handleRoleChange = async (role: DataProductMembershipRole, membershipId: string) => {
-        if (!dataProduct) return;
-        try {
-            await updateMembershipRole({ dataProductId: dataProduct.id, membershipId, role }).unwrap();
-            dispatchMessage({ content: t('User role has been updated'), type: 'success' });
-        } catch (_error) {
-            dispatchMessage({ content: t('Failed to update user role'), type: 'error' });
-        }
-    };
+            try {
+                await updateMembershipRole({ dataProductId: dataProduct.id, membershipId, role }).unwrap();
+                dispatchMessage({ content: t('User role has been updated'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to update user role'), type: 'error' });
+            }
+        },
+        [dataProduct, t, updateMembershipRole],
+    );
 
     const columns: TableColumnsType<DataProductUserMembership> = useMemo(() => {
         return getDataProductUsersTableColumns({
@@ -89,8 +131,26 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
             hasCurrentUserMembership: getDoesUserHaveAnyDataProductMembership(currentUser.id, dataProductUsers),
             onRejectMembershipRequest: handleDenyAccessToDataProduct,
             onAcceptMembershipRequest: handleGrantAccessToDataProduct,
+            canEdit: canEditUserNew,
+            canRemove: canRemoveUserNew,
+            canApprove: canApproveUserNew,
         });
-    }, [t, isCurrentUserDataProductOwner, currentUser.id, dataProductUsers]);
+    }, [
+        t,
+        handleRemoveUserAccess,
+        handleRoleChange,
+        isRemovingUserFromDataProduct,
+        dataProductUsers,
+        isLoadingDataProduct,
+        isUpdatingMembershipRole,
+        currentUser.id,
+        handleDenyAccessToDataProduct,
+        handleGrantAccessToDataProduct,
+        isCurrentUserDataProductOwner,
+        canEditUserNew,
+        canRemoveUserNew,
+        canApproveUserNew,
+    ]);
 
     if (!dataProduct) return null;
 

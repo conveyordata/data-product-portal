@@ -8,17 +8,21 @@ from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 
 
-class DataOutputCreate(ORMModel):
+class DataOutputCreateRequest(ORMModel):
     name: str
     description: str
-    external_id: str
-    owner_id: UUID
+    namespace: str
+
     platform_id: UUID
     service_id: UUID
     status: DataOutputStatus
     configuration: DataOutputConfiguration
     sourceAligned: bool
     tag_ids: list[UUID]
+
+
+class DataOutputCreate(DataOutputCreateRequest):
+    owner_id: UUID
 
 
 class DataOutputUpdate(ORMModel):
@@ -35,7 +39,7 @@ class DataOutput(ORMModel):
     id: UUID
     name: str
     description: str
-    external_id: str
+    namespace: str
     platform_id: UUID
     service_id: UUID
     owner: BaseDataProductGet

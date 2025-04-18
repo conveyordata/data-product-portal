@@ -1,7 +1,8 @@
-import styles from './usage-list-item.module.scss';
-import { Link } from 'react-router-dom';
 import { List, Typography } from 'antd';
 import { ReactNode } from 'react';
+import { Link } from 'react-router';
+
+import styles from './usage-list-item.module.scss';
 
 type Props = {
     itemId: string;

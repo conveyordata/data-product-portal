@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
 import { generateUUID } from '@/utils/uuid.helper.ts';
 
 export type NotificationType = 'success' | 'info' | 'warning' | 'error';
