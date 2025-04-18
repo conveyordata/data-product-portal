@@ -59,7 +59,9 @@ class RoleMigrationService:
     def _transfer_product_memberships(self):
         memberships = DataProductMembershipService().list_memberships(self.db)
 
-        owner_role = self.role_service.find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER)
+        owner_role = self.role_service.find_prototype(
+            Scope.DATA_PRODUCT, Prototype.OWNER
+        )
         assert owner_role is not None
 
         # Create the member role if it doesn't exist
