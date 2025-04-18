@@ -3,7 +3,7 @@ from typing import Optional
 from uuid import UUID
 
 from app.core.authz.authorization import Authorization
-from app.roles.service import ADMIN_UUID
+from app.roles import ADMIN_UUID
 
 from ..auth import AuthAssignment
 from .schema import RoleAssignment
