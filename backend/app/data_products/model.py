@@ -7,7 +7,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
 from app.data_product_memberships.model import DataProductMembership
@@ -16,6 +15,7 @@ from app.data_products.schema import DataProduct as DataProductSchema
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
+from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
 from app.tags.model import Tag, tag_data_product_table
 
@@ -87,6 +87,6 @@ class DataProduct(Base, BaseORM):
             for membership in self.memberships
             if (
                 membership.role == DataProductUserRole.OWNER
-                and membership.status == DataProductMembershipStatus.APPROVED
+                and membership.status == DecisionStatus.APPROVED
             )
         ]

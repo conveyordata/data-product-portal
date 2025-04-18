@@ -2,9 +2,9 @@ import { DataProductContract } from '@/types/data-product';
 import {
     DataProductMembershipRole,
     DataProductMembershipRoleType,
-    DataProductMembershipStatus,
     DataProductUserMembership,
 } from '@/types/data-product-membership';
+import { DecisionStatus } from '@/types/roles';
 
 export function getDataProductUserRole(
     dataProduct: DataProductContract,
@@ -49,9 +49,7 @@ export function getIsUserDataProductOwner(userId: string, dataProductUsers: Data
 }
 
 export function getCanUserAccessDataProductData(userId: string, dataProductUsers: DataProductUserMembership[]) {
-    return dataProductUsers.some(
-        (user) => user.user.id === userId && user.status === DataProductMembershipStatus.Approved,
-    );
+    return dataProductUsers.some((user) => user.user.id === userId && user.status === DecisionStatus.Approved);
 }
 
 export function getDoesUserHaveAnyDataProductMembership(userId: string, dataProductUsers: DataProductUserMembership[]) {

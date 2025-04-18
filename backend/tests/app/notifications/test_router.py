@@ -17,12 +17,8 @@ from tests.factories.data_product_membership_notification import (
 from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
 from tests.factories.notification_interaction import NotificationInteractionFactory
 
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
-from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
-)
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.notifications.enums import NotificationTypes
+from app.role_assignments.enums import DecisionStatus
 
 NOTIFICATIONS_ENDPOINT = "/api/notifications"
 DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"
@@ -38,7 +34,7 @@ class TestNotificationsRouter:
     def test_get_approved_notifications_data_product_dataset(self, client):
         owner = UserFactory(external_id="sub", is_admin=True)
         data_product_dataset_link = DataProductDatasetAssociationFactory(
-            requested_by=owner, status=DataProductDatasetLinkStatus.PENDING_APPROVAL
+            requested_by=owner, status=DecisionStatus.PENDING
         )
 
         response = self.approve_default_data_product_dataset_link(
@@ -65,7 +61,7 @@ class TestNotificationsRouter:
     def test_get_approved_notifications_data_output_dataset(self, client):
         owner = UserFactory(external_id="sub", is_admin=True)
         data_output_dataset_link = DataOutputDatasetAssociationFactory(
-            requested_by=owner, status=DataOutputDatasetLinkStatus.PENDING_APPROVAL
+            requested_by=owner, status=DecisionStatus.PENDING
         )
 
         response = self.approve_default_data_output_dataset_link(
@@ -92,7 +88,7 @@ class TestNotificationsRouter:
     def test_get_approved_notifications_data_product_membership(self, client):
         owner = UserFactory(external_id="sub", is_admin=True)
         data_product_membership_link = DataProductMembershipFactory(
-            user=owner, status=DataProductMembershipStatus.PENDING_APPROVAL
+            user=owner, status=DecisionStatus.PENDING
         )
 
         response = self.approve_data_product_membership(
@@ -119,7 +115,7 @@ class TestNotificationsRouter:
     def test_get_denied_notifications_data_product_dataset(self, client):
         owner = UserFactory(external_id="sub", is_admin=True)
         data_product_dataset_link = DataProductDatasetAssociationFactory(
-            requested_by=owner, status=DataProductDatasetLinkStatus.PENDING_APPROVAL
+            requested_by=owner, status=DecisionStatus.PENDING
         )
 
         response = self.deny_default_data_product_dataset_link(
@@ -146,7 +142,7 @@ class TestNotificationsRouter:
     def test_get_denied_notifications_data_output_dataset(self, client):
         owner = UserFactory(external_id="sub", is_admin=True)
         data_output_dataset_link = DataOutputDatasetAssociationFactory(
-            requested_by=owner, status=DataOutputDatasetLinkStatus.PENDING_APPROVAL
+            requested_by=owner, status=DecisionStatus.PENDING
         )
 
         response = self.deny_default_data_output_dataset_link(
@@ -173,7 +169,7 @@ class TestNotificationsRouter:
     def test_get_denied_notifications_data_product_membership(self, client):
         owner = UserFactory(external_id="sub", is_admin=True)
         data_product_membership_link = DataProductMembershipFactory(
-            user=owner, status=DataProductMembershipStatus.PENDING_APPROVAL
+            user=owner, status=DecisionStatus.PENDING
         )
 
         response = self.deny_data_product_membership(
@@ -202,7 +198,7 @@ class TestNotificationsRouter:
         ds = DatasetFactory(owners=[owner])
         link = DataProductDatasetAssociationFactory(
             dataset=ds,
-            status=DataProductDatasetLinkStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
         )
         NotificationInteractionFactory(
             notification=DataProductDatasetNotificationFactory(
@@ -225,7 +221,7 @@ class TestNotificationsRouter:
         ds = DatasetFactory(owners=[owner])
         link = DataOutputDatasetAssociationFactory(
             dataset=ds,
-            status=DataOutputDatasetLinkStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
         )
         NotificationInteractionFactory(
             notification=DataOutputDatasetNotificationFactory(
@@ -246,7 +242,7 @@ class TestNotificationsRouter:
     def test_delete_parent_data_product_data_product_dataset(self, client):
         owner = UserFactory(external_id="sub")
         link = DataProductDatasetAssociationFactory(
-            status=DataProductDatasetLinkStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
             data_product=(DataProductMembershipFactory(user=owner).data_product),
         )
         NotificationInteractionFactory(
@@ -268,7 +264,7 @@ class TestNotificationsRouter:
     def test_delete_parent_data_product_data_output_dataset(self, client):
         owner = UserFactory(external_id="sub")
         link = DataOutputDatasetAssociationFactory(
-            status=DataProductDatasetLinkStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
             data_output=DataOutputFactory(
                 owner=(DataProductMembershipFactory(user=owner).data_product)
             ),
@@ -292,7 +288,7 @@ class TestNotificationsRouter:
     def test_delete_parent_data_product_data_product_membership(self, client):
         owner = UserFactory(external_id="sub")
         membership = DataProductMembershipFactory(
-            status=DataProductMembershipStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
             data_product=(DataProductMembershipFactory(user=owner).data_product),
         )
         NotificationInteractionFactory(
@@ -314,7 +310,7 @@ class TestNotificationsRouter:
     def test_delete_parent_data_output_data_output_dataset(self, client):
         owner = UserFactory(external_id="sub")
         link = DataOutputDatasetAssociationFactory(
-            status=DataProductDatasetLinkStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
             data_output=DataOutputFactory(
                 owner=(DataProductMembershipFactory(user=owner).data_product)
             ),
@@ -338,7 +334,7 @@ class TestNotificationsRouter:
     def test_delete_own_notification_data_product_dataset(self, client):
         owner = UserFactory(external_id="sub")
         link = DataProductDatasetAssociationFactory(
-            status=DataProductDatasetLinkStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
         )
         notification = NotificationInteractionFactory(
             notification=DataProductDatasetNotificationFactory(
@@ -357,7 +353,7 @@ class TestNotificationsRouter:
     def test_delete_other_user_notification_data_product_dataset(self, client):
         other = UserFactory()
         link = DataProductDatasetAssociationFactory(
-            status=DataProductDatasetLinkStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
         )
         notification = NotificationInteractionFactory(
             notification=DataProductDatasetNotificationFactory(
@@ -374,7 +370,7 @@ class TestNotificationsRouter:
     def test_delete_own_notification_data_output_dataset(self, client):
         owner = UserFactory(external_id="sub")
         link = DataOutputDatasetAssociationFactory(
-            status=DataOutputDatasetLinkStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
         )
         notification = NotificationInteractionFactory(
             notification=DataOutputDatasetNotificationFactory(
@@ -393,7 +389,7 @@ class TestNotificationsRouter:
     def test_delete_other_user_notification_data_output_dataset(self, client):
         other = UserFactory()
         link = DataOutputDatasetAssociationFactory(
-            status=DataOutputDatasetLinkStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
         )
         notification = NotificationInteractionFactory(
             notification=DataOutputDatasetNotificationFactory(
@@ -410,7 +406,7 @@ class TestNotificationsRouter:
     def test_delete_own_notification_data_product_membership(self, client):
         owner = UserFactory(external_id="sub")
         link = DataProductMembershipFactory(
-            status=DataProductMembershipStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
         )
         notification = NotificationInteractionFactory(
             notification=DataProductMembershipNotificationFactory(
@@ -429,7 +425,7 @@ class TestNotificationsRouter:
     def test_delete_other_user_notification_data_product_membership(self, client):
         other = UserFactory()
         link = DataProductMembershipFactory(
-            status=DataProductMembershipStatus.APPROVED.value,
+            status=DecisionStatus.APPROVED,
         )
         notification = NotificationInteractionFactory(
             notification=DataProductMembershipNotificationFactory(

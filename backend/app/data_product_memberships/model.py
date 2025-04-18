@@ -4,11 +4,11 @@ from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstrain
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
 from app.database.database import Base
 from app.notifications.model import DataProductMembershipNotification
+from app.role_assignments.enums import DecisionStatus
 
 if TYPE_CHECKING:
     from app.users.model import User
@@ -35,9 +35,9 @@ class DataProductMembership(Base, BaseORM):
     role: Mapped[DataProductUserRole] = mapped_column(
         Enum(DataProductUserRole), default=DataProductUserRole.MEMBER
     )
-    status: Mapped[DataProductMembershipStatus] = mapped_column(
-        Enum(DataProductMembershipStatus),
-        default=DataProductMembershipStatus.PENDING_APPROVAL,
+    status: Mapped[DecisionStatus] = mapped_column(
+        Enum(DecisionStatus),
+        default=DecisionStatus.PENDING,
     )
     data_product: Mapped["DataProduct"] = relationship(
         "DataProduct", back_populates="memberships", order_by="DataProduct.name"

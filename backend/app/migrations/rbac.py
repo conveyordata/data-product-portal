@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from app.authorization.service import AuthorizationService
 from app.core.authz import Authorization
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
 from app.data_product_memberships.schema import DataProductMembership
@@ -81,11 +80,11 @@ def transfer_product_memberships(db: Session):
 def map_decision(
     membership: DataProductMembership,
 ) -> tuple[DecisionStatus, Optional[UUID], Optional[datetime]]:
-    if membership.status == DataProductMembershipStatus.APPROVED:
+    if membership.status == DecisionStatus.APPROVED:
         return DecisionStatus.APPROVED, membership.approved_by, membership.approved_on
-    if membership.status == DataProductMembershipStatus.DENIED:
+    if membership.status == DecisionStatus.DENIED:
         return DecisionStatus.DENIED, membership.declined_by, membership.denied_on
-    if membership.status == DataProductMembershipStatus.PENDING_APPROVAL:
+    if membership.status == DecisionStatus.PENDING:
         return DecisionStatus.PENDING, None, None
     raise ValueError("Invalid membership status")
 

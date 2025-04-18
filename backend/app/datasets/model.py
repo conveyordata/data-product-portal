@@ -7,13 +7,12 @@ from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import DataProductLifecycle
-from app.data_product_memberships.enums import DataProductMembershipStatus
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import DatasetAccessType
 from app.datasets.schema import Dataset as DatasetSchema
 from app.datasets.status import DatasetStatus
+from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM, utcnow
 from app.tags.model import Tag, tag_dataset_table
 
@@ -87,13 +86,13 @@ class Dataset(Base, BaseORM):
         consuming_data_products = {
             link.data_product
             for link in self.data_product_links
-            if link.status == DataProductDatasetLinkStatus.APPROVED
+            if link.status == DecisionStatus.APPROVED
         }
 
         user_data_products = {
             membership.data_product
             for membership in user.data_product_memberships
-            if membership.status == DataProductMembershipStatus.APPROVED
+            if membership.status == DecisionStatus.APPROVED
         }
 
         return bool(consuming_data_products & user_data_products)

@@ -13,11 +13,9 @@ from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema import (
@@ -30,6 +28,7 @@ from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.role_assignments.enums import DecisionStatus
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User, ensure_user_exists
@@ -260,8 +259,7 @@ class DatasetService:
                     id=f"{downstream_products.id}-{dataset.id}",
                     target=downstream_products.data_product_id,
                     source=dataset.id,
-                    animated=downstream_products.status
-                    == DataProductDatasetLinkStatus.APPROVED,
+                    animated=downstream_products.status == DecisionStatus.APPROVED,
                 )
             )
 
@@ -284,8 +282,7 @@ class DatasetService:
                     id=f"{data_output.id}-{dataset.id}",
                     source=data_output.id,
                     target=dataset.id,
-                    animated=data_output_link.status
-                    == DataOutputDatasetLinkStatus.APPROVED,
+                    animated=data_output_link.status == DecisionStatus.APPROVED,
                 )
             )
             if level >= 2:

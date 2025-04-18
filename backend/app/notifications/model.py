@@ -5,6 +5,8 @@ from sqlalchemy import Column, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.role_assignments.enums import DecisionStatus
+
 if TYPE_CHECKING:
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_product_memberships.model import DataProductMembership
@@ -12,7 +14,7 @@ if TYPE_CHECKING:
 
 from app.database.database import Base
 from app.notification_interactions.model import NotificationInteraction
-from app.notifications.enums import NotificationOrigins, NotificationTypes
+from app.notifications.enums import NotificationTypes
 from app.shared.model import BaseORM
 
 
@@ -25,8 +27,8 @@ class Notification(Base, BaseORM):
         back_populates="notification",
         cascade="all, delete-orphan",
     )
-    notification_origin: Mapped[NotificationOrigins] = mapped_column(
-        Enum(NotificationOrigins), nullable=False
+    notification_origin: Mapped[DecisionStatus] = mapped_column(
+        Enum(DecisionStatus), nullable=False
     )
     __mapper_args__ = {
         "polymorphic_on": "notification_type",

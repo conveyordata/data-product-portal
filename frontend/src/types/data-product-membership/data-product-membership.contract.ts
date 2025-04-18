@@ -1,14 +1,15 @@
-import { DataProductMembershipRoleType, DataProductMembershipStatus } from '@/types/data-product-membership';
+import { DataProductMembershipRoleType } from '@/types/data-product-membership';
 import { UserContract } from '@/types/users';
 
 import { DataProductContract } from '../data-product';
+import { DecisionStatus } from '../roles';
 
 export interface DataProductMembershipContract {
     id: string;
     data_product_id: string;
     user_id: string;
     role: DataProductMembershipRoleType;
-    status: DataProductMembershipStatus;
+    status: DecisionStatus;
     user: UserContract;
     data_product: DataProductContract;
     requested_on: string;

@@ -6,6 +6,7 @@ Create Date: 2024-04-17 17:15:55.096655
 
 """
 
+from enum import Enum
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -14,15 +15,26 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.core.auth.device_flows.schema import DeviceFlowStatus
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
 from app.data_product_types.enums import DataProductIconKey
 from app.data_products.status import DataProductStatus
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
 from app.shared.model import utcnow
+
+
+class DataProductDatasetLinkStatus(str, Enum):
+    PENDING_APPROVAL = "pending_approval"
+    APPROVED = "approved"
+    DENIED = "denied"
+
+
+class DataProductMembershipStatus(str, Enum):
+    APPROVED = "approved"
+    PENDING_APPROVAL = "pending_approval"
+    DENIED = "denied"
+
 
 # revision identifiers, used by Alembic.
 revision: str = "4c40a4ff5a7f"

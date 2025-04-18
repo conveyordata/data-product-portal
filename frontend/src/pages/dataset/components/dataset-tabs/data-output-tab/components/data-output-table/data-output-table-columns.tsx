@@ -3,9 +3,10 @@ import { TFunction } from 'i18next';
 
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import { DataOutputDatasetLinkRequest, DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
+import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
 import { DataOutputLink } from '@/types/dataset';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { DecisionStatus } from '@/types/roles';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
 import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
@@ -100,7 +101,7 @@ export const getDatasetDataProductsColumns = ({
             key: 'action',
             hidden: !isCurrentDatasetOwner,
             render: (_, { id, data_output, status, dataset_id, data_output_id }) => {
-                if (status === DataOutputDatasetLinkStatus.Pending) {
+                if (status === DecisionStatus.Pending) {
                     return (
                         <Flex>
                             <Popconfirm
@@ -146,7 +147,7 @@ export const getDatasetDataProductsColumns = ({
                         </Flex>
                     );
                 }
-                if (status === DataOutputDatasetLinkStatus.Approved) {
+                if (status === DecisionStatus.Approved) {
                     return (
                         <Popconfirm
                             title={t('Revoke Data Output Access')}
@@ -171,7 +172,7 @@ export const getDatasetDataProductsColumns = ({
                     );
                 }
 
-                if (status === DataOutputDatasetLinkStatus.Denied) {
+                if (status === DecisionStatus.Denied) {
                     return (
                         <Button
                             type={'link'}

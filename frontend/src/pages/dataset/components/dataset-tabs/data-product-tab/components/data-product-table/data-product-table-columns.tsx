@@ -3,9 +3,10 @@ import { TFunction } from 'i18next';
 
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import { DataProductDatasetLinkRequest, DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
+import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { DataProductLink } from '@/types/dataset';
 import { createDataProductIdPath } from '@/types/navigation.ts';
+import { DecisionStatus } from '@/types/roles';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
@@ -81,7 +82,7 @@ export const getDatasetDataProductsColumns = ({
             key: 'action',
             hidden: !isCurrentDatasetOwner,
             render: (_, { id, data_product, status, dataset_id, data_product_id }) => {
-                if (status === DataProductDatasetLinkStatus.Pending) {
+                if (status === DecisionStatus.Pending) {
                     return (
                         <Flex>
                             <Popconfirm
@@ -127,7 +128,7 @@ export const getDatasetDataProductsColumns = ({
                         </Flex>
                     );
                 }
-                if (status === DataProductDatasetLinkStatus.Approved) {
+                if (status === DecisionStatus.Approved) {
                     return (
                         <Popconfirm
                             title={t('Revoke Data Product Access')}
@@ -152,7 +153,7 @@ export const getDatasetDataProductsColumns = ({
                     );
                 }
 
-                if (status === DataProductDatasetLinkStatus.Denied) {
+                if (status === DecisionStatus.Denied) {
                     return (
                         <Button
                             type={'link'}

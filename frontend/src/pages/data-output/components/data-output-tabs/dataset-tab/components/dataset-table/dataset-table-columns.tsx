@@ -67,10 +67,10 @@ export const getDataOutputDatasetsColumns = ({
             title: t('Actions'),
             key: 'action',
             render: (_, { dataset, dataset_id, status }) => {
-                const buttonText = status === 'pending_approval' ? t('Cancel') : t('Remove');
-                const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Unlink Dataset');
+                const buttonText = status === 'pending' ? t('Cancel') : t('Remove');
+                const popupTitle = status === 'pending' ? t('Cancel Request') : t('Unlink Dataset');
                 const popupDescription =
-                    status === 'pending_approval'
+                    status === 'pending'
                         ? t('Are you sure you want to cancel the request to link {{name}} to the data output?', {
                               name: dataset.name,
                           })
@@ -78,9 +78,7 @@ export const getDataOutputDatasetsColumns = ({
                               name: dataset.name,
                           });
                 const onConfirm =
-                    status === 'pending_approval'
-                        ? onCancelDataOutputDatasetLinkRequest
-                        : onRemoveDataOutputDatasetLink;
+                    status === 'pending' ? onCancelDataOutputDatasetLinkRequest : onRemoveDataOutputDatasetLink;
                 return (
                     <Popconfirm
                         title={popupTitle}

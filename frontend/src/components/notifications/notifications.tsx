@@ -15,7 +15,8 @@ import {
     useRemoveNotificationMutation,
 } from '@/store/features/notifications/notifications-api-slice';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { NotificationModel, NotificationOrigins, NotificationTypes } from '@/types/notifications/notification.contract';
+import { NotificationModel, NotificationTypes } from '@/types/notifications/notification.contract';
+import { DecisionStatus } from '@/types/roles';
 import { UserContract } from '@/types/users';
 
 import styles from './notifications.module.scss';
@@ -57,7 +58,7 @@ export function Notifications() {
                 case NotificationTypes.DataProductDatasetNotification:
                     link = createDataProductIdPath(userNotification.notification.data_product_dataset.data_product_id);
                     switch (userNotification.notification.notification_origin) {
-                        case NotificationOrigins.Approved:
+                        case DecisionStatus.Approved:
                             description =
                                 currentUser?.id ===
                                 userNotification.notification.data_product_dataset.requested_by.id ? (
@@ -102,7 +103,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 );
                             break;
-                        case NotificationOrigins.Denied:
+                        case DecisionStatus.Denied:
                             description =
                                 currentUser?.id ===
                                 userNotification.notification.data_product_dataset.requested_by.id ? (
@@ -160,7 +161,7 @@ export function Notifications() {
                         userNotification.notification.data_output_dataset.data_output.owner_id,
                     );
                     switch (userNotification.notification.notification_origin) {
-                        case NotificationOrigins.Approved:
+                        case DecisionStatus.Approved:
                             description =
                                 currentUser?.id ===
                                 userNotification.notification.data_output_dataset.requested_by.id ? (
@@ -205,7 +206,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 );
                             break;
-                        case NotificationOrigins.Denied:
+                        case DecisionStatus.Denied:
                             description =
                                 currentUser?.id ===
                                 userNotification.notification.data_output_dataset.requested_by.id ? (
@@ -262,7 +263,7 @@ export function Notifications() {
                         userNotification.notification.data_product_membership.data_product_id,
                     );
                     switch (userNotification.notification.notification_origin) {
-                        case NotificationOrigins.Approved:
+                        case DecisionStatus.Approved:
                             description =
                                 currentUser?.id === userNotification.notification.data_product_membership.user.id ? (
                                     <Typography.Text>
@@ -289,7 +290,7 @@ export function Notifications() {
                                     </Typography.Text>
                                 );
                             break;
-                        case NotificationOrigins.Denied:
+                        case DecisionStatus.Denied:
                             description =
                                 currentUser?.id === userNotification.notification.data_product_membership.user.id ? (
                                     <Typography.Text>
