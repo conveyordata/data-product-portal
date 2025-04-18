@@ -20,6 +20,7 @@ from app.roles.router import router as role
 from app.tags.router import router as tag
 from app.theme_settings.router import router as theme_settings
 from app.users.router import router as user
+from app.pending_actions.router import router as pending_action
 
 router = (
     APIRouter(dependencies=[Security(api_key_authenticated)])
@@ -45,3 +46,4 @@ router.include_router(user)
 router.include_router(role)
 router.include_router(role_assignment)
 router.include_router(theme_settings)
+router.include_router(pending_action)
