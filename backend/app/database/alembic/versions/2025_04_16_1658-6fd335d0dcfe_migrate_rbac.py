@@ -28,9 +28,8 @@ from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.model import GlobalRoleAssignment
-from app.roles import ADMIN_UUID
 from app.roles.model import Role as RoleModel
-from app.roles.schema import CreateRole, Prototype, Role, Scope
+from app.roles.schema import CreateRole, Prototype, Scope
 from app.roles.service import RoleService
 from app.users.model import User as UserModel
 
