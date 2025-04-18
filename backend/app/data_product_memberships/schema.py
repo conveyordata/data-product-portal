@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 from app.data_product_memberships.enums import (
@@ -33,8 +34,8 @@ class DataProductMembership(BaseDataProductMembership):
     data_product_id: UUID
     status: DataProductMembershipStatus
     requested_on: datetime
-    requested_by: User | None
-    approved_by: User | None
-    approved_on: datetime | None
-    denied_by: User | None
-    denied_on: datetime | None
+    requested_by: Optional[User]
+    approved_by: Optional[User]
+    approved_on: Optional[datetime]
+    denied_by: Optional[User]
+    denied_on: Optional[datetime]
