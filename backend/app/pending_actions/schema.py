@@ -17,6 +17,7 @@ class DataOutputDatasetAction(DataOutputDatasetAssociation):
 class DataProductMembershipAction(DataProductMembershipGet):
     pending_action_type: Literal[PendingActionTypes.DataProductMembershipAction]
 
+
 PendingAction = Union[
     DataProductDatasetAction,
     DataOutputDatasetAction,
