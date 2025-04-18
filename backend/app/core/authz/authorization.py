@@ -32,6 +32,11 @@ class Authorization(metaclass=Singleton):
         await enforcer.load_policy()
         return cls(enforcer)
 
+    @classmethod
+    def deregister(cls):
+        """Releases the enforcer from the singleton. Useful during testing."""
+        Singleton.deregister(cls)
+
     @staticmethod
     async def _construct_enforcer(model: str) -> AsyncEnforcer:
         """Initializes the casbin table in the DB and constructs the enforcer."""

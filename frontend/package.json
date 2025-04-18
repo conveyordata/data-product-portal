@@ -83,5 +83,10 @@
   "engines": {
     "node": ">= 20.9",
     "npm": ">= 10.1"
+  },
+  "overrides": {
+    "zustand": {
+      "use-sync-external-store": "^1.4.0"
+    }
   }
 }
