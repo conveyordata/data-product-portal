@@ -1,4 +1,4 @@
-import Icon, { HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import Icon, { CompassOutlined, HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Breadcrumb, Space, Typography } from 'antd';
 import { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadcrumb/Breadcrumb';
 import { ReactNode, useMemo } from 'react';
@@ -174,6 +174,20 @@ export const Breadcrumbs = () => {
                                     >
                                         <UnorderedListOutlined />
                                         {t('Audit Logs')}
+                                    </Space>
+                                ),
+                            });
+                            break;
+                        case ApplicationPaths.Explorer:
+                            Object.assign(breadcrumbItem, {
+                                title: (
+                                    <Space
+                                        classNames={{
+                                            item: styles.breadcrumbItem,
+                                        }}
+                                    >
+                                        <Icon component={CompassOutlined} />
+                                        {t('Explorer')}
                                     </Space>
                                 ),
                             });
