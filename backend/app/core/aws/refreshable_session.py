@@ -1,5 +1,6 @@
 from datetime import datetime
 from time import time
+from typing import Optional
 from uuid import uuid4
 
 import pytz
@@ -23,10 +24,10 @@ class RefreshableBotoSession:
 
     def __init__(
         self,
-        region_name: str | None = None,
-        profile_name: str | None = None,
-        sts_arn: str | None = None,
-        session_name: str | None = None,
+        region_name: Optional[str] = None,
+        profile_name: Optional[str] = None,
+        sts_arn: Optional[str] = None,
+        session_name: Optional[str] = None,
         session_ttl: int = 3000,
     ):
         """
