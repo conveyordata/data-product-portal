@@ -8,6 +8,7 @@ from app.data_product_memberships.enums import (
     DataProductUserRole,
 )
 from app.database.database import Base
+from app.notifications.model import DataProductMembershipNotification
 
 if TYPE_CHECKING:
     from app.users.model import User
@@ -54,6 +55,12 @@ class DataProductMembership(Base, BaseORM):
     denied_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     denied_by: Mapped["User"] = relationship(
         foreign_keys=[denied_by_id], back_populates="denied_memberships"
+    )
+    notifications = relationship(
+        DataProductMembershipNotification,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        back_populates="data_product_membership",
     )
     denied_on = Column(DateTime(timezone=False))
     __table_args__ = (

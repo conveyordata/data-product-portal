@@ -20,6 +20,7 @@ from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
+from app.notification_interactions.service import NotificationInteractionService
 from app.settings import settings
 from app.users.model import ensure_user_exists
 from app.users.schema import User
@@ -110,6 +111,11 @@ class DataProductMembershipService:
         data_product_membership.status = DataProductMembershipStatus.APPROVED
         data_product_membership.approved_by_id = authenticated_user.id
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
+
+        NotificationInteractionService().create_data_product_membership_notifications(
+            db, data_product_membership
+        )
+
         db.commit()
         db.refresh(data_product_membership)
         RefreshInfrastructureLambda().trigger()
@@ -142,9 +148,13 @@ class DataProductMembershipService:
         data_product_membership.status = DataProductMembershipStatus.DENIED
         data_product_membership.denied_by_id = authenticated_user.id
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
+
+        NotificationInteractionService().create_data_product_membership_notifications(
+            db, data_product_membership
+        )
+
         db.commit()
         db.refresh(data_product_membership)
-
         return {"id": data_product_membership.id}
 
     def remove_membership(self, id: UUID, db: Session, authenticated_user: User):
