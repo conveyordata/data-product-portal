@@ -1,0 +1,12 @@
+@use '@/styles/globals';
+
+aside.react-flow-sidebar {
+    // Completely unsuccessful
+    width: 300px;
+    height: 40%;
+    background-color: red;
+    border: 4px solid blue;
+    overflow-y: auto;
+    margin: 4em;
+    padding: 4em;
+}

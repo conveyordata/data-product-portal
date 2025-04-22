@@ -25,6 +25,7 @@ import type { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 
 import styles from './explorer.module.scss';
+import Sidebar from './sidebar';
 
 const { getDesignToken } = theme;
 
@@ -134,7 +135,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
 function InternalFullExplorer() {
     // Same as InternalExplorer but this one does not filter anything, it shows the full graph
 
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
     const { data: graph, isFetching } = useGetGraphDataQuery('', {
@@ -155,6 +156,7 @@ function InternalFullExplorer() {
     }
     return (
         <Flex vertical className={styles.nodeWrapper}>
+            <Sidebar nodes={nodes} setNodes={setNodes} />
             <NodeEditor
                 nodes={nodes}
                 edges={edges}
