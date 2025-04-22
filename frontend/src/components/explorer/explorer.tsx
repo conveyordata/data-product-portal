@@ -117,7 +117,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
         return {
             id: node.id,
             position: defaultNodePosition,
-            draggable: false,
+            draggable: true,
             deletable: false,
             type: node.type,
             data: {
