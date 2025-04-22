@@ -1,13 +1,13 @@
 from sqlalchemy.orm import Session
 
+from app.data_outputs.service import DataOutputService
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.data_products.service import DataProductService
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
+from app.datasets.service import DatasetService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.data_products.service import DataProductService
-from app.datasets.service import DatasetService
-from app.data_outputs.service import DataOutputService
 from app.users.schema import User
 
 
@@ -65,7 +65,8 @@ class GraphService:
         # Edges are the links between data products, datasets and data outputs
         edges = []
 
-        # Data products -- produce --> data outputs. This is a one-to-many. Data outputs have a single owner.
+        # Data products -- produce --> data outputs. This is a one-to-many.
+        # Data outputs have a single owner.
         for data_output_get in data_outputs:
             data_output = data_output_get
             edges.append(
