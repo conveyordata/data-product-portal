@@ -37,6 +37,7 @@ from app.data_product_memberships.enums import (
 )
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_memberships.schema import DataProductMembershipCreate
+from app.data_product_settings.model import DataProductSettingValue
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.schema import (
@@ -110,19 +111,32 @@ class DataProductService:
         return data_product
 
     def get_data_products(self, db: Session) -> list[DataProductsGet]:
-        default_lifecycle = (
-            db.query(DataProductLifeCycleModel)
-            .filter(DataProductLifeCycleModel.is_default)
-            .first()
+        default_lifecycle = db.scalar(
+            select(DataProductLifeCycleModel).filter(
+                DataProductLifeCycleModel.is_default
+            )
         )
         dps = (
-            db.query(DataProductModel)
-            .options(
-                joinedload(DataProductModel.dataset_links),
+            db.scalars(
+                select(DataProductModel)
+                .options(
+                    joinedload(DataProductModel.dataset_links),
+                    joinedload(DataProductModel.memberships),
+                    joinedload(DataProductModel.data_outputs),
+                    joinedload(DataProductModel.tags),
+                    joinedload(DataProductModel.lifecycle),
+                    joinedload(DataProductModel.data_product_settings).joinedload(
+                        DataProductSettingValue.data_product_setting
+                    ),
+                    joinedload(DataProductModel.type),
+                    joinedload(DataProductModel.domain),
+                )
+                .order_by(asc(DataProductModel.name))
             )
-            .order_by(asc(DataProductModel.name))
+            .unique()
             .all()
         )
+
         for dp in dps:
             if not dp.lifecycle:
                 dp.lifecycle = default_lifecycle

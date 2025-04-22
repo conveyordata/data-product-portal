@@ -5,10 +5,12 @@ from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
+from app.data_product_memberships.enums import DataProductMembershipStatus
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_settings.model import DataProductSettingValue
 from app.data_products.schema import DataProduct as DataProductSchema
 from app.data_products.status import DataProductStatus
+from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
@@ -73,3 +75,25 @@ class DataProduct(Base, BaseORM):
         back_populates="owner",
         cascade="all, delete-orphan",
     )
+
+    @property
+    def user_count(self) -> int:
+        approved_memberships = [
+            membership
+            for membership in self.memberships
+            if membership.status == DataProductMembershipStatus.APPROVED
+        ]
+        return len(approved_memberships)
+
+    @property
+    def dataset_count(self) -> int:
+        accepted_dataset_links = [
+            link
+            for link in self.dataset_links
+            if link.status == DataProductDatasetLinkStatus.APPROVED
+        ]
+        return len(accepted_dataset_links)
+
+    @property
+    def data_outputs_count(self) -> int:
+        return len(self.data_outputs)
