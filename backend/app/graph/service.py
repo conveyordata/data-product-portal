@@ -37,7 +37,6 @@ class GraphService:
         dataset_nodes = [
             Node(
                 id=dataset_get.id,
-                isMain=True,
                 data=NodeData(
                     id=dataset_get.id, name=dataset_get.name, icon_key="dataset"
                 ),
@@ -100,8 +99,8 @@ class GraphService:
                 edges.append(
                     Edge(
                         id=f"{data_product.id}-{dataset.id}",
-                        source=data_product.id,
-                        target=dataset.id,
+                        source=dataset.id,
+                        target=data_product.id,
                         animated=dataset_link.status
                         == DataProductDatasetLinkStatus.APPROVED,
                     )
