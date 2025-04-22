@@ -15,7 +15,10 @@ import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/dat
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductGraphDataQuery, useGetGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import {
+    useGetDataProductGraphDataQuery,
+    useGetGraphDataQuery,
+} from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
 import { greenThemeConfig } from '@/theme/antd-theme';
 import type { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts';
@@ -134,7 +137,6 @@ function InternalFullExplorer() {
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
-
     const { data: graph, isFetching } = useGetGraphDataQuery('', {
         skip: false,
     });
@@ -147,8 +149,7 @@ function InternalFullExplorer() {
     }, [defaultNodePosition, graph, setNodesAndEdges]);
     useEffect(() => {
         generateGraph();
-    }
-        , [generateGraph]);
+    }, [generateGraph]);
     if (isFetching) {
         return <LoadingSpinner />;
     }
@@ -168,7 +169,6 @@ function InternalFullExplorer() {
             />
         </Flex>
     );
-
 }
 
 function InternalExplorer({ id, type }: Props) {

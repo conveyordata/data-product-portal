@@ -1,6 +1,7 @@
-import { FullExplorer } from '@/components/explorer/explorer';
 import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+
+import { FullExplorer } from '@/components/explorer/explorer';
 
 export function ExplorerPage() {
     const { t } = useTranslation();
