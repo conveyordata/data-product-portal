@@ -84,7 +84,7 @@ def map_decision(
     if membership.status == DataProductMembershipStatus.APPROVED:
         return DecisionStatus.APPROVED, membership.approved_by, membership.approved_on
     if membership.status == DataProductMembershipStatus.DENIED:
-        return DecisionStatus.DENIED, membership.declined_by, membership.denied_on
+        return DecisionStatus.DENIED, membership.denied_by, membership.denied_on
     if membership.status == DataProductMembershipStatus.PENDING_APPROVAL:
         return DecisionStatus.PENDING, None, None
     raise ValueError("Invalid membership status")
