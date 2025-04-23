@@ -45,6 +45,10 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     padding: globals.$spacing-m !important;
 }
 
+.bolder {
+    font-weight: globals.$font-weight-bolder !important;
+}
+
 .tag {
     display: flex;
     gap: globals.$spacing-xs;

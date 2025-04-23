@@ -53,8 +53,8 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
             icon = <DatasetOutlined />;
             link = createDataProductIdPath(action.data_product_id);
             description = (
-                <Typography.Text>
-                    {t('Request for')} <strong className={styles.descriptionCore}>{t('read access')}</strong>{' '}
+                <Typography.Text strong>
+                    {t('Request for')} <strong className={styles.bolder}>{t('read access')}</strong>{' '}
                     {t('from the data product')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
                         <strong>{action.data_product.name}</strong>
@@ -100,8 +100,8 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
             icon = <DatasetOutlined color="" />;
             link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
             description = (
-                <Typography.Text>
-                    {t('Request for')} <strong className={styles.descriptionCore}>{t('the creation of a link')}</strong>{' '}
+                <Typography.Text strong>
+                    {t('Request for')} <strong className={styles.bolder}>{t('the creation of a link')}</strong>{' '}
                     {t('coming from the data output')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         <strong>{action.data_output.name}</strong>
@@ -147,9 +147,8 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
             icon = <DataProductOutlined />;
             link = createDataProductIdPath(action.data_product_id);
             description = (
-                <Typography.Text>
-                    {t('Request for ')} <strong className={styles.descriptionCore}>{t('team membership')}</strong>{' '}
-                    {t('from')}{' '}
+                <Typography.Text strong>
+                    {t('Request for ')} <strong className={styles.bolder}>{t('team membership')}</strong> {t('from')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={'/'}>
                         <strong>
                             {action.user.first_name} {action.user.last_name}
