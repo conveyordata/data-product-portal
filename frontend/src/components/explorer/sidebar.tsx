@@ -11,25 +11,14 @@ export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | (
         (nodeId: string) => {
             // Update only the selected node
             setNodes((nodes: Node[]) =>
-                nodes.map((node) =>
-                    node.id === nodeId
-                        ? {
-                              ...node,
-                              data: {
-                                  ...node.data,
-                                  isMainNode: true, // Mark as the main node
-                              },
-                              selected: true, // Mark as selected
-                          }
-                        : {
-                              ...node,
-                              data: {
-                                  ...node.data,
-                                  isMainNode: false, // Ensure others are not main nodes
-                              },
-                              selected: false, // Ensure others are not selected
-                          },
-                ),
+                nodes.map((node) => ({
+                    ...node,
+                    data: {
+                        ...node.data,
+                        isMainNode: node.id === nodeId, // Mark as the main node
+                    },
+                    selected: node.id === nodeId, // Mark as selected
+                })),
             );
             setNodeId(nodeId);
         },
