@@ -134,6 +134,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
 
 function InternalFullExplorer() {
     // Same as InternalExplorer but this one does not filter anything, it shows the full graph
+    // Also includes a sidebar to select nodes
 
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();

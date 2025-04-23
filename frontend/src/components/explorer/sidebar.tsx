@@ -11,15 +11,14 @@ export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | (
     const { t } = useTranslation();
     const selectNode = useCallback(
         (nodeId: string) => {
-            // Update only the selected node
             setNodes((nodes: Node[]) =>
                 nodes.map((node) => ({
                     ...node,
                     data: {
                         ...node.data,
-                        isMainNode: node.id === nodeId, // Mark as the main node
+                        isMainNode: node.id === nodeId, // Mark as the main node (invert SVG colors)
                     },
-                    selected: node.id === nodeId, // Mark as selected
+                    selected: node.id === nodeId, // Mark as selected (show tooltip with link)
                 })),
             );
             setNodeId(nodeId);
