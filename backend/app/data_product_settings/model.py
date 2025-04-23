@@ -42,7 +42,8 @@ class DataProductSettingValue(Base, BaseORM):
     data_product_setting: Mapped["DataProductSetting"] = relationship(
         "DataProductSetting",
         back_populates="data_products",
-        order_by="DataProduct.name",
+        order_by="DataProductSetting.name",
+        lazy="joined",
     )
     value = Column(String)
 

@@ -34,8 +34,10 @@ class DataOutput(Base, BaseORM):
     platform_id: Mapped[UUID] = Column(ForeignKey("platforms.id"))
     service_id: Mapped[UUID] = Column(ForeignKey("platform_services.id"))
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
-    owner: Mapped["DataProduct"] = relationship(back_populates="data_outputs")
-    configuration: Mapped["BaseDataOutputConfiguration"] = relationship()
+    owner: Mapped["DataProduct"] = relationship(
+        back_populates="data_outputs", lazy="joined"
+    )
+    configuration: Mapped["BaseDataOutputConfiguration"] = relationship(lazy="joined")
     configuration_id: Mapped[UUID] = Column(ForeignKey("data_output_configurations.id"))
     dataset_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
         "DataOutputDatasetAssociation",
@@ -48,5 +50,5 @@ class DataOutput(Base, BaseORM):
     platform: Mapped["Platform"] = relationship()
     service: Mapped["PlatformService"] = relationship()
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_output_table, back_populates="data_outputs"
+        secondary=tag_data_output_table, back_populates="data_outputs", lazy="joined"
     )

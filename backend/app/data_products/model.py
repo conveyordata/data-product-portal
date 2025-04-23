@@ -52,24 +52,29 @@ class DataProduct(Base, BaseORM):
         order_by="DataProductDatasetAssociation.status.desc()",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_product_table, back_populates="data_products"
+        secondary=tag_data_product_table, back_populates="data_products", lazy="joined"
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
         back_populates="data_product",
         cascade="all, delete-orphan",
         order_by="DataProductSettingValue.data_product_id",
+        lazy="joined",
     )
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
-    type: Mapped["DataProductType"] = relationship(back_populates="data_products")
+    type: Mapped["DataProductType"] = relationship(
+        back_populates="data_products", lazy="joined"
+    )
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
-        back_populates="data_products"
+        back_populates="data_products", lazy="joined"
     )
     domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
-    domain: Mapped["Domain"] = relationship(back_populates="data_products")
+    domain: Mapped["Domain"] = relationship(
+        back_populates="data_products", lazy="joined"
+    )
     data_outputs: Mapped[list["DataOutput"]] = relationship(
         "DataOutput",
         back_populates="owner",

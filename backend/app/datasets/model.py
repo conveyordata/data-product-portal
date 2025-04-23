@@ -61,20 +61,32 @@ class Dataset(Base, BaseORM):
         cascade="all, delete-orphan",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_dataset_table, back_populates="datasets"
+        secondary=tag_dataset_table, back_populates="datasets", lazy="joined"
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
         back_populates="dataset",
         cascade="all, delete-orphan",
         order_by="DataProductSettingValue.dataset_id",
+        lazy="joined",
     )
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
-    lifecycle: Mapped["DataProductLifecycle"] = relationship(back_populates="datasets")
+    lifecycle: Mapped["DataProductLifecycle"] = relationship(
+        back_populates="datasets", lazy="joined"
+    )
     domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
-    domain: Mapped["Domain"] = relationship(back_populates="datasets")
+    domain: Mapped["Domain"] = relationship(back_populates="datasets", lazy="joined")
+
+    @property
+    def data_product_count(self) -> int:
+        accepted_product_links = [
+            link
+            for link in self.data_product_links
+            if link.status == DataProductDatasetLinkStatus.APPROVED
+        ]
+        return len(accepted_product_links)
 
     def isVisibleToUser(self, user: "User"):
         if (
