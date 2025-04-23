@@ -1,60 +1,78 @@
-import { useCallback } from 'react';
-import { Node, useReactFlow, useStore } from '@xyflow/react';
+import { Node, useReactFlow } from '@xyflow/react';
 import { Select } from 'antd';
-import styles from './sidebar.module.scss';
+import { useCallback, useEffect, useState } from 'react';
 
-// const transformSelector = (state: any) => state.transform;
+// import styles from './sidebar.module.scss';
 
-export default ({ nodes, setNodes }: { nodes: Node[]; setNodes: (nodes: Node[] | ((nodes: Node[]) => Node[])) => void }) => {
-    // const transform = useStore(transformSelector);
-    const { setCenter, getNode } = useReactFlow();
-
+export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | ((nodes: Node[]) => Node[])) => void }) {
+    const { setCenter, getNode, setNodes } = useReactFlow();
+    const [nodeId, setNodeId] = useState<string | null>(null);
     const selectNode = useCallback(
         (nodeId: string) => {
+            // Update only the selected node
             setNodes((nodes: Node[]) =>
-                nodes.map((node) => {
-                    const isSelected: boolean = node.id === nodeId;
-                    console.log('isSelected', isSelected);
-                    return {
-                        ...node,
-                        data: {
-                            ...node.data,
-                            isMainNode: isSelected,
-                        },
-                        selected: isSelected,
-                    };
-                }),
+                nodes.map((node) =>
+                    node.id === nodeId
+                        ? {
+                              ...node,
+                              data: {
+                                  ...node.data,
+                                  isMainNode: true, // Mark as the main node
+                              },
+                              selected: true, // Mark as selected
+                          }
+                        : {
+                              ...node,
+                              data: {
+                                  ...node.data,
+                                  isMainNode: false, // Ensure others are not main nodes
+                              },
+                              selected: false, // Ensure others are not selected
+                          },
+                ),
             );
+            setNodeId(nodeId);
+        },
+        [setNodes],
+    );
+
+    useEffect(() => {
+        if (!nodeId) return;
+
+        // Give React Flow time to update its internals
+        const timeout = setTimeout(() => {
             const nodeToFocus = getNode(nodeId);
             if (nodeToFocus) {
+                console.log('zooming to ', nodeToFocus.position.x, nodeToFocus.position.y);
                 setCenter(nodeToFocus.position.x, nodeToFocus.position.y, {
-                    zoom: 1.2, // adjust as needed
+                    zoom: 1.2,
                     duration: 800,
                 });
             }
-        },
-        [getNode, setCenter, setNodes],
-    );
+        }, 50); // 50ms is usually enough
+
+        return () => clearTimeout(timeout);
+    }, [nodeId, getNode, setCenter]);
 
     return (
-        <aside className={styles.aside}>
-            <Select
-                showSearch
-                placeholder="Select a node"
-                onSelect={(value: string) => {
-                    selectNode(value);
-                }}
-                filterOption={(input: string, option?: { value: string; label: string }) =>
-                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
-                style={{ width: '20em', margin: '1em' }} // TODO: was unsucessful in using scss
-            >
-                {nodes.map((node) => (
-                    <Select.Option label={node.data.name} value={node.data.id}>
-                        <>{node.data.name}</>
-                    </Select.Option>
-                ))}
-            </Select>
-        </aside>
+        // <aside className={styles.aside}>
+        <Select
+            showSearch
+            placeholder="Select a node"
+            onSelect={(value: string) => {
+                selectNode(value); // Update the selected node
+            }}
+            filterOption={(input: string, option?: { value: string; label: string }) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+            style={{ width: '20em', margin: '1em' }}
+        >
+            {nodes.map((node) => (
+                <Select.Option key={node.id} label={node.data.name} value={node.id}>
+                    {String(node.data.name)}
+                </Select.Option>
+            ))}
+        </Select>
+        // </aside>
     );
-};
+}

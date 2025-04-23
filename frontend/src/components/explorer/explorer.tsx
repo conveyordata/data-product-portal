@@ -25,7 +25,7 @@ import type { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 
 import styles from './explorer.module.scss';
-import Sidebar from './sidebar';
+import { Sidebar } from './sidebar';
 
 const { getDesignToken } = theme;
 
