@@ -1,11 +1,13 @@
-import { Button, Flex, Form } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Button, Col, Flex, Form, Pagination } from 'antd';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { Searchbar } from '@/components/form';
 import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useModal } from '@/hooks/use-modal.tsx';
+import { useTablePagination } from '@/hooks/use-table-pagination';
 import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
@@ -48,6 +50,9 @@ export function TeamTab({ dataProductId }: Props) {
     const [addUserToDataProduct, { isLoading: isAddingUser }] = useAddDataProductMembershipMutation();
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
 
     const filteredUsers = useMemo(() => {
         return filterUsers(dataProduct?.memberships ?? [], searchTerm);
@@ -86,30 +91,56 @@ export function TeamTab({ dataProductId }: Props) {
         [addUserToDataProduct, dataProductId, t],
     );
 
+    const handlePageChange = (page: number, pageSize: number) => {
+        handlePaginationChange({
+            ...pagination,
+            current: page,
+            pageSize,
+        });
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [filteredUsers, resetPagination]);
+
     if (!dataProduct || !user) return null;
 
     return (
         <>
             <Flex vertical className={styles.container}>
-                <Searchbar
-                    form={searchForm}
-                    formItemProps={{ initialValue: '' }}
-                    placeholder={t('Search users by email or name')}
-                    actionButton={
-                        <Button
-                            disabled={!(canAddUserNew || isDataProductOwner)}
-                            type={'primary'}
-                            className={styles.formButton}
-                            onClick={handleOpen}
-                        >
-                            {t('Add User')}
-                        </Button>
-                    }
-                />
+                <Flex>
+                    <Col span={20} className={styles.bar}>
+                        <Searchbar
+                            form={searchForm}
+                            formItemProps={{ initialValue: '' }}
+                            placeholder={t('Search users by email or name')}
+                            actionButton={
+                                <Button
+                                    disabled={!(canAddUserNew || isDataProductOwner)}
+                                    type={'primary'}
+                                    className={styles.formButton}
+                                    onClick={handleOpen}
+                                >
+                                    {t('Add User')}
+                                </Button>
+                            }
+                        />
+                    </Col>
+                    <Col span={4} className={styles.paginationBox}>
+                        <Pagination
+                            current={pagination.current}
+                            pageSize={pagination.pageSize}
+                            total={filteredUsers.length}
+                            onChange={handlePageChange}
+                            size="small"
+                        />
+                    </Col>
+                </Flex>
                 <TeamTable
                     isCurrentUserDataProductOwner={isDataProductOwner}
                     dataProductId={dataProductId}
                     dataProductUsers={filteredUsers}
+                    pagination={pagination}
                 />
             </Flex>
             {isVisible && (

@@ -1,10 +1,12 @@
-import { Button, Flex, Form } from 'antd';
-import { useMemo } from 'react';
+import { Button, Col, Flex, Form, Pagination } from 'antd';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { Searchbar } from '@/components/form';
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useModal } from '@/hooks/use-modal.tsx';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -38,6 +40,9 @@ export function DatasetTab({ dataProductId }: Props) {
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
 
     const filteredDatasets = useMemo(() => {
         return filterDatasets(dataProduct?.dataset_links ?? [], searchTerm);
@@ -59,29 +64,55 @@ export function DatasetTab({ dataProductId }: Props) {
         return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
     }, [dataProduct, user]);
 
+    const handlePageChange = (page: number, pageSize: number) => {
+        handlePaginationChange({
+            ...pagination,
+            current: page,
+            pageSize,
+        });
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [filteredDatasets, resetPagination]);
+
     return (
         <>
             <Flex vertical className={styles.container}>
-                <Searchbar
-                    placeholder={t('Search existing input datasets by name')}
-                    formItemProps={{ initialValue: '' }}
-                    form={searchForm}
-                    actionButton={
-                        <Button
-                            disabled={!(canCreateDatasetNew || isDataProductOwner)}
-                            type={'primary'}
-                            className={styles.formButton}
-                            onClick={handleOpen}
-                        >
-                            {t('Add Dataset')}
-                        </Button>
-                    }
-                />
+                <Flex>
+                    <Col span={20} className={styles.bar}>
+                        <Searchbar
+                            placeholder={t('Search existing input datasets by name')}
+                            formItemProps={{ initialValue: '' }}
+                            form={searchForm}
+                            actionButton={
+                                <Button
+                                    disabled={!(canCreateDatasetNew || isDataProductOwner)}
+                                    type={'primary'}
+                                    className={styles.formButton}
+                                    onClick={handleOpen}
+                                >
+                                    {t('Add Dataset')}
+                                </Button>
+                            }
+                        />
+                    </Col>
+                    <Col span={4} className={styles.paginationBox}>
+                        <Pagination
+                            current={pagination.current}
+                            pageSize={pagination.pageSize}
+                            total={filteredDatasets.length}
+                            onChange={handlePageChange}
+                            size="small"
+                        />
+                    </Col>
+                </Flex>
 
                 <DatasetTable
                     isCurrentDataProductOwner={isDataProductOwner}
                     dataProductId={dataProductId}
                     datasets={filteredDatasets}
+                    pagination={pagination}
                 />
             </Flex>
             {isVisible && <AddDatasetPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}

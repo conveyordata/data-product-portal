@@ -1,10 +1,8 @@
-import { Flex, Table, type TableColumnsType, TableProps } from 'antd';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Flex, Table, type TableColumnsType } from 'antd';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useModal } from '@/hooks/use-modal.tsx';
-import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     useRemoveDataOutputMutation,
     useRemoveDatasetFromDataOutputMutation,
@@ -12,6 +10,7 @@ import {
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { DataOutputsGetContract } from '@/types/data-output';
+import { TablePaginationConfig } from '@/types/shared/tables.ts';
 
 import { AddDatasetPopup } from '../add-dataset-popup/add-dataset-popup.tsx';
 import styles from './data-output-table.module.scss';
@@ -21,9 +20,10 @@ type Props = {
     isCurrentUserDataProductOwner: boolean;
     dataProductId: string;
     dataOutputs: DataOutputsGetContract;
+    pagination: TablePaginationConfig;
 };
 
-export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, dataOutputs }: Props) {
+export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, dataOutputs, pagination }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
@@ -32,18 +32,6 @@ export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, 
 
     const [dataOutput, setDataOutput] = useState<string | undefined>(undefined);
     const { isVisible, handleOpen, handleClose } = useModal();
-
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
-        initialPagination: TABLE_SUBSECTION_PAGINATION,
-    });
-
-    const onChange: TableProps<DataOutputsGetContract[0]>['onChange'] = (pagination) => {
-        handlePaginationChange(pagination);
-    };
-
-    useEffect(() => {
-        resetPagination();
-    }, [dataOutputs, resetPagination]);
 
     const handleRemoveDataOutput = useCallback(
         async (dataOutputId: string, name: string) => {
@@ -100,10 +88,9 @@ export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, 
                     columns={columns}
                     dataSource={dataOutputs}
                     rowKey={({ id }) => id}
-                    onChange={onChange}
                     pagination={{
                         ...pagination,
-                        hideOnSinglePage: true,
+                        style: { display: 'none' },
                     }}
                     rowClassName={styles.tableRow}
                     size={'small'}

@@ -1,10 +1,8 @@
-import { Flex, Table, TableColumnsType, TableProps } from 'antd';
-import { useCallback, useEffect, useMemo } from 'react';
+import { Flex, Table, TableColumnsType } from 'antd';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
-import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
@@ -18,6 +16,7 @@ import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+import { TablePaginationConfig } from '@/types/shared/tables';
 import { UserContract } from '@/types/users';
 import { getDoesUserHaveAnyDataProductMembership } from '@/utils/data-product-user-role.helper.ts';
 
@@ -27,13 +26,14 @@ type Props = {
     isCurrentUserDataProductOwner: boolean;
     dataProductId: string;
     dataProductUsers: DataProductUserMembership[];
+    pagination: TablePaginationConfig;
 };
 
 function canPerformTeamActions(isCurrentUserDataProductOwner: boolean, userId: string, currentUserId: string) {
     return isCurrentUserDataProductOwner && userId !== currentUserId;
 }
 
-export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataProductUsers }: Props) {
+export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataProductUsers, pagination }: Props) {
     const { t } = useTranslation();
     const currentUser = useSelector(selectCurrentUser) as UserContract;
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
@@ -42,17 +42,6 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         useRemoveMembershipAccessMutation();
     const [grantMembershipAccess] = useGrantMembershipAccessMutation();
     const [denyMembershipAccess] = useDenyMembershipAccessMutation();
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
-        initialPagination: TABLE_SUBSECTION_PAGINATION,
-    });
-
-    const onChange: TableProps<DataProductUserMembership>['onChange'] = (pagination) => {
-        handlePaginationChange(pagination);
-    };
-
-    useEffect(() => {
-        resetPagination();
-    }, [dataProductUsers, resetPagination]);
 
     const { data: edit_access } = useCheckAccessQuery(
         {
@@ -175,10 +164,9 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
                 columns={columns}
                 dataSource={dataProductUsers}
                 rowKey={({ user }) => user.id}
-                onChange={onChange}
                 pagination={{
                     ...pagination,
-                    hideOnSinglePage: true,
+                    style: { display: 'none' },
                 }}
                 rowClassName={styles.tableRow}
                 size={'small'}
