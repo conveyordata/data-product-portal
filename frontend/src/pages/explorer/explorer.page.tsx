@@ -2,6 +2,7 @@ import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { FullExplorer } from '@/components/explorer/explorer';
+
 import styles from './explorer.page.module.scss';
 
 export function ExplorerPage() {
