@@ -2,14 +2,17 @@ import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { FullExplorer } from '@/components/explorer/explorer';
+import styles from './explorer.page.module.scss';
 
 export function ExplorerPage() {
     const { t } = useTranslation();
     return (
-        <div>
-            <Typography.Title level={3}>{t('Explorer')}</Typography.Title>
-            <div style={{ height: '80vh' }}>
-                <FullExplorer></FullExplorer>
+        <div className={styles.explorerPage}>
+            <Typography.Title level={3} className={styles.title}>
+                {t('Explorer')}
+            </Typography.Title>
+            <div className={styles.explorerContainer}>
+                <FullExplorer />
             </div>
         </div>
     );
