@@ -45,7 +45,7 @@ export function DataProductsTable() {
         { skip: !currentUser },
     );
     const canCreateDataProduct = access?.allowed || false;
-    const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 
@@ -69,25 +69,13 @@ export function DataProductsTable() {
 
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
         onQuickFilterChange(value);
-        resetPagination();
     };
 
     useEffect(() => {
         if (!isFetching && !isFetchingUserDataProducts) {
-            if (quickFilter === QuickFilterParticipation.All) {
-                handleTotalChange(dataProducts.length);
-            } else {
-                handleTotalChange(userDataProducts.length);
-            }
+            resetPagination();
         }
-    }, [
-        quickFilter,
-        isFetching,
-        isFetchingUserDataProducts,
-        handleTotalChange,
-        dataProducts.length,
-        userDataProducts.length,
-    ]);
+    }, [filteredDataProducts, isFetching, isFetchingUserDataProducts, resetPagination]);
 
     return (
         <Flex vertical className={styles.tableContainer}>
