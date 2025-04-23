@@ -1,12 +1,14 @@
 import { Node, useReactFlow } from '@xyflow/react';
 import { Select } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-// import styles from './sidebar.module.scss';
+import styles from './sidebar.module.scss';
 
 export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | ((nodes: Node[]) => Node[])) => void }) {
     const { setCenter, getNode, setNodes } = useReactFlow();
     const [nodeId, setNodeId] = useState<string | null>(null);
+    const { t } = useTranslation();
     const selectNode = useCallback(
         (nodeId: string) => {
             // Update only the selected node
@@ -32,7 +34,6 @@ export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | (
         const timeout = setTimeout(() => {
             const nodeToFocus = getNode(nodeId);
             if (nodeToFocus) {
-                console.log('zooming to ', nodeToFocus.position.x, nodeToFocus.position.y);
                 setCenter(nodeToFocus.position.x, nodeToFocus.position.y, {
                     zoom: 1.2,
                     duration: 800,
@@ -44,17 +45,16 @@ export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | (
     }, [nodeId, getNode, setCenter]);
 
     return (
-        // <aside className={styles.aside}>
         <Select
             showSearch
-            placeholder="Select a node"
+            placeholder={t('Select a node')}
             onSelect={(value: string) => {
                 selectNode(value); // Update the selected node
             }}
             filterOption={(input: string, option?: { value: string; label: string }) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
             }
-            style={{ width: '20em', margin: '1em' }}
+            className={styles.sidebar}
         >
             {nodes.map((node) => (
                 <Select.Option key={node.id} label={node.data.name} value={node.id}>
@@ -62,6 +62,5 @@ export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | (
                 </Select.Option>
             ))}
         </Select>
-        // </aside>
     );
 }
