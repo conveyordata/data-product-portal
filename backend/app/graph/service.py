@@ -52,7 +52,7 @@ class GraphService:
                     id=data_output.id,
                     name=data_output.name,
                     icon_key=data_output.configuration.configuration_type,
-                    link_to_id=data_output.id,
+                    link_to_id=data_output.owner.id,
                 ),
                 type=NodeType.dataOutputNode,
             )
