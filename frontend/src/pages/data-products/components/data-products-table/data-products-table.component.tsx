@@ -1,5 +1,5 @@
-import type { RadioChangeEvent, TableProps } from 'antd';
-import { Button, Flex, Form, Input, Space, Table, Typography } from 'antd';
+import type { RadioChangeEvent } from 'antd';
+import { Button, Flex, Form, Input, Pagination, Space, Table, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -59,8 +59,12 @@ export function DataProductsTable() {
         [t, filteredDataProducts],
     );
 
-    const onChange: TableProps<DataProductsGetContract[0]>['onChange'] = (pagination) => {
-        handlePaginationChange(pagination);
+    const handlePageChange = (page: number, pageSize: number) => {
+        handlePaginationChange({
+            ...pagination,
+            current: page,
+            pageSize,
+        });
     };
 
     const navigateToDataProduct = (dataProductId: string) => {
@@ -99,11 +103,21 @@ export function DataProductsTable() {
                 </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                <TableQuickFilter
-                    value={quickFilter}
-                    onFilterChange={handleQuickFilterChange}
-                    quickFilterOptions={quickFilterOptions}
-                />
+                <Flex align="flex-end" justify="space-between" className={styles.tableBar}>
+                    <TableQuickFilter
+                        value={quickFilter}
+                        onFilterChange={handleQuickFilterChange}
+                        quickFilterOptions={quickFilterOptions}
+                    />
+                    <Pagination
+                        current={pagination.current}
+                        pageSize={pagination.pageSize}
+                        total={filteredDataProducts.length}
+                        onChange={handlePageChange}
+                        size="small"
+                    />
+                </Flex>
+
                 <Table<DataProductsGetContract[0]>
                     onRow={(record) => ({
                         onClick: () => navigateToDataProduct(record.id),
@@ -111,8 +125,10 @@ export function DataProductsTable() {
                     className={styles.table}
                     columns={columns}
                     dataSource={filteredDataProducts}
-                    onChange={onChange}
-                    pagination={pagination}
+                    pagination={{
+                        ...pagination,
+                        style: { display: 'none' },
+                    }}
                     rowKey={(record) => record.id}
                     loading={isFetching}
                     rowHoverable
