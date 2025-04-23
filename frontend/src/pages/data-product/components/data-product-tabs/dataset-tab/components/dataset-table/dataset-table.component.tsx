@@ -1,7 +1,9 @@
-import { Flex, Table, type TableColumnsType } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Flex, Table, type TableColumnsType, TableProps } from 'antd';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     useGetDataProductByIdQuery,
     useRemoveDatasetFromDataProductMutation,
@@ -23,6 +25,17 @@ export function DatasetTable({ isCurrentDataProductOwner, dataProductId, dataset
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
     const [removeDatasetFromDataProduct, { isLoading: isRemovingDatasetFromDataProduct }] =
         useRemoveDatasetFromDataProductMutation();
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
+
+    const onChange: TableProps<DatasetLink>['onChange'] = (pagination) => {
+        handlePaginationChange(pagination);
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [datasets, resetPagination]);
 
     const handleRemoveDatasetFromDataProduct = useCallback(
         async (datasetId: string, name: string) => {
@@ -82,7 +95,11 @@ export function DatasetTable({ isCurrentDataProductOwner, dataProductId, dataset
                 columns={columns}
                 dataSource={datasets}
                 rowKey={({ id }) => id}
-                pagination={false}
+                onChange={onChange}
+                pagination={{
+                    ...pagination,
+                    hideOnSinglePage: true,
+                }}
                 rowClassName={styles.tableRow}
                 size={'small'}
             />
