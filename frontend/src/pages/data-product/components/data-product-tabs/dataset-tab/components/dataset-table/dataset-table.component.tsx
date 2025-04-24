@@ -1,14 +1,15 @@
-import { Flex, Table, type TableColumnsType } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Flex, Table, type TableColumnsType, TableProps } from 'antd';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     useGetDataProductByIdQuery,
     useRemoveDatasetFromDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { DatasetLink } from '@/types/data-product';
-import { TablePaginationConfig } from '@/types/shared/tables.ts';
 
 import styles from './dataset-table.module.scss';
 import { getDataProductDatasetsColumns } from './dataset-table-columns.tsx';
@@ -17,14 +18,25 @@ type Props = {
     isCurrentDataProductOwner: boolean;
     dataProductId: string;
     datasets: DatasetLink[];
-    pagination: TablePaginationConfig;
 };
 
-export function DatasetTable({ isCurrentDataProductOwner, dataProductId, datasets, pagination }: Props) {
+export function DatasetTable({ isCurrentDataProductOwner, dataProductId, datasets }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
     const [removeDatasetFromDataProduct, { isLoading: isRemovingDatasetFromDataProduct }] =
         useRemoveDatasetFromDataProductMutation();
+
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
+
+    const onChange: TableProps<DatasetLink>['onChange'] = (pagination) => {
+        handlePaginationChange(pagination);
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [datasets, resetPagination]);
 
     const handleRemoveDatasetFromDataProduct = useCallback(
         async (datasetId: string, name: string) => {
@@ -84,9 +96,18 @@ export function DatasetTable({ isCurrentDataProductOwner, dataProductId, dataset
                 columns={columns}
                 dataSource={datasets}
                 rowKey={({ id }) => id}
+                onChange={onChange}
                 pagination={{
                     ...pagination,
-                    position: [],
+                    position: ['topRight'],
+                    simple: true,
+                    showTotal: (total, range) =>
+                        t('Showing {{range0}}-{{range1}} of {{total}} datasets', {
+                            range0: range[0],
+                            range1: range[1],
+                            total: total,
+                        }),
+                    className: styles.pagination,
                 }}
                 rowClassName={styles.tableRow}
                 size={'small'}

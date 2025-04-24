@@ -1,12 +1,10 @@
-import { Button, Col, Flex, Form, Pagination } from 'antd';
-import { useEffect, useMemo } from 'react';
+import { Button, Flex, Form } from 'antd';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { Searchbar } from '@/components/form';
-import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useModal } from '@/hooks/use-modal.tsx';
-import { useTablePagination } from '@/hooks/use-table-pagination';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -40,9 +38,6 @@ export function DataOutputTab({ dataProductId }: Props) {
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
-        initialPagination: TABLE_SUBSECTION_PAGINATION,
-    });
 
     const filteredDataOutputs = useMemo(() => {
         return filterDataOutputs(dataProduct?.data_outputs ?? [], searchTerm);
@@ -64,55 +59,29 @@ export function DataOutputTab({ dataProductId }: Props) {
         return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
     }, [dataProduct, user]);
 
-    const handlePageChange = (page: number, pageSize: number) => {
-        handlePaginationChange({
-            ...pagination,
-            current: page,
-            pageSize,
-        });
-    };
-
-    useEffect(() => {
-        resetPagination();
-    }, [filteredDataOutputs, resetPagination]);
-
     return (
         <>
             <Flex vertical className={styles.container}>
-                <Flex>
-                    <Col span={20} className={styles.bar}>
-                        <Searchbar
-                            placeholder={t('Search data outputs by name')}
-                            formItemProps={{ initialValue: '' }}
-                            form={searchForm}
-                            actionButton={
-                                <Button
-                                    disabled={!(canCreateDataOutputNew || isDataProductOwner)}
-                                    type={'primary'}
-                                    className={styles.formButton}
-                                    onClick={handleOpen}
-                                >
-                                    {t('Add Data Output')}
-                                </Button>
-                            }
-                        />
-                    </Col>
-                    <Col span={4} className={styles.paginationBox}>
-                        <Pagination
-                            current={pagination.current}
-                            pageSize={pagination.pageSize}
-                            total={filteredDataOutputs.length}
-                            onChange={handlePageChange}
-                            size="small"
-                        />
-                    </Col>
-                </Flex>
+                <Searchbar
+                    placeholder={t('Search data outputs by name')}
+                    formItemProps={{ initialValue: '' }}
+                    form={searchForm}
+                    actionButton={
+                        <Button
+                            disabled={!(canCreateDataOutputNew || isDataProductOwner)}
+                            type={'primary'}
+                            className={styles.formButton}
+                            onClick={handleOpen}
+                        >
+                            {t('Add Data Output')}
+                        </Button>
+                    }
+                />
 
                 <DataOutputTable
                     dataProductId={dataProductId}
                     dataOutputs={filteredDataOutputs}
                     isCurrentUserDataProductOwner={isDataProductOwner}
-                    pagination={pagination}
                 />
             </Flex>
             {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
