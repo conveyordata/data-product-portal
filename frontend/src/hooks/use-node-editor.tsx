@@ -32,10 +32,6 @@ export function useNodeEditor() {
         [setEdges],
     );
 
-    // useEffect(() => {
-    //     window.requestAnimationFrame(() => fitView(defaultFitViewOptions));
-    // }, [nodes, edges, fitView]);
-
     return {
         setNodesAndEdges,
         setNodes,
