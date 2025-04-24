@@ -38,7 +38,7 @@ export const getDataOutputDatasetsColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             render: (_, { dataset, status }) => {
-                const isDatasetRequestApproved = status === 'approved';
+                const isDatasetRequestApproved = status === DecisionStatus.Approved;
                 const popoverTitle = (
                     <DatasetPopoverTitle
                         name={dataset.name}
