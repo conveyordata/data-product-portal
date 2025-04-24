@@ -1,5 +1,5 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
-import { Badge, Col, Empty, Pagination, theme, Typography } from 'antd';
+import { Badge, Col, Empty, Flex, Pagination, theme, Typography } from 'antd';
 import { TFunction } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -59,7 +59,6 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
                         <strong>{action.data_product.name}</strong>
                     </Link>
-                    {t(' :')}
                 </Typography.Text>
             );
             message = (
@@ -106,7 +105,6 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         <strong>{action.data_output.name}</strong>
                     </Link>
-                    {t(' :')}
                 </Typography.Text>
             );
             message = (
@@ -154,7 +152,6 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                             {action.user.first_name} {action.user.last_name}
                         </strong>
                     </Link>
-                    {t(' :')}
                 </Typography.Text>
             );
             message = (
@@ -432,29 +429,26 @@ export function PendingRequestsInbox() {
 
     return (
         <div className={styles.requestsInbox}>
+            <Flex align="flex-end" justify="space-between">
+                <Typography.Title level={3}>
+                    {t('Pending Requests')}
+                    <Badge count={slicedPendingActionItems.length} color="gray" className={styles.requestsInfo} />
+                </Typography.Title>{' '}
+                <Pagination
+                    current={pagination.current}
+                    pageSize={pagination.pageSize}
+                    total={slicedPendingActionItems.length}
+                    onChange={onPaginationChange}
+                    size="small"
+                />
+            </Flex>
             <div className={styles.sectionTitle}>
-                <Col span={12}>
-                    <Typography.Title level={3}>
-                        {t('Pending Requests')}
-                        <Badge count={slicedPendingActionItems.length} color="gray" className={styles.requestsInfo} />
-                    </Typography.Title>
-                </Col>
-                <Col span={12} className={styles.topRightColumn}>
+                <Col span={24}>
                     <SelectableTabs onSelectChange={handleTabChange} />
-                    <div className={styles.pagination}>
-                        <Pagination
-                            current={pagination.current}
-                            pageSize={pagination.pageSize}
-                            total={slicedPendingActionItems.length}
-                            onChange={onPaginationChange}
-                            size="small"
-                            simple
-                        />
-                    </div>
                 </Col>
             </div>
 
-            <div className={styles.contentSecondary}>
+            <Flex className={styles.contentSecondary} vertical>
                 <PendingRequestsList
                     pendingActionItems={slicedPendingActionItems}
                     pagination={pagination}
@@ -465,7 +459,7 @@ export function PendingRequestsInbox() {
                         handleDeny(item);
                     }}
                 />
-            </div>
+            </Flex>
         </div>
     );
 }

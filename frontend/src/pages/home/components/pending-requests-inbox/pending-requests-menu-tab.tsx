@@ -59,7 +59,6 @@ export const SelectableTabs = ({ onSelectChange }: SelectableTabsProps) => {
         <Tabs
             activeKey={activeKey}
             onChange={handleChange}
-            style={{ width: '100%' }}
             items={items.map(({ key, title, icon }) => ({
                 key,
                 label: title,

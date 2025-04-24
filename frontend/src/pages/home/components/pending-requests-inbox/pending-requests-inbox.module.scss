@@ -4,20 +4,18 @@ $item-card-width: 360px;
 $landing-banner-height: 260px;
 $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgba(3, 79, 165, 0.1) 45.13%);
 
-.pagination {
-    position: static;
-    top: 0;
-    right: 0;
-    padding-right: globals.$spacing-xxl;
-    padding-top: globals.$spacing-regular;
-    @media (min-width: 1350px) {
-        position: absolute;
-    }
+.content-secondary {
+    display: flex;
+}
+
+.pagination-box {
+    margin-left: auto;
+    width: 100%;
+    background-color: blue;
 }
 
 .avatar {
-    margin-top: globals.$spacing-s;
-    margin-left: globals.$spacing-s;
+    margin-bottom: globals.$icon-size-large - globals.$spacing-ml;
 }
 
 .top-right-column {
@@ -29,20 +27,30 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     padding-right: globals.$spacing-xxl;
 }
 
-.action-item {
-    position: relative;
+$item-card-width: 360px;
+
+.list-item {
+    width: 100%;
     background-color: globals.$quaternary-color-fill;
     border: 1px solid globals.$border-color-secondary;
-    border-radius: globals.$border-radius-sm;
+    border-radius: globals.$border-radius-lg;
+    padding: unset !important;
+    margin-bottom: globals.$spacing-m;
     transition: border-color 0.3s;
-    cursor: pointer;
 
     &:hover {
         border-color: globals.$primary-color-border-hover;
         transition: border-color 0.3s;
     }
-    margin-bottom: globals.$spacing-regular;
-    padding: globals.$spacing-m !important;
+
+    .item-card {
+        width: 100% !important;
+        display: flex;
+        align-items: center !important;
+        height: 100%;
+        padding: globals.$spacing-m globals.$spacing-l;
+        min-width: $item-card-width;
+    }
 }
 
 .bolder {
@@ -100,4 +108,13 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 .welcome-content {
     display: flex;
     justify-content: center;
+}
+
+.button {
+    width: globals.$button-width/2;
+}
+
+.buttons {
+    margin-top: globals.$spacing-m;
+    background-color: globals.$quaternary-color-fill;
 }

@@ -58,17 +58,22 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                     <>
                         <List.Item
                             key={item.key}
-                            className={styles.actionItem}
+                            className={styles.listItem}
                             onClick={() => handleItemClick(item.navigatePath)}
                         >
                             <List.Item.Meta
+                                className={styles.itemCard}
                                 avatar={
-                                    <Avatar style={{ backgroundColor: item.color }} className={styles.avatar}>
+                                    <Avatar
+                                        style={{ backgroundColor: item.color }}
+                                        size="large"
+                                        className={styles.avatar}
+                                    >
                                         {item.initials || <UserOutlined />}
                                     </Avatar>
                                 }
                                 title={
-                                    <Flex vertical>
+                                    <Flex vertical gap={2}>
                                         <Typography.Text>{item.description}</Typography.Text>
                                         <Typography.Text type="secondary" style={{ fontWeight: 'normal' }}>
                                             by {item.author}, {formattedDate}
@@ -78,34 +83,31 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                                 description={<Typography.Text>{item.message}</Typography.Text>}
                             />
                             <Flex align="end" className={styles.actionsTopRight}>
-                                <Flex className={styles.typeIndicator}>
+                                <Flex className={styles.typeIndicator} gap="small">
                                     <Typography.Text className={styles.tag} type="secondary">
                                         {item.icon}
-                                        <Typography.Text>{item.origin}</Typography.Text>
                                     </Typography.Text>
+                                    <Typography.Text>{item.origin}</Typography.Text>
                                 </Flex>
 
-                                <div
-                                    style={{
-                                        borderColor: item.color,
-                                        boxShadow: `0 -4px 0 0 ${item.color}`,
-                                    }}
-                                >
+                                <div className={styles.buttons}>
                                     <Button
-                                        className={styles.resolveButton}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onAccept(item.request);
                                         }}
+                                        className={styles.button}
+                                        type="link"
                                     >
                                         {t('Accept')}
                                     </Button>
                                     <Button
-                                        className={styles.resolveButton}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onReject(item.request);
                                         }}
+                                        className={styles.button}
+                                        type="link"
                                     >
                                         {t('Reject')}
                                     </Button>
