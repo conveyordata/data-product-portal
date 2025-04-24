@@ -448,6 +448,7 @@ export function PendingRequestsInbox() {
                             total={slicedPendingActionItems.length}
                             onChange={onPaginationChange}
                             size="small"
+                            simple
                         />
                     </div>
                 </Col>

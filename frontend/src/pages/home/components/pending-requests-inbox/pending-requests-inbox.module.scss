@@ -10,7 +10,7 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     right: 0;
     padding-right: globals.$spacing-xxl;
     padding-top: globals.$spacing-regular;
-    @media (min-width: 1380px) {
+    @media (min-width: 1350px) {
         position: absolute;
     }
 }
