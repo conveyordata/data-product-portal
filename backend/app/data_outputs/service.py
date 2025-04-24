@@ -4,7 +4,8 @@ from uuid import UUID
 import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.email.send_mail import send_mail
@@ -95,11 +96,25 @@ class DataOutputService:
         return tags
 
     def get_data_outputs(self, db: Session) -> list[DataOutput]:
-        data_outputs = db.query(DataOutputModel).all()
+        data_outputs = (
+            db.scalars(
+                select(DataOutputModel).options(
+                    joinedload(DataOutputModel.dataset_links)
+                )
+            )
+            .unique()
+            .all()
+        )
         return data_outputs
 
     def get_data_output(self, id: UUID, db: Session) -> DataOutput:
-        return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
+        return db.get(
+            DataOutputModel,
+            id,
+            options=[
+                joinedload(DataOutputModel.dataset_links),
+            ],
+        )
 
     def create_data_output(
         self,
@@ -137,6 +152,7 @@ class DataOutputService:
         data_output = db.get(
             DataOutputModel,
             id,
+            options=[joinedload(DataOutputModel.dataset_links)],
         )
         if not data_output:
             raise HTTPException(
@@ -165,7 +181,9 @@ class DataOutputService:
         background_tasks: BackgroundTasks,
     ):
         dataset = ensure_dataset_exists(dataset_id, db)
-        data_output = ensure_data_output_exists(id, db)
+        data_output = ensure_data_output_exists(
+            id, db, options=[joinedload(DataOutputModel.dataset_links)]
+        )
         self.ensure_owner(authenticated_user, data_output, db)
 
         if dataset.id in [
@@ -228,7 +246,9 @@ class DataOutputService:
         self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
     ):
         ensure_dataset_exists(dataset_id, db)
-        data_output = ensure_data_output_exists(id, db)
+        data_output = ensure_data_output_exists(
+            id, db, options=[joinedload(DataOutputModel.dataset_links)]
+        )
         self.ensure_owner(authenticated_user, data_output, db)
         data_output_dataset = next(
             (
@@ -263,7 +283,9 @@ class DataOutputService:
         return {"id": current_data_output.id}
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
-        dataOutput = db.get(DataOutputModel, id)
+        dataOutput = db.get(
+            DataOutputModel, id, options=[joinedload(DataOutputModel.dataset_links)]
+        )
         graph = DataProductService().get_graph_data(dataOutput.owner_id, level, db)
 
         for node in graph.nodes:

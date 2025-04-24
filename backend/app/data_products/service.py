@@ -487,7 +487,15 @@ class DataProductService:
         return CONVEYOR_SERVICE.generate_ide_url(data_product.namespace)
 
     def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
-        return db.query(DataOutputModel).filter(DataOutputModel.owner_id == id).all()
+        return (
+            db.scalars(
+                select(DataOutputModel)
+                .filter(DataOutputModel.owner_id == id)
+                .options(joinedload(DataOutputModel.dataset_links))
+            )
+            .unique()
+            .all()
+        )
 
     def get_databricks_workspace_url(
         self, id: UUID, environment: str, db: Session

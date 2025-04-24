@@ -7,6 +7,7 @@ from sqlalchemy import asc
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
@@ -67,7 +68,15 @@ class DataOutputDatasetService:
         db.commit()
 
     def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
+        current_link = db.get(
+            DataOutputDatasetAssociationModel,
+            id,
+            options=[
+                joinedload(DataOutputDatasetAssociationModel.data_output).joinedload(
+                    DataOutputModel.dataset_links
+                )
+            ],
+        )
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
