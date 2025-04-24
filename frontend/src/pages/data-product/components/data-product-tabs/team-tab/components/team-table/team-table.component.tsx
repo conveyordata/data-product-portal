@@ -1,8 +1,10 @@
-import { Flex, Table, TableColumnsType } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Flex, Table, TableColumnsType, TableProps } from 'antd';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
+import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
@@ -66,6 +68,18 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     const canApproveUserNew = approve_access?.allowed || false;
     const canEditUserNew = edit_access?.allowed || false;
     const canRemoveUserNew = remove_access?.allowed || false;
+
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
+
+    const onChange: TableProps<DataProductUserMembership>['onChange'] = (pagination) => {
+        handlePaginationChange(pagination);
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [dataProductUsers, resetPagination]);
 
     const handleRemoveUserAccess = useCallback(
         async (membershipId: string) => {
@@ -162,7 +176,19 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
                 columns={columns}
                 dataSource={dataProductUsers}
                 rowKey={({ user }) => user.id}
-                pagination={false}
+                onChange={onChange}
+                pagination={{
+                    ...pagination,
+                    position: ['topRight'],
+                    size: 'small',
+                    showTotal: (total, range) =>
+                        t('Showing {{range0}}-{{range1}} of {{total}} team members', {
+                            range0: range[0],
+                            range1: range[1],
+                            total: total,
+                        }),
+                    className: styles.pagination,
+                }}
                 rowClassName={styles.tableRow}
                 size={'small'}
             />

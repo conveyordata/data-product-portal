@@ -1,6 +1,11 @@
 {
     "Documentation": "Documentation",
     "by {{author}} on {{date}}": "by {{author}} on {{date}}",
+    "Showing {{range0}}-{{range1}} of {{total}} team members": "Showing {{range0}}-{{range1}} of {{total}} team members",
+    "Showing {{range0}}-{{range1}} of {{total}} data outputs": "Showing {{range0}}-{{range1}} of {{total}} data outputs",
+    "Showing {{range0}}-{{range1}} of {{total}} datasets": "Showing {{range0}}-{{range1}} of {{total}} datasets",
+    "Showing {{range0}}-{{range1}} of {{total}} data products": "Showing {{range0}}-{{range1}} of {{total}} data products",
+    "Showing {{range0}}-{{range1}} of {{total}} dataset owners": "Showing {{range0}}-{{range1}} of {{total}} dataset owners",
     "There are currently no pending requests.": "There are currently no pending requests.",
     "Logo": "Data Product Portal",
     "Data Product Portal": "Data Product Portal",
