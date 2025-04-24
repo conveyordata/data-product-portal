@@ -167,7 +167,7 @@ export function PendingRequestsInbox() {
                     pageSize={pagination.pageSize}
                     total={pendingItems.length}
                     onChange={onPaginationChange}
-                    size="small"
+                    simple
                 />
             </div>
             <div className={styles.requestsListContainer}>
