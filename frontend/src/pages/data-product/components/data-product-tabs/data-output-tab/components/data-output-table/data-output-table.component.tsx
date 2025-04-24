@@ -103,13 +103,14 @@ export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, 
                     pagination={{
                         ...pagination,
                         position: ['topRight'],
-                        simple: true,
+                        size: 'small',
                         showTotal: (total, range) =>
                             t('Showing {{range0}}-{{range1}} of {{total}} data outputs', {
                                 range0: range[0],
                                 range1: range[1],
                                 total: total,
                             }),
+                        hideOnSinglePage: false,
                         className: styles.pagination,
                     }}
                     rowClassName={styles.tableRow}

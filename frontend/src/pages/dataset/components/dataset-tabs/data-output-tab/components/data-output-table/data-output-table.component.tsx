@@ -1,7 +1,9 @@
-import { Flex, Table, type TableColumnsType } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Flex, Table, type TableColumnsType, TableProps } from 'antd';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRemoveDataOutputDatasetLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
 import { useApproveDataOutputLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
@@ -45,6 +47,18 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
     );
     const canAcceptNew = accept_access?.allowed || false;
     const canRevokeNew = revoke_access?.allowed || false;
+
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
+
+    const onChange: TableProps<DataOutputLink>['onChange'] = (pagination) => {
+        handlePaginationChange(pagination);
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [dataOutputs, resetPagination]);
 
     const handleRemoveDatasetFromDataOutput = useCallback(
         async (dataOutputId: string, name: string, datasetLinkId: string) => {
@@ -133,7 +147,19 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
                 columns={columns}
                 dataSource={dataOutputs}
                 rowKey={({ id }) => id}
-                pagination={false}
+                onChange={onChange}
+                pagination={{
+                    ...pagination,
+                    position: ['topRight'],
+                    size: 'small',
+                    showTotal: (total, range) =>
+                        t('Showing {{range0}}-{{range1}} of {{total}} data outputs', {
+                            range0: range[0],
+                            range1: range[1],
+                            total: total,
+                        }),
+                    className: styles.pagination,
+                }}
                 rowClassName={styles.tableRow}
                 size={'small'}
             />

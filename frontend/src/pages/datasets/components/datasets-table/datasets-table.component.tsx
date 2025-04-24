@@ -104,7 +104,7 @@ export function DatasetsTable() {
                         pageSize={pagination.pageSize}
                         total={filteredDatasets.length}
                         onChange={handlePageChange}
-                        simple
+                        size="small"
                         showTotal={(total, range) =>
                             t('Showing {{range0}}-{{range1}} of {{total}} datasets', {
                                 range0: range[0],

@@ -114,7 +114,7 @@ export function DataProductsTable() {
                         pageSize={pagination.pageSize}
                         total={filteredDataProducts.length}
                         onChange={handlePageChange}
-                        simple
+                        size="small"
                         showTotal={(total, range) =>
                             t('Showing {{range0}}-{{range1}} of {{total}} data products', {
                                 range0: range[0],

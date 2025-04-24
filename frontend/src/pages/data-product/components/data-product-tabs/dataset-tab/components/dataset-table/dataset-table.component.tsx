@@ -100,7 +100,7 @@ export function DatasetTable({ isCurrentDataProductOwner, dataProductId, dataset
                 pagination={{
                     ...pagination,
                     position: ['topRight'],
-                    simple: true,
+                    size: 'small',
                     showTotal: (total, range) =>
                         t('Showing {{range0}}-{{range1}} of {{total}} datasets', {
                             range0: range[0],

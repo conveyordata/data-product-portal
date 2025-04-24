@@ -180,7 +180,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
                 pagination={{
                     ...pagination,
                     position: ['topRight'],
-                    simple: true,
+                    size: 'small',
                     showTotal: (total, range) =>
                         t('Showing {{range0}}-{{range1}} of {{total}} team members', {
                             range0: range[0],
