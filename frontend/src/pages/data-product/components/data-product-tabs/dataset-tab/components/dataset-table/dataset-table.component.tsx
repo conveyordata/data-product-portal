@@ -86,7 +86,7 @@ export function DatasetTable({ isCurrentDataProductOwner, dataProductId, dataset
                 rowKey={({ id }) => id}
                 pagination={{
                     ...pagination,
-                    style: { display: 'none' },
+                    position: [],
                 }}
                 rowClassName={styles.tableRow}
                 size={'small'}

@@ -90,7 +90,7 @@ export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, 
                     rowKey={({ id }) => id}
                     pagination={{
                         ...pagination,
-                        style: { display: 'none' },
+                        position: [],
                     }}
                     rowClassName={styles.tableRow}
                     size={'small'}

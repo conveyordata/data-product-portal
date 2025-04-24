@@ -166,7 +166,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
                 rowKey={({ user }) => user.id}
                 pagination={{
                     ...pagination,
-                    style: { display: 'none' },
+                    position: [],
                 }}
                 rowClassName={styles.tableRow}
                 size={'small'}

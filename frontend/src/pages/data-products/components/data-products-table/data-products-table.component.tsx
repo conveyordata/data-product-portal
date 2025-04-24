@@ -127,7 +127,7 @@ export function DataProductsTable() {
                     dataSource={filteredDataProducts}
                     pagination={{
                         ...pagination,
-                        style: { display: 'none' },
+                        position: [],
                     }}
                     rowKey={(record) => record.id}
                     loading={isFetching}
