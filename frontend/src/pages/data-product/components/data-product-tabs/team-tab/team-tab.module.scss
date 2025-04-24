@@ -2,16 +2,5 @@
 
 .container {
     @extend .container;
-    gap: globals.$column-gap-xs;
-}
-
-.pagination-box {
-    padding: globals.$column-gap-xs;
-    display: flex;
-    align-items: baseline;
-    justify-content: end;
-}
-
-.list {
-    width: 100%;
+    gap: globals.$column-gap-regular;
 }
