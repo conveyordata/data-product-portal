@@ -19,37 +19,40 @@ if TYPE_CHECKING:
 
 class DataProductSettingValue(Base, BaseORM):
     __tablename__ = "data_products_settings_values"
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    data_product_id: Mapped[uuid.UUID] = mapped_column(
-        "data_product_id", ForeignKey("data_products.id"), nullable=True
+    value = Column(String)
+
+    # Foreign keys
+    data_product_setting_id: Mapped[UUID] = mapped_column(
+        ForeignKey("data_product_settings.id")
     )
-    data_product: Mapped["DataProduct"] = relationship(
-        "DataProduct",
-        back_populates="data_product_settings",
-        order_by="DataProduct.name",
+    data_product_id: Mapped[UUID] = mapped_column(
+        ForeignKey("data_products.id"), nullable=True
     )
-    data_product_setting_id: Mapped[uuid.UUID] = mapped_column(
-        "data_product_setting_id", ForeignKey("data_product_settings.id")
-    )
-    dataset_id: Mapped[uuid.UUID] = mapped_column(
-        "dataset_id", ForeignKey("datasets.id"), nullable=True
-    )
-    dataset: Mapped["Dataset"] = relationship(
-        "Dataset",
-        back_populates="data_product_settings",
-        order_by="Dataset.name",
-    )
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"), nullable=True)
+
+    # Relationships
     data_product_setting: Mapped["DataProductSetting"] = relationship(
-        "DataProductSetting",
-        back_populates="data_products",
+        back_populates="data_product_setting_value",
         order_by="DataProductSetting.name",
         lazy="joined",
     )
-    value = Column(String)
+    data_product: Mapped["DataProduct"] = relationship(
+        back_populates="data_product_settings",
+        order_by="DataProduct.name",
+        lazy="raise",
+    )
+    dataset: Mapped["Dataset"] = relationship(
+        back_populates="data_product_settings",
+        order_by="Dataset.name",
+        lazy="raise",
+    )
 
 
 class DataProductSetting(Base, BaseORM):
     __tablename__ = "data_product_settings"
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     namespace = Column(String)
     name = Column(String)
@@ -60,9 +63,10 @@ class DataProductSetting(Base, BaseORM):
     order = Column(Integer)
     scope = Column(Enum(DataProductSettingScope))
 
-    data_products: Mapped[list["DataProductSettingValue"]] = relationship(
-        "DataProductSettingValue",
+    # Relationships
+    data_product_setting_value: Mapped[list["DataProductSettingValue"]] = relationship(
         back_populates="data_product_setting",
         cascade="all, delete-orphan",
         order_by="DataProductSettingValue.data_product_id",
+        lazy="raise",
     )
