@@ -1,8 +1,5 @@
 @use '@/styles/globals';
 
-$landing-banner-height: 260px;
-$landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgba(3, 79, 165, 0.1) 45.13%);
-
 .container {
     height: 100%;
     display: flex;
