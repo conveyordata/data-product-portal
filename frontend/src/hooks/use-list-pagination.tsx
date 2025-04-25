@@ -35,9 +35,9 @@ export const useListPagination = ({ initialPagination = DEFAULT_LIST_PAGINATION 
         }));
     };
 
-    const handlePaginationChange = useCallback((pagination: ListPaginationConfig) => {
+    const handlePaginationChange = (pagination: ListPaginationConfig) => {
         setPagination(pagination);
-    }, []);
+    };
     return {
         pagination,
         resetPagination,
