@@ -82,7 +82,7 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                                             <Typography.Text>{item.origin}</Typography.Text>
                                         </Flex>
 
-                                        <div className={styles.buttons}>
+                                        <div>
                                             <Button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
