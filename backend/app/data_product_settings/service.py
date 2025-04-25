@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -9,6 +10,7 @@ from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
     NamespaceValidation,
+    NamespaceValidityType,
 )
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.enums import DataProductSettingScope
@@ -87,6 +89,16 @@ class DataProductSettingService:
     def create_data_product_setting(
         self, setting: DataProductSetting, db: Session
     ) -> dict[str, UUID]:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                setting.namespace, db, setting.scope
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
         setting = DataProductSettingModel(**setting.parse_pydantic_schema())
         db.add(setting)
         db.commit()
