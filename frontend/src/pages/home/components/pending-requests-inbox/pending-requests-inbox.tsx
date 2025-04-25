@@ -30,7 +30,7 @@ type PendingAction =
     | ({ type: PendingActionTypes.DataProductMembership } & DataProductMembershipContract);
 
 const createPendingItem = (action: PendingAction, t: TFunction, color: string) => {
-    let link, description, navigatePath, date, author, initials, message, origin, type, request, icon;
+    let link, description, navigatePath, date, author, initials, message, tag, type, request, icon;
 
     function getInitials(firstName: string, lastName: string) {
         return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
@@ -58,7 +58,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
                     {t('dataset.')}
                 </Typography.Text>
             );
-            origin = (
+            tag = (
                 <Typography.Text
                     style={{
                         color: color,
@@ -103,7 +103,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
                     {t('dataset.')}
                 </Typography.Text>
             );
-            origin = (
+            tag = (
                 <Typography.Text
                     style={{
                         color: color,
@@ -153,7 +153,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
                     {t('data product.')}
                 </Typography.Text>
             );
-            origin = (
+            tag = (
                 <Typography.Text
                     style={{
                         color: color,
@@ -186,7 +186,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
         initials: initials,
         message: message,
         color: color,
-        origin: origin,
+        tag: tag,
         type: action.type,
         request: request,
         icon: icon,

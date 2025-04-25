@@ -19,7 +19,7 @@ type PendingActionItem = {
     initials: string;
     message: ReactNode;
     color: string;
-    origin: ReactNode;
+    tag: ReactNode;
     request: ActionResolveRequest;
     icon: ReactNode;
 };
@@ -79,7 +79,7 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                                     <Flex align="flex-start" justify="flex-start" className={styles.endActions}>
                                         <Flex className={styles.typeIndicator} gap="small">
                                             <Typography.Text type="secondary">{item.icon}</Typography.Text>
-                                            <Typography.Text>{item.origin}</Typography.Text>
+                                            <Typography.Text>{item.tag}</Typography.Text>
                                         </Flex>
 
                                         <div>
