@@ -354,7 +354,7 @@ export function PendingRequestsInbox() {
             });
     }, [pendingActionsDatasets, pendingActionsDataOutputs, pendingActionsDataProducts, t, colorInfo, colorInfoActive]);
 
-    const { pagination, handlePaginationChange, resetPagination, handleTotalChange } = useListPagination({});
+    const { pagination, handlePaginationChange, resetPagination } = useListPagination({});
 
     const onPaginationChange = (current: number, pageSize: number) => {
         handlePaginationChange({ current, pageSize });
@@ -377,8 +377,8 @@ export function PendingRequestsInbox() {
     }, [pendingItems, selectedTypes]);
 
     useEffect(() => {
-        handleTotalChange(slicedPendingActionItems.length);
-    }, [slicedPendingActionItems.length, handleTotalChange]);
+        resetPagination();
+    }, [slicedPendingActionItems, resetPagination]);
 
     if (pendingItems.length == 0 && isFetching == false) {
         return (
