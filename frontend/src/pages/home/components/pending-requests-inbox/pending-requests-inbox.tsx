@@ -1,87 +1,191 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
-import { Badge, Empty, Pagination, Typography } from 'antd';
+import { Badge, Col, Empty, Flex, Pagination, theme, Typography } from 'antd';
 import { TFunction } from 'i18next';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
+import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { useListPagination } from '@/hooks/use-list-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
-import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
-import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
-import { DataOutputDatasetContract } from '@/types/data-output-dataset';
-import { DataProductDatasetContract } from '@/types/data-product-dataset';
+import {
+    useApproveDataOutputLinkMutation,
+    useGetDataOutputDatasetPendingActionsQuery,
+    useRejectDataOutputLinkMutation,
+} from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
+import {
+    useDenyMembershipAccessMutation,
+    useGetDataProductMembershipPendingActionsQuery,
+    useGrantMembershipAccessMutation,
+} from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
+import {
+    useApproveDataProductLinkMutation,
+    useGetDataProductDatasetPendingActionsQuery,
+    useRejectDataProductLinkMutation,
+} from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
+import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { DataProductMembershipContract } from '@/types/data-product-membership';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
+import { ActionResolveRequest, PendingActionTypes } from '@/types/pending-actions/pending-actions';
 
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
+import { SelectableTabs } from './pending-requests-menu-tabs';
 
 type PendingAction =
-    | ({ type: 'data_product' } & DataProductDatasetContract)
-    | ({ type: 'data_output' } & DataOutputDatasetContract)
-    | ({ type: 'team' } & DataProductMembershipContract);
+    | ({ type: PendingActionTypes.DataProductDataset } & DataProductDatasetContract)
+    | ({ type: PendingActionTypes.DataOutputDataset } & DataOutputDatasetContract)
+    | ({ type: PendingActionTypes.DataProductMembership } & DataProductMembershipContract);
 
-const createPendingItem = (action: PendingAction, t: TFunction) => {
-    let link, description, navigatePath, date, author;
+const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key in PendingActionTypes]: string }) => {
+    let link, description, navigatePath, date, author, initials, message, color, origin, type, request, icon;
+
+    function getInitials(firstName: string, lastName: string) {
+        return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
+    }
 
     switch (action.type) {
-        case 'data_product':
+        case PendingActionTypes.DataProductDataset:
+            icon = <DatasetOutlined />;
             link = createDataProductIdPath(action.data_product_id);
             description = (
+                <Typography.Text strong>
+                    {t('Request for')} <strong className={styles.bolder}>{t('read access')}</strong>{' '}
+                    {t('from the data product')}{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={link}>
+                        <strong>{action.data_product.name}</strong>
+                    </Link>
+                </Typography.Text>
+            );
+            message = (
                 <Typography.Text>
-                    {t('Made a request for read access to the')}{' '}
+                    {t('Accepting will grant the data product read access on the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         {action.dataset.name}
                     </Link>{' '}
-                    {t('dataset, on behalf of the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {action.data_product.name}
-                    </Link>{' '}
-                    {t('data product.')}
+                    {t('dataset.')}
+                </Typography.Text>
+            );
+            color = colors[PendingActionTypes.DataProductDataset];
+            origin = (
+                <Typography.Text
+                    style={{
+                        color: color,
+                    }}
+                    strong
+                >
+                    {t('{{name}} Dataset', { name: action.dataset.name })}
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
             date = action.requested_on;
             author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
+            initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
+            request = {
+                type: PendingActionTypes.DataProductDataset as PendingActionTypes.DataProductDataset,
+                request: {
+                    id: action.id,
+                    data_product_id: action.data_product_id,
+                    dataset_id: action.dataset_id,
+                },
+            };
             break;
 
-        case 'data_output':
+        case PendingActionTypes.DataOutputDataset:
+            icon = <DatasetOutlined color="" />;
             link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
             description = (
+                <Typography.Text strong>
+                    {t('Request for')} <strong className={styles.bolder}>{t('the creation of a link')}</strong>{' '}
+                    {t('coming from the data output')}{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                        <strong>{action.data_output.name}</strong>
+                    </Link>
+                </Typography.Text>
+            );
+            message = (
                 <Typography.Text>
-                    {t('Made a request for a link to the')}{' '}
+                    {t('Accepting will create a link from the data output to the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         {action.dataset.name}
                     </Link>{' '}
-                    {t('dataset, on behalf of the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {action.data_output.name}
-                    </Link>{' '}
-                    {t('data output.')}
+                    {t('dataset.')}
+                </Typography.Text>
+            );
+            color = colors[PendingActionTypes.DataOutputDataset];
+            origin = (
+                <Typography.Text
+                    style={{
+                        color: color,
+                    }}
+                    strong
+                >
+                    {t('{{name}} Dataset', { name: action.dataset.name })}
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
             date = action.requested_on;
             author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
+            initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
+            request = {
+                type: PendingActionTypes.DataOutputDataset as PendingActionTypes.DataOutputDataset,
+                request: {
+                    id: action.id,
+                    data_output_id: action.data_output_id,
+                    dataset_id: action.dataset_id,
+                },
+            };
             break;
 
-        case 'team':
+        case PendingActionTypes.DataProductMembership:
+            icon = <DataProductOutlined />;
             link = createDataProductIdPath(action.data_product_id);
             description = (
+                <Typography.Text strong>
+                    {t('Request for ')} <strong className={styles.bolder}>{t('team membership')}</strong> {t('from')}{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={'/'}>
+                        <strong>
+                            {action.user.first_name} {action.user.last_name}
+                        </strong>
+                    </Link>
+                </Typography.Text>
+            );
+            message = (
                 <Typography.Text>
-                    {t('Made a request to join the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
+                    {t('Accepting will grant the user the role of {{role}} in the ', {
+                        role: action.role,
+                        firstName: action.user.first_name,
+                        lastName: action.user.last_name,
+                    })}
+                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.data_product_id)}>
                         {action.data_product.name}
                     </Link>{' '}
-                    {t('data product team.')}
+                    {t('data product.')}
+                </Typography.Text>
+            );
+            color = colors[PendingActionTypes.DataProductMembership];
+            origin = (
+                <Typography.Text
+                    style={{
+                        color: color,
+                    }}
+                    strong
+                >
+                    {t('{{name}} Data Product', { name: action.data_product.name })}
                 </Typography.Text>
             );
             navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
             date = action.requested_on;
             author = action.user.first_name + ' ' + action.user.last_name;
+            initials = getInitials(action.user.first_name, action.user.last_name);
+            request = {
+                type: PendingActionTypes.DataProductMembership as PendingActionTypes.DataProductMembership,
+                request: action.id,
+            };
             break;
 
         default:
@@ -89,16 +193,130 @@ const createPendingItem = (action: PendingAction, t: TFunction) => {
     }
 
     return {
-        key: action.id,
+        key: type + action.id,
         description: description,
         navigatePath: navigatePath,
         date: date,
         author: author,
+        initials: initials,
+        message: message,
+        color: color,
+        origin: origin,
+        type: action.type,
+        request: request,
+        icon: icon,
     };
 };
 
 export function PendingRequestsInbox() {
     const { t } = useTranslation();
+    const {
+        token: { colorInfo, colorInfoActive },
+    } = theme.useToken();
+    const [selectedTypes, setSelectedTypes] = useState<Set<PendingActionTypes>>(new Set());
+
+    const [approveDataProductLink] = useApproveDataProductLinkMutation();
+    const [rejectDataProductLink] = useRejectDataProductLinkMutation();
+    const [approveDataOutputLink] = useApproveDataOutputLinkMutation();
+    const [rejectDataOutputLink] = useRejectDataOutputLinkMutation();
+    const [grantMembershipAccess] = useGrantMembershipAccessMutation();
+    const [denyMembershipAccess] = useDenyMembershipAccessMutation();
+
+    const handleAcceptDataProductDatasetLink = useCallback(
+        async (request: DataProductDatasetLinkRequest) => {
+            try {
+                await approveDataProductLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset request has been successfully approved'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to approve data product dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [approveDataProductLink, t],
+    );
+
+    const handleRejectDataProductDatasetLink = useCallback(
+        async (request: DataProductDatasetLinkRequest) => {
+            try {
+                await rejectDataProductLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset access request has been successfully rejected'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to reject data product dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [rejectDataProductLink, t],
+    );
+
+    const handleAcceptDataOutputDatasetLink = useCallback(
+        async (request: DataOutputDatasetLinkRequest) => {
+            try {
+                await approveDataOutputLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset request has been successfully approved'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to approve data output dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [approveDataOutputLink, t],
+    );
+
+    const handleRejectDataOutputDatasetLink = useCallback(
+        async (request: DataOutputDatasetLinkRequest) => {
+            try {
+                await rejectDataOutputLink(request).unwrap();
+                dispatchMessage({
+                    content: t('Dataset access request has been successfully rejected'),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to reject data output dataset link'),
+                    type: 'error',
+                });
+            }
+        },
+        [rejectDataOutputLink, t],
+    );
+
+    const handleGrantAccessToDataProduct = useCallback(
+        async (membershipId: string) => {
+            try {
+                await grantMembershipAccess({ membershipId }).unwrap();
+                dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
+            }
+        },
+        [grantMembershipAccess, t],
+    );
+
+    const handleDenyAccessToDataProduct = useCallback(
+        async (membershipId: string) => {
+            try {
+                await denyMembershipAccess({ membershipId }).unwrap();
+                dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
+            }
+        },
+        [denyMembershipAccess, t],
+    );
 
     const { data: pendingActionsDatasets, isFetching: isFetchingPendingActionsDatasets } =
         useGetDataProductDatasetPendingActionsQuery();
@@ -111,14 +329,19 @@ export function PendingRequestsInbox() {
         isFetchingPendingActionsDatasets || isFetchingPendingActionsDataOutputs || isFetchingPendingActionsDataProducts;
 
     const pendingItems = useMemo(() => {
+        const colors = {
+            [PendingActionTypes.DataProductDataset]: colorInfoActive,
+            [PendingActionTypes.DataOutputDataset]: colorInfoActive,
+            [PendingActionTypes.DataProductMembership]: colorInfo,
+        };
         const datasets = pendingActionsDatasets?.map((action) =>
-            createPendingItem({ ...action, type: 'data_product' }, t),
+            createPendingItem({ ...action, type: PendingActionTypes.DataProductDataset }, t, colors),
         );
         const dataOutputs = pendingActionsDataOutputs?.map((action) =>
-            createPendingItem({ ...action, type: 'data_output' }, t),
+            createPendingItem({ ...action, type: PendingActionTypes.DataOutputDataset }, t, colors),
         );
         const dataProducts = pendingActionsDataProducts?.map((action) =>
-            createPendingItem({ ...action, type: 'team' }, t),
+            createPendingItem({ ...action, type: PendingActionTypes.DataProductMembership }, t, colors),
         );
 
         return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])]
@@ -129,13 +352,33 @@ export function PendingRequestsInbox() {
                 }
                 return new Date(a.date).getTime() - new Date(b.date).getTime();
             });
-    }, [pendingActionsDatasets, pendingActionsDataOutputs, pendingActionsDataProducts, t]);
+    }, [pendingActionsDatasets, pendingActionsDataOutputs, pendingActionsDataProducts, t, colorInfo, colorInfoActive]);
 
-    const { pagination, handlePaginationChange } = useListPagination({});
+    const { pagination, handlePaginationChange, resetPagination, handleTotalChange } = useListPagination({});
 
     const onPaginationChange = (current: number, pageSize: number) => {
         handlePaginationChange({ current, pageSize });
     };
+
+    const handleTabChange = (types: Set<PendingActionTypes>) => {
+        resetPagination();
+        setSelectedTypes(types);
+    };
+
+    const slicedPendingActionItems = useMemo(() => {
+        return (
+            selectedTypes.size === 0 ? pendingItems : pendingItems.filter((item) => selectedTypes.has(item.type))
+        ).sort((a, b) => {
+            if (!a?.date || !b?.date) {
+                return 0;
+            }
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
+    }, [pendingItems, selectedTypes]);
+
+    useEffect(() => {
+        handleTotalChange(slicedPendingActionItems.length);
+    }, [slicedPendingActionItems.length, handleTotalChange]);
 
     if (pendingItems.length == 0 && isFetching == false) {
         return (
@@ -155,28 +398,76 @@ export function PendingRequestsInbox() {
         );
     }
 
+    const handleAccept = (request: ActionResolveRequest) => {
+        switch (request.type) {
+            case PendingActionTypes.DataProductDataset:
+                handleAcceptDataProductDatasetLink(request.request);
+                break;
+            case PendingActionTypes.DataOutputDataset:
+                handleAcceptDataOutputDatasetLink(request.request);
+                break;
+            case PendingActionTypes.DataProductMembership:
+                handleGrantAccessToDataProduct(request.request);
+                break;
+        }
+    };
+    const handleDeny = (request: ActionResolveRequest) => {
+        switch (request.type) {
+            case PendingActionTypes.DataProductDataset:
+                handleRejectDataProductDatasetLink(request.request);
+                break;
+            case PendingActionTypes.DataOutputDataset:
+                handleRejectDataOutputDatasetLink(request.request);
+                break;
+            case PendingActionTypes.DataProductMembership:
+                handleDenyAccessToDataProduct(request.request);
+                break;
+        }
+    };
+
+    if (isFetching) return <LoadingSpinner />;
+
     return (
-        <div className={styles.section}>
-            <div className={styles.sectionTitle}>
+        <div className={styles.requestsInbox}>
+            <Flex align="flex-end" justify="space-between">
                 <Typography.Title level={3}>
-                    {t('Pending Requests')}{' '}
-                    <Badge count={pendingItems.length} color="gray" className={styles.requestsInfo} />
-                </Typography.Title>
-                <Pagination
-                    current={pagination.current}
-                    pageSize={pagination.pageSize}
-                    total={pendingItems.length}
-                    onChange={onPaginationChange}
-                    size="small"
-                />
-            </div>
-            <div className={styles.requestsListContainer}>
+                    {t('Pending Requests')}
+                    <Badge count={slicedPendingActionItems.length} color="gray" className={styles.requestsInfo} />
+                </Typography.Title>{' '}
+            </Flex>
+            <Flex align="center" justify="space-between">
+                <Col span={24}>
+                    <SelectableTabs onSelectChange={handleTabChange} />{' '}
+                    <Pagination
+                        current={pagination.current}
+                        pageSize={pagination.pageSize}
+                        total={slicedPendingActionItems.length}
+                        onChange={onPaginationChange}
+                        size="small"
+                        className={styles.pagination}
+                        showTotal={(total, range) =>
+                            t('Showing {{range0}}-{{range1}} of {{total}} pending requests', {
+                                range0: range[0],
+                                range1: range[1],
+                                total: total,
+                            })
+                        }
+                    />
+                </Col>
+            </Flex>
+
+            <Flex vertical>
                 <PendingRequestsList
-                    pendingActionItems={pendingItems}
-                    isFetching={isFetching}
+                    pendingActionItems={slicedPendingActionItems}
                     pagination={pagination}
+                    onAccept={(item) => {
+                        handleAccept(item);
+                    }}
+                    onReject={(item) => {
+                        handleDeny(item);
+                    }}
                 />
-            </div>
+            </Flex>
         </div>
     );
 }

@@ -1,18 +1,18 @@
-import type { PaginationConfig } from 'antd/es/pagination';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { DEFAULT_LIST_PAGINATION } from '@/constants/list.constants';
+import { ListPaginationConfig } from '@/types/shared/lists';
 
 type Props = {
-    initialPagination?: PaginationConfig;
+    initialPagination?: ListPaginationConfig;
 };
 
 export const useListPagination = ({ initialPagination = DEFAULT_LIST_PAGINATION }: Props) => {
-    const [pagination, setPagination] = useState<PaginationConfig>(initialPagination);
+    const [pagination, setPagination] = useState<ListPaginationConfig>(initialPagination);
 
-    const resetPagination = () => {
+    const resetPagination = useCallback(() => {
         setPagination(initialPagination);
-    };
+    }, [initialPagination]);
 
     const handleTotalChange = (total: number) => {
         setPagination((prev) => ({
@@ -35,9 +35,9 @@ export const useListPagination = ({ initialPagination = DEFAULT_LIST_PAGINATION 
         }));
     };
 
-    const handlePaginationChange = (pagination: PaginationConfig) => {
+    const handlePaginationChange = useCallback((pagination: ListPaginationConfig) => {
         setPagination(pagination);
-    };
+    }, []);
     return {
         pagination,
         resetPagination,

@@ -1,15 +1,18 @@
 @use '@/styles/globals';
 
 $item-card-width: 360px;
+$landing-banner-height: 260px;
+$landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgba(3, 79, 165, 0.1) 45.13%);
 
-.requests-list-container {
-    margin-top: globals.$spacing-m;
+.avatar {
+    margin-right: globals.$spacing-l;
 }
 
-.list-item-top-info {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
+.pagination {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin-top: globals.$spacing-regular;
 }
 
 .list-item {
@@ -20,60 +23,62 @@ $item-card-width: 360px;
     padding: unset !important;
     margin-bottom: globals.$spacing-m;
     transition: border-color 0.3s;
-    cursor: pointer;
 
     &:hover {
         border-color: globals.$primary-color-border-hover;
         transition: border-color 0.3s;
     }
-
-    .item-card {
-        width: 100% !important;
-        display: flex;
-        align-items: center !important;
-        height: 100%;
-        padding: globals.$spacing-m globals.$spacing-l;
-        min-width: $item-card-width;
-    }
 }
-
-.section {
+.item-card {
+    width: 100% !important;
     height: 100%;
+    padding: globals.$spacing-m globals.$spacing-l;
+    padding-right: 0;
+    min-width: $item-card-width;
 }
 
-.section-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.action-container {
-    margin-left: auto;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.date-section {
-    display: flex;
-    flex-direction: column;
+.bolder {
+    font-weight: globals.$font-weight-bolder !important;
 }
 
 .ant-list .ant-list-pagination {
     display: none !important;
 }
 
-.requestsInfo {
-    padding-left: globals.$spacing-xs;
-}
-
 .requests-inbox {
     margin-left: globals.$spacing-xxl;
     margin-right: globals.$spacing-xxl;
+    margin-top: globals.$spacing-xl;
     padding-top: globals.$spacing-s;
 }
 
 .welcome-content {
     display: flex;
     justify-content: center;
+}
+
+.type-indicator {
+    height: 100%;
+    background-color: globals.$quaternary-color-fill;
+    padding: globals.$spacing-xs;
+    padding-right: globals.$spacing-m;
+}
+
+.end-actions {
+    margin-left: auto;
+    margin-bottom: auto;
+}
+
+.requests-info {
+    padding-left: globals.$spacing-s;
+    padding-bottom: globals.$spacing-xs;
+}
+
+.button {
+    width: calc(globals.$button-width / 2);
+}
+
+.message {
+    margin-left: globals.$spacing-xl;
+    padding-left: globals.$spacing-xl;
 }
