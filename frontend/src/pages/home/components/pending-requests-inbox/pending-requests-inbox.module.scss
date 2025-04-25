@@ -4,30 +4,9 @@ $item-card-width: 360px;
 $landing-banner-height: 260px;
 $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgba(3, 79, 165, 0.1) 45.13%);
 
-.content-secondary {
-    display: flex;
-}
-
-.pagination-box {
-    margin-left: auto;
-    width: 100%;
-    background-color: blue;
-}
-
 .avatar {
     margin-right: globals.$spacing-l;
 }
-
-.top-right-column {
-    position: relative;
-    display: flex;
-    padding-bottom: 0;
-    width: 100%;
-    margin-left: globals.$spacing-xxl;
-    padding-right: globals.$spacing-xxl;
-}
-
-$item-card-width: 360px;
 
 .list-item {
     width: 100%;
@@ -50,19 +29,9 @@ $item-card-width: 360px;
     padding-right: 0;
     min-width: $item-card-width;
 }
+
 .bolder {
     font-weight: globals.$font-weight-bolder !important;
-}
-
-.tag {
-    display: flex;
-    gap: globals.$spacing-xs;
-}
-
-.section-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .ant-list .ant-list-pagination {
@@ -81,10 +50,6 @@ $item-card-width: 360px;
     justify-content: center;
 }
 
-.actions-top-right {
-    margin-bottom: auto;
-}
-
 .type-indicator {
     height: 100%;
     background-color: globals.$secondary-color-fill;
@@ -97,19 +62,9 @@ $item-card-width: 360px;
     margin-bottom: auto;
 }
 
-.resolve-button {
-    border-radius: 0;
-    width: calc((globals.$button-width) / 2 - (globals.$spacing-m) / 2);
-}
-
 .requests-info {
     padding-left: globals.$spacing-s;
     padding-bottom: globals.$spacing-xs;
-}
-
-.welcome-content {
-    display: flex;
-    justify-content: center;
 }
 
 .button {

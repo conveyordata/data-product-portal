@@ -1,5 +1,5 @@
 import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Button, Flex, List, Space, Typography } from 'antd';
+import { Avatar, Button, Flex, List, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -78,9 +78,7 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                                     </Flex>
                                     <Flex align="flex-start" justify="flex-start" className={styles.endActions}>
                                         <Flex className={styles.typeIndicator} gap="small">
-                                            <Typography.Text className={styles.tag} type="secondary">
-                                                {item.icon}
-                                            </Typography.Text>
+                                            <Typography.Text type="secondary">{item.icon}</Typography.Text>
                                             <Typography.Text>{item.origin}</Typography.Text>
                                         </Flex>
 

@@ -442,13 +442,13 @@ export function PendingRequestsInbox() {
                     size="small"
                 />
             </Flex>
-            <div className={styles.sectionTitle}>
+            <Flex align="center" justify="space-between">
                 <Col span={24}>
                     <SelectableTabs onSelectChange={handleTabChange} />
                 </Col>
-            </div>
+            </Flex>
 
-            <Flex className={styles.contentSecondary} vertical>
+            <Flex vertical>
                 <PendingRequestsList
                     pendingActionItems={slicedPendingActionItems}
                     pagination={pagination}
