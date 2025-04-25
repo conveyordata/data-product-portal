@@ -82,28 +82,26 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                                             <Typography.Text>{item.tag}</Typography.Text>
                                         </Flex>
 
-                                        <div>
-                                            <Button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onAccept(item.request);
-                                                }}
-                                                className={styles.button}
-                                                type="link"
-                                            >
-                                                {t('Accept')}
-                                            </Button>
-                                            <Button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onReject(item.request);
-                                                }}
-                                                className={styles.button}
-                                                type="link"
-                                            >
-                                                {t('Reject')}
-                                            </Button>
-                                        </div>
+                                        <Button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onAccept(item.request);
+                                            }}
+                                            className={styles.button}
+                                            type="link"
+                                        >
+                                            {t('Accept')}
+                                        </Button>
+                                        <Button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onReject(item.request);
+                                            }}
+                                            className={styles.button}
+                                            type="link"
+                                        >
+                                            {t('Reject')}
+                                        </Button>
                                     </Flex>
                                 </Flex>
                                 <Typography.Text className={styles.message}>{item.message}</Typography.Text>
