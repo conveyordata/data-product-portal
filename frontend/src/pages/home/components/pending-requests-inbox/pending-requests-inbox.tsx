@@ -289,24 +289,6 @@ export function PendingRequestsInbox() {
         setSelectedTypes(typesSet);
     };
 
-    if (pendingItems.length == 0 && isFetching == false) {
-        return (
-            <div className={styles.requestsInbox}>
-                <Typography.Title level={1} className={styles.welcomeContent}>
-                    {t('Welcome back')}
-                </Typography.Title>
-                <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={
-                        <Typography.Text>
-                            <CheckCircleOutlined /> {t(`You have no requests to handle.`)}
-                        </Typography.Text>
-                    }
-                ></Empty>
-            </div>
-        );
-    }
-
     const handleAccept = (request: ActionResolveRequest) => {
         switch (request.type) {
             case PendingActionTypes.DataProductDataset:
@@ -333,6 +315,24 @@ export function PendingRequestsInbox() {
                 break;
         }
     };
+
+    if (pendingItems.length == 0 && isFetching == false) {
+        return (
+            <div className={styles.requestsInbox}>
+                <Typography.Title level={1} className={styles.welcomeContent}>
+                    {t('Welcome back')}
+                </Typography.Title>
+                <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={
+                        <Typography.Text>
+                            <CheckCircleOutlined /> {t(`You have no requests to handle.`)}
+                        </Typography.Text>
+                    }
+                ></Empty>
+            </div>
+        );
+    }
 
     if (isFetching) return <LoadingSpinner />;
 
