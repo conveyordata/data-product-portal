@@ -1,7 +1,7 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
 import { Badge, Col, Empty, Flex, Pagination, theme, Typography } from 'antd';
 import { TFunction } from 'i18next';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -10,27 +10,15 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { useListPagination } from '@/hooks/use-list-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import {
-    useApproveDataOutputLinkMutation,
-    useGetDataOutputDatasetPendingActionsQuery,
-    useRejectDataOutputLinkMutation,
-} from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
-import {
-    useDenyMembershipAccessMutation,
-    useGetDataProductMembershipPendingActionsQuery,
-    useGrantMembershipAccessMutation,
-} from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
-import {
-    useApproveDataProductLinkMutation,
-    useGetDataProductDatasetPendingActionsQuery,
-    useRejectDataProductLinkMutation,
-} from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
+import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
+import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
+import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
+import { DataOutputDatasetContract } from '@/types/data-output-dataset';
+import { DataProductDatasetContract } from '@/types/data-product-dataset';
 import { DataProductMembershipContract } from '@/types/data-product-membership';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 import { ActionResolveRequest, PendingActionTypes } from '@/types/pending-actions/pending-actions';
+import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
@@ -216,115 +204,21 @@ export function PendingRequestsInbox() {
     const [activeTab, setActiveTab] = useState<CustomPendingRequestsTabKey>('all');
     const [selectedTypes, setSelectedTypes] = useState<Set<PendingActionTypes>>(new Set());
 
-    const [approveDataProductLink] = useApproveDataProductLinkMutation();
-    const [rejectDataProductLink] = useRejectDataProductLinkMutation();
-    const [approveDataOutputLink] = useApproveDataOutputLinkMutation();
-    const [rejectDataOutputLink] = useRejectDataOutputLinkMutation();
-    const [grantMembershipAccess] = useGrantMembershipAccessMutation();
-    const [denyMembershipAccess] = useDenyMembershipAccessMutation();
-
-    const handleAcceptDataProductDatasetLink = useCallback(
-        async (request: DataProductDatasetLinkRequest) => {
-            try {
-                await approveDataProductLink(request).unwrap();
-                dispatchMessage({
-                    content: t('Dataset request has been successfully approved'),
-                    type: 'success',
-                });
-            } catch (_error) {
-                dispatchMessage({
-                    content: t('Failed to approve data product dataset link'),
-                    type: 'error',
-                });
-            }
-        },
-        [approveDataProductLink, t],
-    );
-
-    const handleRejectDataProductDatasetLink = useCallback(
-        async (request: DataProductDatasetLinkRequest) => {
-            try {
-                await rejectDataProductLink(request).unwrap();
-                dispatchMessage({
-                    content: t('Dataset access request has been successfully rejected'),
-                    type: 'success',
-                });
-            } catch (_error) {
-                dispatchMessage({
-                    content: t('Failed to reject data product dataset link'),
-                    type: 'error',
-                });
-            }
-        },
-        [rejectDataProductLink, t],
-    );
-
-    const handleAcceptDataOutputDatasetLink = useCallback(
-        async (request: DataOutputDatasetLinkRequest) => {
-            try {
-                await approveDataOutputLink(request).unwrap();
-                dispatchMessage({
-                    content: t('Dataset request has been successfully approved'),
-                    type: 'success',
-                });
-            } catch (_error) {
-                dispatchMessage({
-                    content: t('Failed to approve data output dataset link'),
-                    type: 'error',
-                });
-            }
-        },
-        [approveDataOutputLink, t],
-    );
-
-    const handleRejectDataOutputDatasetLink = useCallback(
-        async (request: DataOutputDatasetLinkRequest) => {
-            try {
-                await rejectDataOutputLink(request).unwrap();
-                dispatchMessage({
-                    content: t('Dataset access request has been successfully rejected'),
-                    type: 'success',
-                });
-            } catch (_error) {
-                dispatchMessage({
-                    content: t('Failed to reject data output dataset link'),
-                    type: 'error',
-                });
-            }
-        },
-        [rejectDataOutputLink, t],
-    );
-
-    const handleGrantAccessToDataProduct = useCallback(
-        async (membershipId: string) => {
-            try {
-                await grantMembershipAccess({ membershipId }).unwrap();
-                dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
-            } catch (_error) {
-                dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
-            }
-        },
-        [grantMembershipAccess, t],
-    );
-
-    const handleDenyAccessToDataProduct = useCallback(
-        async (membershipId: string) => {
-            try {
-                await denyMembershipAccess({ membershipId }).unwrap();
-                dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
-            } catch (_error) {
-                dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
-            }
-        },
-        [denyMembershipAccess, t],
-    );
-
     const { data: pendingActionsDatasets, isFetching: isFetchingPendingActionsDatasets } =
         useGetDataProductDatasetPendingActionsQuery();
     const { data: pendingActionsDataOutputs, isFetching: isFetchingPendingActionsDataOutputs } =
         useGetDataOutputDatasetPendingActionsQuery();
     const { data: pendingActionsDataProducts, isFetching: isFetchingPendingActionsDataProducts } =
         useGetDataProductMembershipPendingActionsQuery();
+
+    const {
+        handleAcceptDataProductDatasetLink,
+        handleRejectDataProductDatasetLink,
+        handleAcceptDataOutputDatasetLink,
+        handleRejectDataOutputDatasetLink,
+        handleGrantAccessToDataProduct,
+        handleDenyAccessToDataProduct,
+    } = usePendingActionHandlers();
 
     const isFetching =
         isFetchingPendingActionsDatasets || isFetchingPendingActionsDataOutputs || isFetchingPendingActionsDataProducts;

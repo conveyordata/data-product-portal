@@ -5,15 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import {
-    useApproveDataProductLinkMutation,
-    useRejectDataProductLinkMutation,
-    useRemoveDataProductDatasetLinkMutation,
-} from '@/store/features/data-products-datasets/data-products-datasets-api-slice.ts';
+import { useRemoveDataProductDatasetLinkMutation } from '@/store/features/data-products-datasets/data-products-datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { DataProductLink } from '@/types/dataset';
+import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
 import styles from './data-product-table.module.scss';
 import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';
@@ -28,10 +24,16 @@ type Props = {
 
 export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProducts, isLoading }: Props) {
     const { t } = useTranslation();
-    const [approveDataProductLink, { isLoading: isApprovingLink }] = useApproveDataProductLinkMutation();
-    const [rejectDataProductLink, { isLoading: isRejectingLink }] = useRejectDataProductLinkMutation();
     const [removeDatasetFromDataProduct, { isLoading: isRemovingDatasetFromDataProduct }] =
         useRemoveDataProductDatasetLinkMutation();
+
+    const {
+        handleAcceptDataProductDatasetLink,
+        handleRejectDataProductDatasetLink,
+
+        isApprovingDataProductLink,
+        isRejectingDataProductLink,
+    } = usePendingActionHandlers();
 
     const { data: access } = useCheckAccessQuery(
         {
@@ -80,49 +82,13 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
         [datasetId, removeDatasetFromDataProduct, t],
     );
 
-    const handleAcceptDataProductDatasetLink = useCallback(
-        async (request: DataProductDatasetLinkRequest) => {
-            try {
-                await approveDataProductLink(request).unwrap();
-                dispatchMessage({
-                    content: t('Dataset request has been successfully approved'),
-                    type: 'success',
-                });
-            } catch (_error) {
-                dispatchMessage({
-                    content: t('Failed to approve data product dataset link'),
-                    type: 'error',
-                });
-            }
-        },
-        [approveDataProductLink, t],
-    );
-
-    const handleRejectDataProductDatasetLink = useCallback(
-        async (request: DataProductDatasetLinkRequest) => {
-            try {
-                await rejectDataProductLink(request).unwrap();
-                dispatchMessage({
-                    content: t('Dataset access request has been successfully rejected'),
-                    type: 'success',
-                });
-            } catch (_error) {
-                dispatchMessage({
-                    content: t('Failed to reject data product dataset link'),
-                    type: 'error',
-                });
-            }
-        },
-        [rejectDataProductLink, t],
-    );
-
     const columns: TableColumnsType<DataProductLink> = useMemo(() => {
         return getDatasetDataProductsColumns({
             onRemoveDataProductDatasetLink: handleRemoveDatasetFromDataProduct,
             t,
             dataProductLinks: dataProducts,
             isDisabled: !isCurrentDatasetOwner,
-            isLoading: isRemovingDatasetFromDataProduct || isRejectingLink || isApprovingLink,
+            isLoading: isRemovingDatasetFromDataProduct || isRejectingDataProductLink || isApprovingDataProductLink,
             isCurrentDatasetOwner,
             canApproveNew,
             canRevokeNew,
@@ -135,8 +101,8 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
         dataProducts,
         isCurrentDatasetOwner,
         isRemovingDatasetFromDataProduct,
-        isRejectingLink,
-        isApprovingLink,
+        isRejectingDataProductLink,
+        isApprovingDataProductLink,
         canApproveNew,
         canRevokeNew,
         handleRejectDataProductDatasetLink,
