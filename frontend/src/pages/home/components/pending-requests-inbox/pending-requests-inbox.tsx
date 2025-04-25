@@ -29,8 +29,8 @@ type PendingAction =
     | ({ type: PendingActionTypes.DataOutputDataset } & DataOutputDatasetContract)
     | ({ type: PendingActionTypes.DataProductMembership } & DataProductMembershipContract);
 
-const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key in PendingActionTypes]: string }) => {
-    let link, description, navigatePath, date, author, initials, message, color, origin, type, request, icon;
+const createPendingItem = (action: PendingAction, t: TFunction, color: string) => {
+    let link, description, navigatePath, date, author, initials, message, origin, type, request, icon;
 
     function getInitials(firstName: string, lastName: string) {
         return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
@@ -58,7 +58,6 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     {t('dataset.')}
                 </Typography.Text>
             );
-            color = colors[PendingActionTypes.DataProductDataset];
             origin = (
                 <Typography.Text
                     style={{
@@ -104,7 +103,6 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     {t('dataset.')}
                 </Typography.Text>
             );
-            color = colors[PendingActionTypes.DataOutputDataset];
             origin = (
                 <Typography.Text
                     style={{
@@ -155,7 +153,6 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
                     {t('data product.')}
                 </Typography.Text>
             );
-            color = colors[PendingActionTypes.DataProductMembership];
             origin = (
                 <Typography.Text
                     style={{
@@ -201,6 +198,10 @@ export function PendingRequestsInbox() {
     const {
         token: { colorInfo, colorInfoActive },
     } = theme.useToken();
+
+    const dataProductColor = colorInfo;
+    const datasetColor = colorInfoActive;
+
     const [activeTab, setActiveTab] = useState<CustomPendingRequestsTabKey>('all');
     const [selectedTypes, setSelectedTypes] = useState<Set<PendingActionTypes>>(new Set());
 
@@ -224,19 +225,14 @@ export function PendingRequestsInbox() {
         isFetchingPendingActionsDatasets || isFetchingPendingActionsDataOutputs || isFetchingPendingActionsDataProducts;
 
     const pendingItems = useMemo(() => {
-        const colors = {
-            [PendingActionTypes.DataProductDataset]: colorInfoActive,
-            [PendingActionTypes.DataOutputDataset]: colorInfoActive,
-            [PendingActionTypes.DataProductMembership]: colorInfo,
-        };
         const datasets = pendingActionsDatasets?.map((action) =>
-            createPendingItem({ ...action, type: PendingActionTypes.DataProductDataset }, t, colors),
+            createPendingItem({ ...action, type: PendingActionTypes.DataProductDataset }, t, datasetColor),
         );
         const dataOutputs = pendingActionsDataOutputs?.map((action) =>
-            createPendingItem({ ...action, type: PendingActionTypes.DataOutputDataset }, t, colors),
+            createPendingItem({ ...action, type: PendingActionTypes.DataOutputDataset }, t, datasetColor),
         );
         const dataProducts = pendingActionsDataProducts?.map((action) =>
-            createPendingItem({ ...action, type: PendingActionTypes.DataProductMembership }, t, colors),
+            createPendingItem({ ...action, type: PendingActionTypes.DataProductMembership }, t, dataProductColor),
         );
 
         return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])]
@@ -247,7 +243,14 @@ export function PendingRequestsInbox() {
                 }
                 return new Date(a.date).getTime() - new Date(b.date).getTime();
             });
-    }, [pendingActionsDatasets, pendingActionsDataOutputs, pendingActionsDataProducts, t, colorInfo, colorInfoActive]);
+    }, [
+        pendingActionsDatasets,
+        pendingActionsDataOutputs,
+        pendingActionsDataProducts,
+        t,
+        dataProductColor,
+        datasetColor,
+    ]);
 
     const { pagination, handlePaginationChange, resetPagination } = useListPagination({});
 
