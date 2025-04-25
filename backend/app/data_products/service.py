@@ -85,9 +85,12 @@ class DataProductService:
                 joinedload(DataProductModel.dataset_links)
                 .joinedload(DataProductDatasetModel.dataset)
                 .joinedload(DatasetModel.data_output_links)
-                .joinedload(DataOutputDatasetAssociation.data_output),
+                .joinedload(DataOutputDatasetAssociation.data_output)
+                .joinedload(DataOutputModel.dataset_links),
                 joinedload(DataProductModel.memberships),
-                joinedload(DataProductModel.data_outputs),
+                joinedload(DataProductModel.data_outputs).joinedload(
+                    DataOutputModel.dataset_links
+                ),
             ],
         )
 
@@ -567,7 +570,9 @@ class DataProductService:
             id,
             options=[
                 joinedload(DataProductModel.dataset_links),
-                joinedload(DataProductModel.data_outputs),
+                joinedload(DataProductModel.data_outputs).joinedload(
+                    DataOutputModel.dataset_links
+                ),
             ],
         )
         nodes = [
