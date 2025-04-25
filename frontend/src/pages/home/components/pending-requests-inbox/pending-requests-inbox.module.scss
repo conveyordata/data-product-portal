@@ -15,7 +15,7 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 }
 
 .avatar {
-    margin-bottom: globals.$icon-size-large - globals.$spacing-ml;
+    margin-right: globals.$spacing-l;
 }
 
 .top-right-column {
@@ -42,17 +42,14 @@ $item-card-width: 360px;
         border-color: globals.$primary-color-border-hover;
         transition: border-color 0.3s;
     }
-
-    .item-card {
-        width: 100% !important;
-        display: flex;
-        align-items: center !important;
-        height: 100%;
-        padding: globals.$spacing-m globals.$spacing-l;
-        min-width: $item-card-width;
-    }
 }
-
+.item-card {
+    width: 100% !important;
+    height: 100%;
+    padding: globals.$spacing-m globals.$spacing-l;
+    padding-right: 0;
+    min-width: $item-card-width;
+}
 .bolder {
     font-weight: globals.$font-weight-bolder !important;
 }
@@ -95,6 +92,11 @@ $item-card-width: 360px;
     padding-right: globals.$spacing-m;
 }
 
+.end-actions {
+    margin-left: auto;
+    margin-bottom: auto;
+}
+
 .resolve-button {
     border-radius: 0;
     width: calc((globals.$button-width) / 2 - (globals.$spacing-m) / 2);
@@ -115,6 +117,10 @@ $item-card-width: 360px;
 }
 
 .buttons {
-    margin-top: globals.$spacing-m;
     background-color: globals.$quaternary-color-fill;
+}
+
+.message {
+    margin-left: globals.$spacing-xl;
+    padding-left: globals.$spacing-xl;
 }
