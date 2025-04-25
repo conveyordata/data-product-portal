@@ -34,7 +34,7 @@ import { ActionResolveRequest, PendingActionTypes } from '@/types/pending-action
 
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
-import { SelectableTabs } from './pending-requests-menu-tabs';
+import { CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
 
 type PendingAction =
     | ({ type: PendingActionTypes.DataProductDataset } & DataProductDatasetContract)
@@ -213,6 +213,7 @@ export function PendingRequestsInbox() {
     const {
         token: { colorInfo, colorInfoActive },
     } = theme.useToken();
+    const [activeTab, setActiveTab] = useState<CustomPendingRequestsTabKey>('all');
     const [selectedTypes, setSelectedTypes] = useState<Set<PendingActionTypes>>(new Set());
 
     const [approveDataProductLink] = useApproveDataProductLinkMutation();
@@ -360,11 +361,6 @@ export function PendingRequestsInbox() {
         handlePaginationChange({ current, pageSize });
     };
 
-    const handleTabChange = (types: Set<PendingActionTypes>) => {
-        resetPagination();
-        setSelectedTypes(types);
-    };
-
     const slicedPendingActionItems = useMemo(() => {
         return (
             selectedTypes.size === 0 ? pendingItems : pendingItems.filter((item) => selectedTypes.has(item.type))
@@ -379,6 +375,22 @@ export function PendingRequestsInbox() {
     useEffect(() => {
         resetPagination();
     }, [slicedPendingActionItems, resetPagination]);
+
+    const handleTabChange = (key: CustomPendingRequestsTabKey) => {
+        setActiveTab(key);
+
+        const typesSet = new Set<PendingActionTypes>();
+        if (key === 'all') {
+            Object.values(PendingActionTypes).forEach((type) => typesSet.add(type));
+        } else if (key === 'dataProduct') {
+            typesSet.add(PendingActionTypes.DataProductMembership);
+        } else if (key === 'dataset') {
+            typesSet.add(PendingActionTypes.DataProductDataset);
+            typesSet.add(PendingActionTypes.DataOutputDataset);
+        }
+
+        setSelectedTypes(typesSet);
+    };
 
     if (pendingItems.length == 0 && isFetching == false) {
         return (
@@ -437,7 +449,7 @@ export function PendingRequestsInbox() {
             </Flex>
             <Flex align="center" justify="space-between">
                 <Col span={24}>
-                    <SelectableTabs onSelectChange={handleTabChange} />{' '}
+                    <SelectableTabs activeKey={activeTab} onTabChange={handleTabChange} />
                     <Pagination
                         current={pagination.current}
                         pageSize={pagination.pageSize}
