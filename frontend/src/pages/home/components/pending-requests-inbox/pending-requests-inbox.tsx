@@ -156,11 +156,11 @@ const createPendingItem = (action: PendingAction, t: TFunction, colors: { [key i
             );
             message = (
                 <Typography.Text>
-                    {t('Accepting will grant the user the role of {{role}} in the ', {
+                    {t('Accepting will grant the user the role of {{role}} in the', {
                         role: action.role,
                         firstName: action.user.first_name,
                         lastName: action.user.last_name,
-                    })}
+                    })}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.data_product_id)}>
                         {action.data_product.name}
                     </Link>{' '}
