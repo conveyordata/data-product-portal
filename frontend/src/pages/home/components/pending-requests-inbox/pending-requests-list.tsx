@@ -87,7 +87,6 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                                                 e.stopPropagation();
                                                 onAccept(item.request);
                                             }}
-                                            className={styles.button}
                                             type="link"
                                         >
                                             {t('Accept')}
@@ -97,7 +96,6 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                                                 e.stopPropagation();
                                                 onReject(item.request);
                                             }}
-                                            className={styles.button}
                                             type="link"
                                         >
                                             {t('Reject')}

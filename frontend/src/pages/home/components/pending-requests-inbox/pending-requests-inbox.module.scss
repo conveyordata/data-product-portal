@@ -56,10 +56,8 @@ $item-card-width: 360px;
 }
 
 .type-indicator {
-    height: 100%;
-    background-color: globals.$quaternary-color-fill;
     padding: globals.$spacing-xs;
-    padding-right: globals.$spacing-m;
+    margin-right: globals.$spacing-m;
 }
 
 .end-actions {
@@ -70,10 +68,6 @@ $item-card-width: 360px;
 .requests-info {
     padding-left: globals.$spacing-s;
     padding-bottom: globals.$spacing-xs;
-}
-
-.button {
-    width: calc(globals.$button-width / 2);
 }
 
 .message {
