@@ -251,8 +251,11 @@ export function PendingRequestsInbox() {
 
     const { pagination, handlePaginationChange, resetPagination } = useListPagination({});
 
-    const onPaginationChange = (current: number, pageSize: number) => {
-        handlePaginationChange({ current, pageSize });
+    const handlePageChange = (page: number, pageSize: number) => {
+        handlePaginationChange({
+            current: page,
+            pageSize,
+        });
     };
 
     const slicedPendingActionItems = useMemo(() => {
@@ -348,7 +351,7 @@ export function PendingRequestsInbox() {
                         current={pagination.current}
                         pageSize={pagination.pageSize}
                         total={slicedPendingActionItems.length}
-                        onChange={onPaginationChange}
+                        onChange={handlePageChange}
                         size="small"
                         className={styles.pagination}
                         showTotal={(total, range) =>
