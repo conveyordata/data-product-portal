@@ -258,6 +258,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 editToggleDisabled={mode === 'edit'}
                 canEditNamespace={canEditNamespace}
                 toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                validationRequired={mode === 'create'}
                 validateNamespace={validateNamespaceCallback}
             />
             <Form.Item<DatasetCreateFormSchema>
