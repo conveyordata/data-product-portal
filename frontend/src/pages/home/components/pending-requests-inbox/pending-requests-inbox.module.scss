@@ -8,6 +8,13 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     margin-right: globals.$spacing-l;
 }
 
+.pagination {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin-top: globals.$spacing-regular;
+}
+
 .list-item {
     width: 100%;
     background-color: globals.$quaternary-color-fill;

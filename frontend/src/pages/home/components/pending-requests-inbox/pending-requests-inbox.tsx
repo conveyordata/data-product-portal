@@ -434,17 +434,25 @@ export function PendingRequestsInbox() {
                     {t('Pending Requests')}
                     <Badge count={slicedPendingActionItems.length} color="gray" className={styles.requestsInfo} />
                 </Typography.Title>{' '}
-                <Pagination
-                    current={pagination.current}
-                    pageSize={pagination.pageSize}
-                    total={slicedPendingActionItems.length}
-                    onChange={onPaginationChange}
-                    size="small"
-                />
             </Flex>
             <Flex align="center" justify="space-between">
                 <Col span={24}>
-                    <SelectableTabs onSelectChange={handleTabChange} />
+                    <SelectableTabs onSelectChange={handleTabChange} />{' '}
+                    <Pagination
+                        current={pagination.current}
+                        pageSize={pagination.pageSize}
+                        total={slicedPendingActionItems.length}
+                        onChange={onPaginationChange}
+                        size="small"
+                        className={styles.pagination}
+                        showTotal={(total, range) =>
+                            t('Showing {{range0}}-{{range1}} of {{total}} pending requests', {
+                                range0: range[0],
+                                range1: range[1],
+                                total: total,
+                            })
+                        }
+                    />
                 </Col>
             </Flex>
 
