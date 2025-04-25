@@ -28,6 +28,7 @@ from app.core.namespace.validation import (
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -37,7 +38,6 @@ from app.data_product_memberships.enums import (
 )
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_memberships.schema import DataProductMembershipCreate
-from app.data_product_settings.model import DataProductSettingValue
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.schema import (
@@ -53,6 +53,7 @@ from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
 from app.datasets.enums import DatasetAccessType
+from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema import Dataset
 from app.environment_platform_configurations.model import (
@@ -77,19 +78,23 @@ class DataProductService:
         self.data_output_namespace_validator = DataOutputNamespaceValidator()
 
     def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
-        data_product: DataProductGet = (
-            db.query(DataProductModel)
-            .options(
-                joinedload(DataProductModel.dataset_links),
-            )
-            .filter(DataProductModel.id == id)
-            .first()
+        data_product: DataProductGet = db.get(
+            DataProductModel,
+            id,
+            options=[
+                joinedload(DataProductModel.dataset_links)
+                .joinedload(DataProductDatasetModel.dataset)
+                .joinedload(DatasetModel.data_output_links)
+                .joinedload(DataOutputDatasetAssociation.data_output),
+                joinedload(DataProductModel.memberships),
+                joinedload(DataProductModel.data_outputs),
+            ],
         )
 
-        default_lifecycle = (
-            db.query(DataProductLifeCycleModel)
-            .filter(DataProductLifeCycleModel.is_default)
-            .first()
+        default_lifecycle = db.scalar(
+            select(DataProductLifeCycleModel).filter(
+                DataProductLifeCycleModel.is_default
+            )
         )
 
         rolled_up_tags = set()
@@ -123,13 +128,6 @@ class DataProductService:
                     joinedload(DataProductModel.dataset_links),
                     joinedload(DataProductModel.memberships),
                     joinedload(DataProductModel.data_outputs),
-                    joinedload(DataProductModel.tags),
-                    joinedload(DataProductModel.lifecycle),
-                    joinedload(DataProductModel.data_product_settings).joinedload(
-                        DataProductSettingValue.data_product_setting
-                    ),
-                    joinedload(DataProductModel.type),
-                    joinedload(DataProductModel.domain),
                 )
                 .order_by(asc(DataProductModel.name))
             )
@@ -143,28 +141,39 @@ class DataProductService:
         return dps
 
     def get_owners(self, id: UUID, db: Session) -> List[User]:
-        data_product = ensure_data_product_exists(id, db)
+        data_product = ensure_data_product_exists(
+            id, db, options=[joinedload(DataProductModel.memberships)]
+        )
         user_ids = [
             membership.user_id
             for membership in data_product.memberships
             if membership.role == DataProductUserRole.OWNER
         ]
-        return db.query(UserModel).filter(UserModel.id.in_(user_ids)).all()
+        return (
+            db.scalars(select(UserModel).filter(UserModel.id.in_(user_ids)))
+            .unique()
+            .all()
+        )
 
     def get_user_data_products(
         self, user_id: UUID, db: Session
     ) -> list[DataProductsGet]:
         return (
-            db.query(DataProductModel)
-            .options(
-                joinedload(DataProductModel.memberships),
-            )
-            .filter(
-                DataProductModel.memberships.any(
-                    user_id=user_id, status=DataProductMembershipStatus.APPROVED
+            db.scalars(
+                select(DataProductModel)
+                .options(
+                    joinedload(DataProductModel.memberships),
+                    joinedload(DataProductModel.dataset_links),
+                    joinedload(DataProductModel.data_outputs),
                 )
+                .filter(
+                    DataProductModel.memberships.any(
+                        user_id=user_id, status=DataProductMembershipStatus.APPROVED
+                    )
+                )
+                .order_by(asc(DataProductModel.name))
             )
-            .order_by(asc(DataProductModel.name))
+            .unique()
             .all()
         )
 
@@ -232,7 +241,13 @@ class DataProductService:
         data_product = db.get(
             DataProductModel,
             id,
-            options=[joinedload(DataProductModel.dataset_links)],
+            options=[
+                joinedload(DataProductModel.memberships),
+                joinedload(DataProductModel.dataset_links),
+                joinedload(DataProductModel.data_outputs).joinedload(
+                    DataOutputModel.dataset_links
+                ),
+            ],
         )
         if not data_product:
             raise HTTPException(
@@ -289,7 +304,13 @@ class DataProductService:
     def update_data_product(
         self, id: UUID, data_product: DataProductUpdate, db: Session
     ):
-        current_data_product = ensure_data_product_exists(id, db)
+        current_data_product = ensure_data_product_exists(
+            id,
+            db,
+            options=[
+                joinedload(DataProductModel.memberships),
+            ],
+        )
         update_data_product = data_product.model_dump(exclude_unset=True)
 
         for k, v in update_data_product.items():
@@ -363,8 +384,14 @@ class DataProductService:
         db: Session,
         background_tasks: BackgroundTasks,
     ):
-        dataset = ensure_dataset_exists(dataset_id, db)
-        data_product = ensure_data_product_exists(id, db)
+        dataset = ensure_dataset_exists(
+            dataset_id,
+            db,
+            options=[joinedload(DatasetModel.data_product_links)],
+        )
+        data_product = ensure_data_product_exists(
+            id, db, options=[joinedload(DataProductModel.dataset_links)]
+        )
 
         if dataset.id in [
             link.dataset_id
@@ -406,7 +433,9 @@ class DataProductService:
 
     def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID, db: Session):
         ensure_dataset_exists(dataset_id, db)
-        data_product = ensure_data_product_exists(id, db)
+        data_product = ensure_data_product_exists(
+            id, db, options=[joinedload(DataProductModel.dataset_links)]
+        )
         data_product_dataset = next(
             (
                 dataset
@@ -533,7 +562,14 @@ class DataProductService:
         return config[str(data_product.domain_id)]
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
-        product = db.get(DataProductModel, id)
+        product = db.get(
+            DataProductModel,
+            id,
+            options=[
+                joinedload(DataProductModel.dataset_links),
+                joinedload(DataProductModel.data_outputs),
+            ],
+        )
         nodes = [
             Node(
                 id=id,

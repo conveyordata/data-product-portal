@@ -23,17 +23,41 @@ if TYPE_CHECKING:
     from app.domains.model import Domain
 
 
-def ensure_data_product_exists(data_product_id: UUID, db: Session) -> DataProductSchema:
-    return ensure_exists(data_product_id, db, DataProduct)
+def ensure_data_product_exists(
+    data_product_id: UUID, db: Session, **kwargs
+) -> DataProductSchema:
+    return ensure_exists(data_product_id, db, DataProduct, **kwargs)
 
 
 class DataProduct(Base, BaseORM):
     __tablename__ = "data_products"
+
     id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
     namespace = Column(String)
     description = Column(String)
     about = Column(String)
+    status: DataProductStatus = Column(
+        Enum(DataProductStatus), default=DataProductStatus.ACTIVE
+    )
+
+    # Foreign keys
+    type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
+    lifecycle_id: Mapped[UUID] = mapped_column(
+        ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
+    )
+    domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
+
+    # Relationships
+    type: Mapped["DataProductType"] = relationship(
+        back_populates="data_products", lazy="joined"
+    )
+    lifecycle: Mapped["DataProductLifecycle"] = relationship(
+        back_populates="data_products", lazy="joined"
+    )
+    domain: Mapped["Domain"] = relationship(
+        back_populates="data_products", lazy="joined"
+    )
     memberships: Mapped[list["DataProductMembership"]] = relationship(
         "DataProductMembership",
         back_populates="data_product",
@@ -41,9 +65,6 @@ class DataProduct(Base, BaseORM):
         order_by="DataProductMembership.status, "
         "DataProductMembership.requested_on, "
         "DataProductMembership.role",
-    )
-    status: DataProductStatus = Column(
-        Enum(DataProductStatus), default=DataProductStatus.ACTIVE
     )
     dataset_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
@@ -60,20 +81,6 @@ class DataProduct(Base, BaseORM):
         cascade="all, delete-orphan",
         order_by="DataProductSettingValue.data_product_id",
         lazy="joined",
-    )
-    type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
-    type: Mapped["DataProductType"] = relationship(
-        back_populates="data_products", lazy="joined"
-    )
-    lifecycle_id: Mapped[UUID] = mapped_column(
-        ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
-    )
-    lifecycle: Mapped["DataProductLifecycle"] = relationship(
-        back_populates="data_products", lazy="joined"
-    )
-    domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
-    domain: Mapped["Domain"] = relationship(
-        back_populates="data_products", lazy="joined"
     )
     data_outputs: Mapped[list["DataOutput"]] = relationship(
         "DataOutput",

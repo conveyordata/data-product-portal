@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.model import DataOutput as DataOutputModel
@@ -149,10 +149,14 @@ class OnlyWithProductAccess:
         if data_product_id:
             id = data_product_id
         if id:
-            data_product = db.get(DataProductModel, id)
+            data_product = db.get(
+                DataProductModel, id, options=[joinedload(DataProductModel.memberships)]
+            )
         elif data_product_name:
             data_product = db.scalar(
-                select(DataProductModel).filter_by(namespace=data_product_name)
+                select(DataProductModel)
+                .options(joinedload(DataProductModel.memberships))
+                .filter_by(namespace=data_product_name)
             )
         else:
             raise HTTPException(

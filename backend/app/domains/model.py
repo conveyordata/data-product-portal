@@ -24,6 +24,14 @@ class Domain(Base, BaseORM):
     datasets: Mapped[list["Dataset"]] = relationship(lazy="raise")
     data_products: Mapped[list["DataProduct"]] = relationship(lazy="raise")
 
+    @property
+    def data_product_count(self) -> int:
+        return len(self.data_products)
+
+    @property
+    def dataset_count(self) -> int:
+        return len(self.datasets)
+
 
 def ensure_domain_exists(data_product_type_id: UUID, db: Session, **kwargs) -> Domain:
     return ensure_exists(data_product_type_id, db, Domain, **kwargs)

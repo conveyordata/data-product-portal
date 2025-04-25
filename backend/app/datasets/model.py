@@ -32,8 +32,8 @@ datasets_owner_table = Table(
 )
 
 
-def ensure_dataset_exists(dataset_id: UUID, db: Session) -> DatasetSchema:
-    return ensure_exists(dataset_id, db, Dataset)
+def ensure_dataset_exists(dataset_id: UUID, db: Session, **kwargs) -> DatasetSchema:
+    return ensure_exists(dataset_id, db, Dataset, **kwargs)
 
 
 class Dataset(Base, BaseORM):
