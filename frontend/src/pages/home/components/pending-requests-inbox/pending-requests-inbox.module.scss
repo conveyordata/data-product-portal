@@ -59,7 +59,8 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 
 .type-indicator {
     height: 100%;
-    background-color: globals.$secondary-color-fill;
+    border-right: globals.$spacing-xs solid globals.$secondary-color-fill;
+    background-color: globals.$quaternary-color-fill;
     padding: globals.$spacing-xs;
     padding-right: globals.$spacing-m;
 }
@@ -79,7 +80,6 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
 }
 
 .buttons {
-    background-color: globals.$quaternary-color-fill;
 }
 
 .message {
