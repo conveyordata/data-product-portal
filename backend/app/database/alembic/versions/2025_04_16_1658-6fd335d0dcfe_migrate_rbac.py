@@ -8,21 +8,17 @@ Create Date: 2025-04-16 16:58:38.284751
 
 import asyncio
 from datetime import datetime
+from enum import Enum
 from typing import Optional, Sequence, Union
 from uuid import UUID
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Session
 
 from app.authorization.service import AuthorizationService
 from app.core.authz import Action, Authorization
-from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
-    DataProductUserRole,
-)
-from app.data_product_memberships.schema import DataProductMembership
-from app.data_product_memberships.service import DataProductMembershipService
 from app.datasets.model import Dataset
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.dataset.model import DatasetRoleAssignment
@@ -39,11 +35,57 @@ down_revision: Union[str, None] = "b3a391db07dd"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+data_product_membership = sa.Table(
+    "data_product_memberships",
+    sa.MetaData(),
+    sa.Column("id", PGUUID(as_uuid=True), primary_key=True),
+    sa.Column(
+        "user_id", PGUUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=False
+    ),
+    sa.Column(
+        "data_product_id",
+        PGUUID(as_uuid=True),
+        sa.ForeignKey("data_products.id"),
+        nullable=False,
+    ),
+    sa.Column("role", sa.String, nullable=False),
+    sa.Column("status", sa.String, nullable=False),
+    sa.Column("requested_on", sa.DateTime, nullable=False),
+    sa.Column(
+        "requested_by_id",
+        PGUUID(as_uuid=True),
+        sa.ForeignKey("users.id"),
+        nullable=True,
+    ),
+    sa.Column(
+        "approved_by_id", PGUUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=True
+    ),
+    sa.Column("approved_on", sa.DateTime, nullable=True),
+    sa.Column(
+        "denied_by_id", PGUUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=True
+    ),
+    sa.Column("denied_on", sa.DateTime, nullable=True),
+)
+
+
+# Define DataProductMembershipStatus enum
+class DataProductMembershipStatus(str, Enum):
+    APPROVED = "APPROVED"
+    DENIED = "DENIED"
+    PENDING_APPROVAL = "PENDING_APPROVAL"
+
+
+# Define DataProductUserRole enum
+class DataProductUserRole(str, Enum):
+    OWNER = "OWNER"
+    MEMBER = "MEMBER"
+
 
 class RoleMigrationService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, data_product_membership):
         self.db = db
         self.role_service = RoleService(db)
+        self.data_product_membership = data_product_membership
 
     async def migrate(self):
         self._transfer_product_memberships()
@@ -56,7 +98,9 @@ class RoleMigrationService:
         Authorization.deregister()
 
     def _transfer_product_memberships(self):
-        memberships = DataProductMembershipService().list_memberships(self.db)
+        memberships = self.db.execute(
+            sa.select(self.data_product_membership)
+        ).fetchall()
 
         owner_role = self.role_service.find_prototype(
             Scope.DATA_PRODUCT, Prototype.OWNER
@@ -87,7 +131,7 @@ class RoleMigrationService:
                 if membership.role == DataProductUserRole.OWNER
                 else member_role.id
             )
-            decision, decided_by, decided_on = self.map_decision(membership)
+            decision, decided_by_id, decided_on = self.map_decision(membership)
             self.db.add(
                 DataProductRoleAssignment(
                     data_product_id=membership.data_product_id,
@@ -97,24 +141,27 @@ class RoleMigrationService:
                     requested_by_id=membership.requested_by_id,
                     decision=decision,
                     decided_on=decided_on,
-                    decided_by=decided_by,
+                    decided_by_id=decided_by_id,
                 )
             )
         self.db.commit()
 
     @classmethod
     def map_decision(
-        cls,
-        membership: DataProductMembership,
+        cls, membership  #: DataProductMembership,
     ) -> tuple[DecisionStatus, Optional[UUID], Optional[datetime]]:
         if membership.status == DataProductMembershipStatus.APPROVED:
             return (
                 DecisionStatus.APPROVED,
-                membership.approved_by,
+                membership.approved_by_id,
                 membership.approved_on,
             )
         if membership.status == DataProductMembershipStatus.DENIED:
-            return DecisionStatus.DENIED, membership.declined_by, membership.denied_on
+            return (
+                DecisionStatus.DENIED,
+                membership.declined_by_id,
+                membership.denied_on,
+            )
         if membership.status == DataProductMembershipStatus.PENDING_APPROVAL:
             return DecisionStatus.PENDING, None, None
         raise ValueError("Invalid membership status")
@@ -159,8 +206,14 @@ class RoleMigrationService:
 
 def upgrade() -> None:
     session = Session(bind=op.get_bind())
+    metadata = sa.MetaData()
+    metadata.reflect(bind=session.bind)
 
-    service = RoleMigrationService(db=session)
+    data_product_membership = metadata.tables["data_product_memberships"]
+
+    service = RoleMigrationService(
+        db=session, data_product_membership=data_product_membership
+    )
     service.role_service.initialize_prototype_roles()
     asyncio.run(service.migrate())
 
