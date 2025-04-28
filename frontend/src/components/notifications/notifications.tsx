@@ -1,4 +1,4 @@
-import { BellOutlined } from '@ant-design/icons';
+import { BellOutlined, CloseOutlined } from '@ant-design/icons';
 import { Badge, Button, Dropdown, Flex, type MenuProps, Space, theme, Typography } from 'antd';
 import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
@@ -330,7 +330,11 @@ export function Notifications() {
             return {
                 key: userNotification.id,
                 label: <Flex>{description}</Flex>,
-                extra: <Button onClick={() => handleRemoveNotification(userNotification.id)}>{t('Hide')}</Button>,
+                extra: (
+                    <Button type="link" onClick={() => handleRemoveNotification(userNotification.id)}>
+                        <CloseOutlined />
+                    </Button>
+                ),
                 onClick: () => navigate(navigatePath),
             };
         },
