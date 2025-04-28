@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.database.database import Base
+from app.role_assignments.enums import DecisionStatus
 
 if TYPE_CHECKING:
     from app.users.model import User
@@ -33,9 +33,9 @@ class DataOutputDatasetAssociation(Base, BaseORM):
     data_output: Mapped["DataOutput"] = relationship(
         "DataOutput", back_populates="dataset_links", order_by="DataOutput.name"
     )
-    status: Mapped[DataOutputDatasetLinkStatus] = mapped_column(
-        Enum(DataOutputDatasetLinkStatus),
-        default=DataOutputDatasetLinkStatus.PENDING_APPROVAL,
+    status: Mapped[DecisionStatus] = mapped_column(
+        Enum(DecisionStatus),
+        default=DecisionStatus.PENDING,
     )
     requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     requested_by: Mapped["User"] = relationship(
