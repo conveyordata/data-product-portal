@@ -24,14 +24,19 @@ type PendingActionItem = {
     icon: ReactNode;
 };
 
-type DataProductListProps = {
+type PendingRequestsListProps = {
     pendingActionItems: PendingActionItem[];
     pagination: ListPaginationConfig;
     onAccept: (request: ActionResolveRequest) => void;
     onReject: (request: ActionResolveRequest) => void;
 };
 
-export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, onReject }: DataProductListProps) => {
+export const PendingRequestsList = ({
+    pendingActionItems,
+    pagination,
+    onAccept,
+    onReject,
+}: PendingRequestsListProps) => {
     const { t } = useTranslation();
 
     const navigate = useNavigate();
