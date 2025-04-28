@@ -278,6 +278,20 @@ class DataProductService:
         current_data_product = ensure_data_product_exists(id, db)
         update_data_product = data_product.model_dump(exclude_unset=True)
 
+        if (
+            current_data_product.namespace != data_product.namespace
+            and (
+                validity := self.namespace_validator.validate_namespace(
+                    data_product.namespace, db
+                ).validity
+            )
+            != NamespaceValidityType.VALID
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
         for k, v in update_data_product.items():
             if k == "memberships":
                 self._update_memberships(current_data_product, v, db)

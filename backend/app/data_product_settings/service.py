@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -9,6 +10,7 @@ from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
     NamespaceValidation,
+    NamespaceValidityType,
 )
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.enums import DataProductSettingScope
@@ -87,6 +89,16 @@ class DataProductSettingService:
     def create_data_product_setting(
         self, setting: DataProductSetting, db: Session
     ) -> dict[str, UUID]:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                setting.namespace, db, setting.scope
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
         setting = DataProductSettingModel(**setting.parse_pydantic_schema())
         db.add(setting)
         db.commit()
@@ -95,9 +107,26 @@ class DataProductSettingService:
     def update_data_product_setting(
         self, id: UUID, setting: DataProductSettingUpdate, db: Session
     ) -> dict[str, UUID]:
-        db.query(DataProductSettingModel).filter_by(id=id).update(
-            setting.parse_pydantic_schema()
-        )
+        current_setting = db.get(DataProductSettingModel, id)
+        update_setting = setting.model_dump(exclude_unset=True)
+
+        if (
+            current_setting.namespace != setting.namespace
+            and (
+                validity := self.namespace_validator.validate_namespace(
+                    setting.namespace, db, current_setting.scope
+                ).validity
+            )
+            != NamespaceValidityType.VALID
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
+        for k, v in update_setting.items():
+            setattr(current_setting, k, v)
+
         db.commit()
         return {"id": id}
 
