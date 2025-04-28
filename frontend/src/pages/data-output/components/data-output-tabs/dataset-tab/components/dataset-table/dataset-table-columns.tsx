@@ -9,7 +9,7 @@ import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-
 import type { DataOutputDatasetLink } from '@/types/data-output';
 import { createDatasetIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
-import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
+import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 
 import styles from './dataset-table.module.scss';
 
@@ -54,8 +54,8 @@ export const getDataOutputDatasetsColumns = ({
                         title={<DatasetTitle name={dataset.name} accessType={dataset.access_type} />}
                         subtitle={
                             <Badge
-                                status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
+                                status={getDecisionStatusBadgeStatus(status)}
+                                text={getDecisionStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }

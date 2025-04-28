@@ -9,7 +9,7 @@ import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigat
 import { DecisionStatus } from '@/types/roles';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
-import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
+import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper';
 
 import styles from './data-output-table.module.scss';
 
@@ -59,8 +59,8 @@ export const getDatasetDataProductsColumns = ({
                         title={data_output.owner.name}
                         subtitle={
                             <Badge
-                                status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
+                                status={getDecisionStatusBadgeStatus(status)}
+                                text={getDecisionStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -86,8 +86,8 @@ export const getDatasetDataProductsColumns = ({
                         title={data_output.name}
                         subtitle={
                             <Badge
-                                status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
+                                status={getDecisionStatusBadgeStatus(status)}
+                                text={getDecisionStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }

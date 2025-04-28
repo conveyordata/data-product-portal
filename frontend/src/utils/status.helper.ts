@@ -32,7 +32,7 @@ export function getBadgeStatus(status: Status): BadgeProps['status'] {
     }
 }
 
-export function getDataProductDatasetLinkStatusLabel(t: TFunction, status: DecisionStatus): string {
+export function getDecisionStatusLabel(t: TFunction, status: DecisionStatus): string {
     switch (status) {
         case DecisionStatus.Pending:
             return t('Requested');
@@ -45,33 +45,7 @@ export function getDataProductDatasetLinkStatusLabel(t: TFunction, status: Decis
     }
 }
 
-export function getDataOutputDatasetLinkStatusLabel(t: TFunction, status: DecisionStatus): string {
-    switch (status) {
-        case DecisionStatus.Pending:
-            return t('Requested');
-        case DecisionStatus.Approved:
-            return t('Available');
-        case DecisionStatus.Denied:
-            return t('Rejected');
-        default:
-            return t('Unknown');
-    }
-}
-
-export function getDataOutputDatasetLinkBadgeStatus(status: DecisionStatus): BadgeProps['status'] {
-    switch (status) {
-        case DecisionStatus.Pending:
-            return 'processing';
-        case DecisionStatus.Approved:
-            return 'success';
-        case DecisionStatus.Denied:
-            return 'error';
-        default:
-            return 'default';
-    }
-}
-
-export function getDataProductDatasetLinkBadgeStatus(status: DecisionStatus): BadgeProps['status'] {
+export function getDecisionStatusBadgeStatus(status: DecisionStatus): BadgeProps['status'] {
     switch (status) {
         case DecisionStatus.Pending:
             return 'processing';
