@@ -61,7 +61,7 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                             className={styles.listItem}
                             onClick={() => handleItemClick(item.navigatePath)}
                         >
-                            <Flex vertical className={styles.itemCard} gap={4}>
+                            <Flex vertical className={styles.itemCard} gap={8}>
                                 <Flex align="center">
                                     <Avatar
                                         style={{ backgroundColor: item.color }}
@@ -70,36 +70,40 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                                     >
                                         {item.initials || <UserOutlined />}
                                     </Avatar>
-                                    <Flex vertical>
-                                        <Typography.Text>{item.description}</Typography.Text>
+                                    <Flex vertical className={styles.width}>
+                                        <Flex justify="space-between">
+                                            <Typography.Text>{item.description}</Typography.Text>
+                                            <Flex>
+                                                <Flex className={styles.typeIndicator} gap="small">
+                                                    <Typography.Text type="secondary">{item.icon}</Typography.Text>
+                                                    <Typography.Text>{item.tag}</Typography.Text>
+                                                </Flex>
+
+                                                <Button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onAccept(item.request);
+                                                    }}
+                                                    type="link"
+                                                    className={styles.resolveButton}
+                                                >
+                                                    {t('Accept')}
+                                                </Button>
+                                                <Button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onReject(item.request);
+                                                    }}
+                                                    type="link"
+                                                    className={styles.resolveButton}
+                                                >
+                                                    {t('Reject')}
+                                                </Button>
+                                            </Flex>
+                                        </Flex>
                                         <Typography.Text type="secondary" style={{ fontWeight: 'normal' }}>
                                             by {item.author}, {formattedDate}
                                         </Typography.Text>
-                                    </Flex>
-                                    <Flex align="flex-start" justify="flex-start" className={styles.endActions}>
-                                        <Flex className={styles.typeIndicator} gap="small">
-                                            <Typography.Text type="secondary">{item.icon}</Typography.Text>
-                                            <Typography.Text>{item.tag}</Typography.Text>
-                                        </Flex>
-
-                                        <Button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onAccept(item.request);
-                                            }}
-                                            type="link"
-                                        >
-                                            {t('Accept')}
-                                        </Button>
-                                        <Button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onReject(item.request);
-                                            }}
-                                            type="link"
-                                        >
-                                            {t('Reject')}
-                                        </Button>
                                     </Flex>
                                 </Flex>
                                 <Typography.Text className={styles.message}>{item.message}</Typography.Text>

@@ -55,14 +55,8 @@ $item-card-width: 360px;
     justify-content: center;
 }
 
-.type-indicator {
-    padding: globals.$spacing-xs;
-    margin-right: globals.$spacing-m;
-}
-
 .end-actions {
-    margin-left: auto;
-    margin-bottom: auto;
+    padding-bottom: globals.$spacing-m;
 }
 
 .requests-info {
@@ -73,4 +67,18 @@ $item-card-width: 360px;
 .message {
     margin-left: globals.$spacing-xl;
     padding-left: globals.$spacing-xl;
+}
+
+.width {
+    width: 100%;
+}
+
+.resolve-button {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    height: auto !important;
+}
+
+.type-indicator {
+    margin-right: globals.$spacing-regular;
 }
