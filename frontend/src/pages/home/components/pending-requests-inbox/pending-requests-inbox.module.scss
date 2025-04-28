@@ -21,6 +21,7 @@ $item-card-width: 360px;
     padding: unset !important;
     margin-bottom: globals.$spacing-m;
     transition: border-color 0.3s;
+    cursor: pointer;
 
     &:hover {
         border-color: globals.$primary-color-border-hover;
@@ -72,7 +73,7 @@ $item-card-width: 360px;
 .resolve-button {
     margin: 0;
     padding: 0;
-    height: auto !important;
+    height: auto;
 }
 
 .buttons {
