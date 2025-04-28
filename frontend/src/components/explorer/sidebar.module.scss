@@ -1,0 +1,9 @@
+@use '@/styles/globals';
+
+.sidebar {
+    width: 20em;
+    height: 4em;
+    overflow-y: auto;
+    margin: globals.$spacing-m;
+    padding: globals.$spacing-m;
+}

@@ -6,8 +6,6 @@ $node-wrapper-min-width: 500px;
 .node-wrapper {
     height: 100%;
     width: 100%;
-    min-height: $node-wrapper-min-height;
-    min-width: $node-wrapper-min-width;
     border: 1px solid globals.$border-color;
     border-radius: globals.$border-radius;
 }
