@@ -74,34 +74,36 @@ export const PendingRequestsList = ({ pendingActionItems, pagination, onAccept, 
                                         <Flex justify="space-between">
                                             <Typography.Text>{item.description}</Typography.Text>
                                             <Flex>
-                                                <Flex className={styles.typeIndicator} gap="small">
+                                                <Flex gap="small">
                                                     <Typography.Text type="secondary">{item.icon}</Typography.Text>
                                                     <Typography.Text>{item.tag}</Typography.Text>
                                                 </Flex>
 
-                                                <Button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onAccept(item.request);
-                                                    }}
-                                                    type="link"
-                                                    className={styles.resolveButton}
-                                                >
-                                                    {t('Accept')}
-                                                </Button>
-                                                <Button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onReject(item.request);
-                                                    }}
-                                                    type="link"
-                                                    className={styles.resolveButton}
-                                                >
-                                                    {t('Reject')}
-                                                </Button>
+                                                <Flex align="center" justify="space-evenly" className={styles.buttons}>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onAccept(item.request);
+                                                        }}
+                                                        type="link"
+                                                        className={styles.resolveButton}
+                                                    >
+                                                        {t('Accept')}
+                                                    </Button>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onReject(item.request);
+                                                        }}
+                                                        type="link"
+                                                        className={styles.resolveButton}
+                                                    >
+                                                        {t('Reject')}
+                                                    </Button>
+                                                </Flex>
                                             </Flex>
                                         </Flex>
-                                        <Typography.Text type="secondary" style={{ fontWeight: 'normal' }}>
+                                        <Typography.Text type="secondary">
                                             by {item.author}, {formattedDate}
                                         </Typography.Text>
                                     </Flex>
