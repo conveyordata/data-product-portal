@@ -179,6 +179,27 @@ class TestDataProductSettingsRouter:
         response = self.create_data_product_setting(client, create_payload)
         assert response.status_code == 400
 
+    @pytest.mark.usefixtures("admin")
+    def test_update_data_product_setting_duplicate_namespace(self, client):
+        namespace = "namespace"
+        DataProductSettingFactory(namespace=namespace, scope="dataproduct")
+        data_product_setting = DataProductSettingFactory(scope="dataproduct")
+
+        update_payload = {
+            "namespace": namespace,
+            "tooltip": "tooltip",
+            "name": "name",
+            "type": "checkbox",
+            "category": "category",
+            "default": "False",
+            "order": 3,
+            "scope": "dataproduct",
+        }
+        response = self.update_data_product_setting(
+            client, update_payload, data_product_setting.id
+        )
+        assert response.status_code == 400
+
     @staticmethod
     def create_data_product_setting(client, data_product_setting_payload):
         return client.post(ENDPOINT, json=data_product_setting_payload)
