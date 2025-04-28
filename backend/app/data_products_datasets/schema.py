@@ -14,7 +14,7 @@ from app.users.schema import User
 
 class BaseDataProductDatasetAssociation(ORMModel):
     dataset_id: UUID
-    status: DecisionStatus = DecisionStatus("pending")
+    status: DecisionStatus = DecisionStatus.PENDING
 
     class Meta:
         orm_model = DataProductDatasetModel
