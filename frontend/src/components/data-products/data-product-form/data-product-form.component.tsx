@@ -260,6 +260,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 editToggleDisabled={mode === 'edit'}
                 canEditNamespace={canEditNamespace}
                 toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                validationRequired={mode === 'create'}
                 validateNamespace={validateNamespaceCallback}
             />
             <Form.Item<DataProductCreateFormSchema>

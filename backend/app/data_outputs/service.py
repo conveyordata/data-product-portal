@@ -13,6 +13,7 @@ from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
     NamespaceLengthLimits,
     NamespaceSuggestion,
+    NamespaceValidityType,
 )
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
@@ -112,6 +113,15 @@ class DataOutputService:
         db: Session,
         authenticated_user: User,
     ) -> dict[str, UUID]:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                data_output.namespace, db, id
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
         data_output = DataOutputCreate(
             **data_output.parse_pydantic_schema(), owner_id=id
         )

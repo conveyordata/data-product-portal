@@ -7,8 +7,8 @@ from tests.factories import (
 
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.schema import RoleAssignment
+from app.roles import ADMIN_UUID
 from app.roles.schema import Role, Scope
-from app.roles.service import ADMIN_UUID
 from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/global"

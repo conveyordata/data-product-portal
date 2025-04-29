@@ -1,8 +1,10 @@
-import { Flex, Table, TableColumnsType } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Flex, Table, TableColumnsType, TableProps } from 'antd';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
@@ -40,6 +42,19 @@ export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Pr
         { skip: !datasetId },
     );
     const canRemoveNew = remove_access?.allowed || false;
+
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
+
+    const onChange: TableProps<UserContract>['onChange'] = (pagination) => {
+        handlePaginationChange(pagination);
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [datasetUsers, resetPagination]);
+
     const handleRemoveUserAccess = useCallback(
         async (userId: string) => {
             try {
@@ -74,7 +89,19 @@ export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Pr
                 columns={columns}
                 dataSource={datasetUsers}
                 rowKey={({ id }) => id}
-                pagination={false}
+                onChange={onChange}
+                pagination={{
+                    ...pagination,
+                    position: ['topRight'],
+                    size: 'small',
+                    showTotal: (total, range) =>
+                        t('Showing {{range0}}-{{range1}} of {{total}} dataset owners', {
+                            range0: range[0],
+                            range1: range[1],
+                            total: total,
+                        }),
+                    className: styles.pagination,
+                }}
                 rowClassName={styles.tableRow}
                 size={'small'}
             />

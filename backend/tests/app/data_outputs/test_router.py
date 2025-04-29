@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import pytest
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_product import DataProductFactory
@@ -44,7 +46,7 @@ def data_output_payload_not_owner():
     return {
         "name": "Data Output Name",
         "description": "Updated Data Output Description",
-        "namespace": "Updated Data Output External ID",
+        "namespace": "namespace",
         "sourceAligned": True,
         "configuration": {
             "bucket": "test",
@@ -195,6 +197,37 @@ class TestDataOutputsRouter:
         response = self.get_namespace_length_limits(client)
         assert response.status_code == 200
         assert response.json()["max_length"] > 1
+
+    def test_create_data_output_duplicate_namespace(self, data_output_payload, client):
+        owner = DataProductFactory()
+        DataOutputFactory(
+            namespace=data_output_payload["namespace"],
+            owner=owner,
+        )
+
+        create_payload = deepcopy(data_output_payload)
+        create_payload["owner_id"] = str(owner.id)
+
+        response = self.create_data_output(client, create_payload)
+        assert response.status_code == 400
+
+    def test_create_data_output_invalid_characters_namespace(
+        self, data_output_payload, client
+    ):
+        create_payload = deepcopy(data_output_payload)
+        create_payload["namespace"] = "!"
+
+        response = self.create_data_output(client, create_payload)
+        assert response.status_code == 400
+
+    def test_create_data_output_invalid_length_namespace(
+        self, data_output_payload, client
+    ):
+        create_payload = deepcopy(data_output_payload)
+        create_payload["namespace"] = "a" * 256
+
+        response = self.create_data_output(client, create_payload)
+        assert response.status_code == 400
 
     @staticmethod
     def create_data_output(client, default_data_output_payload):

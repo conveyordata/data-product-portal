@@ -187,6 +187,20 @@ class DatasetService:
         current_dataset = ensure_dataset_exists(id, db)
         updated_dataset = dataset.model_dump(exclude_unset=True)
 
+        if (
+            current_dataset.namespace != dataset.namespace
+            and (
+                validity := self.namespace_validator.validate_namespace(
+                    dataset.namespace, db
+                ).validity
+            )
+            != NamespaceValidityType.VALID
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
         for k, v in updated_dataset.items():
             if k == "owners":
                 current_dataset = self._update_owners(current_dataset, db, v)

@@ -1,4 +1,10 @@
-import { FileSearchOutlined, HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import {
+    CompassOutlined,
+    FileSearchOutlined,
+    HomeOutlined,
+    SettingOutlined,
+    UnorderedListOutlined,
+} from '@ant-design/icons';
 import { Flex, Layout, Menu, type MenuProps, Space } from 'antd';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
@@ -41,9 +47,15 @@ export const Sidebar = () => {
             key: ApplicationPaths.AuditLogs,
         },
         {
+            label: <Link to={ApplicationPaths.Explorer}>{t('Explorer')}</Link>,
+            icon: <CompassOutlined />,
+            key: ApplicationPaths.Explorer,
+        },
+        {
             label: (
                 <a
                     href={`https://d33vpinjygaq6n.cloudfront.net/docs/${version?.version.split('.').slice(0, 2).join('.')}.x/intro`}
+                    target="_blank"
                 >
                     {t('Documentation')}
                 </a>
