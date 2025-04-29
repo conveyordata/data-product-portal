@@ -149,11 +149,7 @@ class DataProductService:
             for membership in data_product.memberships
             if membership.role == DataProductUserRole.OWNER
         ]
-        return (
-            db.scalars(select(UserModel).filter(UserModel.id.in_(user_ids)))
-            .unique()
-            .all()
-        )
+        return db.scalars(select(UserModel).filter(UserModel.id.in_(user_ids))).all()
 
     def get_user_data_products(
         self, user_id: UUID, db: Session
