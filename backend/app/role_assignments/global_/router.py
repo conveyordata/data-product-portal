@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Literal, Optional, Sequence, Union, cast
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -17,7 +17,7 @@ from app.role_assignments.global_.schema import (
     UpdateRoleAssignment,
 )
 from app.role_assignments.global_.service import RoleAssignmentService
-from app.roles.service import ADMIN_UUID
+from app.roles import ADMIN_UUID
 from app.users.schema import User
 
 router = APIRouter(prefix="/global")
@@ -38,8 +38,7 @@ def create_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    if (role_id := request.role_id) == "admin":
-        role_id = ADMIN_UUID
+    role_id = _resolve_role_id(request.role_id)
     return RoleAssignmentService(db=db, user=user).create_assignment(
         RoleAssignmentRequest(user_id=request.user_id, role_id=role_id)
     )
@@ -97,8 +96,7 @@ def modify_assigned_role(
     service = RoleAssignmentService(db=db, user=user)
     original = service.get_assignment(id)
 
-    if (role_id := request.role_id) == "admin":
-        role_id = ADMIN_UUID
+    role_id = _resolve_role_id(request.role_id)
     assignment = service.update_assignment(UpdateRoleAssignment(id=id, role_id=role_id))
 
     if assignment.decision is DecisionStatus.APPROVED:
@@ -107,3 +105,9 @@ def modify_assigned_role(
         )
 
     return assignment
+
+
+def _resolve_role_id(role_id: Union[UUID, Literal["admin"]]) -> UUID:
+    if role_id == "admin":
+        return ADMIN_UUID
+    return cast(UUID, role_id)
