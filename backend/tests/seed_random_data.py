@@ -30,7 +30,7 @@ def add_random_data(
     for _ in range(nr_of_data_products):
         data_product = DataProductFactory()
 
-        for _ in range(random.randint(1, 3)):
+        for _ in range(random.randint(0, 3)):
             data_output = DataOutputFactory(owner=data_product, service=service)
             data_outputs.append(data_output)
 
@@ -41,7 +41,7 @@ def add_random_data(
         dataset = DatasetFactory()
 
         # Add data outputs to the dataset
-        for _ in range(random.randint(1, 3)):
+        for _ in range(random.randint(0, 3)):
             data_output = random.choice(data_outputs)
 
             DataOutputDatasetAssociationFactory(
@@ -50,7 +50,7 @@ def add_random_data(
             )
 
         # Add data products to the dataset
-        for _ in range(random.randint(1, 3)):
+        for _ in range(random.randint(0, 3)):
             data_product = random.choice(data_products)
 
             DataProductDatasetAssociationFactory(
