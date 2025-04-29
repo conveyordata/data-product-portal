@@ -7,7 +7,6 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
@@ -71,11 +70,7 @@ class DataOutputDatasetService:
         current_link = db.get(
             DataOutputDatasetAssociationModel,
             id,
-            options=[
-                joinedload(DataOutputDatasetAssociationModel.data_output).joinedload(
-                    DataOutputModel.dataset_links
-                )
-            ],
+            options=[joinedload(DataOutputDatasetAssociationModel.data_output)],
         )
         if not current_link:
             raise HTTPException(

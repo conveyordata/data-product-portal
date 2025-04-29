@@ -85,12 +85,9 @@ class DataProductService:
                 joinedload(DataProductModel.dataset_links)
                 .joinedload(DataProductDatasetModel.dataset)
                 .joinedload(DatasetModel.data_output_links)
-                .joinedload(DataOutputDatasetAssociation.data_output)
-                .joinedload(DataOutputModel.dataset_links),
+                .joinedload(DataOutputDatasetAssociation.data_output),
                 joinedload(DataProductModel.memberships),
-                joinedload(DataProductModel.data_outputs).joinedload(
-                    DataOutputModel.dataset_links
-                ),
+                joinedload(DataProductModel.data_outputs),
             ],
         )
 
@@ -247,9 +244,7 @@ class DataProductService:
             options=[
                 joinedload(DataProductModel.memberships),
                 joinedload(DataProductModel.dataset_links),
-                joinedload(DataProductModel.data_outputs).joinedload(
-                    DataOutputModel.dataset_links
-                ),
+                joinedload(DataProductModel.data_outputs),
             ],
         )
         if not data_product:
@@ -520,11 +515,7 @@ class DataProductService:
 
     def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
         return (
-            db.scalars(
-                select(DataOutputModel)
-                .filter(DataOutputModel.owner_id == id)
-                .options(joinedload(DataOutputModel.dataset_links))
-            )
+            db.scalars(select(DataOutputModel).filter(DataOutputModel.owner_id == id))
             .unique()
             .all()
         )
@@ -570,9 +561,7 @@ class DataProductService:
             id,
             options=[
                 joinedload(DataProductModel.dataset_links),
-                joinedload(DataProductModel.data_outputs).joinedload(
-                    DataOutputModel.dataset_links
-                ),
+                joinedload(DataProductModel.data_outputs),
             ],
         )
         nodes = [
