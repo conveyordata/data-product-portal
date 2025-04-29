@@ -1,8 +1,8 @@
 from typing import Literal
 
-from app.data_outputs.data_output_types import DataOutputTypes
-from app.data_outputs.s3_data_output.model import S3DataOutput as S3DataOutputModel
-from app.data_outputs.schema_base import BaseDataOutputConfiguration
+from app.data_output_configuration.base_schema import BaseDataOutputConfiguration
+from app.data_output_configuration.data_output_types import DataOutputTypes
+from app.data_output_configuration.s3.model import S3DataOutput as S3DataOutputModel
 from app.data_products.schema_base import BaseDataProduct
 
 

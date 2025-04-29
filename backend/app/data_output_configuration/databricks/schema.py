@@ -2,11 +2,11 @@ from typing import Literal, Self
 
 from pydantic import model_validator
 
-from app.data_outputs.data_output_types import DataOutputTypes
-from app.data_outputs.databricks_data_output.model import (
+from app.data_output_configuration.base_schema import BaseDataOutputConfiguration
+from app.data_output_configuration.data_output_types import DataOutputTypes
+from app.data_output_configuration.databricks.model import (
     DatabricksDataOutput as DatabricksDataOutputModel,
 )
-from app.data_outputs.schema_base import BaseDataOutputConfiguration
 from app.data_products.schema_base import BaseDataProduct
 
 

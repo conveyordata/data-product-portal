@@ -1,4 +1,4 @@
-from app.data_outputs.data_output_types import DataOutputTypes
+from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.shared.schema import ORMModel
 
 

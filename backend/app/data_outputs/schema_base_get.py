@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.data_outputs.schema_union import DataOutputConfiguration
+from app.data_output_configuration.schema_union import DataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
 from app.data_products.schema_base_get import BaseDataProductGet
 from app.shared.schema import ORMModel

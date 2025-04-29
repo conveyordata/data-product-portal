@@ -2,25 +2,25 @@ from typing import Literal, Self
 
 from pydantic import model_validator
 
-from app.data_outputs.data_output_types import DataOutputTypes
-from app.data_outputs.redshift_data_output.model import (
-    RedshiftDataOutput as RedshiftDataOutputModel,
+from app.data_output_configuration.base_schema import BaseDataOutputConfiguration
+from app.data_output_configuration.data_output_types import DataOutputTypes
+from app.data_output_configuration.glue.model import (
+    GlueDataOutput as GlueDataOutputModel,
 )
-from app.data_outputs.schema_base import BaseDataOutputConfiguration
 from app.data_products.schema_base import BaseDataProduct
 
 
-class RedshiftDataOutput(BaseDataOutputConfiguration):
+class GlueDataOutput(BaseDataOutputConfiguration):
     database: str
-    schema: str = ""
-    configuration_type: Literal[DataOutputTypes.RedshiftDataOutput]
+    database_suffix: str = ""
     table: str = "*"
     bucket_identifier: str = ""
     database_path: str = ""
     table_path: str = ""
+    configuration_type: Literal[DataOutputTypes.GlueDataOutput]
 
     class Meta:
-        orm_model = RedshiftDataOutputModel
+        orm_model = GlueDataOutputModel
 
     @model_validator(mode="after")
     def validate_paths(self) -> Self:
@@ -31,7 +31,7 @@ class RedshiftDataOutput(BaseDataOutputConfiguration):
         return self
 
     def validate_configuration(self, data_product: BaseDataProduct):
-        # If product aligned
+        # TODO Force defaul t bucket identifier if bucket = ''
         if not self.database.startswith(data_product.namespace):
             raise ValueError("Invalid database specified")
 

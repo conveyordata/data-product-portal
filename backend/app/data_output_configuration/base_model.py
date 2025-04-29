@@ -4,7 +4,7 @@ from sqlalchemy import Column, Enum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped
 
-from app.data_outputs.data_output_types import DataOutputTypes
+from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.database.database import Base
 from app.shared.model import BaseORM
 

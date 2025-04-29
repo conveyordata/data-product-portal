@@ -11,7 +11,7 @@ from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.data_outputs.base_model import BaseDataOutputConfiguration
+    from app.data_output_configuration.base_model import BaseDataOutputConfiguration
 
 from app.database.database import Base, ensure_exists
 from app.platform_services.schema import PlatformService

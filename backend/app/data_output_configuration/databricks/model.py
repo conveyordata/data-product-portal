@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.data_outputs.base_model import BaseDataOutputConfiguration
+from app.data_output_configuration.base_model import BaseDataOutputConfiguration
 
 
 class DatabricksDataOutput(BaseDataOutputConfiguration):
