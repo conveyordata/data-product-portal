@@ -50,6 +50,11 @@ declare
     glue_data_output_id uuid;
     databricks_configuration_id uuid;
     databricks_data_output_id uuid;
+
+    product_owner_id uuid;
+    admin_role_id uuid;
+    product_member_id uuid;
+    dataset_owner_id uuid;
 begin
     TRUNCATE TABLE public.data_product_memberships CASCADE;
     TRUNCATE TABLE public.data_products_datasets CASCADE;
@@ -120,12 +125,16 @@ begin
 
     -- ROLES
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('f80c101c-345c-4d5b-9524-57c55bd12d2d', 'Everyone', 'global', 1, 'This is the role that is used as fallback for users that don''t have another role', ARRAY [102, 103, 104, 105], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '1 seconds'), NULL, NULL);
-    INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('e43b6f7a-e776-49b2-9b51-117d8644d971', 'Owner', 'data_product', 2, 'The owner of a Data Product', ARRAY [301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 313, 314, 315], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('e43b6f7a-e776-49b2-9b51-117d8644d971', 'Owner', 'data_product', 2, 'The owner of a Data Product', ARRAY [301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 313, 314, 315], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into product_owner_id;
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('18e67286-92aa-449a-ba46-ac26eb0de21d', 'Solution Architect', 'data_product', 0, 'The Solution Architect for a Data Product', ARRAY [303, 309, 310, 311, 312, 313, 314], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '1 seconds'), NULL, NULL);
-    INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('9ca3bfdd-2919-4190-a8bb-55e9ee7d70dd', 'Member', 'data_product', 0, 'A regular team member of a Data Product', ARRAY [313, 314, 315], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '2 seconds'), NULL, NULL);
-    INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'Owner', 'dataset', 2, 'The owner of a Dataset', ARRAY [401, 402, 404, 405, 406, 407, 408, 411, 412, 413], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('9ca3bfdd-2919-4190-a8bb-55e9ee7d70dd', 'Member', 'data_product', 0, 'A regular team member of a Data Product', ARRAY [313, 314, 315], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '2 seconds'), NULL, NULL) returning id into product_member_id;
+    INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'Owner', 'dataset', 2, 'The owner of a Dataset', ARRAY [401, 402, 404, 405, 406, 407, 408, 411, 412, 413], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into dataset_owner_id;
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('2ae1b4e3-5b13-491a-912b-984e2e90b858', 'Solution Architect', 'dataset', 0, 'The Solution Architect for a Dataset', ARRAY [403, 409, 410], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '1 seconds'), NULL, NULL);
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('db8d7a76-c50b-4e95-8549-8da86f48e7c2', 'Member', 'dataset', 0, 'A regular team member of a Dataset', ARRAY [413], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '2 seconds'), NULL, NULL);
+    INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at)
+    VALUES
+        ('00000000-0000-0000-0000-000000000000', 'Admin', 'global', 3, 'Global admin role', ARRAY[]::integer[], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+    RETURNING id INTO admin_role_id;
 
     -- DATA PRODUCTS
     INSERT INTO public.data_products (id, "name", namespace, description, about, status, type_id, domain_id, created_on, updated_on, deleted_at) VALUES ('e269fd59-14f4-4710-9ce0-bb31b1c8b541', 'Sales Funnel Optimization', 'sales_funnel_optimization', 'Analyze data to optimize the Sales Funnel', '<h2>Sales Funnel Optimization</h2><p></p><p>This data product aims to analyze the current sales funnel, identify drop-off points,  implement improvements, and test new strategies.</p><p></p><p><strong>Key objectives include:</strong></p><ul><li><p>Increase Conversion Rates</p></li><li><p>Enhance Lead Quality</p></li><li><p>Optimize Lead Nurturing Processes</p></li><li><p>Improve Sales Team Efficiency</p></li><li><p>Maximize Customer Lifetime Value (CLV)</p></li><li><p>Data-Driven Decision Making</p></li><li><p>Align Marketing and Sales Efforts</p></li><li><p>Enhance Customer Experience</p></li><li><p>Drive Revenue Growth</p></li></ul>', 'ACTIVE', exploration_type_id, sales_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_funnel_optimization_id;
@@ -190,4 +199,58 @@ begin
     INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES ('6c2ea4b3-48af-448d-9e9e-2892d3dddf50', glue_data_output_id, sales_data_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     INSERT INTO public.data_product_settings (id, namespace, name, "default", "order", type, tooltip, category, scope) VALUES ('e12ec335-d7a4-4e27-8225-b66da70f3158', 'iam_role', 'IAM service accounts', 'false', '100', 'CHECKBOX', 'Generate IAM access credentials for this data product', 'AWS', 'DATAPRODUCT');
+
+    -- -- INSERT ROLE ASSIGNMENTS FOR DATA PRODUCTS
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_on, decided_on, decided_by_id)
+    VALUES
+        -- Sales Funnel Optimization
+        ('46060c7b-ad7c-4405-aa7b-e5f0aa0b61ae', sales_funnel_optimization_id, john_id, product_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('cbf9b323-c37d-44c4-a88f-05657c393f57', sales_funnel_optimization_id, bob_id, product_member_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('6afe2dc4-c59d-4a7e-9f63-05813190041b', sales_funnel_optimization_id, alice_id, product_member_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('b9206f00-dfad-4813-a531-7777097f6f40', sales_funnel_optimization_id, jane_id, product_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+
+        -- Customer Segmentation
+        ('9dcb7545-3d82-4230-aa45-f99724a45f77', customer_segmentation_id, john_id, product_member_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('3d6c1f8c-0d57-4aaa-b2e0-79dfff456dce', customer_segmentation_id, bob_id, product_member_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('135b71f6-4836-4f84-91c9-35fc1dda3781', customer_segmentation_id, alice_id, product_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('310e9de4-0218-4167-b0b4-378f4a53d51f', customer_segmentation_id, jane_id, product_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+
+        -- Marketing Campaign
+        ('97ac436c-598b-4fe9-a25a-1f9da2b348b2', marketing_campaign_id, john_id, product_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('d4dc3e0e-8316-4f27-a377-15276d33541b', marketing_campaign_id, bob_id, product_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('b1f839de-8e36-4e5f-817d-6ff247d15b0e', marketing_campaign_id, alice_id, product_member_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('f90a21f1-49f1-42ee-a310-fbeb95993c90', marketing_campaign_id, jane_id, product_member_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+
+        -- Sales Forecast
+        ('db656db9-0d9c-4740-9cc3-b6ac6e05c634', sales_forecast_id, john_id, product_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('7a0c32aa-0082-4b88-b5db-8a50443d9556', sales_forecast_id, bob_id, product_member_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+        ('3841cd2a-bcf7-4720-952e-4995d330d743', sales_forecast_id, alice_id, product_member_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id);
+
+    -- INSERT ROLE ASSIGNMENTS FOR DATASETS
+INSERT INTO public.role_assignments_dataset (id, dataset_id, user_id, role_id, decision, requested_on, decided_on, decided_by_id)
+VALUES
+    -- Customer Data
+    ('773c12c0-ec70-4178-b387-9a87ba0a9dbc', customer_data_id, john_id, dataset_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+    ('2c686614-7986-4cac-a96c-62551ffafb4c', customer_data_id, jane_id, dataset_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+
+    -- Stores Data
+    ('8ffa9aa9-35bf-4815-8843-e8833999c764', stores_data_id, john_id, dataset_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+    ('8ca03984-dda3-4b11-9bea-3c69fc4d2414', stores_data_id, bob_id, dataset_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+    ('882d12a5-58f2-41d3-8064-97631b153492', stores_data_id, jane_id, dataset_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+
+    -- Sales Data
+    ('ac0db781-60c2-4d7e-92d1-4fbb0b6c9133', sales_data_id, bob_id, dataset_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+    ('ce9bdf7e-8fb4-49c9-af05-be618f26b2f7', sales_data_id, jane_id, dataset_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+
+    -- Products Data
+    ('c6ccef1f-ba1a-4dc5-b0c4-5a2b8a9fd265', products_data_id, alice_id, dataset_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+
+    -- Employees Data
+    ('e790b201-4275-4c01-aeac-a632ce773454', employees_data_id, jane_id, dataset_owner_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id);
+
+-- INSERT ROLE ASSIGNMENTS FOR GLOBAL ROLES
+INSERT INTO public.role_assignments_global (id, user_id, role_id, decision, requested_on, decided_on, decided_by_id)
+VALUES
+    ('f2d1fc47-3afa-49be-b652-fa6de00bea6b', john_id, admin_role_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id),
+    ('b8288793-ae92-4808-9927-d3da20d1321b', jane_id, admin_role_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), john_id);
 end $$;
