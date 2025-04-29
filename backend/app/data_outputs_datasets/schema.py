@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from app.data_outputs.schema_base_get import DataOutputBaseGet
+from app.data_outputs.schema_basic import DataOutputBasic
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetModel,
@@ -32,7 +32,7 @@ class DataOutputDatasetAssociation(BaseDataOutputDatasetAssociation):
     id: UUID
     data_output_id: UUID
     dataset: Dataset
-    data_output: DataOutputBaseGet
+    data_output: DataOutputBasic
     status: DataOutputDatasetLinkStatus
     requested_by: User
     denied_by: Optional[User]

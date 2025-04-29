@@ -5,7 +5,6 @@ from sqlalchemy import Boolean, Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, relationship
 
-from app.data_outputs.schema import DataOutput as DataOutputSchema
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 
@@ -18,12 +17,6 @@ from app.platform_services.schema import PlatformService
 from app.platforms.schema import Platform
 from app.shared.model import BaseORM
 from app.tags.model import Tag, tag_data_output_table
-
-
-def ensure_data_output_exists(
-    data_output_id: UUID, db: Session, **kwargs
-) -> DataOutputSchema:
-    return ensure_exists(data_output_id, db, DataOutput, **kwargs)
 
 
 class DataOutput(Base, BaseORM):
@@ -60,3 +53,9 @@ class DataOutput(Base, BaseORM):
     tags: Mapped[list[Tag]] = relationship(
         secondary=tag_data_output_table, back_populates="data_outputs", lazy="joined"
     )
+
+
+def ensure_data_output_exists(
+    data_output_id: UUID, db: Session, **kwargs
+) -> DataOutput:
+    return ensure_exists(data_output_id, db, DataOutput, **kwargs)

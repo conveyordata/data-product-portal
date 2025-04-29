@@ -10,7 +10,7 @@ from app.core.namespace.validation import (
     NamespaceSuggestion,
     NamespaceValidation,
 )
-from app.data_outputs.schema import DataOutputCreateRequest
+from app.data_outputs.schema_create import DataOutputCreate
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs.service import DataOutputService
 from app.data_product_memberships.enums import DataProductUserRole
@@ -217,7 +217,7 @@ def update_data_product(
 )
 def create_data_output(
     id: UUID,
-    data_output: DataOutputCreateRequest,
+    data_output: DataOutputCreate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:

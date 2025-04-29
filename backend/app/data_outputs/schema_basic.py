@@ -6,14 +6,17 @@ from app.data_products.schema_base_get import BaseDataProductGet
 from app.shared.schema import ORMModel
 
 
-class DataOutputBaseGet(ORMModel):
+class DataOutputBasic(ORMModel):
     id: UUID
     name: str
-    description: str
     namespace: str
-    owner: BaseDataProductGet
+    description: str
+    status: DataOutputStatus
+    sourceAligned: bool
     owner_id: UUID
     platform_id: UUID
     service_id: UUID
+
+    # Nested schemas
     configuration: DataOutputConfiguration
-    status: DataOutputStatus
+    owner: BaseDataProductGet
