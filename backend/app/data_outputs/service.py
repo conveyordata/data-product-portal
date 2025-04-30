@@ -4,6 +4,7 @@ from uuid import UUID
 import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
@@ -96,11 +97,14 @@ class DataOutputService:
         return tags
 
     def get_data_outputs(self, db: Session) -> list[DataOutput]:
-        data_outputs = db.query(DataOutputModel).all()
+        data_outputs = db.scalars(select(DataOutputModel)).unique().all()
         return data_outputs
 
     def get_data_output(self, id: UUID, db: Session) -> DataOutput:
-        return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
+        return db.get(
+            DataOutputModel,
+            id,
+        )
 
     def create_data_output(
         self,

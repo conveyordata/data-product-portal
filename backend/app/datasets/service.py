@@ -13,6 +13,7 @@ from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
 )
+from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -75,16 +76,30 @@ class DatasetService:
         return dataset
 
     def get_datasets(self, db: Session, user: User) -> Sequence[DatasetsGet]:
-        default_lifecycle = (
-            db.query(DataProductLifeCycleModel)
-            .filter(DataProductLifeCycleModel.is_default)
-            .first()
+        default_lifecycle = db.scalar(
+            select(DataProductLifeCycleModel).filter(
+                DataProductLifeCycleModel.is_default
+            )
         )
         datasets = [
             dataset
             for dataset in db.scalars(
-                select(DatasetModel).order_by(asc(DatasetModel.name))
-            ).all()
+                select(DatasetModel)
+                .options(
+                    joinedload(DatasetModel.owners),
+                    joinedload(DatasetModel.data_product_settings),
+                    joinedload(DatasetModel.data_output_links).joinedload(
+                        DataOutputDatasetAssociation.data_output
+                    ),
+                    joinedload(DatasetModel.data_product_links),
+                    joinedload(DatasetModel.tags),
+                    joinedload(DatasetModel.lifecycle),
+                    joinedload(DatasetModel.domain),
+                )
+                .order_by(asc(DatasetModel.name))
+            )
+            .unique()
+            .all()
             if dataset.isVisibleToUser(user)
         ]
 

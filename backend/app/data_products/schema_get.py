@@ -1,7 +1,5 @@
-from typing import Annotated, Optional
+from typing import Optional
 from uuid import UUID
-
-from pydantic import Field, computed_field
 
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_lifecycles.schema import DataProductLifeCycle
@@ -11,12 +9,11 @@ from app.data_product_types.schema import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema import DatasetDataProductLink
 from app.domains.schema import Domain
-from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 
 
-class DataProductGet(ORMModel):
+class BaseDataProductGet(ORMModel):
     id: UUID
     name: str
     description: str
@@ -25,41 +22,19 @@ class DataProductGet(ORMModel):
     tags: list[Tag]
     status: DataProductStatus
     lifecycle: Optional[DataProductLifeCycle]
-    dataset_links: list[DatasetDataProductLink]
-    memberships: list[DataProductMembershipGet]
     type: DataProductType
     domain: Domain
-    data_outputs: list[DataOutputGet]
     data_product_settings: list[DataProductSettingValue]
+
+
+class DataProductGet(BaseDataProductGet):
+    dataset_links: list[DatasetDataProductLink]
+    memberships: list[DataProductMembershipGet]
+    data_outputs: list[DataOutputGet]
     rolled_up_tags: set[Tag]
 
 
-class DataProductsGet(DataProductGet):
-    id: UUID
-    about: Optional[Annotated[str, Field(exclude=True)]]
-    dataset_links: Annotated[list[DatasetDataProductLink], Field(exclude=True)]
-    memberships: Annotated[list[DataProductMembershipGet], Field(exclude=True)]
-    data_outputs: Annotated[list[DataOutputGet], Field(exclude=True)]
-    rolled_up_tags: Annotated[set[Tag], Field(exclude=True)] = set()
-
-    @computed_field
-    def user_count(self) -> int:
-        approved_memberships = [
-            membership
-            for membership in self.memberships
-            if membership.status == DecisionStatus.APPROVED
-        ]
-        return len(approved_memberships)
-
-    @computed_field
-    def dataset_count(self) -> int:
-        accepted_dataset_links = [
-            link
-            for link in self.dataset_links
-            if link.status == DecisionStatus.APPROVED
-        ]
-        return len(accepted_dataset_links)
-
-    @computed_field
-    def data_outputs_count(self) -> int:
-        return len(self.data_outputs)
+class DataProductsGet(BaseDataProductGet):
+    user_count: int
+    dataset_count: int
+    data_outputs_count: int

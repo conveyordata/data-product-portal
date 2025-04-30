@@ -15,4 +15,5 @@ class DatabricksDataOutput(BaseDataOutputConfiguration):
 
     __mapper_args__ = {
         "polymorphic_identity": "DatabricksDataOutput",
+        "polymorphic_load": "inline",
     }
