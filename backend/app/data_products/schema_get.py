@@ -12,7 +12,7 @@ from app.data_products_datasets.schema_basic import DataProductDatasetAssociatio
 from app.datasets.schema_basic import DatasetBasic
 from app.domains.schema_basic import DomainBasic
 from app.shared.schema import ORMModel
-from app.tags.schema import Tag
+from app.tags.schema_basic import TagBasic
 from app.users.schema import User
 
 
@@ -24,7 +24,7 @@ class BaseDataProductGet(ORMModel):
     status: DataProductStatus
 
     # Nested schemas
-    tags: list[Tag]
+    tags: list[TagBasic]
     domain: DomainBasic
     type: DataProductTypeBasic
     lifecycle: Optional[DataProductLifeCycleBasic]
@@ -53,7 +53,7 @@ class DataProductGet(BaseDataProductGet):
     dataset_links: list[DatasetLinks]
     memberships: list[MembershipLinks]
     data_outputs: list[DataOutputLinks]
-    rolled_up_tags: set[Tag]
+    rolled_up_tags: set[TagBasic]
 
 
 class DataProductsGet(BaseDataProductGet):

@@ -6,7 +6,7 @@ from app.data_outputs_datasets.schema_basic import DataOutputDatasetAssociationB
 from app.data_products.schema_basic import DataProductBasic
 from app.datasets.schema_basic import DatasetBasic
 from app.shared.schema import ORMModel
-from app.tags.schema import Tag
+from app.tags.schema_basic import TagBasic
 
 
 class BaseDataOutputGet(ORMModel):
@@ -32,7 +32,7 @@ class DatasetLink(DataOutputDatasetAssociationBasic):
 class DataOutputGet(BaseDataOutputGet):
     # Nested schemas
     dataset_links: list[DatasetLink]
-    tags: list[Tag]
+    tags: list[TagBasic]
 
 
 class DataOutputsGet(BaseDataOutputGet):
