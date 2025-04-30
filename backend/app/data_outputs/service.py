@@ -24,7 +24,6 @@ from app.data_outputs.schema import (
     DataOutputUpdate,
 )
 from app.data_outputs.status import DataOutputStatus
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
@@ -33,6 +32,7 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
 from app.graph.graph import Graph
+from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
@@ -181,7 +181,7 @@ class DataOutputService:
         if dataset.id in [
             link.dataset_id
             for link in data_output.dataset_links
-            if link.status != DataOutputDatasetLinkStatus.DENIED
+            if link.status != DecisionStatus.DENIED
         ]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -194,7 +194,7 @@ class DataOutputService:
                 detail="You do not have access to this private dataset",
             )
         # Data output requests always need to be approved
-        approval_status = DataOutputDatasetLinkStatus.PENDING_APPROVAL
+        approval_status = DecisionStatus.PENDING
 
         dataset_link = DataOutputDatasetAssociationModel(
             dataset_id=dataset_id,

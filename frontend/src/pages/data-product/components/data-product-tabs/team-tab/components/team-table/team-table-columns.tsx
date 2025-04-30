@@ -3,11 +3,8 @@ import { TFunction } from 'i18next';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form.tsx';
-import {
-    DataProductMembershipRole,
-    DataProductMembershipStatus,
-    DataProductUserMembership,
-} from '@/types/data-product-membership';
+import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+import { DecisionStatus } from '@/types/roles';
 import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -54,7 +51,7 @@ export const getDataProductUsersTableColumns = ({
             title: t('Name'),
             dataIndex: 'user.first_name',
             render: (_, { user, status }) => {
-                const isNotApproved = status !== DataProductMembershipStatus.Approved;
+                const isNotApproved = status !== DecisionStatus.Approved;
                 return (
                     <UserAvatar
                         name={`${user.first_name} ${user.last_name}`}
@@ -71,7 +68,7 @@ export const getDataProductUsersTableColumns = ({
             title: t('Role'),
             dataIndex: 'role',
             render: (role: DataProductMembershipRole, { user, id, status }) => {
-                const isApproved = status === DataProductMembershipStatus.Approved;
+                const isApproved = status === DecisionStatus.Approved;
                 return (
                     <RoleChangeForm
                         initialRole={role}
@@ -89,7 +86,7 @@ export const getDataProductUsersTableColumns = ({
         {
             title: t('Status'),
             dataIndex: 'status',
-            render: (status: DataProductMembershipStatus) => {
+            render: (status: DecisionStatus) => {
                 return (
                     <Badge
                         status={getDataProductMembershipBadgeStatus(status)}
@@ -109,7 +106,7 @@ export const getDataProductUsersTableColumns = ({
             hidden: !hasCurrentUserMembership,
             render: (_, { user, status, id }) => (
                 <Space>
-                    {status === DataProductMembershipStatus.Pending ? (
+                    {status === DecisionStatus.Pending ? (
                         <Space>
                             <Popconfirm
                                 title={t('Allow User')}

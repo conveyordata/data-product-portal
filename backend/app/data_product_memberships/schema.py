@@ -3,12 +3,12 @@ from typing import Optional
 from uuid import UUID
 
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
 )
+from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -32,7 +32,7 @@ class DataProductMembershipUpdate(BaseDataProductMembership):
 class DataProductMembership(BaseDataProductMembership):
     id: UUID
     data_product_id: UUID
-    status: DataProductMembershipStatus
+    status: DecisionStatus
     requested_on: datetime
     requested_by: Optional[User]
     approved_by: Optional[User]

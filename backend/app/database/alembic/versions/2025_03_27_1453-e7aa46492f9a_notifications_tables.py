@@ -6,14 +6,22 @@ Create Date: 2025-03-27 14:53:15.943060
 
 """
 
+from enum import Enum
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects.postgresql import UUID
 
-from app.notifications.enums import NotificationOrigins, NotificationTypes
+from app.notifications.enums import NotificationTypes
 from app.shared.model import utcnow
+
+
+class NotificationOrigins(str, Enum):
+    PENDING_APPROVAL = "pending_approval"
+    APPROVED = "approved"
+    DENIED = "denied"
+
 
 # revision identifiers, used by Alembic.
 revision: str = "e7aa46492f9a"

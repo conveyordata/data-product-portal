@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.email.send_mail import send_mail
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
 from app.data_product_memberships.model import DataProductMembership
@@ -21,6 +20,7 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
 from app.notification_interactions.service import NotificationInteractionService
+from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.users.model import ensure_user_exists
 from app.users.schema import User
@@ -99,16 +99,13 @@ class DataProductMembershipService:
                 detail=f"Data product membership {id} not found",
             )
 
-        if (
-            data_product_membership.status
-            != DataProductMembershipStatus.PENDING_APPROVAL
-        ):
+        if data_product_membership.status != DecisionStatus.PENDING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Data product membership {id} is not in requested status",
             )
 
-        data_product_membership.status = DataProductMembershipStatus.APPROVED
+        data_product_membership.status = DecisionStatus.APPROVED
         data_product_membership.approved_by_id = authenticated_user.id
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
 
@@ -136,16 +133,13 @@ class DataProductMembershipService:
                 detail=f"Data product membership {id} not found",
             )
 
-        if (
-            data_product_membership.status
-            != DataProductMembershipStatus.PENDING_APPROVAL
-        ):
+        if data_product_membership.status != DecisionStatus.PENDING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Data product membership {id} is not in requested status",
             )
 
-        data_product_membership.status = DataProductMembershipStatus.DENIED
+        data_product_membership.status = DecisionStatus.DENIED
         data_product_membership.denied_by_id = authenticated_user.id
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
 
@@ -205,7 +199,7 @@ class DataProductMembershipService:
 
         data_product_membership = DataProductMembership(
             **data_product_membership.dict(),
-            status=DataProductMembershipStatus.APPROVED,
+            status=DecisionStatus.APPROVED,
             requested_by_id=authenticated_user.id,
             requested_on=datetime.now(tz=pytz.utc),
             approved_by_id=authenticated_user.id,
@@ -264,10 +258,7 @@ class DataProductMembershipService:
                 joinedload(DataProductMembership.user),
                 joinedload(DataProductMembership.requested_by),
             )
-            .filter(
-                DataProductMembership.status
-                == DataProductMembershipStatus.PENDING_APPROVAL
-            )
+            .filter(DataProductMembership.status == DecisionStatus.PENDING)
             .filter(
                 DataProductMembership.data_product.has(
                     DataProductModel.memberships.any(

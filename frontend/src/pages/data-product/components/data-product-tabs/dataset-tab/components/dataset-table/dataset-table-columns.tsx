@@ -8,6 +8,7 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { DatasetLink } from '@/types/data-product';
 import { createDatasetIdPath } from '@/types/navigation.ts';
+import { DecisionStatus } from '@/types/roles';
 import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -42,7 +43,7 @@ export const getDataProductDatasetsColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             render: (_, { dataset, status }) => {
-                const isDatasetRequestApproved = status === 'approved';
+                const isDatasetRequestApproved = status === DecisionStatus.Approved;
                 const popoverTitle = (
                     <DatasetPopoverTitle
                         name={dataset.name}
@@ -77,10 +78,10 @@ export const getDataProductDatasetsColumns = ({
             title: t('Actions'),
             key: 'action',
             render: (_, { dataset, dataset_id, status }) => {
-                const buttonText = status === 'pending_approval' ? t('Cancel') : t('Remove');
-                const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Unlink Dataset');
+                const buttonText = status === DecisionStatus.Pending ? t('Cancel') : t('Remove');
+                const popupTitle = status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Dataset');
                 const popupDescription =
-                    status === 'pending_approval'
+                    status === DecisionStatus.Pending
                         ? t('Are you sure you want to cancel the request to link {{name}} to the data product?', {
                               name: dataset.name,
                           })
@@ -88,7 +89,7 @@ export const getDataProductDatasetsColumns = ({
                               name: dataset.name,
                           });
                 const onConfirm =
-                    status === 'pending_approval'
+                    status === DecisionStatus.Pending
                         ? onCancelDataProductDatasetLinkRequest
                         : onRemoveDataProductDatasetLink;
                 return (

@@ -8,6 +8,7 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import type { DataOutputDatasetLink } from '@/types/data-output';
 import { createDatasetIdPath } from '@/types/navigation.ts';
+import { DecisionStatus } from '@/types/roles';
 import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
 
 import styles from './dataset-table.module.scss';
@@ -37,7 +38,7 @@ export const getDataOutputDatasetsColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             render: (_, { dataset, status }) => {
-                const isDatasetRequestApproved = status === 'approved';
+                const isDatasetRequestApproved = status === DecisionStatus.Approved;
                 const popoverTitle = (
                     <DatasetPopoverTitle
                         name={dataset.name}
@@ -67,10 +68,10 @@ export const getDataOutputDatasetsColumns = ({
             title: t('Actions'),
             key: 'action',
             render: (_, { dataset, dataset_id, status }) => {
-                const buttonText = status === 'pending_approval' ? t('Cancel') : t('Remove');
-                const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Unlink Dataset');
+                const buttonText = status === DecisionStatus.Pending ? t('Cancel') : t('Remove');
+                const popupTitle = status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Dataset');
                 const popupDescription =
-                    status === 'pending_approval'
+                    status === DecisionStatus.Pending
                         ? t('Are you sure you want to cancel the request to link {{name}} to the data output?', {
                               name: dataset.name,
                           })
@@ -78,7 +79,7 @@ export const getDataOutputDatasetsColumns = ({
                               name: dataset.name,
                           });
                 const onConfirm =
-                    status === 'pending_approval'
+                    status === DecisionStatus.Pending
                         ? onCancelDataOutputDatasetLinkRequest
                         : onRemoveDataOutputDatasetLink;
                 return (

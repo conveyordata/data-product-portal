@@ -1,18 +1,13 @@
 import { DataOutputDatasetContract } from '../data-output-dataset';
 import { DataProductDatasetContract } from '../data-product-dataset';
 import { DataProductMembershipContract } from '../data-product-membership';
+import { DecisionStatus } from '../roles';
 import { UserContract } from '../users';
 
 export enum NotificationTypes {
     DataProductDatasetNotification = 'DataProductDatasetNotification',
     DataOutputDatasetNotification = 'DataOutputDatasetNotification',
     DataProductMembershipNotification = 'DataProductMembershipNotification',
-}
-
-export enum NotificationOrigins {
-    Pending = 'pending_approval',
-    Approved = 'approved',
-    Denied = 'denied',
 }
 
 export interface NotificationModel {
@@ -30,7 +25,7 @@ export type Notification =
 
 export interface DataProductDatasetNotification {
     notification_type: NotificationTypes.DataProductDatasetNotification;
-    notification_origin: NotificationOrigins;
+    notification_origin: DecisionStatus;
     id: string;
     data_product_dataset_id: string;
     data_product_dataset: DataProductDatasetContract;
@@ -38,7 +33,7 @@ export interface DataProductDatasetNotification {
 
 export interface DataOutputDatasetNotification {
     notification_type: NotificationTypes.DataOutputDatasetNotification;
-    notification_origin: NotificationOrigins;
+    notification_origin: DecisionStatus;
     id: string;
     data_output_dataset_id: string;
     data_output_dataset: DataOutputDatasetContract;
@@ -46,7 +41,7 @@ export interface DataOutputDatasetNotification {
 
 export interface DataProductMembershipNotification {
     notification_type: NotificationTypes.DataProductMembershipNotification;
-    notification_origin: NotificationOrigins;
+    notification_origin: DecisionStatus;
     id: string;
     data_product_membership_id: string;
     data_product_membership: DataProductMembershipContract;

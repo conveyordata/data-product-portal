@@ -5,14 +5,13 @@ from pydantic import Field, computed_field
 
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_lifecycles.schema import DataProductLifeCycle
-from app.data_product_memberships.enums import DataProductMembershipStatus
 from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_product_settings.schema import DataProductSettingValue
 from app.data_product_types.schema import DataProductType
 from app.data_products.status import DataProductStatus
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.schema import DatasetDataProductLink
 from app.domains.schema import Domain
+from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 
@@ -48,7 +47,7 @@ class DataProductsGet(DataProductGet):
         approved_memberships = [
             membership
             for membership in self.memberships
-            if membership.status == DataProductMembershipStatus.APPROVED
+            if membership.status == DecisionStatus.APPROVED
         ]
         return len(approved_memberships)
 
@@ -57,7 +56,7 @@ class DataProductsGet(DataProductGet):
         accepted_dataset_links = [
             link
             for link in self.dataset_links
-            if link.status == DataProductDatasetLinkStatus.APPROVED
+            if link.status == DecisionStatus.APPROVED
         ]
         return len(accepted_dataset_links)
 
