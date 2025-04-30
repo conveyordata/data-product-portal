@@ -427,6 +427,18 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["validity"] == NamespaceValidityType.VALID
 
+    def test_update_data_product_duplicate_namespace(self, payload, client):
+        namespace = "namespace"
+        DataProductFactory(namespace=namespace)
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        update_payload = deepcopy(payload)
+        update_payload["namespace"] = namespace
+        response = self.update_data_product(client, update_payload, data_product.id)
+
+        assert response.status_code == 400
+
     @staticmethod
     def create_data_product(client, default_data_product_payload):
         return client.post(ENDPOINT, json=default_data_product_payload)

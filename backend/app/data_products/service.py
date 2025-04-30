@@ -51,7 +51,6 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
-from app.data_products_datasets.schema import DataProductDatasetAssociationCreate
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema import Dataset
@@ -174,28 +173,6 @@ class DataProductService:
             )
         return data_product
 
-    def _update_datasets(
-        self,
-        data_product: DataProductCreate,
-        db: Session,
-        authenticated_user: User,
-        dataset_links: list[DataProductDatasetAssociationCreate] = [],
-    ) -> DataProductCreate:
-        if not dataset_links:
-            dataset_links = data_product.dataset_links
-        data_product.dataset_links = []
-        for dataset in dataset_links:
-            dataset_model = ensure_dataset_exists(dataset.dataset_id, db)
-            data_product.dataset_links.append(
-                DataProductDatasetModel(
-                    dataset_id=dataset_model.id,
-                    status=DataProductDatasetLinkStatus.PENDING_APPROVAL,
-                    requested_by_id=authenticated_user.id,
-                    requested_on=datetime.now(tz=pytz.utc),
-                )
-            )
-        return data_product
-
     def _get_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
         tags = []
         for tag_id in tag_ids:
@@ -301,25 +278,23 @@ class DataProductService:
         current_data_product = ensure_data_product_exists(id, db)
         update_data_product = data_product.model_dump(exclude_unset=True)
 
+        if (
+            current_data_product.namespace != data_product.namespace
+            and (
+                validity := self.namespace_validator.validate_namespace(
+                    data_product.namespace, db
+                ).validity
+            )
+            != NamespaceValidityType.VALID
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
         for k, v in update_data_product.items():
             if k == "memberships":
                 self._update_memberships(current_data_product, v, db)
-            elif k == "dataset_links":
-                current_data_product.dataset_links = []
-                for dataset in v:
-                    dataset_model = ensure_dataset_exists(dataset.dataset_id, db)
-                    dataset = DataProductDatasetModel(
-                        dataset_id=dataset_model.id,
-                        data_product_id=current_data_product.id,
-                        status=dataset.status,
-                        requested_by=dataset.requested_by,
-                        requested_on=dataset.requested_on,
-                        approved_by=dataset.approved_by,
-                        approved_on=dataset.approved_on,
-                        denied_by=dataset.denied_by,
-                        denied_on=dataset.denied_on,
-                    )
-                    current_data_product.dataset_links.append(dataset)
             elif k == "tag_ids":
                 new_tags = self._get_tags(db, v)
                 current_data_product.tags = new_tags

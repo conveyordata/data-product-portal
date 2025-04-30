@@ -262,6 +262,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                     editToggleDisabled={mode === 'edit'}
                     canEditNamespace={canEditNamespace}
                     toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                    validationRequired={mode === 'create'}
                     validateNamespace={validateNamespaceCallback}
                 />
                 <Form.Item

@@ -85,6 +85,7 @@ export enum ApiUrl {
     Version = '/api/version',
     ThemeSettings = '/api/theme_settings',
     AccessCheck = '/api/authz/access',
+    Graph = '/api/graph',
 }
 
 export type DynamicPathParams =

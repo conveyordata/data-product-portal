@@ -331,7 +331,13 @@ export function Notifications() {
                 key: userNotification.id,
                 label: <Flex>{description}</Flex>,
                 extra: (
-                    <Button type="link" onClick={() => handleRemoveNotification(userNotification.id)}>
+                    <Button
+                        type="link"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            handleRemoveNotification(userNotification.id);
+                        }}
+                    >
                         <CloseOutlined />
                     </Button>
                 ),

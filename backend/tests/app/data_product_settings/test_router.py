@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import pytest
 from tests.factories import DataProductSettingFactory
 
@@ -144,6 +146,59 @@ class TestDataProductSettingsRouter:
 
         assert response.status_code == 200
         assert response.json()["validity"] == NamespaceValidityType.VALID
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_data_product_setting_duplicate_namespace(
+        self, default_setting_payload, client
+    ):
+        DataProductSettingFactory(
+            namespace=default_setting_payload["namespace"],
+            scope=default_setting_payload["scope"],
+        )
+
+        response = self.create_data_product_setting(client, default_setting_payload)
+        assert response.status_code == 400
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_data_product_setting_invalid_characters_namespace(
+        self, default_setting_payload, client
+    ):
+        create_payload = deepcopy(default_setting_payload)
+        create_payload["namespace"] = "!"
+
+        response = self.create_data_product_setting(client, create_payload)
+        assert response.status_code == 400
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_data_product_setting_invalid_length_namespace(
+        self, default_setting_payload, client
+    ):
+        create_payload = deepcopy(default_setting_payload)
+        create_payload["namespace"] = "a" * 256
+
+        response = self.create_data_product_setting(client, create_payload)
+        assert response.status_code == 400
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_data_product_setting_duplicate_namespace(self, client):
+        namespace = "namespace"
+        DataProductSettingFactory(namespace=namespace, scope="dataproduct")
+        data_product_setting = DataProductSettingFactory(scope="dataproduct")
+
+        update_payload = {
+            "namespace": namespace,
+            "tooltip": "tooltip",
+            "name": "name",
+            "type": "checkbox",
+            "category": "category",
+            "default": "False",
+            "order": 3,
+            "scope": "dataproduct",
+        }
+        response = self.update_data_product_setting(
+            client, update_payload, data_product_setting.id
+        )
+        assert response.status_code == 400
 
     @staticmethod
     def create_data_product_setting(client, data_product_setting_payload):

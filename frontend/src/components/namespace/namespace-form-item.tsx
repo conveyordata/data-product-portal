@@ -14,6 +14,7 @@ type Props = {
     editToggleDisabled?: boolean;
     canEditNamespace?: boolean;
     toggleCanEditNamespace?: () => void;
+    validationRequired?: boolean;
     validateNamespace?: (namespace: string) => Promise<NamespaceValidationResponse>;
 };
 
@@ -26,6 +27,7 @@ export function NamespaceFormItem({
     editToggleDisabled = false,
     canEditNamespace = false,
     toggleCanEditNamespace,
+    validationRequired = false,
     validateNamespace = async () => {
         return { validity: ValidationType.VALID };
     },
@@ -41,34 +43,44 @@ export function NamespaceFormItem({
                     hasFeedback
                     validateFirst
                     validateDebounce={DEBOUNCE}
-                    rules={[
-                        {
-                            required: canEditNamespace,
-                            message: t('Please input a namespace'),
-                        },
-                        {
-                            validator: async (_, value) => {
-                                if (!canEditNamespace && !value) {
-                                    return Promise.resolve();
-                                }
+                    rules={
+                        validationRequired
+                            ? [
+                                  {
+                                      required: canEditNamespace,
+                                      message: t('Please input a namespace'),
+                                  },
+                                  {
+                                      validator: async (_, value) => {
+                                          if (!canEditNamespace && !value) {
+                                              return Promise.resolve();
+                                          }
 
-                                const validationResponse = await validateNamespace(value);
+                                          const validationResponse = await validateNamespace(value);
 
-                                switch (validationResponse.validity) {
-                                    case ValidationType.VALID:
-                                        return Promise.resolve();
-                                    case ValidationType.INVALID_LENGTH:
-                                        return Promise.reject(new Error(t('Namespace is too long')));
-                                    case ValidationType.INVALID_CHARACTERS:
-                                        return Promise.reject(new Error(t('Namespace contains invalid characters')));
-                                    case ValidationType.DUPLICATE_NAMESPACE:
-                                        return Promise.reject(new Error(t('This namespace is already in use')));
-                                    default:
-                                        return Promise.reject(new Error(t('Unknown namespace validation error')));
-                                }
-                            },
-                        },
-                    ]}
+                                          switch (validationResponse.validity) {
+                                              case ValidationType.VALID:
+                                                  return Promise.resolve();
+                                              case ValidationType.INVALID_LENGTH:
+                                                  return Promise.reject(new Error(t('Namespace is too long')));
+                                              case ValidationType.INVALID_CHARACTERS:
+                                                  return Promise.reject(
+                                                      new Error(t('Namespace contains invalid characters')),
+                                                  );
+                                              case ValidationType.DUPLICATE_NAMESPACE:
+                                                  return Promise.reject(
+                                                      new Error(t('This namespace is already in use')),
+                                                  );
+                                              default:
+                                                  return Promise.reject(
+                                                      new Error(t('Unknown namespace validation error')),
+                                                  );
+                                          }
+                                      },
+                                  },
+                              ]
+                            : []
+                    }
                 >
                     <Input
                         disabled={!canEditNamespace}
