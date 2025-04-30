@@ -2,7 +2,7 @@ from uuid import UUID
 
 from app.data_output_configuration.schema_union import DataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
-from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
+from app.data_outputs_datasets.schema_basic import DataOutputDatasetAssociationBasic
 from app.data_products.schema_base_get import BaseDataProductGet
 from app.datasets.schema import Dataset
 from app.shared.schema import ORMModel
@@ -24,7 +24,7 @@ class BaseDataOutputGet(ORMModel):
     owner: BaseDataProductGet
 
 
-class DatasetLink(DataOutputDatasetAssociation):
+class DatasetLink(DataOutputDatasetAssociationBasic):
     # Nested schemas
     dataset: Dataset
 

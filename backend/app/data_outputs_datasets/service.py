@@ -12,7 +12,7 @@ from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
+from app.data_outputs_datasets.schema_get import DataOutputDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.users.model import User as UserModel
@@ -92,7 +92,7 @@ class DataOutputDatasetService:
 
     def get_user_pending_actions(
         self, db: Session, authenticated_user: User
-    ) -> list[DataOutputDatasetAssociation]:
+    ) -> list[DataOutputDatasetAssociationsGet]:
         return (
             db.scalars(
                 select(DataOutputDatasetAssociationModel)

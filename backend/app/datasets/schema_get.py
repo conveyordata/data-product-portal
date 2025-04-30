@@ -4,9 +4,7 @@ from uuid import UUID
 from annotated_types import MinLen
 
 from app.data_outputs.schema_basic import DataOutputBasic
-from app.data_outputs_datasets.schema_base_get import (
-    BaseDataOutputDatasetAssociationGet,
-)
+from app.data_outputs_datasets.schema_basic import DataOutputDatasetAssociationBasic
 from app.data_product_lifecycles.schema import DataProductLifeCycle
 from app.data_product_settings.schema import DataProductSettingValue
 from app.data_products.schema_base_get import BaseDataProductGet
@@ -23,7 +21,7 @@ class DataProductLink(DataProductDatasetAssociation):
     data_product: BaseDataProductGet
 
 
-class DataOutputLink(BaseDataOutputDatasetAssociationGet):
+class DataOutputLink(DataOutputDatasetAssociationBasic):
     data_output: DataOutputBasic
 
 
