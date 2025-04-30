@@ -37,7 +37,7 @@ from app.data_product_memberships.enums import (
     DataProductUserRole,
 )
 from app.data_product_memberships.model import DataProductMembership
-from app.data_product_memberships.schema import DataProductMembershipCreate
+from app.data_product_memberships.schema_create import DataProductMembershipCreate
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.schema import (

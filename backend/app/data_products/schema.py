@@ -6,10 +6,8 @@ from pydantic import field_validator
 
 from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_memberships.enums import DataProductUserRole
-from app.data_product_memberships.schema import (
-    DataProductMembership,
-    DataProductMembershipCreate,
-)
+from app.data_product_memberships.schema_basic import DataProductMembershipBasic
+from app.data_product_memberships.schema_create import DataProductMembershipCreate
 from app.data_products.schema_base import BaseDataProduct
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
@@ -53,6 +51,6 @@ class DataProduct(BaseDataProduct):
     status: DataProductStatus
     dataset_links: list[DataProductDatasetAssociation]
     tags: list[Tag]
-    memberships: list[DataProductMembership]
+    memberships: list[DataProductMembershipBasic]
     domain: Domain
     data_outputs: list[DataOutputGet]

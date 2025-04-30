@@ -13,7 +13,7 @@ from app.core.authz import (
 )
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import DataProductMembership
-from app.data_product_memberships.schema import DataProductMembershipCreate
+from app.data_product_memberships.schema_create import DataProductMembershipCreate
 from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_product_memberships.service import DataProductMembershipService
 from app.database.database import get_db_session

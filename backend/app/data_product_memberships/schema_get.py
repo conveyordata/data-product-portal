@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from app.data_product_memberships.enums import (
@@ -18,10 +17,6 @@ class BaseDataProductMembershipGet(ORMModel):
     role: DataProductUserRole
     status: DataProductMembershipStatus
     requested_on: datetime
-    approved_by: Optional[User]
-    approved_on: Optional[datetime]
-    denied_by: Optional[User]
-    denied_on: Optional[datetime]
 
 
 class DataProductMembershipGet(BaseDataProductMembershipGet):
