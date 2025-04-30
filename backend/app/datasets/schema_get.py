@@ -30,18 +30,22 @@ class BaseDatasetGet(ORMModel):
     namespace: str
     name: str
     description: str
-    owners: Annotated[list[User], MinLen(1)]
-    lifecycle: Optional[DataProductLifeCycleBasic]
     status: DatasetStatus
+    access_type: DatasetAccessType
+
+    # Nested schemas
     tags: list[Tag]
     domain: Domain
-    access_type: DatasetAccessType
-    data_output_links: list[DataOutputLink]
+    lifecycle: Optional[DataProductLifeCycleBasic]
     data_product_settings: list[DataProductSettingValueBasic]
+    data_output_links: list[DataOutputLink]
+    owners: Annotated[list[User], MinLen(1)]
 
 
 class DatasetGet(BaseDatasetGet):
-    about: Optional[str] = None
+    about: Optional[str]
+
+    # Nested schemas
     data_product_links: list[DataProductLink]
     rolled_up_tags: set[Tag]
 

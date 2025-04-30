@@ -1,5 +1,5 @@
 from app.data_products.schema_basic import DataProductBasic
-from app.datasets.schema import Dataset
+from app.datasets.schema_basic import DatasetBasic
 from app.domains.schema import Domain
 
 
@@ -10,4 +10,4 @@ class DomainsGet(Domain):
 
 class DomainGet(Domain):
     data_products: list[DataProductBasic]
-    datasets: list[Dataset]
+    datasets: list[DatasetBasic]

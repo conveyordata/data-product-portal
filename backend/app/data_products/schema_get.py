@@ -9,7 +9,7 @@ from app.data_product_settings.schema_basic import DataProductSettingValueBasic
 from app.data_product_types.schema_basic import DataProductTypeBasic
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema_basic import DataProductDatasetAssociationBasic
-from app.datasets.schema import Dataset
+from app.datasets.schema_basic import DatasetBasic
 from app.domains.schema import Domain
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
@@ -20,15 +20,14 @@ class BaseDataProductGet(ORMModel):
     id: UUID
     name: str
     description: str
-    about: Optional[str]
     namespace: str
     status: DataProductStatus
 
     # Nested schemas
     tags: list[Tag]
-    lifecycle: Optional[DataProductLifeCycleBasic]
-    type: DataProductTypeBasic
     domain: Domain
+    type: DataProductTypeBasic
+    lifecycle: Optional[DataProductLifeCycleBasic]
     data_product_settings: list[DataProductSettingValueBasic]
 
 
@@ -44,10 +43,12 @@ class DataOutputLinks(DataOutputBasic):
 
 class DatasetLinks(DataProductDatasetAssociationBasic):
     # Nested schemas
-    dataset: Dataset
+    dataset: DatasetBasic
 
 
 class DataProductGet(BaseDataProductGet):
+    about: Optional[str]
+
     # Nested schemas
     dataset_links: list[DatasetLinks]
     memberships: list[MembershipLinks]

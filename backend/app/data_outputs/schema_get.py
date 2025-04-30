@@ -4,7 +4,7 @@ from app.data_output_configuration.schema_union import DataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.schema_basic import DataOutputDatasetAssociationBasic
 from app.data_products.schema_basic import DataProductBasic
-from app.datasets.schema import Dataset
+from app.datasets.schema_basic import DatasetBasic
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 
@@ -26,7 +26,7 @@ class BaseDataOutputGet(ORMModel):
 
 class DatasetLink(DataOutputDatasetAssociationBasic):
     # Nested schemas
-    dataset: Dataset
+    dataset: DatasetBasic
 
 
 class DataOutputGet(BaseDataOutputGet):

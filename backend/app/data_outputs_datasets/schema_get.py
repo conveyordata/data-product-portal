@@ -4,7 +4,7 @@ from uuid import UUID
 
 from app.data_outputs.schema_basic import DataOutputBasic
 from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
-from app.datasets.schema import Dataset
+from app.datasets.schema_basic import DatasetBasic
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -19,7 +19,7 @@ class BaseDataOutputDatasetAssociationGet(ORMModel):
     approved_on: Optional[datetime]
 
     # Nested schemas
-    dataset: Dataset
+    dataset: DatasetBasic
     data_output: DataOutputBasic
     requested_by: User
     denied_by: Optional[User]

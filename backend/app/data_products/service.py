@@ -54,7 +54,6 @@ from app.data_products_datasets.model import (
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.datasets.schema import Dataset
 from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
@@ -349,7 +348,7 @@ class DataProductService:
 
     def _send_email_for_dataset_link(
         self,
-        dataset: Dataset,
+        dataset: DatasetModel,
         data_product: DataProductModel,
         authenticated_user: User,
         background_tasks: BackgroundTasks,

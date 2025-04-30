@@ -13,7 +13,7 @@ from app.core.namespace.validation import (
 )
 from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
-from app.datasets.schema import (
+from app.datasets.schema_create import (
     DatasetAboutUpdate,
     DatasetCreateUpdate,
     DatasetStatusUpdate,
