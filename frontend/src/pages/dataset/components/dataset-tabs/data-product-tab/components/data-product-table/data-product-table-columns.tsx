@@ -8,7 +8,7 @@ import { DataProductLink } from '@/types/dataset';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
-import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
+import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
@@ -64,8 +64,8 @@ export const getDatasetDataProductsColumns = ({
                         title={data_product.name}
                         subtitle={
                             <Badge
-                                status={getDataProductDatasetLinkBadgeStatus(status)}
-                                text={getDataProductDatasetLinkStatusLabel(t, status)}
+                                status={getDecisionStatusBadgeStatus(status)}
+                                text={getDecisionStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -73,7 +73,7 @@ export const getDatasetDataProductsColumns = ({
                 );
             },
             width: '100%',
-            ...new FilterSettings(dataProductLinks, (dpl) => getDataProductDatasetLinkStatusLabel(t, dpl.status)),
+            ...new FilterSettings(dataProductLinks, (dpl) => getDecisionStatusLabel(t, dpl.status)),
             sorter: sorter.stringSorter((dpl) => dpl.data_product.name),
             defaultSortOrder: 'ascend',
         },

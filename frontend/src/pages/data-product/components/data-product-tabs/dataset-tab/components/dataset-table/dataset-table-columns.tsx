@@ -9,7 +9,7 @@ import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-
 import { DatasetLink } from '@/types/data-product';
 import { createDatasetIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
-import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
+import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
@@ -59,8 +59,8 @@ export const getDataProductDatasetsColumns = ({
                         title={<DatasetTitle name={dataset.name} accessType={dataset.access_type} />}
                         subtitle={
                             <Badge
-                                status={getDataProductDatasetLinkBadgeStatus(status)}
-                                text={getDataProductDatasetLinkStatusLabel(t, status)}
+                                status={getDecisionStatusBadgeStatus(status)}
+                                text={getDecisionStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -68,9 +68,7 @@ export const getDataProductDatasetsColumns = ({
                 );
             },
             width: '100%',
-            ...new FilterSettings(datasetLinks, (datasetLink) =>
-                getDataProductDatasetLinkStatusLabel(t, datasetLink.status),
-            ),
+            ...new FilterSettings(datasetLinks, (datasetLink) => getDecisionStatusLabel(t, datasetLink.status)),
             sorter: sorter.stringSorter((datasetLink) => datasetLink.dataset.name),
             defaultSortOrder: 'ascend',
         },

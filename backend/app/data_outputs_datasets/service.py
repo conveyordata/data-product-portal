@@ -3,7 +3,7 @@ from uuid import UUID
 
 import pytz
 from fastapi import HTTPException, status
-from sqlalchemy import asc
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
@@ -74,7 +74,11 @@ class DataOutputDatasetService:
         db.commit()
 
     def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
+        current_link = db.get(
+            DataOutputDatasetAssociationModel,
+            id,
+            options=[joinedload(DataOutputDatasetAssociationModel.data_output)],
+        )
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -97,20 +101,25 @@ class DataOutputDatasetService:
         self, db: Session, authenticated_user: User
     ) -> list[DataOutputDatasetAssociation]:
         return (
-            db.query(DataOutputDatasetAssociationModel)
-            .options(
-                joinedload(DataOutputDatasetAssociationModel.dataset).joinedload(
-                    DatasetModel.owners
-                ),
-                joinedload(DataOutputDatasetAssociationModel.data_output),
-                joinedload(DataOutputDatasetAssociationModel.requested_by),
-            )
-            .filter(DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING)
-            .filter(
-                DataOutputDatasetAssociationModel.dataset.has(
-                    DatasetModel.owners.any(UserModel.id == authenticated_user.id)
+            db.scalars(
+                select(DataOutputDatasetAssociationModel)
+                .options(
+                    joinedload(DataOutputDatasetAssociationModel.dataset).joinedload(
+                        DatasetModel.owners
+                    ),
+                    joinedload(DataOutputDatasetAssociationModel.data_output),
+                    joinedload(DataOutputDatasetAssociationModel.requested_by),
                 )
+                .filter(
+                    DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
+                )
+                .filter(
+                    DataOutputDatasetAssociationModel.dataset.has(
+                        DatasetModel.owners.any(UserModel.id == authenticated_user.id)
+                    )
+                )
+                .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
             )
-            .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
+            .unique()
             .all()
         )

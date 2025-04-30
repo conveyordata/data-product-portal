@@ -1,7 +1,6 @@
-export enum DecisionStatus {
-    Approved = 'approved',
-    Pending = 'pending',
-    Denied = 'denied',
-}
-
-export type DecisionStatusType = DecisionStatus.Approved | DecisionStatus.Pending | DecisionStatus.Denied;
+export const DecisionStatus = {
+    Approved: 'approved',
+    Pending: 'pending',
+    Denied: 'denied',
+} as const;
+export type DecisionStatus = (typeof DecisionStatus)[keyof typeof DecisionStatus];

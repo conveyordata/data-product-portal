@@ -5,8 +5,8 @@ from uuid import UUID
 import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy import asc
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import asc, select
+from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.email.send_mail import send_mail
@@ -27,8 +27,8 @@ from app.users.schema import User
 
 
 class DataProductMembershipService:
-    @staticmethod
     def request_user_access_to_data_product(
+        self,
         user_id: UUID,
         data_product_id: UUID,
         authenticated_user: User,
@@ -251,24 +251,24 @@ class DataProductMembershipService:
     def get_user_pending_actions(
         self, db: Session, authenticated_user: User
     ) -> list[DataProductMembershipGet]:
-        return (
-            db.query(DataProductMembership)
-            .options(
-                joinedload(DataProductMembership.data_product),
-                joinedload(DataProductMembership.user),
-                joinedload(DataProductMembership.requested_by),
-            )
-            .filter(DataProductMembership.status == DecisionStatus.PENDING)
-            .filter(
-                DataProductMembership.data_product.has(
-                    DataProductModel.memberships.any(
-                        user_id=authenticated_user.id, role=DataProductUserRole.OWNER
+        actions = (
+            db.scalars(
+                select(DataProductMembership)
+                .filter(DataProductMembership.status == DecisionStatus.PENDING)
+                .filter(
+                    DataProductMembership.data_product.has(
+                        DataProductModel.memberships.any(
+                            user_id=authenticated_user.id,
+                            role=DataProductUserRole.OWNER,
+                        )
                     )
                 )
+                .order_by(asc(DataProductMembership.requested_on))
             )
-            .order_by(asc(DataProductMembership.requested_on))
+            .unique()
             .all()
         )
+        return actions
 
     def list_memberships(self, db: Session) -> Sequence[DataProductMembership]:
-        return db.query(DataProductMembership).all()
+        return db.scalars(select(DataProductMembership)).unique().all()

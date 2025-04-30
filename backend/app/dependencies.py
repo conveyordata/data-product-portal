@@ -3,8 +3,7 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.model import DataOutput as DataOutputModel
@@ -43,9 +42,10 @@ def only_dataset_owners(
 ):
     if settings.AUTHORIZER_ENABLED:
         return
-    try:
-        dataset = db.scalars(select(DatasetModel).filter_by(id=id)).one()
-    except NoResultFound:
+
+    dataset = db.get(DatasetModel, id)
+
+    if not dataset:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="dataset not found"
         )
@@ -53,6 +53,26 @@ def only_dataset_owners(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User is not an owner of the dataset",
+        )
+
+
+def only_notification_interaction_owner(
+    id: UUID,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+):
+    notification_interaction = db.get(NotificationInteraction, id)
+
+    if not notification_interaction:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="notification not found"
+        )
+    if not authenticated_user.is_admin and (
+        notification_interaction.user_id != authenticated_user.id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Notification does not belong to authenticated user",
         )
 
 
@@ -104,11 +124,10 @@ async def only_product_membership_owners(
 ):
     if settings.AUTHORIZER_ENABLED:
         return
-    try:
-        membership = db.scalars(
-            select(DataProductMembershipModel).filter_by(id=id)
-        ).one()
-    except NoResultFound:
+
+    membership = db.get(DataProductMembershipModel, id)
+
+    if not membership:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="membership not found"
         )
@@ -127,28 +146,6 @@ async def only_product_membership_owners(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User is not an owner of the product for the membership request",
-        )
-
-
-def only_notification_interaction_owner(
-    id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
-    db: Session = Depends(get_db_session),
-):
-    try:
-        notification_interaction = db.scalars(
-            select(NotificationInteraction).filter_by(id=id)
-        ).one()
-    except NoResultFound:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="notification not found"
-        )
-    if not authenticated_user.is_admin and (
-        notification_interaction.user_id != authenticated_user.id
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Notification does not belong to authenticated user",
         )
 
 
@@ -172,21 +169,22 @@ class OnlyWithProductAccess:
             return
         if data_product_id:
             id = data_product_id
-        try:
-            if id:
-                data_product = db.scalars(
-                    select(DataProductModel).filter_by(id=id)
-                ).one()
-            elif data_product_name:
-                data_product = db.scalars(
-                    select(DataProductModel).filter_by(namespace=data_product_name)
-                ).one()
-            else:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Provide at least a product name or id",
-                )
-        except NoResultFound:
+        if id:
+            data_product = db.get(
+                DataProductModel, id, options=[joinedload(DataProductModel.memberships)]
+            )
+        elif data_product_name:
+            data_product = db.scalar(
+                select(DataProductModel)
+                .options(joinedload(DataProductModel.memberships))
+                .filter_by(namespace=data_product_name)
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Provide at least a product name or id",
+            )
+        if not data_product:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="product not found"
             )

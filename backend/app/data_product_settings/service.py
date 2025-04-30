@@ -34,11 +34,11 @@ class DataProductSettingService:
         self.namespace_validator = DataProductSettingNamespaceValidator()
 
     def get_data_product_settings(self, db: Session) -> list[DataProductSetting]:
-        return (
-            db.query(DataProductSettingModel)
-            .order_by(DataProductSettingModel.order, DataProductSettingModel.name)
-            .all()
-        )
+        return db.scalars(
+            select(DataProductSettingModel).order_by(
+                DataProductSettingModel.order, DataProductSettingModel.name
+            )
+        ).all()
 
     def set_value_for_product(
         self,
@@ -131,7 +131,11 @@ class DataProductSettingService:
         return {"id": id}
 
     def delete_data_product_setting(self, setting_id: UUID, db: Session):
-        db.query(DataProductSettingModel).filter_by(id=setting_id).delete()
+        data_product_setting = db.get(
+            DataProductSettingModel,
+            setting_id,
+        )
+        db.delete(data_product_setting)
         db.commit()
 
     def validate_data_product_settings_namespace(
