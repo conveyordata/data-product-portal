@@ -8,13 +8,13 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_outputs.model import ensure_data_output_exists
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
+from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -35,12 +35,12 @@ class DataOutputDatasetService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only dataset owners can execute this action",
             )
-        if current_link.status != DataOutputDatasetLinkStatus.PENDING_APPROVAL:
+        if current_link.status != DecisionStatus.PENDING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Request can not be already approved or denied",
             )
-        current_link.status = DataOutputDatasetLinkStatus.APPROVED
+        current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
         RefreshInfrastructureLambda().trigger()
@@ -61,7 +61,7 @@ class DataOutputDatasetService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only dataset owners can execute this action",
             )
-        current_link.status = DataOutputDatasetLinkStatus.DENIED
+        current_link.status = DecisionStatus.DENIED
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
         db.commit()
@@ -104,8 +104,7 @@ class DataOutputDatasetService:
                     joinedload(DataOutputDatasetAssociationModel.requested_by),
                 )
                 .filter(
-                    DataOutputDatasetAssociationModel.status
-                    == DataOutputDatasetLinkStatus.PENDING_APPROVAL,
+                    DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
                 )
                 .filter(
                     DataOutputDatasetAssociationModel.dataset.has(

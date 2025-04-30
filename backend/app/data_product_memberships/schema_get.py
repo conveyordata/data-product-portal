@@ -3,10 +3,10 @@ from typing import Optional
 from uuid import UUID
 
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
 from app.data_products.schema_base_get import BaseDataProductGet
+from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -16,7 +16,7 @@ class BaseDataProductMembershipGet(ORMModel):
     user_id: UUID
     data_product_id: UUID
     role: DataProductUserRole
-    status: DataProductMembershipStatus
+    status: DecisionStatus
     requested_on: datetime
     approved_by: Optional[User]
     approved_on: Optional[datetime]
