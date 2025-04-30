@@ -1,7 +1,7 @@
 """Decision Status enum refactor
 
 Revision ID: 886fc49acbda
-Revises: fd4d29ed5f7c
+Revises: 6fd335d0dcfe
 Create Date: 2025-04-17 15:39:35.942198
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "886fc49acbda"
-down_revision: Union[str, None] = "fd4d29ed5f7c"
+down_revision: Union[str, None] = "6fd335d0dcfe"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
