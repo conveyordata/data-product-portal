@@ -8,7 +8,8 @@ from app.data_product_memberships.schema_basic import DataProductMembershipBasic
 from app.data_product_settings.schema_basic import DataProductSettingValueBasic
 from app.data_product_types.schema_basic import DataProductTypeBasic
 from app.data_products.status import DataProductStatus
-from app.data_products_datasets.schema import DatasetDataProductLink
+from app.data_products_datasets.schema_basic import DataProductDatasetAssociationBasic
+from app.datasets.schema import Dataset
 from app.domains.schema import Domain
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
@@ -41,9 +42,14 @@ class DataOutputLinks(DataOutputBasic):
     dataset_links: list[DataOutputDatasetAssociationBasic]
 
 
+class DatasetLinks(DataProductDatasetAssociationBasic):
+    # Nested schemas
+    dataset: Dataset
+
+
 class DataProductGet(BaseDataProductGet):
     # Nested schemas
-    dataset_links: list[DatasetDataProductLink]
+    dataset_links: list[DatasetLinks]
     memberships: list[MembershipLinks]
     data_outputs: list[DataOutputLinks]
     rolled_up_tags: set[Tag]

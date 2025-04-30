@@ -12,7 +12,7 @@ from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
-from app.data_products_datasets.schema import DataProductDatasetAssociation
+from app.data_products_datasets.schema_get import DataProductDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.users.model import User as UserModel
@@ -62,7 +62,7 @@ class DataProductDatasetService:
 
     def get_user_pending_actions(
         self, db: Session, authenticated_user: User
-    ) -> list[DataProductDatasetAssociation]:
+    ) -> list[DataProductDatasetAssociationsGet]:
         return (
             db.query(DataProductDatasetAssociationModel)
             .options(

@@ -8,7 +8,7 @@ from app.data_outputs_datasets.schema_basic import DataOutputDatasetAssociationB
 from app.data_product_lifecycles.schema_basic import DataProductLifeCycleBasic
 from app.data_product_settings.schema_basic import DataProductSettingValueBasic
 from app.data_products.schema_basic import DataProductBasic
-from app.data_products_datasets.schema import DataProductDatasetAssociation
+from app.data_products_datasets.schema_basic import DataProductDatasetAssociationBasic
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
 from app.domains.schema import Domain
@@ -17,7 +17,7 @@ from app.tags.schema import Tag
 from app.users.schema import User
 
 
-class DataProductLink(DataProductDatasetAssociation):
+class DataProductLink(DataProductDatasetAssociationBasic):
     data_product: DataProductBasic
 
 
