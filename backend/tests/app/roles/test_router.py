@@ -2,8 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 from tests.factories import RoleFactory
 
+from app.roles import ADMIN_UUID
 from app.roles.schema import Prototype, Role, Scope
-from app.roles.service import ADMIN_UUID
 
 ENDPOINT = "/api/roles"
 

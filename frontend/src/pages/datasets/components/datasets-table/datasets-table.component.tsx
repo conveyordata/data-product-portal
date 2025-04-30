@@ -1,4 +1,4 @@
-import { Button, Flex, Form, Input, RadioChangeEvent, Space, Table, TableProps, Typography } from 'antd';
+import { Button, Flex, Form, Input, Pagination, RadioChangeEvent, Space, Table, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -41,7 +41,7 @@ export function DatasetsTable() {
         { skip: !currentUser },
     );
     const canCreateDataset = access?.allowed || false;
-    const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 
@@ -52,8 +52,12 @@ export function DatasetsTable() {
 
     const columns = useMemo(() => getDatasetTableColumns({ t, datasets: filteredDatasets }), [t, filteredDatasets]);
 
-    const onChange: TableProps<DatasetsGetContract[0]>['onChange'] = (pagination) => {
-        handlePaginationChange(pagination);
+    const handlePageChange = (page: number, pageSize: number) => {
+        handlePaginationChange({
+            ...pagination,
+            current: page,
+            pageSize,
+        });
     };
 
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
@@ -67,13 +71,9 @@ export function DatasetsTable() {
 
     useEffect(() => {
         if (!isFetching && !isFetchingUserDatasets) {
-            if (quickFilter === QuickFilterParticipation.All) {
-                handleTotalChange(datasets.length);
-            } else {
-                handleTotalChange(userDatasets.length);
-            }
+            resetPagination();
         }
-    }, [quickFilter, isFetching, isFetchingUserDatasets, handleTotalChange, datasets.length, userDatasets.length]);
+    }, [filteredDatasets, isFetching, isFetchingUserDatasets, resetPagination]);
 
     return (
         <Flex vertical className={styles.tableContainer}>
@@ -93,11 +93,27 @@ export function DatasetsTable() {
                 </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                <TableQuickFilter
-                    value={quickFilter}
-                    onFilterChange={handleQuickFilterChange}
-                    quickFilterOptions={quickFilterOptions}
-                />
+                <Flex align="flex-end" justify="space-between" className={styles.tableBar}>
+                    <TableQuickFilter
+                        value={quickFilter}
+                        onFilterChange={handleQuickFilterChange}
+                        quickFilterOptions={quickFilterOptions}
+                    />
+                    <Pagination
+                        current={pagination.current}
+                        pageSize={pagination.pageSize}
+                        total={filteredDatasets.length}
+                        onChange={handlePageChange}
+                        size="small"
+                        showTotal={(total, range) =>
+                            t('Showing {{range0}}-{{range1}} of {{total}} datasets', {
+                                range0: range[0],
+                                range1: range[1],
+                                total: total,
+                            })
+                        }
+                    />
+                </Flex>
                 <Table<DatasetsGetContract[0]>
                     onRow={(record) => {
                         return {
@@ -107,8 +123,10 @@ export function DatasetsTable() {
                     className={styles.table}
                     columns={columns}
                     dataSource={filteredDatasets}
-                    onChange={onChange}
-                    pagination={pagination}
+                    pagination={{
+                        ...pagination,
+                        position: [],
+                    }}
                     rowKey={(record) => record.id}
                     loading={isFetching}
                     rowHoverable

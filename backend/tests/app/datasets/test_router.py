@@ -405,6 +405,24 @@ class TestDatasetsRouter:
             == NamespaceValidityType.DUPLICATE_NAMESPACE.value
         )
 
+    def test_update_dataset_duplicate_namespace(self, client):
+        namespace = "namespace"
+        DatasetFactory(namespace=namespace)
+        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+        update_payload = {
+            "name": "new_name",
+            "namespace": namespace,
+            "description": "new_description",
+            "tag_ids": [],
+            "access_type": "public",
+            "owners": [str(ds.owners[0].id)],
+            "domain_id": str(ds.domain_id),
+        }
+
+        response = self.update_default_dataset(client, update_payload, ds.id)
+
+        assert response.status_code == 400
+
     @staticmethod
     def create_default_dataset(client, default_dataset_payload):
         return client.post(ENDPOINT, json=default_dataset_payload)

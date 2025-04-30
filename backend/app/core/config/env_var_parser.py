@@ -1,7 +1,8 @@
 import os
+from typing import Optional
 
 
-def get_boolean_variable(name: str, default_value: bool | None = None) -> bool:
+def get_boolean_variable(name: str, default_value: Optional[bool] = None) -> bool:
     true_ = (
         "true",
         "1",
@@ -18,7 +19,7 @@ def get_boolean_variable(name: str, default_value: bool | None = None) -> bool:
         "no",
         "off",
     )  # Add more entries if you want, like: `n`, `no`, `off`, ...
-    value: str | None = os.getenv(name, None)
+    value: Optional[str] = os.getenv(name, None)
     if value is None:
         if default_value is None:
             raise ValueError(f"Variable `{name}` not set!")
