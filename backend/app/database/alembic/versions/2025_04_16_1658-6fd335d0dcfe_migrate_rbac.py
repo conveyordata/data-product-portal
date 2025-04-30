@@ -170,7 +170,7 @@ class RoleMigrationService:
         owner_role = self.role_service.find_prototype(Scope.DATASET, Prototype.OWNER)
         assert owner_role is not None
 
-        datasets = self.db.scalars(sa.select(Dataset)).all()
+        datasets = self.db.scalars(sa.select(Dataset)).unique().all()
         for dataset in datasets:
             for owner in dataset.owners:
                 self.db.add(
