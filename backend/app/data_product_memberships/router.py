@@ -14,7 +14,7 @@ from app.core.authz import (
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_memberships.schema_create import DataProductMembershipCreate
-from app.data_product_memberships.schema_get import DataProductMembershipGet
+from app.data_product_memberships.schema_get import DataProductMembershipsGet
 from app.data_product_memberships.service import DataProductMembershipService
 from app.database.database import get_db_session
 from app.dependencies import (
@@ -204,7 +204,7 @@ def update_data_product_role(
 def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> list[DataProductMembershipGet]:
+) -> list[DataProductMembershipsGet]:
     return DataProductMembershipService().get_user_pending_actions(
         db, authenticated_user
     )
