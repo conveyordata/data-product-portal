@@ -5,7 +5,7 @@ from app.data_outputs.schema_get import DataOutputGet
 from app.data_product_lifecycles.schema_basic import DataProductLifeCycleBasic
 from app.data_product_memberships.schema_basic import DataProductMembershipBasic
 from app.data_product_settings.schema_basic import DataProductSettingValueBasic
-from app.data_product_types.schema import DataProductType
+from app.data_product_types.schema_basic import DataProductTypeBasic
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema import DatasetDataProductLink
 from app.domains.schema import Domain
@@ -23,7 +23,7 @@ class BaseDataProductGet(ORMModel):
     tags: list[Tag]
     status: DataProductStatus
     lifecycle: Optional[DataProductLifeCycleBasic]
-    type: DataProductType
+    type: DataProductTypeBasic
     domain: Domain
     data_product_settings: list[DataProductSettingValueBasic]
 
