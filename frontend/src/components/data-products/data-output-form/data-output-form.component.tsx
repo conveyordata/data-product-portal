@@ -257,6 +257,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 max_length={namespaceLengthLimits?.max_length}
                 canEditNamespace={canEditNamespace}
                 toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                validationRequired
                 validateNamespace={validateNamespaceCallback}
             />
             <Form.Item<DataOutputCreateFormSchema>

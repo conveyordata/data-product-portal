@@ -8,4 +8,4 @@ class PlatformFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = Platform
 
     id = factory.Faker("uuid4")
-    name = "AWS"
+    name = factory.Faker("word")

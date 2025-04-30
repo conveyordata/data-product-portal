@@ -1,8 +1,5 @@
 @use '@/styles/globals';
 
-$landing-banner-height: 260px;
-$landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgba(3, 79, 165, 0.1) 45.13%);
-
 .container {
     height: 100%;
     display: flex;
@@ -10,15 +7,9 @@ $landing-banner-gradient: linear-gradient(90deg, rgba(1, 30, 63, 0.3) 0.16%, rgb
     padding: 0;
 }
 
-.content {
-    flex: 0.6;
-    padding: globals.$container-padding-large;
-    padding-bottom: 0;
-}
-
 .content-secondary {
     flex: 0.6;
     padding: globals.$container-padding-large;
     padding-bottom: 0;
-    padding-top: globals.$spacing-ml;
+    padding-top: globals.$spacing-regular;
 }
