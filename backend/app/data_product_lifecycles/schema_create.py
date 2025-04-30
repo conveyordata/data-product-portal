@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -18,7 +16,3 @@ class DataProductLifeCycleCreate(ORMModel):
 
 class DataProductLifeCycleUpdate(DataProductLifeCycleCreate):
     pass
-
-
-class DataProductLifeCycle(DataProductLifeCycleCreate):
-    id: UUID

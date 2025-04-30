@@ -5,7 +5,7 @@ from annotated_types import MinLen
 
 from app.data_outputs.schema_basic import DataOutputBasic
 from app.data_outputs_datasets.schema_basic import DataOutputDatasetAssociationBasic
-from app.data_product_lifecycles.schema import DataProductLifeCycle
+from app.data_product_lifecycles.schema_basic import DataProductLifeCycleBasic
 from app.data_product_settings.schema import DataProductSettingValue
 from app.data_products.schema_base_get import BaseDataProductGet
 from app.data_products_datasets.schema import DataProductDatasetAssociation
@@ -31,7 +31,7 @@ class BaseDatasetGet(ORMModel):
     name: str
     description: str
     owners: Annotated[list[User], MinLen(1)]
-    lifecycle: Optional[DataProductLifeCycle]
+    lifecycle: Optional[DataProductLifeCycleBasic]
     status: DatasetStatus
     tags: list[Tag]
     domain: Domain

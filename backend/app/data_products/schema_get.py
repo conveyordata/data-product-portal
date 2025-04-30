@@ -2,7 +2,7 @@ from typing import Optional
 from uuid import UUID
 
 from app.data_outputs.schema_get import DataOutputGet
-from app.data_product_lifecycles.schema import DataProductLifeCycle
+from app.data_product_lifecycles.schema_basic import DataProductLifeCycleBasic
 from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_product_settings.schema import DataProductSettingValue
 from app.data_product_types.schema import DataProductType
@@ -21,7 +21,7 @@ class BaseDataProductGet(ORMModel):
     namespace: str
     tags: list[Tag]
     status: DataProductStatus
-    lifecycle: Optional[DataProductLifeCycle]
+    lifecycle: Optional[DataProductLifeCycleBasic]
     type: DataProductType
     domain: Domain
     data_product_settings: list[DataProductSettingValue]
