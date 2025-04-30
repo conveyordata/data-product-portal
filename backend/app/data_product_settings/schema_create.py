@@ -32,10 +32,6 @@ class DataProductSettingUpdate(DataProductSettingCreate):
     pass
 
 
-class DataProductSetting(DataProductSettingCreate):
-    id: UUID
-
-
 class DataProductSettingValueCreate(ORMModel):
     data_product_id: Optional[UUID] = None
     dataset_id: Optional[UUID] = None
@@ -44,8 +40,3 @@ class DataProductSettingValueCreate(ORMModel):
 
     class Meta:
         orm_model = DataProductSettingValueModel
-
-
-class DataProductSettingValue(DataProductSettingValueCreate):
-    id: UUID
-    data_product_setting: DataProductSetting

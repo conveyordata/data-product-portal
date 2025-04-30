@@ -6,7 +6,7 @@ from annotated_types import MinLen
 from app.data_outputs.schema_basic import DataOutputBasic
 from app.data_outputs_datasets.schema_basic import DataOutputDatasetAssociationBasic
 from app.data_product_lifecycles.schema_basic import DataProductLifeCycleBasic
-from app.data_product_settings.schema import DataProductSettingValue
+from app.data_product_settings.schema_basic import DataProductSettingValueBasic
 from app.data_products.schema_base_get import BaseDataProductGet
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.enums import DatasetAccessType
@@ -37,7 +37,7 @@ class BaseDatasetGet(ORMModel):
     domain: Domain
     access_type: DatasetAccessType
     data_output_links: list[DataOutputLink]
-    data_product_settings: list[DataProductSettingValue]
+    data_product_settings: list[DataProductSettingValueBasic]
 
 
 class DatasetGet(BaseDatasetGet):

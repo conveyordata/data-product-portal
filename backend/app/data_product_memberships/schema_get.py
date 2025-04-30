@@ -20,6 +20,7 @@ class BaseDataProductMembershipGet(ORMModel):
 
 
 class DataProductMembershipGet(BaseDataProductMembershipGet):
+    # Nested schemas
     user: User
     data_product: BaseDataProductGet
 
