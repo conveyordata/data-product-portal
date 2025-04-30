@@ -15,7 +15,7 @@ from app.data_outputs.schema_get import DataOutputGet
 from app.data_outputs.service import DataOutputService
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.service import DataProductSettingService
-from app.data_products.schema import (
+from app.data_products.schema_create import (
     DataProductAboutUpdate,
     DataProductCreate,
     DataProductStatusUpdate,

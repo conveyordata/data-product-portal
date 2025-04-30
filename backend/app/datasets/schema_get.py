@@ -7,7 +7,7 @@ from app.data_outputs.schema_basic import DataOutputBasic
 from app.data_outputs_datasets.schema_basic import DataOutputDatasetAssociationBasic
 from app.data_product_lifecycles.schema_basic import DataProductLifeCycleBasic
 from app.data_product_settings.schema_basic import DataProductSettingValueBasic
-from app.data_products.schema_base_get import BaseDataProductGet
+from app.data_products.schema_basic import DataProductBasic
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
@@ -18,7 +18,7 @@ from app.users.schema import User
 
 
 class DataProductLink(DataProductDatasetAssociation):
-    data_product: BaseDataProductGet
+    data_product: DataProductBasic
 
 
 class DataOutputLink(DataOutputDatasetAssociationBasic):

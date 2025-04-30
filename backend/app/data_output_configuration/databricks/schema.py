@@ -7,7 +7,7 @@ from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.databricks.model import (
     DatabricksDataOutput as DatabricksDataOutputModel,
 )
-from app.data_products.schema_base import BaseDataProduct
+from app.data_products.schema_basic import DataProductBasic
 
 
 class DatabricksDataOutput(BaseDataOutputConfiguration):
@@ -30,7 +30,7 @@ class DatabricksDataOutput(BaseDataOutputConfiguration):
             self.table_path = self.table
         return self
 
-    def validate_configuration(self, data_product: BaseDataProduct):
+    def validate_configuration(self, data_product: DataProductBasic):
         # If product aligned
         if not self.catalog.startswith(data_product.namespace):
             raise ValueError("Invalid catalog specified")

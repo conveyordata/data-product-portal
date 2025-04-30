@@ -7,7 +7,7 @@ from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.glue.model import (
     GlueDataOutput as GlueDataOutputModel,
 )
-from app.data_products.schema_base import BaseDataProduct
+from app.data_products.schema_basic import DataProductBasic
 
 
 class GlueDataOutput(BaseDataOutputConfiguration):
@@ -30,7 +30,7 @@ class GlueDataOutput(BaseDataOutputConfiguration):
             self.table_path = self.table
         return self
 
-    def validate_configuration(self, data_product: BaseDataProduct):
+    def validate_configuration(self, data_product: DataProductBasic):
         # TODO Force defaul t bucket identifier if bucket = ''
         if not self.database.startswith(data_product.namespace):
             raise ValueError("Invalid database specified")

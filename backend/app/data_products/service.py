@@ -40,8 +40,7 @@ from app.data_product_memberships.model import DataProductMembership
 from app.data_product_memberships.schema_create import DataProductMembershipCreate
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
-from app.data_products.schema import (
-    DataProduct,
+from app.data_products.schema_create import (
     DataProductAboutUpdate,
     DataProductCreate,
     DataProductStatusUpdate,
@@ -78,7 +77,7 @@ class DataProductService:
         self.data_output_namespace_validator = DataOutputNamespaceValidator()
 
     def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
-        data_product: DataProductGet = db.get(
+        data_product = db.get(
             DataProductModel,
             id,
             options=[
@@ -204,7 +203,7 @@ class DataProductService:
         data_product: DataProductCreate,
         db: Session,
         authenticated_user: User,
-    ) -> DataProduct:
+    ) -> DataProductModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 data_product.namespace, db
@@ -270,7 +269,7 @@ class DataProductService:
         )
 
     def _update_memberships(
-        self, data_product: DataProduct, membership_data: List[dict], db: Session
+        self, data_product: DataProductModel, membership_data: List[dict], db: Session
     ):
         existing_memberships = data_product.memberships
         request_user_ids = set(m["user_id"] for m in membership_data)
@@ -351,7 +350,7 @@ class DataProductService:
     def _send_email_for_dataset_link(
         self,
         dataset: Dataset,
-        data_product: DataProduct,
+        data_product: DataProductModel,
         authenticated_user: User,
         background_tasks: BackgroundTasks,
     ):

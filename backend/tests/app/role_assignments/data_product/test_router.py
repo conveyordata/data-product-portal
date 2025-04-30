@@ -6,7 +6,7 @@ from tests.factories import (
     UserFactory,
 )
 
-from app.data_products.schema import DataProduct
+from app.data_products.model import DataProduct
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Role, Scope

@@ -3,7 +3,7 @@ from uuid import UUID
 from app.data_output_configuration.schema_union import DataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.schema_basic import DataOutputDatasetAssociationBasic
-from app.data_products.schema_base_get import BaseDataProductGet
+from app.data_products.schema_basic import DataProductBasic
 from app.datasets.schema import Dataset
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
@@ -21,7 +21,7 @@ class BaseDataOutputGet(ORMModel):
 
     # Nested schemas
     configuration: DataOutputConfiguration
-    owner: BaseDataProductGet
+    owner: DataProductBasic
 
 
 class DatasetLink(DataOutputDatasetAssociationBasic):

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from app.data_products.schema_base_get import BaseDataProductGet
+from app.data_products.schema_basic import DataProductBasic
 from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
@@ -32,7 +32,7 @@ class DataProductDatasetAssociation(BaseDataProductDatasetAssociation):
     id: UUID
     data_product_id: UUID
     dataset: Dataset
-    data_product: BaseDataProductGet
+    data_product: DataProductBasic
     status: DataProductDatasetLinkStatus
     requested_by: User
     denied_by: Optional[User]

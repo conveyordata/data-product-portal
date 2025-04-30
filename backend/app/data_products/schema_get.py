@@ -1,7 +1,8 @@
 from typing import Optional
 from uuid import UUID
 
-from app.data_outputs.schema_get import DataOutputGet
+from app.data_outputs.schema_basic import DataOutputBasic
+from app.data_outputs_datasets.schema_basic import DataOutputDatasetAssociationBasic
 from app.data_product_lifecycles.schema_basic import DataProductLifeCycleBasic
 from app.data_product_memberships.schema_basic import DataProductMembershipBasic
 from app.data_product_settings.schema_basic import DataProductSettingValueBasic
@@ -20,8 +21,10 @@ class BaseDataProductGet(ORMModel):
     description: str
     about: Optional[str]
     namespace: str
-    tags: list[Tag]
     status: DataProductStatus
+
+    # Nested schemas
+    tags: list[Tag]
     lifecycle: Optional[DataProductLifeCycleBasic]
     type: DataProductTypeBasic
     domain: Domain
@@ -29,13 +32,20 @@ class BaseDataProductGet(ORMModel):
 
 
 class MembershipLinks(DataProductMembershipBasic):
+    # Nested schemas
     user: User
 
 
+class DataOutputLinks(DataOutputBasic):
+    # Nested schemas
+    dataset_links: list[DataOutputDatasetAssociationBasic]
+
+
 class DataProductGet(BaseDataProductGet):
+    # Nested schemas
     dataset_links: list[DatasetDataProductLink]
     memberships: list[MembershipLinks]
-    data_outputs: list[DataOutputGet]
+    data_outputs: list[DataOutputLinks]
     rolled_up_tags: set[Tag]
 
 

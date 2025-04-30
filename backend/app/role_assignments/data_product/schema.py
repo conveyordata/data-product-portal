@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.data_products.schema import DataProduct
+from app.data_products.schema_basic import DataProductBasic
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Role
@@ -28,7 +28,7 @@ class ModifyRoleAssignment(BaseModel):
 
 class RoleAssignmentResponse(ORMModel):
     id: UUID
-    data_product: DataProduct
+    data_product: DataProductBasic
     user: User
     role: Optional[Role]
     decision: DecisionStatus

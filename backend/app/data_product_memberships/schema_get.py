@@ -5,7 +5,7 @@ from app.data_product_memberships.enums import (
     DataProductMembershipStatus,
     DataProductUserRole,
 )
-from app.data_products.schema_base_get import BaseDataProductGet
+from app.data_products.schema_basic import DataProductBasic
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -22,7 +22,7 @@ class BaseDataProductMembershipGet(ORMModel):
 class DataProductMembershipGet(BaseDataProductMembershipGet):
     # Nested schemas
     user: User
-    data_product: BaseDataProductGet
+    data_product: DataProductBasic
 
 
 class DataProductMembershipsGet(BaseDataProductMembershipGet):
