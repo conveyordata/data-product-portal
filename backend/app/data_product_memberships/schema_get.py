@@ -22,7 +22,7 @@ class BaseDataProductMembershipGet(ORMModel):
     # Nested schemas
     user: User
     data_product: DataProductBasic
-    requested_by: User
+    requested_by: Optional[User]
     denied_by: Optional[User]
     approved_by: Optional[User]
 
