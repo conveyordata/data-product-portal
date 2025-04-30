@@ -10,7 +10,7 @@ from app.data_product_types.schema_basic import DataProductTypeBasic
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema_basic import DataProductDatasetAssociationBasic
 from app.datasets.schema_basic import DatasetBasic
-from app.domains.schema import Domain
+from app.domains.schema_basic import DomainBasic
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 from app.users.schema import User
@@ -25,7 +25,7 @@ class BaseDataProductGet(ORMModel):
 
     # Nested schemas
     tags: list[Tag]
-    domain: Domain
+    domain: DomainBasic
     type: DataProductTypeBasic
     lifecycle: Optional[DataProductLifeCycleBasic]
     data_product_settings: list[DataProductSettingValueBasic]
