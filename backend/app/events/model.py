@@ -1,20 +1,17 @@
 import uuid
-from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy import Column, Enum, ForeignKey, String, and_, event, update
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.data_outputs.model import DataOutput
+from app.data_products.model import DataProduct
 from app.database.database import Base
+from app.datasets.model import Dataset
+from app.domains.model import Domain
 from app.events.enum import Type
 from app.shared.model import BaseORM
-
-if TYPE_CHECKING:
-    from app.data_outputs.model import DataOutput
-    from app.data_products.model import DataProduct
-    from app.datasets.model import Dataset
-    from app.domains.model import Domain
-    from app.users.model import User
+from app.users.model import User
 
 
 class Event(Base, BaseORM):
@@ -35,7 +32,6 @@ class Event(Base, BaseORM):
     # Conditional relationships based on subject_type
     data_product: Mapped["DataProduct"] = relationship(
         "DataProduct",
-        # back_populates="events",
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(DataProduct.id), Event.subject_type == 'DATA_PRODUCT'), "
         "and_(Event.target_id == foreign(DataProduct.id), "
@@ -43,7 +39,6 @@ class Event(Base, BaseORM):
     )
     user: Mapped["User"] = relationship(
         "User",
-        # back_populates="events",
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(User.id), Event.subject_type == 'USER')"
         ",and_(Event.target_id == foreign(User.id), "
@@ -51,7 +46,6 @@ class Event(Base, BaseORM):
     )
     dataset: Mapped["Dataset"] = relationship(
         "Dataset",
-        # back_populates="events",
         primaryjoin="or_(and_(Event.subject_id == foreign(Dataset.id),"
         " Event.subject_type == 'DATASET'),"
         "and_(Event.target_id == foreign(Dataset.id),"
@@ -59,9 +53,82 @@ class Event(Base, BaseORM):
     )
     data_output: Mapped["DataOutput"] = relationship(
         "DataOutput",
-        # back_populates="events",
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(DataOutput.id), Event.subject_type == 'DATA_OUTPUT'),"
         "and_(Event.target_id == foreign(DataOutput.id),"
         " Event.target_type == 'DATA_OUTPUT'))",
     )
+
+    @event.listens_for(User, "before_delete")
+    def _backup_user_name_on_delete(mapper, connection, target):
+        connection.execute(
+            update(Event.__table__)
+            .where(and_(Event.subject_id == target.id, Event.subject_type == Type.USER))
+            .values(deleted_subject_identifier=target.email)
+        )
+        connection.execute(
+            update(Event.__table__)
+            .where(and_(Event.target_id == target.id, Event.target_type == Type.USER))
+            .values(deleted_target_identifier=target.email)
+        )
+
+    @event.listens_for(Dataset, "before_delete")
+    def _backup_dataset_name_on_delete(mapper, connection, target):
+        connection.execute(
+            update(Event.__table__)
+            .where(
+                and_(Event.subject_id == target.id, Event.subject_type == Type.DATASET)
+            )
+            .values(deleted_subject_identifier=target.name)
+        )
+        connection.execute(
+            update(Event.__table__)
+            .where(
+                and_(Event.target_id == target.id, Event.target_type == Type.DATASET)
+            )
+            .values(deleted_target_identifier=target.name)
+        )
+
+    @event.listens_for(DataProduct, "before_delete")
+    def _backup_data_product_name_on_delete(mapper, connection, target):
+        connection.execute(
+            update(Event.__table__)
+            .where(
+                and_(
+                    Event.subject_id == target.id,
+                    Event.subject_type == Type.DATA_PRODUCT,
+                )
+            )
+            .values(deleted_subject_identifier=target.name)
+        )
+        connection.execute(
+            update(Event.__table__)
+            .where(
+                and_(
+                    Event.target_id == target.id, Event.target_type == Type.DATA_PRODUCT
+                )
+            )
+            .values(deleted_target_identifier=target.name)
+        )
+
+    @event.listens_for(DataOutput, "before_delete")
+    def _backup_data_output_name_on_delete(mapper, connection, target):
+        connection.execute(
+            update(Event.__table__)
+            .where(
+                and_(
+                    Event.subject_id == target.id,
+                    Event.subject_type == Type.DATA_OUTPUT,
+                )
+            )
+            .values(deleted_subject_identifier=target.name)
+        )
+        connection.execute(
+            update(Event.__table__)
+            .where(
+                and_(
+                    Event.target_id == target.id, Event.target_type == Type.DATA_OUTPUT
+                )
+            )
+            .values(deleted_target_identifier=target.name)
+        )

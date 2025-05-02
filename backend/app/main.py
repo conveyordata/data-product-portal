@@ -9,7 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 
-import app.events.listeners as DeleteListeners
 from app.audit.model import AuditLog as AuditLogModel
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
