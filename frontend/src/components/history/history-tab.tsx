@@ -1,4 +1,5 @@
-import { Form, Input, Table } from 'antd';
+import { CaretRightOutlined } from '@ant-design/icons';
+import { Flex, Form, Input, Table, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +13,8 @@ import {
     useGetDataProductHistoryQuery,
 } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetByIdQuery, useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice';
+import { EventContract } from '@/types/events/event.contract';
+import { getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
 
 import styles from './history-tab.module.scss';
 
@@ -68,30 +71,24 @@ export function HistoryTab({ id, type }: Props) {
             render: (text: string) => text || t('No title available'),
         },
         {
-            title: t('User'),
-            dataIndex: 'user',
-            key: 'user',
-            render: (user: { email: string } | undefined) => (user ? user.email : t('No user available')),
-        },
-        {
-            title: t('Data Product'),
-            dataIndex: 'data_product',
-            key: 'data_product',
-            render: (data_product: { name: string } | undefined) =>
-                data_product ? data_product.name : t('No data product available'),
-        },
-        {
-            title: t('Data Output'),
-            dataIndex: 'data_output',
-            key: 'data_output',
-            render: (data_output: { name: string } | undefined) =>
-                data_output ? data_output.name : t('No data output available'),
-        },
-        {
-            title: t('Dataset'),
-            dataIndex: 'dataset',
-            key: 'dataset',
-            render: (dataset: { name: string } | undefined) => (dataset ? dataset.name : t('No dataset available')),
+            title: t('Involved entities'),
+            key: 'Detail',
+            render: (record: EventContract) => {
+                const subjectLabel = getSubjectDisplayLabel(t, record);
+                const targetLabel = getTargetDisplayLabel(t, record);
+
+                if (targetLabel) {
+                    return (
+                        <Flex vertical>
+                            <Typography.Text>{subjectLabel}</Typography.Text>
+                            <Typography.Text>
+                                <CaretRightOutlined /> {targetLabel}
+                            </Typography.Text>
+                        </Flex>
+                    );
+                }
+                return <Typography.Text>{subjectLabel}</Typography.Text>;
+            },
         },
         {
             title: t('Executed By'),
