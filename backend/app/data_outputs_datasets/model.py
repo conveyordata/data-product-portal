@@ -4,7 +4,6 @@ from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstrain
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
-from app.notifications.model import DataOutputDatasetNotification
 from app.role_assignments.enums import DecisionStatus
 
 if TYPE_CHECKING:
@@ -60,12 +59,7 @@ class DataOutputDatasetAssociation(Base, BaseORM):
     denied_by: Mapped["User"] = relationship(
         foreign_keys=[denied_by_id], back_populates="denied_dataoutputs", lazy="joined"
     )
-    notifications = relationship(
-        DataOutputDatasetNotification,
-        cascade="all, delete-orphan",
-        passive_deletes=True,
-        back_populates="data_output_dataset",
-    )
+
     __table_args__ = (
         UniqueConstraint(
             "data_output_id", "dataset_id", name="unique_data_output_dataset"

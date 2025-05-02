@@ -16,5 +16,7 @@ class DataProductMembershipNotificationFactory(factory.alchemy.SQLAlchemyModelFa
     id = factory.Faker("uuid4")
     notification_type = NotificationTypes.DataProductMembershipNotification.value
     notification_origin = DecisionStatus.APPROVED
-    data_product_membership = factory.SubFactory(DataProductMembershipFactory)
+    data_product_membership_id = factory.LazyFunction(
+        lambda: DataProductMembershipFactory().id
+    )
     user = factory.SubFactory(UserFactory)

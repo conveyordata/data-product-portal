@@ -1,21 +1,17 @@
 import uuid
-from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.role_assignments.enums import DecisionStatus
-
-if TYPE_CHECKING:
-    from app.data_outputs_datasets.model import DataOutputDatasetAssociation
-    from app.data_product_memberships.model import DataProductMembership
-    from app.data_products_datasets.model import DataProductDatasetAssociation
-    from app.users.model import User
-
+from app.data_outputs_datasets.model import DataOutputDatasetAssociation
+from app.data_product_memberships.model import DataProductMembership
+from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base
 from app.notifications.enums import NotificationTypes
+from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
+from app.users.model import User
 
 
 class Notification(Base, BaseORM):
@@ -25,14 +21,8 @@ class Notification(Base, BaseORM):
     notification_origin: Mapped[DecisionStatus] = mapped_column(
         Enum(DecisionStatus), nullable=False
     )
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        "user_id", ForeignKey("users.id", ondelete="CASCADE")
-    )
-    user: Mapped["User"] = relationship(
-        "User",
-        foreign_keys=[user_id],
-        back_populates="notifications",
-    )
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    user: Mapped["User"] = relationship("User")
     __mapper_args__ = {
         "polymorphic_on": "notification_type",
         "polymorphic_identity": "notification",
@@ -40,15 +30,20 @@ class Notification(Base, BaseORM):
 
 
 class DataProductDatasetNotification(Notification):
-    data_product_dataset_id: Mapped[UUID] = mapped_column(
-        "data_product_dataset_id",
-        ForeignKey("data_products_datasets.id", ondelete="CASCADE"),
-        nullable=False,
-    )
+    data_product_dataset_id = Column(UUID(as_uuid=True))
     data_product_dataset: Mapped["DataProductDatasetAssociation"] = relationship(
         "DataProductDatasetAssociation",
-        back_populates="notifications",
-        passive_deletes=True,
+        primaryjoin=(
+            "DataProductDatasetNotification.data_product_dataset_id == "
+            "foreign(DataProductDatasetAssociation.id)"
+        ),
+        viewonly=True,
+    )
+    deleted_data_product_identifier: Mapped[str] = mapped_column(
+        nullable=True, use_existing_column=True
+    )
+    deleted_dataset_identifier: Mapped[str] = mapped_column(
+        nullable=True, use_existing_column=True
     )
     __mapper_args__ = {
         "polymorphic_identity": "DataProductDatasetNotification",
@@ -56,15 +51,18 @@ class DataProductDatasetNotification(Notification):
 
 
 class DataOutputDatasetNotification(Notification):
-    data_output_dataset_id: Mapped[UUID] = mapped_column(
-        "data_output_dataset_id",
-        ForeignKey("data_outputs_datasets.id", ondelete="CASCADE"),
-        nullable=False,
-    )
+    data_output_dataset_id = Column(UUID(as_uuid=True))
     data_output_dataset: Mapped["DataOutputDatasetAssociation"] = relationship(
         "DataOutputDatasetAssociation",
-        back_populates="notifications",
-        passive_deletes=True,
+        primaryjoin=(
+            "DataOutputDatasetNotification.data_output_dataset_id == "
+            "foreign(DataOutputDatasetAssociation.id)"
+        ),
+        viewonly=True,
+    )
+    deleted_data_output_identifier: Mapped[str] = mapped_column(nullable=True)
+    deleted_dataset_identifier: Mapped[str] = mapped_column(
+        nullable=True, use_existing_column=True
     )
     __mapper_args__ = {
         "polymorphic_identity": "DataOutputDatasetNotification",
@@ -72,15 +70,17 @@ class DataOutputDatasetNotification(Notification):
 
 
 class DataProductMembershipNotification(Notification):
-    data_product_membership_id: Mapped[UUID] = mapped_column(
-        "data_product_membership_id",
-        ForeignKey("data_product_memberships.id", ondelete="CASCADE"),
-        nullable=False,
-    )
+    data_product_membership_id = Column(UUID(as_uuid=True))
     data_product_membership: Mapped["DataProductMembership"] = relationship(
         "DataProductMembership",
-        back_populates="notifications",
-        passive_deletes=True,
+        primaryjoin=(
+            "DataProductMembershipNotification.data_product_membership_id == "
+            "foreign(DataProductMembership.id)"
+        ),
+        viewonly=True,
+    )
+    deleted_data_product_identifier: Mapped[str] = mapped_column(
+        nullable=True, use_existing_column=True
     )
     __mapper_args__ = {
         "polymorphic_identity": "DataProductMembershipNotification",

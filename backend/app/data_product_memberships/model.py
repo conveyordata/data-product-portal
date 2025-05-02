@@ -7,7 +7,6 @@ from app.data_product_memberships.enums import (
     DataProductUserRole,
 )
 from app.database.database import Base
-from app.notifications.model import DataProductMembershipNotification
 from app.role_assignments.enums import DecisionStatus
 
 if TYPE_CHECKING:
@@ -33,13 +32,6 @@ class DataProductMembership(Base, BaseORM):
     requested_on = Column(DateTime(timezone=False), server_default=utcnow())
     approved_on = Column(DateTime(timezone=False))
     denied_on = Column(DateTime(timezone=False))
-
-    notifications = relationship(
-        DataProductMembershipNotification,
-        cascade="all, delete-orphan",
-        passive_deletes=True,
-        back_populates="data_product_membership",
-    )
 
     # Foreign keys
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))

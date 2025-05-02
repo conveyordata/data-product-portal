@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 from uuid import UUID
 
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
@@ -19,18 +19,23 @@ class NotificationBase(ORMModel):
 
 class DataProductDatasetNotification(NotificationBase):
     notification_type: Literal[NotificationTypes.DataProductDatasetNotification]
+    deleted_data_product_identifier: Optional[str] = None
+    deleted_dataset_identifier: Optional[str] = None
     data_product_dataset_id: UUID
     data_product_dataset: DataProductDatasetAssociation
 
 
 class DataOutputDatasetNotification(NotificationBase):
     notification_type: Literal[NotificationTypes.DataOutputDatasetNotification]
+    deleted_data_output_identifier: Optional[str] = None
+    deleted_dataset_identifier: Optional[str] = None
     data_output_dataset_id: UUID
     data_output_dataset: DataOutputDatasetAssociation
 
 
 class DataProductMembershipNotification(NotificationBase):
     notification_type: Literal[NotificationTypes.DataProductMembershipNotification]
+    deleted_data_product_identifier: Optional[str] = None
     data_product_membership_id: UUID
     data_product_membership: DataProductMembershipGet
 
