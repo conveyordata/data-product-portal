@@ -1,5 +1,8 @@
 from typing import cast
 
+from casbin import AsyncEnforcer
+from casbin_async_sqlalchemy_adapter import Adapter, CasbinRule
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from app.core.authz import Authorization
@@ -34,9 +37,16 @@ class AuthorizationService:
         await self._sync_dataset_assignments()
         await self._sync_global_assignments()
 
-    async def _clear_casbin_table(self):
+    async def _clear_casbin_table(self) -> None:
+        """Clears the database table used by casbin. Use with caution!
+        This means the casbin table will be out of sync with the role assignments.
+        """
         authorizer = Authorization()
-        await authorizer.clear_adapter()
+        enforcer: AsyncEnforcer = authorizer._enforcer
+        adapter: Adapter = enforcer.adapter
+
+        async with adapter.session_local() as session:
+            await session.execute(delete(CasbinRule))
 
     async def _sync_roles(self):
         service = RoleService(self.db)

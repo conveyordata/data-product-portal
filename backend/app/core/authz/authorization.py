@@ -5,9 +5,7 @@ from typing import Sequence, cast
 import casbin_async_sqlalchemy_adapter as sqlalchemy_adapter
 from cachetools import Cache, LRUCache, cachedmethod
 from casbin import AsyncEnforcer
-from casbin_async_sqlalchemy_adapter import Adapter, CasbinRule
 from fastapi import Depends, HTTPException, Request, status
-from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -217,13 +215,3 @@ class Authorization(metaclass=Singleton):
         enforcer: AsyncEnforcer = self._enforcer
         await enforcer.remove_filtered_named_grouping_policy("g2", 2, domain_id)
         self._after_update()
-
-    async def clear_adapter(self) -> None:
-        """Clears the database table used by casbin. Use with caution!
-        This means the casbin table will be out of sync with the role assignments.
-        """
-        enforcer: AsyncEnforcer = self._enforcer
-        adapter: Adapter = enforcer.adapter
-
-        async with adapter.session_local() as session:
-            await session.execute(delete(CasbinRule))
