@@ -10,10 +10,9 @@ export enum NotificationTypes {
     DataProductMembershipNotification = 'DataProductMembershipNotification',
 }
 
-export interface NotificationModel {
+export interface BaseNotification {
+    notification_origin: DecisionStatus;
     id: string;
-    notification_id: string;
-    notification: Notification;
     user_id: string;
     user: UserContract;
 }
@@ -23,26 +22,20 @@ export type Notification =
     | DataOutputDatasetNotification
     | DataProductMembershipNotification;
 
-export interface DataProductDatasetNotification {
+export interface DataProductDatasetNotification extends BaseNotification {
     notification_type: NotificationTypes.DataProductDatasetNotification;
-    notification_origin: DecisionStatus;
-    id: string;
     data_product_dataset_id: string;
     data_product_dataset: DataProductDatasetContract;
 }
 
-export interface DataOutputDatasetNotification {
+export interface DataOutputDatasetNotification extends BaseNotification {
     notification_type: NotificationTypes.DataOutputDatasetNotification;
-    notification_origin: DecisionStatus;
-    id: string;
     data_output_dataset_id: string;
     data_output_dataset: DataOutputDatasetContract;
 }
 
-export interface DataProductMembershipNotification {
+export interface DataProductMembershipNotification extends BaseNotification {
     notification_type: NotificationTypes.DataProductMembershipNotification;
-    notification_origin: DecisionStatus;
-    id: string;
     data_product_membership_id: string;
     data_product_membership: DataProductMembershipContract;
 }

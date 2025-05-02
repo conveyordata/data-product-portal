@@ -14,7 +14,7 @@ from app.data_outputs_datasets.model import (
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.notification_interactions.service import NotificationInteractionService
+from app.notifications.service import NotificationService
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -44,9 +44,7 @@ class DataOutputDatasetService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        NotificationInteractionService().create_data_output_dataset_notifications(
-            db, current_link
-        )
+        NotificationService().create_data_output_dataset_notifications(db, current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
@@ -68,9 +66,7 @@ class DataOutputDatasetService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        NotificationInteractionService().create_data_output_dataset_notifications(
-            db, current_link
-        )
+        NotificationService().create_data_output_dataset_notifications(db, current_link)
         db.commit()
 
     def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):

@@ -1,12 +1,11 @@
 """Notifications tables
 
 Revision ID: e7aa46492f9a
-Revises: c02e4638423f
-Create Date: 2025-03-27 14:53:15.943060
+Revises: 886fc49acbda
+Create Date: 2025-05-02 14:53:15.943060
 
 """
 
-from enum import Enum
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -14,18 +13,12 @@ from alembic import op
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.notifications.enums import NotificationTypes
+from app.role_assignments.enums import DecisionStatus
 from app.shared.model import utcnow
-
-
-class NotificationOrigins(str, Enum):
-    PENDING_APPROVAL = "pending_approval"
-    APPROVED = "approved"
-    DENIED = "denied"
-
 
 # revision identifiers, used by Alembic.
 revision: str = "e7aa46492f9a"
-down_revision: Union[str, None] = "c02e4638423f"
+down_revision: Union[str, None] = "886fc49acbda"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -36,7 +29,7 @@ def upgrade() -> None:
         "notifications",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("notification_type", sa.Enum(NotificationTypes)),
-        sa.Column("notification_origin", sa.Enum(NotificationOrigins)),
+        sa.Column("notification_origin", sa.Enum(DecisionStatus)),
         sa.Column(
             "data_product_dataset_id",
             UUID(as_uuid=True),
@@ -55,20 +48,6 @@ def upgrade() -> None:
             sa.ForeignKey("data_product_memberships.id", ondelete="CASCADE"),
             nullable=True,
         ),
-        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
-        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
-        sa.Column("deleted_at", sa.DateTime),
-    )
-
-    # Create the "notification_interactions" table
-    op.create_table(
-        "notification_interactions",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column(
-            "notification_id",
-            UUID(as_uuid=True),
-            sa.ForeignKey("notifications.id", ondelete="CASCADE"),
-        ),
         sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id")),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
@@ -77,5 +56,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("notification_interactions")
     op.drop_table("notifications")

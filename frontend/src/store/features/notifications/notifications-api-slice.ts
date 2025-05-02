@@ -1,7 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { NotificationModel } from '@/types/notifications/notification.contract';
+import { Notification } from '@/types/notifications/notification.contract';
 
 export const notificationsTags: string[] = [
     TagTypes.UserDataProducts,
@@ -15,7 +15,7 @@ export const notificationsTags: string[] = [
 
 export const notificationsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: notificationsTags }).injectEndpoints({
     endpoints: (builder) => ({
-        getNotifications: builder.query<NotificationModel[], void>({
+        getNotifications: builder.query<Notification[], void>({
             query: () => ({
                 url: buildUrl(ApiUrl.Notifications, {}),
                 method: 'GET',

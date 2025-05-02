@@ -19,7 +19,7 @@ from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
-from app.notification_interactions.service import NotificationInteractionService
+from app.notifications.service import NotificationService
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.users.model import ensure_user_exists
@@ -109,7 +109,7 @@ class DataProductMembershipService:
         data_product_membership.approved_by_id = authenticated_user.id
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
 
-        NotificationInteractionService().create_data_product_membership_notifications(
+        NotificationService().create_data_product_membership_notifications(
             db, data_product_membership
         )
 
@@ -143,7 +143,7 @@ class DataProductMembershipService:
         data_product_membership.denied_by_id = authenticated_user.id
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
 
-        NotificationInteractionService().create_data_product_membership_notifications(
+        NotificationService().create_data_product_membership_notifications(
             db, data_product_membership
         )
 

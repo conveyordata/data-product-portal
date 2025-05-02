@@ -7,11 +7,14 @@ from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.notifications.enums import NotificationTypes
 from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
+from app.users.schema import User
 
 
 class NotificationBase(ORMModel):
     id: UUID
     notification_origin: DecisionStatus
+    user_id: UUID
+    user: User
 
 
 class DataProductDatasetNotification(NotificationBase):

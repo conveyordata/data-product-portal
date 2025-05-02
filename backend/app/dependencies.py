@@ -19,7 +19,7 @@ from app.data_products_datasets.model import (
 )
 from app.database.database import get_db_session
 from app.datasets.model import Dataset as DatasetModel
-from app.notification_interactions.model import NotificationInteraction
+from app.notifications.model import Notification
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.users.schema import User
@@ -56,19 +56,19 @@ def only_dataset_owners(
         )
 
 
-def only_notification_interaction_owner(
+def only_notification_owner(
     id: UUID,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
-    notification_interaction = db.get(NotificationInteraction, id)
+    notification = db.get(Notification, id)
 
-    if not notification_interaction:
+    if not notification:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="notification not found"
         )
     if not authenticated_user.is_admin and (
-        notification_interaction.user_id != authenticated_user.id
+        notification.user_id != authenticated_user.id
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

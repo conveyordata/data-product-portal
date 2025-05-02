@@ -7,7 +7,6 @@ from tests.factories.data_product_dataset_notification import (
 from tests.factories.data_product_membership_notification import (
     DataProductMembershipNotificationFactory,
 )
-from tests.factories.notification_interaction import NotificationInteractionFactory
 
 from .. import test_session
 from .data_output import DataOutputFactory
@@ -60,7 +59,6 @@ factories = [
     TagFactory,
     UserFactory,
     ThemeSettingsFactory,
-    NotificationInteractionFactory,
     DataOutputDatasetNotificationFactory,
     DataProductDatasetNotificationFactory,
     DataProductMembershipNotificationFactory,
