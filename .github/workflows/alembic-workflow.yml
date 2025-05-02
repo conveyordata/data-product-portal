@@ -1,5 +1,7 @@
 name: Alembic latest migration test
 on:
+  push:
+    branches: [ "main", "feature/test-latest-migration" ]
   pull_request:
     paths:
       - 'backend/app/database/alembic/**'
@@ -26,10 +28,20 @@ jobs:
             fi
             sleep 3
           done
+      - name: Wait for Backend
+        run: |
+            for i in {1..10}; do
+              STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" localhost:5050)
+              echo "Status code: $STATUS_CODE"
+              test $STATUS_CODE -eq 200
+              if test $STATUS_CODE -eq 200; then
+                break
+              fi
+              sleep 3
+            done
 
       - name: Downgrade to previous migration
         run: |
-          sleep 10
           docker compose exec backend alembic downgrade -1
 
       - name: Upgrade only latest migration
@@ -37,11 +49,16 @@ jobs:
           docker compose exec backend alembic upgrade head
 
       - name: Start remaining services
-        run: docker compose up -d frontend nginx  # or your app service name
+        run: docker compose up -d frontend nginx
 
-      - name: Curl Test
+      - name: Curl Test API Frontend
         run: |
-          sleep 10
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" localhost:8080)
-          echo "Status code: $STATUS_CODE"
-          test $STATUS_CODE -eq 200
+            for i in {1..10}; do
+              STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" localhost:8080)
+              echo "Status code: $STATUS_CODE"
+              test $STATUS_CODE -eq 200
+              if test $STATUS_CODE -eq 200; then
+                break
+              fi
+              sleep 3
+            done
