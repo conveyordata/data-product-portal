@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
 from app.events.enum import Type
@@ -21,7 +21,9 @@ class Event(Base, BaseORM):
     __tablename__ = "events"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
+    deleted_subject_identifier: Mapped[str] = mapped_column(nullable=True)
     subject_id = Column(UUID(as_uuid=True))
+    deleted_target_identifier: Mapped[str] = mapped_column(nullable=True)
     target_id = Column(UUID(as_uuid=True))
     subject_type = Column(Enum(Type))
     target_type = Column(Enum(Type))

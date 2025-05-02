@@ -32,6 +32,8 @@ class EventUpdate(EventCreate):
 
 class Event(EventCreate):
     id: UUID
+    deleted_subject_identifier: Optional[str] = None
+    deleted_target_identifier: Optional[str] = None
     actor: User
     data_product: Optional[BaseDataProductGet] = None
     user: Optional[User] = None
