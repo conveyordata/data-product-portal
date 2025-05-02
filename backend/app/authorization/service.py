@@ -45,7 +45,7 @@ class AuthorizationService:
         enforcer: AsyncEnforcer = authorizer._enforcer
         adapter: Adapter = enforcer.adapter
 
-        async with adapter.session_local() as session:
+        async with adapter._session_scope() as session:
             await session.execute(delete(CasbinRule))
 
     async def _sync_roles(self):
