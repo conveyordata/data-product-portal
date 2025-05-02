@@ -1,4 +1,5 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
@@ -11,7 +12,9 @@ from app.database.database import Base
 from app.notifications.enums import NotificationTypes
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
-from app.users.model import User
+
+if TYPE_CHECKING:
+    from app.users.model import User
 
 
 class Notification(Base, BaseORM):
@@ -22,7 +25,9 @@ class Notification(Base, BaseORM):
         Enum(DecisionStatus), nullable=False
     )
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
-    user: Mapped["User"] = relationship("User")
+    user: Mapped["User"] = relationship(
+        foreign_keys=[user_id], back_populates="notifications"
+    )
     __mapper_args__ = {
         "polymorphic_on": "notification_type",
         "polymorphic_identity": "notification",

@@ -9,6 +9,7 @@ from app.data_product_memberships.model import DataProductMembership
 from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
 from app.datasets.model import datasets_owner_table
+from app.notifications.model import Notification
 from app.shared.model import BaseORM
 from app.users.schema import User as UserSchema
 
@@ -16,7 +17,6 @@ if TYPE_CHECKING:
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
-    from app.notifications.model import Notification
 
 
 def ensure_user_exists(user_id: UUID, db: Session) -> UserSchema:
