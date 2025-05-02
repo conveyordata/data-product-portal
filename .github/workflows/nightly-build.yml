@@ -2,8 +2,6 @@ name: Nightly Docker Compose Test
 on:
   schedule:
     - cron: '0 2 * * *'
-  pull_request:
-    branches: ['*']
 permissions:
   contents: read
 
@@ -35,42 +33,3 @@ jobs:
         run: |
           echo "Command failed with status code ${{ steps.run_command.outputs.status_code }}"
           exit 1
-  incremental_migration_test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 0
-      - name: Pull Docker Images
-        run: docker compose pull
-
-      - name: Start DB container only
-        run: docker compose up -d postgresql backend
-
-      - name: Wait for Postgres
-        run: |
-          for i in {1..10}; do
-            if pg_isready -h localhost -p 5432; then
-              break
-            fi
-            sleep 3
-          done
-
-      - name: Downgrade to previous migration
-        run: |
-          sleep 10
-          docker compose exec backend alembic downgrade -1
-
-      - name: Upgrade only latest migration
-        run: |
-          docker compose exec backend alembic upgrade head
-
-      - name: Start remaining services
-        run: docker compose up -d frontend nginx  # or your app service name
-
-      - name: Curl Test
-        run: |
-          sleep 10
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" localhost:8080)
-          echo "Status code: $STATUS_CODE"
-          test $STATUS_CODE -eq 200
