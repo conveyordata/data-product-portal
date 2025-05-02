@@ -46,7 +46,6 @@
     "Executed By": "Executed By",
     "Timestamp": "Timestamp",
     "UTC": "UTC",
-
     "If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.": "If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.",
     "Catalog": "Catalog",
     "The name of the Databricks catalog to link the data output to": "The name of the Databricks catalog to link the data output to",
