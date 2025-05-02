@@ -22,7 +22,7 @@ class DataProductDatasetNotification(NotificationBase):
     deleted_data_product_identifier: Optional[str] = None
     deleted_dataset_identifier: Optional[str] = None
     data_product_dataset_id: UUID
-    data_product_dataset: DataProductDatasetAssociation
+    data_product_dataset: Optional[DataProductDatasetAssociation] = None
 
 
 class DataOutputDatasetNotification(NotificationBase):
@@ -30,14 +30,14 @@ class DataOutputDatasetNotification(NotificationBase):
     deleted_data_output_identifier: Optional[str] = None
     deleted_dataset_identifier: Optional[str] = None
     data_output_dataset_id: UUID
-    data_output_dataset: DataOutputDatasetAssociation
+    data_output_dataset: Optional[DataOutputDatasetAssociation] = None
 
 
 class DataProductMembershipNotification(NotificationBase):
     notification_type: Literal[NotificationTypes.DataProductMembershipNotification]
     deleted_data_product_identifier: Optional[str] = None
     data_product_membership_id: UUID
-    data_product_membership: DataProductMembershipGet
+    data_product_membership: Optional[DataProductMembershipGet] = None
 
 
 Notification = Union[
