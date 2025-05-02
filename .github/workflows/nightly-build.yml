@@ -58,6 +58,7 @@ jobs:
 
       - name: Downgrade to previous migration
         run: |
+          sleep 10
           docker compose exec backend alembic downgrade -1
 
       - name: Upgrade only latest migration
