@@ -35,6 +35,7 @@ class User(Base, BaseORM):
         "DataProductMembership",
         foreign_keys="DataProductMembership.user_id",
         back_populates="user",
+        cascade="all, delete-orphan",
     )
     approved_memberships: Mapped[list["DataProductMembership"]] = relationship(
         "DataProductMembership",

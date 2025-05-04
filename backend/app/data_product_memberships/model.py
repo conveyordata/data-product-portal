@@ -35,7 +35,7 @@ class DataProductMembership(Base, BaseORM):
 
     # Foreign keys
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     approved_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     denied_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
