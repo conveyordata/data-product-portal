@@ -3,12 +3,13 @@ import { TFunction } from 'i18next';
 
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import { DataOutputDatasetLinkRequest, DataOutputDatasetLinkStatus } from '@/types/data-output-dataset';
+import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
 import { DataOutputLink } from '@/types/dataset';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
+import { DecisionStatus } from '@/types/roles';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
-import { getDataOutputDatasetLinkBadgeStatus, getDataOutputDatasetLinkStatusLabel } from '@/utils/status.helper';
+import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper';
 
 import styles from './data-output-table.module.scss';
 
@@ -20,6 +21,8 @@ type Props = {
     isCurrentDatasetOwner: boolean;
     isLoading?: boolean;
     isDisabled?: boolean;
+    canAcceptNew?: boolean;
+    canRevokeNew?: boolean;
 };
 
 export const getDatasetDataProductsColumns = ({
@@ -30,6 +33,8 @@ export const getDatasetDataProductsColumns = ({
     isDisabled,
     isLoading,
     isCurrentDatasetOwner,
+    canAcceptNew,
+    canRevokeNew,
 }: Props): TableColumnsType<DataOutputLink> => {
     return [
         {
@@ -54,8 +59,8 @@ export const getDatasetDataProductsColumns = ({
                         title={data_output.owner.name}
                         subtitle={
                             <Badge
-                                status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
+                                status={getDecisionStatusBadgeStatus(status)}
+                                text={getDecisionStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -81,8 +86,8 @@ export const getDatasetDataProductsColumns = ({
                         title={data_output.name}
                         subtitle={
                             <Badge
-                                status={getDataOutputDatasetLinkBadgeStatus(status)}
-                                text={getDataOutputDatasetLinkStatusLabel(t, status)}
+                                status={getDecisionStatusBadgeStatus(status)}
+                                text={getDecisionStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -96,7 +101,7 @@ export const getDatasetDataProductsColumns = ({
             key: 'action',
             hidden: !isCurrentDatasetOwner,
             render: (_, { id, data_output, status, dataset_id, data_output_id }) => {
-                if (status === DataOutputDatasetLinkStatus.Pending) {
+                if (status === DecisionStatus.Pending) {
                     return (
                         <Flex>
                             <Popconfirm
@@ -111,7 +116,11 @@ export const getDatasetDataProductsColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                <Button
+                                    loading={isLoading}
+                                    disabled={isLoading || (!canAcceptNew && isDisabled)}
+                                    type={'link'}
+                                >
                                     {t('Accept')}
                                 </Button>
                             </Popconfirm>
@@ -127,14 +136,18 @@ export const getDatasetDataProductsColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                <Button
+                                    loading={isLoading}
+                                    disabled={isLoading || (!canAcceptNew && isDisabled)}
+                                    type={'link'}
+                                >
                                     {t('Reject')}
                                 </Button>
                             </Popconfirm>
                         </Flex>
                     );
                 }
-                if (status === DataOutputDatasetLinkStatus.Approved) {
+                if (status === DecisionStatus.Approved) {
                     return (
                         <Popconfirm
                             title={t('Revoke Data Output Access')}
@@ -148,14 +161,18 @@ export const getDatasetDataProductsColumns = ({
                             okButtonProps={{ loading: isLoading }}
                             autoAdjustOverflow={true}
                         >
-                            <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                            <Button
+                                loading={isLoading}
+                                disabled={isLoading || (!canRevokeNew && isDisabled)}
+                                type={'link'}
+                            >
                                 {t('Revoke Access')}
                             </Button>
                         </Popconfirm>
                     );
                 }
 
-                if (status === DataOutputDatasetLinkStatus.Denied) {
+                if (status === DecisionStatus.Denied) {
                     return (
                         <Button
                             type={'link'}

@@ -10,4 +10,5 @@ class S3DataOutput(BaseDataOutputConfiguration):
 
     __mapper_args__ = {
         "polymorphic_identity": "S3DataOutput",
+        "polymorphic_load": "inline",
     }

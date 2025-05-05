@@ -3,11 +3,8 @@ import { TFunction } from 'i18next';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form.tsx';
-import {
-    DataProductMembershipRole,
-    DataProductMembershipStatus,
-    DataProductUserMembership,
-} from '@/types/data-product-membership';
+import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+import { DecisionStatus } from '@/types/roles';
 import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -23,6 +20,9 @@ type Props = {
     canPerformTeamActions: (userId: string) => boolean;
     isLoading?: boolean;
     hasCurrentUserMembership: boolean;
+    canEdit?: boolean;
+    canRemove?: boolean;
+    canApprove?: boolean;
 };
 
 export const getDataProductUsersTableColumns = ({
@@ -36,6 +36,9 @@ export const getDataProductUsersTableColumns = ({
     dataProductUsers,
     canPerformTeamActions,
     hasCurrentUserMembership,
+    canEdit,
+    canRemove,
+    canApprove,
 }: Props): TableColumnsType<DataProductUserMembership> => {
     const sorter = new Sorter<DataProductUserMembership>();
     return [
@@ -48,7 +51,7 @@ export const getDataProductUsersTableColumns = ({
             title: t('Name'),
             dataIndex: 'user.first_name',
             render: (_, { user, status }) => {
-                const isNotApproved = status !== DataProductMembershipStatus.Approved;
+                const isNotApproved = status !== DecisionStatus.Approved;
                 return (
                     <UserAvatar
                         name={`${user.first_name} ${user.last_name}`}
@@ -65,14 +68,14 @@ export const getDataProductUsersTableColumns = ({
             title: t('Role'),
             dataIndex: 'role',
             render: (role: DataProductMembershipRole, { user, id, status }) => {
-                const isApproved = status === DataProductMembershipStatus.Approved;
+                const isApproved = status === DecisionStatus.Approved;
                 return (
                     <RoleChangeForm
                         initialRole={role}
                         userId={user.id}
                         dataProductUsers={dataProductUsers}
                         onRoleChange={(role) => onRoleChange(role, id)}
-                        isDisabled={!canPerformTeamActions(user.id) || !isApproved}
+                        isDisabled={!(canEdit || canPerformTeamActions(user.id)) || !isApproved}
                     />
                 );
             },
@@ -83,7 +86,7 @@ export const getDataProductUsersTableColumns = ({
         {
             title: t('Status'),
             dataIndex: 'status',
-            render: (status: DataProductMembershipStatus) => {
+            render: (status: DecisionStatus) => {
                 return (
                     <Badge
                         status={getDataProductMembershipBadgeStatus(status)}
@@ -103,10 +106,10 @@ export const getDataProductUsersTableColumns = ({
             hidden: !hasCurrentUserMembership,
             render: (_, { user, status, id }) => (
                 <Space>
-                    {status === DataProductMembershipStatus.Pending ? (
+                    {status === DecisionStatus.Pending ? (
                         <Space>
                             <Popconfirm
-                                title={t('Remove User')}
+                                title={t('Allow User')}
                                 description={t('Are you sure you want to allow access to user {{name}}?', {
                                     name: user.first_name,
                                 })}
@@ -119,7 +122,7 @@ export const getDataProductUsersTableColumns = ({
                             >
                                 <Button
                                     loading={isLoading}
-                                    disabled={isLoading || !canPerformTeamActions(user.id)}
+                                    disabled={isLoading || !(canApprove || canPerformTeamActions(user.id))}
                                     type={'link'}
                                 >
                                     {t('Accept')}
@@ -139,7 +142,7 @@ export const getDataProductUsersTableColumns = ({
                             >
                                 <Button
                                     loading={isLoading}
-                                    disabled={isLoading || !canPerformTeamActions(user.id)}
+                                    disabled={isLoading || !(canApprove || canPerformTeamActions(user.id))}
                                     type={'link'}
                                 >
                                     {t('Reject')}
@@ -161,7 +164,7 @@ export const getDataProductUsersTableColumns = ({
                         >
                             <Button
                                 loading={isRemovingUser}
-                                disabled={isRemovingUser || !canPerformTeamActions(user.id)}
+                                disabled={isRemovingUser || !(canRemove || canPerformTeamActions(user.id))}
                                 type={'link'}
                             >
                                 {t('Remove')}

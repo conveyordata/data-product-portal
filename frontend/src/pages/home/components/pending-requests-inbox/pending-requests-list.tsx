@@ -1,13 +1,13 @@
 import { UserOutlined } from '@ant-design/icons';
-import { List, Space, Typography } from 'antd';
-import type { PaginationConfig } from 'antd/es/pagination';
+import { Avatar, Button, Flex, List, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
+import { ActionResolveRequest } from '@/types/pending-actions/pending-actions';
+import { ListPaginationConfig } from '@/types/shared/lists';
 import { formatDate } from '@/utils/date.helper.ts';
 
 type PendingActionItem = {
@@ -16,22 +16,33 @@ type PendingActionItem = {
     navigatePath: string;
     date: string;
     author: string;
+    initials: string;
+    message: ReactNode;
+    color: string;
+    tag: ReactNode;
+    request: ActionResolveRequest;
+    icon: ReactNode;
 };
 
-type DataProductListProps = {
-    isFetching: boolean;
+type PendingRequestsListProps = {
     pendingActionItems: PendingActionItem[];
-    pagination: PaginationConfig;
+    pagination: ListPaginationConfig;
+    onAccept: (request: ActionResolveRequest) => void;
+    onReject: (request: ActionResolveRequest) => void;
 };
 
-export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination }: DataProductListProps) => {
+export const PendingRequestsList = ({
+    pendingActionItems,
+    pagination,
+    onAccept,
+    onReject,
+}: PendingRequestsListProps) => {
     const { t } = useTranslation();
+
     const navigate = useNavigate();
 
-    if (isFetching) return <LoadingSpinner />;
-
     if (!pendingActionItems || pendingActionItems.length === 0) {
-        return <EmptyList description={t(`There are currently no pending requests.`)} />;
+        return <EmptyList description={t(`No requests available.`)} />;
     }
 
     const handleItemClick = (navigatePath: string) => {
@@ -47,25 +58,63 @@ export const PendingRequestsList = ({ isFetching, pendingActionItems, pagination
                 className: styles.antListPagination,
             }}
             renderItem={(item) => {
-                const formattedDate = item.date ? formatDate(item.date) : undefined;
+                const formattedDate = item.date ? formatDate(item.date) : '';
                 return (
                     <>
-                        <Space size={0} className={styles.listItemTopInfo}>
-                            <Space align="center">
-                                <UserOutlined />
-                                <Typography.Text>{item.author}</Typography.Text>
-                            </Space>
-                            <Space>
-                                <Typography.Text type="secondary">{formattedDate}</Typography.Text>
-                            </Space>
-                        </Space>
-
                         <List.Item
                             key={item.key}
                             className={styles.listItem}
                             onClick={() => handleItemClick(item.navigatePath)}
                         >
-                            <List.Item.Meta className={styles.itemCard} description={item.description} />
+                            <Flex vertical className={styles.itemCard} gap={8}>
+                                <Flex align="center">
+                                    <Avatar
+                                        style={{ backgroundColor: item.color }}
+                                        className={styles.avatar}
+                                        size="large"
+                                    >
+                                        {item.initials || <UserOutlined />}
+                                    </Avatar>
+                                    <Flex vertical className={styles.width}>
+                                        <Flex justify="space-between">
+                                            <Typography.Text>{item.description}</Typography.Text>
+                                            <Flex>
+                                                <Flex gap="small">
+                                                    <Typography.Text type="secondary">{item.icon}</Typography.Text>
+                                                    <Typography.Text>{item.tag}</Typography.Text>
+                                                </Flex>
+
+                                                <Flex align="center" justify="space-evenly" className={styles.buttons}>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onAccept(item.request);
+                                                        }}
+                                                        type="link"
+                                                        className={styles.resolveButton}
+                                                    >
+                                                        {t('Accept')}
+                                                    </Button>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onReject(item.request);
+                                                        }}
+                                                        type="link"
+                                                        className={styles.resolveButton}
+                                                    >
+                                                        {t('Reject')}
+                                                    </Button>
+                                                </Flex>
+                                            </Flex>
+                                        </Flex>
+                                        <Typography.Text type="secondary">
+                                            by {item.author}, {formattedDate}
+                                        </Typography.Text>
+                                    </Flex>
+                                </Flex>
+                                <Typography.Text className={styles.message}>{item.message}</Typography.Text>
+                            </Flex>
                         </List.Item>
                         <div />
                     </>

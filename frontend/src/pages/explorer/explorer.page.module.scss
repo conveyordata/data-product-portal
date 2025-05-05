@@ -1,0 +1,19 @@
+@use '@/styles/globals';
+
+.explorerPage {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Full height of the viewport */
+    padding: globals.$spacing-m; /* Add some padding around the page */
+    box-sizing: border-box; /* Ensure padding doesn't affect width/height */
+}
+
+.title {
+    margin-bottom: globals.$spacing-m; /* Add spacing below the title */
+}
+
+.explorerContainer {
+    flex-grow: 1; /* Allow the container to take up remaining space */
+    height: 100%; /* Ensure it fills the available height */
+    overflow: hidden; /* Prevent scrollbars if content overflows */
+}

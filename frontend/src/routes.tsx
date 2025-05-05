@@ -14,6 +14,7 @@ import { DatasetCreate } from '@/pages/dataset-create/dataset-create.page.tsx';
 import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
 import { Datasets } from '@/pages/datasets/datasets.page.tsx';
 import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
+import { ExplorerPage } from '@/pages/explorer/explorer.page.tsx';
 import { Home } from '@/pages/home/home.page.tsx';
 import { RoleConfiguration } from '@/pages/roles/roles.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
@@ -99,6 +100,10 @@ const router = createBrowserRouter([
                     {
                         path: ApplicationPaths.AuditLogs,
                         element: <AuditLogs />,
+                    },
+                    {
+                        path: ApplicationPaths.Explorer,
+                        element: <ExplorerPage />,
                     },
                     {
                         path: ApplicationPaths.Settings,

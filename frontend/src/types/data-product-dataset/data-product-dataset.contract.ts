@@ -1,8 +1,8 @@
-import { DataProductDatasetLinkStatus } from '@/types/data-product-dataset';
 import { UserContract } from '@/types/users';
 
 import { DataProductContract } from '../data-product';
 import { DatasetContract } from '../dataset';
+import { DecisionStatus } from '../roles';
 
 export type DataProductDatasetContract = {
     id: string;
@@ -10,7 +10,7 @@ export type DataProductDatasetContract = {
     dataset_id: string;
     dataset: DatasetContract;
     data_product: DataProductContract;
-    status: DataProductDatasetLinkStatus;
+    status: DecisionStatus;
     requested_by: UserContract;
     denied_by: UserContract | null;
     approved_by: UserContract | null;

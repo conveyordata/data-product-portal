@@ -7,7 +7,7 @@ import yaml
 # API key of the data product portal
 API_KEY: str = os.getenv("API_KEY", "")
 # URL of where to contact the portal API
-API_HOST = "https://portal.acme.com"
+API_HOST = "http://localhost:5050"
 FOLDER = "./"
 proxies: dict[str, str] = {}
 
@@ -41,16 +41,31 @@ def get_data_products():
     verify_response(data_products)
 
     data_products_export = {}
+    data_products_settings = {}
     for data_product_info in data_products:
         data_product = session.get(
             f"{API_HOST}/api/data_products/{data_product_info.get('id')}"
         ).json()
         verify_response(data_product)
 
+        if data_product.get("data_product_settings") != []:
+            data_products_settings[data_product.get("namespace")] = {"services": {}}
+
+            for setting in data_product.get("data_product_settings"):
+                data_products_settings[data_product.get("namespace")][
+                    "services"
+                ].update(
+                    {
+                        setting.get("data_product_setting").get("namespace"): [
+                            setting.get("value")
+                        ]
+                    }
+                )
+
         datasets = []
         for dataset_link in data_product.get("dataset_links"):
             if dataset_link.get("status") == "approved":
-                datasets.append(dataset_link.get("dataset").get("external_id"))
+                datasets.append(dataset_link.get("dataset").get("namespace"))
 
         members = {}
         for member in data_product.get("memberships"):
@@ -58,7 +73,7 @@ def get_data_products():
             role = "admin" if member.get("role") == "owner" else "member"
             members[member.get("user").get("email")] = role
 
-        data_products_export[data_product.get("external_id")] = {
+        data_products_export[data_product.get("namespace")] = {
             "description": data_product.get("description"),
             "read_datasets": datasets,
             "users": members,
@@ -70,6 +85,12 @@ def get_data_products():
         "w",
     ) as f:
         yaml.dump(data_products_export, f, allow_unicode=True)
+
+    with open(
+        os.path.join(FOLDER, "config", "data_product_glossary", "create_users.yaml"),
+        "w",
+    ) as f:
+        yaml.dump(data_products_settings, f, allow_unicode=True)
 
 
 def get_datasets():
@@ -87,9 +108,11 @@ def get_datasets():
         for owner in dataset.get("owners"):
             owners.append(owner.get("email"))
 
-        datasets_export[dataset.get("external_id")] = {
+        datasets_export[dataset.get("namespace")] = {
             "data_outputs": [
-                data_output_link.get("data_output").get("external_id")
+                f"{data_output_link.get("data_output")
+                   .get("owner").get("namespace")}/"
+                f"{data_output_link.get("data_output").get("namespace")}"
                 for data_output_link in dataset.get("data_output_links")
                 if data_output_link.get("status") == "approved"
             ],
@@ -119,11 +142,15 @@ def get_data_outputs():
         ).json()
         verify_response(platform_service)
 
-        data_outputs_export[data_output_info.get("external_id")] = {
+        data_outputs_export[
+            f"{data_output_info.get("owner").get("namespace")}/"
+            f"{data_output_info.get("namespace")}"
+        ] = {
             platform_service.get("service")
             .get("name")
             .lower(): data_output_info.get("configuration"),
-            "owner": data_output_info.get("owner").get("external_id"),
+            "owner": data_output_info.get("owner").get("namespace"),
+            "name": data_output_info.get("namespace"),
         }
 
     with open(

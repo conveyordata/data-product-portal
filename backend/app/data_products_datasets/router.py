@@ -4,6 +4,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz import (
+    Action,
+    Authorization,
+    DataProductDatasetAssociationResolver,
+)
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.data_products_datasets.service import DataProductDatasetService
 from app.database.database import get_db_session
@@ -16,7 +21,16 @@ router = APIRouter(
 
 
 @router.post(
-    "/approve/{id}", dependencies=[Depends(only_dataproduct_dataset_link_owners)]
+    "/approve/{id}",
+    dependencies=[
+        Depends(only_dataproduct_dataset_link_owners),
+        Depends(
+            Authorization.enforce(
+                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                DataProductDatasetAssociationResolver,
+            )
+        ),
+    ],
 )
 def approve_data_product_link(
     id: UUID,
@@ -28,7 +42,18 @@ def approve_data_product_link(
     )
 
 
-@router.post("/deny/{id}", dependencies=[Depends(only_dataproduct_dataset_link_owners)])
+@router.post(
+    "/deny/{id}",
+    dependencies=[
+        Depends(only_dataproduct_dataset_link_owners),
+        Depends(
+            Authorization.enforce(
+                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                DataProductDatasetAssociationResolver,
+            )
+        ),
+    ],
+)
 def deny_data_product_link(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -40,7 +65,16 @@ def deny_data_product_link(
 
 
 @router.post(
-    "/remove/{id}", dependencies=[Depends(only_dataproduct_dataset_link_owners)]
+    "/remove/{id}",
+    dependencies=[
+        Depends(only_dataproduct_dataset_link_owners),
+        Depends(
+            Authorization.enforce(
+                Action.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+                DataProductDatasetAssociationResolver,
+            )
+        ),
+    ],
 )
 def remove_data_product_link(
     id: UUID,

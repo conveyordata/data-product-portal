@@ -132,6 +132,7 @@ overview of all ongoing data initiatives.
 - Now visit http://localhost:8080 to check it out!
 
 ### Sample Data
+
 While running in sandbox mode, the Portal will be automatically seeded with sample data (incl. users, data products,
 datasets, ...). The source of this data can be found in the [sample_data.sql](./backend/sample_data.sql) file.
 If you want to see different data in the sandbox mode, you can either modify this file or create your custom data file
@@ -149,12 +150,13 @@ you want to explore additional technical integrations, more setup is required (s
 ### Prerequisites
 
 #### Pre-commit hooks
+
 It is recommended that you enable the pre-commit hooks the moment you start contributing to the project.
 
 - Install pre-commit ([pip](https://pre-commit.com) / [brew](https://formulae.brew.sh/formula/pre-commit)) on your machine.
 - Run the command below in the root of this project.
-```sh
-pre-commit install
+  ```sh
+  pre-commit install
   ```
 
 ### Backend
@@ -166,6 +168,7 @@ For backend specific instructions, check [backend/README.md](backend/README.md)
 For frontend specific instructions, check [frontend/README.md](frontend/README.md)
 
 # Integrations
+
 The data product portal comes with default integrations for many different platform technologies. Check out the
 [integrations](integrations/README.md) folder for more information. These integrations are meant as an example on how
 you can translate the data product portal configuration to a practical implementation for your data platform.
@@ -184,6 +187,7 @@ request for a technology integration, please don't hesitate to reach out to us. 
 request with the integration you would like to see in the data product portal.
 
 # Production Installation
+
 Please find the relevant info in [Installation](docs/INSTALLATION.md)
 
 # Contributing

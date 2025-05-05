@@ -11,7 +11,7 @@ type Props = {
 export function SettingsTab({ dataProductId }: Props) {
     return (
         <Flex vertical className={styles.container}>
-            <DataProductSettings dataProductId={dataProductId} scope={'dataproduct'} />
+            <DataProductSettings id={dataProductId} scope={'dataproduct'} />
         </Flex>
     );
 }

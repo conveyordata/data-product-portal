@@ -15,4 +15,5 @@ class SnowflakeDataOutput(BaseDataOutputConfiguration):
 
     __mapper_args__ = {
         "polymorphic_identity": "SnowflakeDataOutput",
+        "polymorphic_load": "inline",
     }

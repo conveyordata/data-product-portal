@@ -1,21 +1,23 @@
 import { SettingOutlined } from '@ant-design/icons';
-import { Flex, Popover, Typography } from 'antd';
+import { Flex, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { DatasetAccessIcon } from '@/components/datasets/dataset-access-icon/dataset-access-icon';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.tsx';
 import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description.tsx';
 import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
@@ -35,9 +37,17 @@ export function Dataset() {
         () => datasetOwners.some((owner) => owner.id === currentUser?.id) || Boolean(currentUser?.is_admin),
         [datasetOwners, currentUser],
     );
+    const { data: access } = useCheckAccessQuery(
+        {
+            resource: datasetId,
+            action: AuthorizationAction.DATASET__UPDATE_PROPERTIES,
+        },
+        { skip: !datasetId },
+    );
+    const canEditNew = access?.allowed || false;
 
     function navigateToDatasetEditPage() {
-        if (isDatasetOwner && datasetId) {
+        if (canEditNew || (isDatasetOwner && datasetId)) {
             navigate(getDynamicRoutePath(ApplicationPaths.DatasetEdit, DynamicPathParams.DatasetId, datasetId));
         }
     }
@@ -60,13 +70,9 @@ export function Dataset() {
                     <Flex className={styles.datasetHeader}>
                         <CustomSvgIconLoader iconComponent={datasetBorderIcon} size="large" />
                         <Typography.Title level={3}>{dataset?.name}</Typography.Title>
-                        {dataset.access_type === 'restricted' && (
-                            <Popover content={t('Restricted access')} trigger="hover">
-                                <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />
-                            </Popover>
-                        )}
+                        <DatasetAccessIcon accessType={dataset.access_type} hasPopover />
                     </Flex>
-                    {isDatasetOwner && (
+                    {(canEditNew || isDatasetOwner) && (
                         <CircleIconButton
                             icon={<SettingOutlined />}
                             tooltip={t('Edit dataset')}

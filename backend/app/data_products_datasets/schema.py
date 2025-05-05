@@ -1,19 +1,20 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 from app.data_products.schema_base_get import BaseDataProductGet
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
 from app.datasets.schema import Dataset
+from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
 
 class BaseDataProductDatasetAssociation(ORMModel):
     dataset_id: UUID
-    status: DataProductDatasetLinkStatus = DataProductDatasetLinkStatus.PENDING_APPROVAL
+    status: DecisionStatus = DecisionStatus.PENDING
 
     class Meta:
         orm_model = DataProductDatasetModel
@@ -32,13 +33,13 @@ class DataProductDatasetAssociation(BaseDataProductDatasetAssociation):
     data_product_id: UUID
     dataset: Dataset
     data_product: BaseDataProductGet
-    status: DataProductDatasetLinkStatus
+    status: DecisionStatus
     requested_by: User
-    denied_by: User | None
-    approved_by: User | None
+    denied_by: Optional[User]
+    approved_by: Optional[User]
     requested_on: datetime
-    denied_on: datetime | None
-    approved_on: datetime | None
+    denied_on: Optional[datetime]
+    approved_on: Optional[datetime]
 
 
 class DatasetDataProductLink(DataProductDatasetAssociation):
