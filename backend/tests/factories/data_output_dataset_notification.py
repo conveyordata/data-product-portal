@@ -16,7 +16,18 @@ class DataOutputDatasetNotificationFactory(factory.alchemy.SQLAlchemyModelFactor
     id = factory.Faker("uuid4")
     notification_type = NotificationTypes.DataOutputDatasetNotification.value
     notification_origin = DecisionStatus.APPROVED
-    data_output_dataset_id = factory.LazyFunction(
-        lambda: DataOutputDatasetAssociationFactory().id
+
+    data_output_dataset = factory.SubFactory(DataOutputDatasetAssociationFactory)
+
+    data_output_dataset_id = factory.LazyAttribute(
+        lambda obj: obj.data_output_dataset.id
     )
+    data_output_id = factory.LazyAttribute(
+        lambda obj: obj.data_output_dataset.data_output_id
+    )
+    data_product_id = factory.LazyAttribute(
+        lambda obj: obj.data_output_dataset.data_output.owner_id
+    )
+    dataset_id = factory.LazyAttribute(lambda obj: obj.data_output_dataset.dataset_id)
+
     user = factory.SubFactory(UserFactory)

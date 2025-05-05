@@ -170,13 +170,15 @@ class TestNotificationsRouter:
             owner.id
         )
 
-    def test_delete_parent_dataset_data_product_dataset(self, client):
+    def test_delete_parent_dataset_data_product_dataset_retain_info(self, client):
         owner = UserFactory(external_id="sub")
         ds = DatasetFactory(owners=[owner])
         link = DataProductDatasetAssociationFactory(
             dataset=ds,
             status=DecisionStatus.APPROVED,
         )
+        data_product_name = link.data_product.name
+        dataset_name = link.dataset.name
         DataProductDatasetNotificationFactory(
             notification_type=NotificationTypes.DataProductDatasetNotification,
             data_product_dataset_id=link.id,
@@ -186,17 +188,19 @@ class TestNotificationsRouter:
         assert response.json()[0]["data_product_dataset"]["id"] == str(link.id)
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
-        # TODO
-        # response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        # assert response.json() == []
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["deleted_data_product_name"] == data_product_name
+        assert response.json()[0]["deleted_dataset_name"] == dataset_name
 
-    def test_delete_parent_dataset_data_output_dataset(self, client):
+    def test_delete_parent_dataset_data_output_dataset_retain_info(self, client):
         owner = UserFactory(external_id="sub")
         ds = DatasetFactory(owners=[owner])
         link = DataOutputDatasetAssociationFactory(
             dataset=ds,
             status=DecisionStatus.APPROVED,
         )
+        data_output_name = link.data_output.name
+        dataset_name = link.dataset.name
         DataOutputDatasetNotificationFactory(
             notification_type=NotificationTypes.DataOutputDatasetNotification,
             data_output_dataset_id=link.id,
@@ -207,16 +211,18 @@ class TestNotificationsRouter:
         assert response.json()[0]["data_output_dataset"]["id"] == str(link.id)
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
-        # TODO
-        # response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        # assert response.json() == []
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["deleted_data_output_name"] == data_output_name
+        assert response.json()[0]["deleted_dataset_name"] == dataset_name
 
-    def test_delete_parent_data_product_data_product_dataset(self, client):
+    def test_delete_parent_data_product_data_product_dataset_retain_info(self, client):
         owner = UserFactory(external_id="sub")
         link = DataProductDatasetAssociationFactory(
             status=DecisionStatus.APPROVED,
             data_product=(DataProductMembershipFactory(user=owner).data_product),
         )
+        data_product_name = link.data_product.name
+        dataset_name = link.dataset.name
         DataProductDatasetNotificationFactory(
             notification_type=NotificationTypes.DataProductDatasetNotification,
             data_product_dataset_id=link.id,
@@ -227,11 +233,11 @@ class TestNotificationsRouter:
         assert response.json()[0]["data_product_dataset"]["id"] == str(link.id)
         response = self.delete_data_product(client, link.data_product.id)
         assert response.status_code == 200
-        # TODO
-        # response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        # assert response.json() == []
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["deleted_data_product_name"] == data_product_name
+        assert response.json()[0]["deleted_dataset_name"] == dataset_name
 
-    def test_delete_parent_data_product_data_output_dataset(self, client):
+    def test_delete_parent_data_product_data_output_dataset_retain_info(self, client):
         owner = UserFactory(external_id="sub")
         link = DataOutputDatasetAssociationFactory(
             status=DecisionStatus.APPROVED,
@@ -239,6 +245,8 @@ class TestNotificationsRouter:
                 owner=(DataProductMembershipFactory(user=owner).data_product)
             ),
         )
+        data_output_name = link.data_output.name
+        dataset_name = link.dataset.name
         DataOutputDatasetNotificationFactory(
             notification_type=NotificationTypes.DataOutputDatasetNotification,
             data_output_dataset_id=link.id,
@@ -248,11 +256,13 @@ class TestNotificationsRouter:
         assert response.json()[0]["data_output_dataset"]["id"] == str(link.id)
         response = self.delete_data_product(client, link.data_output.owner.id)
         assert response.status_code == 200
-        # TODO
-        # response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        # assert response.json() == []
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["deleted_data_output_name"] == data_output_name
+        assert response.json()[0]["deleted_dataset_name"] == dataset_name
 
-    def test_delete_parent_data_product_data_product_membership(self, client):
+    def test_delete_parent_data_product_data_product_membership_retain_info(
+        self, client
+    ):
         owner = UserFactory(external_id="sub")
         membership = DataProductMembershipFactory(
             status=DecisionStatus.APPROVED,
@@ -263,15 +273,20 @@ class TestNotificationsRouter:
             data_product_membership_id=membership.id,
             user=owner,
         )
+        membership_username = (
+            membership.user.first_name + " " + membership.user.last_name
+        )
+        data_product_name = membership.data_product.name
+
         response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
         assert response.json()[0]["data_product_membership"]["id"] == str(membership.id)
         response = self.delete_data_product(client, membership.data_product.id)
         assert response.status_code == 200
-        # TODO
-        # response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        # assert response.json() == []
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["deleted_data_product_name"] == data_product_name
+        assert response.json()[0]["deleted_membership_username"] == membership_username
 
-    def test_delete_parent_data_output_data_output_dataset(self, client):
+    def test_delete_parent_data_output_data_output_dataset_retain_info(self, client):
         owner = UserFactory(external_id="sub")
         link = DataOutputDatasetAssociationFactory(
             status=DecisionStatus.APPROVED,
@@ -279,6 +294,8 @@ class TestNotificationsRouter:
                 owner=(DataProductMembershipFactory(user=owner).data_product)
             ),
         )
+        data_output_name = link.data_output.name
+        dataset_name = link.dataset.name
         DataOutputDatasetNotificationFactory(
             notification_type=NotificationTypes.DataOutputDatasetNotification,
             data_output_dataset_id=link.id,
@@ -289,9 +306,9 @@ class TestNotificationsRouter:
         assert response.json()[0]["data_output_dataset"]["id"] == str(link.id)
         response = self.delete_data_output(client, link.data_output.id)
         assert response.status_code == 200
-        # TODO
-        # response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
-        # assert response.json() == []
+        response = client.get(f"{NOTIFICATIONS_ENDPOINT}")
+        assert response.json()[0]["deleted_data_output_name"] == data_output_name
+        assert response.json()[0]["deleted_dataset_name"] == dataset_name
 
     def test_delete_own_notification_data_product_dataset(self, client):
         owner = UserFactory(external_id="sub")
