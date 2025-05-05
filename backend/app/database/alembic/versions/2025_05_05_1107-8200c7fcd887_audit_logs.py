@@ -1,8 +1,8 @@
 """audit logs
 
 Revision ID: 8200c7fcd887
-Revises: 2a58b7ce3cea
-Create Date: 2025-03-05 11:07:09.880051
+Revises: 886fc49acbda
+Create Date: 2025-05-05 11:07:09.880051
 
 """
 
@@ -16,7 +16,7 @@ from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
 revision: str = "8200c7fcd887"
-down_revision: Union[str, None] = "2a58b7ce3cea"
+down_revision: Union[str, None] = "886fc49acbda"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -62,3 +62,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("events")
     op.drop_table("audit_logs")
+    op.execute('DROP TYPE "type"')
