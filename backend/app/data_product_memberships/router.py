@@ -70,19 +70,20 @@ def create_data_product_membership(
         .filter_by(scope=Scope.DATA_PRODUCT)
         .filter(func.lower(Role.name) == membership.role.name.lower())
     ).first()
-    request = CreateRoleAssignment(
-        data_product_id=membership.data_product_id,
-        user_id=membership.user_id,
-        role_id=role.id,
-    )
-    assignment = create_assignment(request, db, authenticated_user)
-    decide_assignment(
-        assignment.id,
-        DecideRoleAssignment(decision=DecisionStatus.APPROVED),
-        background_tasks,
-        db,
-        authenticated_user,
-    )
+    if role:
+        request = CreateRoleAssignment(
+            data_product_id=membership.data_product_id,
+            user_id=membership.user_id,
+            role_id=role.id,
+        )
+        assignment = create_assignment(request, db, authenticated_user)
+        decide_assignment(
+            assignment.id,
+            DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+            background_tasks,
+            db,
+            authenticated_user,
+        )
     return {"id": membership.id}
 
 
@@ -136,19 +137,20 @@ def approve_data_product_membership(
         .filter_by(scope=Scope.DATA_PRODUCT)
         .filter(func.lower(Role.name) == membership.role.name.lower())
     ).first()
-    request = CreateRoleAssignment(
-        data_product_id=membership.data_product_id,
-        user_id=membership.user_id,
-        role_id=role.id,
-    )
-    assignment = create_assignment(request, db, authenticated_user)
-    decide_assignment(
-        assignment.id,
-        DecideRoleAssignment(decision=DecisionStatus.APPROVED),
-        background_tasks,
-        db,
-        authenticated_user,
-    )
+    if role:
+        request = CreateRoleAssignment(
+            data_product_id=membership.data_product_id,
+            user_id=membership.user_id,
+            role_id=role.id,
+        )
+        assignment = create_assignment(request, db, authenticated_user)
+        decide_assignment(
+            assignment.id,
+            DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+            background_tasks,
+            db,
+            authenticated_user,
+        )
     return {"id": membership.id}
 
 
@@ -176,19 +178,20 @@ def deny_data_product_membership(
         .filter_by(scope=Scope.DATA_PRODUCT)
         .filter(func.lower(Role.name) == membership.role.name.lower())
     ).first()
-    request = CreateRoleAssignment(
-        data_product_id=membership.data_product_id,
-        user_id=membership.user_id,
-        role_id=role.id,
-    )
-    assignment = create_assignment(request, db, authenticated_user)
-    decide_assignment(
-        assignment.id,
-        DecideRoleAssignment(decision=DecisionStatus.DENIED),
-        background_tasks,
-        db,
-        authenticated_user,
-    )
+    if role:
+        request = CreateRoleAssignment(
+            data_product_id=membership.data_product_id,
+            user_id=membership.user_id,
+            role_id=role.id,
+        )
+        assignment = create_assignment(request, db, authenticated_user)
+        decide_assignment(
+            assignment.id,
+            DecideRoleAssignment(decision=DecisionStatus.DENIED),
+            background_tasks,
+            db,
+            authenticated_user,
+        )
 
     DataProductMembershipService().deny_membership_request(id, db, authenticated_user)
 
