@@ -4,12 +4,9 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.data_outputs.schema import (
-    DataOutput,
-    DataOutputCreate,
-    DataOutputStatusUpdate,
-    DataOutputUpdate,
-)
+from app.core.authz import Action, Authorization, DataOutputResolver
+from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
+from app.data_outputs.schema import DataOutput, DataOutputStatusUpdate, DataOutputUpdate
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.dependencies import only_data_output_owners
@@ -23,6 +20,16 @@ router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
 @router.get("")
 def get_data_outputs(db: Session = Depends(get_db_session)) -> list[DataOutput]:
     return DataOutputService().get_data_outputs(db)
+
+
+@router.get("/namespace_suggestion")
+def get_data_output_namespace_suggestion(name: str) -> NamespaceSuggestion:
+    return DataOutputService().data_output_namespace_suggestion(name)
+
+
+@router.get("/namespace_length_limits")
+def get_data_output_namespace_length_limits() -> NamespaceLengthLimits:
+    return DataOutputService().data_output_namespace_length_limits()
 
 
 @router.get("/{id}")
@@ -45,7 +52,15 @@ def get_event_history(id: UUID, db: Session = Depends(get_db_session)) -> list[E
             },
         }
     },
-    dependencies=[Depends(only_data_output_owners)],
+    dependencies=[
+        Depends(only_data_output_owners),
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+                DataOutputResolver,
+            )
+        ),
+    ],
 )
 def remove_data_output(
     id: UUID,
@@ -53,27 +68,6 @@ def remove_data_output(
     authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataOutputService().remove_data_output(id, db, authenticated_user)
-
-
-@router.post(
-    "",
-    responses={
-        200: {
-            "description": "DataOutput successfully created",
-            "content": {
-                "application/json": {
-                    "example": {"id": "random id of the new data_output"}
-                }
-            },
-        },
-    },
-)
-def create_data_output(
-    data_output: DataOutputCreate,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> dict[str, UUID]:
-    return DataOutputService().create_data_output(data_output, db, authenticated_user)
 
 
 @router.put(
@@ -86,7 +80,15 @@ def create_data_output(
             },
         }
     },
-    dependencies=[Depends(only_data_output_owners)],
+    dependencies=[
+        Depends(only_data_output_owners),
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                DataOutputResolver,
+            )
+        ),
+    ],
 )
 def update_data_product(
     id: UUID,
@@ -109,9 +111,17 @@ def update_data_product(
             },
         }
     },
-    dependencies=[Depends(only_data_output_owners)],
+    dependencies=[
+        Depends(only_data_output_owners),
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                DataOutputResolver,
+            )
+        ),
+    ],
 )
-def update_data_product_status(
+def update_data_output_status(
     id: UUID,
     data_output: DataOutputStatusUpdate,
     db: Session = Depends(get_db_session),
@@ -138,7 +148,15 @@ def update_data_product_status(
             },
         },
     },
-    dependencies=[Depends(only_data_output_owners)],
+    dependencies=[
+        Depends(only_data_output_owners),
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                DataOutputResolver,
+            )
+        ),
+    ],
 )
 def link_dataset_to_data_output(
     id: UUID,
@@ -168,7 +186,15 @@ def link_dataset_to_data_output(
             },
         },
     },
-    dependencies=[Depends(only_data_output_owners)],
+    dependencies=[
+        Depends(only_data_output_owners),
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                DataOutputResolver,
+            )
+        ),
+    ],
 )
 def unlink_dataset_from_data_output(
     id: UUID,

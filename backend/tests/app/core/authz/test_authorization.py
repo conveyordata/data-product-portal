@@ -12,7 +12,7 @@ ANY_ACT: AuthorizationAction = cast(AuthorizationAction, 0)
 class TestAuthorization:
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_everyone_role(self, authorizer: Authorization):
+    async def test_everyone_role(self, authorizer: Authorization, enable_authorizer):
         allowed = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
         denied = AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS
 
@@ -26,7 +26,7 @@ class TestAuthorization:
         assert authorizer.has_access(sub=ANY, dom=ANY, obj=ANY, act=allowed) is False
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_resource_role(self, authorizer: Authorization):
+    async def test_resource_role(self, authorizer: Authorization, enable_authorizer):
         role = "test_role"
         user = "test_user"
         obj = "test_resource"
@@ -52,7 +52,7 @@ class TestAuthorization:
         assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=allowed) is False
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_domain_role(self, authorizer: Authorization):
+    async def test_domain_role(self, authorizer: Authorization, enable_authorizer):
         role = "test_role"
         user = "test_user"
         dom = "test_domain"
@@ -74,7 +74,22 @@ class TestAuthorization:
         assert authorizer.has_access(sub=user, dom=dom, obj=ANY, act=allowed) is False
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_admin_role(self, authorizer: Authorization):
+    async def test_global_role(self, authorizer: Authorization, enable_authorizer):
+        user = "test_user"
+        role = "test_role"
+        act = AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS
+
+        await authorizer.sync_role_permissions(role_id=role, actions=[act])
+        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
+
+        await authorizer.assign_global_role(user_id=user, role_id=role)
+        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is True
+
+        await authorizer.revoke_global_role(user_id=user, role_id=role)
+        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_admin_role(self, authorizer: Authorization, enable_authorizer):
         user = "test_user"
 
         assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=ANY_ACT) is False
@@ -86,7 +101,7 @@ class TestAuthorization:
         assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=ANY_ACT) is False
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_role_removal(self, authorizer: Authorization):
+    async def test_role_removal(self, authorizer: Authorization, enable_authorizer):
         role = "test_role"
         user = "test_user"
         obj = "test_resource"
@@ -104,7 +119,9 @@ class TestAuthorization:
         assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=act) is False
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_multiple_permissions(self, authorizer: Authorization):
+    async def test_multiple_permissions(
+        self, authorizer: Authorization, enable_authorizer
+    ):
         role = "test_role"
         user = "test_user"
         obj = "test_resource"

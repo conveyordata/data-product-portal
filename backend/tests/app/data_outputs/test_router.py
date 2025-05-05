@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import pytest
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_product import DataProductFactory
@@ -20,7 +22,7 @@ def data_output_payload():
     return {
         "name": "Data Output Name",
         "description": "Updated Data Output Description",
-        "external_id": "Updated Data Output External ID",
+        "namespace": "namespace-updated",
         "sourceAligned": True,
         "configuration": {
             "bucket": "test",
@@ -44,7 +46,7 @@ def data_output_payload_not_owner():
     return {
         "name": "Data Output Name",
         "description": "Updated Data Output Description",
-        "external_id": "Updated Data Output External ID",
+        "namespace": "namespace",
         "sourceAligned": True,
         "configuration": {
             "bucket": "test",
@@ -206,9 +208,57 @@ class TestDataOutputsRouter:
         response = self.get_data_output_history(client, id)
         assert len(response.json()) == 0
 
+    def test_get_namespace_suggestion_subsitution(self, client):
+        name = "test with spaces"
+        response = self.get_namespace_suggestion(client, name)
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["namespace"] == "test-with-spaces"
+
+    def test_get_namespace_length_limits(self, client):
+        response = self.get_namespace_length_limits(client)
+        assert response.status_code == 200
+        assert response.json()["max_length"] > 1
+
+    def test_create_data_output_duplicate_namespace(self, data_output_payload, client):
+        owner = DataProductFactory()
+        DataOutputFactory(
+            namespace=data_output_payload["namespace"],
+            owner=owner,
+        )
+
+        create_payload = deepcopy(data_output_payload)
+        create_payload["owner_id"] = str(owner.id)
+
+        response = self.create_data_output(client, create_payload)
+        assert response.status_code == 400
+
+    def test_create_data_output_invalid_characters_namespace(
+        self, data_output_payload, client
+    ):
+        create_payload = deepcopy(data_output_payload)
+        create_payload["namespace"] = "!"
+
+        response = self.create_data_output(client, create_payload)
+        assert response.status_code == 400
+
+    def test_create_data_output_invalid_length_namespace(
+        self, data_output_payload, client
+    ):
+        create_payload = deepcopy(data_output_payload)
+        create_payload["namespace"] = "a" * 256
+
+        response = self.create_data_output(client, create_payload)
+        assert response.status_code == 400
+
     @staticmethod
     def create_data_output(client, default_data_output_payload):
-        return client.post(ENDPOINT, json=default_data_output_payload)
+        return client.post(
+            f"/api/data_products/"
+            f"{default_data_output_payload.get('owner_id')}/data_output",
+            json=default_data_output_payload,
+        )
 
     @staticmethod
     def get_data_output_by_id(client, data_output_id):
@@ -229,3 +279,11 @@ class TestDataOutputsRouter:
     @staticmethod
     def update_data_output_status(client, status, data_output_id):
         return client.put(f"{ENDPOINT}/{data_output_id}/status", json=status)
+
+    @staticmethod
+    def get_namespace_suggestion(client, name):
+        return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
+
+    @staticmethod
+    def get_namespace_length_limits(client):
+        return client.get(f"{ENDPOINT}/namespace_length_limits")

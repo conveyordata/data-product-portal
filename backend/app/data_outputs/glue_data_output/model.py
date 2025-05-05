@@ -17,4 +17,5 @@ class GlueDataOutput(BaseDataOutputConfiguration):
 
     __mapper_args__ = {
         "polymorphic_identity": "GlueDataOutput",
+        "polymorphic_load": "inline",
     }

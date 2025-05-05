@@ -13,7 +13,9 @@ import { DataProductActions } from '@/pages/data-product/components/data-product
 import { DataProductDescription } from '@/pages/data-product/components/data-product-description/data-product-description.tsx';
 import { DataProductTabs } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
@@ -28,18 +30,28 @@ export function DataProduct() {
     const { dataProductId = '' } = useParams();
     const { data: dataProduct, isLoading } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
     const navigate = useNavigate();
+    const { data: edit_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canEditProduct = edit_access?.allowed || false;
 
     const dataProductTypeIcon = useMemo(() => {
         return getDataProductTypeIcon(dataProduct?.type?.icon_key);
     }, [dataProduct?.type?.icon_key]);
 
     const dataProductOwners = dataProduct ? getDataProductOwners(dataProduct) : [];
+
     const isCurrentDataProductOwner = Boolean(
         dataProduct && currentUser && (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
     );
 
     function navigateToEditPage() {
-        if (isCurrentDataProductOwner && dataProductId) {
+        if (canEditProduct || (isCurrentDataProductOwner && dataProductId)) {
             navigate(
                 getDynamicRoutePath(ApplicationPaths.DataProductEdit, DynamicPathParams.DataProductId, dataProductId),
             );
@@ -73,7 +85,7 @@ export function DataProduct() {
                             {dataProduct?.name}
                         </Typography.Title>
                     </Space>
-                    {isCurrentDataProductOwner && (
+                    {(canEditProduct || isCurrentDataProductOwner) && (
                         <Space className={styles.editIcon}>
                             <CircleIconButton
                                 icon={<SettingOutlined />}

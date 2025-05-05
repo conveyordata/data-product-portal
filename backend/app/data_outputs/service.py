@@ -4,20 +4,27 @@ from uuid import UUID
 import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.email.send_mail import send_mail
+from app.core.namespace.validation import (
+    DataOutputNamespaceValidator,
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidityType,
+)
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs.schema import (
     DataOutput,
     DataOutputCreate,
+    DataOutputCreateRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
 from app.data_outputs.status import DataOutputStatus
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
@@ -29,6 +36,7 @@ from app.events.enum import Type
 from app.events.schema import Event, EventCreate
 from app.events.service import EventService
 from app.graph.graph import Graph
+from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
@@ -36,6 +44,9 @@ from app.users.schema import User
 
 
 class DataOutputService:
+    def __init__(self):
+        self.namespace_validator = DataOutputNamespaceValidator()
+
     def ensure_member(
         self, authenticated_user: User, data_output: DataOutputCreate, db: Session
     ):
@@ -89,18 +100,37 @@ class DataOutputService:
         return tags
 
     def get_data_outputs(self, db: Session) -> list[DataOutput]:
-        data_outputs = db.query(DataOutputModel).all()
+        data_outputs = db.scalars(select(DataOutputModel)).unique().all()
         return data_outputs
 
     def get_data_output(self, id: UUID, db: Session) -> DataOutput:
-        return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
+        return db.get(
+            DataOutputModel,
+            id,
+        )
 
     def get_event_history(self, id: UUID, db: Session) -> list[Event]:
         return EventService().get_history(db, id, Type.DATA_OUTPUT)
 
     def create_data_output(
-        self, data_output: DataOutputCreate, db: Session, authenticated_user: User
+        self,
+        id: UUID,
+        data_output: DataOutputCreateRequest,
+        db: Session,
+        authenticated_user: User,
     ) -> dict[str, UUID]:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                data_output.namespace, db, id
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+        data_output = DataOutputCreate(
+            **data_output.parse_pydantic_schema(), owner_id=id
+        )
         self.ensure_member(authenticated_user, data_output, db)
 
         if data_output.sourceAligned:
@@ -112,11 +142,11 @@ class DataOutputService:
             # somehow and let sourcealigned be handled internally there?
             data_output.configuration.validate_configuration(data_product)
 
-        data_output = data_output.parse_pydantic_schema()
-        tags = self._get_tags(db, data_output.pop("tag_ids", []))
-        data_output = DataOutputModel(**data_output, tags=tags)
+        data_output_schema = data_output.parse_pydantic_schema()
+        tags = self._get_tags(db, data_output_schema.pop("tag_ids", []))
+        model = DataOutputModel(**data_output_schema, tags=tags)
 
-        db.add(data_output)
+        db.add(model)
         db.commit()
 
         # config.on_create()
@@ -201,14 +231,20 @@ class DataOutputService:
         if dataset.id in [
             link.dataset_id
             for link in data_output.dataset_links
-            if link.status != DataOutputDatasetLinkStatus.DENIED
+            if link.status != DecisionStatus.DENIED
         ]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Dataset {dataset_id} already exists in data product {id}",
             )
+
+        if not dataset.isVisibleToUser(authenticated_user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this private dataset",
+            )
         # Data output requests always need to be approved
-        approval_status = DataOutputDatasetLinkStatus.PENDING_APPROVAL
+        approval_status = DecisionStatus.PENDING
 
         dataset_link = DataOutputDatasetAssociationModel(
             dataset_id=dataset_id,
@@ -339,3 +375,9 @@ class DataOutputService:
                 node.isMain = True
 
         return graph
+
+    def data_output_namespace_suggestion(self, name: str) -> NamespaceSuggestion:
+        return self.namespace_validator.namespace_suggestion(name)
+
+    def data_output_namespace_length_limits(self) -> NamespaceLengthLimits:
+        return self.namespace_validator.namespace_length_limits()

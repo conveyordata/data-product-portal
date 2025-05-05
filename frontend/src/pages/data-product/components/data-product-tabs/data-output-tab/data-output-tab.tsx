@@ -6,7 +6,9 @@ import { useSelector } from 'react-redux';
 import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import { SearchForm } from '@/types/shared';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
@@ -24,7 +26,7 @@ function filterDataOutputs(data_outputs: DataOutputsGetContract, searchTerm: str
         data_outputs.filter(
             (data_output) =>
                 data_output?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                data_output?.external_id?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+                data_output?.namespace?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
     );
 }
@@ -41,6 +43,16 @@ export function DataOutputTab({ dataProductId }: Props) {
         return filterDataOutputs(dataProduct?.data_outputs ?? [], searchTerm);
     }, [dataProduct?.data_outputs, searchTerm]);
 
+    const { data: access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canCreateDataOutputNew = access?.allowed || false;
+
     const isDataProductOwner = useMemo(() => {
         if (!dataProduct || !user) return false;
 
@@ -56,7 +68,7 @@ export function DataOutputTab({ dataProductId }: Props) {
                     form={searchForm}
                     actionButton={
                         <Button
-                            disabled={!isDataProductOwner}
+                            disabled={!(canCreateDataOutputNew || isDataProductOwner)}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}
@@ -66,7 +78,11 @@ export function DataOutputTab({ dataProductId }: Props) {
                     }
                 />
 
-                <DataOutputTable dataProductId={dataProductId} dataOutputs={filteredDataOutputs} />
+                <DataOutputTable
+                    dataProductId={dataProductId}
+                    dataOutputs={filteredDataOutputs}
+                    isCurrentUserDataProductOwner={isDataProductOwner}
+                />
             </Flex>
             {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </>

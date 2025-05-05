@@ -15,8 +15,11 @@ export enum DatasetStatus {
 export enum DatasetAccess {
     Public = 'public',
     Restricted = 'restricted',
+    Private = 'private',
 }
-export const datasetStatusList = [DatasetStatus.Pending, DatasetStatus.Active, DatasetStatus.Deleted];
+
+export const datasetAccessList = Object.values(DatasetAccess);
+export const datasetStatusList = Object.values(DatasetStatus);
 
 export interface DatasetContract {
     id: string;
@@ -34,7 +37,7 @@ export interface DatasetContract {
     data_output_links: DataOutputLink[];
     access_type: DatasetAccess;
     domain: DomainContract;
-    external_id: string;
+    namespace: string;
     data_product_settings: DataProductSettingValueContract[];
 }
 

@@ -10,6 +10,6 @@ class PlatformServiceFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = PlatformService
 
     id = factory.Faker("uuid4")
-    name = "S3"
+    name = factory.Faker("word")
 
     platform = factory.SubFactory(PlatformFactory)

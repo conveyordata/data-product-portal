@@ -1,7 +1,9 @@
 import pytest
+from fastapi.testclient import TestClient
 from tests.factories import RoleFactory
 
-from app.roles.model import Role
+from app.roles import ADMIN_UUID
+from app.roles.schema import Prototype, Role, Scope
 
 ENDPOINT = "/api/roles"
 
@@ -15,7 +17,7 @@ class TestRolesRouter:
         "permissions": [101],
     }
 
-    def test_get_roles(self, client):
+    def test_get_roles(self, client: TestClient):
         role: Role = RoleFactory(scope="global")
         response = client.get(f"{ENDPOINT}/global")
 
@@ -25,7 +27,7 @@ class TestRolesRouter:
         assert data[0]["scope"] == role.scope
 
     @pytest.mark.usefixtures("admin")
-    def test_create_role(self, client):
+    def test_create_role(self, client: TestClient):
         response = client.post(
             ENDPOINT,
             json={
@@ -44,7 +46,7 @@ class TestRolesRouter:
         assert data["permissions"] == self.test_role["permissions"]
 
     @pytest.mark.usefixtures("admin")
-    def test_update_role(self, client):
+    def test_update_role(self, client: TestClient):
         role: Role = RoleFactory()
         response = client.patch(
             ENDPOINT,
@@ -64,7 +66,40 @@ class TestRolesRouter:
         assert data["permissions"] == [101, 102]
 
     @pytest.mark.usefixtures("admin")
-    def test_delete_role(self, client):
+    def test_update_admin_role(self, client: TestClient):
+        admin: Role = RoleFactory(
+            scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID
+        )
+        illegal = client.patch(
+            ENDPOINT,
+            json={
+                "id": str(admin.id),
+                "permissions": [101, 102],
+            },
+        )
+        assert illegal.status_code == 403
+        assert (
+            illegal.json()["detail"]
+            == "You cannot change the permissions of the admin role"
+        )
+
+        legal = client.patch(
+            ENDPOINT,
+            json={
+                "id": str(admin.id),
+                "description": "admins can have a custom description",
+            },
+        )
+        assert legal.status_code == 200
+
+        data = legal.json()
+        assert data["id"] == str(admin.id)
+        assert data["name"] == admin.name
+        assert data["scope"] == admin.scope
+        assert data["description"] == "admins can have a custom description"
+
+    @pytest.mark.usefixtures("admin")
+    def test_delete_role(self, client: TestClient):
         role: Role = RoleFactory()
         response = client.get(f"{ENDPOINT}/{role.scope}")
         assert response.status_code == 200

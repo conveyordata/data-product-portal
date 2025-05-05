@@ -47,7 +47,7 @@ const typeConversion = (type: string, t: TFunction) => {
     }
 };
 
-export const getDataProductTableColumns = ({
+export const getDataProductSettingsTableColumns = ({
     t,
     isDisabled,
     isLoading,
@@ -68,8 +68,17 @@ export const getDataProductTableColumns = ({
                 showTitle: false,
             },
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
-            sorter: sorter.stringSorter((dp) => dp.name),
+            sorter: sorter.stringSorter((setting) => setting.name),
             defaultSortOrder: 'ascend',
+        },
+        {
+            title: t('Namespace'),
+            dataIndex: 'namespace',
+            ellipsis: {
+                showTitle: false,
+            },
+            render: (namespace: string) => <TableCellItem text={namespace} />,
+            sorter: sorter.stringSorter((setting) => setting.namespace),
         },
         {
             title: t('Type'),
@@ -78,7 +87,7 @@ export const getDataProductTableColumns = ({
                 showTitle: false,
             },
             render: (type: string) => <TableCellItem text={typeConversion(type, t)} />,
-            sorter: sorter.stringSorter((dp) => typeConversion(dp.type, t)),
+            sorter: sorter.stringSorter((setting) => typeConversion(setting.type, t)),
         },
         {
             title: t('Tooltip'),
@@ -87,7 +96,7 @@ export const getDataProductTableColumns = ({
                 showTitle: false,
             },
             render: (tooltip: string) => <TableCellItem text={tooltip} tooltip={{ content: tooltip }} />,
-            sorter: sorter.stringSorter((dp) => dp.tooltip),
+            sorter: sorter.stringSorter((setting) => setting.tooltip),
         },
         {
             title: t('Category'),
@@ -96,7 +105,7 @@ export const getDataProductTableColumns = ({
                 showTitle: false,
             },
             render: (category: string) => <TableCellItem text={category} />,
-            sorter: sorter.stringSorter((dp) => dp.category),
+            sorter: sorter.stringSorter((setting) => setting.category),
         },
         {
             title: t('Default'),
@@ -113,12 +122,12 @@ export const getDataProductTableColumns = ({
                 showTitle: false,
             },
             render: (order: number) => <TableCellItem text={order.toString()} />,
-            sorter: sorter.numberSorter((dp) => dp.order),
+            sorter: sorter.numberSorter((setting) => setting.order),
         },
         {
             title: t('Actions'),
             key: 'action',
-            width: '10%',
+            width: '15%',
             render: (record) => {
                 return (
                     <Flex>

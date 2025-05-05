@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 from uuid import UUID
 
 from pydantic import computed_field
@@ -21,9 +22,9 @@ class DeviceFlow(ORMModel):
     expiration: int
     oidc_redirect_uri: str
     status: DeviceFlowStatus
-    authz_code: str | None
-    authz_state: str | None
-    authz_verif: str | None
+    authz_code: Optional[str]
+    authz_state: Optional[str]
+    authz_verif: Optional[str]
 
     @computed_field
     def verification_uri_complete(self) -> str:

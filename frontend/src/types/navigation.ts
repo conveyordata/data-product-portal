@@ -5,6 +5,7 @@ import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-ta
 export enum ApplicationPaths {
     Home = '/',
     DataProducts = '/data-products',
+    Documentation = '/documentation',
     DataProduct = '/data-products/:dataProductId',
     DataProductNew = '/data-products/new',
     DataProductEdit = '/data-products/:dataProductId/edit',
@@ -16,6 +17,7 @@ export enum ApplicationPaths {
     DataOutputNew = '/data-outputs/new',
     DataOutputEdit = '/data-products/:dataProductId/:dataOutputId/edit',
     AuditLogs = '/audit-logs',
+    Explorer = '/explorer',
     Logout = '/logout',
     PlatformsConfigs = '/platforms-configs',
     PlatformServiceConfigNew = '/platforms-configs/new',
@@ -50,6 +52,7 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.EnvironmentConfig,
     ApplicationPaths.EnvironmentConfigs,
     ApplicationPaths.EnvironmentConfigNew,
+    ApplicationPaths.Explorer,
 ];
 
 export function createDataProductIdPath(dataProductId: string, tabKey: DataProductTabKeys = DataProductTabKeys.About) {
@@ -107,4 +110,5 @@ export enum ApplicationPageTitles {
     Dataset = 'Dataset',
     AuditLogs = 'Audit Logs',
     Settings = 'Settings',
+    Explorer = 'Explorer',
 }

@@ -12,7 +12,7 @@ class BaseDataProductGet(ORMModel):
     name: str
     description: str
     about: Optional[str]
-    external_id: str
+    namespace: str
     status: DataProductStatus
     type: DataProductTypeCreate
     domain: Domain
