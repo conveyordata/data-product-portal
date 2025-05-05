@@ -44,9 +44,9 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             providesTags: (result = []) =>
                 result
                     ? [
-                          { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
-                          ...result.map(({ id }) => ({ type: TagTypes.DataProduct as const, id })),
-                      ]
+                        { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                        ...result.map(({ id }) => ({ type: TagTypes.DataProduct as const, id })),
+                    ]
                     : [{ type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST }],
         }),
         getUserDataProducts: builder.query<DataProductsGetContract, string>({
@@ -75,12 +75,6 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
         getDataProductGraphData: builder.query<GraphContract, string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductGraph, { dataProductId: id }),
-                method: 'GET',
-            }),
-        }),
-        getGraphData: builder.query<GraphContract, string>({
-            query: () => ({
-                url: ApiUrl.Graph,
                 method: 'GET',
             }),
         }),
@@ -255,7 +249,6 @@ export const {
     useGetUserDataProductsQuery,
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
-    useGetGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,
