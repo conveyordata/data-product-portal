@@ -90,7 +90,7 @@ def remove_data_output(
         ),
     ],
 )
-def update_data_product(
+def update_data_output(
     id: UUID,
     data_output: DataOutputUpdate,
     db: Session = Depends(get_db_session),

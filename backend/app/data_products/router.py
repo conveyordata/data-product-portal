@@ -245,27 +245,6 @@ async def validate_data_output_namespace(
     return DataProductService().validate_data_output_namespace(namespace, id, db)
 
 
-@router.post(
-    "/{id}/data_output",
-    responses={
-        200: {
-            "description": "DataOutput successfully created",
-            "content": {
-                "application/json": {
-                    "example": {"id": "random id of the new data_output"}
-                }
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__CREATE_DATA_OUTPUT,
-                DataProductResolver,
-            )
-        )
-    ],
-)
 @router.put(
     "/{id}/about",
     responses={
