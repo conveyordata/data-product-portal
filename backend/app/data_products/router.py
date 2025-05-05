@@ -245,6 +245,45 @@ async def validate_data_output_namespace(
     return DataProductService().validate_data_output_namespace(namespace, id, db)
 
 
+@router.post(
+    "/{id}/data_output",
+    responses={
+        200: {
+            "description": "DataOutput successfully created",
+            "content": {
+                "application/json": {
+                    "example": {"id": "random id of the new data_output"}
+                }
+            },
+        },
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                DataProductResolver,
+            )
+        )
+    ],
+)
+def create_data_output(
+    id: UUID,
+    data_output: DataOutputCreateRequest,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> dict[str, UUID]:
+    return DataOutputService().create_data_output(
+        id, data_output, db, authenticated_user
+    )
+
+
+@router.get("/{id}/data_output/validate_namespace")
+async def validate_data_output_namespace(
+    id: UUID, namespace: str, db: Session = Depends(get_db_session)
+) -> NamespaceValidation:
+    return DataProductService().validate_data_output_namespace(namespace, id, db)
+
+
 @router.put(
     "/{id}/about",
     responses={

@@ -163,7 +163,7 @@ class DataOutputService:
                 domain_id=data_output.owner.domain_id,
             ),
         )
-        return {"id": data_output.id}
+        return {"id": model.id}
 
     def remove_data_output(self, id: UUID, db: Session, authenticated_user: User):
         data_output = db.get(
