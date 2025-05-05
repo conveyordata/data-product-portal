@@ -26,6 +26,7 @@ COPY poetry.lock pyproject.toml alembic.ini sample_data.sql /
 RUN poetry install --no-root
 
 FROM base-image
+RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
 COPY --from=build-stage /usr/local /usr/local
 COPY --from=build-stage alembic.ini .
