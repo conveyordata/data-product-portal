@@ -1,3 +1,4 @@
+import pytest
 from tests.factories import (
     DataProductFactory,
     DataProductMembershipFactory,
@@ -6,6 +7,8 @@ from tests.factories import (
     UserFactory,
 )
 
+from app.core.authz.actions import AuthorizationAction
+from app.core.authz.authorization import Authorization
 from app.data_product_memberships.enums import (
     DataProductUserRole,
 )
@@ -20,6 +23,26 @@ class TestDataProductMembershipsRouter:
         membership = DataProductMembershipFactory(user=UserFactory(external_id="sub"))
         new_user = UserFactory()
 
+        response = self.create_secondary_membership(
+            client, new_user.id, membership.data_product_id
+        )
+        assert response.status_code == 200
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_create_data_product_membership_with_authz(
+        self, client, authorizer: Authorization, enable_authorizer
+    ):
+        user = UserFactory(external_id="sub")
+
+        await authorizer.sync_role_permissions(
+            role_id="*",
+            actions=[
+                AuthorizationAction.DATA_PRODUCT__CREATE_USER,
+                AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
+            ],
+        )
+        membership = DataProductMembershipFactory(user=user)
+        new_user = UserFactory()
         response = self.create_secondary_membership(
             client, new_user.id, membership.data_product_id
         )
@@ -42,7 +65,18 @@ class TestDataProductMembershipsRouter:
         )
         assert response.status_code == 200
 
-    def test_approve_data_product_membership_request(self, client):
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_approve_data_product_membership_request(
+        self, client, authorizer: Authorization, enable_authorizer
+    ):
+        await authorizer.sync_role_permissions(
+            role_id="*",
+            actions=[
+                AuthorizationAction.DATA_PRODUCT__CREATE_USER,
+                AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
+                AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+            ],
+        )
         owner_membership = DataProductMembershipFactory(
             user=UserFactory(external_id="sub")
         )
@@ -58,7 +92,18 @@ class TestDataProductMembershipsRouter:
         response = self.approve_data_product_membership(client, membership_request.id)
         assert response.status_code == 200
 
-    def test_deny_data_product_membership_request(self, client):
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_deny_data_product_membership_request(
+        self, client, authorizer: Authorization, enable_authorizer
+    ):
+        await authorizer.sync_role_permissions(
+            role_id="*",
+            actions=[
+                AuthorizationAction.DATA_PRODUCT__CREATE_USER,
+                AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
+                AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+            ],
+        )
         owner_membership = DataProductMembershipFactory(
             user=UserFactory(external_id="sub")
         )
