@@ -46,6 +46,14 @@ export function DataProductActions({ dataProductId }: Props) {
             skip: !dataProductId,
         },
     );
+    const { data: request_access } = useCheckAccessQuery(
+        {
+            action: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canRequestAccess = request_access?.allowed || false;
     if (!dataProduct || !user) {
         return null;
     }
@@ -116,7 +124,7 @@ export function DataProductActions({ dataProductId }: Props) {
     return (
         <>
             <Flex vertical className={styles.actionsContainer}>
-                {!doesUserHaveAnyDataProductMembership && (
+                {!doesUserHaveAnyDataProductMembership && canRequestAccess && (
                     <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />
                 )}
                 <Flex vertical className={styles.accessDataContainer}>
