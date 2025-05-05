@@ -155,12 +155,12 @@ class DataOutputService:
             db,
             EventCreate(
                 name="Data output created",
-                subject_id=data_output.id,
+                subject_id=model.id,
                 subject_type=Type.DATA_OUTPUT,
-                target_id=data_output.owner_id,
+                target_id=model.owner_id,
                 target_type=Type.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=data_output.owner.domain_id,
+                domain_id=model.owner.domain_id,
             ),
         )
         return {"id": model.id}

@@ -170,10 +170,10 @@ class DatasetService:
             db,
             EventCreate(
                 name="Dataset created",
-                subject_id=dataset.id,
+                subject_id=model.id,
                 subject_type=Type.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=dataset.domain_id,
+                domain_id=model.domain_id,
             ),
         )
         return model

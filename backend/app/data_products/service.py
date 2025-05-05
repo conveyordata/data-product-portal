@@ -238,10 +238,10 @@ class DataProductService:
             db,
             EventCreate(
                 name="Data product created",
-                subject_id=data_product.id,
+                subject_id=model.id,
                 subject_type=Type.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=data_product.domain_id,
+                domain_id=model.domain_id,
             ),
         )
         RefreshInfrastructureLambda().trigger()
@@ -395,7 +395,9 @@ class DataProductService:
 
         for k, v in update_data_product.items():
             if k == "memberships":
-                self._update_memberships(current_data_product, v, db)
+                self._update_memberships(
+                    current_data_product, v, db, authenticated_user
+                )
             elif k == "tag_ids":
                 new_tags = self._get_tags(db, v)
                 current_data_product.tags = new_tags
@@ -493,22 +495,6 @@ class DataProductService:
             f"Action Required: {data_product.name} wants "
             f"to consume data from {dataset.name}",
         )
-        EventService().create_event(
-            db,
-            EventCreate(
-                name=(
-                    "Data product requested access to dataset"
-                    if dataset.access_type != DatasetAccessType.PUBLIC
-                    else "Data product linked to dataset"
-                ),
-                subject_id=data_product.id,
-                subject_type=Type.DATA_PRODUCT,
-                target_id=dataset.id,
-                target_type=Type.DATASET,
-                actor_id=authenticated_user.id,
-                domain_id=data_product.domain.id,
-            ),
-        )
 
     def link_dataset_to_data_product(
         self,
@@ -563,6 +549,22 @@ class DataProductService:
             self._send_email_for_dataset_link(
                 dataset, data_product, authenticated_user, background_tasks
             )
+        EventService().create_event(
+            db,
+            EventCreate(
+                name=(
+                    "Data product requested access to dataset"
+                    if dataset.access_type != DatasetAccessType.PUBLIC
+                    else "Data product linked to dataset"
+                ),
+                subject_id=data_product.id,
+                subject_type=Type.DATA_PRODUCT,
+                target_id=dataset.id,
+                target_type=Type.DATASET,
+                actor_id=authenticated_user.id,
+                domain_id=data_product.domain.id,
+            ),
+        )
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(
