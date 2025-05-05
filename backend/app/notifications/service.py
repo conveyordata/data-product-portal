@@ -19,6 +19,7 @@ from app.notifications.model import (
 )
 from app.notifications.model import Notification as NotificationModel
 from app.notifications.schema import Notification
+from app.users.model import User as UserModel
 from app.users.schema import User
 
 
@@ -43,8 +44,8 @@ def _backup_info_data_product_dataset(mapper, connection, target):
         update(DataProductDatasetNotification.__table__)
         .where(DataProductDatasetNotification.data_product_dataset_id == target.id)
         .values(
-            deleted_dataset_identifier=dataset_name,
-            deleted_data_product_identifier=product_name,
+            deleted_dataset_name=dataset_name,
+            deleted_data_product_name=product_name,
         )
     )
 
@@ -70,8 +71,8 @@ def _backup_info_data_output_dataset(mapper, connection, target):
         update(DataOutputDatasetNotification.__table__)
         .where(DataOutputDatasetNotification.data_output_dataset_id == target.id)
         .values(
-            deleted_dataset_identifier=dataset_name,
-            deleted_data_output_identifier=output_name,
+            deleted_dataset_name=dataset_name,
+            deleted_data_output_name=output_name,
         )
     )
 
@@ -79,23 +80,24 @@ def _backup_info_data_output_dataset(mapper, connection, target):
 @event.listens_for(DataProductMembership, "before_delete")
 def _backup_info_data_product_membership(mapper, connection, target):
     stmt = (
-        select(DataProduct.name)
+        select(DataProduct.name, UserModel.first_name, UserModel.last_name)
         .select_from(
-            DataProduct.__table__.join(
-                DataProductMembership.__table__,
+            DataProductMembership.__table__.join(
+                DataProduct.__table__,
                 DataProduct.id == DataProductMembership.data_product_id,
-            )
+            ).join(UserModel.__table__, UserModel.id == DataProductMembership.user_id)
         )
         .where(DataProductMembership.id == target.id)
     )
-    (product_name,) = connection.execute(stmt).one()
+    product_name, first_name, last_name = connection.execute(stmt).one()
 
     connection.execute(
         update(DataProductMembershipNotification.__table__)
         .where(
             DataProductMembershipNotification.data_product_membership_id == target.id
         )
-        .values(deleted_data_product_identifier=product_name)
+        .values(deleted_data_product_name=product_name)
+        .values(deleted_membership_username=f"{first_name} {last_name}")
     )
 
 
@@ -148,6 +150,8 @@ class NotificationService:
                 notification_origin=data_product_dataset.status,
                 data_product_dataset_id=data_product_dataset.id,
                 user_id=receiver,
+                dataset_id=data_product_dataset.dataset_id,
+                data_product_id=data_product_dataset.data_product_id,
             )
             db.add(notification)
 
@@ -169,6 +173,9 @@ class NotificationService:
                 notification_origin=data_output_dataset.status,
                 data_output_dataset_id=data_output_dataset.id,
                 user_id=receiver,
+                dataset_id=data_output_dataset.dataset_id,
+                data_output_id=data_output_dataset.data_output_id,
+                data_product_id=data_output_dataset.data_output.owner_id,
             )
             db.add(notification)
 
@@ -190,5 +197,7 @@ class NotificationService:
                 notification_origin=data_product_membership.status,
                 data_product_membership_id=data_product_membership.id,
                 user_id=receiver,
+                data_product_id=data_product_membership.data_product_id,
+                membership_role=data_product_membership.role,
             )
             db.add(notification)

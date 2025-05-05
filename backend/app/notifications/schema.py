@@ -19,24 +19,32 @@ class NotificationBase(ORMModel):
 
 class DataProductDatasetNotification(NotificationBase):
     notification_type: Literal[NotificationTypes.DataProductDatasetNotification]
-    deleted_data_product_identifier: Optional[str] = None
-    deleted_dataset_identifier: Optional[str] = None
+    deleted_data_product_name: Optional[str] = None
+    deleted_dataset_name: Optional[str] = None
     data_product_dataset_id: UUID
+    dataset_id: UUID
+    data_product_id: UUID
     data_product_dataset: Optional[DataProductDatasetAssociation] = None
 
 
 class DataOutputDatasetNotification(NotificationBase):
     notification_type: Literal[NotificationTypes.DataOutputDatasetNotification]
-    deleted_data_output_identifier: Optional[str] = None
-    deleted_dataset_identifier: Optional[str] = None
+    deleted_data_output_name: Optional[str] = None
+    deleted_dataset_name: Optional[str] = None
     data_output_dataset_id: UUID
+    dataset_id: UUID
+    data_output_id: UUID
+    data_product_id: UUID
     data_output_dataset: Optional[DataOutputDatasetAssociation] = None
 
 
 class DataProductMembershipNotification(NotificationBase):
     notification_type: Literal[NotificationTypes.DataProductMembershipNotification]
-    deleted_data_product_identifier: Optional[str] = None
+    deleted_data_product_name: Optional[str] = None
+    deleted_membership_username: Optional[str] = None
+    membership_role: str
     data_product_membership_id: UUID
+    data_product_id: UUID
     data_product_membership: Optional[DataProductMembershipGet] = None
 
 

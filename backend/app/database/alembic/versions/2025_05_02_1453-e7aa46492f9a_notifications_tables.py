@@ -36,9 +36,14 @@ def upgrade() -> None:
         sa.Column(
             "user_id", UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")
         ),
-        sa.Column("deleted_dataset_identifier", sa.String, nullable=True),
-        sa.Column("deleted_data_product_identifier", sa.String, nullable=True),
-        sa.Column("deleted_data_output_identifier", sa.String, nullable=True),
+        sa.Column("deleted_dataset_name", sa.String, nullable=True),
+        sa.Column("deleted_data_product_name", sa.String, nullable=True),
+        sa.Column("deleted_data_output_name", sa.String, nullable=True),
+        sa.Column("deleted_membership_username", sa.String, nullable=True),
+        sa.Column("membership_role", sa.String, nullable=True),
+        sa.Column("dataset_id", sa.UUID, nullable=True),
+        sa.Column("data_product_id", sa.UUID, nullable=True),
+        sa.Column("data_output_id", sa.UUID, nullable=True),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),

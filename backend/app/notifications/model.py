@@ -44,10 +44,12 @@ class DataProductDatasetNotification(Notification):
         ),
         viewonly=True,
     )
-    deleted_data_product_identifier: Mapped[str] = mapped_column(
+    data_product_id: Mapped[uuid.UUID] = mapped_column(use_existing_column=True)
+    deleted_data_product_name: Mapped[str] = mapped_column(
         nullable=True, use_existing_column=True
     )
-    deleted_dataset_identifier: Mapped[str] = mapped_column(
+    dataset_id: Mapped[uuid.UUID] = mapped_column(use_existing_column=True)
+    deleted_dataset_name: Mapped[str] = mapped_column(
         nullable=True, use_existing_column=True
     )
     __mapper_args__ = {
@@ -65,8 +67,11 @@ class DataOutputDatasetNotification(Notification):
         ),
         viewonly=True,
     )
-    deleted_data_output_identifier: Mapped[str] = mapped_column(nullable=True)
-    deleted_dataset_identifier: Mapped[str] = mapped_column(
+    data_output_id = Column(UUID(as_uuid=True))
+    deleted_data_output_name: Mapped[str] = mapped_column(nullable=True)
+    dataset_id: Mapped[uuid.UUID] = mapped_column(use_existing_column=True)
+    data_product_id: Mapped[uuid.UUID] = mapped_column(use_existing_column=True)
+    deleted_dataset_name: Mapped[str] = mapped_column(
         nullable=True, use_existing_column=True
     )
     __mapper_args__ = {
@@ -84,9 +89,12 @@ class DataProductMembershipNotification(Notification):
         ),
         viewonly=True,
     )
-    deleted_data_product_identifier: Mapped[str] = mapped_column(
+    data_product_id: Mapped[uuid.UUID] = mapped_column(use_existing_column=True)
+    deleted_data_product_name: Mapped[str] = mapped_column(
         nullable=True, use_existing_column=True
     )
+    deleted_membership_username: Mapped[str] = mapped_column(nullable=True)
+    membership_role: Mapped[str] = mapped_column(nullable=False)
     __mapper_args__ = {
         "polymorphic_identity": "DataProductMembershipNotification",
     }
