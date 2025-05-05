@@ -22,10 +22,17 @@ from app.dependencies import (
     only_product_membership_owners,
 )
 from app.role_assignments.data_product.router import (
+    create_assignment,
+    decide_assignment,
     list_assignments,
     modify_assigned_role,
 )
-from app.role_assignments.data_product.schema import ModifyRoleAssignment
+from app.role_assignments.data_product.schema import (
+    CreateRoleAssignment,
+    DecideRoleAssignment,
+    ModifyRoleAssignment,
+)
+from app.role_assignments.enums import DecisionStatus
 from app.roles.model import Role
 from app.roles.schema import Scope
 from app.users.schema import User
@@ -51,12 +58,32 @@ router = APIRouter(
 def create_data_product_membership(
     data_product_id: UUID,
     data_product_membership: DataProductMembershipCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
-    return DataProductMembershipService().add_data_product_membership(
+) -> dict[str, UUID]:
+    membership = DataProductMembershipService().add_data_product_membership(
         data_product_id, data_product_membership, db, authenticated_user
     )
+    role = db.scalars(
+        select(Role)
+        .filter_by(scope=Scope.DATA_PRODUCT)
+        .filter(func.lower(Role.name) == membership.role.name.lower())
+    ).first()
+    request = CreateRoleAssignment(
+        data_product_id=membership.data_product_id,
+        user_id=membership.user_id,
+        role_id=role.id,
+    )
+    assignment = create_assignment(request, db, authenticated_user)
+    decide_assignment(
+        assignment.id,
+        DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+        background_tasks,
+        db,
+        authenticated_user,
+    )
+    return {"id": membership.id}
 
 
 @router.post(
@@ -97,12 +124,32 @@ def request_data_product_membership(
 )
 def approve_data_product_membership(
     id: UUID,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductMembershipService().approve_membership_request(
+    membership = DataProductMembershipService().approve_membership_request(
         id, db, authenticated_user
     )
+    role = db.scalars(
+        select(Role)
+        .filter_by(scope=Scope.DATA_PRODUCT)
+        .filter(func.lower(Role.name) == membership.role.name.lower())
+    ).first()
+    request = CreateRoleAssignment(
+        data_product_id=membership.data_product_id,
+        user_id=membership.user_id,
+        role_id=role.id,
+    )
+    assignment = create_assignment(request, db, authenticated_user)
+    decide_assignment(
+        assignment.id,
+        DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+        background_tasks,
+        db,
+        authenticated_user,
+    )
+    return {"id": membership.id}
 
 
 @router.post(
@@ -119,12 +166,31 @@ def approve_data_product_membership(
 )
 def deny_data_product_membership(
     id: UUID,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductMembershipService().deny_membership_request(
-        id, db, authenticated_user
+    membership = db.scalar(select(DataProductMembership).filter_by(id=id))
+    role = db.scalars(
+        select(Role)
+        .filter_by(scope=Scope.DATA_PRODUCT)
+        .filter(func.lower(Role.name) == membership.role.name.lower())
+    ).first()
+    request = CreateRoleAssignment(
+        data_product_id=membership.data_product_id,
+        user_id=membership.user_id,
+        role_id=role.id,
     )
+    assignment = create_assignment(request, db, authenticated_user)
+    decide_assignment(
+        assignment.id,
+        DecideRoleAssignment(decision=DecisionStatus.DENIED),
+        background_tasks,
+        db,
+        authenticated_user,
+    )
+
+    DataProductMembershipService().deny_membership_request(id, db, authenticated_user)
 
 
 @router.post(

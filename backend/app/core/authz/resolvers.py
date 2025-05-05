@@ -57,9 +57,11 @@ class DataOutputResolver(SubjectResolver):
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
         obj = DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
-            data_output = db.scalars(
-                select(DataOutput).where(DataOutput.id == obj)
-            ).one_or_none()
+            data_output = (
+                db.scalars(select(DataOutput).where(DataOutput.id == obj))
+                .unique()
+                .one_or_none()
+            )
             if data_output:
                 return data_output.owner_id
         return cls.DEFAULT
@@ -72,9 +74,13 @@ class DataProductMembershipResolver(SubjectResolver):
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
         obj = DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
-            membership = db.scalars(
-                select(DataProductMembership).where(DataProductMembership.id == obj)
-            ).one_or_none()
+            membership = (
+                db.scalars(
+                    select(DataProductMembership).where(DataProductMembership.id == obj)
+                )
+                .unique()
+                .one_or_none()
+            )
             if membership:
                 return membership.data_product_id
         return cls.DEFAULT
@@ -87,11 +93,15 @@ class DataOutputDatasetAssociationResolver(SubjectResolver):
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
         obj = DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
-            data_output_dataset = db.scalars(
-                select(DataOutputDatasetAssociation).where(
-                    DataOutputDatasetAssociation.id == obj
+            data_output_dataset = (
+                db.scalars(
+                    select(DataOutputDatasetAssociation).where(
+                        DataOutputDatasetAssociation.id == obj
+                    )
                 )
-            ).one_or_none()
+                .unique()
+                .one_or_none()
+            )
             if data_output_dataset:
                 return data_output_dataset.dataset_id
         return cls.DEFAULT
@@ -104,11 +114,15 @@ class DataProductDatasetAssociationResolver(SubjectResolver):
     def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
         obj = DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
-            data_product_dataset = db.scalars(
-                select(DataProductDatasetAssociation).where(
-                    DataProductDatasetAssociation.id == obj
+            data_product_dataset = (
+                db.scalars(
+                    select(DataProductDatasetAssociation).where(
+                        DataProductDatasetAssociation.id == obj
+                    )
                 )
-            ).one_or_none()
+                .unique()
+                .one_or_none()
+            )
             if data_product_dataset:
                 return data_product_dataset.dataset_id
         return cls.DEFAULT

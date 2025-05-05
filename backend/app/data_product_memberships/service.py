@@ -88,7 +88,7 @@ class DataProductMembershipService:
         id: UUID,
         db: Session,
         authenticated_user: User,
-    ):
+    ) -> DataProductMembership:
         data_product_membership = (
             db.query(DataProductMembership).filter_by(id=id).first()
         )
@@ -110,7 +110,7 @@ class DataProductMembershipService:
         db.commit()
         db.refresh(data_product_membership)
         RefreshInfrastructureLambda().trigger()
-        return {"id": data_product_membership.id}
+        return data_product_membership
 
     def deny_membership_request(
         self,
@@ -175,7 +175,7 @@ class DataProductMembershipService:
         data_product_membership: DataProductMembershipCreate,
         db: Session,
         authenticated_user: User,
-    ):
+    ) -> DataProductMembership:
         data_product = ensure_data_product_exists(data_product_id, db)
 
         if data_product_membership.user_id in [
@@ -188,7 +188,7 @@ class DataProductMembershipService:
             )
 
         data_product_membership = DataProductMembership(
-            **data_product_membership.dict(),
+            **data_product_membership.model_dump(),
             status=DecisionStatus.APPROVED,
             requested_by_id=authenticated_user.id,
             requested_on=datetime.now(tz=pytz.utc),
@@ -199,7 +199,7 @@ class DataProductMembershipService:
         db.commit()
         db.refresh(data_product_membership)
         RefreshInfrastructureLambda().trigger()
-        return {"id": data_product_membership.id}
+        return data_product_membership
 
     def update_data_product_membership_role(
         self,
