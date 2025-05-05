@@ -1,11 +1,9 @@
-import { Empty, Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
+import { RoleConfiguration } from '@/pages/roles/roles.page';
 
 export function RolesTab() {
-    const { t } = useTranslation();
     return (
         <div>
-            <Empty description={<Typography.Text>{t('Under construction')}</Typography.Text>} />
+            <RoleConfiguration />
         </div>
     );
 }
