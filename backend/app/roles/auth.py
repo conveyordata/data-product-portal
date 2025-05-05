@@ -26,7 +26,7 @@ class AuthRole(_AuthRole):
 
     async def sync(self) -> None:
         authorizer = Authorization()
-        if self.prototype is Prototype.EVERYONE:
+        if self.prototype == Prototype.EVERYONE:
             await authorizer.sync_everyone_role_permissions(actions=self.permissions)
         else:
             await authorizer.sync_role_permissions(
