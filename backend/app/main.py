@@ -16,6 +16,7 @@ from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging.logger import logger
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.webhook import call_webhook
+from app.database.database import get_db_session
 from app.settings import settings
 from app.shared.router import router
 

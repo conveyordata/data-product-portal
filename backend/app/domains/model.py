@@ -6,12 +6,12 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.database.database import Base, ensure_exists
+from app.events.model import Event
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
     from app.datasets.model import Dataset
-    from app.events.model import Event
 
 
 class Domain(Base, BaseORM):
