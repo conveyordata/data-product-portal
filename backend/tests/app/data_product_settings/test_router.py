@@ -1,5 +1,10 @@
+from copy import deepcopy
+
 import pytest
 from tests.factories import DataProductSettingFactory
+
+from app.core.namespace.validation import NamespaceValidityType
+from app.data_product_settings.enums import DataProductSettingScope
 
 ENDPOINT = "/api/data_product_settings"
 
@@ -7,7 +12,7 @@ ENDPOINT = "/api/data_product_settings"
 @pytest.fixture
 def default_setting_payload():
     return {
-        "external_id": "external_id",
+        "namespace": "namespace",
         "tooltip": "tooltip",
         "name": "name",
         "type": "checkbox",
@@ -35,7 +40,7 @@ class TestDataProductSettingsRouter:
     def test_update_data_product_setting(self, client):
         data_product_setting = DataProductSettingFactory()
         update_payload = {
-            "external_id": "update",
+            "namespace": "update",
             "tooltip": "tooltip",
             "name": "name",
             "type": "checkbox",
@@ -78,6 +83,123 @@ class TestDataProductSettingsRouter:
         response = self.remove_data_product_setting(client, data_product_setting.id)
         assert response.status_code == 403
 
+    def test_get_namespace_suggestion_subsitution(self, client):
+        name = "test with spaces"
+        response = self.get_namespace_suggestion(client, name)
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["namespace"] == "test-with-spaces"
+
+    def test_get_namespace_length_limits(self, client):
+        response = self.get_namespace_length_limits(client)
+        assert response.status_code == 200
+        assert response.json()["max_length"] > 1
+
+    def test_validate_namespace(self, client):
+        namespace = "test"
+        response = self.validate_namespace(
+            client, namespace, DataProductSettingScope.DATAPRODUCT
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID
+
+    def test_validate_namespace_invalid_characters(self, client):
+        namespace = "!"
+        response = self.validate_namespace(
+            client, namespace, DataProductSettingScope.DATAPRODUCT
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_CHARACTERS
+
+    def test_validate_namespace_invalid_length(self, client):
+        namespace = "a" * 256
+        response = self.validate_namespace(
+            client, namespace, DataProductSettingScope.DATAPRODUCT
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.INVALID_LENGTH
+
+    def test_validate_namespace_duplicate(self, client):
+        namespace = "test"
+        DataProductSettingFactory(
+            namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
+        )
+        response = self.validate_namespace(
+            client, namespace, DataProductSettingScope.DATAPRODUCT
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
+
+    def test_validate_namespace_duplicate_scoped_to_data_product(self, client):
+        namespace = "test"
+        DataProductSettingFactory(
+            namespace=namespace, scope=DataProductSettingScope.DATAPRODUCT
+        )
+        response = self.validate_namespace(
+            client, namespace, DataProductSettingScope.DATASET
+        )
+
+        assert response.status_code == 200
+        assert response.json()["validity"] == NamespaceValidityType.VALID
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_data_product_setting_duplicate_namespace(
+        self, default_setting_payload, client
+    ):
+        DataProductSettingFactory(
+            namespace=default_setting_payload["namespace"],
+            scope=default_setting_payload["scope"],
+        )
+
+        response = self.create_data_product_setting(client, default_setting_payload)
+        assert response.status_code == 400
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_data_product_setting_invalid_characters_namespace(
+        self, default_setting_payload, client
+    ):
+        create_payload = deepcopy(default_setting_payload)
+        create_payload["namespace"] = "!"
+
+        response = self.create_data_product_setting(client, create_payload)
+        assert response.status_code == 400
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_data_product_setting_invalid_length_namespace(
+        self, default_setting_payload, client
+    ):
+        create_payload = deepcopy(default_setting_payload)
+        create_payload["namespace"] = "a" * 256
+
+        response = self.create_data_product_setting(client, create_payload)
+        assert response.status_code == 400
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_data_product_setting_duplicate_namespace(self, client):
+        namespace = "namespace"
+        DataProductSettingFactory(namespace=namespace, scope="dataproduct")
+        data_product_setting = DataProductSettingFactory(scope="dataproduct")
+
+        update_payload = {
+            "namespace": namespace,
+            "tooltip": "tooltip",
+            "name": "name",
+            "type": "checkbox",
+            "category": "category",
+            "default": "False",
+            "order": 3,
+            "scope": "dataproduct",
+        }
+        response = self.update_data_product_setting(
+            client, update_payload, data_product_setting.id
+        )
+        assert response.status_code == 400
+
     @staticmethod
     def create_data_product_setting(client, data_product_setting_payload):
         return client.post(ENDPOINT, json=data_product_setting_payload)
@@ -101,3 +223,17 @@ class TestDataProductSettingsRouter:
     @staticmethod
     def migrate_data_product_settings(client, from_id, to_id):
         return client.put(f"{ENDPOINT}/migrate/{from_id}/{to_id}")
+
+    @staticmethod
+    def get_namespace_suggestion(client, name):
+        return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
+
+    @staticmethod
+    def validate_namespace(client, namespace, scope: DataProductSettingScope):
+        return client.get(
+            f"{ENDPOINT}/validate_namespace?namespace={namespace}&scope={scope.value}"
+        )
+
+    @staticmethod
+    def get_namespace_length_limits(client):
+        return client.get(f"{ENDPOINT}/namespace_length_limits")

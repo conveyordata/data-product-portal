@@ -14,7 +14,7 @@ class DataProductFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     name = factory.Faker("word")
-    external_id = "external_id"
+    namespace = factory.Faker("word")
     description = factory.Faker("text", max_nb_chars=20)
     about = factory.Faker("text", max_nb_chars=20)
     status = DataProductStatus.PENDING.value

@@ -1,17 +1,21 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.data_outputs.model import DataOutput
-from app.data_products.model import DataProduct
 from app.database.database import Base
-from app.datasets.model import Dataset
-from app.domains.model import Domain
 from app.events.enum import Type
+
+if TYPE_CHECKING:
+    from app.datasets.model import Dataset
+    from app.domains.model import Domain
+    from app.users.model import User
+    from app.data_outputs.model import DataOutput
+    from app.data_products.model import DataProduct
+
 from app.shared.model import BaseORM
-from app.users.model import User
 
 
 class Event(Base, BaseORM):

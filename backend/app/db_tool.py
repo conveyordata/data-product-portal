@@ -1,3 +1,4 @@
+import asyncio
 import os
 
 import typer
@@ -10,6 +11,7 @@ from sqlalchemy_utils.functions import create_database, database_exists, drop_da
 from app.core.helpers.local import add_additional_env_vars
 
 add_additional_env_vars()
+
 from app.database.database import get_url  # noqa: E402
 from app.seed import seed_db  # noqa: E402
 
@@ -25,7 +27,7 @@ def seed_cmd(path: str = typer.Argument(..., help="Path to the seed script.")):
     print("[bold green]Seeding :seedling:[/bold green]")
     print("Seeding started -> source =", path)
     try:
-        seed_db(path)
+        asyncio.run(seed_db(path))
         print("Seeding finished successfully")
     except Exception as e:
         print("Something went wrong when seeding", e)

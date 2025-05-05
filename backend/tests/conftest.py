@@ -13,6 +13,7 @@ from app.data_product_memberships.model import DataProductUserRole
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.main import app
+from app.settings import settings
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
@@ -80,7 +81,7 @@ def default_data_product_payload() -> dict[str, Any]:
     return {
         "name": "Test Data Product",
         "description": "Test Description",
-        "external_id": "test-data_product",
+        "namespace": "test-data_product",
         "tags": [],
         "type_id": str(data_product_type.id),
         "memberships": [
@@ -100,7 +101,7 @@ def default_dataset_payload() -> dict[str, Any]:
     return {
         "name": "Test Dataset",
         "description": "Test Description",
-        "external_id": "test-dataset",
+        "namespace": "test-dataset",
         "tags": [],
         "owners": [str(user.id)],
         "access_type": DatasetAccessType.RESTRICTED,
@@ -125,3 +126,10 @@ def admin() -> UserFactory:
 async def authorizer() -> AsyncGenerator[Authorization, None]:
     """Initializes casbin at the start of the testing session."""
     yield await Authorization.initialize()
+
+
+@pytest.fixture
+def enable_authorizer():
+    settings.AUTHORIZER_ENABLED = True
+    yield
+    settings.AUTHORIZER_ENABLED = False

@@ -2,13 +2,14 @@ import { Badge, Button, Popconfirm, TableColumnsType } from 'antd';
 import { TFunction } from 'i18next';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import { RestrictedDatasetPopoverTitle } from '@/components/datasets/restricted-dataset-popover-title/restricted-dataset-popover-title.tsx';
-import { RestrictedDatasetTitle } from '@/components/datasets/restricted-dataset-title/restricted-dataset-title.tsx';
+import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title';
+import { DatasetTitle } from '@/components/datasets/dataset-title/dataset-title';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { DatasetLink } from '@/types/data-product';
 import { createDatasetIdPath } from '@/types/navigation.ts';
-import { getDataProductDatasetLinkBadgeStatus, getDataProductDatasetLinkStatusLabel } from '@/utils/status.helper.ts';
+import { DecisionStatus } from '@/types/roles';
+import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
@@ -42,24 +43,24 @@ export const getDataProductDatasetsColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             render: (_, { dataset, status }) => {
-                const isRestrictedDataset = dataset.access_type === 'restricted';
-                const isDatasetRequestApproved = status === 'approved';
-                const popoverTitle = isRestrictedDataset ? (
-                    <RestrictedDatasetPopoverTitle name={dataset.name} isApproved={isDatasetRequestApproved} />
-                ) : (
-                    dataset.name
+                const isDatasetRequestApproved = status === DecisionStatus.Approved;
+                const popoverTitle = (
+                    <DatasetPopoverTitle
+                        name={dataset.name}
+                        accessType={dataset.access_type}
+                        isApproved={isDatasetRequestApproved}
+                    />
                 );
-                const title = isRestrictedDataset ? <RestrictedDatasetTitle name={dataset.name} /> : dataset.name;
                 return (
                     <TableCellAvatar
                         popover={{ title: popoverTitle, content: dataset.description }}
                         linkTo={createDatasetIdPath(dataset.id)}
                         icon={<CustomSvgIconLoader iconComponent={datasetBorderIcon} />}
-                        title={title}
+                        title={<DatasetTitle name={dataset.name} accessType={dataset.access_type} />}
                         subtitle={
                             <Badge
-                                status={getDataProductDatasetLinkBadgeStatus(status)}
-                                text={getDataProductDatasetLinkStatusLabel(t, status)}
+                                status={getDecisionStatusBadgeStatus(status)}
+                                text={getDecisionStatusLabel(t, status)}
                                 className={styles.noSelect}
                             />
                         }
@@ -67,9 +68,7 @@ export const getDataProductDatasetsColumns = ({
                 );
             },
             width: '100%',
-            ...new FilterSettings(datasetLinks, (datasetLink) =>
-                getDataProductDatasetLinkStatusLabel(t, datasetLink.status),
-            ),
+            ...new FilterSettings(datasetLinks, (datasetLink) => getDecisionStatusLabel(t, datasetLink.status)),
             sorter: sorter.stringSorter((datasetLink) => datasetLink.dataset.name),
             defaultSortOrder: 'ascend',
         },
@@ -77,10 +76,10 @@ export const getDataProductDatasetsColumns = ({
             title: t('Actions'),
             key: 'action',
             render: (_, { dataset, dataset_id, status }) => {
-                const buttonText = status === 'pending_approval' ? t('Cancel') : t('Remove');
-                const popupTitle = status === 'pending_approval' ? t('Cancel Request') : t('Unlink Dataset');
+                const buttonText = status === DecisionStatus.Pending ? t('Cancel') : t('Remove');
+                const popupTitle = status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Dataset');
                 const popupDescription =
-                    status === 'pending_approval'
+                    status === DecisionStatus.Pending
                         ? t('Are you sure you want to cancel the request to link {{name}} to the data product?', {
                               name: dataset.name,
                           })
@@ -88,7 +87,7 @@ export const getDataProductDatasetsColumns = ({
                               name: dataset.name,
                           });
                 const onConfirm =
-                    status === 'pending_approval'
+                    status === DecisionStatus.Pending
                         ? onCancelDataProductDatasetLinkRequest
                         : onRemoveDataProductDatasetLink;
                 return (

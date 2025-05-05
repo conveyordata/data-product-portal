@@ -22,3 +22,7 @@
     justify-content: center;
     gap: globals.$column-gap-sm;
 }
+
+.pagination {
+    margin-top: 0 !important;
+}

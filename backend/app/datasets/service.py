@@ -1,18 +1,26 @@
+from typing import Iterable, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.core.namespace.validation import (
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidation,
+    NamespaceValidator,
+    NamespaceValidityType,
+)
+from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema import (
+    Dataset,
     DatasetAboutUpdate,
     DatasetCreateUpdate,
     DatasetStatusUpdate,
@@ -24,14 +32,19 @@ from app.events.service import EventService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.role_assignments.enums import DecisionStatus
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
+from app.users.model import User as UserModel
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 
 
 class DatasetService:
-    def get_dataset(self, id: UUID, db: Session) -> DatasetGet:
+    def __init__(self):
+        self.namespace_validator = NamespaceValidator(DatasetModel)
+
+    def get_dataset(self, id: UUID, db: Session, user: UserModel) -> DatasetGet:
         dataset = db.get(
             DatasetModel,
             id,
@@ -40,36 +53,61 @@ class DatasetService:
             ],
         )
 
-        rolled_up_tags = set()
-
-        default_lifecycle = (
-            db.query(DataProductLifeCycleModel)
-            .filter(DataProductLifeCycleModel.is_default)
-            .first()
-        )
-
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
             )
 
+        if not dataset.isVisibleToUser(user):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this private dataset",
+            )
+
+        rolled_up_tags = set()
         for output_link in dataset.data_output_links:
             rolled_up_tags.update(output_link.data_output.tags)
 
         dataset.rolled_up_tags = rolled_up_tags
 
         if not dataset.lifecycle:
+            default_lifecycle = (
+                db.query(DataProductLifeCycleModel)
+                .filter(DataProductLifeCycleModel.is_default)
+                .first()
+            )
             dataset.lifecycle = default_lifecycle
 
         return dataset
 
-    def get_datasets(self, db: Session) -> list[DatasetsGet]:
-        default_lifecycle = (
-            db.query(DataProductLifeCycleModel)
-            .filter(DataProductLifeCycleModel.is_default)
-            .first()
+    def get_datasets(self, db: Session, user: UserModel) -> Sequence[DatasetsGet]:
+        default_lifecycle = db.scalar(
+            select(DataProductLifeCycleModel).filter(
+                DataProductLifeCycleModel.is_default
+            )
         )
-        datasets = db.query(DatasetModel).order_by(asc(DatasetModel.name)).all()
+        datasets = [
+            dataset
+            for dataset in db.scalars(
+                select(DatasetModel)
+                .options(
+                    joinedload(DatasetModel.owners),
+                    joinedload(DatasetModel.data_product_settings),
+                    joinedload(DatasetModel.data_output_links).joinedload(
+                        DataOutputDatasetAssociation.data_output
+                    ),
+                    joinedload(DatasetModel.data_product_links),
+                    joinedload(DatasetModel.tags),
+                    joinedload(DatasetModel.lifecycle),
+                    joinedload(DatasetModel.domain),
+                )
+                .order_by(asc(DatasetModel.name))
+            )
+            .unique()
+            .all()
+            if dataset.isVisibleToUser(user)
+        ]
+
         for dataset in datasets:
             if not dataset.lifecycle:
                 dataset.lifecycle = default_lifecycle
@@ -78,7 +116,7 @@ class DatasetService:
     def get_event_history(self, id: UUID, db: Session) -> list[Event]:
         return EventService().get_history(db, id, Type.DATASET)
 
-    def get_user_datasets(self, user_id: UUID, db: Session) -> list[DatasetsGet]:
+    def get_user_datasets(self, user_id: UUID, db: Session) -> Sequence[DatasetsGet]:
         return (
             db.query(DatasetModel)
             .options(joinedload(DatasetModel.owners))
@@ -89,7 +127,7 @@ class DatasetService:
         )
 
     def _update_owners(
-        self, dataset: DatasetCreateUpdate, db: Session, owner_ids: list[UUID] = []
+        self, dataset: DatasetCreateUpdate, db: Session, owner_ids: Iterable[UUID] = ()
     ) -> DatasetCreateUpdate:
         if not owner_ids:
             owner_ids = dataset.owners
@@ -99,7 +137,7 @@ class DatasetService:
             dataset.owners.append(user)
         return dataset
 
-    def _fetch_tags(self, db: Session, tag_ids: list[UUID] = []) -> list[TagModel]:
+    def _fetch_tags(self, db: Session, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
         for tag_id in tag_ids:
             tag = ensure_tag_exists(tag_id, db)
@@ -109,27 +147,38 @@ class DatasetService:
 
     def create_dataset(
         self, dataset: DatasetCreateUpdate, db: Session, authenticated_user: User
-    ) -> dict[str, UUID]:
-        dataset = self._update_owners(dataset, db)
-        dataset = dataset.parse_pydantic_schema()
-        tags = self._fetch_tags(db, dataset.pop("tag_ids", []))
-        dataset = DatasetModel(**dataset, tags=tags)
-        db.add(dataset)
+    ) -> Dataset:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                dataset.namespace, db
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
+        new_dataset: Dataset = self._update_owners(dataset, db)
+        dataset_schema = new_dataset.parse_pydantic_schema()
+        tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
+        model = DatasetModel(**dataset_schema, tags=tags)
+
+        db.add(model)
         db.commit()
         RefreshInfrastructureLambda().trigger()
         EventService().create_event(
             db,
             EventCreate(
                 name="Dataset created",
-                subject_id=dataset.id,
+                subject_id=model.id,
                 subject_type=Type.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=dataset.domain_id,
+                domain_id=model.domain_id,
             ),
         )
-        return {"id": dataset.id}
+        return model
 
-    def remove_dataset(self, id: UUID, db: Session, authenticated_user: User):
+    def remove_dataset(self, id: UUID, db: Session, authenticated_user: User) -> None:
         dataset = db.get(
             DatasetModel,
             id,
@@ -163,9 +212,23 @@ class DatasetService:
         dataset: DatasetCreateUpdate,
         db: Session,
         authenticated_user: User,
-    ):
+    ) -> dict[str, UUID]:
         current_dataset = ensure_dataset_exists(id, db)
         updated_dataset = dataset.model_dump(exclude_unset=True)
+
+        if (
+            current_dataset.namespace != dataset.namespace
+            and (
+                validity := self.namespace_validator.validate_namespace(
+                    dataset.namespace, db
+                ).validity
+            )
+            != NamespaceValidityType.VALID
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
 
         for k, v in updated_dataset.items():
             if k == "owners":
@@ -195,7 +258,7 @@ class DatasetService:
         dataset: DatasetAboutUpdate,
         db: Session,
         authenticated_user: User,
-    ):
+    ) -> None:
         current_dataset = ensure_dataset_exists(id, db)
         current_dataset.about = dataset.about
         db.commit()
@@ -216,7 +279,7 @@ class DatasetService:
         dataset: DatasetStatusUpdate,
         db: Session,
         authenticated_user: User,
-    ):
+    ) -> None:
         current_dataset = ensure_dataset_exists(id, db)
         current_dataset.status = dataset.status
         db.commit()
@@ -233,7 +296,7 @@ class DatasetService:
 
     def add_user_to_dataset(
         self, dataset_id: UUID, user_id: UUID, db: Session, authenticated_user: User
-    ):
+    ) -> None:
         dataset = ensure_dataset_exists(dataset_id, db)
         user = ensure_user_exists(user_id, db)
         if user in dataset.owners:
@@ -260,7 +323,7 @@ class DatasetService:
 
     def remove_user_from_dataset(
         self, dataset_id: UUID, user_id: UUID, db: Session, authenticated_user: User
-    ):
+    ) -> None:
         dataset = ensure_dataset_exists(dataset_id, db)
         user = ensure_user_exists(user_id, db)
 
@@ -319,8 +382,7 @@ class DatasetService:
                     id=f"{downstream_products.id}-{dataset.id}",
                     target=downstream_products.data_product_id,
                     source=dataset.id,
-                    animated=downstream_products.status
-                    == DataProductDatasetLinkStatus.APPROVED,
+                    animated=downstream_products.status == DecisionStatus.APPROVED,
                 )
             )
 
@@ -343,8 +405,7 @@ class DatasetService:
                     id=f"{data_output.id}-{dataset.id}",
                     source=data_output.id,
                     target=dataset.id,
-                    animated=data_output_link.status
-                    == DataOutputDatasetLinkStatus.APPROVED,
+                    animated=data_output_link.status == DecisionStatus.APPROVED,
                 )
             )
             if level >= 2:
@@ -368,3 +429,16 @@ class DatasetService:
                     )
                 )
         return Graph(nodes=set(nodes), edges=set(edges))
+
+    def validate_dataset_namespace(
+        self, namespace: str, db: Session
+    ) -> NamespaceValidation:
+        return self.namespace_validator.validate_namespace(namespace, db)
+
+    def dataset_namespace_suggestion(
+        self, name: str, db: Session
+    ) -> NamespaceSuggestion:
+        return self.namespace_validator.namespace_suggestion(name)
+
+    def dataset_namespace_length_limits(self) -> NamespaceLengthLimits:
+        return self.namespace_validator.namespace_length_limits()

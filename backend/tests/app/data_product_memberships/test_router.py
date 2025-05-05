@@ -1,13 +1,16 @@
 from tests.factories import (
     DataProductFactory,
     DataProductMembershipFactory,
+    DataProductRoleAssignmentFactory,
+    RoleFactory,
     UserFactory,
 )
 
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
+from app.role_assignments.enums import DecisionStatus
+from app.roles.schema import Prototype, Scope
 
 MEMBERSHIPS_ENDPOINT = "/api/data_product_memberships"
 
@@ -48,7 +51,7 @@ class TestDataProductMembershipsRouter:
             data_product=owner_membership.data_product,
             user=user,
             role=DataProductUserRole.MEMBER.value,
-            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
+            status=DecisionStatus.PENDING,
             requested_by_id=str(user.id),
         )
 
@@ -64,7 +67,7 @@ class TestDataProductMembershipsRouter:
             data_product=owner_membership.data_product,
             user=user,
             role=DataProductUserRole.MEMBER.value,
-            status=DataProductMembershipStatus.PENDING_APPROVAL.value,
+            status=DecisionStatus.PENDING,
             requested_by_id=str(user.id),
         )
 
@@ -101,6 +104,29 @@ class TestDataProductMembershipsRouter:
         )
         assert response.status_code == 200
 
+    def test_update_data_product_membership_role_with_assignments(self, client):
+        user = UserFactory()
+        owner_membership = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        )
+        membership = DataProductMembershipFactory(
+            data_product=owner_membership.data_product,
+            user=user,
+            role=DataProductUserRole.OWNER.value,
+        )
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER, name="owner"
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=owner_membership.data_product.id,
+        )
+        response = self.update_data_product_membership_user_role(
+            client, membership.id, DataProductUserRole.OWNER.value
+        )
+        assert response.status_code == 200
+
     def test_update_data_product_membership_role_last_owner(self, client):
         membership = DataProductMembershipFactory(user=UserFactory(external_id="sub"))
         response = self.update_data_product_membership_user_role(
@@ -124,7 +150,7 @@ class TestDataProductMembershipsRouter:
         assert response.json()[0]["data_product_id"] == str(
             owner_membership.data_product.id
         )
-        assert response.json()[0]["status"] == "pending_approval"
+        assert response.json()[0]["status"] == "pending"
 
     @staticmethod
     def create_secondary_membership(client, user_id, data_product_id):

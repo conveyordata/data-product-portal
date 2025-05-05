@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.authz import Action, Authorization, DataProductResolver
 from app.data_product_types.schema_create import (
     DataProductTypeCreate,
     DataProductTypeUpdate,
@@ -49,7 +50,14 @@ def get_data_product_type(
             },
         },
     },
-    dependencies=[Depends(only_for_admin)],
+    dependencies=[
+        Depends(only_for_admin),
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+            )
+        ),
+    ],
 )
 def create_data_product_type(
     data_product_type: DataProductTypeCreate, db: Session = Depends(get_db_session)
@@ -57,7 +65,17 @@ def create_data_product_type(
     return DataProductTypeService().create_data_product_type(data_product_type, db)
 
 
-@router.put("/{id}", dependencies=[Depends(only_for_admin)])
+@router.put(
+    "/{id}",
+    dependencies=[
+        Depends(only_for_admin),
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+            )
+        ),
+    ],
+)
 def update_data_product_type(
     id: UUID,
     data_product_type: DataProductTypeUpdate,
@@ -66,12 +84,32 @@ def update_data_product_type(
     return DataProductTypeService().update_data_product_type(id, data_product_type, db)
 
 
-@router.delete("/{id}", dependencies=[Depends(only_for_admin)])
+@router.delete(
+    "/{id}",
+    dependencies=[
+        Depends(only_for_admin),
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+            )
+        ),
+    ],
+)
 def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)):
     return DataProductTypeService().remove_data_product_type(id, db)
 
 
-@router.put("/migrate/{from_id}/{to_id}", dependencies=[Depends(only_for_admin)])
+@router.put(
+    "/migrate/{from_id}/{to_id}",
+    dependencies=[
+        Depends(only_for_admin),
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
+            )
+        ),
+    ],
+)
 def migrate_data_product_type(
     from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)
 ):

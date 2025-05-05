@@ -1,5 +1,5 @@
 import type { TablePaginationConfig } from 'antd';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
 
@@ -9,9 +9,9 @@ type Props = {
 export const useTablePagination = ({ initialPagination = DEFAULT_TABLE_PAGINATION }: Props) => {
     const [pagination, setPagination] = useState<TablePaginationConfig>(initialPagination);
 
-    const resetPagination = () => {
+    const resetPagination = useCallback(() => {
         setPagination(initialPagination);
-    };
+    }, [initialPagination]);
 
     const handleTotalChange = (total: number) => {
         setPagination((prev) =>

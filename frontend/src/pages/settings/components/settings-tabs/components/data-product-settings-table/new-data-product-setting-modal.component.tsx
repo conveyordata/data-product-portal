@@ -1,38 +1,47 @@
 import { Button, Checkbox, Form, Input, InputNumber, Select } from 'antd';
 import { TFunction } from 'i18next';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
+import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import {
     useCreateDataProductSettingMutation,
+    useGetDataProductSettingNamespaceLengthLimitsQuery,
+    useLazyGetDataProductSettingNamespaceSuggestionQuery,
+    useLazyValidateDataProductSettingNamespaceQuery,
     useUpdateDataProductSettingMutation,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { DataProductSettingContract } from '@/types/data-product-setting';
-import { generateExternalIdFromName } from '@/utils/external-id.helper';
+import {
+    DataProductSettingContract,
+    DataProductSettingScope,
+    DataProductSettingType,
+} from '@/types/data-product-setting';
 
 import styles from './data-product-settings-table.module.scss';
 
 const { Option } = Select;
 
 type Mode = 'create' | 'edit';
-type Scope = 'dataproduct' | 'dataset';
-type SettingType = 'checkbox' | 'tags' | 'input';
+
+const DEBOUNCE = 500;
 
 interface CreateSettingModalProps {
     onClose: () => void;
     t: TFunction;
     isOpen: boolean;
     mode: Mode;
-    scope: Scope;
+    scope: DataProductSettingScope;
     initial?: DataProductSettingContract;
 }
 
 interface DataProductSettingValueForm {
     name: string;
+    namespace: string;
     id: string;
     tooltip: string;
-    type: 'checkbox' | 'tags' | 'input';
+    type: DataProductSettingType;
     default: boolean | string | string[];
     category: string;
     order: number;
@@ -45,7 +54,7 @@ interface SettingsFormText {
     submitButtonText: string;
 }
 
-const createText = (t: TFunction, scope: Scope, mode: Mode): SettingsFormText => {
+const createText = (t: TFunction, scope: DataProductSettingScope, mode: Mode): SettingsFormText => {
     if (mode === 'create') {
         if (scope === 'dataproduct') {
             return {
@@ -81,7 +90,7 @@ const createText = (t: TFunction, scope: Scope, mode: Mode): SettingsFormText =>
     }
 };
 
-const typeFormItem = (type: SettingType) => {
+const typeFormItem = (type: DataProductSettingType) => {
     switch (type) {
         case 'checkbox':
             return <Checkbox defaultChecked />;
@@ -107,7 +116,7 @@ const parseInitialDefaultValue = (initial: DataProductSettingContract) => {
     }
 };
 
-const initialDefaultValue = (type: SettingType) => {
+const initialDefaultValue = (type: DataProductSettingType) => {
     switch (type) {
         case 'checkbox':
             return true;
@@ -124,7 +133,13 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
     const [form] = Form.useForm();
     const [createDataProductSetting] = useCreateDataProductSettingMutation();
     const [updateDataProductSetting] = useUpdateDataProductSettingMutation();
-    const typeValue = Form.useWatch<SettingType>('type', form);
+    const typeValue = Form.useWatch<DataProductSettingType>('type', form);
+    const nameValue = Form.useWatch<string>('name', form);
+
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductSettingNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateDataProductSettingNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetDataProductSettingNamespaceLengthLimitsQuery();
+    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
     const initialValues = useMemo(() => {
         if (initial) {
@@ -148,12 +163,10 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
     const handleFinish = async (values: DataProductSettingValueForm) => {
         try {
             if (mode === 'create') {
-                console.log(values);
                 const newSetting: DataProductSettingContract = {
                     ...values,
                     default: values.default.toString(),
                     scope: scope,
-                    external_id: generateExternalIdFromName(values.name),
                     order: values.order,
                 };
                 await createDataProductSetting(newSetting);
@@ -173,6 +186,33 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
             dispatchMessage({ content: variableText.errorMessage, type: 'error' });
         }
     };
+
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFields([
+                {
+                    name: 'namespace',
+                    validating: true,
+                    errors: [],
+                },
+            ]);
+            fetchNamespaceDebounced(nameValue ?? '');
+        }
+    }, [mode, form, canEditNamespace, nameValue, fetchNamespaceDebounced]);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.validateFields(['namespace']);
+        }
+    }, [form, mode, canEditNamespace, namespaceSuggestion]);
+
+    const validateNamespaceCallback = useCallback(
+        (namespace: string) => validateNamespace({ namespace, scope }).unwrap(),
+        [validateNamespace, scope],
+    );
 
     return (
         <FormModal
@@ -215,7 +255,16 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 >
                     <Input />
                 </Form.Item>
-
+                <NamespaceFormItem
+                    form={form}
+                    tooltip={t('The namespace of the setting')}
+                    max_length={namespaceLengthLimits?.max_length}
+                    editToggleDisabled={mode === 'edit'}
+                    canEditNamespace={canEditNamespace}
+                    toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                    validationRequired={mode === 'create'}
+                    validateNamespace={validateNamespaceCallback}
+                />
                 <Form.Item
                     name="tooltip"
                     label={t('Tooltip')}

@@ -1,7 +1,8 @@
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 
 from app.domains.model import Domain as DomainModel
 from app.domains.model import ensure_domain_exists
@@ -11,10 +12,28 @@ from app.domains.schema_get import DomainGet, DomainsGet
 
 class DomainService:
     def get_domains(self, db: Session) -> list[DomainsGet]:
-        return db.query(DomainModel).order_by(DomainModel.name).all()
+        return (
+            db.scalars(
+                select(DomainModel)
+                .options(
+                    joinedload(DomainModel.datasets),
+                    joinedload(DomainModel.data_products),
+                )
+                .order_by(DomainModel.name)
+            )
+            .unique()
+            .all()
+        )
 
     def get_domain(self, id: UUID, db: Session) -> DomainGet:
-        domain = db.get(DomainModel, id)
+        domain = db.get(
+            DomainModel,
+            id,
+            options=[
+                joinedload(DomainModel.datasets),
+                joinedload(DomainModel.data_products),
+            ],
+        )
 
         if not domain:
             raise HTTPException(
@@ -43,7 +62,14 @@ class DomainService:
         return {"id": id}
 
     def remove_domain(self, id: UUID, db: Session):
-        domain = db.get(DomainModel, id)
+        domain = db.get(
+            DomainModel,
+            id,
+            options=[
+                joinedload(DomainModel.datasets),
+                joinedload(DomainModel.data_products),
+            ],
+        )
 
         if domain.data_products or domain.datasets:
             raise HTTPException(
@@ -58,7 +84,14 @@ class DomainService:
         db.commit()
 
     def migrate_domain(self, from_id: UUID, to_id: UUID, db: Session):
-        domain = ensure_domain_exists(from_id, db)
+        domain = ensure_domain_exists(
+            from_id,
+            db,
+            options=[
+                joinedload(DomainModel.datasets),
+                joinedload(DomainModel.data_products),
+            ],
+        )
         new_domain = ensure_domain_exists(to_id, db)
 
         for dataset in domain.datasets:

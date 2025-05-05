@@ -19,10 +19,16 @@ class DataProductType(Base, BaseORM):
     name = Column(String)
     description = Column(String)
     icon_key = Column(Enum(DataProductIconKey), default=DataProductIconKey.DEFAULT)
-    data_products: Mapped[list["DataProduct"]] = relationship(lazy="select")
+
+    # Relationships
+    data_products: Mapped[list["DataProduct"]] = relationship(lazy="raise")
+
+    @property
+    def data_product_count(self) -> int:
+        return len(self.data_products)
 
 
 def ensure_data_product_type_exists(
-    data_product_type_id: UUID, db: Session
+    data_product_type_id: UUID, db: Session, **kwargs
 ) -> DataProductType:
-    return ensure_exists(data_product_type_id, db, DataProductType)
+    return ensure_exists(data_product_type_id, db, DataProductType, **kwargs)
