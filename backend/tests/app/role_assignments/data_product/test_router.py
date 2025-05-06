@@ -5,17 +5,16 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.factories.data_product_membership import DataProductMembershipFactory
 
 from app.data_products.schema import DataProduct
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Role, Scope
 from app.users.schema import User
-from tests.factories.data_product_membership import DataProductMembershipFactory
 
 ENDPOINT = "/api/role_assignments/data_product"
 ENDPOINT_DATA_PRODUCT = "/api/data_products"
-
 
 
 class TestDataProductRoleAssignmentsRouter:
@@ -170,9 +169,7 @@ class TestDataProductRoleAssignmentsRouter:
         data = response.json()
         assert data["role"]["id"] == str(new_role.id)
 
-    def test_delete_data_product_with_role_assignment(
-        self, client: TestClient
-    ):
+    def test_delete_data_product_with_role_assignment(self, client: TestClient):
         user = UserFactory(external_id="sub")
         data_product: DataProduct = DataProductMembershipFactory(
             user=user,
@@ -197,7 +194,6 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 0
-
 
     @staticmethod
     def delete_data_product(client, data_product_id):

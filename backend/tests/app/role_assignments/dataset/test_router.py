@@ -16,7 +16,6 @@ ENDPOINT = "/api/role_assignments/dataset"
 ENDPOINT_DATASET = "/api/datasets"
 
 
-
 class TestDatasetRoleAssignmentsRouter:
 
     def test_list_assignments(self, client: TestClient):
@@ -169,9 +168,7 @@ class TestDatasetRoleAssignmentsRouter:
         data = response.json()
         assert data["role"]["id"] == str(new_role.id)
 
-    def test_delete_dataset_with_role_assignment(
-        self, client: TestClient
-    ):
+    def test_delete_dataset_with_role_assignment(self, client: TestClient):
         user = UserFactory(external_id="sub")
         dataset: Dataset = DatasetFactory(owners=[user])
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -194,7 +191,6 @@ class TestDatasetRoleAssignmentsRouter:
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 0
-
 
     @staticmethod
     def delete_dataset(client, dataset_id):
