@@ -13,6 +13,8 @@ from app.roles.schema import Role, Scope
 from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/dataset"
+ENDPOINT_DATASET = "/api/datasets"
+
 
 
 class TestDatasetRoleAssignmentsRouter:
@@ -166,3 +168,34 @@ class TestDatasetRoleAssignmentsRouter:
         assert response.status_code == 200
         data = response.json()
         assert data["role"]["id"] == str(new_role.id)
+
+    def test_delete_dataset_with_role_assignment(
+        self, client: TestClient
+    ):
+        user = UserFactory(external_id="sub")
+        dataset: Dataset = DatasetFactory(owners=[user])
+        role: Role = RoleFactory(scope=Scope.DATASET)
+        DatasetRoleAssignmentFactory(
+            dataset_id=dataset.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+
+        response = self.delete_dataset(client, dataset.id)
+        assert response.status_code == 200
+
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 0
+
+
+    @staticmethod
+    def delete_dataset(client, dataset_id):
+        return client.delete(f"{ENDPOINT_DATASET}/{dataset_id}")
