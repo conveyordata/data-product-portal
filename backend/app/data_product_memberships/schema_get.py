@@ -6,7 +6,7 @@ from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.schema_basic import DataProductBasic
 from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
 class BaseDataProductMembershipGet(ORMModel):
@@ -18,11 +18,11 @@ class BaseDataProductMembershipGet(ORMModel):
     requested_on: datetime
 
     # Nested schemas
-    user: User
+    user: UserBasic
     data_product: DataProductBasic
-    requested_by: Optional[User]
-    denied_by: Optional[User]
-    approved_by: Optional[User]
+    requested_by: Optional[UserBasic]
+    denied_by: Optional[UserBasic]
+    approved_by: Optional[UserBasic]
 
 
 class DataProductMembershipGet(BaseDataProductMembershipGet):

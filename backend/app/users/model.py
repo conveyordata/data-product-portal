@@ -10,7 +10,7 @@ from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
 from app.datasets.model import datasets_owner_table
 from app.shared.model import BaseORM
-from app.users.schema import User as UserSchema
+from app.users.schema_basic import UserBasic as UserSchema
 
 if TYPE_CHECKING:
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation

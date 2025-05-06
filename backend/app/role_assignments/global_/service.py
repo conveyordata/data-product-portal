@@ -13,11 +13,11 @@ from app.role_assignments.global_.schema import (
     RoleAssignmentRequest,
     UpdateRoleAssignment,
 )
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
 class RoleAssignmentService:
-    def __init__(self, db: Session, user: User) -> None:
+    def __init__(self, db: Session, user: UserBasic) -> None:
         self.db = db
         self.user = user
 

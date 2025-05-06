@@ -18,7 +18,7 @@ from app.role_assignments.global_.schema import (
 )
 from app.role_assignments.global_.service import RoleAssignmentService
 from app.roles import ADMIN_UUID
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 router = APIRouter(prefix="/global")
 
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/global")
 def list_assignments(
     user_id: Optional[UUID] = None,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
+    user: UserBasic = Depends(get_authenticated_user),
 ) -> Sequence[RoleAssignmentResponse]:
     return RoleAssignmentService(db=db, user=user).list_assignments(user_id=user_id)
 
@@ -36,7 +36,7 @@ def list_assignments(
 def create_assignment(
     request: CreateRoleAssignment,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
+    user: UserBasic = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     role_id = _resolve_role_id(request.role_id)
     return RoleAssignmentService(db=db, user=user).create_assignment(
@@ -49,7 +49,7 @@ def delete_assignment(
     id: UUID,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
+    user: UserBasic = Depends(get_authenticated_user),
 ) -> None:
     assignment = RoleAssignmentService(db=db, user=user).delete_assignment(id)
 
@@ -64,7 +64,7 @@ def decide_assignment(
     request: DecideRoleAssignment,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
+    user: UserBasic = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
     original = service.get_assignment(id)
@@ -91,7 +91,7 @@ def modify_assigned_role(
     request: ModifyRoleAssignment,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
+    user: UserBasic = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
     original_role = service.get_assignment(id).role_id

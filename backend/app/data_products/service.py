@@ -63,7 +63,7 @@ from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User as UserModel
 from app.users.model import ensure_user_exists
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
 class DataProductService:
@@ -134,7 +134,7 @@ class DataProductService:
                 dp.lifecycle = default_lifecycle
         return dps
 
-    def get_owners(self, id: UUID, db: Session) -> List[User]:
+    def get_owners(self, id: UUID, db: Session) -> List[UserBasic]:
         data_product = ensure_data_product_exists(
             id, db, options=[joinedload(DataProductModel.memberships)]
         )
@@ -197,7 +197,7 @@ class DataProductService:
         self,
         data_product: DataProductCreate,
         db: Session,
-        authenticated_user: User,
+        authenticated_user: UserBasic,
     ) -> DataProductModel:
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -251,7 +251,7 @@ class DataProductService:
         db.commit()
 
     def _create_new_membership(
-        self, user: User, role: DataProductUserRole
+        self, user: UserBasic, role: DataProductUserRole
     ) -> DataProductMembership:
         return DataProductMembership(
             user_id=user.id,
@@ -346,7 +346,7 @@ class DataProductService:
         self,
         dataset: DatasetModel,
         data_product: DataProductModel,
-        authenticated_user: User,
+        authenticated_user: UserBasic,
         background_tasks: BackgroundTasks,
     ):
         url = (
@@ -371,7 +371,7 @@ class DataProductService:
         )
         background_tasks.add_task(
             send_mail,
-            [User.model_validate(owner) for owner in dataset.owners],
+            [UserBasic.model_validate(owner) for owner in dataset.owners],
             action,
             url,
             f"Action Required: {data_product.name} wants "
@@ -382,7 +382,7 @@ class DataProductService:
         self,
         id: UUID,
         dataset_id: UUID,
-        authenticated_user: User,
+        authenticated_user: UserBasic,
         db: Session,
         background_tasks: BackgroundTasks,
     ):
@@ -466,7 +466,7 @@ class DataProductService:
         return role_arn
 
     def get_aws_temporary_credentials(
-        self, role_arn: str, authenticated_user: User
+        self, role_arn: str, authenticated_user: UserBasic
     ) -> AWSCredentials:
         email = authenticated_user.email
         try:
@@ -483,7 +483,7 @@ class DataProductService:
         return AWSCredentials(**response.get("Credentials"))
 
     def generate_signin_url(
-        self, id: UUID, environment: str, authenticated_user: User, db: Session
+        self, id: UUID, environment: str, authenticated_user: UserBasic, db: Session
     ) -> str:
         role = self.get_data_product_role_arn(id, environment, db)
         json_credentials = self.get_aws_temporary_credentials(role, authenticated_user)

@@ -6,7 +6,7 @@ from app.data_outputs.schema_basic import DataOutputBasic
 from app.datasets.schema_basic import DatasetBasic
 from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
 class BaseDataOutputDatasetAssociationGet(ORMModel):
@@ -21,9 +21,9 @@ class BaseDataOutputDatasetAssociationGet(ORMModel):
     # Nested schemas
     dataset: DatasetBasic
     data_output: DataOutputBasic
-    requested_by: User
-    denied_by: Optional[User]
-    approved_by: Optional[User]
+    requested_by: UserBasic
+    denied_by: Optional[UserBasic]
+    approved_by: Optional[UserBasic]
 
 
 class DataOutputDatasetAssociationGet(BaseDataOutputDatasetAssociationGet):

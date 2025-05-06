@@ -27,7 +27,7 @@ from app.data_product_settings.schema_create import (
 )
 from app.data_product_settings.schema_get import DataProductSettingsGet
 from app.dependencies import OnlyWithProductAccessDataProductID, only_dataset_owners
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
 class DataProductSettingService:
@@ -46,7 +46,7 @@ class DataProductSettingService:
         setting_id: UUID,
         product_id: UUID,
         value: str,
-        authenticated_user: User,
+        authenticated_user: UserBasic,
         db: Session,
     ):
         scope = db.get(DataProductSettingModel, setting_id).scope

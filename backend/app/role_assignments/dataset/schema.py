@@ -9,7 +9,7 @@ from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Role
 from app.shared.schema import ORMModel
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
 class CreateRoleAssignment(BaseModel):
@@ -29,13 +29,13 @@ class ModifyRoleAssignment(BaseModel):
 class RoleAssignmentResponse(ORMModel):
     id: UUID
     dataset: DatasetBasic
-    user: User
+    user: UserBasic
     role: Optional[Role]
     decision: DecisionStatus
     requested_on: Optional[datetime]
-    requested_by: Optional[User]
+    requested_by: Optional[UserBasic]
     decided_on: Optional[datetime]
-    decided_by: Optional[User]
+    decided_by: Optional[UserBasic]
 
     class Meta:
         orm_model = DatasetRoleAssignment

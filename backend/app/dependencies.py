@@ -7,9 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.model import DataOutput as DataOutputModel
-from app.data_product_memberships.enums import (
-    DataProductUserRole,
-)
+from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
 )
@@ -21,10 +19,12 @@ from app.database.database import get_db_session
 from app.datasets.model import Dataset as DatasetModel
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
-async def only_for_admin(authenticated_user: User = Depends(get_authenticated_user)):
+async def only_for_admin(
+    authenticated_user: UserBasic = Depends(get_authenticated_user),
+):
     if settings.AUTHORIZER_ENABLED:
         return
     if not authenticated_user.is_admin:
@@ -36,7 +36,7 @@ async def only_for_admin(authenticated_user: User = Depends(get_authenticated_us
 
 def only_dataset_owners(
     id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
+    authenticated_user: UserBasic = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
     if settings.AUTHORIZER_ENABLED:
@@ -57,7 +57,7 @@ def only_dataset_owners(
 
 async def only_dataproduct_dataset_link_owners(
     id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
+    authenticated_user: UserBasic = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
     if settings.AUTHORIZER_ENABLED:
@@ -80,7 +80,7 @@ async def only_dataproduct_dataset_link_owners(
 
 async def only_data_output_owners(
     id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
+    authenticated_user: UserBasic = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
     if settings.AUTHORIZER_ENABLED:
@@ -98,7 +98,7 @@ async def only_data_output_owners(
 
 async def only_product_membership_owners(
     id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
+    authenticated_user: UserBasic = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
     if settings.AUTHORIZER_ENABLED:
@@ -141,7 +141,7 @@ class OnlyWithProductAccess:
         data_product_name: Optional[str] = None,
         data_product_id: Optional[UUID] = None,
         id: Optional[UUID] = None,
-        authenticated_user: User = Depends(get_authenticated_user),
+        authenticated_user: UserBasic = Depends(get_authenticated_user),
         db: Session = Depends(get_db_session),
     ) -> None:
         if settings.AUTHORIZER_ENABLED:
@@ -187,7 +187,7 @@ class OnlyWithProductAccessID(OnlyWithProductAccess):
     def __call__(
         self,
         id: UUID,
-        authenticated_user: User = Depends(get_authenticated_user),
+        authenticated_user: UserBasic = Depends(get_authenticated_user),
         db: Session = Depends(get_db_session),
     ) -> None:
         super().call(id=id, authenticated_user=authenticated_user, db=db)
@@ -197,7 +197,7 @@ class OnlyWithProductAccessDataProductID(OnlyWithProductAccess):
     def __call__(
         self,
         data_product_id: UUID,
-        authenticated_user: User = Depends(get_authenticated_user),
+        authenticated_user: UserBasic = Depends(get_authenticated_user),
         db: Session = Depends(get_db_session),
     ) -> None:
         super().call(
@@ -211,7 +211,7 @@ class OnlyWithProductAccessName(OnlyWithProductAccess):
     def __call__(
         self,
         data_product_name: str,
-        authenticated_user: User = Depends(get_authenticated_user),
+        authenticated_user: UserBasic = Depends(get_authenticated_user),
         db: Session = Depends(get_db_session),
     ) -> None:
         super().call(

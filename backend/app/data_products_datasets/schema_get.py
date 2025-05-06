@@ -6,7 +6,7 @@ from app.data_products.schema_basic import DataProductBasic
 from app.datasets.schema_basic import DatasetBasic
 from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
 class BaseDataProductDatasetAssociationGet(ORMModel):
@@ -19,9 +19,9 @@ class BaseDataProductDatasetAssociationGet(ORMModel):
     # Nested schemas
     dataset: DatasetBasic
     data_product: DataProductBasic
-    requested_by: User
-    denied_by: Optional[User]
-    approved_by: Optional[User]
+    requested_by: UserBasic
+    denied_by: Optional[UserBasic]
+    approved_by: Optional[UserBasic]
 
 
 class DataProductDatasetAssociationGet(BaseDataProductDatasetAssociationGet):

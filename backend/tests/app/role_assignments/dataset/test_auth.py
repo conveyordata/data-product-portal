@@ -12,14 +12,14 @@ from app.role_assignments.dataset.auth import DatasetAuthAssignment
 from app.role_assignments.dataset.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Role, Scope
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
 @pytest.mark.asyncio(loop_scope="session")
 class TestAuth:
     async def test_add(self, authorizer: Authorization):
         dataset: Dataset = DatasetFactory()
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
 
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
@@ -39,7 +39,7 @@ class TestAuth:
 
     async def test_remove(self, authorizer: Authorization):
         dataset: Dataset = DatasetFactory()
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
 
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
@@ -63,7 +63,7 @@ class TestAuth:
 
     async def test_swap(self, authorizer: Authorization):
         dataset: Dataset = DatasetFactory()
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 

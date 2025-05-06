@@ -14,7 +14,7 @@ from app.datasets.status import DatasetStatus
 from app.domains.schema_basic import DomainBasic
 from app.shared.schema import ORMModel
 from app.tags.schema_basic import TagBasic
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
 class DataProductLink(DataProductDatasetAssociationBasic):
@@ -39,7 +39,7 @@ class BaseDatasetGet(ORMModel):
     lifecycle: Optional[DataProductLifeCycleBasic]
     data_product_settings: list[DataProductSettingValueBasic]
     data_output_links: list[DataOutputLink]
-    owners: Annotated[list[User], MinLen(1)]
+    owners: Annotated[list[UserBasic], MinLen(1)]
 
 
 class DatasetGet(BaseDatasetGet):

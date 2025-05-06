@@ -13,7 +13,7 @@ from app.datasets.schema_basic import DatasetBasic
 from app.domains.schema_basic import DomainBasic
 from app.shared.schema import ORMModel
 from app.tags.schema_basic import TagBasic
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 
 class BaseDataProductGet(ORMModel):
@@ -33,7 +33,7 @@ class BaseDataProductGet(ORMModel):
 
 class MembershipLinks(DataProductMembershipBasic):
     # Nested schemas
-    user: User
+    user: UserBasic
 
 
 class DataOutputLinks(DataOutputBasic):

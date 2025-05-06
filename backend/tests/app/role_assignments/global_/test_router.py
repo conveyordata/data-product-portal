@@ -1,15 +1,11 @@
 from fastapi.testclient import TestClient
-from tests.factories import (
-    GlobalRoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
+from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
 
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.schema import RoleAssignment
 from app.roles import ADMIN_UUID
 from app.roles.schema import Role, Scope
-from app.users.schema import User
+from app.users.schema_basic import UserBasic
 
 ENDPOINT = "/api/role_assignments/global"
 
@@ -17,7 +13,7 @@ ENDPOINT = "/api/role_assignments/global"
 class TestGlobalRoleAssignmentsRouter:
 
     def test_list_assignments(self, client: TestClient):
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: RoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id, role_id=role.id
@@ -30,7 +26,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data[0]["id"] == str(assignment.id)
 
     def test_create_assignment(self, client: TestClient):
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
         response = client.post(
@@ -47,7 +43,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
     def test_create_assignment_admin(self, client: TestClient):
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         _: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
 
         response = client.post(
@@ -64,7 +60,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(ADMIN_UUID)
 
     def test_delete_assignment(self, client: TestClient):
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: RoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -84,7 +80,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert len(response.json()) == 0
 
     def test_decide_assignment(self, client: TestClient):
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: RoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -103,7 +99,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["decision"] == DecisionStatus.APPROVED
 
     def test_decide_assignment_already_decided(self, client: TestClient):
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: RoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -120,7 +116,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert "already decided" in response.json()["detail"]
 
     def test_decide_assignment_idempotency(self, client: TestClient):
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: RoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -135,7 +131,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert response.status_code == 200
 
     def test_modify_assigned_role(self, client: TestClient):
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         new_role: Role = RoleFactory(scope=Scope.GLOBAL)
 
@@ -153,7 +149,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(new_role.id)
 
     def test_modify_assigned_role_from_admin(self, client: TestClient):
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         admin: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
@@ -171,7 +167,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
     def test_modify_assigned_role_to_admin(self, client: TestClient):
-        user: User = UserFactory()
+        user: UserBasic = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         admin: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
 
