@@ -29,7 +29,9 @@ class ResourceAuthAssignment(AuthAssignment):
 
     @classmethod
     def _assert_invariants(
-        cls, assignment: Union[DataProductRoleAssignment, DatasetRoleAssignment]
+        cls,
+        assignment: Union[DataProductRoleAssignment, DatasetRoleAssignment],
+        previous_role_id: Optional[UUID],
     ) -> UUID:
         assert (
             assignment.decision is DecisionStatus.APPROVED
@@ -37,6 +39,9 @@ class ResourceAuthAssignment(AuthAssignment):
         assert (
             assignment.role_id is not None
         ), "Only decisions that define a role can be propagated to the enforcer"
+        assert (
+            assignment.role_id != previous_role_id
+        ), "Re-assigning the same role is a no-op and indicates a logic bug"
 
         return assignment.role_id
 
