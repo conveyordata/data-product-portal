@@ -1,13 +1,12 @@
 from sqlalchemy.orm import Session
 
 from app.data_outputs.service import DataOutputService
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_products.service import DataProductService
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
 from app.datasets.service import DatasetService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.role_assignments.enums import DecisionStatus
 from app.users.schema import User
 
 
@@ -87,8 +86,7 @@ class GraphService:
                         id=f"{data_output.id}-{dataset.id}",
                         source=data_output.id,
                         target=dataset.id,
-                        animated=data_output_link.status
-                        == DataOutputDatasetLinkStatus.APPROVED,
+                        animated=data_output_link.status == DecisionStatus.APPROVED,
                     )
                 )
 
@@ -101,8 +99,7 @@ class GraphService:
                         id=f"{data_product.id}-{dataset.id}",
                         source=dataset.id,
                         target=data_product.id,
-                        animated=dataset_link.status
-                        == DataProductDatasetLinkStatus.APPROVED,
+                        animated=dataset_link.status == DecisionStatus.APPROVED,
                     )
                 )
 

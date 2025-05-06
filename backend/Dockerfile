@@ -1,5 +1,5 @@
 ARG PLATFORM=linux/amd64
-FROM --platform=${PLATFORM} python:3.13.3-slim-bookworm@sha256:21e39cf1815802d4c6f89a0d3a166cc67ce58f95b6d1639e68a394c99310d2e5 AS base-image
+FROM --platform=${PLATFORM} python:3.13.3-slim-bookworm@sha256:60248ff36cf701fcb6729c085a879d81e4603f7f507345742dc82d4b38d16784 AS base-image
 
 FROM base-image AS build-stage
 
@@ -26,6 +26,7 @@ COPY poetry.lock pyproject.toml alembic.ini sample_data.sql /
 RUN poetry install --no-root
 
 FROM base-image
+RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
 COPY --from=build-stage /usr/local /usr/local
 COPY --from=build-stage alembic.ini .

@@ -3,8 +3,8 @@ from typing import Optional
 from uuid import UUID
 
 from app.data_outputs.schema_basic import DataOutputBasic
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.datasets.schema_basic import DatasetBasic
+from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -13,7 +13,7 @@ class BaseDataOutputDatasetAssociationGet(ORMModel):
     id: UUID
     dataset_id: UUID
     data_output_id: UUID
-    status: DataOutputDatasetLinkStatus
+    status: DecisionStatus
     requested_on: datetime
     denied_on: Optional[datetime]
     approved_on: Optional[datetime]
