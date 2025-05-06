@@ -94,14 +94,14 @@ def modify_assigned_role(
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
-    original = service.get_assignment(id)
+    original_role = service.get_assignment(id).role_id
 
     role_id = _resolve_role_id(request.role_id)
     assignment = service.update_assignment(UpdateRoleAssignment(id=id, role_id=role_id))
 
     if assignment.decision is DecisionStatus.APPROVED:
         background_tasks.add_task(
-            GlobalAuthAssignment(assignment, previous=original).swap
+            GlobalAuthAssignment(assignment, previous_role_id=original_role).swap
         )
 
     return assignment

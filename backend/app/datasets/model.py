@@ -71,9 +71,7 @@ class Dataset(Base, BaseORM):
         back_populates="datasets", lazy="joined"
     )
     domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
-    domain: Mapped["Domain"] = relationship(
-        "Domain", back_populates="datasets", lazy="joined"
-    )
+    domain: Mapped["Domain"] = relationship(back_populates="datasets", lazy="joined")
 
     @property
     def data_product_count(self) -> int:

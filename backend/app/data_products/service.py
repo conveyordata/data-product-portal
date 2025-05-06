@@ -138,15 +138,11 @@ class DataProductService:
         data_product = ensure_data_product_exists(
             id, db, options=[joinedload(DataProductModel.memberships)]
         )
-        data_product = ensure_data_product_exists(
-            id, db, options=[joinedload(DataProductModel.memberships)]
-        )
         user_ids = [
             membership.user_id
             for membership in data_product.memberships
             if membership.role == DataProductUserRole.OWNER
         ]
-        return db.scalars(select(UserModel).filter(UserModel.id.in_(user_ids))).all()
         return db.scalars(select(UserModel).filter(UserModel.id.in_(user_ids))).all()
 
     def get_user_data_products(

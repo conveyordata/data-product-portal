@@ -20,12 +20,12 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
     """Dataclass to pass values separate from the DB session."""
 
     def __init__(
-        self, assignment: RoleAssignment, *, previous: Optional[RoleAssignment] = None
+        self, assignment: RoleAssignment, *, previous_role_id: Optional[UUID] = None
     ) -> None:
         super().__init__(
             user_id=assignment.user_id,
             role_id=assignment.role_id,
-            previous_role_id=previous.role_id if previous else None,
+            previous_role_id=previous_role_id,
         )
 
     def is_admin(self) -> bool:
