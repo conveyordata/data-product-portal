@@ -13,6 +13,7 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth.credentials import AWSCredentials
+from app.core.authz.authorization import Authorization
 from app.core.aws.boto3_clients import get_client
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
@@ -231,7 +232,9 @@ class DataProductService:
         RefreshInfrastructureLambda().trigger()
         return model
 
-    def remove_data_product(self, id: UUID, db: Session):
+    def remove_data_product(
+        self, id: UUID, db: Session, background_tasks: BackgroundTasks
+    ):
         data_product = db.get(
             DataProductModel,
             id,
@@ -253,6 +256,11 @@ class DataProductService:
             db.delete(output)
         db.delete(data_product)
         db.commit()
+
+        background_tasks.add_task(
+            Authorization().clear_assignments_for_resource,
+            resource_id=str(id),
+        )
 
     def _create_new_membership(
         self, user: User, role: DataProductUserRole

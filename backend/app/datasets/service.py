@@ -1,10 +1,11 @@
 from typing import Iterable, Sequence
 from uuid import UUID
 
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.authz.authorization import Authorization
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
@@ -162,7 +163,9 @@ class DatasetService:
         RefreshInfrastructureLambda().trigger()
         return model
 
-    def remove_dataset(self, id: UUID, db: Session) -> None:
+    def remove_dataset(
+        self, id: UUID, db: Session, background_tasks: BackgroundTasks
+    ) -> None:
         dataset = db.get(
             DatasetModel,
             id,
@@ -179,6 +182,11 @@ class DatasetService:
 
         db.commit()
         RefreshInfrastructureLambda().trigger()
+
+        background_tasks.add_task(
+            Authorization().clear_assignments_for_resource,
+            resource_id=str(id),
+        )
 
     def update_dataset(
         self, id: UUID, dataset: DatasetCreateUpdate, db: Session

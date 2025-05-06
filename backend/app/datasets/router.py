@@ -156,12 +156,7 @@ def create_dataset(
 def remove_dataset(
     id: UUID, background_tasks: BackgroundTasks, db: Session = Depends(get_db_session)
 ):
-    DatasetService().remove_dataset(id, db)
-    background_tasks.add_task(
-        Authorization().clear_assignments_for_resource,
-        resource_id=str(id),
-    )
-    return
+    return DatasetService().remove_dataset(id, db, background_tasks)
 
 
 @router.put(
