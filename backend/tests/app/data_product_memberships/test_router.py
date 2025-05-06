@@ -33,7 +33,7 @@ class TestDataProductMembershipsRouter:
         self, client, authorizer: Authorization, enable_authorizer
     ):
         user = UserFactory(external_id="sub")
-
+        RoleFactory(name="member", scope=Scope.DATA_PRODUCT)
         await authorizer.sync_role_permissions(
             role_id="*",
             actions=[
@@ -77,6 +77,7 @@ class TestDataProductMembershipsRouter:
                 AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
             ],
         )
+        RoleFactory(name="member", scope=Scope.DATA_PRODUCT)
         owner_membership = DataProductMembershipFactory(
             user=UserFactory(external_id="sub")
         )
@@ -104,6 +105,7 @@ class TestDataProductMembershipsRouter:
                 AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
             ],
         )
+        RoleFactory(name="member", scope=Scope.DATA_PRODUCT)
         owner_membership = DataProductMembershipFactory(
             user=UserFactory(external_id="sub")
         )
