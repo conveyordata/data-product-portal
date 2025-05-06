@@ -3,10 +3,16 @@ from typing import Optional
 from uuid import UUID
 
 from app.data_outputs.schema_basic import DataOutputBasic
+from app.data_products.schema_basic import DataProductBasic
 from app.datasets.schema_basic import DatasetBasic
 from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 from app.users.schema_basic import UserBasic
+
+
+class DataOutput(DataOutputBasic):
+    # Nested schemas
+    owner: DataProductBasic
 
 
 class BaseDataOutputDatasetAssociationGet(ORMModel):
@@ -20,7 +26,7 @@ class BaseDataOutputDatasetAssociationGet(ORMModel):
 
     # Nested schemas
     dataset: DatasetBasic
-    data_output: DataOutputBasic
+    data_output: DataOutput
     requested_by: UserBasic
     denied_by: Optional[UserBasic]
     approved_by: Optional[UserBasic]

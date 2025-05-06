@@ -2,7 +2,6 @@ from uuid import UUID
 
 from app.data_output_configuration.schema_union import DataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
-from app.data_products.schema_basic import DataProductBasic
 from app.shared.schema import ORMModel
 
 
@@ -19,4 +18,3 @@ class DataOutputBasic(ORMModel):
 
     # Nested schemas
     configuration: DataOutputConfiguration
-    owner: DataProductBasic

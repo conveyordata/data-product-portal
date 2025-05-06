@@ -21,8 +21,13 @@ class DataProductLink(DataProductDatasetAssociationBasic):
     data_product: DataProductBasic
 
 
+class DataOutput(DataOutputBasic):
+    # Nested schemas
+    owner: DataProductBasic
+
+
 class DataOutputLink(DataOutputDatasetAssociationBasic):
-    data_output: DataOutputBasic
+    data_output: DataOutput
 
 
 class BaseDatasetGet(ORMModel):

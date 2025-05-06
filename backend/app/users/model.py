@@ -10,16 +10,11 @@ from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
 from app.datasets.model import datasets_owner_table
 from app.shared.model import BaseORM
-from app.users.schema_basic import UserBasic as UserSchema
 
 if TYPE_CHECKING:
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
-
-
-def ensure_user_exists(user_id: UUID, db: Session) -> UserSchema:
-    return ensure_exists(user_id, db, User)
 
 
 class User(Base, BaseORM):
@@ -87,3 +82,7 @@ class User(Base, BaseORM):
         foreign_keys="DataOutputDatasetAssociation.approved_by_id",
         back_populates="approved_by",
     )
+
+
+def ensure_user_exists(user_id: UUID, db: Session) -> User:
+    return ensure_exists(user_id, db, User)
