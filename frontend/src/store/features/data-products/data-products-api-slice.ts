@@ -44,9 +44,9 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             providesTags: (result = []) =>
                 result
                     ? [
-                        { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
-                        ...result.map(({ id }) => ({ type: TagTypes.DataProduct as const, id })),
-                    ]
+                          { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                          ...result.map(({ id }) => ({ type: TagTypes.DataProduct as const, id })),
+                      ]
                     : [{ type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST }],
         }),
         getUserDataProducts: builder.query<DataProductsGetContract, string>({

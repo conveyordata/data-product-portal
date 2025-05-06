@@ -1,43 +1,25 @@
-import type { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
 import type { Node, NodeProps } from '@xyflow/react';
 import { NodeToolbar, Position } from '@xyflow/react';
 import { Flex, Typography } from 'antd';
-import type { ComponentType, ForwardRefExoticComponent, ReactNode, SVGProps } from 'react';
+import type { ComponentType, ForwardRefExoticComponent, ReactNode } from 'react';
 
 import { DefaultHandle } from '@/components/charts/custom-handles/default-handle.tsx';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 
-import styles from './base-node.module.scss';
+import styles from '../base-node/base-node.module.scss';
+// Domain nodes are not BaseNodes because they don't have icons
 
-export type BaseNodeProps = Node<{
+export type DomainNodeProps = Node<{
     id: string;
     name: string;
-    icon:
-        | ComponentType<CustomIconComponentProps | SVGProps<SVGSVGElement>>
-        | ForwardRefExoticComponent<CustomIconComponentProps>;
     borderType?: 'square' | 'round';
-    isMainNode?: boolean;
     nodeToolbarActions?: ReactNode;
     targetHandlePosition?: Position;
     sourceHandlePosition?: Position;
     isActive?: boolean;
-    domain?: string;
-    members?: Array<string>;
-    description?: string;
 }>;
 
-export function BaseNode<T extends BaseNodeProps>({
-    data: {
-        name,
-        isMainNode,
-        icon,
-        borderType = 'round',
-        nodeToolbarActions,
-        isActive = true,
-        domain,
-        members,
-        description,
-    },
+export function DomainNode<T extends DomainNodeProps>({
+    data: { name, borderType = 'round', nodeToolbarActions, isActive = true },
 }: NodeProps<T>) {
     return (
         <>
@@ -45,21 +27,26 @@ export function BaseNode<T extends BaseNodeProps>({
                 <DefaultHandle id={'left_t'} type={'target'} position={Position.Left} isConnectable={false} />
                 <DefaultHandle id={'left_s'} type={'source'} position={Position.Left} isConnectable={false} />
                 <Flex className={styles.nodeWrapper}>
-                    <CustomSvgIconLoader
-                        iconComponent={icon}
-                        hasRoundBorder={borderType === 'round'}
-                        hasSquareBorder={borderType === 'square'}
-                        size={'large'}
-                        inverted={isMainNode}
-                        color={isActive ? 'primary' : 'light'}
-                    />
+                    <div
+                        className={styles.nodeBox}
+                        style={{
+                            backgroundColor: 'rgba(255, 0, 255, 0.2)',
+                            height: 150,
+                            width: 270,
+                            visibility: 'visible',
+                            borderRadius: '8px',
+                            //backgroundColor: isActive ? '#f0f0f0' : '#e0e0e0',
+                        }}
+                    >
+                        <Typography.Text strong>Domain {name}</Typography.Text>
+                    </div>
                 </Flex>
                 <DefaultHandle id={'right_t'} type={'target'} position={Position.Right} isConnectable={false} />
                 <DefaultHandle id={'right_s'} type={'source'} position={Position.Right} isConnectable={false} />
                 {nodeToolbarActions && <NodeToolbar position={Position.Bottom}>{nodeToolbarActions}</NodeToolbar>}
             </Flex>
             <Typography.Paragraph ellipsis={{ tooltip: name, rows: 2 }} className={styles.nodeLabel}>
-                {name}
+                Domain {name}
             </Typography.Paragraph>
         </>
     );

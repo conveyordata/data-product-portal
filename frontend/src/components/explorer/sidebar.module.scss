@@ -1,9 +1,23 @@
 @use '@/styles/globals';
 
-.sidebar {
+.sidebarContainer {
+    width: 24em;
+    height: 100%;
+    background-color: globals.$quaternary-color-fill;
+    border: solid 1px globals.$primary-color;
+    border-radius: globals.$border-radius;
+}
+
+.select {
     width: 20em;
-    height: 4em;
+    height: 3em;
     overflow-y: auto;
     margin: globals.$spacing-m;
-    padding: globals.$spacing-m;
+}
+
+.p {
+    margin: globals.$spacing-m;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
 }

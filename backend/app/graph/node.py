@@ -10,12 +10,16 @@ class NodeData(BaseModel):
     name: str
     link_to_id: Optional[str | UUID] = None
     icon_key: Optional[str] = None
+    domain: Optional[str] = None
+    description: Optional[str] = None
+    members: Optional[list[str | UUID]] = None
 
 
 class NodeType(str, Enum):
     dataProductNode = "dataProductNode"
     dataOutputNode = "dataOutputNode"
     datasetNode = "datasetNode"
+    domainNode = "domainNode"
 
 
 class Node(BaseModel):

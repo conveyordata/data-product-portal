@@ -7,6 +7,9 @@ export interface NodeContract {
         name: string;
         icon_key: string | undefined;
         link_to_id: string | undefined;
+        domain: string | undefined;
+        members: Array<string> | undefined;
+        description: string | undefined;
     };
     isMain: boolean;
     type: CustomNodeTypes;
