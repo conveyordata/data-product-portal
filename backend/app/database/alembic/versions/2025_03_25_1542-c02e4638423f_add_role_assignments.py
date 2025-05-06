@@ -28,7 +28,7 @@ def upgrade() -> None:
         sa.Column(
             "data_product_id",
             sa.UUID,
-            sa.ForeignKey("data_products.id"),
+            sa.ForeignKey("data_products.id", ondelete="CASCADE"),
             nullable=False,
         ),
         sa.Column("user_id", sa.UUID, sa.ForeignKey("users.id"), nullable=False),
@@ -50,7 +50,12 @@ def upgrade() -> None:
     op.create_table(
         "role_assignments_dataset",
         sa.Column("id", sa.UUID, primary_key=True, nullable=False),
-        sa.Column("dataset_id", sa.UUID, sa.ForeignKey("datasets.id"), nullable=False),
+        sa.Column(
+            "dataset_id",
+            sa.UUID,
+            sa.ForeignKey("datasets.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("user_id", sa.UUID, sa.ForeignKey("users.id"), nullable=False),
         sa.Column("role_id", sa.UUID, sa.ForeignKey("roles.id"), nullable=True),
         sa.Column(
