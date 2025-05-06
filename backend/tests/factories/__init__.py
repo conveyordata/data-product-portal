@@ -1,3 +1,5 @@
+from tests.factories.audit_log import AuditLogFactory
+
 from .. import test_session
 from .data_output import DataOutputFactory
 from .data_outputs_datasets import DataOutputDatasetAssociationFactory
@@ -48,6 +50,7 @@ factories = [
     S3DataOutputFactory,
     TagFactory,
     UserFactory,
+    AuditLogFactory,
     ThemeSettingsFactory,
 ]
 

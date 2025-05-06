@@ -5,6 +5,7 @@ from sqlalchemy import UUID, Boolean, Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
+from app.audit.model import AuditLog
 from app.data_product_memberships.model import DataProductMembership
 from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
+    from app.events.model import Event
 
 
 def ensure_user_exists(user_id: UUID, db: Session) -> UserSchema:
@@ -30,7 +32,9 @@ class User(Base, BaseORM):
     first_name = Column(String)
     last_name = Column(String)
     is_admin = Column(Boolean, server_default="false", nullable=False)
-
+    events: Mapped[list["Event"]] = relationship(
+        "Event", back_populates="actor", foreign_keys="Event.actor_id"
+    )
     data_product_memberships: Mapped[list["DataProductMembership"]] = relationship(
         "DataProductMembership",
         foreign_keys="DataProductMembership.user_id",
@@ -51,6 +55,7 @@ class User(Base, BaseORM):
         foreign_keys="DataProductMembership.requested_by_id",
         back_populates="requested_by",
     )
+    audit_logs: Mapped[list["AuditLog"]] = relationship(lazy="select")
     data_products: Mapped[list["DataProduct"]] = association_proxy(
         "data_product_memberships", "data_product"
     )

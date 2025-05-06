@@ -20,6 +20,7 @@ import {
     DataProductUpdateRequest,
     DataProductUpdateResponse,
 } from '@/types/data-product';
+import { EventContract } from '@/types/events/event.contract';
 import { GraphContract } from '@/types/graph/graph-contract';
 import {
     NamespaceLengthLimitsResponse,
@@ -65,6 +66,16 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
         getDataProductById: builder.query<DataProductContract, string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductGet, { dataProductId: id }),
+                method: 'GET',
+            }),
+            providesTags: (_, __, id) => [
+                { type: TagTypes.DataProduct as const, id },
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+            ],
+        }),
+        getDataProductHistory: builder.query<EventContract[], string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataProductHistory, { dataProductId: id }),
                 method: 'GET',
             }),
             providesTags: (_, __, id) => [
@@ -257,6 +268,7 @@ export const {
     useGetDataProductGraphDataQuery,
     useGetGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
+    useGetDataProductHistoryQuery,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,
     useGetDataProductNamespaceLengthLimitsQuery,

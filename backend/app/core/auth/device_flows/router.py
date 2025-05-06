@@ -3,10 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
+from app.audit.service import audit_logs
 from app.core.auth.device_flows.service import DeviceFlowService, verify_auth_header
 from app.database.database import get_db_session
 
-router = APIRouter(prefix="/device", tags=["device flow"])
+router = APIRouter(
+    prefix="/device", tags=["device flow"], dependencies=[Depends(audit_logs)]
+)
 
 
 @router.post("/device_token")

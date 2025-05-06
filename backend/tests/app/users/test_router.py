@@ -11,7 +11,7 @@ class TestUsersRouter:
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
+        assert len(data) == 2
         assert data[0]["is_admin"] is False
 
     def test_remove_user_not_admin(self, client):
