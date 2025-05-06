@@ -98,7 +98,7 @@ def modify_assigned_role(
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
-    original = service.get_assignment(id)
+    original_role = service.get_assignment(id).role_id
 
     assignment = service.update_assignment(
         UpdateRoleAssignment(id=id, role_id=request.role_id)
@@ -106,7 +106,7 @@ def modify_assigned_role(
 
     if assignment.decision is DecisionStatus.APPROVED:
         background_tasks.add_task(
-            DataProductAuthAssignment(assignment, previous=original).swap
+            DataProductAuthAssignment(assignment, previous_role_id=original_role).swap
         )
 
     return assignment
