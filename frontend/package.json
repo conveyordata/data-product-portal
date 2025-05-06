@@ -42,7 +42,7 @@
     "date-fns": "^4.1.0",
     "i18next": "^25.0.2",
     "i18next-http-backend": "^3.0.2",
-    "oidc-client-ts": "^3.2.0",
+    "oidc-client-ts": "^3.2.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-i18next": "^15.5.1",
