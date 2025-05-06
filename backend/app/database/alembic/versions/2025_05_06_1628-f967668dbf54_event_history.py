@@ -1,10 +1,11 @@
 """event history
 
 Revision ID: f967668dbf54
-Revises: 886fc49acbda
+Revises: 7727032896e7
 Create Date: 2025-05-06 16:28:28.024986
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -13,10 +14,9 @@ from alembic import op
 from app.events.enum import Type
 from app.shared.model import utcnow
 
-
 # revision identifiers, used by Alembic.
-revision: str = 'f967668dbf54'
-down_revision: Union[str, None] = '886fc49acbda'
+revision: str = "f967668dbf54"
+down_revision: Union[str, None] = "7727032896e7"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
