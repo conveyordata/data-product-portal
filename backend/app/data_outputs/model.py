@@ -5,12 +5,12 @@ from sqlalchemy import Boolean, Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, relationship
 
+from app.data_output_configuration.base_model import BaseDataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.data_output_configuration.base_model import BaseDataOutputConfiguration
 
 from app.database.database import Base, ensure_exists
 from app.platform_services.schema import PlatformService

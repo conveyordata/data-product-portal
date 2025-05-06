@@ -13,12 +13,12 @@ from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
+from app.domains.model import Domain
 from app.shared.model import BaseORM, utcnow
 from app.tags.model import Tag, tag_dataset_table
 
 if TYPE_CHECKING:
     from app.data_product_settings.model import DataProductSettingValue
-    from app.domains.model import Domain
     from app.users.model import User
 
 datasets_owner_table = Table(
