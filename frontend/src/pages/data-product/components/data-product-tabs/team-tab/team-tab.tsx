@@ -12,8 +12,10 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useAddDataProductMembershipMutation } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetRoleAssignmentQuery } from '@/store/features/role-assignments/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+import { DataProductMembershipRole } from '@/types/data-product-membership';
+import { RoleAssignmentContract } from '@/types/roles/role.contract';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
@@ -24,10 +26,21 @@ type Props = {
     dataProductId: string;
 };
 
-function filterUsers(users: DataProductUserMembership[], searchTerm: string) {
+function filterUsers(users: RoleAssignmentContract[], searchTerm: string) {
     if (!searchTerm) return users;
     if (!users) return [];
 
+    console.log(users);
+    console.log(
+        users.filter((membership) => {
+            const searchString = searchTerm.toLowerCase();
+            return (
+                membership?.user?.email?.toLowerCase()?.includes(searchString) ||
+                membership?.user?.first_name?.toLowerCase()?.includes(searchString) ||
+                membership?.user?.last_name?.toLowerCase()?.includes(searchString)
+            );
+        }) ?? [],
+    );
     return (
         users.filter((membership) => {
             const searchString = searchTerm.toLowerCase();
@@ -44,14 +57,18 @@ export function TeamTab({ dataProductId }: Props) {
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching } = useGetDataProductByIdQuery(dataProductId);
+    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: roleAssignments, isFetching } = useGetRoleAssignmentQuery({
+        data_product_id: dataProductId,
+        user_id: undefined,
+    });
     const [addUserToDataProduct, { isLoading: isAddingUser }] = useAddDataProductMembershipMutation();
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 
     const filteredUsers = useMemo(() => {
-        return filterUsers(dataProduct?.memberships ?? [], searchTerm);
-    }, [dataProduct?.memberships, searchTerm]);
+        return filterUsers(roleAssignments ?? [], searchTerm);
+    }, [searchTerm, roleAssignments]);
     const dataProductUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
 
     const { data: access } = useCheckAccessQuery(
