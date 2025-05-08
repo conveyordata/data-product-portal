@@ -165,6 +165,19 @@ class DatasetService:
         model = DatasetModel(**dataset_schema, tags=tags)
 
         db.add(model)
+        db.flush()
+        for owner in model.owners:
+            db.add(
+                EventModel(
+                    name="Dataset creation: owner added",
+                    subject_id=model.id,
+                    subject_type=Type.DATASET,
+                    target_id=owner.id,
+                    target_type=Type.USER,
+                    actor_id=authenticated_user.id,
+                    domain_id=model.domain.id,
+                ),
+            )
         db.add(
             EventModel(
                 name="Dataset created",
@@ -230,7 +243,36 @@ class DatasetService:
 
         for k, v in updated_dataset.items():
             if k == "owners":
+                owners_to_remove = {o.id for o in current_dataset.owners} - set(v)
+                owners_to_add = set(v) - {o.id for o in current_dataset.owners}
+
                 current_dataset = self._update_owners(current_dataset, db, v)
+
+                for owner_id in owners_to_remove:
+                    db.add(
+                        EventModel(
+                            name="Dataset update: owner removed",
+                            subject_id=current_dataset.id,
+                            subject_type=Type.DATASET,
+                            target_id=owner_id,
+                            target_type=Type.USER,
+                            actor_id=authenticated_user.id,
+                            domain_id=current_dataset.domain_id,
+                        ),
+                    )
+                for owner_id in owners_to_add:
+                    db.add(
+                        EventModel(
+                            name="Dataset update: owner added",
+                            subject_id=current_dataset.id,
+                            subject_type=Type.DATASET,
+                            target_id=owner_id,
+                            target_type=Type.USER,
+                            actor_id=authenticated_user.id,
+                            domain_id=current_dataset.domain_id,
+                        ),
+                    )
+
             elif k == "tag_ids":
                 new_tags = self._fetch_tags(db, v)
                 current_dataset.tags = new_tags
