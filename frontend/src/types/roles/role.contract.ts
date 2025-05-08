@@ -27,6 +27,13 @@ export interface RoleUpdate {
     description?: string;
     permissions?: number[];
 }
+
+export interface RoleAssignmentCreateContract {
+    data_product_id: string;
+    user_id: string;
+    role_id: string;
+}
+
 export interface RoleAssignmentContract {
     id: string;
     data_product: DataProductContract;

@@ -39,6 +39,8 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
     const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] = useDeleteRoleAssignmentMutation();
     const [updateRoleAssignment] = useUpdateRoleAssignmentMutation();
+
+    // TODO Implement the pending action handlers with new Role Assignments system.
     const { handleGrantAccessToDataProduct, handleDenyAccessToDataProduct } = usePendingActionHandlers();
     const [lazyGetRolesAssignments] = useLazyGetRoleAssignmentQuery();
     const { data: edit_access } = useCheckAccessQuery(
@@ -102,10 +104,6 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
                     user_id: userId,
                 }).unwrap();
                 const currentRole = roles[0];
-                console.log(role);
-                // const result = await updateRoleAssignment({
-                //     role_assignment_id: currentRole.id, role_id: role.id}).unwrap();
-                // console.log(result);
                 await updateRoleAssignment({ role_assignment_id: currentRole.id, role_id: role.id }).unwrap();
                 dispatchMessage({ content: t('User role has been updated'), type: 'success' });
             } catch (_error) {

@@ -9,10 +9,13 @@ import { useModal } from '@/hooks/use-modal.tsx';
 import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useAddDataProductMembershipMutation } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetRoleAssignmentQuery } from '@/store/features/role-assignments/roles-api-slice';
+import {
+    useCreateRoleAssignmentMutation,
+    useGetRoleAssignmentQuery,
+} from '@/store/features/role-assignments/roles-api-slice';
+import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataProductMembershipRole } from '@/types/data-product-membership';
 import { RoleAssignmentContract } from '@/types/roles/role.contract';
@@ -62,9 +65,10 @@ export function TeamTab({ dataProductId }: Props) {
         data_product_id: dataProductId,
         user_id: undefined,
     });
-    const [addUserToDataProduct, { isLoading: isAddingUser }] = useAddDataProductMembershipMutation();
+    const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateRoleAssignmentMutation();
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
+    const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
 
     const filteredUsers = useMemo(() => {
         return filterUsers(roleAssignments ?? [], searchTerm);
@@ -90,17 +94,22 @@ export function TeamTab({ dataProductId }: Props) {
     const handleGrantAccessToDataProduct = useCallback(
         async (user: UserContract) => {
             try {
+                // Use Member as default initial role (for now)
+                const role_id =
+                    DATA_PRODUCT_ROLES?.find((role) => role.name.toLowerCase() === DataProductMembershipRole.Member)
+                        ?.id || '';
+
                 await addUserToDataProduct({
-                    dataProductId: dataProductId,
+                    data_product_id: dataProductId,
                     user_id: user.id,
-                    role: DataProductMembershipRole.Member,
+                    role_id: role_id,
                 }).unwrap();
                 dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to grant access to the data product'), type: 'error' });
             }
         },
-        [addUserToDataProduct, dataProductId, t],
+        [addUserToDataProduct, dataProductId, t, DATA_PRODUCT_ROLES],
     );
 
     if (!dataProduct || !user) return null;

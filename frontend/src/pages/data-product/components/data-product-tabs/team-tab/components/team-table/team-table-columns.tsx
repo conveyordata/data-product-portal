@@ -69,7 +69,6 @@ export const getDataProductUsersTableColumns = ({
             dataIndex: 'role',
             render: (role: RoleContract, { user, id, decision }) => {
                 const isApproved = decision === DecisionStatus.Approved;
-                console.log(canEdit);
                 return (
                     <RoleChangeForm
                         initialRole={role}
@@ -108,9 +107,9 @@ export const getDataProductUsersTableColumns = ({
             title: t('Actions'),
             key: 'action',
             hidden: !(canRemove || canApprove),
-            render: (_, { user, id }) => (
+            render: (_, { user, id, decision }) => (
                 <Space>
-                    {status === DecisionStatus.Pending ? (
+                    {decision === DecisionStatus.Pending ? (
                         <Space>
                             <Popconfirm
                                 title={t('Allow User')}

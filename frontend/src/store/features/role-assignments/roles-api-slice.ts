@@ -1,7 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls';
 import { baseApiSlice } from '@/store/features/api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
-import { RoleAssignmentContract } from '@/types/roles/role.contract';
+import { RoleAssignmentContract, RoleAssignmentCreateContract } from '@/types/roles/role.contract';
 
 export const roleTags: string[] = [TagTypes.Role];
 
@@ -21,14 +21,14 @@ export const roleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTyp
             }),
             providesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
         }),
-        // createRole: builder.mutation<RoleContract, Omit<RoleContract, 'id'>>({
-        //     query: (request) => ({
-        //         url: ApiUrl.Roles,
-        //         method: 'POST',
-        //         data: request,
-        //     }),
-        //     invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
-        // }),
+        createRoleAssignment: builder.mutation<RoleAssignmentContract, RoleAssignmentCreateContract>({
+            query: (request) => ({
+                url: ApiUrl.RoleAssignmentsDataProductGet,
+                method: 'POST',
+                data: request,
+            }),
+            invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
+        }),
         updateRoleAssignment: builder.mutation<RoleAssignmentContract, { role_assignment_id: string; role_id: string }>(
             {
                 query: (request) => ({
@@ -55,4 +55,5 @@ export const {
     useLazyGetRoleAssignmentQuery,
     useUpdateRoleAssignmentMutation,
     useDeleteRoleAssignmentMutation,
+    useCreateRoleAssignmentMutation,
 } = roleAssignmentsApiSlice;
