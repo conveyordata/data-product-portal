@@ -15,12 +15,12 @@ router = APIRouter(prefix="/integrations", tags=["integrations"])
 def get_integrations(db: Session = Depends(get_db_session)) -> Sequence[Integration]:
     return IntegrationService(db).get_integrations()
 
-@router.get("/{id}")
-def get_integration(uuid: UUID, db: Session = Depends(get_db_session)) -> Integration:
-    return IntegrationService(db).get_integration(uuid)
+@router.get("/{uuid}/{integration_type}")
+def get_integration(uuid: UUID, integration_type: str, db: Session = Depends(get_db_session)) -> Integration:
+    return IntegrationService(db).get_integration(uuid, integration_type)
 
 @router.delete(
-    "/{id}",
+    "/{uuid}/{integration_type}",
     responses={
         404: {
             "description": "Integration not found",
@@ -31,7 +31,7 @@ def get_integration(uuid: UUID, db: Session = Depends(get_db_session)) -> Integr
     },
 )
 def remove_integration(uuid: UUID, db: Session = Depends(get_db_session)) -> None:
-    return IntegrationService().remove_integration(uuid, db)
+    return IntegrationService().remove_integration(uuid, integration_type, db)
 
 @router.post(
     "",

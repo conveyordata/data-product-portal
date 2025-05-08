@@ -7,7 +7,7 @@ from app.database.database import Base
 from app.shared.model import BaseORM
 
 
-class Integrations(Base, BaseORM):
+class Integration(Base, BaseORM):
     __tablename__ = "integrations"
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

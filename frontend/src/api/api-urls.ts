@@ -68,7 +68,7 @@ export enum ApiUrl {
     PlatformServiceConfigById = '/api/platforms/configs/:configId',
     Version = '/api/version',
     ThemeSettings = '/api/theme_settings',
-    IntegrationUrl = '/api/integrations',
+    IntegrationUrl = '/api/integrations/:uuid/:integration_type',
 }
 
 export type DynamicPathParams =

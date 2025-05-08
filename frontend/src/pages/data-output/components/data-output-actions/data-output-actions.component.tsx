@@ -11,8 +11,8 @@ import { CustomDropdownItemProps } from '@/types/shared';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 
 import {
-    useGetIntegrationUrlMutation
-} from '@/store/features/data-products/data-products-api-slice.ts';
+    useGetIntegrationUrlQuery
+} from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 
 import styles from './data-output-actions.module.scss';
 
@@ -33,25 +33,37 @@ const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[]
 export function DataOutputActions({ dataOutputId, isCurrentDataOutputOwner }: Props) {
     const { t } = useTranslation();
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
-    const getIntegrationUrl = useGetIntegrationUrlMutation();
+
+    console.log('useGetIntegrationUrlQuery called with:', { 
+        uuid: dataOutputId, 
+        integration_type: DataPlatforms.Datahub 
+    });
+
+    const integrationUrl = useGetIntegrationUrlQuery({ 
+        uuid: dataOutputId, 
+        integration_type: DataPlatforms.Datahub 
+    });
 
     async function handleTileClick(dataPlatform: DataPlatform) {
         switch (dataPlatform) {
             case DataPlatforms.Datahub:
-                try {
-                    const url = await getIntegrationUrl({ id: dataOutputId, dataPlatform }).unwrap();
-                    if (url) {
-                        window.open(url, '_blank');
+                // log integrationUrl
+                console.log(integrationUrl);
+                console.log('Type of integrationUrl:', typeof integrationUrl);
+                if (integrationUrl) {
+                    if (integrationUrl.data && integrationUrl.data.url) {
+                        console.log('Attributes of integrationUrl:', integrationUrl.data.url);
+                        window.open(integrationUrl.data.url, '', 'noopener,noreferrer');
                     } else {
                         dispatchMessage({
                             type: 'error',
-                            content: t('Failed to get Datahub url'),
+                            content: t(`Failed to get Datahub url for Data Output. DataOutputId: ${dataOutputId}, DataPlatform: ${dataPlatform}`),
                         });
                     }
-                } catch (_error) {
+                } else {
                     dispatchMessage({
                         type: 'error',
-                        content: t('Failed to get Datahub url'),
+                        content: t(`Failed read Data Output Integration. DataOutputId: ${dataOutputId}, DataPlatform: ${dataPlatform}`),
                     });
                 }
                 break;
