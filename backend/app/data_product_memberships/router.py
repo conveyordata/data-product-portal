@@ -181,7 +181,7 @@ def update_data_product_role(
     old_membership = db.scalar(select(DataProductMembership).filter_by(id=id))
     old_role = old_membership.role.name.lower()
     updated_id = DataProductMembershipService().update_data_product_membership_role(
-        id, membership_role, db
+        id, membership_role, db, authenticated_user
     )
     roles = list_assignments(
         old_membership.data_product_id, old_membership.user_id, db, authenticated_user
