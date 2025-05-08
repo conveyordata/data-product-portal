@@ -1,6 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls';
 import { baseApiSlice } from '@/store/features/api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
+import { DecisionStatus } from '@/types/roles';
 import { RoleAssignmentContract, RoleAssignmentCreateContract } from '@/types/roles/role.contract';
 
 export const roleTags: string[] = [TagTypes.Role];
@@ -39,6 +40,17 @@ export const roleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTyp
                 invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
             },
         ),
+        decideRoleAssignment: builder.mutation<
+            RoleAssignmentContract,
+            { role_assignment_id: string; decision_status: DecisionStatus }
+        >({
+            query: (request) => ({
+                url: buildUrl(ApiUrl.RoleAssignmentsDataProductDecide, { id: request.role_assignment_id }),
+                method: 'PATCH',
+                data: { decision: request.decision_status },
+            }),
+            invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
+        }),
         deleteRoleAssignment: builder.mutation<void, string>({
             query: (id: string) => ({
                 url: buildUrl(ApiUrl.RoleAssignmentsDataProductDelete, { id }),
@@ -56,4 +68,5 @@ export const {
     useUpdateRoleAssignmentMutation,
     useDeleteRoleAssignmentMutation,
     useCreateRoleAssignmentMutation,
+    useDecideRoleAssignmentMutation,
 } = roleAssignmentsApiSlice;
