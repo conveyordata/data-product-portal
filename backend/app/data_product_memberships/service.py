@@ -59,7 +59,7 @@ class DataProductMembershipService:
                 target_id=data_product_membership.user_id,
                 target_type=Type.USER,
                 actor_id=authenticated_user.id,
-                domain_id=data_product.domain_id,
+                domain_id=data_product.domain.id,
             ),
         )
         db.commit()
@@ -249,7 +249,7 @@ class DataProductMembershipService:
                 target_id=data_product_membership.user_id,
                 target_type=Type.USER,
                 actor_id=authenticated_user.id,
-                domain_id=data_product.domain_id,
+                domain_id=data_product.domain.id,
             ),
         )
         db.commit()
