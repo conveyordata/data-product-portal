@@ -1,5 +1,7 @@
-from typing import Optional
+from typing import Annotated, Optional
 from uuid import UUID
+
+from annotated_types import MinLen
 
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
@@ -11,7 +13,7 @@ from app.users.schema import User
 
 class BaseDataset(ORMModel):
     name: str
-    external_id: str
+    namespace: str
     description: str
     access_type: DatasetAccessType
     about: Optional[str] = None
@@ -27,14 +29,14 @@ class DatasetStatusUpdate(ORMModel):
 
 
 class DatasetCreateUpdate(BaseDataset):
-    owners: list[UUID]
+    owners: Annotated[list[UUID], MinLen(1)]
     domain_id: UUID
     tag_ids: list[UUID]
 
 
 class Dataset(BaseDataset):
     id: UUID
-    owners: list[User]
+    owners: Annotated[list[User], MinLen(1)]
     status: DatasetStatus
     domain: Domain
     tags: list[Tag]

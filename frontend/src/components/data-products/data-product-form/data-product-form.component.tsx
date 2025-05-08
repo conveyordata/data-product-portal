@@ -1,9 +1,11 @@
 import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
+import { useDebouncedCallback } from 'use-debounce';
 
+import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
@@ -11,6 +13,9 @@ import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-ty
 import {
     useCreateDataProductMutation,
     useGetDataProductByIdQuery,
+    useGetDataProductNamespaceLengthLimitsQuery,
+    useLazyGetDataProductNamespaceSuggestionQuery,
+    useLazyValidateDataProductNamespaceQuery,
     useRemoveDataProductMutation,
     useUpdateDataProductMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
@@ -26,12 +31,13 @@ import {
     getDataProductOwnerIds,
     getIsDataProductOwner,
 } from '@/utils/data-product-user-role.helper.ts';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
 import styles from './data-product-form.module.scss';
 
 const { TextArea } = Input;
+
+const DEBOUNCE = 500;
 
 type Props = {
     mode: 'create' | 'edit';
@@ -53,12 +59,18 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
     const { data: dataProductTypes = [], isFetching: isFetchingDataProductTypes } = useGetAllDataProductTypesQuery();
     const { data: dataProductOwners = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
-    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
+    const { data: availableTags = [], isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataProduct, { isLoading: isCreating }] = useCreateDataProductMutation();
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
     const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateDataProductNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetDataProductNamespaceLengthLimitsQuery();
+
     const [form] = Form.useForm<DataProductCreateFormSchema>();
     const dataProductNameValue = Form.useWatch('name', form);
+
+    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
     const canEditForm = Boolean(
         mode === 'edit' &&
@@ -80,7 +92,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
     const userSelectOptions = dataProductOwners.map((owner) => ({ label: owner.email, value: owner.id }));
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id }));
 
     const onSubmit: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
         try {
@@ -92,7 +104,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             if (mode === 'create') {
                 const request: DataProductCreate = {
                     name: values.name,
-                    external_id: values.external_id,
+                    namespace: values.namespace,
                     description: values.description,
                     memberships: owners,
                     lifecycle_id: values.lifecycle_id,
@@ -120,7 +132,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
                 const request: DataProductUpdateRequest = {
                     name: values.name,
-                    external_id: values.external_id,
+                    namespace: values.namespace,
                     description: values.description,
                     type_id: values.type_id,
                     lifecycle_id: values.lifecycle_id,
@@ -173,16 +185,32 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     };
 
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
+
     useEffect(() => {
-        if (mode === 'create') {
-            form.setFieldsValue({ external_id: generateExternalIdFromName(dataProductNameValue ?? '') });
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFields([
+                {
+                    name: 'namespace',
+                    validating: true,
+                    errors: [],
+                },
+            ]);
+            fetchNamespaceDebounced(dataProductNameValue ?? '');
         }
-    }, [dataProductNameValue, form, mode]);
+    }, [mode, form, canEditNamespace, dataProductNameValue, fetchNamespaceDebounced]);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFieldValue('namespace', namespaceSuggestion?.namespace);
+            form.validateFields(['namespace']);
+        }
+    }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
     useEffect(() => {
         if (currentDataProduct && mode === 'edit') {
             form.setFieldsValue({
-                external_id: currentDataProduct.external_id,
+                namespace: currentDataProduct.namespace,
                 name: currentDataProduct.name,
                 description: currentDataProduct.description,
                 type_id: currentDataProduct.type.id,
@@ -193,6 +221,11 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             });
         }
     }, [currentDataProduct, form, mode]);
+
+    const validateNamespaceCallback = useCallback(
+        (namespace: string) => validateNamespace(namespace).unwrap(),
+        [validateNamespace],
+    );
 
     return (
         <Form
@@ -220,15 +253,16 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             >
                 <Input />
             </Form.Item>
-            {/*Disabled field that will render an external ID everytime the name changes*/}
-            <Form.Item<DataProductCreateFormSchema>
-                required
-                name={'external_id'}
-                label={t('External ID')}
-                tooltip={t('The external ID of the data product')}
-            >
-                <Input disabled />
-            </Form.Item>
+            <NamespaceFormItem
+                form={form}
+                tooltip={t('The namespace of the data product')}
+                max_length={namespaceLengthLimits?.max_length}
+                editToggleDisabled={mode === 'edit'}
+                canEditNamespace={canEditNamespace}
+                toggleCanEditNamespace={() => setCanEditNamespace((prev) => !prev)}
+                validationRequired={mode === 'create'}
+                validateNamespace={validateNamespaceCallback}
+            />
             <Form.Item<DataProductCreateFormSchema>
                 name={'owners'}
                 label={t('Owners')}

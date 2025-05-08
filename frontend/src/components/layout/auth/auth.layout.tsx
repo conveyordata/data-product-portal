@@ -99,7 +99,10 @@ export const AuthLayout = () => {
         switch (activeNavigator) {
             case 'signinRedirect':
             case 'signoutRedirect':
+            case 'signoutSilent':
                 return <LoadingSpinner />;
+            case 'signinSilent':
+                return <Outlet />;
         }
     }
 

@@ -1,8 +1,17 @@
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
+from app.core.namespace.validation import (
+    DataProductSettingNamespaceValidator,
+    NamespaceLengthLimits,
+    NamespaceSuggestion,
+    NamespaceValidation,
+    NamespaceValidityType,
+)
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.enums import DataProductSettingScope
 from app.data_product_settings.model import (
@@ -16,20 +25,20 @@ from app.data_product_settings.schema import (
     DataProductSettingUpdate,
     DataProductSettingValueCreate,
 )
-from app.dependencies import (
-    OnlyWithProductAccessDataProductID,
-    only_dataset_owners,
-)
+from app.dependencies import OnlyWithProductAccessDataProductID, only_dataset_owners
 from app.users.schema import User
 
 
 class DataProductSettingService:
+    def __init__(self):
+        self.namespace_validator = DataProductSettingNamespaceValidator()
+
     def get_data_product_settings(self, db: Session) -> list[DataProductSetting]:
-        return (
-            db.query(DataProductSettingModel)
-            .order_by(DataProductSettingModel.order, DataProductSettingModel.name)
-            .all()
-        )
+        return db.scalars(
+            select(DataProductSettingModel).order_by(
+                DataProductSettingModel.order, DataProductSettingModel.name
+            )
+        ).all()
 
     def set_value_for_product(
         self,
@@ -75,10 +84,21 @@ class DataProductSettingService:
                 )
             db.add(DataProductSettingValueModel(**new_setting.parse_pydantic_schema()))
         db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def create_data_product_setting(
         self, setting: DataProductSetting, db: Session
     ) -> dict[str, UUID]:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                setting.namespace, db, setting.scope
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
         setting = DataProductSettingModel(**setting.parse_pydantic_schema())
         db.add(setting)
         db.commit()
@@ -87,12 +107,46 @@ class DataProductSettingService:
     def update_data_product_setting(
         self, id: UUID, setting: DataProductSettingUpdate, db: Session
     ) -> dict[str, UUID]:
-        db.query(DataProductSettingModel).filter_by(id=id).update(
-            setting.parse_pydantic_schema()
-        )
+        current_setting = db.get(DataProductSettingModel, id)
+        update_setting = setting.model_dump(exclude_unset=True)
+
+        if (
+            current_setting.namespace != setting.namespace
+            and (
+                validity := self.namespace_validator.validate_namespace(
+                    setting.namespace, db, current_setting.scope
+                ).validity
+            )
+            != NamespaceValidityType.VALID
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
+        for k, v in update_setting.items():
+            setattr(current_setting, k, v)
+
         db.commit()
         return {"id": id}
 
     def delete_data_product_setting(self, setting_id: UUID, db: Session):
-        db.query(DataProductSettingModel).filter_by(id=setting_id).delete()
+        data_product_setting = db.get(
+            DataProductSettingModel,
+            setting_id,
+        )
+        db.delete(data_product_setting)
         db.commit()
+
+    def validate_data_product_settings_namespace(
+        self, namespace: str, scope: DataProductSettingScope, db: Session
+    ) -> NamespaceValidation:
+        return self.namespace_validator.validate_namespace(namespace, db, scope)
+
+    def data_product_settings_namespace_suggestion(
+        self, name: str
+    ) -> NamespaceSuggestion:
+        return self.namespace_validator.namespace_suggestion(name)
+
+    def data_product_settings_namespace_length_limits(self) -> NamespaceLengthLimits:
+        return self.namespace_validator.namespace_length_limits()

@@ -15,4 +15,5 @@ class RedshiftDataOutput(BaseDataOutputConfiguration):
 
     __mapper_args__ = {
         "polymorphic_identity": "RedshiftDataOutput",
+        "polymorphic_load": "inline",
     }

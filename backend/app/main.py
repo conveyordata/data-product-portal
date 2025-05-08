@@ -55,7 +55,9 @@ async def log_middleware(request: Request, call_next):
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    # Initialize Casbin
     await Authorization.initialize()
+
     yield
 
 

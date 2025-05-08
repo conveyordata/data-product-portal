@@ -1,16 +1,16 @@
 from datetime import datetime
+from typing import Sequence
 from uuid import UUID
 
 import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy import asc
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import asc, select
+from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.email.send_mail import send_mail
 from app.data_product_memberships.enums import (
-    DataProductMembershipStatus,
     DataProductUserRole,
 )
 from app.data_product_memberships.model import DataProductMembership
@@ -19,14 +19,15 @@ from app.data_product_memberships.schema_get import DataProductMembershipGet
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
+from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 
 
 class DataProductMembershipService:
-    @staticmethod
     def request_user_access_to_data_product(
+        self,
         user_id: UUID,
         data_product_id: UUID,
         authenticated_user: User,
@@ -97,16 +98,13 @@ class DataProductMembershipService:
                 detail=f"Data product membership {id} not found",
             )
 
-        if (
-            data_product_membership.status
-            != DataProductMembershipStatus.PENDING_APPROVAL
-        ):
+        if data_product_membership.status != DecisionStatus.PENDING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Data product membership {id} is not in requested status",
             )
 
-        data_product_membership.status = DataProductMembershipStatus.APPROVED
+        data_product_membership.status = DecisionStatus.APPROVED
         data_product_membership.approved_by_id = authenticated_user.id
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
         db.commit()
@@ -129,16 +127,13 @@ class DataProductMembershipService:
                 detail=f"Data product membership {id} not found",
             )
 
-        if (
-            data_product_membership.status
-            != DataProductMembershipStatus.PENDING_APPROVAL
-        ):
+        if data_product_membership.status != DecisionStatus.PENDING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Data product membership {id} is not in requested status",
             )
 
-        data_product_membership.status = DataProductMembershipStatus.DENIED
+        data_product_membership.status = DecisionStatus.DENIED
         data_product_membership.denied_by_id = authenticated_user.id
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
         db.commit()
@@ -157,6 +152,18 @@ class DataProductMembershipService:
             )
 
         data_product = data_product_membership.data_product
+
+        if not any(
+            membership.role == DataProductUserRole.OWNER
+            for membership in data_product.memberships
+            if membership != data_product_membership
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Cannot remove the last owner from data product {data_product.id}"
+                ),
+            )
 
         data_product.memberships.remove(data_product_membership)
         db.commit()
@@ -182,7 +189,7 @@ class DataProductMembershipService:
 
         data_product_membership = DataProductMembership(
             **data_product_membership.dict(),
-            status=DataProductMembershipStatus.APPROVED,
+            status=DecisionStatus.APPROVED,
             requested_by_id=authenticated_user.id,
             requested_on=datetime.now(tz=pytz.utc),
             approved_by_id=authenticated_user.id,
@@ -200,16 +207,31 @@ class DataProductMembershipService:
         membership_role: DataProductUserRole,
         db: Session,
     ):
-        data_product_membership = (
-            db.query(DataProductMembership).filter_by(id=id).first()
-        )
+        data_product_membership = db.get(DataProductMembership, id)
         if data_product_membership is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product membership {id} not found",
             )
 
-        data_product_membership = db.get(DataProductMembership, id)
+        data_product = data_product_membership.data_product
+
+        if (
+            data_product_membership.role == DataProductUserRole.OWNER
+            and membership_role != DataProductUserRole.OWNER
+            and not any(
+                membership.role == DataProductUserRole.OWNER
+                for membership in data_product.memberships
+                if membership != data_product_membership
+            )
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Cannot remove the last owner from data product {data_product.id}"
+                ),
+            )
+
         data_product_membership.role = membership_role
         db.commit()
         db.refresh(data_product_membership)
@@ -219,24 +241,24 @@ class DataProductMembershipService:
     def get_user_pending_actions(
         self, db: Session, authenticated_user: User
     ) -> list[DataProductMembershipGet]:
-        return (
-            db.query(DataProductMembership)
-            .options(
-                joinedload(DataProductMembership.data_product),
-                joinedload(DataProductMembership.user),
-                joinedload(DataProductMembership.requested_by),
-            )
-            .filter(
-                DataProductMembership.status
-                == DataProductMembershipStatus.PENDING_APPROVAL
-            )
-            .filter(
-                DataProductMembership.data_product.has(
-                    DataProductModel.memberships.any(
-                        user_id=authenticated_user.id, role=DataProductUserRole.OWNER
+        actions = (
+            db.scalars(
+                select(DataProductMembership)
+                .filter(DataProductMembership.status == DecisionStatus.PENDING)
+                .filter(
+                    DataProductMembership.data_product.has(
+                        DataProductModel.memberships.any(
+                            user_id=authenticated_user.id,
+                            role=DataProductUserRole.OWNER,
+                        )
                     )
                 )
+                .order_by(asc(DataProductMembership.requested_on))
             )
-            .order_by(asc(DataProductMembership.requested_on))
+            .unique()
             .all()
         )
+        return actions
+
+    def list_memberships(self, db: Session) -> Sequence[DataProductMembership]:
+        return db.scalars(select(DataProductMembership)).unique().all()

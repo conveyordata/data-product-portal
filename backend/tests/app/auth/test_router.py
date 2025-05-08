@@ -18,7 +18,7 @@ class TestAuthRouter:
         ).data_product
         response = client.get(
             f"{ENDPOINT}/aws_credentials?data_product_name"
-            f"={data_product.external_id}"
+            f"={data_product.namespace}"
             "&environment=production"
         )
         assert (

@@ -12,8 +12,10 @@ from app.shared.schema import ORMModel
 OM = TypeVar("OM", bound=ORMModel)
 
 
-def ensure_exists(id_: UUID, db: Session, type_: Type[OM] | Mapper[Type[OM]]) -> OM:
-    item = db.get(type_, id_)
+def ensure_exists(
+    id_: UUID, db: Session, type_: Type[OM] | Mapper[Type[OM]], **kwargs
+) -> OM:
+    item = db.get(type_, id_, **kwargs)
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

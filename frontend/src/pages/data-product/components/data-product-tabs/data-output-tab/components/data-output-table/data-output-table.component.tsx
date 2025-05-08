@@ -1,8 +1,10 @@
-import { Flex, Table, type TableColumnsType } from 'antd';
-import { useCallback, useMemo, useState } from 'react';
+import { Flex, Table, type TableColumnsType, TableProps } from 'antd';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useModal } from '@/hooks/use-modal.tsx';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     useRemoveDataOutputMutation,
     useRemoveDatasetFromDataOutputMutation,
@@ -16,11 +18,12 @@ import styles from './data-output-table.module.scss';
 import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
 
 type Props = {
+    isCurrentUserDataProductOwner: boolean;
     dataProductId: string;
     dataOutputs: DataOutputsGetContract;
 };
 
-export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
+export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, dataOutputs }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
@@ -29,6 +32,17 @@ export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
 
     const [dataOutput, setDataOutput] = useState<string | undefined>(undefined);
     const { isVisible, handleOpen, handleClose } = useModal();
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
+
+    const onChange: TableProps<DataOutputsGetContract[0]>['onChange'] = (pagination) => {
+        handlePaginationChange(pagination);
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [dataOutputs, resetPagination]);
 
     const handleRemoveDataOutput = useCallback(
         async (dataOutputId: string, name: string) => {
@@ -69,10 +83,10 @@ export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
             },
             onRemoveDataOutput: handleRemoveDataOutput,
             onRemoveDatasetFromDataOutput: handleRemoveDatasetFromDataOutput,
-            //isDisabled: !isCurrentDataProductOwner,
+            isDisabled: !isCurrentUserDataProductOwner,
             //isLoading: () => {},//isRemovingDataOutputFromDataProduct,
         });
-    }, [t, handleRemoveDataOutput, handleRemoveDatasetFromDataOutput, handleOpen]);
+    }, [t, handleRemoveDataOutput, handleRemoveDatasetFromDataOutput, handleOpen, isCurrentUserDataProductOwner]);
 
     if (!dataProduct) return null;
 
@@ -85,7 +99,20 @@ export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
                     columns={columns}
                     dataSource={dataOutputs}
                     rowKey={({ id }) => id}
-                    pagination={false}
+                    onChange={onChange}
+                    pagination={{
+                        ...pagination,
+                        position: ['topRight'],
+                        size: 'small',
+                        showTotal: (total, range) =>
+                            t('Showing {{range0}}-{{range1}} of {{total}} data outputs', {
+                                range0: range[0],
+                                range1: range[1],
+                                total: total,
+                            }),
+                        hideOnSinglePage: false,
+                        className: styles.pagination,
+                    }}
                     rowClassName={styles.tableRow}
                     size={'small'}
                 />

@@ -7,11 +7,11 @@ import type { DataOutputConfiguration, DataOutputCreateFormSchema, GlueDataOutpu
 type Props = {
     sourceAligned: boolean;
     identifiers: string[] | undefined;
-    external_id: string;
+    namespace: string;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
-export function GlueDataOutputForm({ form, identifiers, external_id, sourceAligned }: Props) {
+export function GlueDataOutputForm({ form, identifiers, namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
     const entireSchema = Form.useWatch('entire_schema', form);
     const databaseValue = Form.useWatch('database', form);
@@ -23,13 +23,13 @@ export function GlueDataOutputForm({ form, identifiers, external_id, sourceAlign
     useEffect(() => {
         let databaseOptionsList = identifiers;
         if (!sourceAligned) {
-            databaseOptionsList = [external_id];
-            form.setFieldsValue({ database: external_id });
+            databaseOptionsList = [namespace];
+            form.setFieldsValue({ database: namespace });
         } else {
             form.setFieldsValue({ database: undefined });
         }
         databaseOptions.current = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
-    }, [external_id, form, identifiers, sourceAligned]);
+    }, [namespace, form, identifiers, sourceAligned]);
 
     useEffect(() => {
         let result = databaseValue;

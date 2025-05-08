@@ -65,10 +65,7 @@ export function UserMenu() {
                 </Badge>
 
                 <Typography.Text strong className={styles.userGreeting}>
-                    {t('{{first_name}} {{last_name}}', {
-                        first_name: user?.first_name || usernameFallback,
-                        last_name: user?.last_name || usernameFallback,
-                    })}
+                    {user?.first_name || usernameFallback} {user?.last_name || usernameFallback}
                 </Typography.Text>
             </Flex>
             <Flex className={headerStyles.headerActionsWrapper}>

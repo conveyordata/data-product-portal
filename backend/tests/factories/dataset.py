@@ -14,7 +14,7 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = Dataset
 
     id = factory.Faker("uuid4")
-    external_id = "external_id"
+    namespace = factory.Faker("word")
     name = factory.Faker("word")
     description = factory.Faker("text", max_nb_chars=20)
     about = factory.Faker("text", max_nb_chars=20)

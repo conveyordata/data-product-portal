@@ -1,10 +1,11 @@
-import 'reactflow/dist/base.css';
+import '@xyflow/react/dist/base.css';
 
+import type { Edge, Node, XYPosition } from '@xyflow/react';
+import { Position, ReactFlowProvider } from '@xyflow/react';
 import { Button, Flex, theme } from 'antd';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Edge, Node, Position, XYPosition } from 'reactflow';
 
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
@@ -14,13 +15,17 @@ import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/dat
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import {
+    useGetDataProductGraphDataQuery,
+    useGetGraphDataQuery,
+} from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
 import { greenThemeConfig } from '@/theme/antd-theme';
-import { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts';
+import type { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 
 import styles from './explorer.module.scss';
+import { Sidebar } from './sidebar';
 
 const { getDesignToken } = theme;
 
@@ -109,10 +114,11 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
             default:
                 break;
         }
+
         return {
             id: node.id,
             position: defaultNodePosition,
-            draggable: false,
+            draggable: true,
             deletable: false,
             type: node.type,
             data: {
@@ -126,7 +132,49 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
     });
 }
 
-export function Explorer({ id, type }: Props) {
+function InternalFullExplorer() {
+    // Same as InternalExplorer but this one does not filter anything, it shows the full graph
+    // Also includes a sidebar to select nodes
+
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
+        useNodeEditor();
+
+    const { data: graph, isFetching } = useGetGraphDataQuery('', {
+        skip: false,
+    });
+    const generateGraph = useCallback(() => {
+        if (graph) {
+            const nodes = parseNodes(graph.nodes, defaultNodePosition);
+            const edges = parseEdges(graph.edges);
+            setNodesAndEdges(nodes, edges);
+        }
+    }, [defaultNodePosition, graph, setNodesAndEdges]);
+    useEffect(() => {
+        generateGraph();
+    }, [generateGraph]);
+    if (isFetching) {
+        return <LoadingSpinner />;
+    }
+    return (
+        <Flex vertical className={styles.nodeWrapper}>
+            <Sidebar nodes={nodes} setNodes={setNodes} />
+            <NodeEditor
+                nodes={nodes}
+                edges={edges}
+                onConnect={onConnect}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                editorProps={{
+                    draggable: false,
+                    edgesReconnectable: false,
+                    nodesConnectable: false,
+                }}
+            />
+        </Flex>
+    );
+}
+
+function InternalExplorer({ id, type }: Props) {
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
@@ -175,10 +223,26 @@ export function Explorer({ id, type }: Props) {
                 onEdgesChange={onEdgesChange}
                 editorProps={{
                     draggable: false,
-                    edgesUpdatable: false,
+                    edgesReconnectable: false,
                     nodesConnectable: false,
                 }}
             />
         </Flex>
+    );
+}
+
+export function Explorer(props: Props) {
+    return (
+        <ReactFlowProvider>
+            <InternalExplorer {...props} />
+        </ReactFlowProvider>
+    );
+}
+
+export function FullExplorer() {
+    return (
+        <ReactFlowProvider>
+            <InternalFullExplorer />
+        </ReactFlowProvider>
     );
 }
