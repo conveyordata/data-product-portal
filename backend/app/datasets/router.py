@@ -153,8 +153,15 @@ def create_dataset(
         Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
     ],
 )
-def remove_dataset(id: UUID, db: Session = Depends(get_db_session)):
-    return DatasetService().remove_dataset(id, db)
+def remove_dataset(
+    id: UUID, background_tasks: BackgroundTasks, db: Session = Depends(get_db_session)
+):
+    DatasetService().remove_dataset(id, db)
+    background_tasks.add_task(
+        Authorization().clear_assignments_for_resource,
+        resource_id=str(id),
+    )
+    return
 
 
 @router.put(

@@ -164,9 +164,15 @@ def create_data_product(
 )
 def remove_data_product(
     id: UUID,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
 ):
-    return DataProductService().remove_data_product(id, db)
+    DataProductService().remove_data_product(id, db)
+    background_tasks.add_task(
+        Authorization().clear_assignments_for_resource,
+        resource_id=str(id),
+    )
+    return
 
 
 @router.put(
