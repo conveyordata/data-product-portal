@@ -27,7 +27,8 @@ from app.datasets.schema import (
 )
 from app.datasets.schema_get import DatasetGet, DatasetsGet
 from app.events.enum import Type
-from app.events.schema import Event, EventCreate
+from app.events.model import Event as EventModel
+from app.events.schema import Event
 from app.events.service import EventService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
@@ -164,11 +165,8 @@ class DatasetService:
         model = DatasetModel(**dataset_schema, tags=tags)
 
         db.add(model)
-        db.commit()
-        RefreshInfrastructureLambda().trigger()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Dataset created",
                 subject_id=model.id,
                 subject_type=Type.DATASET,
@@ -176,6 +174,8 @@ class DatasetService:
                 domain_id=model.domain_id,
             ),
         )
+        db.commit()
+        RefreshInfrastructureLambda().trigger()
         return model
 
     def remove_dataset(self, id: UUID, db: Session, authenticated_user: User) -> None:
@@ -191,12 +191,8 @@ class DatasetService:
         dataset.owners = []
         dataset.data_product_links = []
         dataset.tags = []
-        db.delete(dataset)
-
-        db.commit()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Dataset removed",
                 subject_id=dataset.id,
                 subject_type=Type.DATASET,
@@ -204,6 +200,8 @@ class DatasetService:
                 domain_id=dataset.domain_id,
             ),
         )
+        db.delete(dataset)
+        db.commit()
         RefreshInfrastructureLambda().trigger()
 
     def update_dataset(
@@ -238,11 +236,8 @@ class DatasetService:
                 current_dataset.tags = new_tags
             else:
                 setattr(current_dataset, k, v) if v else None
-        db.commit()
-        RefreshInfrastructureLambda().trigger()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Dataset updated",
                 subject_id=current_dataset.id,
                 subject_type=Type.DATASET,
@@ -250,6 +245,8 @@ class DatasetService:
                 domain_id=dataset.domain_id,
             ),
         )
+        db.commit()
+        RefreshInfrastructureLambda().trigger()
         return {"id": current_dataset.id}
 
     def update_dataset_about(
@@ -261,10 +258,8 @@ class DatasetService:
     ) -> None:
         current_dataset = ensure_dataset_exists(id, db)
         current_dataset.about = dataset.about
-        db.commit()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Dataset about updated",
                 subject_id=current_dataset.id,
                 subject_type=Type.DATASET,
@@ -272,6 +267,7 @@ class DatasetService:
                 domain_id=current_dataset.domain.id,
             ),
         )
+        db.commit()
 
     def update_dataset_status(
         self,
@@ -282,10 +278,8 @@ class DatasetService:
     ) -> None:
         current_dataset = ensure_dataset_exists(id, db)
         current_dataset.status = dataset.status
-        db.commit()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Dataset status updated",
                 subject_id=current_dataset.id,
                 subject_type=Type.DATASET,
@@ -293,6 +287,7 @@ class DatasetService:
                 domain_id=current_dataset.domain.id,
             ),
         )
+        db.commit()
 
     def add_user_to_dataset(
         self, dataset_id: UUID, user_id: UUID, db: Session, authenticated_user: User
@@ -306,11 +301,8 @@ class DatasetService:
             )
 
         dataset.owners.append(user)
-        db.commit()
-        RefreshInfrastructureLambda().trigger()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="User added to dataset",
                 subject_id=dataset.id,
                 subject_type=Type.DATASET,
@@ -320,6 +312,8 @@ class DatasetService:
                 domain_id=dataset.domain.id,
             ),
         )
+        db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def remove_user_from_dataset(
         self, dataset_id: UUID, user_id: UUID, db: Session, authenticated_user: User
@@ -339,11 +333,8 @@ class DatasetService:
             )
 
         dataset.owners.remove(user)
-        db.commit()
-        RefreshInfrastructureLambda().trigger()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="User removed from dataset",
                 subject_id=dataset.id,
                 subject_type=Type.DATASET,
@@ -353,6 +344,8 @@ class DatasetService:
                 domain_id=dataset.domain.id,
             ),
         )
+        db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
         dataset = db.get(DatasetModel, id)

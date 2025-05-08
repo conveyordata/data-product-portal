@@ -20,8 +20,7 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
 from app.events.enum import Type
-from app.events.schema import EventCreate
-from app.events.service import EventService
+from app.events.model import Event as EventModel
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.users.model import ensure_user_exists
@@ -52,11 +51,8 @@ class DataProductMembershipService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.memberships.append(data_product_membership)
-        db.commit()
-        db.refresh(data_product_membership)
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Data product membership requested",
                 subject_id=data_product_membership.data_product_id,
                 subject_type=Type.DATA_PRODUCT,
@@ -66,6 +62,8 @@ class DataProductMembershipService:
                 domain_id=data_product.domain_id,
             ),
         )
+        db.commit()
+        db.refresh(data_product_membership)
 
         url = (
             settings.HOST.strip("/")
@@ -122,12 +120,8 @@ class DataProductMembershipService:
         data_product_membership.status = DecisionStatus.APPROVED
         data_product_membership.approved_by_id = authenticated_user.id
         data_product_membership.approved_on = datetime.now(tz=pytz.utc)
-        db.commit()
-        db.refresh(data_product_membership)
-        RefreshInfrastructureLambda().trigger()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Data product membership approved",
                 subject_id=data_product_membership.data_product_id,
                 subject_type=Type.DATA_PRODUCT,
@@ -137,6 +131,9 @@ class DataProductMembershipService:
                 domain_id=data_product_membership.data_product.domain_id,
             ),
         )
+        db.commit()
+        db.refresh(data_product_membership)
+        RefreshInfrastructureLambda().trigger()
         return {"id": data_product_membership.id}
 
     def deny_membership_request(
@@ -163,11 +160,8 @@ class DataProductMembershipService:
         data_product_membership.status = DecisionStatus.DENIED
         data_product_membership.denied_by_id = authenticated_user.id
         data_product_membership.denied_on = datetime.now(tz=pytz.utc)
-        db.commit()
-        db.refresh(data_product_membership)
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Data product membership denied",
                 subject_id=data_product_membership.data_product_id,
                 subject_type=Type.DATA_PRODUCT,
@@ -177,6 +171,8 @@ class DataProductMembershipService:
                 domain_id=data_product_membership.data_product.domain_id,
             ),
         )
+        db.commit()
+        db.refresh(data_product_membership)
         return {"id": data_product_membership.id}
 
     def remove_membership(self, id: UUID, db: Session, authenticated_user: User):
@@ -204,11 +200,8 @@ class DataProductMembershipService:
             )
 
         data_product.memberships.remove(data_product_membership)
-        db.commit()
-        RefreshInfrastructureLambda().trigger()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Data product membership removed",
                 subject_id=data_product_membership.data_product_id,
                 subject_type=Type.DATA_PRODUCT,
@@ -218,6 +211,8 @@ class DataProductMembershipService:
                 domain_id=data_product.domain_id,
             ),
         )
+        db.commit()
+        RefreshInfrastructureLambda().trigger()
 
     def add_data_product_membership(
         self,
@@ -246,12 +241,8 @@ class DataProductMembershipService:
             approved_on=datetime.now(tz=pytz.utc),
         )
         data_product.memberships.append(data_product_membership)
-        db.commit()
-        db.refresh(data_product_membership)
-        RefreshInfrastructureLambda().trigger()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Data product membership added",
                 subject_id=data_product_membership.data_product_id,
                 subject_type=Type.DATA_PRODUCT,
@@ -261,6 +252,9 @@ class DataProductMembershipService:
                 domain_id=data_product.domain_id,
             ),
         )
+        db.commit()
+        db.refresh(data_product_membership)
+        RefreshInfrastructureLambda().trigger()
         return {"id": data_product_membership.id}
 
     def update_data_product_membership_role(
@@ -296,12 +290,8 @@ class DataProductMembershipService:
             )
 
         data_product_membership.role = membership_role
-        db.commit()
-        db.refresh(data_product_membership)
-        RefreshInfrastructureLambda().trigger()
-        EventService().create_event(
-            db,
-            EventCreate(
+        db.add(
+            EventModel(
                 name="Data product membership updated",
                 subject_id=data_product_membership.data_product_id,
                 subject_type=Type.DATA_PRODUCT,
@@ -311,6 +301,9 @@ class DataProductMembershipService:
                 domain_id=data_product.domain_id,
             ),
         )
+        db.commit()
+        db.refresh(data_product_membership)
+        RefreshInfrastructureLambda().trigger()
         return {"id": data_product_membership.id}
 
     def get_user_pending_actions(
