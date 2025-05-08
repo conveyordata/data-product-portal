@@ -5,7 +5,7 @@ from app.data_outputs.status import DataOutputStatus
 from app.shared.schema import ORMModel
 
 
-class DataOutputBasic(ORMModel):
+class DataOutput(ORMModel):
     id: UUID
     name: str
     namespace: str

@@ -12,7 +12,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.database import database
 from app.database.database import get_db_session
 from app.settings import settings
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
@@ -52,10 +52,10 @@ class Authorization(metaclass=Singleton):
         resolver: type[SubjectResolver],
         *,
         object_id: str = "id",
-    ) -> Callable[[Request, UserBasic, Session], None]:
+    ) -> Callable[[Request, User, Session], None]:
         def inner(
             request: Request,
-            user: UserBasic = Depends(get_authenticated_user),
+            user: User = Depends(get_authenticated_user),
             db: Session = Depends(get_db_session),
         ) -> None:
             if not settings.AUTHORIZER_ENABLED:

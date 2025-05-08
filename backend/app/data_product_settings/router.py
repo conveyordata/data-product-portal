@@ -10,11 +10,11 @@ from app.core.namespace.validation import (
     NamespaceValidation,
 )
 from app.data_product_settings.enums import DataProductSettingScope
-from app.data_product_settings.schema_create import (
+from app.data_product_settings.schema_request import (
     DataProductSettingCreate,
     DataProductSettingUpdate,
 )
-from app.data_product_settings.schema_get import DataProductSettingsGet
+from app.data_product_settings.schema_response import DataProductSettingsGet
 from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin

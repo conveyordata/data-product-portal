@@ -19,12 +19,12 @@ from app.data_product_lifecycles.model import (
 )
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.datasets.schema_create import (
+from app.datasets.schema_request import (
     DatasetAboutUpdate,
     DatasetCreateUpdate,
     DatasetStatusUpdate,
 )
-from app.datasets.schema_get import DatasetGet, DatasetsGet
+from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType

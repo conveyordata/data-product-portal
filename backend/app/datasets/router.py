@@ -13,12 +13,12 @@ from app.core.namespace.validation import (
 )
 from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
-from app.datasets.schema_create import (
+from app.datasets.schema_request import (
     DatasetAboutUpdate,
     DatasetCreateUpdate,
     DatasetStatusUpdate,
 )
-from app.datasets.schema_get import DatasetGet, DatasetsGet
+from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
 from app.dependencies import only_dataset_owners
 from app.graph.graph import Graph

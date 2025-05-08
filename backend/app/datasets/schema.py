@@ -5,7 +5,7 @@ from app.datasets.status import DatasetStatus
 from app.shared.schema import ORMModel
 
 
-class DatasetBasic(ORMModel):
+class Dataset(ORMModel):
     id: UUID
     name: str
     namespace: str

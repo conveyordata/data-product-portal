@@ -4,7 +4,7 @@ from app.data_product_types.enums import DataProductIconKey
 from app.shared.schema import ORMModel
 
 
-class DataProductTypeBasic(ORMModel):
+class DataProductType(ORMModel):
     id: UUID
     name: str
     description: str

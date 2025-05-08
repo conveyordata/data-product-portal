@@ -5,7 +5,7 @@ from annotated_types import MinLen
 from pydantic import field_validator
 
 from app.data_product_memberships.enums import DataProductUserRole
-from app.data_product_memberships.schema_create import DataProductMembershipCreate
+from app.data_product_memberships.schema_request import DataProductMembershipCreate
 from app.data_products.status import DataProductStatus
 from app.shared.schema import ORMModel
 

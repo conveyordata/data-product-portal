@@ -11,17 +11,17 @@ from app.data_products.model import ensure_data_product_exists
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
-from app.data_products_datasets.schema_get import DataProductDatasetAssociationsGet
+from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
 class DataProductDatasetService:
     def approve_data_product_link(
-        self, id: UUID, db: Session, authenticated_user: UserBasic
+        self, id: UUID, db: Session, authenticated_user: User
     ):
         current_link = db.get(DataProductDatasetAssociationModel, id)
         if current_link.status != DecisionStatus.PENDING:
@@ -35,9 +35,7 @@ class DataProductDatasetService:
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
-    def deny_data_product_link(
-        self, id: UUID, db: Session, authenticated_user: UserBasic
-    ):
+    def deny_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
         current_link = db.get(DataProductDatasetAssociationModel, id)
         if (
             current_link.status != DecisionStatus.PENDING
@@ -52,9 +50,7 @@ class DataProductDatasetService:
         current_link.denied_on = datetime.now(tz=pytz.utc)
         db.commit()
 
-    def remove_data_product_link(
-        self, id: UUID, db: Session, authenticated_user: UserBasic
-    ):
+    def remove_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
         current_link = db.get(DataProductDatasetAssociationModel, id)
         dataset = current_link.dataset
         ensure_dataset_exists(dataset.id, db)
@@ -65,7 +61,7 @@ class DataProductDatasetService:
         db.commit()
 
     def get_user_pending_actions(
-        self, db: Session, authenticated_user: UserBasic
+        self, db: Session, authenticated_user: User
     ) -> list[DataProductDatasetAssociationsGet]:
         return (
             db.query(DataProductDatasetAssociationModel)

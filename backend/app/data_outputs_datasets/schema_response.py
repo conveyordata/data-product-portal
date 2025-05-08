@@ -2,17 +2,17 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from app.data_outputs.schema_basic import DataOutputBasic
-from app.data_products.schema_basic import DataProductBasic
-from app.datasets.schema_basic import DatasetBasic
+from app.data_outputs.schema import DataOutput as DataOutputBaseSchema
+from app.data_products.schema import DataProduct
+from app.datasets.schema import Dataset
 from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
-class DataOutput(DataOutputBasic):
+class DataOutput(DataOutputBaseSchema):
     # Nested schemas
-    owner: DataProductBasic
+    owner: DataProduct
 
 
 class BaseDataOutputDatasetAssociationGet(ORMModel):
@@ -25,11 +25,11 @@ class BaseDataOutputDatasetAssociationGet(ORMModel):
     approved_on: Optional[datetime]
 
     # Nested schemas
-    dataset: DatasetBasic
+    dataset: Dataset
     data_output: DataOutput
-    requested_by: UserBasic
-    denied_by: Optional[UserBasic]
-    approved_by: Optional[UserBasic]
+    requested_by: User
+    denied_by: Optional[User]
+    approved_by: Optional[User]
 
 
 class DataOutputDatasetAssociationGet(BaseDataOutputDatasetAssociationGet):

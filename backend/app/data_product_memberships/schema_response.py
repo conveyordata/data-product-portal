@@ -3,10 +3,10 @@ from typing import Optional
 from uuid import UUID
 
 from app.data_product_memberships.enums import DataProductUserRole
-from app.data_products.schema_basic import DataProductBasic
+from app.data_products.schema import DataProduct
 from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
 class BaseDataProductMembershipGet(ORMModel):
@@ -18,11 +18,11 @@ class BaseDataProductMembershipGet(ORMModel):
     requested_on: datetime
 
     # Nested schemas
-    user: UserBasic
-    data_product: DataProductBasic
-    requested_by: Optional[UserBasic]
-    denied_by: Optional[UserBasic]
-    approved_by: Optional[UserBasic]
+    user: User
+    data_product: DataProduct
+    requested_by: Optional[User]
+    denied_by: Optional[User]
+    approved_by: Optional[User]
 
 
 class DataProductMembershipGet(BaseDataProductMembershipGet):

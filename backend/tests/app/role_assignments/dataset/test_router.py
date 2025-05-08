@@ -10,7 +10,7 @@ from app.datasets.model import Dataset
 from app.role_assignments.dataset.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Role, Scope
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/dataset"
 
@@ -19,7 +19,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_list_assignments(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id, user_id=user.id, role_id=role.id
@@ -33,7 +33,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_create_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
 
         response = client.post(
@@ -53,7 +53,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_delete_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
@@ -75,7 +75,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_decide_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
@@ -96,7 +96,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_decide_assignment_already_decided(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
@@ -115,7 +115,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_decide_assignment_idempotency(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
@@ -132,7 +132,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_decide_assignment_no_role(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
@@ -149,7 +149,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_modify_assigned_role(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 

@@ -5,7 +5,7 @@ import emailgen
 
 from app.core.logging.logger import logger
 from app.settings import settings
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 # For most simple use cases, this should be all you need to define.
 generator = emailgen.Generator(
@@ -20,9 +20,7 @@ generator = emailgen.Generator(
 )
 
 
-def send_mail(
-    recipients: list[UserBasic], action: emailgen.Table, url: str, subject: str
-):
+def send_mail(recipients: list[User], action: emailgen.Table, url: str, subject: str):
     for recipient in recipients:
         try:
             email = emailgen.Email(f"{recipient.first_name}")

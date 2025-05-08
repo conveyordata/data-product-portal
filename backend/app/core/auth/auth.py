@@ -11,11 +11,11 @@ from app.core.auth.oidc import OIDCIdentity
 from app.database.database import get_db_session
 from app.settings import settings
 from app.users.model import User as UserModel
-from app.users.schema_basic import UserBasic
-from app.users.schema_create import UserCreate
+from app.users.schema import User
+from app.users.schema_request import UserCreate
 
 
-def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> UserBasic:
+def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> User:
     db_user = db.query(UserModel).filter(UserModel.external_id == token.sub).first()
     if db_user:
         db_user.email = oidc_user.email
@@ -39,7 +39,7 @@ def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> Use
 
     db.commit()
 
-    UserBasic.model_validate(db_user)
+    User.model_validate(db_user)
     return db_user
 
 
@@ -56,7 +56,7 @@ if settings.OIDC_ENABLED:
 
     def authorize_user(
         token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
-    ) -> UserBasic:
+    ) -> User:
         response = httpx.post(
             url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
         )
@@ -78,7 +78,7 @@ if settings.OIDC_ENABLED:
     def get_authenticated_user(
         token: JWTToken = Depends(api_key_authenticated),
         db: Session = Depends(get_db_session),
-    ) -> UserBasic:
+    ) -> User:
         result = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)
         ).one_or_none()
@@ -96,7 +96,7 @@ else:
 
     def authorize_user(
         token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
-    ) -> UserBasic:
+    ) -> User:
         oidc_user = OIDCIdentity(
             sub="sub",
             name="John",
@@ -109,9 +109,9 @@ else:
 
     def get_authenticated_user(
         token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
-    ) -> UserBasic:
+    ) -> User:
         token = JWTToken(sub="sub", token="token_value")
-        user: Optional[UserBasic] = db.scalars(
+        user: Optional[User] = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)
         ).one_or_none()
         if not user:

@@ -4,7 +4,7 @@ from app.core.auth.credentials import AWSCredentials
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.environments.service import EnvironmentService
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
 class AuthService:
@@ -12,7 +12,7 @@ class AuthService:
         self,
         data_product_name: str,
         environment: str,
-        authorized_user: UserBasic,
+        authorized_user: User,
         db: Session,
     ) -> AWSCredentials:
         envs = EnvironmentService(db).get_environments()

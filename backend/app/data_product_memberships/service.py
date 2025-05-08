@@ -12,15 +12,15 @@ from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLamb
 from app.core.email.send_mail import send_mail
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import DataProductMembership
-from app.data_product_memberships.schema_create import DataProductMembershipCreate
-from app.data_product_memberships.schema_get import DataProductMembershipsGet
+from app.data_product_memberships.schema_request import DataProductMembershipCreate
+from app.data_product_memberships.schema_response import DataProductMembershipsGet
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.users.model import ensure_user_exists
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
 class DataProductMembershipService:
@@ -28,7 +28,7 @@ class DataProductMembershipService:
         self,
         user_id: UUID,
         data_product_id: UUID,
-        authenticated_user: UserBasic,
+        authenticated_user: User,
         db: Session,
         background_tasks: BackgroundTasks,
     ):
@@ -57,7 +57,7 @@ class DataProductMembershipService:
             + "#team"
         )
         owners = [
-            UserBasic.model_validate(owner)
+            User.model_validate(owner)
             for owner in DataProductService().get_owners(data_product_id, db)
         ]
         action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
@@ -85,7 +85,7 @@ class DataProductMembershipService:
         self,
         id: UUID,
         db: Session,
-        authenticated_user: UserBasic,
+        authenticated_user: User,
     ):
         data_product_membership = (
             db.query(DataProductMembership).filter_by(id=id).first()
@@ -114,7 +114,7 @@ class DataProductMembershipService:
         self,
         id: UUID,
         db: Session,
-        authenticated_user: UserBasic,
+        authenticated_user: User,
     ):
         data_product_membership = (
             db.query(DataProductMembership).filter_by(id=id).first()
@@ -139,7 +139,7 @@ class DataProductMembershipService:
 
         return {"id": data_product_membership.id}
 
-    def remove_membership(self, id: UUID, db: Session, authenticated_user: UserBasic):
+    def remove_membership(self, id: UUID, db: Session, authenticated_user: User):
         data_product_membership = (
             db.query(DataProductMembership).filter_by(id=id).first()
         )
@@ -172,7 +172,7 @@ class DataProductMembershipService:
         data_product_id: UUID,
         data_product_membership: DataProductMembershipCreate,
         db: Session,
-        authenticated_user: UserBasic,
+        authenticated_user: User,
     ):
         data_product = ensure_data_product_exists(data_product_id, db)
 
@@ -237,7 +237,7 @@ class DataProductMembershipService:
         return {"id": data_product_membership.id}
 
     def get_user_pending_actions(
-        self, db: Session, authenticated_user: UserBasic
+        self, db: Session, authenticated_user: User
     ) -> list[DataProductMembershipsGet]:
         actions = (
             db.scalars(

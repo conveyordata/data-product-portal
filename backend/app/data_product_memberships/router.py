@@ -13,8 +13,8 @@ from app.core.authz import (
 )
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import DataProductMembership
-from app.data_product_memberships.schema_create import DataProductMembershipCreate
-from app.data_product_memberships.schema_get import DataProductMembershipsGet
+from app.data_product_memberships.schema_request import DataProductMembershipCreate
+from app.data_product_memberships.schema_response import DataProductMembershipsGet
 from app.data_product_memberships.service import DataProductMembershipService
 from app.database.database import get_db_session
 from app.dependencies import (
@@ -28,7 +28,7 @@ from app.role_assignments.data_product.router import (
 from app.role_assignments.data_product.schema import ModifyRoleAssignment
 from app.roles.model import Role
 from app.roles.schema import Scope
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 router = APIRouter(
     prefix="/data_product_memberships", tags=["data_product_memberships"]
@@ -52,7 +52,7 @@ def create_data_product_membership(
     data_product_id: UUID,
     data_product_membership: DataProductMembershipCreate,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductMembershipService().add_data_product_membership(
         data_product_id, data_product_membership, db, authenticated_user
@@ -76,7 +76,7 @@ def request_data_product_membership(
     data_product_id: UUID,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductMembershipService().request_user_access_to_data_product(
         user_id, data_product_id, authenticated_user, db, background_tasks
@@ -98,7 +98,7 @@ def request_data_product_membership(
 def approve_data_product_membership(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductMembershipService().approve_membership_request(
         id, db, authenticated_user
@@ -120,7 +120,7 @@ def approve_data_product_membership(
 def deny_data_product_membership(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductMembershipService().deny_membership_request(
         id, db, authenticated_user
@@ -142,7 +142,7 @@ def deny_data_product_membership(
 def remove_data_product_membership(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductMembershipService().remove_membership(id, db, authenticated_user)
 
@@ -176,7 +176,7 @@ def update_data_product_role(
     membership_role: DataProductUserRole,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     old_membership = db.scalar(select(DataProductMembership).filter_by(id=id))
     old_role = old_membership.role.name.lower()
@@ -203,7 +203,7 @@ def update_data_product_role(
 @router.get("/actions")
 def get_user_pending_actions(
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> list[DataProductMembershipsGet]:
     return DataProductMembershipService().get_user_pending_actions(
         db, authenticated_user

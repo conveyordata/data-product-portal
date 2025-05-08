@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
-from app.tags.schema_create import TagCreate, TagUpdate
-from app.tags.schema_get import TagsGet
+from app.tags.schema_request import TagCreate, TagUpdate
+from app.tags.schema_response import TagsGet
 
 
 class TagService:

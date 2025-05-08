@@ -10,7 +10,7 @@ from app.data_products.model import DataProduct
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Role, Scope
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/data_product"
 
@@ -19,7 +19,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_list_assignments(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id, user_id=user.id, role_id=role.id
@@ -33,7 +33,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_create_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
@@ -53,7 +53,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_delete_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
@@ -75,7 +75,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
@@ -96,7 +96,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment_already_decided(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
@@ -115,7 +115,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment_idempotency(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
@@ -132,7 +132,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment_no_role(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
@@ -149,7 +149,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_modify_assigned_role(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        user: UserBasic = UserFactory()
+        user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         new_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 

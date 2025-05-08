@@ -6,13 +6,13 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataOutputResolver
 from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
-from app.data_outputs.schema_create import DataOutputStatusUpdate, DataOutputUpdate
-from app.data_outputs.schema_get import DataOutputGet, DataOutputsGet
+from app.data_outputs.schema_request import DataOutputStatusUpdate, DataOutputUpdate
+from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.dependencies import only_data_output_owners
 from app.graph.graph import Graph
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
 
@@ -60,7 +60,7 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
 def remove_data_output(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataOutputService().remove_data_output(id, db, authenticated_user)
 
@@ -149,7 +149,7 @@ def link_dataset_to_data_output(
     id: UUID,
     dataset_id: UUID,
     background_tasks: BackgroundTasks,
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
     return DataOutputService().link_dataset_to_data_output(
@@ -186,7 +186,7 @@ def link_dataset_to_data_output(
 def unlink_dataset_from_data_output(
     id: UUID,
     dataset_id: UUID,
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ):
     return DataOutputService().unlink_dataset_from_data_output(

@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from app.data_products.schema_basic import DataProductBasic
-from app.datasets.schema_basic import DatasetBasic
+from app.data_products.schema import DataProduct
+from app.datasets.schema import Dataset
 from app.shared.schema import ORMModel
 
 
@@ -12,8 +12,8 @@ class BaseDomainGet(ORMModel):
 
 
 class DomainGet(BaseDomainGet):
-    data_products: list[DataProductBasic]
-    datasets: list[DatasetBasic]
+    data_products: list[DataProduct]
+    datasets: list[Dataset]
 
 
 class DomainsGet(BaseDomainGet):

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from app.authorization.schema import AccessResponse
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 router = APIRouter(prefix="/authz", tags=["authz"])
 
@@ -26,7 +26,7 @@ def check_access(
     action: Action,
     resource: Optional[UUID] = None,
     domain: Optional[UUID] = None,
-    user: UserBasic = Depends(get_authenticated_user),
+    user: User = Depends(get_authenticated_user),
 ) -> AccessResponse:
     """Allows the requesting user to check whether an access check will fail or succeed.
     Useful to conditionally disable parts of the UI that are known to be inaccessible.

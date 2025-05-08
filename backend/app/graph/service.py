@@ -7,11 +7,11 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.role_assignments.enums import DecisionStatus
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
 class GraphService:
-    def get_graph_data(self, db: Session, user: UserBasic) -> Graph:
+    def get_graph_data(self, db: Session, user: User) -> Graph:
         # get all data products
         data_product_gets = DataProductService().get_data_products(db=db)
         # get all datasets

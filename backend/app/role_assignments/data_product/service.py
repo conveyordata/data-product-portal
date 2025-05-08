@@ -13,11 +13,11 @@ from app.role_assignments.data_product.schema import (
     UpdateRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
 class RoleAssignmentService:
-    def __init__(self, db: Session, user: UserBasic) -> None:
+    def __init__(self, db: Session, user: User) -> None:
         self.db = db
         self.user = user
 

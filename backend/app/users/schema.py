@@ -5,7 +5,7 @@ from pydantic import EmailStr
 from app.shared.schema import ORMModel
 
 
-class UserBasic(ORMModel):
+class User(ORMModel):
     id: UUID
     email: EmailStr
     external_id: str

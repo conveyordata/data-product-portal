@@ -5,7 +5,7 @@ from app.role_assignments.enums import DecisionStatus
 from app.shared.schema import ORMModel
 
 
-class DataProductMembershipBasic(ORMModel):
+class DataProductMembership(ORMModel):
     id: UUID
     status: DecisionStatus
     data_product_id: UUID

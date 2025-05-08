@@ -17,12 +17,12 @@ from app.core.namespace.validation import (
 )
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
-from app.data_outputs.schema_create import (
+from app.data_outputs.schema_request import (
     DataOutputCreate,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
-from app.data_outputs.schema_get import DataOutputGet, DataOutputsGet
+from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
@@ -36,7 +36,7 @@ from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
 class DataOutputService:
@@ -45,7 +45,7 @@ class DataOutputService:
 
     def ensure_member(
         self,
-        authenticated_user: UserBasic,
+        authenticated_user: User,
         owner_id: UUID,
         db: Session,
     ):
@@ -68,7 +68,7 @@ class DataOutputService:
             )
 
     def ensure_owner(
-        self, authenticated_user: UserBasic, data_output: DataOutputModel, db: Session
+        self, authenticated_user: User, data_output: DataOutputModel, db: Session
     ):
         product = db.get(DataProductModel, data_output.owner_id)
         if authenticated_user.is_admin:
@@ -113,7 +113,7 @@ class DataOutputService:
         id: UUID,
         data_output: DataOutputCreate,
         db: Session,
-        authenticated_user: UserBasic,
+        authenticated_user: User,
     ) -> dict[str, UUID]:
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -147,7 +147,7 @@ class DataOutputService:
         RefreshInfrastructureLambda().trigger()
         return {"id": model.id}
 
-    def remove_data_output(self, id: UUID, db: Session, authenticated_user: UserBasic):
+    def remove_data_output(self, id: UUID, db: Session, authenticated_user: User):
         data_output = db.get(
             DataOutputModel,
             id,
@@ -174,7 +174,7 @@ class DataOutputService:
         self,
         id: UUID,
         dataset_id: UUID,
-        authenticated_user: UserBasic,
+        authenticated_user: User,
         db: Session,
         background_tasks: BackgroundTasks,
     ):
@@ -230,7 +230,7 @@ class DataOutputService:
         )
         background_tasks.add_task(
             send_mail,
-            [UserBasic.model_validate(owner) for owner in dataset.owners],
+            [User.model_validate(owner) for owner in dataset.owners],
             action,
             url,
             f"Action Required: {data_output.owner.name} wants "
@@ -239,7 +239,7 @@ class DataOutputService:
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_output(
-        self, id: UUID, dataset_id: UUID, authenticated_user: UserBasic, db: Session
+        self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
     ):
         ensure_dataset_exists(dataset_id, db)
         data_output = ensure_data_output_exists(id, db)

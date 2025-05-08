@@ -11,18 +11,16 @@ from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_outputs_datasets.schema_get import DataOutputDatasetAssociationsGet
+from app.data_outputs_datasets.schema_response import DataOutputDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
 class DataOutputDatasetService:
-    def approve_data_output_link(
-        self, id: UUID, db: Session, authenticated_user: UserBasic
-    ):
+    def approve_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
         current_link = db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
@@ -48,9 +46,7 @@ class DataOutputDatasetService:
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
-    def deny_data_output_link(
-        self, id: UUID, db: Session, authenticated_user: UserBasic
-    ):
+    def deny_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
         current_link = db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
@@ -70,9 +66,7 @@ class DataOutputDatasetService:
         current_link.denied_on = datetime.now(tz=pytz.utc)
         db.commit()
 
-    def remove_data_output_link(
-        self, id: UUID, db: Session, authenticated_user: UserBasic
-    ):
+    def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
         current_link = db.get(
             DataOutputDatasetAssociationModel,
             id,
@@ -97,7 +91,7 @@ class DataOutputDatasetService:
         db.commit()
 
     def get_user_pending_actions(
-        self, db: Session, authenticated_user: UserBasic
+        self, db: Session, authenticated_user: User
     ) -> list[DataOutputDatasetAssociationsGet]:
         return (
             db.scalars(

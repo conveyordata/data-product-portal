@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization, DataProductResolver
-from app.data_product_lifecycles.schema_create import (
+from app.data_product_lifecycles.schema_request import (
     DataProductLifeCycleCreate,
     DataProductLifeCycleUpdate,
 )
-from app.data_product_lifecycles.schema_get import DataProductLifeCyclesGet
+from app.data_product_lifecycles.schema_response import DataProductLifeCyclesGet
 from app.data_product_lifecycles.service import DataProductLifeCycleService
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin

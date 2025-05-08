@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductDatasetAssociationResolver
-from app.data_products_datasets.schema_get import DataProductDatasetAssociationsGet
+from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
 from app.data_products_datasets.service import DataProductDatasetService
 from app.database.database import get_db_session
 from app.dependencies import only_dataproduct_dataset_link_owners
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 router = APIRouter(
     prefix="/data_product_dataset_links", tags=["data_product_dataset_links"]
@@ -31,7 +31,7 @@ router = APIRouter(
 def approve_data_product_link(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductDatasetService().approve_data_product_link(
         id, db, authenticated_user
@@ -53,7 +53,7 @@ def approve_data_product_link(
 def deny_data_product_link(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductDatasetService().deny_data_product_link(
         id, db, authenticated_user
@@ -75,7 +75,7 @@ def deny_data_product_link(
 def remove_data_product_link(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataProductDatasetService().remove_data_product_link(
         id, db, authenticated_user
@@ -85,6 +85,6 @@ def remove_data_product_link(
 @router.get("/actions")
 def get_user_pending_actions(
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> list[DataProductDatasetAssociationsGet]:
     return DataProductDatasetService().get_user_pending_actions(db, authenticated_user)

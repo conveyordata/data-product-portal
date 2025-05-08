@@ -5,10 +5,11 @@ from app.data_product_settings.enums import (
     DataProductSettingScope,
     DataProductSettingType,
 )
+from app.data_product_settings.schema import DataProductSetting
 from app.shared.schema import ORMModel
 
 
-class DataProductSettingBasic(ORMModel):
+class BaseDataProductSettingGet(ORMModel):
     id: UUID
     category: str
     type: DataProductSettingType
@@ -20,7 +21,15 @@ class DataProductSettingBasic(ORMModel):
     scope: DataProductSettingScope
 
 
-class DataProductSettingValueBasic(ORMModel):
+class DataProductSettingGet(BaseDataProductSettingGet):
+    pass
+
+
+class DataProductSettingsGet(BaseDataProductSettingGet):
+    pass
+
+
+class BaseDataProductSettingValueGet(ORMModel):
     id: UUID
     data_product_id: Optional[UUID] = None
     dataset_id: Optional[UUID] = None
@@ -28,4 +37,12 @@ class DataProductSettingValueBasic(ORMModel):
     value: str
 
     # Nested schemas
-    data_product_setting: DataProductSettingBasic
+    data_product_setting: DataProductSetting
+
+
+class DataProductSettingValueGet(BaseDataProductSettingValueGet):
+    pass
+
+
+class DataProductSettingValuesGet(BaseDataProductSettingValueGet):
+    pass

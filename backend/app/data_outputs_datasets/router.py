@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataOutputDatasetAssociationResolver
-from app.data_outputs_datasets.schema_get import DataOutputDatasetAssociationsGet
+from app.data_outputs_datasets.schema_response import DataOutputDatasetAssociationsGet
 from app.data_outputs_datasets.service import DataOutputDatasetService
 from app.database.database import get_db_session
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 router = APIRouter(
     prefix="/data_output_dataset_links", tags=["data_output_dataset_links"]
@@ -29,7 +29,7 @@ router = APIRouter(
 def approve_data_output_link(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataOutputDatasetService().approve_data_output_link(
         id, db, authenticated_user
@@ -50,7 +50,7 @@ def approve_data_output_link(
 def deny_data_output_link(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataOutputDatasetService().deny_data_output_link(id, db, authenticated_user)
 
@@ -69,7 +69,7 @@ def deny_data_output_link(
 def remove_data_output_link(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
     return DataOutputDatasetService().remove_data_output_link(
         id, db, authenticated_user
@@ -79,6 +79,6 @@ def remove_data_output_link(
 @router.get("/actions")
 def get_user_pending_actions(
     db: Session = Depends(get_db_session),
-    authenticated_user: UserBasic = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> list[DataOutputDatasetAssociationsGet]:
     return DataOutputDatasetService().get_user_pending_actions(db, authenticated_user)

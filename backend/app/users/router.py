@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
-from app.users.schema_create import UserCreate
-from app.users.schema_get import UsersGet
+from app.users.schema_request import UserCreate
+from app.users.schema_response import UsersGet
 from app.users.service import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])

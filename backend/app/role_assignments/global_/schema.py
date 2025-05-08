@@ -8,7 +8,7 @@ from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.model import GlobalRoleAssignment
 from app.roles.schema import Role
 from app.shared.schema import ORMModel
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
 class CreateRoleAssignment(BaseModel):
@@ -31,13 +31,13 @@ class RoleAssignmentRequest(BaseModel):
 
 class RoleAssignmentResponse(ORMModel):
     id: UUID
-    user: UserBasic
+    user: User
     role: Role
     decision: DecisionStatus
     requested_on: Optional[datetime]
-    requested_by: Optional[UserBasic]
+    requested_by: Optional[User]
     decided_on: Optional[datetime]
-    decided_by: Optional[UserBasic]
+    decided_by: Optional[User]
 
     class Meta:
         orm_model = GlobalRoleAssignment

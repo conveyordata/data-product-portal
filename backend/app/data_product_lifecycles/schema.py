@@ -3,7 +3,9 @@ from uuid import UUID
 from app.shared.schema import ORMModel
 
 
-class DomainBasic(ORMModel):
+class DataProductLifeCycle(ORMModel):
     id: UUID
     name: str
-    description: str
+    value: int
+    color: str
+    is_default: bool

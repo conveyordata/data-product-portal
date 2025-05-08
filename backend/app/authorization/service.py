@@ -21,7 +21,7 @@ from app.role_assignments.global_.service import (
 )
 from app.roles.auth import AuthRole
 from app.roles.service import RoleService
-from app.users.schema_basic import UserBasic
+from app.users.schema import User
 
 
 class AuthorizationService:
@@ -56,7 +56,7 @@ class AuthorizationService:
             await AuthRole(role).sync()
 
     async def _sync_product_assignments(self):
-        service = DataProductRoleAssignmentService(self.db, cast(UserBasic, None))
+        service = DataProductRoleAssignmentService(self.db, cast(User, None))
         product_assignments = service.list_assignments(
             data_product_id=None, user_id=None, decision=DecisionStatus.APPROVED
         )
@@ -65,7 +65,7 @@ class AuthorizationService:
             await DataProductAuthAssignment(assignment).add()
 
     async def _sync_dataset_assignments(self):
-        service = DatasetRoleAssignmentService(self.db, cast(UserBasic, None))
+        service = DatasetRoleAssignmentService(self.db, cast(User, None))
         dataset_assignments = service.list_assignments(
             dataset_id=None, user_id=None, decision=DecisionStatus.APPROVED
         )
@@ -74,7 +74,7 @@ class AuthorizationService:
             await DatasetAuthAssignment(assignment).add()
 
     async def _sync_global_assignments(self):
-        service = GlobalRoleAssignmentService(self.db, cast(UserBasic, None))
+        service = GlobalRoleAssignmentService(self.db, cast(User, None))
         global_assignments = service.list_assignments(
             user_id=None, decision=DecisionStatus.APPROVED
         )

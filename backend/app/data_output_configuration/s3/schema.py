@@ -3,7 +3,7 @@ from typing import Literal
 from app.data_output_configuration.base_schema import BaseDataOutputConfiguration
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.s3.model import S3DataOutput as S3DataOutputModel
-from app.data_products.schema_basic import DataProductBasic
+from app.data_products.schema import DataProduct
 
 
 class S3DataOutput(BaseDataOutputConfiguration):
@@ -15,7 +15,7 @@ class S3DataOutput(BaseDataOutputConfiguration):
     class Meta:
         orm_model = S3DataOutputModel
 
-    def validate_configuration(self, data_product: DataProductBasic):
+    def validate_configuration(self, data_product: DataProduct):
         # TODO
         # if not self.suffix.startswith(data_product.namespace):
         #     raise ValueError("Invalid suffix specified")

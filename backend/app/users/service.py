@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.users.model import User as UserModel
 from app.users.model import ensure_user_exists
-from app.users.schema_create import UserCreate
-from app.users.schema_get import UsersGet
+from app.users.schema_request import UserCreate
+from app.users.schema_response import UsersGet
 
 
 class UserService:

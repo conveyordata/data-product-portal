@@ -6,11 +6,11 @@ from sqlalchemy.orm import Session
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.data_product_lifecycles.schema_create import (
+from app.data_product_lifecycles.schema_request import (
     DataProductLifeCycleCreate,
     DataProductLifeCycleUpdate,
 )
-from app.data_product_lifecycles.schema_get import DataProductLifeCyclesGet
+from app.data_product_lifecycles.schema_response import DataProductLifeCyclesGet
 
 
 class DataProductLifeCycleService:
