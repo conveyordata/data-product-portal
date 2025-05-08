@@ -1,9 +1,12 @@
 import { CaretRightOutlined } from '@ant-design/icons';
-import { Flex, Form, Input, Table, Typography } from 'antd';
+import { Flex, Form, Input, Table, TableProps, Typography } from 'antd';
 import dayjs from 'dayjs';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
+import { useTablePagination } from '@/hooks/use-table-pagination';
 import {
     useGetDataOutputByIdQuery,
     useGetDataOutputHistoryQuery,
@@ -57,6 +60,18 @@ export function HistoryTab({ id, type }: Props) {
     const { data: data } = dataQuery;
     const { data: history } = historyQuery;
     const [searchForm] = Form.useForm<SearchForm>();
+
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
+
+    const onChange: TableProps<EventContract>['onChange'] = (pagination) => {
+        handlePaginationChange(pagination);
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [history, resetPagination]);
 
     const handleSearch = (values: SearchForm) => {
         console.log(values);
@@ -112,13 +127,21 @@ export function HistoryTab({ id, type }: Props) {
                 </Form.Item>
             </Form>
             {history && history.length > 0 ? (
-                <Table
+                <Table<EventContract>
                     dataSource={history.map((item, index) => ({ ...item, key: index }))}
                     columns={columns}
+                    onChange={onChange}
                     pagination={{
-                        pageSize: 5, // Show 5 items per page
-                        showSizeChanger: true, // Allow changing the page size
-                        pageSizeOptions: ['5', '10', '20'], // Page size options
+                        ...pagination,
+                        position: ['topRight'],
+                        size: 'small',
+                        showTotal: (total, range) =>
+                            t('Showing {{range0}}-{{range1}} of {{total}} history items', {
+                                range0: range[0],
+                                range1: range[1],
+                                total: total,
+                            }),
+                        className: styles.pagination,
                     }}
                 />
             ) : (
