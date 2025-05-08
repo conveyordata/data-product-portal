@@ -199,7 +199,6 @@ class DataProductMembershipService:
                 ),
             )
 
-        data_product.memberships.remove(data_product_membership)
         db.add(
             EventModel(
                 name="Data product membership removed",
@@ -211,6 +210,7 @@ class DataProductMembershipService:
                 domain_id=data_product.domain_id,
             ),
         )
+        data_product.memberships.remove(data_product_membership)
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
@@ -244,7 +244,7 @@ class DataProductMembershipService:
         db.add(
             EventModel(
                 name="Data product membership added",
-                subject_id=data_product_membership.data_product_id,
+                subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
                 target_id=data_product_membership.user_id,
                 target_type=Type.USER,
