@@ -8,10 +8,10 @@ import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useRemoveMembershipAccessMutation } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
+    useDeleteRoleAssignmentMutation,
     useLazyGetRoleAssignmentQuery,
     useUpdateRoleAssignmentMutation,
 } from '@/store/features/role-assignments/roles-api-slice';
@@ -37,8 +37,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     const { t } = useTranslation();
     const currentUser = useSelector(selectCurrentUser) as UserContract;
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const [removeUserFromDataProduct, { isLoading: isRemovingUserFromDataProduct }] =
-        useRemoveMembershipAccessMutation();
+    const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] = useDeleteRoleAssignmentMutation();
     const [updateRoleAssignment] = useUpdateRoleAssignmentMutation();
     const { handleGrantAccessToDataProduct, handleDenyAccessToDataProduct } = usePendingActionHandlers();
     const [lazyGetRolesAssignments] = useLazyGetRoleAssignmentQuery();
@@ -81,17 +80,17 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     }, [dataProductUsers, resetPagination]);
 
     const handleRemoveUserAccess = useCallback(
-        async (membershipId: string) => {
+        async (id: string) => {
             try {
                 if (!dataProduct) return;
 
-                await removeUserFromDataProduct({ membershipId }).unwrap();
+                await deleteRoleAssignment(id).unwrap();
                 dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
             }
         },
-        [dataProduct, removeUserFromDataProduct, t],
+        [dataProduct, deleteRoleAssignment, t],
     );
 
     const handleRoleChange = useCallback(

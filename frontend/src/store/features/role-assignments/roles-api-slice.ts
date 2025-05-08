@@ -39,16 +39,20 @@ export const roleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTyp
                 invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
             },
         ),
-        // deleteRole: builder.mutation<void, string>({
-        //     query: (id: string) => ({
-        //         url: buildUrl(ApiUrl.RolesDelete, { id }),
-        //         method: 'DELETE',
-        //     }),
-        //     invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
-        // }),
+        deleteRoleAssignment: builder.mutation<void, string>({
+            query: (id: string) => ({
+                url: buildUrl(ApiUrl.RoleAssignmentsDataProductDelete, { id }),
+                method: 'DELETE',
+            }),
+            invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
+        }),
     }),
     overrideExisting: false,
 });
 
-export const { useGetRoleAssignmentQuery, useLazyGetRoleAssignmentQuery, useUpdateRoleAssignmentMutation } =
-    roleAssignmentsApiSlice;
+export const {
+    useGetRoleAssignmentQuery,
+    useLazyGetRoleAssignmentQuery,
+    useUpdateRoleAssignmentMutation,
+    useDeleteRoleAssignmentMutation,
+} = roleAssignmentsApiSlice;
