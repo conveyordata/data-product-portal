@@ -10,6 +10,7 @@ from app.data_outputs.schema import DataOutput, DataOutputStatusUpdate, DataOutp
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.dependencies import only_data_output_owners
+from app.events.schema import Event
 from app.graph.graph import Graph
 from app.users.schema import User
 
@@ -34,6 +35,11 @@ def get_data_output_namespace_length_limits() -> NamespaceLengthLimits:
 @router.get("/{id}")
 def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutput:
     return DataOutputService().get_data_output(id, db)
+
+
+@router.get("/{id}/history")
+def get_event_history(id: UUID, db: Session = Depends(get_db_session)) -> list[Event]:
+    return DataOutputService().get_event_history(id, db)
 
 
 @router.delete(
@@ -85,9 +91,14 @@ def remove_data_output(
     ],
 )
 def update_data_output(
-    id: UUID, data_output: DataOutputUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    data_output: DataOutputUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataOutputService().update_data_output(id, data_output, db)
+    return DataOutputService().update_data_output(
+        id, data_output, db, authenticated_user
+    )
 
 
 @router.put(
@@ -114,8 +125,11 @@ def update_data_output_status(
     id: UUID,
     data_output: DataOutputStatusUpdate,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataOutputService().update_data_output_status(id, data_output, db)
+    return DataOutputService().update_data_output_status(
+        id, data_output, db, authenticated_user
+    )
 
 
 @router.post(

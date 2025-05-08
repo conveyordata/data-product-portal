@@ -304,6 +304,25 @@ class TestDatasetsRouter:
         response = client.get(f"{ENDPOINT}/{ds.id}")
         assert response.json()["data_product_settings"][0]["value"] == "false"
 
+    def test_get_data_product_history(self, client):
+        ds_owner = UserFactory(external_id="sub")
+        dataset = DatasetFactory(owners=[ds_owner])
+        id = dataset.id
+        response = self.update_dataset_about(client, dataset.id)
+        response = self.update_dataset_status(client, {"status": "active"}, dataset.id)
+        response = self.delete_default_dataset(client, dataset.id)
+        response = self.get_dataset_history(client, id)
+        assert len(response.json()) == 3
+
+    def test_no_history(self, client):
+        dataset = DatasetFactory()
+        id = dataset.id
+        response = self.update_dataset_about(client, dataset.id)
+        response = self.update_dataset_status(client, {"status": "active"}, dataset.id)
+        response = self.delete_default_dataset(client, dataset.id)
+        response = self.get_dataset_history(client, id)
+        assert len(response.json()) == 0
+
     def test_get_private_dataset_not_allowed(self, client):
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         response = self.get_dataset_by_id(client, ds.id)
@@ -451,6 +470,10 @@ class TestDatasetsRouter:
     @staticmethod
     def delete_dataset_user(client, user_id, dataset_id):
         return client.delete(f"{ENDPOINT}/{dataset_id}/user/{user_id}")
+
+    @staticmethod
+    def get_dataset_history(client, dataset_id):
+        return client.get(f"{ENDPOINT}/{dataset_id}/history")
 
     @staticmethod
     def add_user_to_dataset(client, user_id, dataset_id):

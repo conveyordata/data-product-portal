@@ -333,6 +333,30 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json() == "test_1.com"
 
+    def test_get_data_product_history(self, client):
+        product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        id = product.id
+        response = self.update_data_product_about(client, product.id)
+        response = self.update_data_product_status(
+            client, {"status": "active"}, product.id
+        )
+        response = self.delete_data_product(client, product.id)
+        response = self.get_data_product_history(client, id)
+        assert len(response.json()) == 3
+
+    def test_no_history(self, client):
+        product = DataProductFactory()
+        id = product.id
+        response = self.update_data_product_about(client, product.id)
+        response = self.update_data_product_status(
+            client, {"status": "active"}, product.id
+        )
+        response = self.delete_data_product(client, product.id)
+        response = self.get_data_product_history(client, id)
+        assert len(response.json()) == 0
+
     def test_get_namespace_suggestion_subsitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
@@ -471,6 +495,10 @@ class TestDataProductsRouter:
     @staticmethod
     def get_data_product_by_user_id(client, user_id):
         return client.get(f"{ENDPOINT}/user/{user_id}")
+
+    @staticmethod
+    def get_data_product_history(client, data_product_id):
+        return client.get(f"{ENDPOINT}/{data_product_id}/history")
 
     @staticmethod
     def get_conveyor_ide_url(client, data_product_id):

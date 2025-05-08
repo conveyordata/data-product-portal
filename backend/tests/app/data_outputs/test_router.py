@@ -92,7 +92,7 @@ class TestDataOutputsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_output.id)
 
-    def test_update_data_product(self, client):
+    def test_update_data_output(self, client):
         data_product = DataProductMembershipFactory(
             user=UserFactory(external_id="sub")
         ).data_product
@@ -185,6 +185,29 @@ class TestDataOutputsRouter:
                     "type": "dataProductNode",
                 }
 
+    def test_get_data_product_history(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        data_output = DataOutputFactory(owner=data_product)
+        id = data_output.id
+        response = self.update_data_output_status(
+            client, {"status": "active"}, data_output.id
+        )
+        response = self.delete_data_output(client, data_output.id)
+        response = self.get_data_output_history(client, id)
+        assert len(response.json()) == 2
+
+    def test_no_history(self, client):
+        data_output = DataOutputFactory()
+        id = data_output.id
+        response = self.update_data_output_status(
+            client, {"status": "active"}, data_output.id
+        )
+        response = self.delete_data_output(client, data_output.id)
+        response = self.get_data_output_history(client, id)
+        assert len(response.json()) == 0
+
     def test_get_namespace_suggestion_subsitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
@@ -248,6 +271,10 @@ class TestDataOutputsRouter:
     @staticmethod
     def delete_data_output(client, data_output_id):
         return client.delete(f"{ENDPOINT}/{data_output_id}")
+
+    @staticmethod
+    def get_data_output_history(client, data_output_id):
+        return client.get(f"{ENDPOINT}/{data_output_id}/history")
 
     @staticmethod
     def update_data_output_status(client, status, data_output_id):
