@@ -14,6 +14,8 @@ from app.data_outputs_datasets.model import (
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
+from app.events.enum import Type
+from app.events.model import Event as EventModel
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -43,6 +45,17 @@ class DataOutputDatasetService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
+        db.add(
+            EventModel(
+                name="Data output link to dataset approved",
+                subject_id=current_link.dataset_id,
+                subject_type=Type.DATASET,
+                target_id=current_link.data_output_id,
+                target_type=Type.DATA_OUTPUT,
+                actor_id=authenticated_user.id,
+                domain_id=current_link.dataset.domain_id,
+            ),
+        )
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
@@ -64,6 +77,17 @@ class DataOutputDatasetService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
+        db.add(
+            EventModel(
+                name="Data output link to dataset denied",
+                subject_id=current_link.dataset_id,
+                subject_type=Type.DATASET,
+                target_id=current_link.data_output_id,
+                target_type=Type.DATA_OUTPUT,
+                actor_id=authenticated_user.id,
+                domain_id=current_link.dataset.domain_id,
+            ),
+        )
         db.commit()
 
     def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
@@ -86,6 +110,17 @@ class DataOutputDatasetService:
             )
         linked_data_output = current_link.data_output
         data_output = ensure_data_output_exists(linked_data_output.id, db)
+        db.add(
+            EventModel(
+                name="Data output link to dataset removed",
+                subject_id=current_link.dataset_id,
+                subject_type=Type.DATASET,
+                target_id=current_link.data_output_id,
+                target_type=Type.DATA_OUTPUT,
+                actor_id=authenticated_user.id,
+                domain_id=current_link.dataset.domain_id,
+            ),
+        )
         data_output.dataset_links.remove(current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()

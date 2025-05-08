@@ -148,6 +148,7 @@ class DataOutputService:
         model = DataOutputModel(**data_output_schema, tags=tags)
 
         db.add(model)
+        db.flush()
         db.add(
             EventModel(
                 name="Data output created",
