@@ -1,0 +1,61 @@
+import { Notification, NotificationTypes } from '@/types/notifications/notification.contract';
+
+export function getNotificationDataset(notification: Notification): string {
+    switch (notification.notification_type) {
+        case NotificationTypes.DataProductDatasetNotification: {
+            return notification.data_product_dataset
+                ? notification.data_product_dataset.dataset.name
+                : notification.deleted_dataset_name;
+        }
+        case NotificationTypes.DataOutputDatasetNotification: {
+            return notification.data_output_dataset
+                ? notification.data_output_dataset.dataset.name
+                : notification.deleted_dataset_name;
+        }
+        default:
+            return '';
+    }
+}
+
+export function getNotificationDataProduct(notification: Notification): string {
+    switch (notification.notification_type) {
+        case NotificationTypes.DataProductDatasetNotification: {
+            return notification.data_product_dataset
+                ? notification.data_product_dataset.data_product.name
+                : notification.deleted_data_product_name;
+        }
+        case NotificationTypes.DataProductMembershipNotification: {
+            return notification.data_product_membership
+                ? notification.data_product_membership.data_product.name
+                : notification.deleted_data_product_name;
+        }
+        default:
+            return '';
+    }
+}
+
+export function getNotificationDataOutput(notification: Notification): string {
+    switch (notification.notification_type) {
+        case NotificationTypes.DataOutputDatasetNotification: {
+            return notification.data_output_dataset
+                ? notification.data_output_dataset.data_output.name
+                : notification.deleted_data_output_name;
+        }
+        default:
+            return '';
+    }
+}
+
+export function getNotificationUser(notification: Notification): string {
+    switch (notification.notification_type) {
+        case NotificationTypes.DataProductMembershipNotification: {
+            return notification.data_product_membership
+                ? notification.data_product_membership.user.first_name +
+                      ' ' +
+                      notification.data_product_membership.user.last_name
+                : notification.deleted_membership_username;
+        }
+        default:
+            return '';
+    }
+}
