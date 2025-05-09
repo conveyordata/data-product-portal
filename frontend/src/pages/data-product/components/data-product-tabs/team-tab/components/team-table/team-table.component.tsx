@@ -40,7 +40,6 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] = useDeleteRoleAssignmentMutation();
     const [updateRoleAssignment] = useUpdateRoleAssignmentMutation();
 
-    // TODO Implement the pending action handlers with new Role Assignments system.
     const { handleGrantAccessToDataProduct, handleDenyAccessToDataProduct } = usePendingActionHandlers();
     const [lazyGetRolesAssignments] = useLazyGetRoleAssignmentQuery();
     const { data: edit_access } = useCheckAccessQuery(
