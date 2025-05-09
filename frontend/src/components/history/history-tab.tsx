@@ -80,7 +80,7 @@ export function HistoryTab({ id, type }: Props) {
     // Define table columns
     const columns = [
         {
-            title: t('Event Name'),
+            title: t('Event name'),
             dataIndex: 'name',
             key: 'name',
             render: (text: string) => text || t('No title available'),
@@ -106,7 +106,7 @@ export function HistoryTab({ id, type }: Props) {
             },
         },
         {
-            title: t('Executed By'),
+            title: t('Executed by'),
             dataIndex: 'actor',
             key: 'actor',
             render: (actor: { first_name: string; last_name: string }) => `${actor.first_name} ${actor.last_name}`,
