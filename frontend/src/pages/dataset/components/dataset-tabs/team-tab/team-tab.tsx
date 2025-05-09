@@ -79,10 +79,10 @@ export function TeamTab({ datasetId }: Props) {
 
     return (
         <>
-            <Flex vertical className={styles.container}>
+            <Flex vertical className={styles.container} gap={filteredUsers.length === 0 ? 12 : 0}>
                 <Searchbar
                     form={searchForm}
-                    formItemProps={{ initialValue: '' }}
+                    formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
                     placeholder={t('Search users by email or name')}
                     actionButton={
                         <Button

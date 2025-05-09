@@ -1,6 +1,6 @@
 @use '@/styles/globals';
 
-.container {
-    @extend .container;
-    gap: globals.$column-gap-regular;
+.margin-bottom-large {
+    margin-bottom: globals.$spacing-l;
+    padding-bottom: globals.$spacing-xs;
 }
