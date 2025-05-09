@@ -97,7 +97,7 @@ export function HistoryTab({ id, type }: Props) {
             dataIndex: 'name',
             key: 'name',
             width: '30%',
-            render: (text: string) => text || t('No title available'),
+            render: (event: string) => t(event) || t('No title available'),
         },
         {
             title: t('Involved entities'),
