@@ -96,13 +96,13 @@ export function HistoryTab({ id, type }: Props) {
             title: t('Event name'),
             dataIndex: 'name',
             key: 'name',
-            width: '35%',
+            width: '30%',
             render: (text: string) => text || t('No title available'),
         },
         {
             title: t('Involved entities'),
             key: 'Detail',
-            width: '35%',
+            width: '30%',
             render: (record: EventContract) => {
                 const subjectLabel = getSubjectDisplayLabel(t, record);
                 const targetLabel = getTargetDisplayLabel(t, record);
@@ -124,13 +124,14 @@ export function HistoryTab({ id, type }: Props) {
             title: t('Executed by'),
             dataIndex: 'actor',
             key: 'actor',
-            width: '15%',
+
             render: (actor: { first_name: string; last_name: string }) => `${actor.first_name} ${actor.last_name}`,
         },
         {
             title: t('Timestamp'),
             dataIndex: 'created_on',
             key: 'created_on',
+            width: '15%',
             render: (created_on: string) => `${dayjs(created_on).format('YYYY-MM-DD HH:mm')} ${t('UTC')}`,
         },
     ];
