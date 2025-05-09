@@ -32,17 +32,6 @@ function filterUsers(users: RoleAssignmentContract[], searchTerm: string) {
     if (!searchTerm) return users;
     if (!users) return [];
 
-    console.log(users);
-    console.log(
-        users.filter((membership) => {
-            const searchString = searchTerm.toLowerCase();
-            return (
-                membership?.user?.email?.toLowerCase()?.includes(searchString) ||
-                membership?.user?.first_name?.toLowerCase()?.includes(searchString) ||
-                membership?.user?.last_name?.toLowerCase()?.includes(searchString)
-            );
-        }) ?? [],
-    );
     return (
         users.filter((membership) => {
             const searchString = searchTerm.toLowerCase();
