@@ -90,10 +90,10 @@ export function TeamTab({ dataProductId }: Props) {
 
     return (
         <>
-            <Flex vertical className={styles.container}>
+            <Flex vertical className={`${styles.container} ${filteredUsers.length === 0 && styles.paginationGap}`}>
                 <Searchbar
                     form={searchForm}
-                    formItemProps={{ initialValue: '' }}
+                    formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
                     placeholder={t('Search users by email or name')}
                     actionButton={
                         <Button
