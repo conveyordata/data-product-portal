@@ -92,6 +92,10 @@ export const dataProductMembershipsApiSlice = baseApiSlice
                     method: 'PUT',
                     params: { membership_role: role },
                 }),
+                invalidatesTags: (_result, _error, { dataProductId }) => [
+                    { type: TagTypes.DataProduct as const, id: dataProductId },
+                    { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+                ],
                 onQueryStarted: async ({ dataProductId, membershipId, role }, { dispatch, queryFulfilled }) => {
                     const patchResult = dispatch(
                         dataProductsApiSlice.util.updateQueryData(
