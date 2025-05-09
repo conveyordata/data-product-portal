@@ -34,8 +34,7 @@ class TestDataProductMembershipsRouter:
     ):
         user = UserFactory(external_id="sub")
         RoleFactory(name="member", scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
-            role_id="*",
+        await authorizer.sync_everyone_role_permissions(
             actions=[
                 AuthorizationAction.DATA_PRODUCT__CREATE_USER,
                 AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
