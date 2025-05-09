@@ -1,10 +1,11 @@
-import { Button, Form, List, Typography } from 'antd';
+import { Form, List, Select, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Searchbar } from '@/components/form';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
+import { RoleContract } from '@/types/roles';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
 
@@ -15,8 +16,9 @@ type Props = {
     isOpen: boolean;
     isLoading: boolean;
     userIdsToHide?: string[];
+    roles: RoleContract[];
     item: {
-        action: (user: UserContract) => void;
+        action: (user: UserContract, role_id: string) => void;
         label: string;
     };
 };
@@ -30,7 +32,7 @@ const handleUserListFilter = (users: UserContract[], searchTerm: string) => {
     });
 };
 
-export function UserPopup({ onClose, isOpen, item, isLoading, userIdsToHide }: Props) {
+export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHide }: Props) {
     const { t } = useTranslation();
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const [searchUsersForm] = Form.useForm<SearchForm>();
@@ -65,14 +67,20 @@ export function UserPopup({ onClose, isOpen, item, isLoading, userIdsToHide }: P
                                     }
                                     description={<Typography.Link>{user.email}</Typography.Link>}
                                 />
-                                <Button
+
+                                <Select
+                                    className={styles.roleDropdown}
+                                    placeholder={t('Select a role')}
                                     disabled={isLoading || isFetchingUsers}
                                     loading={isLoading || isFetchingUsers}
-                                    type={'link'}
-                                    onClick={() => item.action(user)}
+                                    onSelect={(roleId: string) => item.action(user, roleId)} // Pass user and selected roleId
                                 >
-                                    {item.label}
-                                </Button>
+                                    {roles.map((role: RoleContract) => (
+                                        <Select.Option key={role.id} value={role.id}>
+                                            {role.name}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
                             </List.Item>
                         );
                     }}

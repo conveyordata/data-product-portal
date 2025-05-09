@@ -19,7 +19,6 @@ type Props = {
     dataProductUsers: RoleAssignmentContract[];
     canPerformTeamActions: (userId: string) => boolean;
     isLoading?: boolean;
-    // hasCurrentUserMembership: boolean;
     canEdit?: boolean;
     canRemove?: boolean;
     canApprove?: boolean;
@@ -35,6 +34,7 @@ export const getDataProductUsersTableColumns = ({
     isRemovingUser,
     dataProductUsers,
     canPerformTeamActions,
+    // hasCurrentUserMembership,
     canEdit,
     canRemove,
     canApprove,

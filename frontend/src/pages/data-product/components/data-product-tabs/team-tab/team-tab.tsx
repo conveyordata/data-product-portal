@@ -17,7 +17,6 @@ import {
 } from '@/store/features/role-assignments/roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { DataProductMembershipRole } from '@/types/data-product-membership';
 import { RoleAssignmentContract } from '@/types/roles/role.contract';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
@@ -92,13 +91,8 @@ export function TeamTab({ dataProductId }: Props) {
     }, [dataProduct, user]);
 
     const handleGrantAccessToDataProduct = useCallback(
-        async (user: UserContract) => {
+        async (user: UserContract, role_id: string) => {
             try {
-                // Use Member as default initial role (for now)
-                const role_id =
-                    DATA_PRODUCT_ROLES?.find((role) => role.name.toLowerCase() === DataProductMembershipRole.Member)
-                        ?.id || '';
-
                 await addUserToDataProduct({
                     data_product_id: dataProductId,
                     user_id: user.id,
@@ -109,7 +103,7 @@ export function TeamTab({ dataProductId }: Props) {
                 dispatchMessage({ content: t('Failed to grant access to the data product'), type: 'error' });
             }
         },
-        [addUserToDataProduct, dataProductId, t, DATA_PRODUCT_ROLES],
+        [addUserToDataProduct, dataProductId, t],
     );
 
     if (!dataProduct || !user) return null;
@@ -144,6 +138,7 @@ export function TeamTab({ dataProductId }: Props) {
                     onClose={handleClose}
                     isLoading={isFetching || isAddingUser}
                     userIdsToHide={dataProductUserIds}
+                    roles={DATA_PRODUCT_ROLES || []}
                     item={{
                         action: handleGrantAccessToDataProduct,
                         label: t('Grant Access'),
