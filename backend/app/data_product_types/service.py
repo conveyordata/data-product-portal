@@ -6,11 +6,14 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.data_product_types.model import DataProductType as DataProductTypeModel
 from app.data_product_types.model import ensure_data_product_type_exists
-from app.data_product_types.schema_create import (
+from app.data_product_types.schema_request import (
     DataProductTypeCreate,
     DataProductTypeUpdate,
 )
-from app.data_product_types.schema_get import DataProductTypeGet, DataProductTypesGet
+from app.data_product_types.schema_response import (
+    DataProductTypeGet,
+    DataProductTypesGet,
+)
 
 
 class DataProductTypeService:

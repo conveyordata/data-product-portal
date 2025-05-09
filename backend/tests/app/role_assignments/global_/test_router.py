@@ -1,9 +1,5 @@
 from fastapi.testclient import TestClient
-from tests.factories import (
-    GlobalRoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
+from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
 
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.schema import RoleAssignment

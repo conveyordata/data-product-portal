@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
-from app.domains.schema_create import DomainCreate, DomainUpdate
-from app.domains.schema_get import DomainGet, DomainsGet
+from app.domains.schema_request import DomainCreate, DomainUpdate
+from app.domains.schema_response import DomainGet, DomainsGet
 from app.domains.service import DomainService
 
 router = APIRouter(prefix="/domains", tags=["domains"])

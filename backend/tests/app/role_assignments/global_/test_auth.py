@@ -1,9 +1,5 @@
 import pytest
-from tests.factories import (
-    GlobalRoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
+from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
 
 from app.core.authz import Authorization
 from app.role_assignments.dataset.schema import RoleAssignment

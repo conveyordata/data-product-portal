@@ -7,7 +7,7 @@ from tests.factories import (
 )
 
 from app.core.authz import Authorization
-from app.datasets.schema import Dataset
+from app.datasets.model import Dataset
 from app.role_assignments.dataset.auth import DatasetAuthAssignment
 from app.role_assignments.dataset.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus

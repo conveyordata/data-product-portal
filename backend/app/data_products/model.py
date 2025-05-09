@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.data_product_memberships.model import DataProductMembership
 from app.data_product_settings.model import DataProductSettingValue
-from app.data_products.schema import DataProduct as DataProductSchema
+from app.data_product_types.model import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
@@ -18,14 +18,7 @@ from app.tags.model import Tag, tag_data_product_table
 if TYPE_CHECKING:
     from app.data_outputs.model import DataOutput
     from app.data_product_lifecycles.model import DataProductLifecycle
-    from app.data_product_types.model import DataProductType
     from app.domains.model import Domain
-
-
-def ensure_data_product_exists(
-    data_product_id: UUID, db: Session, **kwargs
-) -> DataProductSchema:
-    return ensure_exists(data_product_id, db, DataProduct, **kwargs)
 
 
 class DataProduct(Base, BaseORM):
@@ -108,3 +101,9 @@ class DataProduct(Base, BaseORM):
     @property
     def data_outputs_count(self) -> int:
         return len(self.data_outputs)
+
+
+def ensure_data_product_exists(
+    data_product_id: UUID, db: Session, **kwargs
+) -> DataProduct:
+    return ensure_exists(data_product_id, db, DataProduct, **kwargs)

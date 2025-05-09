@@ -6,15 +6,15 @@ from sqlalchemy.orm import Session
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
-from app.tags.schema import Tag as TagGet
-from app.tags.schema import TagCreate, TagUpdate
+from app.tags.schema_request import TagCreate, TagUpdate
+from app.tags.schema_response import TagsGet
 from app.tags.service import TagService
 
 router = APIRouter(prefix="/tags", tags=["tags"])
 
 
 @router.get("")
-def get_tags(db: Session = Depends(get_db_session)) -> list[TagGet]:
+def get_tags(db: Session = Depends(get_db_session)) -> list[TagsGet]:
     return TagService().get_tags(db)
 
 

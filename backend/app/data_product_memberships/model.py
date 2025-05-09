@@ -3,9 +3,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.data_product_memberships.enums import (
-    DataProductUserRole,
-)
+from app.data_product_memberships.enums import DataProductUserRole
 from app.database.database import Base
 from app.role_assignments.enums import DecisionStatus
 

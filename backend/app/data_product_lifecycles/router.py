@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization, DataProductResolver
-from app.data_product_lifecycles.schema import (
-    DataProductLifeCycle,
+from app.data_product_lifecycles.schema_request import (
     DataProductLifeCycleCreate,
     DataProductLifeCycleUpdate,
 )
+from app.data_product_lifecycles.schema_response import DataProductLifeCyclesGet
 from app.data_product_lifecycles.service import DataProductLifeCycleService
 from app.database.database import get_db_session
 from app.dependencies import only_for_admin
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/data_product_lifecycles", tags=["data_product_lifecy
 @router.get("")
 def get_data_products_lifecycles(
     db: Session = Depends(get_db_session),
-) -> list[DataProductLifeCycle]:
+) -> list[DataProductLifeCyclesGet]:
     return DataProductLifeCycleService().get_data_product_lifecycles(db)
 
 

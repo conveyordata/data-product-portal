@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.domains.model import Domain as DomainModel
 from app.domains.model import ensure_domain_exists
-from app.domains.schema_create import DomainCreate, DomainUpdate
-from app.domains.schema_get import DomainGet, DomainsGet
+from app.domains.schema_request import DomainCreate, DomainUpdate
+from app.domains.schema_response import DomainGet, DomainsGet
 
 
 class DomainService:

@@ -1,7 +1,9 @@
 from uuid import UUID
 
-from app.domains.schema_create import DomainCreate
+from app.shared.schema import ORMModel
 
 
-class Domain(DomainCreate):
+class Domain(ORMModel):
     id: UUID
+    name: str
+    description: str

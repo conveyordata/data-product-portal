@@ -17,13 +17,12 @@ from app.core.namespace.validation import (
 )
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
-from app.data_outputs.schema import (
-    DataOutput,
+from app.data_outputs.schema_request import (
     DataOutputCreate,
-    DataOutputCreateRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
+from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
@@ -45,9 +44,12 @@ class DataOutputService:
         self.namespace_validator = DataOutputNamespaceValidator()
 
     def ensure_member(
-        self, authenticated_user: User, data_output: DataOutputCreate, db: Session
+        self,
+        authenticated_user: User,
+        owner_id: UUID,
+        db: Session,
     ):
-        product = db.get(DataProductModel, data_output.owner_id)
+        product = db.get(DataProductModel, owner_id)
         if authenticated_user.is_admin:
             return
 
@@ -66,7 +68,7 @@ class DataOutputService:
             )
 
     def ensure_owner(
-        self, authenticated_user: User, data_output: DataOutputCreate, db: Session
+        self, authenticated_user: User, data_output: DataOutputModel, db: Session
     ):
         product = db.get(DataProductModel, data_output.owner_id)
         if authenticated_user.is_admin:
@@ -96,11 +98,11 @@ class DataOutputService:
             tags.append(tag)
         return tags
 
-    def get_data_outputs(self, db: Session) -> list[DataOutput]:
+    def get_data_outputs(self, db: Session) -> list[DataOutputsGet]:
         data_outputs = db.scalars(select(DataOutputModel)).unique().all()
         return data_outputs
 
-    def get_data_output(self, id: UUID, db: Session) -> DataOutput:
+    def get_data_output(self, id: UUID, db: Session) -> DataOutputGet:
         return db.get(
             DataOutputModel,
             id,
@@ -109,7 +111,7 @@ class DataOutputService:
     def create_data_output(
         self,
         id: UUID,
-        data_output: DataOutputCreateRequest,
+        data_output: DataOutputCreate,
         db: Session,
         authenticated_user: User,
     ) -> dict[str, UUID]:
@@ -122,10 +124,8 @@ class DataOutputService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
             )
-        data_output = DataOutputCreate(
-            **data_output.parse_pydantic_schema(), owner_id=id
-        )
-        self.ensure_member(authenticated_user, data_output, db)
+
+        self.ensure_member(authenticated_user, id, db)
 
         if data_output.sourceAligned:
             data_output.status = DataOutputStatus.PENDING
@@ -138,7 +138,7 @@ class DataOutputService:
 
         data_output_schema = data_output.parse_pydantic_schema()
         tags = self._get_tags(db, data_output_schema.pop("tag_ids", []))
-        model = DataOutputModel(**data_output_schema, tags=tags)
+        model = DataOutputModel(**data_output_schema, tags=tags, owner_id=id)
 
         db.add(model)
         db.commit()
