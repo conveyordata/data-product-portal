@@ -58,6 +58,7 @@ export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlat
         value: DataPlatforms.Snowflake,
         icon: snowflakeLogo,
         disabled: false,
+        hasMenu: true,
         hasConfig: true,
         children: [],
     },
