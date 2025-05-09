@@ -5,6 +5,10 @@
     padding-bottom: globals.$spacing-xs;
 }
 
+.pagination-gap {
+    gap: globals.$spacing-m;
+}
+
 .list {
     width: 100%;
 }

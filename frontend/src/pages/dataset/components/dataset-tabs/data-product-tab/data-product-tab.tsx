@@ -50,7 +50,10 @@ export function DataProductTab({ datasetId }: Props) {
 
     return (
         <>
-            <Flex vertical className={styles.container} gap={filteredDataProducts.length === 0 ? 12 : 0}>
+            <Flex
+                vertical
+                className={`${styles.container} ${filteredDataProducts.length === 0 && styles.paginationGap}`}
+            >
                 <Searchbar
                     placeholder={t('Search data products by name')}
                     formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}

@@ -79,7 +79,7 @@ export function TeamTab({ datasetId }: Props) {
 
     return (
         <>
-            <Flex vertical className={styles.container} gap={filteredUsers.length === 0 ? 12 : 0}>
+            <Flex vertical className={`${styles.container} ${filteredUsers.length === 0 && styles.paginationGap}`}>
                 <Searchbar
                     form={searchForm}
                     formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}

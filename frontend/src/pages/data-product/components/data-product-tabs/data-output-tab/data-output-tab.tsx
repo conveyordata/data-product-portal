@@ -61,7 +61,10 @@ export function DataOutputTab({ dataProductId }: Props) {
 
     return (
         <>
-            <Flex vertical className={styles.container} gap={filteredDataOutputs.length === 0 ? 12 : 0}>
+            <Flex
+                vertical
+                className={`${styles.container} ${filteredDataOutputs.length === 0 && styles.paginationGap}`}
+            >
                 <Searchbar
                     placeholder={t('Search data outputs by name')}
                     formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
