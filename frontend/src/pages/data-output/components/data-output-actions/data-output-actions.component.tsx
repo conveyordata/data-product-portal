@@ -8,6 +8,11 @@ import datahubLogo from '@/assets/icons/datahub-logo.svg?react';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { CustomDropdownItemProps } from '@/types/shared';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+
+import {
+    useGetIntegrationUrlQuery
+} from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 
 import styles from './data-output-actions.module.scss';
 
@@ -22,17 +27,49 @@ const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[]
         value: DataPlatforms.Collibra,
         icon: collibraLogo,
     },
-    { label: t('Datahub'), value: DataPlatforms.Datahub, icon: datahubLogo, disabled: true },
+    { label: t('Datahub'), value: DataPlatforms.Datahub, icon: datahubLogo, disabled: false },
 ];
 
 export function DataOutputActions({ dataOutputId, isCurrentDataOutputOwner }: Props) {
     const { t } = useTranslation();
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
 
-    async function handleAccessToData(environment: string, dataPlatform: string) {
-        // Todo - implement endpoints to allow for dataset data access
-        // All tiles are currently disabled
-        console.log(dataPlatform, environment, dataOutputId);
+    console.log('useGetIntegrationUrlQuery called with:', { 
+        uuid: dataOutputId, 
+        integration_type: DataPlatforms.Datahub 
+    });
+
+    const integrationUrl = useGetIntegrationUrlQuery({ 
+        uuid: dataOutputId, 
+        integration_type: DataPlatforms.Datahub 
+    });
+
+    async function handleTileClick(dataPlatform: DataPlatform) {
+        switch (dataPlatform) {
+            case DataPlatforms.Datahub:
+                // log integrationUrl
+                console.log(integrationUrl);
+                console.log('Type of integrationUrl:', typeof integrationUrl);
+                if (integrationUrl) {
+                    if (integrationUrl.data && integrationUrl.data.url) {
+                        console.log('Attributes of integrationUrl:', integrationUrl.data.url);
+                        window.open(integrationUrl.data.url, '', 'noopener,noreferrer');
+                    } else {
+                        dispatchMessage({
+                            type: 'error',
+                            content: t(`Failed to get Datahub url for Data Output. DataOutputId: ${dataOutputId}, DataPlatform: ${dataPlatform}`),
+                        });
+                    }
+                } else {
+                    dispatchMessage({
+                        type: 'error',
+                        content: t(`Failed read Data Output Integration. DataOutputId: ${dataOutputId}, DataPlatform: ${dataPlatform}`),
+                    });
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     return (
@@ -40,8 +77,7 @@ export function DataOutputActions({ dataOutputId, isCurrentDataOutputOwner }: Pr
             <DataAccessTileGrid
                 canAccessData={isCurrentDataOutputOwner}
                 dataPlatforms={dataPlatforms}
-                onDataPlatformClick={handleAccessToData}
-                isDisabled
+                onTileClick={handleTileClick}
             />
         </Flex>
     );

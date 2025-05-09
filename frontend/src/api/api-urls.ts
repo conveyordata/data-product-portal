@@ -81,6 +81,7 @@ export enum ApiUrl {
     PlatformServiceConfigById = '/api/platforms/configs/:configId',
     Version = '/api/version',
     ThemeSettings = '/api/theme_settings',
+    IntegrationUrl = '/api/integrations/:uuid/:integration_type',
     AccessCheck = '/api/authz/access',
     Graph = '/api/graph',
 }

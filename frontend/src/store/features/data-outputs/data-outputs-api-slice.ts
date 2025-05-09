@@ -11,6 +11,7 @@ import {
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import { DataOutputUpdateRequest, DataOutputUpdateResponse } from '@/types/data-output/data-output-update.contract';
 import { GraphContract } from '@/types/graph/graph-contract';
+import { DataOutputIntegrationUrlRequest, DataOutputIntegrationUrlResponse } from '@/types/data-output/data-output-integration.contract';
 import { NamespaceLengthLimitsResponse, NamespaceSuggestionResponse } from '@/types/namespace/namespace';
 
 import { baseApiSlice } from '../api/base-api-slice';
@@ -118,6 +119,18 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
             }),
             invalidatesTags: [{ type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST }],
         }),
+        getIntegrationUrl: builder.query<
+            DataOutputIntegrationUrlResponse,
+            DataOutputIntegrationUrlRequest
+        >({
+            query: ({ uuid, integration_type }) => {
+                console.log('getIntegrationUrl called with:', { uuid, integration_type });
+                return {
+                    url: buildUrl(ApiUrl.IntegrationUrl, { uuid: uuid, integration_type }),
+                    method: 'GET',
+                };
+            },
+        }),
         removeDatasetFromDataOutput: builder.mutation<DataOutputDatasetRemoveResponse, DataOutputDatasetRemoveRequest>({
             query: ({ dataOutputId, datasetId }) => ({
                 url: buildUrl(ApiUrl.DataOutputsDataset, { dataOutputId, datasetId }),
@@ -175,6 +188,7 @@ export const {
     useRemoveDataOutputMutation,
     useRequestDatasetAccessForDataOutputMutation,
     useGetDataOutputGraphDataQuery,
+    useGetIntegrationUrlQuery, 
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
 } = dataOutputsApiSlice;
