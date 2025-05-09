@@ -150,6 +150,16 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 params: { environment },
             }),
         }),
+        getDataProductSnowflakeUrl: builder.mutation<
+            DataProductGetDatabricksWorkspaceUrlResponse,
+            DataProductGetDatabricksWorkspaceUrlRequest
+        >({
+            query: ({ id, environment }) => ({
+                url: buildUrl(ApiUrl.DataProductSnowflakeUrl, { dataProductId: id }),
+                method: 'GET',
+                params: { environment },
+            }),
+        }),
         requestDatasetAccessForDataProduct: builder.mutation<
             DataProductDatasetAccessResponse,
             DataProductDatasetAccessRequest
@@ -256,6 +266,7 @@ export const {
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
     useGetGraphDataQuery,
+    useGetDataProductSnowflakeUrlMutation,
     useGetDataProductDatabricksWorkspaceUrlMutation,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,

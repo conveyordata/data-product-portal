@@ -28,6 +28,7 @@ export enum ApiUrl {
     DataProductSignInUrl = '/api/data_products/:dataProductId/signin_url',
     DataProductConveyorIdeUrl = '/api/data_products/:dataProductId/conveyor_ide_url',
     DataProductDatabricksWorkspaceUrl = '/api/data_products/:dataProductId/databricks_workspace_url',
+    DataProductSnowflakeUrl = '/api/data_products/:dataProductId/snowflake_url',
     DataProductDataset = '/api/data_products/:dataProductId/dataset/:datasetId',
     DataProductAbout = '/api/data_products/:dataProductId/about',
     DataProductGraph = '/api/data_products/:dataProductId/graph',
