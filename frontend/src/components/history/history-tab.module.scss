@@ -1,44 +1,15 @@
-.container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.listItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-
-.leftContent {
-    flex: 1;
-    margin-right: 16px;
-}
-
-.rightContent {
-    text-align: right;
-    min-width: 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.actor {
-    font-weight: 500;
-    color: #595959;
-}
-
-.timestamp {
-    font-size: 12px;
-    color: #8c8c8c;
-}
-
-.descriptions .ant-descriptions-item-label {
-    width: 150px; /* Ensure consistent label width */
-}
+@use '@/styles/globals';
 
 .pagination {
     margin-top: 0 !important;
+    margin-bottom: globals.$spacing-regular !important;
+}
+
+.margin-bottom-large {
+    margin-bottom: globals.$spacing-l;
+    padding-bottom: globals.$spacing-xs;
+}
+
+.pagination-gap {
+    gap: globals.$spacing-m;
 }

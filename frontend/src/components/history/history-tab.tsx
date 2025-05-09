@@ -1,7 +1,8 @@
 import { CaretRightOutlined } from '@ant-design/icons';
-import { Flex, Form, Input, Table, TableProps, Typography } from 'antd';
+import { Flex, Form, Table, TableProps, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect } from 'react';
+import { TFunction } from 'i18next';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
@@ -19,6 +20,7 @@ import { useGetDatasetByIdQuery, useGetDatasetHistoryQuery } from '@/store/featu
 import { EventContract } from '@/types/events/event.contract';
 import { getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
 
+import { Searchbar } from '../form';
 import styles from './history-tab.module.scss';
 
 type Props = {
@@ -29,6 +31,22 @@ type Props = {
 type SearchForm = {
     search: string;
 };
+
+function filterHistory(events: EventContract[], searchTerm: string, t: TFunction) {
+    if (!searchTerm) return events;
+    if (!events) return [];
+
+    return events.filter((event) => {
+        const subjectLabel = getSubjectDisplayLabel(t, event);
+        const targetLabel = getTargetDisplayLabel(t, event);
+
+        return (
+            subjectLabel?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            targetLabel?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            event.name?.toLowerCase().includes(searchTerm?.toLowerCase())
+        );
+    });
+}
 
 export function HistoryTab({ id, type }: Props) {
     const dataProductQuery = useGetDataProductByIdQuery(id, { skip: type !== 'dataproduct' || !id });
@@ -60,6 +78,11 @@ export function HistoryTab({ id, type }: Props) {
     const { data: data } = dataQuery;
     const { data: history } = historyQuery;
     const [searchForm] = Form.useForm<SearchForm>();
+    const searchTerm = Form.useWatch('search', searchForm);
+
+    const filteredHistory = useMemo(() => {
+        return filterHistory(history ?? [], searchTerm, t);
+    }, [history, searchTerm, t]);
 
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
         initialPagination: TABLE_SUBSECTION_PAGINATION,
@@ -71,11 +94,7 @@ export function HistoryTab({ id, type }: Props) {
 
     useEffect(() => {
         resetPagination();
-    }, [history, resetPagination]);
-
-    const handleSearch = (values: SearchForm) => {
-        console.log(values);
-    };
+    }, [filteredHistory, resetPagination]);
 
     // Define table columns
     const columns = [
@@ -120,15 +139,15 @@ export function HistoryTab({ id, type }: Props) {
     ];
 
     return (
-        <div className={styles.container}>
-            <Form form={searchForm} onFinish={handleSearch}>
-                <Form.Item<SearchForm> name={'search'}>
-                    <Input.Search placeholder={t('Search history by description, type or name')} allowClear />
-                </Form.Item>
-            </Form>
-            {history && history.length > 0 ? (
+        <Flex vertical className={`${styles.container} ${filteredHistory?.length === 0 && styles.paginationGap}`}>
+            <Searchbar
+                form={searchForm}
+                formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
+                placeholder={t('Search event history')}
+            />
+            {filteredHistory && filteredHistory.length > 0 ? (
                 <Table<EventContract>
-                    dataSource={history.map((item, index) => ({ ...item, key: index }))}
+                    dataSource={filteredHistory.map((item, index) => ({ ...item, key: index }))}
                     columns={columns}
                     onChange={onChange}
                     pagination={{
@@ -147,6 +166,6 @@ export function HistoryTab({ id, type }: Props) {
             ) : (
                 <EmptyList description={t(`No history available for {{name}}`, { name: data?.name })} />
             )}
-        </div>
+        </Flex>
     );
 }
