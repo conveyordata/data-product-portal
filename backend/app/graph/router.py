@@ -14,5 +14,16 @@ router = APIRouter(prefix="/graph", tags=["graph"])
 def get_graph_data(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
+    domain_nodes_enabled: bool = True,
+    data_product_nodes_enabled: bool = True,
+    dataset_nodes_enabled: bool = True,
+    data_output_nodes_enabled: bool = True,
 ) -> Graph:
-    return GraphService().get_graph_data(db=db, user=user)
+    return GraphService().get_graph_data(
+        db=db,
+        user=user,
+        domain_nodes_enabled=domain_nodes_enabled,
+        data_product_nodes_enabled=data_product_nodes_enabled,
+        dataset_nodes_enabled=dataset_nodes_enabled,
+        data_output_nodes_enabled=data_output_nodes_enabled,
+    )

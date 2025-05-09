@@ -1,5 +1,5 @@
 import { Node, useReactFlow } from '@xyflow/react';
-import { Select } from 'antd';
+import { Checkbox, Select } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -43,23 +43,83 @@ export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | (
         return () => clearTimeout(timeout);
     }, [nodeId, getNode, setCenter]);
 
+    function getNodeDataForSideBar(nodeId: string) {
+        const node = getNode(nodeId);
+        if (!node) return null;
+        const {
+            name,
+            domain,
+            members,
+            description,
+        }: { name: string; domain: string; members: string[]; description: string } = node.data;
+        console.log(node);
+        return {
+            name: String(name),
+            domain: String(domain),
+            members: members,
+            description: String(description),
+        };
+    }
+
     return (
-        <Select
-            showSearch
-            placeholder={t('Select a node')}
-            onSelect={(value: string) => {
-                selectNode(value); // Update the selected node
-            }}
-            filterOption={(input: string, option?: { value: string; label: string }) =>
-                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-            }
-            className={styles.sidebar}
-        >
-            {nodes.map((node) => (
-                <Select.Option key={node.id} label={node.data.name} value={node.id}>
-                    {String(node.data.name)}
-                </Select.Option>
-            ))}
-        </Select>
+        <div className={styles.sidebarContainer}>
+            <Checkbox defaultChecked value="domain" className={styles.checkbox}>
+                {t('domains')}
+            </Checkbox>
+            <Checkbox
+                defaultChecked
+                value="data product"
+                className={styles.checkbox}
+                onChange={(e) => {
+                    console.log(e.target.checked);
+                    console.log(e);
+                }}
+            >
+                {t('data products')}
+            </Checkbox>
+            <Checkbox defaultChecked value="dataset" className={styles.checkbox}>
+                {t('datasets')}
+            </Checkbox>
+            <Checkbox defaultChecked value="data output" className={styles.checkbox}>
+                {t('data outputs')}
+            </Checkbox>
+            <Select
+                showSearch
+                placeholder={String('Select a node')}
+                onSelect={(value: string) => {
+                    selectNode(value); // Update the selected node
+                }}
+                filterOption={(input: string, option?: { value: string; label: string }) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                className={styles.select}
+            >
+                {nodes.map((node) => (
+                    <Select.Option key={node.id} label={node.data.name} value={node.id}>
+                        {String(node.data.name)}
+                    </Select.Option>
+                ))}
+            </Select>
+
+            <div className={styles.p}>
+                {nodeId && (
+                    <div>
+                        Name: {getNodeDataForSideBar(nodeId)?.name}
+                        <br />
+                        Domain: {getNodeDataForSideBar(nodeId)?.domain}
+                        <br />
+                        Members: <br />
+                        <ul>
+                            {getNodeDataForSideBar(nodeId)?.members?.map((member: string) => (
+                                <li>
+                                    {member}
+                                    <br />
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

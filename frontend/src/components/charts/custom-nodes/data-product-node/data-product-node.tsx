@@ -14,10 +14,25 @@ export type DataProductNodeProps = Node<{
     targetHandlePosition?: Position;
     sourceHandlePosition?: Position;
     isActive?: boolean;
+    domain?: string;
+    members?: Array<string>;
+    description?: string;
 }>;
 
 export function DataProductNode({
-    data: { name, id, icon_key, isMainNode, nodeToolbarActions, targetHandlePosition, sourceHandlePosition, isActive },
+    data: {
+        name,
+        id,
+        icon_key,
+        isMainNode,
+        nodeToolbarActions,
+        targetHandlePosition,
+        sourceHandlePosition,
+        isActive,
+        domain,
+        members,
+        description,
+    },
     ...props
 }: NodeProps<DataProductNodeProps>) {
     return (
@@ -32,6 +47,9 @@ export function DataProductNode({
                     sourceHandlePosition,
                     targetHandlePosition,
                     isActive,
+                    domain,
+                    members,
+                    description,
                 }}
                 {...props}
             />

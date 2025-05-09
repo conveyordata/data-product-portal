@@ -14,6 +14,7 @@ export enum TagTypes {
     Dataset = 'Dataset',
     Domain = 'Domain',
     DataOutput = 'DataOutput',
+    Graph = 'Graph',
     Platform = 'Platform',
     PlatformService = 'PlatformService',
     PlatformServiceConfig = 'PlatformServiceConfig',
