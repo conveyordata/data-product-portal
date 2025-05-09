@@ -10,6 +10,7 @@ import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useAddUserToDatasetMutation, useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
@@ -45,7 +46,7 @@ export function TeamTab({ datasetId }: Props) {
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-
+    const { data: DATASET_ROLES, isFetching: isLoadingRoles } = useGetRolesQuery('dataset');
     const datasetOwnerIds = dataset?.owners.map((owner) => owner.id) ?? [];
     const { data: access } = useCheckAccessQuery(
         {
@@ -102,7 +103,8 @@ export function TeamTab({ datasetId }: Props) {
                     isOpen={isVisible}
                     onClose={handleClose}
                     userIdsToHide={datasetOwnerIds}
-                    isLoading={isFetching || isLoading}
+                    isLoading={isFetching || isLoading || isLoadingRoles}
+                    roles={DATASET_ROLES || []}
                     item={{
                         action: handleAddNewUser,
                         label: t('Add User'),

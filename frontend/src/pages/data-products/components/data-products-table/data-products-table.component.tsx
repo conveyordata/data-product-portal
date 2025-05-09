@@ -92,11 +92,7 @@ export function DataProductsTable() {
                 </Form>
                 <Space>
                     <Link to={ApplicationPaths.DataProductNew}>
-                        <Button
-                            className={styles.formButton}
-                            type={'primary'}
-                            disabled={!(canCreateDataProduct || true)}
-                        >
+                        <Button className={styles.formButton} type={'primary'} disabled={!canCreateDataProduct}>
                             {t('Create Data Product')}
                         </Button>
                     </Link>

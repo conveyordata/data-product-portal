@@ -9,11 +9,15 @@ import { useModal } from '@/hooks/use-modal.tsx';
 import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useAddDataProductMembershipMutation } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import {
+    useCreateRoleAssignmentMutation,
+    useGetRoleAssignmentQuery,
+} from '@/store/features/role-assignments/roles-api-slice';
+import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+import { RoleAssignmentContract } from '@/types/roles/role.contract';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
 import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
@@ -24,7 +28,7 @@ type Props = {
     dataProductId: string;
 };
 
-function filterUsers(users: DataProductUserMembership[], searchTerm: string) {
+function filterUsers(users: RoleAssignmentContract[], searchTerm: string) {
     if (!searchTerm) return users;
     if (!users) return [];
 
@@ -44,14 +48,19 @@ export function TeamTab({ dataProductId }: Props) {
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching } = useGetDataProductByIdQuery(dataProductId);
-    const [addUserToDataProduct, { isLoading: isAddingUser }] = useAddDataProductMembershipMutation();
+    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: roleAssignments, isFetching } = useGetRoleAssignmentQuery({
+        data_product_id: dataProductId,
+        user_id: undefined,
+    });
+    const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateRoleAssignmentMutation();
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
+    const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
 
     const filteredUsers = useMemo(() => {
-        return filterUsers(dataProduct?.memberships ?? [], searchTerm);
-    }, [dataProduct?.memberships, searchTerm]);
+        return filterUsers(roleAssignments ?? [], searchTerm);
+    }, [searchTerm, roleAssignments]);
     const dataProductUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
 
     const { data: access } = useCheckAccessQuery(
@@ -71,12 +80,12 @@ export function TeamTab({ dataProductId }: Props) {
     }, [dataProduct, user]);
 
     const handleGrantAccessToDataProduct = useCallback(
-        async (user: UserContract) => {
+        async (user: UserContract, role_id: string) => {
             try {
                 await addUserToDataProduct({
-                    dataProductId: dataProductId,
+                    data_product_id: dataProductId,
                     user_id: user.id,
-                    role: DataProductMembershipRole.Member,
+                    role_id: role_id,
                 }).unwrap();
                 dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
             } catch (_error) {
@@ -118,6 +127,7 @@ export function TeamTab({ dataProductId }: Props) {
                     onClose={handleClose}
                     isLoading={isFetching || isAddingUser}
                     userIdsToHide={dataProductUserIds}
+                    roles={DATA_PRODUCT_ROLES || []}
                     item={{
                         action: handleGrantAccessToDataProduct,
                         label: t('Grant Access'),

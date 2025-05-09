@@ -83,7 +83,6 @@ export function SettingsTabs() {
                 key: TabKeys.Roles,
                 children: <RolesTab />,
                 icon: <TeamOutlined />,
-                hidden: true,
             },
         ];
     }, [t]);

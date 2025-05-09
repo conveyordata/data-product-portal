@@ -43,7 +43,7 @@ export function RoleConfiguration() {
     return (
         <div>
             <Flex justify="space-between">
-                <Typography.Title level={2}>{t('Manage Roles')}</Typography.Title>
+                <Typography.Title level={3}>{t('Manage Roles')}</Typography.Title>
                 <CreateRoleButton scope={current} />
             </Flex>
             <Paragraph>{t('Roles are reusable sets of permissions.')}</Paragraph>
