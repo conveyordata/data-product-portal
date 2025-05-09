@@ -126,6 +126,13 @@ class Authorization(metaclass=Singleton):
         await enforcer.remove_named_grouping_policy("g", user_id, role_id, resource_id)
         self._after_update()
 
+    def has_resource_role(
+        self, *, user_id: str, role_id: str, resource_id: str
+    ) -> bool:
+        """Determines whether this resource role is assigned to the chosen user."""
+        enforcer: AsyncEnforcer = self._enforcer
+        return enforcer.has_named_grouping_policy("g", user_id, role_id, resource_id)
+
     async def assign_domain_role(
         self, *, user_id: str, role_id: str, domain_id: str
     ) -> None:
@@ -144,6 +151,11 @@ class Authorization(metaclass=Singleton):
         await enforcer.remove_named_grouping_policy("g2", user_id, role_id, domain_id)
         self._after_update()
 
+    def has_domain_role(self, *, user_id: str, role_id: str, domain_id: str) -> bool:
+        """Determines whether this domain role is assigned to chosen user."""
+        enforcer: AsyncEnforcer = self._enforcer
+        return enforcer.has_named_grouping_policy("g2", user_id, role_id, domain_id)
+
     async def assign_global_role(self, *, user_id: str, role_id: str) -> None:
         """Creates an entry in the casbin table,
         assigning the user the chosen global role."""
@@ -158,6 +170,11 @@ class Authorization(metaclass=Singleton):
         await enforcer.remove_named_grouping_policy("g3", user_id, role_id)
         self._after_update()
 
+    def has_global_role(self, *, user_id: str, role_id: str) -> bool:
+        """Determines whether this global role is assigned to the chosen user."""
+        enforcer: AsyncEnforcer = self._enforcer
+        return enforcer.has_named_grouping_policy("g3", user_id, role_id)
+
     async def assign_admin_role(self, *, user_id: str) -> None:
         """Creates an entry in the casbin table, assigning the user the admin role."""
         await self.assign_global_role(user_id=user_id, role_id="*")
@@ -165,6 +182,10 @@ class Authorization(metaclass=Singleton):
     async def revoke_admin_role(self, *, user_id: str) -> None:
         """Deletes the entry in the casbin table, assigning the user the admin role."""
         await self.revoke_global_role(user_id=user_id, role_id="*")
+
+    def has_admin_role(self, *, user_id: str) -> bool:
+        """Determines whether the admin role is assigned to the chosen user."""
+        return self.has_global_role(user_id=user_id, role_id="*")
 
     async def clear_assignments_for_user(self, *, user_id: str) -> None:
         """Removes all role assignments for a user inside the casbin table.
