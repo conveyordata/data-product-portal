@@ -90,7 +90,7 @@ export function TeamTab({ dataProductId }: Props) {
 
     return (
         <>
-            <Flex vertical className={styles.container}>
+            <Flex vertical className={styles.container} gap={filteredUsers.length === 0 ? 12 : 0}>
                 <Searchbar
                     form={searchForm}
                     formItemProps={{ initialValue: '' }}
