@@ -61,10 +61,10 @@ export function DatasetTab({ dataProductId }: Props) {
 
     return (
         <>
-            <Flex vertical className={styles.container}>
+            <Flex vertical className={`${styles.container} ${filteredDatasets.length === 0 && styles.paginationGap}`}>
                 <Searchbar
                     placeholder={t('Search existing input datasets by name')}
-                    formItemProps={{ initialValue: '' }}
+                    formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
                     form={searchForm}
                     actionButton={
                         <Button

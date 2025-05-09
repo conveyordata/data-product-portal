@@ -50,10 +50,13 @@ export function DataOutputTab({ datasetId }: Props) {
 
     return (
         <>
-            <Flex vertical className={styles.container}>
+            <Flex
+                vertical
+                className={`${styles.container} ${filteredDataOutputs.length === 0 && styles.paginationGap}`}
+            >
                 <Searchbar
                     placeholder={t('Search data outputs by name')}
-                    formItemProps={{ initialValue: '' }}
+                    formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
                     form={searchForm}
                 />
 
