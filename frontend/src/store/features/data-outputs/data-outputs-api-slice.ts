@@ -188,11 +188,7 @@ export const {
     useRemoveDataOutputMutation,
     useRequestDatasetAccessForDataOutputMutation,
     useGetDataOutputGraphDataQuery,
-<<<<<<< HEAD
     useGetIntegrationUrlQuery, 
-} = dataOutputsApiSlice;
-=======
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
 } = dataOutputsApiSlice;
->>>>>>> main
