@@ -124,7 +124,6 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
             canPerformTeamActions: (userId: string) =>
                 canPerformTeamActions(isCurrentUserDataProductOwner, userId, currentUser.id),
             isLoading: isLoadingDataProduct,
-            // hasCurrentUserMembership: getDoesUserHaveAnyDataProductMembership(currentUser.id, dataProductUsers),
             onRejectMembershipRequest: handleDenyAccessToDataProduct,
             onAcceptMembershipRequest: handleGrantAccessToDataProduct,
             canEdit: canEditUserNew,
