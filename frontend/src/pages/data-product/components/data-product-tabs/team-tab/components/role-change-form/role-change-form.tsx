@@ -17,7 +17,6 @@ type Props = {
 export function RoleChangeForm({ userId, initialRole, onRoleChange, isDisabled = true }: Props) {
     const [dataProductRoleForm] = Form.useForm<RoleAssignmentContract>();
     const { data: DATA_PRODUCT_ROLES, isLoading } = useGetRolesQuery('data_product', { skip: isDisabled });
-    // const DATA_PRODUCT_ROLES = getRoleOptions(t);
 
     const handleRoleChange: FormProps<RoleContract>['onFinish'] = (role) => {
         console.log(role);

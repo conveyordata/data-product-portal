@@ -35,7 +35,6 @@ export const getDataProductUsersTableColumns = ({
     isRemovingUser,
     dataProductUsers,
     canPerformTeamActions,
-    // hasCurrentUserMembership,
     canEdit,
     canRemove,
     canApprove,
