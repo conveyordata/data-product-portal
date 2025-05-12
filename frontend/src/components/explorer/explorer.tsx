@@ -3,7 +3,7 @@ import '@xyflow/react/dist/base.css';
 import type { Edge, Node, XYPosition } from '@xyflow/react';
 import { Position, ReactFlowProvider } from '@xyflow/react';
 import { Button, Flex, theme } from 'antd';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -23,7 +23,7 @@ import type { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 
 import styles from './explorer.module.scss';
-import { Sidebar } from './sidebar';
+import { SidebarFilters, Sidebar } from './sidebar';
 
 const { getDesignToken } = theme;
 
@@ -192,9 +192,25 @@ function InternalFullExplorer() {
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
-    const { data: graph, isFetching } = useGetGraphDataQuery('', {
-        skip: false,
+    const [sidebarFilters, setSidebarFilters] = useState<SidebarFilters>({
+        dataProductsEnabled: true,
+        datasetsEnabled: true,
+        dataOutputsEnabled: true,
+        domainsEnabled: true,
     });
+
+    const { data: graph, isFetching } = useGetGraphDataQuery(
+        {
+            includeDataProducts: sidebarFilters.dataProductsEnabled,
+            includeDatasets: sidebarFilters.datasetsEnabled,
+            includeDataOutputs: sidebarFilters.dataOutputsEnabled,
+            includeDomains: sidebarFilters.domainsEnabled,
+        },
+        {
+            skip: false,
+        },
+    );
+
     const generateGraph = useCallback(() => {
         if (graph) {
             const nodes = parseNodes(graph.nodes, defaultNodePosition);
@@ -202,15 +218,23 @@ function InternalFullExplorer() {
             setNodesAndEdges(nodes, edges);
         }
     }, [defaultNodePosition, graph, setNodesAndEdges]);
+
     useEffect(() => {
         generateGraph();
     }, [generateGraph]);
+
     if (isFetching) {
         return <LoadingSpinner />;
     }
+
     return (
         <Flex className={styles.nodeWrapper}>
-            <Sidebar nodes={nodes} setNodes={setNodes} />
+            <Sidebar
+                nodes={nodes}
+                setNodes={setNodes}
+                onFilterChange={setSidebarFilters}
+                sidebarFilters={sidebarFilters}
+            />
             <NodeEditor
                 nodes={nodes}
                 edges={edges}

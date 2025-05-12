@@ -5,7 +5,23 @@ import { useTranslation } from 'react-i18next';
 
 import styles from './sidebar.module.scss';
 
-export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | ((nodes: Node[]) => Node[])) => void }) {
+export type SidebarFilters = {
+    dataProductsEnabled: boolean;
+    datasetsEnabled: boolean;
+    dataOutputsEnabled: boolean;
+    domainsEnabled: boolean;
+};
+
+export function Sidebar({
+    nodes,
+    sidebarFilters,
+    onFilterChange,
+}: {
+    nodes: Node[];
+    setNodes: (nodes: Node[] | ((nodes: Node[]) => Node[])) => void;
+    sidebarFilters: SidebarFilters;
+    onFilterChange: (filters: SidebarFilters) => void;
+}) {
     const { setCenter, getNode, setNodes } = useReactFlow();
     const [nodeId, setNodeId] = useState<string | null>(null);
     const { t } = useTranslation();
@@ -46,42 +62,71 @@ export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | (
     function getNodeDataForSideBar(nodeId: string) {
         const node = getNode(nodeId);
         if (!node) return null;
-        const {
-            name,
-            domain,
-            members,
-            description,
-        }: { name: string; domain: string; members: string[]; description: string } = node.data;
+
+        const data = node.data as Record<string, any>;
         console.log(node);
+
         return {
-            name: String(name),
-            domain: String(domain),
-            members: members,
-            description: String(description),
+            name: String(data.name || ''),
+            domain: String(data.domain || ''),
+            members: Array.isArray(data.members) ? data.members : [],
+            description: String(data.description || ''),
         };
     }
 
     return (
         <div className={styles.sidebarContainer}>
-            <Checkbox defaultChecked value="domain" className={styles.checkbox}>
-                {t('domains')}
+            <Checkbox
+                checked={sidebarFilters.domainsEnabled}
+                value="domain"
+                className={styles.checkbox}
+                onChange={(e) => {
+                    onFilterChange({
+                        ...sidebarFilters,
+                        domainsEnabled: e.target.checked,
+                    });
+                }}
+            >
+                {t('Domains')}
             </Checkbox>
             <Checkbox
-                defaultChecked
+                checked={sidebarFilters.dataProductsEnabled}
                 value="data product"
                 className={styles.checkbox}
                 onChange={(e) => {
-                    console.log(e.target.checked);
-                    console.log(e);
+                    onFilterChange({
+                        ...sidebarFilters,
+                        dataProductsEnabled: e.target.checked,
+                    });
                 }}
             >
-                {t('data products')}
+                {t('Data Products')}
             </Checkbox>
-            <Checkbox defaultChecked value="dataset" className={styles.checkbox}>
-                {t('datasets')}
+            <Checkbox
+                checked={sidebarFilters.datasetsEnabled}
+                value="dataset"
+                className={styles.checkbox}
+                onChange={(e) => {
+                    onFilterChange({
+                        ...sidebarFilters,
+                        datasetsEnabled: e.target.checked,
+                    });
+                }}
+            >
+                {t('Datasets')}
             </Checkbox>
-            <Checkbox defaultChecked value="data output" className={styles.checkbox}>
-                {t('data outputs')}
+            <Checkbox
+                checked={sidebarFilters.dataOutputsEnabled}
+                value="data output"
+                className={styles.checkbox}
+                onChange={(e) => {
+                    onFilterChange({
+                        ...sidebarFilters,
+                        dataOutputsEnabled: e.target.checked,
+                    });
+                }}
+            >
+                {t('Data Outputs')}
             </Checkbox>
             <Select
                 showSearch
@@ -111,7 +156,7 @@ export function Sidebar({ nodes }: { nodes: Node[]; setNodes: (nodes: Node[] | (
                         Members: <br />
                         <ul>
                             {getNodeDataForSideBar(nodeId)?.members?.map((member: string) => (
-                                <li>
+                                <li key={member}>
                                     {member}
                                     <br />
                                 </li>
