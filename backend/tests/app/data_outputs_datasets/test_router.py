@@ -178,12 +178,14 @@ class TestDataOutputsDatasetsRouter:
         assert response.json()[0]["status"] == "pending"
 
     def test_data_output_dataset_history(self, client):
-        user= UserFactory(external_id="sub")
+        user = UserFactory(external_id="sub")
         membership = DataProductMembershipFactory(user=user)
         data_output = DataOutputFactory(owner=membership.data_product)
         ds = DatasetFactory(owners=[user])
 
-        link_requested = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        link_requested = self.request_data_output_dataset_link(
+            client, data_output.id, ds.id
+        )
         assert link_requested.status_code == 200
         response = self.get_data_output_history(client, data_output.id)
         assert len(response.json()) == 1
@@ -196,7 +198,7 @@ class TestDataOutputsDatasetsRouter:
         assert len(response.json()) == 2
 
         link = DataOutputDatasetAssociationFactory(
-            dataset=ds, status=DecisionStatus.PENDING,data_output=data_output
+            dataset=ds, status=DecisionStatus.PENDING, data_output=data_output
         )
         response = self.approve_default_data_output_dataset_link(client, link.id)
         assert response.status_code == 200
@@ -214,7 +216,6 @@ class TestDataOutputsDatasetsRouter:
         assert response.status_code == 200
         response = self.get_data_output_history(client, data_output.id)
         assert len(response.json()) == 5
-
 
     @staticmethod
     def request_data_output_dataset_link(client, data_output_id, dataset_id):
