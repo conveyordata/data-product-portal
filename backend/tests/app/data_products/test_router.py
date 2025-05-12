@@ -346,7 +346,6 @@ class TestDataProductsRouter:
         create_payload["memberships"] = memberships
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 200
-        assert "id" in created_data_product.json()
         data_product_id = created_data_product.json().get("id")
         assert data_product_id is not None
         response = self.get_data_product_history(client, data_product_id)
