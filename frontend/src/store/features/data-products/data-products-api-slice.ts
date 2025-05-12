@@ -78,12 +78,6 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 method: 'GET',
             }),
         }),
-        getGraphData: builder.query<GraphContract, string>({
-            query: () => ({
-                url: ApiUrl.Graph,
-                method: 'GET',
-            }),
-        }),
         createDataProduct: builder.mutation<DataProductCreateResponse, DataProductCreate>({
             query: (dataProduct) => ({
                 url: ApiUrl.DataProducts,
@@ -255,7 +249,6 @@ export const {
     useGetUserDataProductsQuery,
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
-    useGetGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,

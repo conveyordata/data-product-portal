@@ -3,27 +3,20 @@ import '@xyflow/react/dist/base.css';
 import type { Node, XYPosition } from '@xyflow/react';
 import { Position, ReactFlowProvider } from '@xyflow/react';
 import { Flex } from 'antd';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
-import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
+import { useGetGraphDataQuery } from '@/store/features/graph/graph-api-slice.ts';
 import type { NodeContract } from '@/types/graph/graph-contract.ts';
 
-import { parseEdges, LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common.tsx';
 import styles from './explorer.module.scss';
+import { SidebarFilters, Sidebar } from './sidebar';
+import { parseEdges, LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common';
 
-type Props = {
-    id: string;
-    type: 'dataset' | 'dataproduct' | 'dataoutput' | 'domain';
-};
-
-function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Node[] {
-    // TODO: revert to old parseNodes function - separate from parseFullNodes
+function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, domainsEnabled: boolean = true): Node[] {
     // Regular nodes and domain nodes. In domain nodes, we count how many children they have so we can estimate their size.
     let regular_nodes = nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
@@ -68,8 +61,11 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
                 draggable: true,
                 deletable: false,
                 type: node.type,
-                parentId: '672debaf-31f9-4233-820b-ad2165af044e', // TODO: needs to be the id of the domain node
-                extent: 'parent', // node not draggable outside of the parent
+                // Only set parentId if domains are enabled
+                ...(domainsEnabled ? {
+                    parentId: '672debaf-31f9-4233-820b-ad2165af044e', // TODO: needs to be the id of the domain node
+                    extent: 'parent', // node not draggable outside of the parent
+                } : {}),
                 data: {
                     name: node.data.name,
                     id: node.data.id,
@@ -92,36 +88,39 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
         return acc;
     }, {});
 
-    let domain_nodes = nodes
-        .filter((node) => node.type === CustomNodeTypes.DomainNode)
-        .map((node) => {
-            const childCount = childCounts[node.id] || 1;
-            const width = Math.max(200, childCount * 120); // Base width of 400px, 200px per child
-            return {
-                id: node.id,
-                position: defaultNodePosition,
-                draggable: true,
-                deletable: false,
-                type: 'group', // TODO: double use of the 'type' field by reactflow and ourselves
-                style: {
-                    // TODO: calculate this based on the number of nodes in the domain
-                    width: width,
-                    height: width * 0.6,
-                    backgroundColor: 'rgba(0, 255, 42, 0.1)',
-                    border: '1px solid rgba(0, 255, 42, 0.5)',
-                    borderRadius: '8em',
-                },
-                data: {
-                    name: node.data.name,
-                    id: node.data.id,
-                    icon_key: node.data.icon_key,
-                    isMainNode: node.isMain,
-                    description: node.data.description,
-                    extent: 'parent',
-                    type: 'group',
-                },
-            };
-        });
+    // Only include domain nodes if domains are enabled
+    let domain_nodes = domainsEnabled
+        ? nodes
+            .filter((node) => node.type === CustomNodeTypes.DomainNode)
+            .map((node) => {
+                const childCount = childCounts[node.id] || 1;
+                const width = Math.max(200, childCount * 120); // Base width of 400px, 200px per child
+                return {
+                    id: node.id,
+                    position: defaultNodePosition,
+                    draggable: true,
+                    deletable: false,
+                    type: 'group', // TODO: double use of the 'type' field by reactflow and ourselves
+                    style: {
+                        // TODO: calculate this based on the number of nodes in the domain
+                        width: width,
+                        height: width * 0.6,
+                        backgroundColor: 'rgba(0, 255, 42, 0.1)',
+                        border: '1px solid rgba(0, 255, 42, 0.5)',
+                        borderRadius: '8em',
+                    },
+                    data: {
+                        name: node.data.name,
+                        id: node.data.id,
+                        icon_key: node.data.icon_key,
+                        isMainNode: node.isMain,
+                        description: node.data.description,
+                        extent: 'parent',
+                        type: 'group',
+                    },
+                };
+            })
+        : [];
 
     let result = [...domain_nodes, ...regular_nodes];
 
@@ -129,36 +128,39 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
     return result;
 }
 
-function InternalExplorer({ id, type }: Props) {
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
+function InternalFullExplorer() {
+    // Same as InternalExplorer but this one does not filter anything, it shows the full graph
+    // Also includes a sidebar to select nodes
+
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
-    const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== 'dataproduct' || !id });
-    const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== 'dataset' || !id });
-    const dataOutputQuery = useGetDataOutputGraphDataQuery(id, { skip: type !== 'dataoutput' || !id });
+    const [sidebarFilters, setSidebarFilters] = useState<SidebarFilters>({
+        dataProductsEnabled: true,
+        datasetsEnabled: true,
+        dataOutputsEnabled: true,
+        domainsEnabled: true,
+    });
 
-    let graphDataQuery;
+    const { data: graph, isFetching } = useGetGraphDataQuery(
+        {
+            includeDataProducts: sidebarFilters.dataProductsEnabled,
+            includeDatasets: sidebarFilters.datasetsEnabled,
+            includeDataOutputs: sidebarFilters.dataOutputsEnabled,
+            includeDomains: sidebarFilters.domainsEnabled,
+        },
+        {
+            skip: false,
+        },
+    );
 
-    switch (type) {
-        case 'dataproduct':
-            graphDataQuery = dataProductQuery;
-            break;
-        case 'dataset':
-            graphDataQuery = datasetQuery;
-            break;
-        case 'dataoutput':
-            graphDataQuery = dataOutputQuery;
-            break;
-    }
-
-    const { data: graph, isFetching } = graphDataQuery;
     const generateGraph = useCallback(() => {
         if (graph) {
-            const nodes = parseNodes(graph.nodes, defaultNodePosition);
+            const nodes = parseFullNodes(graph.nodes, defaultNodePosition, sidebarFilters.domainsEnabled);
             const edges = parseEdges(graph.edges);
             setNodesAndEdges(nodes, edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges]);
+    }, [defaultNodePosition, graph, setNodesAndEdges, sidebarFilters.domainsEnabled]);
 
     useEffect(() => {
         generateGraph();
@@ -169,7 +171,13 @@ function InternalExplorer({ id, type }: Props) {
     }
 
     return (
-        <Flex vertical className={styles.nodeWrapper}>
+        <Flex className={styles.nodeWrapper}>
+            <Sidebar
+                nodes={nodes}
+                setNodes={setNodes}
+                onFilterChange={setSidebarFilters}
+                sidebarFilters={sidebarFilters}
+            />
             <NodeEditor
                 nodes={nodes}
                 edges={edges}
@@ -186,10 +194,10 @@ function InternalExplorer({ id, type }: Props) {
     );
 }
 
-export function Explorer(props: Props) {
+export function FullExplorer() {
     return (
         <ReactFlowProvider>
-            <InternalExplorer {...props} />
+            <InternalFullExplorer />
         </ReactFlowProvider>
     );
 }
