@@ -333,18 +333,48 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json() == "test_1.com"
 
-    def test_get_data_product_history(self, client):
-        product = DataProductMembershipFactory(
-            user=UserFactory(external_id="sub")
-        ).data_product
-        id = product.id
-        response = self.update_data_product_about(client, product.id)
-        response = self.update_data_product_status(
-            client, {"status": "active"}, product.id
-        )
-        response = self.delete_data_product(client, product.id)
-        response = self.get_data_product_history(client, id)
+    def test_get_data_product_history(self, client, payload, session):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        create_payload = deepcopy(payload)
+        memberships = [
+            {
+                "user_id": str(user.id),
+                "role": DataProductUserRole.OWNER.value,
+            }
+        ]
+        create_payload["memberships"] = memberships
+        created_data_product = self.create_data_product(client, create_payload)
+        assert created_data_product.status_code == 200
+        assert "id" in created_data_product.json()
+        data_product_id = created_data_product.json().get("id")
+        assert data_product_id is not None
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 2
+
+        update_payload = deepcopy(create_payload)
+        update_payload["name"] = "Updated Data Product"
+        response = self.update_data_product(client, update_payload, data_product_id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product_id)
         assert len(response.json()) == 3
+
+        response = self.update_data_product_about(client, data_product_id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 4
+
+        response = self.update_data_product_status(
+            client, {"status": "active"}, data_product_id
+        )
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 5
+
+        response = self.delete_data_product(client, data_product_id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 6
 
     def test_no_history(self, client):
         product = DataProductFactory()
