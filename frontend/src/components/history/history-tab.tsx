@@ -1,6 +1,4 @@
-import { CaretRightOutlined } from '@ant-design/icons';
-import { Flex, Form, Table, TableProps, Typography } from 'antd';
-import dayjs from 'dayjs';
+import { Flex, Form, Table, TableProps } from 'antd';
 import { TFunction } from 'i18next';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +13,7 @@ import { getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.h
 
 import { Searchbar } from '../form';
 import styles from './history-tab.module.scss';
+import { getHistoryColumns } from './history-table-columns';
 
 type Props = {
     id: string;
@@ -91,50 +90,7 @@ export function HistoryTab({ id, type }: Props) {
         resetPagination();
     }, [filteredHistory, resetPagination]);
 
-    const columns = [
-        {
-            title: t('Event name'),
-            dataIndex: 'name',
-            key: 'name',
-            width: '30%',
-            render: (event: string) => t(event) || t('No title available'),
-        },
-        {
-            title: t('Involved entities'),
-            key: 'Detail',
-            width: '30%',
-            render: (record: EventContract) => {
-                const subjectLabel = getSubjectDisplayLabel(t, record);
-                const targetLabel = getTargetDisplayLabel(t, record);
-
-                if (targetLabel) {
-                    return (
-                        <Flex vertical>
-                            <Typography.Text>{subjectLabel}</Typography.Text>
-                            <Typography.Text>
-                                <CaretRightOutlined /> {targetLabel}
-                            </Typography.Text>
-                        </Flex>
-                    );
-                }
-                return <Typography.Text>{subjectLabel}</Typography.Text>;
-            },
-        },
-        {
-            title: t('Executed by'),
-            dataIndex: 'actor',
-            key: 'actor',
-
-            render: (actor: { first_name: string; last_name: string }) => `${actor.first_name} ${actor.last_name}`,
-        },
-        {
-            title: t('Timestamp'),
-            dataIndex: 'created_on',
-            key: 'created_on',
-            width: '15%',
-            render: (created_on: string) => `${dayjs(created_on).format('YYYY-MM-DD HH:mm')} ${t('UTC')}`,
-        },
-    ];
+    const columns = useMemo(() => getHistoryColumns({ t }), [t]);
 
     return (
         <Flex vertical className={`${styles.container} ${filteredHistory?.length === 0 && styles.paginationGap}`}>
