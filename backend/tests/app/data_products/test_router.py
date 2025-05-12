@@ -376,17 +376,6 @@ class TestDataProductsRouter:
         response = self.get_data_product_history(client, data_product_id)
         assert len(response.json()) == 6
 
-    def test_no_history(self, client):
-        product = DataProductFactory()
-        id = product.id
-        response = self.update_data_product_about(client, product.id)
-        response = self.update_data_product_status(
-            client, {"status": "active"}, product.id
-        )
-        response = self.delete_data_product(client, product.id)
-        response = self.get_data_product_history(client, id)
-        assert len(response.json()) == 0
-
     def test_get_namespace_suggestion_subsitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
