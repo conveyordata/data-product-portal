@@ -47,10 +47,11 @@ class DataProductMembershipService:
         data_product_membership = DataProductMembership(
             user_id=user.id,
             role=DataProductUserRole.MEMBER,
-            requested_by_id=authenticated_user.id,
+            requested_by_id=user_id,
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.memberships.append(data_product_membership)
+        db.flush()
         db.add(
             EventModel(
                 name="Data product membership requested",
@@ -235,7 +236,7 @@ class DataProductMembershipService:
         data_product_membership = DataProductMembership(
             **data_product_membership.dict(),
             status=DecisionStatus.APPROVED,
-            requested_by_id=authenticated_user.id,
+            requested_by_id=data_product_membership.user_id,
             requested_on=datetime.now(tz=pytz.utc),
             approved_by_id=authenticated_user.id,
             approved_on=datetime.now(tz=pytz.utc),

@@ -13,6 +13,7 @@ from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype, Scope
 
 MEMBERSHIPS_ENDPOINT = "/api/data_product_memberships"
+DATA_PRODUCTS_ENDPOINT = "/api/data_products"
 
 
 class TestDataProductMembershipsRouter:
@@ -152,6 +153,56 @@ class TestDataProductMembershipsRouter:
         )
         assert response.json()[0]["status"] == "pending"
 
+    def test_data_product_membership_history(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductMembershipFactory(
+            role=DataProductUserRole.OWNER.value, user=user
+        ).data_product
+        link_requested = self.request_data_product_membership(
+            client, UserFactory().id, data_product.id
+        )
+        link_id = link_requested.json().get("id")
+        assert link_id is not None
+        response = self.get_data_product_history(client, data_product.id)
+        assert len(response.json()) == 1
+
+        response = self.create_secondary_membership(
+            client, UserFactory().id, data_product.id
+        )
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product.id)
+        assert len(response.json()) == 2
+
+        response = self.deny_data_product_membership(client, link_id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product.id)
+        assert len(response.json()) == 3
+
+        user_new = UserFactory()
+        membership_request = DataProductMembershipFactory(
+            data_product=data_product,
+            user=user_new,
+            role=DataProductUserRole.MEMBER.value,
+            status=DecisionStatus.PENDING,
+            requested_by_id=str(user_new.id),
+        )
+        response = self.approve_data_product_membership(client, membership_request.id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product.id)
+        assert len(response.json()) == 4
+
+        response = self.update_data_product_membership_user_role(
+            client, membership_request.id, DataProductUserRole.OWNER.value
+        )
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product.id)
+        assert len(response.json()) == 5
+
+        response = self.remove_data_product_membership(client, membership_request.id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product.id)
+        assert len(response.json()) == 6
+
     @staticmethod
     def create_secondary_membership(client, user_id, data_product_id):
         data = {
@@ -187,3 +238,7 @@ class TestDataProductMembershipsRouter:
         return client.put(
             f"{MEMBERSHIPS_ENDPOINT}/{membership_id}/role?membership_role={new_role}"
         )
+
+    @staticmethod
+    def get_data_product_history(client, data_product_id):
+        return client.get(f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/history")
