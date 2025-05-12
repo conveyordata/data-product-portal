@@ -9,10 +9,9 @@ import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-gr
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { CustomDropdownItemProps } from '@/types/shared';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-
 import {
     useGetIntegrationUrlQuery
-} from '@/store/features/data-outputs/data-outputs-api-slice.ts';
+} from '@/store/features/integrations/integrations-api-slice.ts';
 
 import styles from './data-output-actions.module.scss';
 
