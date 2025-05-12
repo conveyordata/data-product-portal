@@ -1,9 +1,10 @@
 import { Node, useReactFlow } from '@xyflow/react';
-import { Checkbox, Select } from 'antd';
+import { Tag, Select } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './sidebar.module.scss';
+
 
 export type SidebarFilters = {
     dataProductsEnabled: boolean;
@@ -76,58 +77,54 @@ export function Sidebar({
 
     return (
         <div className={styles.sidebarContainer}>
-            <Checkbox
+            <Tag.CheckableTag
                 checked={sidebarFilters.domainsEnabled}
-                value="domain"
-                className={styles.checkbox}
+                className={styles.checkableTag}
                 onChange={(e) => {
                     onFilterChange({
                         ...sidebarFilters,
-                        domainsEnabled: e.target.checked,
+                        domainsEnabled: e.valueOf(),
                     });
                 }}
             >
                 {t('Domains')}
-            </Checkbox>
-            <Checkbox
+            </Tag.CheckableTag>
+            <Tag.CheckableTag
                 checked={sidebarFilters.dataProductsEnabled}
-                value="data product"
-                className={styles.checkbox}
+                className={styles.checkableTag}
                 onChange={(e) => {
                     onFilterChange({
                         ...sidebarFilters,
-                        dataProductsEnabled: e.target.checked,
+                        dataProductsEnabled: e.valueOf(),
                     });
                 }}
             >
                 {t('Data Products')}
-            </Checkbox>
-            <Checkbox
+            </Tag.CheckableTag>
+            <Tag.CheckableTag
                 checked={sidebarFilters.datasetsEnabled}
-                value="dataset"
-                className={styles.checkbox}
+                className={styles.checkableTag}
                 onChange={(e) => {
                     onFilterChange({
                         ...sidebarFilters,
-                        datasetsEnabled: e.target.checked,
+                        datasetsEnabled: e.valueOf(),
                     });
                 }}
             >
                 {t('Datasets')}
-            </Checkbox>
-            <Checkbox
+            </Tag.CheckableTag>
+            <Tag.CheckableTag
                 checked={sidebarFilters.dataOutputsEnabled}
-                value="data output"
-                className={styles.checkbox}
+                className={styles.checkableTag}
                 onChange={(e) => {
                     onFilterChange({
                         ...sidebarFilters,
-                        dataOutputsEnabled: e.target.checked,
+                        dataOutputsEnabled: e.valueOf(),
                     });
                 }}
             >
                 {t('Data Outputs')}
-            </Checkbox>
+            </Tag.CheckableTag>
             <Select
                 showSearch
                 placeholder={String('Select a node')}
