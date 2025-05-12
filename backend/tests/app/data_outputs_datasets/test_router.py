@@ -177,6 +177,45 @@ class TestDataOutputsDatasetsRouter:
         assert response.json()[0]["data_output_id"] == str(data_output.id)
         assert response.json()[0]["status"] == "pending"
 
+    def test_data_output_dataset_history(self, client):
+        user= UserFactory(external_id="sub")
+        membership = DataProductMembershipFactory(user=user)
+        data_output = DataOutputFactory(owner=membership.data_product)
+        ds = DatasetFactory(owners=[user])
+
+        link_requested = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        assert link_requested.status_code == 200
+        response = self.get_data_output_history(client, data_output.id)
+        assert len(response.json()) == 1
+
+        link_id = link_requested.json().get("id")
+        assert link_id is not None
+        response = self.remove_data_output_dataset_link(client, link_id)
+        assert response.status_code == 200
+        response = self.get_data_output_history(client, data_output.id)
+        assert len(response.json()) == 2
+
+        link = DataOutputDatasetAssociationFactory(
+            dataset=ds, status=DecisionStatus.PENDING,data_output=data_output
+        )
+        response = self.approve_default_data_output_dataset_link(client, link.id)
+        assert response.status_code == 200
+        response = self.get_data_output_history(client, data_output.id)
+        assert len(response.json()) == 3
+
+        response = self.deny_default_data_output_dataset_link(client, link.id)
+        assert response.status_code == 200
+        response = self.get_data_output_history(client, data_output.id)
+        assert len(response.json()) == 4
+
+        response = self.request_data_output_dataset_unlink(
+            client, data_output.id, ds.id
+        )
+        assert response.status_code == 200
+        response = self.get_data_output_history(client, data_output.id)
+        assert len(response.json()) == 5
+
+
     @staticmethod
     def request_data_output_dataset_link(client, data_output_id, dataset_id):
         return client.post(
@@ -200,3 +239,7 @@ class TestDataOutputsDatasetsRouter:
         return client.delete(
             f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}/dataset/{dataset_id}"
         )
+
+    @staticmethod
+    def get_data_output_history(client, data_output_id):
+        return client.get(f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}/history")
