@@ -14,6 +14,7 @@ import {
     useGetDataProductSignInUrlMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { getDataPlatforms } from '@/utils/data-platforms';
@@ -32,7 +33,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const { t } = useTranslation();
     const user = useSelector(selectCurrentUser);
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
+    const { data: availablePlatforms, isLoading: isLoadingPlatforms } = useGetAllPlatformsQuery();
     const [getDataProductSignInUrl, { isLoading }] = useGetDataProductSignInUrlMutation();
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
     const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
@@ -46,6 +47,13 @@ export function DataProductActions({ dataProductId }: Props) {
             skip: !dataProductId,
         },
     );
+
+    const dataPlatforms = useMemo(() => {
+        const names = availablePlatforms ? availablePlatforms.map((platform) => platform.name.toLowerCase()) : [];
+
+        return getDataPlatforms(t).filter((platform) => names.includes(platform.value));
+    }, [t, availablePlatforms]);
+
     if (!dataProduct || !user) {
         return null;
     }
@@ -126,7 +134,7 @@ export function DataProductActions({ dataProductId }: Props) {
                         onDataPlatformClick={handleAccessToData}
                         onTileClick={handleTileClick}
                         isDisabled={isLoading || !(canAccessNew || canAccessDataProductData)}
-                        isLoading={isLoading || isConveyorLoading || isDatabricksLoading}
+                        isLoading={isLoading || isConveyorLoading || isDatabricksLoading || isLoadingPlatforms}
                     />
                 </Flex>
             </Flex>
