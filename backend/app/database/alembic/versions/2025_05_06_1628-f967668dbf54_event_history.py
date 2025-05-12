@@ -6,13 +6,21 @@ Create Date: 2025-05-06 16:28:28.024986
 
 """
 
+from enum import Enum
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 
-from app.events.enum import Type
 from app.shared.model import utcnow
+
+
+class Type(str, Enum):
+    DATA_PRODUCT = "data_product"
+    DATASET = "dataset"
+    DATA_OUTPUT = "data_output"
+    USER = "user"
+
 
 # revision identifiers, used by Alembic.
 revision: str = "f967668dbf54"

@@ -280,7 +280,6 @@ class DataProductService:
         for output in data_product.data_outputs:
             output.dataset_links = []
             db.delete(output)
-        db.delete(data_product)
         db.add(
             EventModel(
                 name="Data product deleted",
@@ -290,6 +289,7 @@ class DataProductService:
                 domain_id=data_product.domain_id,
             ),
         )
+        db.delete(data_product)
         db.commit()
 
     def _create_new_membership(
@@ -592,7 +592,6 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data product {id} not found",
             )
-        data_product.dataset_links.remove(data_product_dataset)
         db.add(
             EventModel(
                 name=(
@@ -608,6 +607,7 @@ class DataProductService:
                 domain_id=data_product.domain.id,
             ),
         )
+        data_product.dataset_links.remove(data_product_dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()
 

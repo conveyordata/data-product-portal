@@ -181,6 +181,7 @@ def remove_data_product(
     )
     return
 
+
 @router.put(
     "/{id}",
     responses={
