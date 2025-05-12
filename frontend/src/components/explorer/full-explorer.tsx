@@ -16,9 +16,7 @@ import styles from './explorer.module.scss';
 import { SidebarFilters, Sidebar } from './sidebar';
 import { parseEdges, LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common';
 
-
-
-function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Node[] {
+function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, domainsEnabled: boolean = true): Node[] {
     // Regular nodes and domain nodes. In domain nodes, we count how many children they have so we can estimate their size.
     let regular_nodes = nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
@@ -63,8 +61,11 @@ function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition):
                 draggable: true,
                 deletable: false,
                 type: node.type,
-                parentId: '672debaf-31f9-4233-820b-ad2165af044e', // TODO: needs to be the id of the domain node
-                extent: 'parent', // node not draggable outside of the parent
+                // Only set parentId if domains are enabled
+                ...(domainsEnabled ? {
+                    parentId: '672debaf-31f9-4233-820b-ad2165af044e', // TODO: needs to be the id of the domain node
+                    extent: 'parent', // node not draggable outside of the parent
+                } : {}),
                 data: {
                     name: node.data.name,
                     id: node.data.id,
@@ -87,36 +88,39 @@ function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition):
         return acc;
     }, {});
 
-    let domain_nodes = nodes
-        .filter((node) => node.type === CustomNodeTypes.DomainNode)
-        .map((node) => {
-            const childCount = childCounts[node.id] || 1;
-            const width = Math.max(200, childCount * 120); // Base width of 400px, 200px per child
-            return {
-                id: node.id,
-                position: defaultNodePosition,
-                draggable: true,
-                deletable: false,
-                type: 'group', // TODO: double use of the 'type' field by reactflow and ourselves
-                style: {
-                    // TODO: calculate this based on the number of nodes in the domain
-                    width: width,
-                    height: width * 0.6,
-                    backgroundColor: 'rgba(0, 255, 42, 0.1)',
-                    border: '1px solid rgba(0, 255, 42, 0.5)',
-                    borderRadius: '8em',
-                },
-                data: {
-                    name: node.data.name,
-                    id: node.data.id,
-                    icon_key: node.data.icon_key,
-                    isMainNode: node.isMain,
-                    description: node.data.description,
-                    extent: 'parent',
-                    type: 'group',
-                },
-            };
-        });
+    // Only include domain nodes if domains are enabled
+    let domain_nodes = domainsEnabled
+        ? nodes
+            .filter((node) => node.type === CustomNodeTypes.DomainNode)
+            .map((node) => {
+                const childCount = childCounts[node.id] || 1;
+                const width = Math.max(200, childCount * 120); // Base width of 400px, 200px per child
+                return {
+                    id: node.id,
+                    position: defaultNodePosition,
+                    draggable: true,
+                    deletable: false,
+                    type: 'group', // TODO: double use of the 'type' field by reactflow and ourselves
+                    style: {
+                        // TODO: calculate this based on the number of nodes in the domain
+                        width: width,
+                        height: width * 0.6,
+                        backgroundColor: 'rgba(0, 255, 42, 0.1)',
+                        border: '1px solid rgba(0, 255, 42, 0.5)',
+                        borderRadius: '8em',
+                    },
+                    data: {
+                        name: node.data.name,
+                        id: node.data.id,
+                        icon_key: node.data.icon_key,
+                        isMainNode: node.isMain,
+                        description: node.data.description,
+                        extent: 'parent',
+                        type: 'group',
+                    },
+                };
+            })
+        : [];
 
     let result = [...domain_nodes, ...regular_nodes];
 
@@ -138,22 +142,25 @@ function InternalFullExplorer() {
         domainsEnabled: true,
     });
 
-    const { data: graph, isFetching } = useGetGraphDataQuery({
-        includeDataProducts: sidebarFilters.dataProductsEnabled,
-        includeDatasets: sidebarFilters.datasetsEnabled,
-        includeDataOutputs: sidebarFilters.dataOutputsEnabled,
-        includeDomains: sidebarFilters.domainsEnabled,
-    }, {
-        skip: false,
-    });
+    const { data: graph, isFetching } = useGetGraphDataQuery(
+        {
+            includeDataProducts: sidebarFilters.dataProductsEnabled,
+            includeDatasets: sidebarFilters.datasetsEnabled,
+            includeDataOutputs: sidebarFilters.dataOutputsEnabled,
+            includeDomains: sidebarFilters.domainsEnabled,
+        },
+        {
+            skip: false,
+        },
+    );
 
     const generateGraph = useCallback(() => {
         if (graph) {
-            const nodes = parseFullNodes(graph.nodes, defaultNodePosition);
+            const nodes = parseFullNodes(graph.nodes, defaultNodePosition, sidebarFilters.domainsEnabled);
             const edges = parseEdges(graph.edges);
             setNodesAndEdges(nodes, edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges]);
+    }, [defaultNodePosition, graph, setNodesAndEdges, sidebarFilters.domainsEnabled]);
 
     useEffect(() => {
         generateGraph();

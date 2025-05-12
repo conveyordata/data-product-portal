@@ -17,8 +17,6 @@ import type { NodeContract } from '@/types/graph/graph-contract.ts';
 import { parseEdges, LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common.tsx';
 import styles from './explorer.module.scss';
 
-
-
 type Props = {
     id: string;
     type: 'dataset' | 'dataproduct' | 'dataoutput' | 'domain';

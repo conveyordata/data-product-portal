@@ -1,7 +1,7 @@
 // Common between explorer and full-explorer
 import '@xyflow/react/dist/base.css';
 
-import type { Edge, } from '@xyflow/react';
+import type { Edge } from '@xyflow/react';
 import { Button, theme } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
