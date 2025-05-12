@@ -25,7 +25,10 @@ class Domain(Base, BaseORM):
     datasets: Mapped[list["Dataset"]] = relationship(lazy="raise")
     data_products: Mapped[list["DataProduct"]] = relationship(lazy="raise")
     events: Mapped[list["Event"]] = relationship(
-        "Event", back_populates="domain", foreign_keys="Event.domain_id"
+        "Event",
+        back_populates="domain",
+        foreign_keys="Event.domain_id",
+        cascade="all, delete-orphan",
     )
 
     @property
