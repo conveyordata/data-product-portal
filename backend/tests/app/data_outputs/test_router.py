@@ -185,28 +185,35 @@ class TestDataOutputsRouter:
                     "type": "dataProductNode",
                 }
 
-    def test_get_data_product_history(self, client):
-        data_product = DataProductMembershipFactory(
-            user=UserFactory(external_id="sub")
-        ).data_product
-        data_output = DataOutputFactory(owner=data_product)
-        id = data_output.id
+    def test_data_output_history(self, data_output_payload, client):
+        created_data_output = self.create_data_output(client, data_output_payload)
+        assert created_data_output.status_code == 200
+        data_output_id = created_data_output.json().get("id")
+        assert data_output_id is not None
+        response = self.get_data_output_history(client, data_output_id)
+        assert len(response.json()) == 1
+
         response = self.update_data_output_status(
-            client, {"status": "active"}, data_output.id
+            client, {"status": "active"}, data_output_id
         )
-        response = self.delete_data_output(client, data_output.id)
-        response = self.get_data_output_history(client, id)
+        response = self.get_data_output_history(client, data_output_id)
         assert len(response.json()) == 2
 
-    def test_no_history(self, client):
-        data_output = DataOutputFactory()
-        id = data_output.id
-        response = self.update_data_output_status(
-            client, {"status": "active"}, data_output.id
-        )
-        response = self.delete_data_output(client, data_output.id)
-        response = self.get_data_output_history(client, id)
-        assert len(response.json()) == 0
+        tag = TagFactory()
+        update_payload = {
+            "name": "update",
+            "description": "update",
+            "tag_ids": [str(tag.id)],
+        }
+        response = self.update_data_output(client, update_payload, data_output_id)
+        assert response.status_code == 200
+        response = self.get_data_output_history(client, data_output_id)
+        assert len(response.json()) == 3
+
+        response = self.delete_data_output(client, data_output_id)
+        response = self.get_data_output_history(client, data_output_id)
+        assert response.status_code == 200
+        assert len(response.json()) == 4
 
     def test_get_namespace_suggestion_subsitution(self, client):
         name = "test with spaces"
