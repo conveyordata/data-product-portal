@@ -51,13 +51,12 @@ class DataProductMembershipService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.memberships.append(data_product_membership)
-        db.flush()
         db.add(
             EventModel(
                 name="Data product membership requested",
-                subject_id=data_product_membership.data_product_id,
+                subject_id=data_product.id,
                 subject_type=Type.DATA_PRODUCT,
-                target_id=data_product_membership.user_id,
+                target_id=user.id,
                 target_type=Type.USER,
                 actor_id=authenticated_user.id,
                 domain_id=data_product.domain.id,
