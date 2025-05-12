@@ -376,6 +376,18 @@ class TestDataProductsRouter:
         response = self.get_data_product_history(client, data_product_id)
         assert len(response.json()) == 6
 
+    def test_retain_deleted_data_product_name_in_history(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        data_product_id = data_product.id
+        data_product_name = data_product.name
+        response = self.delete_data_product(client, data_product_id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 1
+        assert response.json()[0]["deleted_subject_identifier"] == data_product_name
+
     def test_get_namespace_suggestion_subsitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)

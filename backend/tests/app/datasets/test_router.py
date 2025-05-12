@@ -314,14 +314,15 @@ class TestDatasetsRouter:
         response = self.get_dataset_history(client, id)
         assert len(response.json()) == 3
 
-    def test_no_history(self, client):
-        dataset = DatasetFactory()
-        id = dataset.id
-        response = self.update_dataset_about(client, dataset.id)
-        response = self.update_dataset_status(client, {"status": "active"}, dataset.id)
-        response = self.delete_default_dataset(client, dataset.id)
-        response = self.get_dataset_history(client, id)
-        assert len(response.json()) == 0
+    def test_retain_deleted_dataset_name_in_history(self, client):
+        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+        dataset_id = ds.id
+        dataset_name = ds.name
+        response = self.delete_default_dataset(client, dataset_id)
+        assert response.status_code == 200
+        response = self.get_dataset_history(client, dataset_id)
+        assert len(response.json()) == 1
+        assert response.json()[0]["deleted_subject_identifier"] == dataset_name
 
     def test_get_private_dataset_not_allowed(self, client):
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
