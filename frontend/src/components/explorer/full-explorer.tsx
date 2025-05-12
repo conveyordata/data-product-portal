@@ -3,29 +3,22 @@ import '@xyflow/react/dist/base.css';
 import type { Node, XYPosition } from '@xyflow/react';
 import { Position, ReactFlowProvider } from '@xyflow/react';
 import { Flex } from 'antd';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
-import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
-import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
+import { useGetGraphDataQuery } from '@/store/features/graph/graph-api-slice.ts';
 import type { NodeContract } from '@/types/graph/graph-contract.ts';
 
-import { parseEdges, LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common.tsx';
 import styles from './explorer.module.scss';
+import { SidebarFilters, Sidebar } from './sidebar';
+import { parseEdges, LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common';
 
 
 
-type Props = {
-    id: string;
-    type: 'dataset' | 'dataproduct' | 'dataoutput' | 'domain';
-};
-
-function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Node[] {
-    // TODO: revert to old parseNodes function - separate from parseFullNodes
+function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Node[] {
     // Regular nodes and domain nodes. In domain nodes, we count how many children they have so we can estimate their size.
     let regular_nodes = nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
@@ -131,32 +124,32 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
     return result;
 }
 
-function InternalExplorer({ id, type }: Props) {
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
+function InternalFullExplorer() {
+    // Same as InternalExplorer but this one does not filter anything, it shows the full graph
+    // Also includes a sidebar to select nodes
+
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
-    const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== 'dataproduct' || !id });
-    const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== 'dataset' || !id });
-    const dataOutputQuery = useGetDataOutputGraphDataQuery(id, { skip: type !== 'dataoutput' || !id });
+    const [sidebarFilters, setSidebarFilters] = useState<SidebarFilters>({
+        dataProductsEnabled: true,
+        datasetsEnabled: true,
+        dataOutputsEnabled: true,
+        domainsEnabled: true,
+    });
 
-    let graphDataQuery;
+    const { data: graph, isFetching } = useGetGraphDataQuery({
+        includeDataProducts: sidebarFilters.dataProductsEnabled,
+        includeDatasets: sidebarFilters.datasetsEnabled,
+        includeDataOutputs: sidebarFilters.dataOutputsEnabled,
+        includeDomains: sidebarFilters.domainsEnabled,
+    }, {
+        skip: false,
+    });
 
-    switch (type) {
-        case 'dataproduct':
-            graphDataQuery = dataProductQuery;
-            break;
-        case 'dataset':
-            graphDataQuery = datasetQuery;
-            break;
-        case 'dataoutput':
-            graphDataQuery = dataOutputQuery;
-            break;
-    }
-
-    const { data: graph, isFetching } = graphDataQuery;
     const generateGraph = useCallback(() => {
         if (graph) {
-            const nodes = parseNodes(graph.nodes, defaultNodePosition);
+            const nodes = parseFullNodes(graph.nodes, defaultNodePosition);
             const edges = parseEdges(graph.edges);
             setNodesAndEdges(nodes, edges);
         }
@@ -171,7 +164,13 @@ function InternalExplorer({ id, type }: Props) {
     }
 
     return (
-        <Flex vertical className={styles.nodeWrapper}>
+        <Flex className={styles.nodeWrapper}>
+            <Sidebar
+                nodes={nodes}
+                setNodes={setNodes}
+                onFilterChange={setSidebarFilters}
+                sidebarFilters={sidebarFilters}
+            />
             <NodeEditor
                 nodes={nodes}
                 edges={edges}
@@ -188,10 +187,10 @@ function InternalExplorer({ id, type }: Props) {
     );
 }
 
-export function Explorer(props: Props) {
+export function FullExplorer() {
     return (
         <ReactFlowProvider>
-            <InternalExplorer {...props} />
+            <InternalFullExplorer />
         </ReactFlowProvider>
     );
 }
