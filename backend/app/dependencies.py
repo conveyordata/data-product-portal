@@ -19,6 +19,7 @@ from app.data_products_datasets.model import (
 )
 from app.database.database import get_db_session
 from app.datasets.model import Dataset as DatasetModel
+from app.notifications.model import Notification
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.users.schema import User
@@ -52,6 +53,26 @@ def only_dataset_owners(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User is not an owner of the dataset",
+        )
+
+
+def only_notification_owner(
+    id: UUID,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+):
+    notification = db.get(Notification, id)
+
+    if not notification:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="notification not found"
+        )
+    if not authenticated_user.is_admin and (
+        notification.user_id != authenticated_user.id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Notification does not belong to authenticated user",
         )
 
 

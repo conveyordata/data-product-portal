@@ -9,6 +9,7 @@ from app.data_product_memberships.model import DataProductMembership
 from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
 from app.datasets.model import datasets_owner_table
+from app.notifications.model import Notification
 from app.shared.model import BaseORM
 from app.users.schema import User as UserSchema
 
@@ -86,4 +87,7 @@ class User(Base, BaseORM):
         "DataOutputDatasetAssociation",
         foreign_keys="DataOutputDatasetAssociation.approved_by_id",
         back_populates="approved_by",
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification", back_populates="user"
     )

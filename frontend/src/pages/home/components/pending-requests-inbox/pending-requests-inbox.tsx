@@ -132,7 +132,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
             link = createDataProductIdPath(action.data_product_id);
             description = (
                 <Typography.Text strong>
-                    {t('Request for ')} <strong className={styles.bolder}>{t('team membership')}</strong> {t('from')}{' '}
+                    {t('Request for')} <strong className={styles.bolder}>{t('team membership')}</strong> {t('from')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={'/'}>
                         <strong>
                             {action.user.first_name} {action.user.last_name}
