@@ -9,7 +9,7 @@ from app.core.authz import (
     Authorization,
     DataProductResolver,
 )
-from app.data_product_memberships.schema_get import DataProductMembershipGet
+from app.data_product_memberships.schema_response import DataProductMembershipsGet
 from app.data_product_memberships.service import DataProductMembershipService
 from app.database.database import get_db_session
 from app.users.schema import User
@@ -47,7 +47,7 @@ def request_data_product_membership(
 def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> list[DataProductMembershipGet]:
+) -> list[DataProductMembershipsGet]:
     return DataProductMembershipService().get_user_pending_actions(
         db, authenticated_user
     )

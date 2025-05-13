@@ -6,15 +6,17 @@ from sqlalchemy.orm import Session
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.data_product_lifecycles.schema import (
-    DataProductLifeCycle,
+from app.data_product_lifecycles.schema_request import (
     DataProductLifeCycleCreate,
     DataProductLifeCycleUpdate,
 )
+from app.data_product_lifecycles.schema_response import DataProductLifeCyclesGet
 
 
 class DataProductLifeCycleService:
-    def get_data_product_lifecycles(self, db: Session) -> list[DataProductLifeCycle]:
+    def get_data_product_lifecycles(
+        self, db: Session
+    ) -> list[DataProductLifeCyclesGet]:
         return db.scalars(
             select(DataProductLifeCycleModel).order_by(DataProductLifeCycleModel.name)
         ).all()
