@@ -32,6 +32,7 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
 from app.graph.graph import Graph
+from app.platform_services.model import PlatformService
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.tags.model import Tag as TagModel
@@ -293,3 +294,23 @@ class DataOutputService:
 
     def data_output_namespace_length_limits(self) -> NamespaceLengthLimits:
         return self.namespace_validator.namespace_length_limits()
+
+    def get_data_output_result_string(
+        self,
+        data_output: DataOutputCreate,
+        db: Session,
+    ) -> str:
+        template = db.scalar(
+            select(PlatformService.template).where(
+                PlatformService.id == data_output.service_id,
+                PlatformService.platform_id == data_output.platform_id,
+            )
+        )
+
+        if not template:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Template not found for the given platform and service",
+            )
+
+        return data_output.configuration.output_result_string(template)
