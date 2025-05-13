@@ -145,21 +145,37 @@ export function Sidebar({
 
             <div className={styles.p}>
                 {nodeId && (
-                    <div>
-                        Name: {getNodeDataForSideBar(nodeId)?.name}
-                        <br />
-                        Domain: {getNodeDataForSideBar(nodeId)?.domain}
-                        <br />
-                        Members: <br />
-                        <ul>
-                            {getNodeDataForSideBar(nodeId)?.members?.map((member: string) => (
-                                <li key={member}>
-                                    {member}
+                    <>
+                        {(() => {
+                            const nodeData = getNodeDataForSideBar(nodeId);
+                            if (!nodeData) return null;
+
+                            return (
+                                <div>
+                                    Name: {nodeData.name}
                                     <br />
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                                    Domain: {nodeData.domain}
+                                    <br />
+                                    Description: {nodeData.description}
+                                    <br />
+
+                                    {nodeData.members?.length > 0 && (
+                                        <>
+                                            Members: <br />
+                                            <ul>
+                                                {nodeData.members.map((member: string) => (
+                                                    <li key={member}>
+                                                        {member}
+                                                        <br />
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </>
+                                    )}
+                                </div>
+                            );
+                        })()}
+                    </>
                 )}
             </div>
         </div>

@@ -48,7 +48,6 @@ function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, 
                         targetHandlePosition: Position.Left,
                         nodeToolbarActions: node.isMain ? '' : <LinkToDataProductNode id={node.data.id} />,
                         members: node.data.members,
-                        description: node.data.description,
                     };
                     break;
                 default:
@@ -61,9 +60,9 @@ function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, 
                 draggable: true,
                 deletable: false,
                 type: node.type,
-                // Only set parentId if domains are enabled
-                ...(domainsEnabled ? {
-                    parentId: '672debaf-31f9-4233-820b-ad2165af044e', // TODO: needs to be the id of the domain node
+                // Only set parentId if domains are enabled and there is a domain_id in the node
+                ...(domainsEnabled && node.data.domain_id ? {
+                    parentId: node.data.domain_id,
                     extent: 'parent', // node not draggable outside of the parent
                 } : {}),
                 data: {
@@ -72,6 +71,7 @@ function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, 
                     icon_key: node.data.icon_key,
                     isMainNode: node.isMain,
                     domain: node.data.domain,
+                    description: node.data.description,
                     ...extra_attributes,
                 },
             };

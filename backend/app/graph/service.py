@@ -47,11 +47,12 @@ class GraphService:
                     icon_key=data_product_get.type.icon_key,
                     link_to_id=data_product_get.id,
                     domain=data_product_get.domain.name,
+                    domain_id=data_product_get.domain.id,
                     members=[
                         membership.user.email
                         for membership in data_product_get.memberships
                     ],
-                    description=data_product_get.about,
+                    description=data_product_get.description,
                 ),
                 type=NodeType.dataProductNode,
             )
@@ -61,11 +62,15 @@ class GraphService:
             Node(
                 id=dataset_get.id,
                 data=NodeData(
-                    id=dataset_get.id, name=dataset_get.name, icon_key="dataset"
+                    id=dataset_get.id,
+                    name=dataset_get.name,
+                    icon_key="dataset",
+                    link_to_id=dataset_get.id,
+                    domain=dataset_get.domain.name,
+                    domain_id=dataset_get.domain.id,
+                    description=dataset_get.description,
                 ),
                 type=NodeType.datasetNode,
-                link_to_id=dataset_get.id,
-                domain=dataset_get.domain.name,
             )
             for dataset_get in dataset_gets
         ]
@@ -77,6 +82,9 @@ class GraphService:
                     name=data_output.name,
                     icon_key=data_output.configuration.configuration_type,
                     link_to_id=data_output.owner.id,
+                    domain=data_output.owner.domain.name,
+                    domain_id=data_output.owner.domain.id,
+                    description=data_output.description,
                 ),
                 type=NodeType.dataOutputNode,
             )

@@ -8,6 +8,7 @@ export interface NodeContract {
         icon_key: string | undefined;
         link_to_id: string | undefined;
         domain: string | undefined;
+        domain_id: string | undefined;
         members: Array<string> | undefined;
         description: string | undefined;
     };

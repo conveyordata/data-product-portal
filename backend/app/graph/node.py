@@ -11,6 +11,7 @@ class NodeData(BaseModel):
     link_to_id: Optional[str | UUID] = None
     icon_key: Optional[str] = None
     domain: Optional[str] = None
+    domain_id: Optional[str | UUID] = None
     description: Optional[str] = None
     members: Optional[list[str | UUID]] = None
 
