@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from app.data_output_configuration.schema_union import DataOutputConfiguration
@@ -11,7 +12,7 @@ class DataOutput(ORMModel):
     namespace: str
     description: str
     status: DataOutputStatus
-    sourceAligned: bool
+    sourceAligned: Optional[bool]
     owner_id: UUID
     platform_id: UUID
     service_id: UUID
