@@ -10,15 +10,14 @@ from app.data_product_lifecycles.model import DataProductLifecycle
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import DatasetAccessType
-from app.datasets.schema import Dataset as DatasetSchema
 from app.datasets.status import DatasetStatus
+from app.domains.model import Domain
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM, utcnow
 from app.tags.model import Tag, tag_dataset_table
 
 if TYPE_CHECKING:
     from app.data_product_settings.model import DataProductSettingValue
-    from app.domains.model import Domain
     from app.users.model import User
 
 datasets_owner_table = Table(
@@ -29,10 +28,6 @@ datasets_owner_table = Table(
     Column("created_on", DateTime(timezone=False), server_default=utcnow()),
     Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
 )
-
-
-def ensure_dataset_exists(dataset_id: UUID, db: Session, **kwargs) -> DatasetSchema:
-    return ensure_exists(dataset_id, db, Dataset, **kwargs)
 
 
 class Dataset(Base, BaseORM):
@@ -108,3 +103,7 @@ class Dataset(Base, BaseORM):
         }
 
         return bool(consuming_data_products & user_data_products)
+
+
+def ensure_dataset_exists(dataset_id: UUID, db: Session, **kwargs) -> Dataset:
+    return ensure_exists(dataset_id, db, Dataset, **kwargs)

@@ -10,18 +10,18 @@ from app.core.namespace.validation import (
     NamespaceSuggestion,
     NamespaceValidation,
 )
-from app.data_outputs.schema import DataOutputCreateRequest
-from app.data_outputs.schema_get import DataOutputGet
+from app.data_outputs.schema_request import DataOutputCreate
+from app.data_outputs.schema_response import DataOutputGet
 from app.data_outputs.service import DataOutputService
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.service import DataProductSettingService
-from app.data_products.schema import (
+from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
     DataProductStatusUpdate,
     DataProductUpdate,
 )
-from app.data_products.schema_get import DataProductGet, DataProductsGet
+from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.dependencies import OnlyWithProductAccessID
@@ -223,7 +223,7 @@ def update_data_product(
 )
 def create_data_output(
     id: UUID,
-    data_output: DataOutputCreateRequest,
+    data_output: DataOutputCreate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
