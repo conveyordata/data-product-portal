@@ -10,24 +10,14 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { useListPagination } from '@/hooks/use-list-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
-import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
-import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
-import { DataOutputDatasetContract } from '@/types/data-output-dataset';
-import { DataProductDatasetContract } from '@/types/data-product-dataset';
-import { DataProductMembershipContract } from '@/types/data-product-membership';
+import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { ActionResolveRequest, PendingActionTypes } from '@/types/pending-actions/pending-actions';
+import { ActionResolveRequest, PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
 import { CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
-
-type PendingAction =
-    | ({ type: PendingActionTypes.DataProductDataset } & DataProductDatasetContract)
-    | ({ type: PendingActionTypes.DataOutputDataset } & DataOutputDatasetContract)
-    | ({ type: PendingActionTypes.DataProductMembership } & DataProductMembershipContract);
 
 const createPendingItem = (action: PendingAction, t: TFunction, color: string) => {
     let link, description, navigatePath, date, author, initials, message, tag, type, request, icon;
@@ -36,7 +26,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
         return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
     }
 
-    switch (action.type) {
+    switch (action.pending_action_type) {
         case PendingActionTypes.DataProductDataset:
             icon = <DatasetOutlined />;
             link = createDataProductIdPath(action.data_product_id);
@@ -127,6 +117,52 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
             };
             break;
 
+        case PendingActionTypes.DataProductRoleAssignment:
+            icon = <DataProductOutlined />;
+            link = createDataProductIdPath(action.data_product.id);
+            description = (
+                <Typography.Text strong>
+                    {t('Request for ')} <strong className={styles.bolder}>{t('team membership')}</strong> {t('from')}{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={'/'}>
+                        <strong>
+                            {action.user.first_name} {action.user.last_name}
+                        </strong>
+                    </Link>
+                </Typography.Text>
+            );
+            message = (
+                <Typography.Text>
+                    {t('Accepting will grant the user the role of {{role}} in the', {
+                        role: action.role.name,
+                        firstName: action.user.first_name,
+                        lastName: action.user.last_name,
+                    })}{' '}
+                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.data_product.id)}>
+                        {action.data_product.name}
+                    </Link>{' '}
+                    {t('data product.')}
+                </Typography.Text>
+            );
+            tag = (
+                <Typography.Text
+                    style={{
+                        color: color,
+                    }}
+                    strong
+                >
+                    {t('{{name}} Data Product', { name: action.data_product.name })}
+                </Typography.Text>
+            );
+            navigatePath = createDataProductIdPath(action.data_product.id, DataProductTabKeys.Team);
+            date = '';
+            author = action.user.first_name + ' ' + action.user.last_name;
+            initials = getInitials(action.user.first_name, action.user.last_name);
+            request = {
+                type: PendingActionTypes.DataProductMembership as PendingActionTypes.DataProductMembership,
+                request: action.id,
+            };
+            break;
+
         case PendingActionTypes.DataProductMembership:
             icon = <DataProductOutlined />;
             link = createDataProductIdPath(action.data_product_id);
@@ -187,7 +223,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
         message: message,
         color: color,
         tag: tag,
-        type: action.type,
+        type: action.pending_action_type,
         request: request,
         icon: icon,
     };
@@ -202,12 +238,7 @@ export function PendingRequestsInbox() {
     const [activeTab, setActiveTab] = useState<CustomPendingRequestsTabKey>('all');
     const [selectedTypes, setSelectedTypes] = useState<Set<PendingActionTypes>>(new Set());
 
-    const { data: pendingActionsDatasets, isFetching: isFetchingPendingActionsDatasets } =
-        useGetDataProductDatasetPendingActionsQuery();
-    const { data: pendingActionsDataOutputs, isFetching: isFetchingPendingActionsDataOutputs } =
-        useGetDataOutputDatasetPendingActionsQuery();
-    const { data: pendingActionsDataProducts, isFetching: isFetchingPendingActionsDataProducts } =
-        useGetDataProductMembershipPendingActionsQuery();
+    const { data: pendingActions, isFetching } = useGetPendingActionsQuery();
 
     const {
         handleAcceptDataProductDatasetLink,
@@ -218,21 +249,19 @@ export function PendingRequestsInbox() {
         handleDenyAccessToDataProduct,
     } = usePendingActionHandlers();
 
-    const isFetching =
-        isFetchingPendingActionsDatasets || isFetchingPendingActionsDataOutputs || isFetchingPendingActionsDataProducts;
-
     const pendingItems = useMemo(() => {
-        const datasets = pendingActionsDatasets?.map((action) =>
-            createPendingItem({ ...action, type: PendingActionTypes.DataProductDataset }, t, datasetColor),
-        );
-        const dataOutputs = pendingActionsDataOutputs?.map((action) =>
-            createPendingItem({ ...action, type: PendingActionTypes.DataOutputDataset }, t, datasetColor),
-        );
-        const dataProducts = pendingActionsDataProducts?.map((action) =>
-            createPendingItem({ ...action, type: PendingActionTypes.DataProductMembership }, t, dataProductColor),
+        const items = pendingActions?.map((action) =>
+            createPendingItem(
+                action,
+                t,
+                action.pending_action_type == PendingActionTypes.DataOutputDataset ||
+                    action.pending_action_type == PendingActionTypes.DataProductDataset
+                    ? datasetColor
+                    : dataProductColor,
+            ),
         );
 
-        return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])]
+        return (items ?? [])
             .filter((item) => item !== null)
             .sort((a, b) => {
                 if (!a?.date || !b?.date) {
@@ -240,14 +269,7 @@ export function PendingRequestsInbox() {
                 }
                 return new Date(a.date).getTime() - new Date(b.date).getTime();
             });
-    }, [
-        pendingActionsDatasets,
-        pendingActionsDataOutputs,
-        pendingActionsDataProducts,
-        t,
-        dataProductColor,
-        datasetColor,
-    ]);
+    }, [pendingActions, t, dataProductColor, datasetColor]);
 
     const { pagination, handlePaginationChange, resetPagination } = useListPagination({});
 

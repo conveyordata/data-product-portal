@@ -73,6 +73,7 @@ export enum ApiUrl {
     DataProductDatasetLinkReject = '/api/data_product_dataset_links/deny/:datasetLinkId',
     DataProductDatasetLinkRemove = '/api/data_product_dataset_links/remove/:datasetLinkId',
     DataProductDatasetPendingActions = '/api/data_product_dataset_links/actions',
+    PendingActions = '/api/pending_actions',
     Platforms = '/api/platforms',
     PlatformsConfigs = '/api/platforms/configs',
     PlatformServices = '/api/platforms/:platformId/services',
