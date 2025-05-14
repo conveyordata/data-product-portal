@@ -8,6 +8,7 @@ export type {
     DataProductMembershipRequestAccessRequest,
     DataProductMembershipRequestAccessResponse,
 } from './data-product-membership-request-access.contract.ts';
+export type { DataProductMembershipRoleRequest } from './data-product-membership-role.ts';
 export { DataProductMembershipRole, type DataProductMembershipRoleType } from './data-product-membership-role.ts';
 export type { DataProductMembershipRoleUpdateRequest } from './data-product-membership-role-update.contract.ts';
 export type { DataProductUserMembership } from './data-product-user-membership.ts';
