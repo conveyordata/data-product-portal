@@ -4,14 +4,17 @@ from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import asc, func, select
 from sqlalchemy.orm import Session
 
+from app.data_product_memberships.enums import DataProductUserRole
+from app.data_products.model import DataProduct as DataProductModel
 from app.database.database import ensure_exists
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     RoleAssignment,
+    RoleAssignmentResponse,
     UpdateRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
@@ -97,3 +100,25 @@ class RoleAssignmentService:
 
         self.db.commit()
         return assignment
+
+    def get_user_pending_data_product_assignments(
+        self, authenticated_user: User
+    ) -> Sequence[RoleAssignmentResponse]:
+        actions = (
+            self.db.scalars(
+                select(DataProductRoleAssignment)
+                .filter(DataProductRoleAssignment.decision == DecisionStatus.PENDING)
+                .filter(
+                    DataProductRoleAssignment.data_product.has(
+                        DataProductModel.memberships.any(
+                            user_id=authenticated_user.id,
+                            role=DataProductUserRole.OWNER,
+                        )
+                    )
+                )
+                .order_by(asc(DataProductRoleAssignment.requested_on))
+            )
+            .unique()
+            .all()
+        )
+        return actions

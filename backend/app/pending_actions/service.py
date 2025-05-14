@@ -1,9 +1,12 @@
+from itertools import chain
+
 from sqlalchemy.orm import Session
 
 from app.data_outputs_datasets.service import DataOutputDatasetService
 from app.data_product_memberships.service import DataProductMembershipService
 from app.data_products_datasets.service import DataProductDatasetService
 from app.pending_actions.schema import PendingAction
+from app.role_assignments.data_product.service import RoleAssignmentService
 from app.users.schema import User
 
 
@@ -23,9 +26,16 @@ class PendingActionsService:
                 db, authenticated_user
             )
         )
+        data_product_membership_role_actions = RoleAssignmentService(
+            db=db, user=authenticated_user
+        ).get_user_pending_data_product_assignments(authenticated_user)
 
-        return (
-            data_product_dataset_actions
-            + data_output_dataset_actions
-            + data_product_membership_actions
+        return sorted(
+            chain(
+                data_product_dataset_actions,
+                data_output_dataset_actions,
+                data_product_membership_actions,
+                data_product_membership_role_actions,
+            ),
+            key=lambda action: action.requested_on,
         )
