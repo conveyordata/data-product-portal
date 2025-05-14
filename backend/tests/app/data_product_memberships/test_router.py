@@ -4,10 +4,6 @@ from tests.factories import (
     UserFactory,
 )
 
-from app.data_product_memberships.enums import (
-    DataProductUserRole,
-)
-
 MEMBERSHIPS_ENDPOINT = "/api/data_product_memberships"
 
 
@@ -38,17 +34,6 @@ class TestDataProductMembershipsRouter:
             owner_membership.data_product.id
         )
         assert response.json()[0]["status"] == "pending"
-
-    @staticmethod
-    def create_secondary_membership(client, user_id, data_product_id):
-        data = {
-            "role": DataProductUserRole.MEMBER.value,
-            "user_id": str(user_id),
-        }
-        return client.post(
-            f"{MEMBERSHIPS_ENDPOINT}/create?data_product_id={str(data_product_id)}",
-            json=data,
-        )
 
     @staticmethod
     def request_data_product_membership(client, user_id, data_product_id):
