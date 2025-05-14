@@ -8,27 +8,27 @@ from app.role_assignments.data_product.schema import RoleAssignmentResponse
 
 
 class DataProductDatasetPendingAction(DataProductDatasetAssociationsGet):
-    pending_action_type: Literal[PendingActionTypes.DataProductDatasetPendingAction] = (
-        PendingActionTypes.DataProductDatasetPendingAction
+    pending_action_type: Literal[PendingActionTypes.DataProductDataset] = (
+        PendingActionTypes.DataProductDataset
     )
 
 
 class DataOutputDatasetPendingAction(DataOutputDatasetAssociationsGet):
-    pending_action_type: Literal[PendingActionTypes.DataOutputDatasetPendingAction] = (
-        PendingActionTypes.DataOutputDatasetPendingAction
+    pending_action_type: Literal[PendingActionTypes.DataOutputDataset] = (
+        PendingActionTypes.DataOutputDataset
     )
 
 
 class DataProductMembershipPendingAction(DataProductMembershipsGet):
-    pending_action_type: Literal[
-        PendingActionTypes.DataProductMembershipPendingAction
-    ] = PendingActionTypes.DataProductMembershipPendingAction
+    pending_action_type: Literal[PendingActionTypes.DataProductMembership] = (
+        PendingActionTypes.DataProductMembership
+    )
 
 
 class DataProductRoleAssignmentPendingAction(RoleAssignmentResponse):
-    pending_action_type: Literal[
-        PendingActionTypes.DataProductMembershipRolePendingAction
-    ] = PendingActionTypes.DataProductMembershipRolePendingAction
+    pending_action_type: Literal[PendingActionTypes.DataProductRoleAssignment] = (
+        PendingActionTypes.DataProductRoleAssignment
+    )
 
 
 PendingAction = Union[
