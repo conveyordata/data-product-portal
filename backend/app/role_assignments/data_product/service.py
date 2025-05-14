@@ -55,14 +55,16 @@ class RoleAssignmentService:
         )
         self.db.add(role_assignment)
         self.db.flush()
-        EventModel(
-            name="Data product membership created",
-            subject_id=role_assignment.data_product_id,
-            subject_type=Type.DATA_PRODUCT,
-            target_id=role_assignment.user_id,
-            target_type=Type.USER,
-            actor_id=authenticated_user.id,
-            domain_id=role_assignment.data_product.domain_id,
+        self.db.add(
+            EventModel(
+                name="Data product membership created",
+                subject_id=role_assignment.data_product_id,
+                subject_type=Type.DATA_PRODUCT,
+                target_id=role_assignment.user_id,
+                target_type=Type.USER,
+                actor_id=authenticated_user.id,
+                domain_id=role_assignment.data_product.domain_id,
+            )
         )
         self.db.commit()
         return role_assignment
