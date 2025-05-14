@@ -64,8 +64,16 @@ def data_output_payload_not_owner():
 class TestDataOutputsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_data_output(self, data_output_payload, client):
+    def test_create_data_output_source_aligned(self, data_output_payload, client):
         created_data_output = self.create_data_output(client, data_output_payload)
+        assert created_data_output.status_code == 200
+        assert "id" in created_data_output.json()
+
+    def test_create_data_output_product_aligned(self, data_output_payload, client):
+        payload = deepcopy(data_output_payload)
+        payload["sourceAligned"] = False
+
+        created_data_output = self.create_data_output(client, payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
