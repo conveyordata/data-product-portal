@@ -1,5 +1,6 @@
 import { DataOutputDatasetLinkRequest } from '../data-output-dataset';
 import { DataProductDatasetLinkRequest } from '../data-product-dataset';
+import { DataProductMembershipRoleRequest } from '../data-product-membership';
 
 export enum PendingActionTypes {
     DataProductDataset = 'DataProductDataset',
@@ -10,4 +11,4 @@ export enum PendingActionTypes {
 export type ActionResolveRequest =
     | { type: PendingActionTypes.DataOutputDataset; request: DataOutputDatasetLinkRequest }
     | { type: PendingActionTypes.DataProductDataset; request: DataProductDatasetLinkRequest }
-    | { type: PendingActionTypes.DataProductMembership; request: string };
+    | { type: PendingActionTypes.DataProductMembership; request: DataProductMembershipRoleRequest };

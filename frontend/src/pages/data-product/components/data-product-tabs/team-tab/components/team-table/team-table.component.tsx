@@ -85,7 +85,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
             try {
                 if (!dataProduct) return;
 
-                await deleteRoleAssignment(id).unwrap();
+                await deleteRoleAssignment({ id, data_product_id: dataProduct.id }).unwrap();
                 dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
@@ -103,7 +103,11 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
                     user_id: userId,
                 }).unwrap();
                 const currentRole = roles[0];
-                await updateRoleAssignment({ role_assignment_id: currentRole.id, role_id: role.id }).unwrap();
+                await updateRoleAssignment({
+                    role_assignment_id: currentRole.id,
+                    role_id: role.id,
+                    data_product_id: dataProduct.id,
+                }).unwrap();
                 dispatchMessage({ content: t('User role has been updated'), type: 'success' });
             } catch (_error) {
                 console.log(_error);
@@ -111,6 +115,22 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
             }
         },
         [dataProduct, t, updateRoleAssignment, lazyGetRolesAssignments],
+    );
+
+    const handleRejectMembership = useCallback(
+        async (id: string) => {
+            if (!dataProduct) return;
+            handleDenyAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
+        },
+        [dataProduct, handleDenyAccessToDataProduct],
+    );
+
+    const handleAcceptMembership = useCallback(
+        async (id: string) => {
+            if (!dataProduct) return;
+            handleGrantAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
+        },
+        [dataProduct, handleGrantAccessToDataProduct],
     );
 
     const columns: TableColumnsType<RoleAssignmentContract> = useMemo(() => {
@@ -123,8 +143,8 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
             canPerformTeamActions: (userId: string) =>
                 canPerformTeamActions(isCurrentUserDataProductOwner, userId, currentUser.id),
             isLoading: isLoadingDataProduct,
-            onRejectMembershipRequest: handleDenyAccessToDataProduct,
-            onAcceptMembershipRequest: handleGrantAccessToDataProduct,
+            onRejectMembershipRequest: handleRejectMembership,
+            onAcceptMembershipRequest: handleAcceptMembership,
             canEdit: canEditUserNew,
             canRemove: canRemoveUserNew,
             canApprove: canApproveUserNew,
@@ -137,12 +157,12 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         dataProductUsers,
         isLoadingDataProduct,
         currentUser.id,
-        handleDenyAccessToDataProduct,
-        handleGrantAccessToDataProduct,
         isCurrentUserDataProductOwner,
         canEditUserNew,
         canRemoveUserNew,
         canApproveUserNew,
+        handleAcceptMembership,
+        handleRejectMembership,
     ]);
 
     if (!dataProduct) return null;
