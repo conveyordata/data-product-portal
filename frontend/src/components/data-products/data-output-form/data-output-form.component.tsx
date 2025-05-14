@@ -13,6 +13,7 @@ import {
     useCreateDataOutputMutation,
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
+    useLazyGetDataOutputResultStringQuery,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
 import {
     useGetDataProductByIdQuery,
@@ -71,6 +72,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
 
+    const [fetchResultString] = useLazyGetDataOutputResultStringQuery();
+
     const dataPlatforms = useMemo(
         () =>
             getDataPlatforms(t).filter((platform) => {
@@ -83,53 +86,32 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     );
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
+    const createPayload = (values: DataOutputCreateFormSchema) => {
+        const payload: DataOutputCreate = {
+            name: values.name,
+            namespace: values.namespace,
+            description: values.description,
+            configuration: values.configuration,
+            platform_id: platformConfig!.filter(
+                (config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase(),
+            )[0].platform.id,
+            service_id: platformConfig!.filter(
+                (config) =>
+                    config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
+                    config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase(),
+            )[0].service.id,
+            sourceAligned: sourceAligned === undefined ? false : sourceAligned,
+            status: DataOutputStatus.Active,
+            tag_ids: values.tag_ids ?? [],
+        };
+
+        return payload;
+    };
+
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
             if (!platformsLoading) {
-                const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
-                switch (selectedConfiguration?.value) {
-                    case DataPlatforms.S3: {
-                        config['configuration_type'] = 'S3DataOutput';
-                        break;
-                    }
-                    case DataPlatforms.Glue: {
-                        config['configuration_type'] = 'GlueDataOutput';
-                        break;
-                    }
-                    case DataPlatforms.Databricks: {
-                        config['configuration_type'] = 'DatabricksDataOutput';
-                        break;
-                    }
-                    case DataPlatforms.Snowflake: {
-                        config['configuration_type'] = 'SnowflakeDataOutput';
-                        break;
-                    }
-                    case DataPlatforms.Redshift: {
-                        config['configuration_type'] = 'RedshiftDataOutput';
-                        break;
-                    }
-                    default: {
-                        const errorMessage = 'Data output not configured correctly';
-                        dispatchMessage({ content: errorMessage, type: 'error' });
-                    }
-                }
-                const request: DataOutputCreate = {
-                    name: values.name,
-                    namespace: values.namespace,
-                    description: values.description,
-                    configuration: config,
-                    platform_id: platformConfig!.filter(
-                        (config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase(),
-                    )[0].platform.id,
-                    service_id: platformConfig!.filter(
-                        (config) =>
-                            config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
-                            config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase(),
-                    )[0].service.id,
-                    sourceAligned: sourceAligned === undefined ? false : sourceAligned,
-                    status: DataOutputStatus.Active,
-                    tag_ids: values.tag_ids ?? [],
-                };
+                const request = createPayload(values);
                 await createDataOutput({ id: dataProductId, dataOutput: request }).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
@@ -225,6 +207,17 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         [validateNamespace, dataProductId],
     );
 
+    const setResultString: FormProps<DataOutputCreateFormSchema>['onValuesChange'] = useDebouncedCallback(
+        async (changed, values) => {
+            if (changed.configuration) {
+                const request = createPayload(values);
+                const result = await fetchResultString(request).unwrap();
+                form.setFieldValue('result', result);
+            }
+        },
+        DEBOUNCE,
+    );
+
     return (
         <Form
             form={form}
@@ -232,6 +225,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             layout="vertical"
             onFinish={onSubmit}
             onFinishFailed={onSubmitFailed}
+            onValuesChange={setResultString}
             autoComplete={'off'}
             requiredMark={'optional'}
             labelWrap
@@ -348,8 +342,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 identifiers={identifiers}
                                 sourceAligned={sourceAligned}
                                 namespace={currentDataProduct!.namespace}
-                                mode={mode}
-                                dataProductId={dataProductId}
                             />
                         );
                     case DataPlatforms.Redshift:

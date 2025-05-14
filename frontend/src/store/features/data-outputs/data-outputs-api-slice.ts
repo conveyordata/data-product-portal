@@ -161,6 +161,13 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 method: 'GET',
             }),
         }),
+        getDataOutputResultString: builder.query<string, DataOutputCreate>({
+            query: (data) => ({
+                url: ApiUrl.DataOutputResultString,
+                method: 'POST',
+                data,
+            }),
+        }),
     }),
 
     overrideExisting: false,
@@ -177,4 +184,5 @@ export const {
     useGetDataOutputGraphDataQuery,
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
+    useLazyGetDataOutputResultStringQuery,
 } = dataOutputsApiSlice;

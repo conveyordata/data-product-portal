@@ -131,7 +131,7 @@ class DataOutputService:
         if data_output.sourceAligned:
             data_output.status = DataOutputStatus.PENDING
         else:
-            data_product = db.get(DataProductModel, data_output.owner_id)
+            data_product = db.get(DataProductModel, id)
 
             # TODO Figure out if this validation needs to happen either way
             # somehow and let sourcealigned be handled internally there?
