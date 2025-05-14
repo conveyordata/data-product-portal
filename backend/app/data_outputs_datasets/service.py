@@ -11,7 +11,7 @@ from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
+from app.data_outputs_datasets.schema_response import DataOutputDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.events.enum import Type
@@ -127,7 +127,7 @@ class DataOutputDatasetService:
 
     def get_user_pending_actions(
         self, db: Session, authenticated_user: User
-    ) -> list[DataOutputDatasetAssociation]:
+    ) -> list[DataOutputDatasetAssociationsGet]:
         return (
             db.scalars(
                 select(DataOutputDatasetAssociationModel)

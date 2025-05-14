@@ -31,7 +31,7 @@ export function AboutTab({ dataProductId }: Props) {
         { skip: !dataProductId },
     );
 
-    const canEditNew = edit_access?.allowed || false;
+    const canEditNew = edit_access?.allowed;
     if (isFetching) {
         return <LoadingSpinner />;
     }
@@ -62,7 +62,7 @@ export function AboutTab({ dataProductId }: Props) {
             onSubmit={handleSubmit}
             isLoading={isFetching}
             isSubmitting={isLoading}
-            isDisabled={!canEdit}
+            isDisabled={!canEditNew}
         />
     );
 }

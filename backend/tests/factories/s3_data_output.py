@@ -1,6 +1,6 @@
 import factory
 
-from app.data_outputs.s3_data_output.model import S3DataOutput
+from app.data_output_configuration.s3.model import S3DataOutput
 
 
 class S3DataOutputFactory(factory.alchemy.SQLAlchemyModelFactory):

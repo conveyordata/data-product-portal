@@ -19,13 +19,12 @@ from app.data_product_lifecycles.model import (
 )
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.datasets.schema import (
-    Dataset,
+from app.datasets.schema_request import (
     DatasetAboutUpdate,
     DatasetCreateUpdate,
     DatasetStatusUpdate,
 )
-from app.datasets.schema_get import DatasetGet, DatasetsGet
+from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.events.enum import Type
 from app.events.model import Event as EventModel
 from app.events.schema import Event
@@ -148,7 +147,7 @@ class DatasetService:
 
     def create_dataset(
         self, dataset: DatasetCreateUpdate, db: Session, authenticated_user: User
-    ) -> Dataset:
+    ) -> DatasetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, db
@@ -159,7 +158,7 @@ class DatasetService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        new_dataset: Dataset = self._update_owners(dataset, db)
+        new_dataset = self._update_owners(dataset, db)
         dataset_schema = new_dataset.parse_pydantic_schema()
         tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
         model = DatasetModel(**dataset_schema, tags=tags)

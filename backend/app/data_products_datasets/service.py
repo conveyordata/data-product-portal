@@ -11,7 +11,7 @@ from app.data_products.model import ensure_data_product_exists
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
-from app.data_products_datasets.schema import DataProductDatasetAssociation
+from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.events.enum import Type
@@ -97,7 +97,7 @@ class DataProductDatasetService:
 
     def get_user_pending_actions(
         self, db: Session, authenticated_user: User
-    ) -> list[DataProductDatasetAssociation]:
+    ) -> list[DataProductDatasetAssociationsGet]:
         return (
             db.query(DataProductDatasetAssociationModel)
             .options(

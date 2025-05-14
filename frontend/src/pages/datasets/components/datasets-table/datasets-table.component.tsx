@@ -86,7 +86,7 @@ export function DatasetsTable() {
                 </Form>
                 <Space>
                     <Link to={ApplicationPaths.DatasetNew}>
-                        <Button className={styles.formButton} type={'primary'} disabled={!(canCreateDataset || true)}>
+                        <Button className={styles.formButton} type={'primary'} disabled={!canCreateDataset}>
                             {t('Create Dataset')}
                         </Button>
                     </Link>

@@ -26,33 +26,29 @@ from app.core.namespace.validation import (
     NamespaceValidityType,
 )
 from app.data_outputs.model import DataOutput as DataOutputModel
-from app.data_outputs.schema_get import DataOutputGet
+from app.data_outputs.schema_response import DataOutputGet
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.data_product_memberships.enums import (
-    DataProductUserRole,
-)
+from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import DataProductMembership
-from app.data_product_memberships.schema import DataProductMembershipCreate
+from app.data_product_memberships.schema_request import DataProductMembershipCreate
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
-from app.data_products.schema import (
-    DataProduct,
+from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
     DataProductStatusUpdate,
     DataProductUpdate,
 )
-from app.data_products.schema_get import DataProductGet, DataProductsGet
+from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.datasets.schema import Dataset
 from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
@@ -80,7 +76,7 @@ class DataProductService:
         self.data_output_namespace_validator = DataOutputNamespaceValidator()
 
     def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
-        data_product: DataProductGet = db.get(
+        data_product = db.get(
             DataProductModel,
             id,
             options=[
@@ -210,7 +206,7 @@ class DataProductService:
         data_product: DataProductCreate,
         db: Session,
         authenticated_user: User,
-    ) -> DataProduct:
+    ) -> DataProductModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 data_product.namespace, db
@@ -235,18 +231,6 @@ class DataProductService:
 
         db.add(model)
         db.flush()
-        for membership in model.memberships:
-            db.add(
-                EventModel(
-                    name="Data product creation: membership added",
-                    subject_id=model.id,
-                    subject_type=Type.DATA_PRODUCT,
-                    target_id=membership.user_id,
-                    target_type=Type.USER,
-                    actor_id=authenticated_user.id,
-                    domain_id=model.domain.id,
-                ),
-            )
         db.add(
             EventModel(
                 name="Data product created",
@@ -310,7 +294,7 @@ class DataProductService:
 
     def _update_memberships(
         self,
-        data_product: DataProduct,
+        data_product: DataProductModel,
         membership_data: List[dict],
         db: Session,
         authenticated_user: User,
@@ -468,8 +452,8 @@ class DataProductService:
 
     def _send_email_for_dataset_link(
         self,
-        dataset: Dataset,
-        data_product: DataProduct,
+        dataset: DatasetModel,
+        data_product: DataProductModel,
         authenticated_user: User,
         background_tasks: BackgroundTasks,
     ):

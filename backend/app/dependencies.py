@@ -7,9 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.model import DataOutput as DataOutputModel
-from app.data_product_memberships.enums import (
-    DataProductUserRole,
-)
+from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
 )
@@ -24,7 +22,9 @@ from app.settings import settings
 from app.users.schema import User
 
 
-async def only_for_admin(authenticated_user: User = Depends(get_authenticated_user)):
+async def only_for_admin(
+    authenticated_user: User = Depends(get_authenticated_user),
+):
     if settings.AUTHORIZER_ENABLED:
         return
     if not authenticated_user.is_admin:

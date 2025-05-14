@@ -7,7 +7,7 @@ from tests.factories import (
 )
 
 from app.core.authz import Authorization
-from app.data_products.schema import DataProduct
+from app.data_products.model import DataProduct
 from app.role_assignments.data_product.auth import DataProductAuthAssignment
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus

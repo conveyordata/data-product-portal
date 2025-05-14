@@ -7,7 +7,7 @@ from tests.factories import (
 )
 from tests.factories.data_product_membership import DataProductMembershipFactory
 
-from app.data_products.schema import DataProduct
+from app.data_products.model import DataProduct
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Role, Scope

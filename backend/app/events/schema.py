@@ -3,9 +3,9 @@ from uuid import UUID
 
 from pydantic import NaiveDatetime
 
-from app.data_outputs.schema_base_get import DataOutputBaseGet
-from app.data_products.schema_base_get import BaseDataProductGet
-from app.datasets.schema_get import BaseDatasetGet
+from app.data_outputs.schema_response import BaseDataOutputGet
+from app.data_products.schema_response import BaseDataProductGet
+from app.datasets.schema_response import BaseDatasetGet
 from app.domains.schema import Domain
 from app.events.enum import Type
 from app.events.model import Event as EventModel
@@ -39,5 +39,5 @@ class Event(EventCreate):
     user: Optional[User] = None
     domain: Optional[Domain] = None
     dataset: Optional[BaseDatasetGet] = None
-    data_output: Optional[DataOutputBaseGet] = None
+    data_output: Optional[BaseDataOutputGet] = None
     created_on: NaiveDatetime
