@@ -114,6 +114,7 @@ def clear_db(session: scoped_session[Session]) -> None:
     for table in reversed(Base.metadata.sorted_tables):
         session.execute(table.delete())
     session.commit()
+    settings.AUTHORIZER_ENABLED = False
 
 
 @pytest.fixture
