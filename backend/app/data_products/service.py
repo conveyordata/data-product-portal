@@ -329,7 +329,7 @@ class DataProductService:
                 data_product.memberships.append(new_membership)
                 db.add(
                     EventModel(
-                        name="Data product update: membership updated",
+                        name="Data product update: membership added",
                         subject_id=data_product.id,
                         subject_type=Type.DATA_PRODUCT,
                         target_id=user.id,
