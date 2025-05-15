@@ -154,7 +154,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
                 </Typography.Text>
             );
             navigatePath = createDataProductIdPath(action.data_product.id, DataProductTabKeys.Team);
-            date = '';
+            date = action.requested_on ?? '';
             author = action.user.first_name + ' ' + action.user.last_name;
             initials = getInitials(action.user.first_name, action.user.last_name);
             request = {
