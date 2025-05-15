@@ -11,7 +11,7 @@ from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
 from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
-from app.datasets.model import Dataset as DatasetModel
+from app.datasets.model import Dataset as Dataset
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -68,7 +68,7 @@ class DataProductDatasetService:
             db.query(DataProductDatasetAssociationModel)
             .options(
                 joinedload(DataProductDatasetAssociationModel.dataset).joinedload(
-                    DatasetModel.owners
+                    Dataset.owners
                 ),
                 joinedload(DataProductDatasetAssociationModel.data_product),
                 joinedload(DataProductDatasetAssociationModel.requested_by),
@@ -76,7 +76,7 @@ class DataProductDatasetService:
             .filter(DataProductDatasetAssociationModel.status == DecisionStatus.PENDING)
             .filter(
                 DataProductDatasetAssociationModel.dataset.has(
-                    DatasetModel.owners.any(UserModel.id == authenticated_user.id)
+                    Dataset.owners.any(UserModel.id == authenticated_user.id)
                 )
             )
             .order_by(asc(DataProductDatasetAssociationModel.requested_on))

@@ -11,7 +11,7 @@ from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_outputs_datasets.schema_response import DataOutputDatasetAssociationsGet
-from app.datasets.model import Dataset as DatasetModel
+from app.datasets.model import Dataset as Dataset
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -96,7 +96,7 @@ class DataOutputDatasetService:
                 select(DataOutputDatasetAssociationModel)
                 .options(
                     joinedload(DataOutputDatasetAssociationModel.dataset).joinedload(
-                        DatasetModel.owners
+                        Dataset.owners
                     ),
                     joinedload(DataOutputDatasetAssociationModel.data_output),
                     joinedload(DataOutputDatasetAssociationModel.requested_by),
@@ -106,7 +106,7 @@ class DataOutputDatasetService:
                 )
                 .filter(
                     DataOutputDatasetAssociationModel.dataset.has(
-                        DatasetModel.owners.any(UserModel.id == authenticated_user.id)
+                        Dataset.owners.any(UserModel.id == authenticated_user.id)
                     )
                 )
                 .order_by(asc(DataOutputDatasetAssociationModel.requested_on))

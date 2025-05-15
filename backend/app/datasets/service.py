@@ -17,7 +17,7 @@ from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.datasets.model import Dataset as DatasetModel
+from app.datasets.model import Dataset as Dataset
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
@@ -36,14 +36,15 @@ from app.users.model import User, ensure_user_exists
 
 class DatasetService:
     def __init__(self):
-        self.namespace_validator = NamespaceValidator(DatasetModel)
+        self.namespace_validator = NamespaceValidator(Dataset)
 
     def get_dataset(self, id: UUID, db: Session, user: User) -> DatasetGet:
         dataset = db.get(
-            DatasetModel,
+            Dataset,
             id,
             options=[
-                joinedload(DatasetModel.data_product_links),
+                joinedload(Dataset.data_product_links),
+                joinedload(Dataset.data_output_links),
             ],
         )
 
@@ -83,19 +84,19 @@ class DatasetService:
         datasets = [
             dataset
             for dataset in db.scalars(
-                select(DatasetModel)
+                select(Dataset)
                 .options(
-                    joinedload(DatasetModel.owners),
-                    joinedload(DatasetModel.data_product_settings),
-                    joinedload(DatasetModel.data_output_links).joinedload(
+                    joinedload(Dataset.owners),
+                    joinedload(Dataset.data_product_settings),
+                    joinedload(Dataset.data_output_links).joinedload(
                         DataOutputDatasetAssociation.data_output
                     ),
-                    joinedload(DatasetModel.data_product_links),
-                    joinedload(DatasetModel.tags),
-                    joinedload(DatasetModel.lifecycle),
-                    joinedload(DatasetModel.domain),
+                    joinedload(Dataset.data_product_links),
+                    joinedload(Dataset.tags),
+                    joinedload(Dataset.lifecycle),
+                    joinedload(Dataset.domain),
                 )
-                .order_by(asc(DatasetModel.name))
+                .order_by(asc(Dataset.name))
             )
             .unique()
             .all()
@@ -109,11 +110,15 @@ class DatasetService:
 
     def get_user_datasets(self, user_id: UUID, db: Session) -> Sequence[DatasetsGet]:
         return (
-            db.query(DatasetModel)
-            .options(joinedload(DatasetModel.owners))
-            .join(DatasetModel.owners)
-            .filter(DatasetModel.owners.any(id=user_id))
-            .order_by(asc(DatasetModel.name))
+            db.query(Dataset)
+            .options(
+                joinedload(Dataset.owners),
+                joinedload(Dataset.data_product_links),
+                joinedload(Dataset.data_output_links),
+            )
+            .join(Dataset.owners)
+            .filter(Dataset.owners.any(id=user_id))
+            .order_by(asc(Dataset.name))
             .all()
         )
 
@@ -140,7 +145,7 @@ class DatasetService:
         self,
         dataset: DatasetCreateUpdate,
         db: Session,
-    ) -> DatasetModel:
+    ) -> Dataset:
         if (
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, db
@@ -154,7 +159,7 @@ class DatasetService:
         new_dataset = self._update_owners(dataset, db)
         dataset_schema = new_dataset.parse_pydantic_schema()
         tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
-        model = DatasetModel(**dataset_schema, tags=tags)
+        model = Dataset(**dataset_schema, tags=tags)
 
         db.add(model)
         db.commit()
@@ -162,20 +167,12 @@ class DatasetService:
         return model
 
     def remove_dataset(self, id: UUID, db: Session) -> None:
-        dataset = db.get(
-            DatasetModel,
-            id,
-            options=[joinedload(DatasetModel.data_product_links)],
-        )
+        dataset = db.get(Dataset, id)
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
             )
-        dataset.owners = []
-        dataset.data_product_links = []
-        dataset.tags = []
         db.delete(dataset)
-
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
@@ -260,7 +257,14 @@ class DatasetService:
         RefreshInfrastructureLambda().trigger()
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
-        dataset = db.get(DatasetModel, id)
+        dataset = db.get(
+            Dataset,
+            id,
+            options=[
+                joinedload(Dataset.data_product_links),
+                joinedload(Dataset.data_output_links),
+            ],
+        )
         nodes = [
             Node(
                 id=id,

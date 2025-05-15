@@ -16,7 +16,7 @@ from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
 from app.database.database import get_db_session
-from app.datasets.model import Dataset as DatasetModel
+from app.datasets.model import Dataset as Dataset
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.users.schema import User
@@ -42,7 +42,7 @@ def only_dataset_owners(
     if settings.AUTHORIZER_ENABLED:
         return
 
-    dataset = db.get(DatasetModel, id)
+    dataset = db.get(Dataset, id)
 
     if not dataset:
         raise HTTPException(

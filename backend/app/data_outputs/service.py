@@ -30,6 +30,7 @@ from app.data_outputs_datasets.model import (
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
+from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.graph.graph import Graph
 from app.role_assignments.enums import DecisionStatus
@@ -184,7 +185,9 @@ class DataOutputService:
         db: Session,
         background_tasks: BackgroundTasks,
     ):
-        dataset = ensure_dataset_exists(dataset_id, db)
+        dataset = ensure_dataset_exists(
+            dataset_id, db, options=[joinedload(DatasetModel.data_product_links)]
+        )
         data_output = ensure_data_output_exists(
             id, db, options=[joinedload(DataOutputModel.dataset_links)]
         )
