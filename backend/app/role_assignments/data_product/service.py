@@ -165,10 +165,18 @@ class RoleAssignmentService:
             )
         )
         if existing_assignment:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Role assignment already exists for this user and data product.",
-            )
+            if existing_assignment.decision == DecisionStatus.DENIED:
+                self.db.delete(existing_assignment)
+                self.db.flush()
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        "Role assignment already"
+                        " exists for"
+                        " this user and data product."
+                    ),
+                )
 
         role_assignment = self.create_assignment(request)
 

@@ -15,9 +15,12 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
+import { useGetRoleAssignmentQuery } from '@/store/features/role-assignments/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
+import { DecisionStatus } from '@/types/roles';
 import { getDataPlatforms } from '@/utils/data-platforms';
+import { getCanUserAccessDataProductData } from '@/utils/data-product-user-role.helper.ts';
 
 import styles from './data-product-actions.module.scss';
 
@@ -59,6 +62,27 @@ export function DataProductActions({ dataProductId }: Props) {
 
         return getDataPlatforms(t).filter((platform) => names.includes(platform.value));
     }, [t, availablePlatforms]);
+
+    const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useGetRoleAssignmentQuery({
+        data_product_id: dataProductId,
+        user_id: user?.id,
+    });
+
+    const allowRequesting = useMemo(() => {
+        if (!user?.id || isFetchingRoleAssignments || !roleAssignments) {
+            return false;
+        }
+        const userId = user.id;
+
+        const hasRequested = roleAssignments.some(
+            ({ user, decision }) =>
+                user.id === userId && (decision === DecisionStatus.Pending || decision === DecisionStatus.Approved),
+        );
+        if (hasRequested) {
+            return false;
+        }
+        return true;
+    }, [user, isFetchingRoleAssignments, roleAssignments]);
 
     if (!dataProduct || !user) {
         return null;
@@ -123,7 +147,7 @@ export function DataProductActions({ dataProductId }: Props) {
     return (
         <>
             <Flex vertical className={styles.actionsContainer}>
-                {canRequestAccess && <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />}
+                {canRequestAccess && allowRequesting && <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />}
                 <Flex vertical className={styles.accessDataContainer}>
                     <DataAccessTileGrid
                         canAccessData={canReadIntegrations}
