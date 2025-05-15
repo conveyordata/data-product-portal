@@ -158,53 +158,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
             author = action.user.first_name + ' ' + action.user.last_name;
             initials = getInitials(action.user.first_name, action.user.last_name);
             request = {
-                type: PendingActionTypes.DataProductMembership as PendingActionTypes.DataProductMembership,
-                request: action.id,
-            };
-            break;
-
-        case PendingActionTypes.DataProductMembership:
-            icon = <DataProductOutlined />;
-            link = createDataProductIdPath(action.data_product_id);
-            description = (
-                <Typography.Text strong>
-                    {t('Request for ')} <strong className={styles.bolder}>{t('team membership')}</strong> {t('from')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={'/'}>
-                        <strong>
-                            {action.user.first_name} {action.user.last_name}
-                        </strong>
-                    </Link>
-                </Typography.Text>
-            );
-            message = (
-                <Typography.Text>
-                    {t('Accepting will grant the user the role of {{role}} in the', {
-                        role: action.role,
-                        firstName: action.user.first_name,
-                        lastName: action.user.last_name,
-                    })}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.data_product_id)}>
-                        {action.data_product.name}
-                    </Link>{' '}
-                    {t('data product.')}
-                </Typography.Text>
-            );
-            tag = (
-                <Typography.Text
-                    style={{
-                        color: color,
-                    }}
-                    strong
-                >
-                    {t('{{name}} Data Product', { name: action.data_product.name })}
-                </Typography.Text>
-            );
-            navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
-            date = action.requested_on;
-            author = action.user.first_name + ' ' + action.user.last_name;
-            initials = getInitials(action.user.first_name, action.user.last_name);
-            request = {
-                type: PendingActionTypes.DataProductMembership as PendingActionTypes.DataProductMembership,
+                type: PendingActionTypes.DataProductRoleAssignment as PendingActionTypes.DataProductRoleAssignment,
                 request: action.id,
             };
             break;
@@ -302,7 +256,7 @@ export function PendingRequestsInbox() {
         if (key === 'all') {
             Object.values(PendingActionTypes).forEach((type) => typesSet.add(type));
         } else if (key === 'dataProduct') {
-            typesSet.add(PendingActionTypes.DataProductMembership);
+            typesSet.add(PendingActionTypes.DataProductRoleAssignment);
         } else if (key === 'dataset') {
             typesSet.add(PendingActionTypes.DataProductDataset);
             typesSet.add(PendingActionTypes.DataOutputDataset);
@@ -319,7 +273,7 @@ export function PendingRequestsInbox() {
             case PendingActionTypes.DataOutputDataset:
                 handleAcceptDataOutputDatasetLink(request.request);
                 break;
-            case PendingActionTypes.DataProductMembership:
+            case PendingActionTypes.DataProductRoleAssignment:
                 handleGrantAccessToDataProduct(request.request);
                 break;
         }
@@ -332,7 +286,7 @@ export function PendingRequestsInbox() {
             case PendingActionTypes.DataOutputDataset:
                 handleRejectDataOutputDatasetLink(request.request);
                 break;
-            case PendingActionTypes.DataProductMembership:
+            case PendingActionTypes.DataProductRoleAssignment:
                 handleDenyAccessToDataProduct(request.request);
                 break;
         }

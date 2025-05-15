@@ -5,17 +5,14 @@ from uuid import UUID
 import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.email.send_mail import send_mail
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import DataProductMembership
-from app.data_product_memberships.schema_response import DataProductMembershipsGet
-from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
-from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.users.model import ensure_user_exists
 from app.users.schema import User
@@ -78,28 +75,6 @@ class DataProductMembershipService:
             f"to join {data_product.name}",
         )
         return {"id": data_product_membership.id}
-
-    def get_user_pending_actions(
-        self, db: Session, authenticated_user: User
-    ) -> list[DataProductMembershipsGet]:
-        actions = (
-            db.scalars(
-                select(DataProductMembership)
-                .filter(DataProductMembership.status == DecisionStatus.PENDING)
-                .filter(
-                    DataProductMembership.data_product.has(
-                        DataProductModel.memberships.any(
-                            user_id=authenticated_user.id,
-                            role=DataProductUserRole.OWNER,
-                        )
-                    )
-                )
-                .order_by(asc(DataProductMembership.requested_on))
-            )
-            .unique()
-            .all()
-        )
-        return actions
 
     def list_memberships(self, db: Session) -> Sequence[DataProductMembership]:
         return db.scalars(select(DataProductMembership)).unique().all()

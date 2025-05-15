@@ -5,8 +5,7 @@ from uuid import UUID
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
-from app.data_product_memberships.enums import DataProductUserRole
-from app.data_products.model import DataProduct as DataProductModel
+from app.core.authz import Action
 from app.database.database import ensure_exists
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.data_product.schema import (
@@ -16,6 +15,7 @@ from app.role_assignments.data_product.schema import (
     UpdateRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
+from app.roles.model import Role
 from app.users.schema import User
 
 
@@ -78,18 +78,23 @@ class RoleAssignmentService:
     def get_user_pending_data_product_assignments(
         self, authenticated_user: User
     ) -> Sequence[RoleAssignmentResponse]:
+        data_product_ids = (
+            select(DataProductRoleAssignment.data_product_id)
+            .join(DataProductRoleAssignment.role)
+            .where(
+                DataProductRoleAssignment.user_id == authenticated_user.id,
+                Role.permissions.contains(
+                    [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
+                ),
+            )
+            .scalar_subquery()
+        )
+
         actions = (
             self.db.scalars(
                 select(DataProductRoleAssignment)
                 .filter(DataProductRoleAssignment.decision == DecisionStatus.PENDING)
-                .filter(
-                    DataProductRoleAssignment.data_product.has(
-                        DataProductModel.memberships.any(
-                            user_id=authenticated_user.id,
-                            role=DataProductUserRole.OWNER,
-                        )
-                    )
-                )
+                .filter(DataProductRoleAssignment.data_product_id.in_(data_product_ids))
                 .order_by(asc(DataProductRoleAssignment.requested_on))
             )
             .unique()

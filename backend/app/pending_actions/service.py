@@ -3,7 +3,6 @@ from itertools import chain
 from sqlalchemy.orm import Session
 
 from app.data_outputs_datasets.service import DataOutputDatasetService
-from app.data_product_memberships.service import DataProductMembershipService
 from app.data_products_datasets.service import DataProductDatasetService
 from app.pending_actions.schema import PendingAction
 from app.role_assignments.data_product.service import RoleAssignmentService
@@ -21,11 +20,6 @@ class PendingActionsService:
         data_output_dataset_actions = (
             DataOutputDatasetService().get_user_pending_actions(db, authenticated_user)
         )
-        data_product_membership_actions = (
-            DataProductMembershipService().get_user_pending_actions(
-                db, authenticated_user
-            )
-        )
         data_product_membership_role_actions = RoleAssignmentService(
             db=db, user=authenticated_user
         ).get_user_pending_data_product_assignments(authenticated_user)
@@ -34,7 +28,6 @@ class PendingActionsService:
             chain(
                 data_product_dataset_actions,
                 data_output_dataset_actions,
-                data_product_membership_actions,
                 data_product_membership_role_actions,
             ),
             key=lambda action: action.requested_on,
