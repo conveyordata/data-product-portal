@@ -20,6 +20,7 @@ from app.role_assignments.data_product.schema import (
 from app.role_assignments.enums import DecisionStatus
 from app.roles.model import Role
 from app.settings import settings
+from app.users.model import User as UserModel
 from app.users.schema import User
 
 
@@ -31,8 +32,12 @@ class RoleAssignmentService:
     def _get_data_product_request_resolvers(self, data_product_id: UUID) -> List[User]:
         return (
             self.db.scalars(
-                select(DataProductRoleAssignment.user)
-                .join(DataProductRoleAssignment.role)
+                select(UserModel)
+                .join(
+                    DataProductRoleAssignment,
+                    DataProductRoleAssignment.user_id == UserModel.id,
+                )
+                .join(Role, DataProductRoleAssignment.role_id == Role.id)
                 .where(
                     DataProductRoleAssignment.data_product_id == data_product_id,
                     Role.permissions.contains(
