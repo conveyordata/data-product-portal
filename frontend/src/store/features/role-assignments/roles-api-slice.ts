@@ -36,7 +36,11 @@ export const roleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTyp
                 method: 'POST',
                 data: request,
             }),
-            invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: (_, _error, request) => [
+                { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const, id: request.data_product_id },
+                { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+            ],
         }),
         updateRoleAssignment: builder.mutation<RoleAssignmentContract, { role_assignment_id: string; role_id: string }>(
             {
