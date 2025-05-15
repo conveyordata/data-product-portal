@@ -32,27 +32,38 @@ datasets_owner_table = Table(
 
 class Dataset(Base, BaseORM):
     __tablename__ = "datasets"
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     namespace = Column(String)
     name = Column(String)
     description = Column(String)
     about = Column(String)
     access_type = Column(Enum(DatasetAccessType), default=DatasetAccessType.PUBLIC)
-    owners: Mapped[list["User"]] = relationship(
-        secondary=datasets_owner_table, back_populates="owned_datasets"
-    )
     status: DatasetStatus = Column(Enum(DatasetStatus), default=DatasetStatus.ACTIVE)
+
+    # Foreign keys
+    lifecycle_id: Mapped[UUID] = mapped_column(
+        ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
+    )
+    domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
+
+    # Relationships
+    owners: Mapped[list["User"]] = relationship(
+        secondary=datasets_owner_table, back_populates="owned_datasets", lazy="joined"
+    )
     data_product_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
         back_populates="dataset",
         order_by="DataProductDatasetAssociation.status.desc()",
         cascade="all, delete-orphan",
+        lazy="joined",
     )
     data_output_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
         "DataOutputDatasetAssociation",
         back_populates="dataset",
         order_by="DataOutputDatasetAssociation.status.desc()",
         cascade="all, delete-orphan",
+        lazy="joined",
     )
     tags: Mapped[list[Tag]] = relationship(
         secondary=tag_dataset_table, back_populates="datasets", lazy="joined"
@@ -64,13 +75,9 @@ class Dataset(Base, BaseORM):
         order_by="DataProductSettingValue.dataset_id",
         lazy="joined",
     )
-    lifecycle_id: Mapped[UUID] = mapped_column(
-        ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
-    )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="datasets", lazy="joined"
     )
-    domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
     domain: Mapped["Domain"] = relationship(back_populates="datasets", lazy="joined")
 
     @property
