@@ -60,20 +60,6 @@ export function Notifications() {
                 navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
                 break;
 
-            case PendingActionTypes.DataProductMembership:
-                link = createDataProductIdPath(action.data_product_id);
-                description = (
-                    <Typography.Text>
-                        {t('{{name}} would like to join the data product', { name: action.user?.first_name })}{' '}
-                        <Link onClick={(e) => e.stopPropagation()} to={link}>
-                            {action.data_product.name}
-                        </Link>{' '}
-                        {t('team')}{' '}
-                    </Typography.Text>
-                );
-                navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
-                break;
-
             case PendingActionTypes.DataProductRoleAssignment:
                 link = createDataProductIdPath(action.data_product.id);
                 description = (
