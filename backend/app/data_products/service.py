@@ -81,7 +81,9 @@ class DataProductService:
                 .joinedload(DatasetModel.data_output_links)
                 .joinedload(DataOutputDatasetAssociation.data_output),
                 joinedload(DataProductModel.memberships),
-                joinedload(DataProductModel.data_outputs),
+                joinedload(DataProductModel.data_outputs).joinedload(
+                    DataOutputModel.dataset_links
+                ),
             ],
         )
 
@@ -245,7 +247,6 @@ class DataProductService:
         data_product.memberships = []
         data_product.dataset_links = []
         for output in data_product.data_outputs:
-            output.dataset_links = []
             db.delete(output)
         db.delete(data_product)
         db.commit()
@@ -519,7 +520,11 @@ class DataProductService:
 
     def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
         return (
-            db.scalars(select(DataOutputModel).filter(DataOutputModel.owner_id == id))
+            db.scalars(
+                select(DataOutputModel)
+                .options(joinedload(DataOutputModel.dataset_links))
+                .filter(DataOutputModel.owner_id == id)
+            )
             .unique()
             .all()
         )
