@@ -40,6 +40,7 @@ class RoleAssignmentService:
                 .join(Role, DataProductRoleAssignment.role_id == Role.id)
                 .where(
                     DataProductRoleAssignment.data_product_id == data_product_id,
+                    DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
                     Role.permissions.contains(
                         [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
                     ),
@@ -108,6 +109,7 @@ class RoleAssignmentService:
             .join(DataProductRoleAssignment.role)
             .where(
                 DataProductRoleAssignment.user_id == authenticated_user.id,
+                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
                 Role.permissions.contains(
                     [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
                 ),
