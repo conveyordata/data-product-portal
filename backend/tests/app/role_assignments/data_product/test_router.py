@@ -229,7 +229,7 @@ class TestDataProductRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}",
+            f"{ENDPOINT}/request",
             json={
                 "data_product_id": str(data_product.id),
                 "user_id": str(user_requester.id),
