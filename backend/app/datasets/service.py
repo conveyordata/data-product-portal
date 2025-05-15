@@ -16,7 +16,7 @@ from app.core.namespace.validation import (
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.datasets.model import Dataset as Dataset
+from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
@@ -35,15 +35,15 @@ from app.users.model import User, ensure_user_exists
 
 class DatasetService:
     def __init__(self):
-        self.namespace_validator = NamespaceValidator(Dataset)
+        self.namespace_validator = NamespaceValidator(DatasetModel)
 
     def get_dataset(self, id: UUID, db: Session, user: User) -> DatasetGet:
         dataset = db.get(
-            Dataset,
+            DatasetModel,
             id,
             options=[
-                joinedload(Dataset.data_product_links),
-                joinedload(Dataset.data_output_links),
+                joinedload(DatasetModel.data_product_links),
+                joinedload(DatasetModel.data_output_links),
             ],
         )
 
@@ -83,12 +83,12 @@ class DatasetService:
         datasets = [
             dataset
             for dataset in db.scalars(
-                select(Dataset)
+                select(DatasetModel)
                 .options(
-                    joinedload(Dataset.data_output_links),
-                    joinedload(Dataset.data_product_links),
+                    joinedload(DatasetModel.data_output_links),
+                    joinedload(DatasetModel.data_product_links),
                 )
-                .order_by(asc(Dataset.name))
+                .order_by(asc(DatasetModel.name))
             )
             .unique()
             .all()
@@ -103,13 +103,13 @@ class DatasetService:
     def get_user_datasets(self, user_id: UUID, db: Session) -> Sequence[DatasetsGet]:
         return (
             db.scalars(
-                select(Dataset)
+                select(DatasetModel)
                 .options(
-                    joinedload(Dataset.data_product_links),
-                    joinedload(Dataset.data_output_links),
+                    joinedload(DatasetModel.data_product_links),
+                    joinedload(DatasetModel.data_output_links),
                 )
-                .filter(Dataset.owners.any(id=user_id))
-                .order_by(asc(Dataset.name))
+                .filter(DatasetModel.owners.any(id=user_id))
+                .order_by(asc(DatasetModel.name))
             )
             .unique()
             .all()
@@ -138,7 +138,7 @@ class DatasetService:
         self,
         dataset: DatasetCreateUpdate,
         db: Session,
-    ) -> Dataset:
+    ) -> DatasetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, db
@@ -152,7 +152,7 @@ class DatasetService:
         new_dataset = self._update_owners(dataset, db)
         dataset_schema = new_dataset.parse_pydantic_schema()
         tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
-        model = Dataset(**dataset_schema, tags=tags)
+        model = DatasetModel(**dataset_schema, tags=tags)
 
         db.add(model)
         db.commit()
@@ -160,7 +160,7 @@ class DatasetService:
         return model
 
     def remove_dataset(self, id: UUID, db: Session) -> None:
-        dataset = db.get(Dataset, id)
+        dataset = db.get(DatasetModel, id)
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
@@ -251,11 +251,11 @@ class DatasetService:
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
         dataset = db.get(
-            Dataset,
+            DatasetModel,
             id,
             options=[
-                joinedload(Dataset.data_product_links),
-                joinedload(Dataset.data_output_links),
+                joinedload(DatasetModel.data_product_links),
+                joinedload(DatasetModel.data_output_links),
             ],
         )
         nodes = [

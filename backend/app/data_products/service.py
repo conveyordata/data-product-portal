@@ -47,7 +47,7 @@ from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
 from app.datasets.enums import DatasetAccessType
-from app.datasets.model import Dataset as Dataset
+from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
@@ -78,7 +78,7 @@ class DataProductService:
             options=[
                 joinedload(DataProductModel.dataset_links)
                 .joinedload(DataProductDatasetModel.dataset)
-                .joinedload(Dataset.data_output_links),
+                .joinedload(DatasetModel.data_output_links),
                 joinedload(DataProductModel.data_outputs).joinedload(
                     DataOutputModel.dataset_links
                 ),
@@ -324,7 +324,7 @@ class DataProductService:
 
     def _send_email_for_dataset_link(
         self,
-        dataset: Dataset,
+        dataset: DatasetModel,
         data_product: DataProductModel,
         authenticated_user: User,
         background_tasks: BackgroundTasks,
@@ -369,7 +369,7 @@ class DataProductService:
         dataset = ensure_dataset_exists(
             dataset_id,
             db,
-            options=[joinedload(Dataset.data_product_links)],
+            options=[joinedload(DatasetModel.data_product_links)],
         )
         data_product = ensure_data_product_exists(
             id, db, options=[joinedload(DataProductModel.dataset_links)]
@@ -554,7 +554,7 @@ class DataProductService:
                 joinedload(DataProductModel.data_outputs)
                 .joinedload(DataOutputModel.dataset_links)
                 .joinedload(DataOutputDatasetAssociation.dataset)
-                .joinedload(Dataset.data_product_links),
+                .joinedload(DatasetModel.data_product_links),
             ],
             # As this is also called from the DataOutputService, we need to ensure
             # that the DataOutput for which this is called is not loaded from cache,

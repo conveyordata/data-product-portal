@@ -11,7 +11,7 @@ from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
 from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
-from app.datasets.model import Dataset as Dataset
+from app.datasets.model import Dataset as DatasetModel
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -72,7 +72,7 @@ class DataProductDatasetService:
                 )
                 .where(
                     DataProductDatasetAssociationModel.dataset.has(
-                        Dataset.owners.any(UserModel.id == authenticated_user.id)
+                        DatasetModel.owners.any(UserModel.id == authenticated_user.id)
                     )
                 )
                 .order_by(asc(DataProductDatasetAssociationModel.requested_on))
