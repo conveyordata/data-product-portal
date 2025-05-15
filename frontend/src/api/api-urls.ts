@@ -45,6 +45,7 @@ export enum ApiUrl {
     RolesGet = '/api/roles/:scope',
     RolesDelete = '/api/roles/:id',
     RoleAssignmentsDataProductGet = '/api/role_assignments/data_product',
+    RoleAssignmentsDataProductRequest = '/api/role_assignments/data_product/request',
     RoleAssignmentsDataProductDelete = '/api/role_assignments/data_product/:id',
     RoleAssignmentsDataProductUpdate = '/api/role_assignments/data_product/:id/role',
     RoleAssignmentsDataProductDecide = '/api/role_assignments/data_product/:id/decide',
