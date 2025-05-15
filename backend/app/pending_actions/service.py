@@ -30,8 +30,5 @@ class PendingActionsService:
                 data_output_dataset_actions,
                 data_product_membership_role_actions,
             ),
-            key=lambda action: (
-                action.requested_on is None,   
-                action.requested_on 
-            )
+            key=lambda action: (action.requested_on is None, action.requested_on),
         )
