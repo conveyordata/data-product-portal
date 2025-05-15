@@ -27,6 +27,7 @@ from app.core.namespace.validation import (
 )
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_response import DataOutputGet
+from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -550,8 +551,15 @@ class DataProductService:
             id,
             options=[
                 joinedload(DataProductModel.dataset_links),
-                joinedload(DataProductModel.data_outputs),
+                joinedload(DataProductModel.data_outputs)
+                .joinedload(DataOutputModel.dataset_links)
+                .joinedload(DataOutputDatasetAssociation.dataset)
+                .joinedload(Dataset.data_product_links),
             ],
+            # As this is also called from the DataOutputService, we need to ensure
+            # that the DataOutput for which this is called is not loaded from cache,
+            # but instead loaded anew with all necessary fields eagerly loaded
+            populate_existing=True,
         )
         nodes = [
             Node(

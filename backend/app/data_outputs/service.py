@@ -290,21 +290,8 @@ class DataOutputService:
         return {"id": current_data_output.id}
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
-        dataOutput = db.get(
-            DataOutputModel,
-            id,
-            options=[
-                joinedload(DataOutputModel.dataset_links),
-                # Eagerly load to avoid data product to be cached in session with
-                # fields that raise on access
-                joinedload(DataOutputModel.owner).options(
-                    joinedload(DataProductModel.dataset_links),
-                    joinedload(DataProductModel.data_outputs),
-                ),
-            ],
-        )
-        # DataProductService will start with getting the data product and receive this
-        # from cache as it has already been loaded
+        dataOutput = db.get(DataOutputModel, id)
+
         graph = DataProductService().get_graph_data(dataOutput.owner_id, level, db)
 
         for node in graph.nodes:
