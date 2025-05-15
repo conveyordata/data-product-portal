@@ -1,5 +1,6 @@
 import { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '../data-output-dataset';
 import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '../data-product-dataset';
+import { DataProductMembershipRoleRequest } from '../data-product-membership';
 import { RoleAssignmentContract } from '../roles/role.contract';
 
 export enum PendingActionTypes {
@@ -28,4 +29,4 @@ export type PendingAction =
 export type ActionResolveRequest =
     | { type: PendingActionTypes.DataOutputDataset; request: DataOutputDatasetLinkRequest }
     | { type: PendingActionTypes.DataProductDataset; request: DataProductDatasetLinkRequest }
-    | { type: PendingActionTypes.DataProductRoleAssignment; request: string };
+    | { type: PendingActionTypes.DataProductRoleAssignment; request: DataProductMembershipRoleRequest };
