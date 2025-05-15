@@ -3,8 +3,8 @@ from uuid import UUID
 
 import pytz
 from fastapi import HTTPException, status
-from sqlalchemy import asc
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import asc, select
+from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products_datasets.model import (
@@ -65,20 +65,18 @@ class DataProductDatasetService:
         self, db: Session, authenticated_user: User
     ) -> list[DataProductDatasetAssociationsGet]:
         return (
-            db.query(DataProductDatasetAssociationModel)
-            .options(
-                joinedload(DataProductDatasetAssociationModel.dataset).joinedload(
-                    Dataset.owners
-                ),
-                joinedload(DataProductDatasetAssociationModel.data_product),
-                joinedload(DataProductDatasetAssociationModel.requested_by),
-            )
-            .filter(DataProductDatasetAssociationModel.status == DecisionStatus.PENDING)
-            .filter(
-                DataProductDatasetAssociationModel.dataset.has(
-                    Dataset.owners.any(UserModel.id == authenticated_user.id)
+            db.scalars(
+                select(DataProductDatasetAssociationModel)
+                .where(
+                    DataProductDatasetAssociationModel.status == DecisionStatus.PENDING
                 )
+                .where(
+                    DataProductDatasetAssociationModel.dataset.has(
+                        Dataset.owners.any(UserModel.id == authenticated_user.id)
+                    )
+                )
+                .order_by(asc(DataProductDatasetAssociationModel.requested_on))
             )
-            .order_by(asc(DataProductDatasetAssociationModel.requested_on))
+            .unique()
             .all()
         )

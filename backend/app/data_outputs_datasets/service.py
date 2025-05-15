@@ -4,7 +4,7 @@ from uuid import UUID
 import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_outputs_datasets.model import (
@@ -65,11 +65,7 @@ class DataOutputDatasetService:
         db.commit()
 
     def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(
-            DataOutputDatasetAssociationModel,
-            id,
-            options=[joinedload(DataOutputDatasetAssociationModel.data_output)],
-        )
+        current_link = db.get(DataOutputDatasetAssociationModel, id)
 
         if not current_link:
             raise HTTPException(
@@ -94,13 +90,6 @@ class DataOutputDatasetService:
         return (
             db.scalars(
                 select(DataOutputDatasetAssociationModel)
-                .options(
-                    joinedload(DataOutputDatasetAssociationModel.dataset).joinedload(
-                        Dataset.owners
-                    ),
-                    joinedload(DataOutputDatasetAssociationModel.data_output),
-                    joinedload(DataOutputDatasetAssociationModel.requested_by),
-                )
                 .filter(
                     DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
                 )

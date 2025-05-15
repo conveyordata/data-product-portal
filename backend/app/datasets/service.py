@@ -13,7 +13,6 @@ from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -66,10 +65,10 @@ class DatasetService:
         dataset.rolled_up_tags = rolled_up_tags
 
         if not dataset.lifecycle:
-            default_lifecycle = (
-                db.query(DataProductLifeCycleModel)
-                .filter(DataProductLifeCycleModel.is_default)
-                .first()
+            default_lifecycle = db.scalar(
+                select(DataProductLifeCycleModel).where(
+                    DataProductLifeCycleModel.is_default
+                )
             )
             dataset.lifecycle = default_lifecycle
 
@@ -86,15 +85,8 @@ class DatasetService:
             for dataset in db.scalars(
                 select(Dataset)
                 .options(
-                    joinedload(Dataset.owners),
-                    joinedload(Dataset.data_product_settings),
-                    joinedload(Dataset.data_output_links).joinedload(
-                        DataOutputDatasetAssociation.data_output
-                    ),
+                    joinedload(Dataset.data_output_links),
                     joinedload(Dataset.data_product_links),
-                    joinedload(Dataset.tags),
-                    joinedload(Dataset.lifecycle),
-                    joinedload(Dataset.domain),
                 )
                 .order_by(asc(Dataset.name))
             )
@@ -110,15 +102,16 @@ class DatasetService:
 
     def get_user_datasets(self, user_id: UUID, db: Session) -> Sequence[DatasetsGet]:
         return (
-            db.query(Dataset)
-            .options(
-                joinedload(Dataset.owners),
-                joinedload(Dataset.data_product_links),
-                joinedload(Dataset.data_output_links),
+            db.scalars(
+                select(Dataset)
+                .options(
+                    joinedload(Dataset.data_product_links),
+                    joinedload(Dataset.data_output_links),
+                )
+                .filter(Dataset.owners.any(id=user_id))
+                .order_by(asc(Dataset.name))
             )
-            .join(Dataset.owners)
-            .filter(Dataset.owners.any(id=user_id))
-            .order_by(asc(Dataset.name))
+            .unique()
             .all()
         )
 
