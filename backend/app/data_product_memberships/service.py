@@ -76,5 +76,3 @@ class DataProductMembershipService:
         )
         return {"id": data_product_membership.id}
 
-    def list_memberships(self, db: Session) -> Sequence[DataProductMembership]:
-        return db.scalars(select(DataProductMembership)).unique().all()
