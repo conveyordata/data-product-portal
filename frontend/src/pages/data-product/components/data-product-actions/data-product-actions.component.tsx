@@ -69,20 +69,13 @@ export function DataProductActions({ dataProductId }: Props) {
     });
 
     const allowRequesting = useMemo(() => {
-        if (!user?.id || isFetchingRoleAssignments || !roleAssignments) {
-            return false;
-        }
-        const userId = user.id;
+        if (!user?.id || isFetchingRoleAssignments || !roleAssignments) return false;
 
-        const hasRequested = roleAssignments.some(
-            ({ user, decision }) =>
-                user.id === userId && (decision === DecisionStatus.Pending || decision === DecisionStatus.Approved),
+        return !roleAssignments.some(
+            ({ user: u, decision }) =>
+                u.id === user.id && (decision === DecisionStatus.Pending || decision === DecisionStatus.Approved),
         );
-        if (hasRequested) {
-            return false;
-        }
-        return true;
-    }, [user, isFetchingRoleAssignments, roleAssignments]);
+    }, [user?.id, isFetchingRoleAssignments, roleAssignments]);
 
     if (!dataProduct || !user) {
         return null;
