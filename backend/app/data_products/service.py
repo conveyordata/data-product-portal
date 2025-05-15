@@ -244,8 +244,7 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data Product {id} not found",
             )
-        data_product.memberships = []
-        data_product.dataset_links = []
+
         for output in data_product.data_outputs:
             db.delete(output)
         db.delete(data_product)
