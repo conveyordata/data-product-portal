@@ -42,6 +42,18 @@ def create_assignment(
     return RoleAssignmentService(db=db, user=user).create_assignment(request)
 
 
+@router.post("/request")
+def request_assignment(
+    request: CreateRoleAssignment,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> RoleAssignmentResponse:
+    return RoleAssignmentService(db=db, user=user).request_role_assignment(
+        request, background_tasks
+    )
+
+
 @router.delete("/{id}")
 def delete_assignment(
     id: UUID,
