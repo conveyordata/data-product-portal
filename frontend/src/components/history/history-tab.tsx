@@ -35,7 +35,8 @@ function filterHistory(events: EventContract[], searchTerm: string, t: TFunction
         return (
             subjectLabel?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
             targetLabel?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-            event.name?.toLowerCase().includes(searchTerm?.toLowerCase())
+            event.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            event.actor.email.toLowerCase().includes(searchTerm?.toLowerCase())
         );
     });
 }

@@ -22,7 +22,7 @@ export const getHistoryColumns = ({ t }: HistoryColumnsProps): TableColumnsType<
     {
         title: t('Involved entities'),
         key: 'Detail',
-        width: '40%',
+        width: '30%',
         render: (record: EventContract) => {
             const subjectLabel = getSubjectDisplayLabel(t, record);
             const targetLabel = getTargetDisplayLabel(t, record);
@@ -45,7 +45,7 @@ export const getHistoryColumns = ({ t }: HistoryColumnsProps): TableColumnsType<
         dataIndex: 'actor',
         key: 'actor',
 
-        render: (actor: { first_name: string; last_name: string }) => `${actor.first_name} ${actor.last_name}`,
+        render: (actor: { email: string }) => `${actor.email}`,
     },
     {
         title: t('Timestamp'),
