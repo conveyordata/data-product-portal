@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { UserPopup } from '@/components/modal/user-popup/user-popup';
 import { useModal } from '@/hooks/use-modal';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
     useGetRoleAssignmentQuery,
@@ -24,7 +23,6 @@ type Props = {
 export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props) => {
     const { isVisible, handleOpen, handleClose } = useModal();
     const { t } = useTranslation();
-    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useGetRoleAssignmentQuery({
         data_product_id: dataProductId,
         user_id: userId,
@@ -37,10 +35,10 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
     const isLoading = isFetchingRoleAssignments || isFetchingUsers || isRequestingAccess;
 
     const canRequestProductAccess = useMemo(() => {
-        if (!dataProduct || !userId || isLoading || !roleAssignments) return false;
+        if (!userId || isLoading || !roleAssignments) return false;
 
         return roleAssignments.some((assignment) => assignment.user.id === userId) ? false : true;
-    }, [dataProduct, userId, isLoading, roleAssignments]);
+    }, [userId, isLoading, roleAssignments]);
 
     const filteredUserIds = useMemo(() => {
         if (canRequestProductAccess) {
@@ -66,7 +64,7 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
         [requestAccessToDataProduct, dataProductId, t],
     );
 
-    if (!dataProduct || !userId) return null;
+    if (!dataProductId || !userId) return null;
 
     return (
         <>
