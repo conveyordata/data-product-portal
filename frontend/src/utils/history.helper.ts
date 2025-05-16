@@ -21,12 +21,14 @@ export function getSubjectDisplayLabel(t: TFunction, record: EventContract): str
     const displayType = ' ' + getTypeDisplayName(t, subject_type);
 
     if (deleted_subject_identifier) {
-        return deleted_subject_identifier + ' ' + displayType;
+        return subject_type == EventObject.User
+            ? deleted_subject_identifier
+            : `${deleted_subject_identifier} ${displayType}`;
     }
 
     switch (subject_type) {
         case EventObject.User:
-            return record.user.email + displayType;
+            return record.user.email;
         case EventObject.DataProduct:
             return record.data_product.name + displayType;
         case EventObject.DataOutput:
@@ -46,17 +48,19 @@ export function getTargetDisplayLabel(t: TFunction, record: EventContract): stri
     const displayType = getTypeDisplayName(t, target_type);
 
     if (deleted_target_identifier) {
-        return deleted_target_identifier + ' ' + displayType;
+        return target_type == EventObject.User
+            ? deleted_target_identifier
+            : `${deleted_target_identifier} ${displayType}`;
     }
 
     switch (target_type) {
         case EventObject.User:
-            return record.user.email + ' ' + displayType;
+            return record.user.email;
         case EventObject.DataProduct:
-            return record.data_product.name + ' ' + displayType;
+            return `${record.data_product.name} ${displayType}`;
         case EventObject.DataOutput:
-            return record.data_output.name + ' ' + displayType;
+            return `${record.data_output.name} ${displayType}`;
         case EventObject.Dataset:
-            return record.dataset.name + ' ' + displayType;
+            return `${record.dataset.name} ${displayType}`;
     }
 }
