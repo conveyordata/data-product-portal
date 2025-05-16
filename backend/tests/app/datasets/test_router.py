@@ -6,9 +6,16 @@ from tests.factories import DatasetFactory, DomainFactory, UserFactory
 from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.data_product_setting import DataProductSettingFactory
 from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
+from tests.factories.role import RoleFactory
+from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
+from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
 from app.datasets.enums import DatasetAccessType
+from app.role_assignments.data_product.schema import RoleAssignment
+from app.role_assignments.enums import DecisionStatus
+from app.role_assignments.global_.auth import GlobalAuthAssignment
+from app.roles.schema import Scope
 from app.roles.service import RoleService
 
 ENDPOINT = "/api/datasets"
@@ -34,8 +41,19 @@ def dataset_payload():
 class TestDatasetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_dataset(self, session, dataset_payload, client):
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_create_dataset(self, session, dataset_payload, client):
         RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(
+            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        await GlobalAuthAssignment(assignment).add()
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
@@ -108,8 +126,19 @@ class TestDatasetsRouter:
 
         assert updated_dataset.status_code == 403
 
-    def test_update_dataset(self, client):
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_update_dataset(self, client, authorizer):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATASET)
+        ds = DatasetFactory(owners=[user])
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
+
         update_payload = {
             "name": "new_name",
             "namespace": "new_namespace",
@@ -125,8 +154,18 @@ class TestDatasetsRouter:
         assert updated_dataset.status_code == 200
         assert updated_dataset.json()["id"] == str(ds.id)
 
-    def test_update_dataset_remove_all_owners(self, client):
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_update_dataset_remove_all_owners(self, client, authorizer):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATASET)
+        ds = DatasetFactory(owners=[user])
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
         update_payload = {
             "name": "new_name",
             "namespace": "new_namespace",
@@ -146,8 +185,18 @@ class TestDatasetsRouter:
         response = self.update_dataset_about(client, ds.id)
         assert response.status_code == 403
 
-    def test_update_dataset_about(self, client):
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_update_dataset_about(self, client, authorizer):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATASET)
+        ds = DatasetFactory(owners=[user])
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
         response = self.update_dataset_about(client, ds.id)
         assert response.status_code == 200
 
@@ -156,16 +205,36 @@ class TestDatasetsRouter:
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 403
 
-    def test_remove_dataset(self, client):
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_remove_dataset(self, client, authorizer):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATASET)
+        ds = DatasetFactory(owners=[user])
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__DELETE],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
 
         response = self.get_dataset_by_id(client, ds.id)
         assert response.status_code == 404
 
-    def test_add_user_to_dataset(self, client):
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_add_user_to_dataset(self, client, authorizer):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATASET)
+        ds = DatasetFactory(owners=[user])
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__CREATE_USER],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
         user = UserFactory()
         response = self.add_user_to_dataset(client, user.id, ds.id)
         assert response.status_code == 200
@@ -174,9 +243,8 @@ class TestDatasetsRouter:
         assert dataset.status_code == 200
         assert len(dataset.json()["owners"]) == 2
 
+    @pytest.mark.usefixtures("admin")
     def test_add_user_to_dataset_by_admin(self, client):
-        # Create admin user which is used as logged in user
-        UserFactory(external_id="sub", is_admin=True)
         # Add dataset which is owned by another non-admin user
         ds = DatasetFactory(owners=[UserFactory()])
         # Create one more user that should be added to the dataset by admin user
@@ -189,10 +257,21 @@ class TestDatasetsRouter:
         assert len(data["owners"]) == 2
         assert str(new_user.id) in [owner["id"] for owner in data["owners"]]
 
-    def test_remove_user_from_dataset(self, client):
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_remove_user_from_dataset(self, client, authorizer):
         ds_owner = UserFactory()
         # Create dataset with two owners
-        ds = DatasetFactory(owners=[ds_owner, UserFactory(external_id="sub")])
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[ds_owner, user])
+
+        role = RoleFactory(scope=Scope.DATASET)
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__DELETE_USER],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
 
         response = self.delete_dataset_user(client, ds_owner.id, ds.id)
         assert response.status_code == 200
@@ -201,9 +280,20 @@ class TestDatasetsRouter:
         assert dataset.status_code == 200
         assert len(dataset.json()["owners"]) == 1
 
-    def test_remove_last_user_from_dataset(self, client):
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_remove_last_user_from_dataset(self, client, authorizer):
         owner = UserFactory(external_id="sub")
         ds = DatasetFactory(owners=[owner])
+
+        role = RoleFactory(scope=Scope.DATASET)
+        ds = DatasetFactory(owners=[owner])
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__DELETE_USER],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(owner.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
 
         response = self.delete_dataset_user(client, owner.id, ds.id)
         assert response.status_code == 400
@@ -212,7 +302,8 @@ class TestDatasetsRouter:
         dataset = self.get_dataset_by_id(client, self.invalid_id)
         assert dataset.status_code == 404
 
-    def test_update_dataset_with_invalid_dataset_id(self, client):
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_update_dataset_with_invalid_dataset_id(self, client, authorizer):
         update_payload = {
             "name": "new_name",
             "namespace": "new_namespace",
@@ -222,27 +313,61 @@ class TestDatasetsRouter:
             "owners": [],
             "domain_id": str(uuid.uuid4()),
         }
-        dataset = self.update_default_dataset(client, update_payload, self.invalid_id)
-        assert dataset.status_code == 404
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[user])
 
-    def test_remove_dataset_with_invalid_dataset_id(self, client):
+        role = RoleFactory(scope=Scope.DATASET)
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
+        dataset = self.update_default_dataset(client, update_payload, self.invalid_id)
+        assert dataset.status_code == 403
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_remove_dataset_with_invalid_dataset_id(self, client, authorizer):
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[user])
+
+        role = RoleFactory(scope=Scope.DATASET)
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__DELETE],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
         dataset = self.delete_default_dataset(client, self.invalid_id)
-        assert dataset.status_code == 404
+        assert dataset.status_code == 403
 
     def test_remove_user_from_dataset_with_invalid_dataset_id(self, client):
         user = UserFactory()
         dataset = self.delete_dataset_user(client, user.id, self.invalid_id)
-        assert dataset.status_code == 404
+        assert dataset.status_code == 403
 
     def test_remove_user_from_dataset_with_invalid_user_id(self, client):
         ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
         response = self.delete_dataset_user(client, self.invalid_id, ds.id)
-        assert response.status_code == 404
+        assert response.status_code == 403
 
-    def test_add_already_existing_dataset_owner_to_dataset(self, client):
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_add_already_existing_dataset_owner_to_dataset(
+        self, client, authorizer
+    ):
         ds_owner = UserFactory(external_id="sub")
         ds = DatasetFactory(owners=[ds_owner])
 
+        role = RoleFactory(scope=Scope.DATASET)
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__CREATE_USER],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(ds_owner.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
         response = self.add_user_to_dataset(client, ds_owner.id, ds.id)
         assert response.status_code == 400
         assert "is already an owner of dataset" in response.json()["detail"]
@@ -252,9 +377,19 @@ class TestDatasetsRouter:
         response = self.update_dataset_status(client, {"status": "active"}, ds.id)
         assert response.status_code == 403
 
-    def test_update_status(self, client):
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_update_status(self, client, authorizer):
         ds_owner = UserFactory(external_id="sub")
         ds = DatasetFactory(owners=[ds_owner])
+
+        role = RoleFactory(scope=Scope.DATASET)
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__UPDATE_STATUS],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(ds_owner.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
         response = self.get_dataset_by_id(client, ds.id)
         assert response.json()["status"] == "active"
         response = self.update_dataset_status(client, {"status": "pending"}, ds.id)
@@ -295,9 +430,19 @@ class TestDatasetsRouter:
         response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}")
         assert response.status_code == 403
 
-    def test_dataset_set_custom_setting(self, client):
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_dataset_set_custom_setting(self, client, authorizer):
         ds_owner = UserFactory(external_id="sub")
         ds = DatasetFactory(owners=[ds_owner])
+
+        role = RoleFactory(scope=Scope.DATASET)
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__UPDATE_SETTINGS],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(ds_owner.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
         setting = DataProductSettingFactory(scope="dataset")
         response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}?value=false")
         assert response.status_code == 200
@@ -405,10 +550,21 @@ class TestDatasetsRouter:
             == NamespaceValidityType.DUPLICATE_NAMESPACE.value
         )
 
-    def test_update_dataset_duplicate_namespace(self, client):
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_update_dataset_duplicate_namespace(self, client, authorizer):
         namespace = "namespace"
         DatasetFactory(namespace=namespace)
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory(owners=[user])
+
+        role = RoleFactory(scope=Scope.DATASET)
+        await authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+        )
+        await authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(ds.id)
+        )
         update_payload = {
             "name": "new_name",
             "namespace": namespace,
