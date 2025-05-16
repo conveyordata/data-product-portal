@@ -70,8 +70,6 @@ def update_role(
     },
     dependencies=[Depends(only_for_admin)],
 )
-def remove_role(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> None:
+def remove_role(id: UUID, db: Session = Depends(get_db_session)) -> None:
     role: Role = RoleService(db).delete_role(id)
     AuthRole(role).remove()

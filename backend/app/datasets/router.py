@@ -151,9 +151,7 @@ def create_dataset(
         Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
     ],
 )
-def remove_dataset(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> None:
+def remove_dataset(id: UUID, db: Session = Depends(get_db_session)) -> None:
     DatasetService().remove_dataset(id, db)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
     return
