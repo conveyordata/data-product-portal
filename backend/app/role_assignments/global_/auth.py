@@ -34,44 +34,44 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
     def was_admin(self) -> bool:
         return self.previous_role_id == ADMIN_UUID
 
-    async def add(self) -> None:
+    def add(self) -> None:
         authorizer = Authorization()
 
         if self.is_admin():
-            await authorizer.assign_admin_role(user_id=str(self.user_id))
+            authorizer.assign_admin_role(user_id=str(self.user_id))
         else:
-            await authorizer.assign_global_role(
+            authorizer.assign_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.role_id),
             )
 
-    async def remove(self) -> None:
+    def remove(self) -> None:
         authorizer = Authorization()
         if self.is_admin():
-            await authorizer.revoke_admin_role(user_id=str(self.user_id))
+            authorizer.revoke_admin_role(user_id=str(self.user_id))
         else:
-            await authorizer.revoke_global_role(
+            authorizer.revoke_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.role_id),
             )
 
-    async def swap(self) -> None:
+    def swap(self) -> None:
         assert self.previous_role_id is not None
 
         authorizer = Authorization()
 
         if self.was_admin():
-            await authorizer.revoke_admin_role(user_id=str(self.user_id))
+            authorizer.revoke_admin_role(user_id=str(self.user_id))
         else:
-            await authorizer.revoke_global_role(
+            authorizer.revoke_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.previous_role_id),
             )
 
         if self.is_admin():
-            await authorizer.assign_admin_role(user_id=str(self.user_id))
+            authorizer.assign_admin_role(user_id=str(self.user_id))
         else:
-            await authorizer.assign_global_role(
+            authorizer.assign_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.role_id),
             )

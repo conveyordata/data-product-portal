@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db_session
@@ -32,11 +32,10 @@ def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> Sequence[R
 )
 def create_role(
     request: CreateRole,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
 ) -> Role:
     role: Role = RoleService(db).create_role(request)
-    background_tasks.add_task(AuthRole(role).sync)
+    AuthRole(role).sync()
     return role
 
 
@@ -54,11 +53,10 @@ def create_role(
 )
 def update_role(
     request: UpdateRole,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
 ) -> Role:
     role: Role = RoleService(db).update_role(request)
-    background_tasks.add_task(AuthRole(role).sync)
+    AuthRole(role).sync()
     return role
 
 
@@ -72,8 +70,6 @@ def update_role(
     },
     dependencies=[Depends(only_for_admin)],
 )
-def remove_role(
-    id: UUID, background_tasks: BackgroundTasks, db: Session = Depends(get_db_session)
-) -> None:
+def remove_role(id: UUID, db: Session = Depends(get_db_session)) -> None:
     role: Role = RoleService(db).delete_role(id)
-    background_tasks.add_task(AuthRole(role).remove)
+    AuthRole(role).remove()
