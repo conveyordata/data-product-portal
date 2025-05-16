@@ -27,3 +27,8 @@ class S3DataOutput(BaseDataOutputConfiguration):
         # client = get_client("s3")
         # client.put_object(Bucket=self.bucket, Key=self.prefix, Body="")
         pass
+
+    def output_result_string(self, template):
+        return "/".join(
+            [part for part in super().output_result_string(template).split("/") if part]
+        )

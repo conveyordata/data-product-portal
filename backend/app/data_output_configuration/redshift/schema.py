@@ -37,3 +37,11 @@ class RedshiftDataOutput(BaseDataOutputConfiguration):
 
     def on_create(self):
         pass
+
+    def output_result_string(self, template):
+        return ".".join(
+            [
+                part.rstrip("_")
+                for part in super().output_result_string(template).split(".")
+            ]
+        )

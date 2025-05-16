@@ -37,3 +37,6 @@ class SnowflakeDataOutput(BaseDataOutputConfiguration):
 
     def on_create(self):
         pass
+
+    def output_result_string(self, template):
+        return super().output_result_string(template).replace("-", "_")

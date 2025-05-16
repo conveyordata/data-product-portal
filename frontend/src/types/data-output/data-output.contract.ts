@@ -7,6 +7,9 @@ import { DataOutputDatasetLink } from './dataset-link.contract';
 export enum DataOutputConfigurationTypes {
     S3DataOutput = 'S3DataOutput',
     GlueDataOutput = 'GlueDataOutput',
+    DatabricksDataOutput = 'DatabricksDataOutput',
+    SnowflakeDataOutput = 'SnowflakeDataOutput',
+    RedshiftDataOutput = 'RedshiftDataOutput',
 }
 
 export enum DataOutputStatus {

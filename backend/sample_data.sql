@@ -77,12 +77,12 @@ begin
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', returned_platform_id, s3_service_id, '["datalake","ingress","egress"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('fa026b3a-7a17-4c32-b279-995af021f6c2', returned_platform_id, glue_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platforms (id, "name") VALUES ('9be7613c-42fb-4b93-952d-1874ed1ddf77', 'Snowflake') returning id INTO snowflake_id;
-    INSERT INTO public.platform_services (id, "name", platform_id) VALUES ('a75189c1-fa42-4980-9497-4bea4c968a5b', 'Snowflake', '9be7613c-42fb-4b93-952d-1874ed1ddf77') returning id INTO snowflake_service_id;
-    INSERT INTO public.platform_services (id, "name", platform_id) VALUES ('de328223-fd90-4170-a7a1-376e4ebe0594', 'Redshift', returned_platform_id) returning id INTO redshift_service_id;
+    INSERT INTO public.platform_services (id, "name", platform_id, template) VALUES ('a75189c1-fa42-4980-9497-4bea4c968a5b', 'Snowflake', '9be7613c-42fb-4b93-952d-1874ed1ddf77', '{database}.{schema}.{table}') returning id INTO snowflake_service_id;
+    INSERT INTO public.platform_services (id, "name", platform_id, template) VALUES ('de328223-fd90-4170-a7a1-376e4ebe0594', 'Redshift', returned_platform_id,'{database}__{schema}.{table}') returning id INTO redshift_service_id;
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('e5f82cba-28fd-4895-b8b2-4b31cba06cde', '9be7613c-42fb-4b93-952d-1874ed1ddf77', 'a75189c1-fa42-4980-9497-4bea4c968a5b', '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('9ff4c542-c3fb-43cd-982e-f6bd20d24f7f', returned_platform_id, 'de328223-fd90-4170-a7a1-376e4ebe0594', '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platforms (id, "name") VALUES ('baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'Databricks') returning id INTO databricks_id;
-    INSERT INTO public.platform_services (id, "name", platform_id) VALUES ('ce208413-b629-44d2-9f98-e5b47a315a56', 'Databricks', databricks_id) returning id INTO databricks_service_id;
+    INSERT INTO public.platform_services (id, "name", platform_id, template) VALUES ('ce208413-b629-44d2-9f98-e5b47a315a56', 'Databricks', databricks_id, '{catalog}.{schema}.{table}') returning id INTO databricks_service_id;
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('0b9a0e7f-8fee-4fd3-97e0-830e1612b77a', databricks_id, databricks_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- ENVIRONMENTS

@@ -25,3 +25,9 @@ class DataOutputUpdate(ORMModel):
 
 class DataOutputStatusUpdate(ORMModel):
     status: DataOutputStatus
+
+
+class DataOutputResultStringRequest(ORMModel):
+    platform_id: UUID
+    service_id: UUID
+    configuration: DataOutputConfiguration
