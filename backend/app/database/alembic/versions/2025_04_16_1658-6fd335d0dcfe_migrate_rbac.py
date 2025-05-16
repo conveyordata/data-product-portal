@@ -189,7 +189,7 @@ class RoleMigrationService:
         admin_role = self.role_service.find_prototype(Scope.GLOBAL, Prototype.ADMIN)
         assert admin_role is not None
 
-        users = self.db.scalars(sa.select(UserModel)).all()
+        users = self.db.execute(sa.select(UserModel.id, UserModel.is_admin, UserModel.updated_on)).all()
         for user in users:
             if user.is_admin:
                 self.db.add(

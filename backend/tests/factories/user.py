@@ -14,3 +14,4 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
     is_admin = False
+    is_deleted = False

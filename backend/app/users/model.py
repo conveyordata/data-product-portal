@@ -25,6 +25,7 @@ class User(Base, BaseORM):
     first_name = Column(String)
     last_name = Column(String)
     is_admin = Column(Boolean, server_default="false", nullable=False)
+    is_deleted = Column(Boolean, server_default="false", nullable=False)
 
     data_product_memberships: Mapped[list["DataProductMembership"]] = relationship(
         "DataProductMembership",

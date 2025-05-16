@@ -15,6 +15,7 @@ class UserService:
         return (
             db.query(UserModel)
             .where(UserModel.email != "systemaccount@noreply.com")
+            .where(UserModel.is_deleted == False)
             .order_by(asc(UserModel.last_name), asc(UserModel.first_name))
             .all()
         )
@@ -23,7 +24,7 @@ class UserService:
         user = ensure_user_exists(id, db)
         user.data_products = []
         user.owned_datasets = []
-        db.delete(user)
+        user.is_deleted = True
         db.commit()
 
     def create_user(self, user: UserCreate, db: Session) -> dict[str, UUID]:

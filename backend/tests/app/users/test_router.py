@@ -29,12 +29,14 @@ class TestUsersRouter:
         user = UserFactory()
 
         response = client.get(f"{ENDPOINT}")
+        print(response.json())
         response = client.delete(f"{ENDPOINT}/{user.id}")
         assert response.status_code == 200
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()) == 1
+        assert user.id not in [u["id"] for u in response.json()]
 
     def test_post_user_not_admin(self, client):
         response = client.post(f"{ENDPOINT}")
