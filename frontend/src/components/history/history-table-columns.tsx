@@ -1,16 +1,19 @@
 import type { TableColumnsType } from 'antd';
-import { Typography } from 'antd';
 import dayjs from 'dayjs';
 import type { TFunction } from 'i18next';
 
 import { EventContract } from '@/types/events/event.contract';
-import { getTargetDisplayLabel } from '@/utils/history.helper';
+import { EventObject } from '@/types/events/event-object-type';
+
+import { HistoryTableLink } from './history-table-link';
 
 export interface HistoryColumnsProps {
     t: TFunction;
+    resourceId: string;
+    type: EventObject;
 }
 
-export const getHistoryColumns = ({ t }: HistoryColumnsProps): TableColumnsType<EventContract> => [
+export const getHistoryColumns = ({ t, resourceId, type }: HistoryColumnsProps): TableColumnsType<EventContract> => [
     {
         title: t('Event name'),
         dataIndex: 'name',
@@ -19,15 +22,11 @@ export const getHistoryColumns = ({ t }: HistoryColumnsProps): TableColumnsType<
         render: (event: string) => t(event) || t('No title available'),
     },
     {
-        title: t('Involved entities'),
+        title: t('External involved entity'),
         key: 'Detail',
         width: '25%',
         render: (record: EventContract) => {
-            const targetLabel = getTargetDisplayLabel(t, record);
-
-            if (targetLabel) {
-                return <Typography.Text>{targetLabel}</Typography.Text>;
-            }
+            return <HistoryTableLink record={record} resourceId={resourceId} type={type} />;
         },
     },
     {

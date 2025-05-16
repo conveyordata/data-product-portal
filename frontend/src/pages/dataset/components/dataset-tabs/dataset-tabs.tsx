@@ -17,6 +17,7 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+import { EventObject } from '@/types/events/event-object-type.ts';
 
 import { AboutTab } from './about-tab/about-tab.tsx';
 import styles from './dataset-tabs.module.scss';
@@ -91,7 +92,7 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 label: t('History'),
                 key: TabKeys.History,
                 icon: <HistoryOutlined />,
-                children: <HistoryTab id={datasetId} type="dataset" />,
+                children: <HistoryTab id={datasetId} type={EventObject.Dataset} />,
             },
         ];
     }, [datasetId, t]);

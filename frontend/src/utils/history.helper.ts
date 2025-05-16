@@ -2,6 +2,7 @@ import { TFunction } from 'i18next';
 
 import { EventContract } from '@/types/events/event.contract';
 import { EventObject } from '@/types/events/event-object-type';
+import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 
 export function getTypeDisplayName(t: TFunction, type: EventObject): string {
     switch (type) {
@@ -18,7 +19,7 @@ export function getTypeDisplayName(t: TFunction, type: EventObject): string {
 
 export function getSubjectDisplayLabel(t: TFunction, record: EventContract): string {
     const { subject_type, deleted_subject_identifier } = record;
-    const displayType = ' ' + getTypeDisplayName(t, subject_type);
+    const displayType = ` ${getTypeDisplayName(t, subject_type)}`;
 
     if (deleted_subject_identifier) {
         return subject_type == EventObject.User
@@ -45,7 +46,7 @@ export function getTargetDisplayLabel(t: TFunction, record: EventContract): stri
         return null;
     }
 
-    const displayType = getTypeDisplayName(t, target_type);
+    const displayType = ` ${getTypeDisplayName(t, target_type)}`;
 
     if (deleted_target_identifier) {
         return target_type == EventObject.User
@@ -57,10 +58,23 @@ export function getTargetDisplayLabel(t: TFunction, record: EventContract): stri
         case EventObject.User:
             return record.user.email;
         case EventObject.DataProduct:
-            return `${record.data_product.name} ${displayType}`;
+            return record.data_product.name + displayType;
         case EventObject.DataOutput:
-            return `${record.data_output.name} ${displayType}`;
+            return record.data_output.name + displayType;
         case EventObject.Dataset:
-            return `${record.dataset.name} ${displayType}`;
+            return record.dataset.name + displayType;
+    }
+}
+
+export function getEventObjectLinkPath(id: string, dataProductId: string | null, type: EventObject): string | null {
+    switch (type) {
+        case EventObject.Dataset:
+            return createDatasetIdPath(id);
+        case EventObject.DataProduct:
+            return createDataProductIdPath(id);
+        case EventObject.DataOutput:
+            return dataProductId ? createDataOutputIdPath(id, dataProductId) : null;
+        case EventObject.User:
+            return null;
     }
 }

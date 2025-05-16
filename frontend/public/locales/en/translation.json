@@ -532,6 +532,7 @@
     "Data Output": "Data Output",
     "Metadata": "Metadata",
     "Roles": "Roles",
+    "None": "None",
     "Update Lifecycle": "Update Lifecycle",
     "Lifecycle updated successfully": "Lifecycle updated successful",
     "Failed to update lifecycle": "Failed to update lifecycle",

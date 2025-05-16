@@ -11,7 +11,7 @@ export interface EventContract {
     deleted_target_identifier: string;
     subject_type: EventObject;
     target_type: EventObject;
-    subject_id: EventObject;
+    subject_id: string;
     target_id: string;
     data_product: DataProductContract;
     user: UserContract;

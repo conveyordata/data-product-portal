@@ -9,6 +9,7 @@ import { useGetDataOutputHistoryQuery } from '@/store/features/data-outputs/data
 import { useGetDataProductHistoryQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice';
 import { EventContract } from '@/types/events/event.contract';
+import { EventObject } from '@/types/events/event-object-type';
 import { getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
 
 import { Searchbar } from '../form';
@@ -17,7 +18,7 @@ import { getHistoryColumns } from './history-table-columns';
 
 type Props = {
     id: string;
-    type: 'dataset' | 'dataproduct' | 'dataoutput';
+    type: EventObject;
 };
 
 type SearchForm = {
@@ -43,29 +44,29 @@ function filterHistory(events: EventContract[], searchTerm: string, t: TFunction
 
 export function HistoryTab({ id, type }: Props) {
     const { data: dataOutputHistoryData, isLoading: isFetchingDataOutputHistory } = useGetDataOutputHistoryQuery(id, {
-        skip: !id,
+        skip: !id || type != EventObject.DataOutput,
     });
     const { data: dataProductHistoryData, isLoading: isFetchingDataProductHistory } = useGetDataProductHistoryQuery(
         id,
-        { skip: !id },
+        { skip: !id || type != EventObject.DataProduct },
     );
     const { data: datasetHistoryData, isLoading: isFetchingDatasetHistory } = useGetDatasetHistoryQuery(id, {
-        skip: !id,
+        skip: !id || type != EventObject.Dataset,
     });
 
-    let history;
+    let history: EventContract[] | undefined;
     let isFetching;
 
     switch (type) {
-        case 'dataproduct':
+        case EventObject.DataProduct:
             history = dataProductHistoryData;
             isFetching = isFetchingDataProductHistory;
             break;
-        case 'dataset':
+        case EventObject.Dataset:
             history = datasetHistoryData;
             isFetching = isFetchingDatasetHistory;
             break;
-        case 'dataoutput':
+        case EventObject.DataOutput:
             history = dataOutputHistoryData;
             isFetching = isFetchingDataOutputHistory;
             break;
@@ -91,7 +92,7 @@ export function HistoryTab({ id, type }: Props) {
         resetPagination();
     }, [filteredHistory, resetPagination]);
 
-    const columns = useMemo(() => getHistoryColumns({ t }), [t]);
+    const columns = useMemo(() => getHistoryColumns({ t, resourceId: id, type }), [t, id, type]);
 
     return (
         <Flex vertical className={`${styles.container} ${filteredHistory?.length === 0 && styles.paginationGap}`}>
