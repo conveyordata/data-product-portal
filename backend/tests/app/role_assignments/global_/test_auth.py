@@ -1,4 +1,3 @@
-import pytest
 from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
 
 from app.core.authz import Authorization
