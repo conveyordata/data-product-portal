@@ -544,5 +544,8 @@
     "Please input a namespace": "Please input a namespace",
     "The namespace of the data output": "The namespace of the data output",
     "The path on S3 you can access through this data output": "The path on S3 you can access through this data output",
-    "The path can only contain letters, numbers, dots, underscores, dashes and slashes": "The path can only contain letters, numbers, dots, underscores, dashes and slashes"
+    "The path can only contain letters, numbers, dots, underscores, dashes and slashes": "The path can only contain letters, numbers, dots, underscores, dashes and slashes",
+    "The Snowflake schema to link the data output to": "The Snowflake schema to link the data output to",
+    "Please input the name of the Snowflake database for this data output": "Please input the name of the Snowflake database for this data output",
+    "The name of the Snowflake database to link the data output to": "The name of the Snowflake database to link the data output to"
 }

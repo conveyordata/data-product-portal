@@ -18,7 +18,7 @@ type Props = {
 
 export function DatabricksDataOutputForm({ form, identifiers = [], namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
-    const entireCatalog = Form.useWatch(configurationFieldName('entire_catalog'), form);
+    const entireSchema = Form.useWatch(configurationFieldName('entire_schema'), form);
 
     const catalogOptions = (sourceAligned ? identifiers : [namespace]).map((catalog) => ({
         label: catalog,
@@ -70,18 +70,18 @@ export function DatabricksDataOutputForm({ form, identifiers = [], namespace, so
             >
                 <Input />
             </ConfigurationFormItem>
-            <ConfigurationFormItem name={'entire_catalog'} valuePropName="checked" initialValue={true}>
-                <Checkbox>{t('Include entire catalog')}</Checkbox>
+            <ConfigurationFormItem name={'entire_schema'} valuePropName="checked" initialValue={true}>
+                <Checkbox>{t('Include entire schema')}</Checkbox>
             </ConfigurationFormItem>
             <ConfigurationFormItem
                 required
                 name={'table'}
-                hidden={entireCatalog}
+                hidden={entireSchema}
                 label={t('Table')}
                 tooltip={t('The table that your data output can access')}
                 rules={[
                     {
-                        required: !entireCatalog,
+                        required: !entireSchema,
                         message: t('Please input the table this data output can access'),
                     },
                 ]}

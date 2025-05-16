@@ -18,7 +18,7 @@ type Props = {
 
 export function SnowflakeDataOutputForm({ form, identifiers = [], namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
-    const entireDatabase = Form.useWatch(configurationFieldName('entire_database'), form);
+    const entireSchema = Form.useWatch(configurationFieldName('entire_schema'), form);
 
     const databaseOptions = (sourceAligned ? identifiers : [namespace]).map((database) => ({
         label: database,
@@ -43,11 +43,11 @@ export function SnowflakeDataOutputForm({ form, identifiers = [], namespace, sou
             <ConfigurationFormItem
                 name={'database'}
                 label={t('Database')}
-                tooltip={t('The name of the Snowflake schema to link the data output to')}
+                tooltip={t('The name of the Snowflake database to link the data output to')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the Snowflake schema for this data output'),
+                        message: t('Please input the name of the Snowflake database for this data output'),
                     },
                 ]}
                 normalize={(value: string | string[]) => {
@@ -66,22 +66,22 @@ export function SnowflakeDataOutputForm({ form, identifiers = [], namespace, sou
             <ConfigurationFormItem
                 name={'schema'}
                 label={t('Schema')}
-                tooltip={t('The suffix of the Snowflake schema to link the data output to')}
+                tooltip={t('The Snowflake schema to link the data output to')}
             >
                 <Input />
             </ConfigurationFormItem>
-            <ConfigurationFormItem name={'entire_database'} valuePropName="checked" initialValue={true}>
-                <Checkbox>{t('Include entire database')}</Checkbox>
+            <ConfigurationFormItem name={'entire_schema'} valuePropName="checked" initialValue={true}>
+                <Checkbox>{t('Include entire schema')}</Checkbox>
             </ConfigurationFormItem>
             <ConfigurationFormItem
                 required
                 name={'table'}
-                hidden={entireDatabase}
+                hidden={entireSchema}
                 label={t('Table')}
                 tooltip={t('The table that your data output can access')}
                 rules={[
                     {
-                        required: !entireDatabase,
+                        required: !entireSchema,
                         message: t('Please input the table this data output can access'),
                     },
                 ]}
