@@ -100,7 +100,7 @@ class TestDataOutputsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_output.id)
 
-    def test_update_data_product(self, client):
+    def test_update_data_output(self, client):
         data_product = DataProductMembershipFactory(
             user=UserFactory(external_id="sub")
         ).data_product
@@ -193,6 +193,49 @@ class TestDataOutputsRouter:
                     "type": "dataProductNode",
                 }
 
+    def test_data_output_history(self, data_output_payload, client):
+        created_data_output = self.create_data_output(client, data_output_payload)
+        assert created_data_output.status_code == 200
+        data_output_id = created_data_output.json().get("id")
+        assert data_output_id is not None
+        response = self.get_data_output_history(client, data_output_id)
+        assert len(response.json()) == 1
+
+        response = self.update_data_output_status(
+            client, {"status": "active"}, data_output_id
+        )
+        response = self.get_data_output_history(client, data_output_id)
+        assert len(response.json()) == 2
+
+        tag = TagFactory()
+        update_payload = {
+            "name": "update",
+            "description": "update",
+            "tag_ids": [str(tag.id)],
+        }
+        response = self.update_data_output(client, update_payload, data_output_id)
+        assert response.status_code == 200
+        response = self.get_data_output_history(client, data_output_id)
+        assert len(response.json()) == 3
+
+        response = self.delete_data_output(client, data_output_id)
+        response = self.get_data_output_history(client, data_output_id)
+        assert response.status_code == 200
+        assert len(response.json()) == 4
+
+    def test_retain_deleted_data_output_name_in_history(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        data_output = DataOutputFactory(owner=data_product)
+        data_output_id = data_output.id
+        data_output_name = data_output.name
+        response = self.delete_data_output(client, data_output_id)
+        assert response.status_code == 200
+        response = self.get_data_output_history(client, data_output_id)
+        assert len(response.json()) == 1
+        assert response.json()[0]["deleted_subject_identifier"] == data_output_name
+
     def test_get_namespace_suggestion_subsitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
@@ -256,6 +299,10 @@ class TestDataOutputsRouter:
     @staticmethod
     def delete_data_output(client, data_output_id):
         return client.delete(f"{ENDPOINT}/{data_output_id}")
+
+    @staticmethod
+    def get_data_output_history(client, data_output_id):
+        return client.get(f"{ENDPOINT}/{data_output_id}/history")
 
     @staticmethod
     def update_data_output_status(client, status, data_output_id):

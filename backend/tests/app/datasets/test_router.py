@@ -304,6 +304,64 @@ class TestDatasetsRouter:
         response = client.get(f"{ENDPOINT}/{ds.id}")
         assert response.json()["data_product_settings"][0]["value"] == "false"
 
+    def test_get_dataset_history(self, client, session, dataset_payload):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        create_payload = deepcopy(dataset_payload)
+        owners = [str(user.id)]
+        create_payload["owners"] = owners
+        created_dataset = self.create_default_dataset(client, create_payload)
+        assert created_dataset.status_code == 200
+        dataset_id = created_dataset.json().get("id")
+        assert dataset_id is not None
+        response = self.get_dataset_history(client, dataset_id)
+        assert len(response.json()) == 2
+
+        update_payload = deepcopy(create_payload)
+        update_payload["name"] = "updated name"
+        updated_dataset = self.update_default_dataset(
+            client, update_payload, dataset_id
+        )
+        assert updated_dataset.status_code == 200
+        response = self.get_dataset_history(client, dataset_id)
+        assert len(response.json()) == 3
+
+        response = self.update_dataset_about(client, dataset_id)
+        assert response.status_code == 200
+        response = self.get_dataset_history(client, dataset_id)
+        assert len(response.json()) == 4
+
+        response = self.update_dataset_status(client, {"status": "pending"}, dataset_id)
+        assert response.status_code == 200
+        response = self.get_dataset_history(client, dataset_id)
+        assert len(response.json()) == 5
+
+        user_new = UserFactory()
+        response = self.add_user_to_dataset(client, user_new.id, dataset_id)
+        assert response.status_code == 200
+        response = self.get_dataset_history(client, dataset_id)
+        assert len(response.json()) == 6
+
+        response = self.delete_dataset_user(client, user_new.id, dataset_id)
+        assert response.status_code == 200
+        response = self.get_dataset_history(client, dataset_id)
+        assert len(response.json()) == 7
+
+        response = self.delete_default_dataset(client, dataset_id)
+        assert response.status_code == 200
+        response = self.get_dataset_history(client, dataset_id)
+        assert len(response.json()) == 8
+
+    def test_retain_deleted_dataset_name_in_history(self, client):
+        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+        dataset_id = ds.id
+        dataset_name = ds.name
+        response = self.delete_default_dataset(client, dataset_id)
+        assert response.status_code == 200
+        response = self.get_dataset_history(client, dataset_id)
+        assert len(response.json()) == 1
+        assert response.json()[0]["deleted_subject_identifier"] == dataset_name
+
     def test_get_private_dataset_not_allowed(self, client):
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         response = self.get_dataset_by_id(client, ds.id)
@@ -451,6 +509,10 @@ class TestDatasetsRouter:
     @staticmethod
     def delete_dataset_user(client, user_id, dataset_id):
         return client.delete(f"{ENDPOINT}/{dataset_id}/user/{user_id}")
+
+    @staticmethod
+    def get_dataset_history(client, dataset_id):
+        return client.get(f"{ENDPOINT}/{dataset_id}/history")
 
     @staticmethod
     def add_user_to_dataset(client, user_id, dataset_id):

@@ -70,7 +70,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
             date = action.requested_on;
-            author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
+            author = `${action.requested_by.first_name} ${action.requested_by.last_name}`;
             initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
             request = {
                 type: PendingActionTypes.DataProductDataset as PendingActionTypes.DataProductDataset,
@@ -115,7 +115,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
             date = action.requested_on;
-            author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
+            author = `${action.requested_by.first_name} ${action.requested_by.last_name}`;
             initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
             request = {
                 type: PendingActionTypes.DataOutputDataset as PendingActionTypes.DataOutputDataset,
@@ -165,7 +165,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
             );
             navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
             date = action.requested_on;
-            author = action.user.first_name + ' ' + action.user.last_name;
+            author = `${action.user.first_name} ${action.user.last_name}`;
             initials = getInitials(action.user.first_name, action.user.last_name);
             request = {
                 type: PendingActionTypes.DataProductMembership as PendingActionTypes.DataProductMembership,

@@ -333,6 +333,60 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json() == "test_1.com"
 
+    def test_get_data_product_history(self, client, payload, session):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        create_payload = deepcopy(payload)
+        memberships = [
+            {
+                "user_id": str(user.id),
+                "role": DataProductUserRole.OWNER.value,
+            }
+        ]
+        create_payload["memberships"] = memberships
+        created_data_product = self.create_data_product(client, create_payload)
+        assert created_data_product.status_code == 200
+        data_product_id = created_data_product.json().get("id")
+        assert data_product_id is not None
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 3
+
+        update_payload = deepcopy(create_payload)
+        update_payload["name"] = "Updated Data Product"
+        response = self.update_data_product(client, update_payload, data_product_id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 4
+
+        response = self.update_data_product_about(client, data_product_id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 5
+
+        response = self.update_data_product_status(
+            client, {"status": "active"}, data_product_id
+        )
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 6
+
+        response = self.delete_data_product(client, data_product_id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 7
+
+    def test_retain_deleted_data_product_name_in_history(self, client):
+        data_product = DataProductMembershipFactory(
+            user=UserFactory(external_id="sub")
+        ).data_product
+        data_product_id = data_product.id
+        data_product_name = data_product.name
+        response = self.delete_data_product(client, data_product_id)
+        assert response.status_code == 200
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 1
+        assert response.json()[0]["deleted_subject_identifier"] == data_product_name
+
     def test_get_namespace_suggestion_subsitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
@@ -471,6 +525,10 @@ class TestDataProductsRouter:
     @staticmethod
     def get_data_product_by_user_id(client, user_id):
         return client.get(f"{ENDPOINT}/user/{user_id}")
+
+    @staticmethod
+    def get_data_product_history(client, data_product_id):
+        return client.get(f"{ENDPOINT}/{data_product_id}/history")
 
     @staticmethod
     def get_conveyor_ide_url(client, data_product_id):

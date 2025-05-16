@@ -39,7 +39,9 @@ def create_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return RoleAssignmentService(db=db, user=user).create_assignment(request)
+    return RoleAssignmentService(db=db, user=user).create_assignment(
+        request, authenticated_user=user
+    )
 
 
 @router.delete("/{id}")
@@ -49,7 +51,9 @@ def delete_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> None:
-    assignment = RoleAssignmentService(db=db, user=user).delete_assignment(id)
+    assignment = RoleAssignmentService(db=db, user=user).delete_assignment(
+        id, authenticated_user=user
+    )
 
     if assignment.decision is DecisionStatus.APPROVED:
         background_tasks.add_task(DataProductAuthAssignment(assignment).remove)
@@ -80,7 +84,7 @@ def decide_assignment(
         )
 
     assignment = RoleAssignmentService(db=db, user=user).update_assignment(
-        UpdateRoleAssignment(id=id, decision=request.decision)
+        UpdateRoleAssignment(id=id, decision=request.decision), authenticated_user=user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
@@ -101,7 +105,7 @@ def modify_assigned_role(
     original_role = service.get_assignment(id).role_id
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id)
+        UpdateRoleAssignment(id=id, role_id=request.role_id), authenticated_user=user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
