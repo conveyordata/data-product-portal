@@ -24,20 +24,18 @@ class AuthRole(_AuthRole):
             permissions=role.permissions,
         )
 
-    async def sync(self) -> None:
+    def sync(self) -> None:
         authorizer = Authorization()
         if self.prototype == Prototype.EVERYONE:
-            await authorizer.sync_everyone_role_permissions(actions=self.permissions)
+            authorizer.sync_everyone_role_permissions(actions=self.permissions)
         else:
-            await authorizer.sync_role_permissions(
-                role_id=self.id, actions=self.permissions
-            )
+            authorizer.sync_role_permissions(role_id=self.id, actions=self.permissions)
 
-    async def remove(self) -> None:
+    def remove(self) -> None:
         authorizer = Authorization()
-        await authorizer.remove_role_permissions(role_id=self.id)
+        authorizer.remove_role_permissions(role_id=self.id)
 
         if self.scope == Scope.DATASET or self.scope == Scope.DATA_PRODUCT:
-            await authorizer.clear_assignments_for_resource_role(role_id=self.id)
+            authorizer.clear_assignments_for_resource_role(role_id=self.id)
         elif self.scope == Scope.DOMAIN:
-            await authorizer.clear_assignments_for_domain_role(role_id=self.id)
+            authorizer.clear_assignments_for_domain_role(role_id=self.id)

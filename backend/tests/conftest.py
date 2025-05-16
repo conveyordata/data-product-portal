@@ -1,8 +1,7 @@
-from typing import Any, AsyncGenerator, Generator
+from typing import Any, Generator
 from unittest.mock import MagicMock
 
 import pytest
-import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, scoped_session
 from starlette.routing import _DefaultLifespan
@@ -121,10 +120,9 @@ def admin() -> UserFactory:
     return UserFactory(external_id="sub", is_admin=True)
 
 
-@pytest_asyncio.fixture(loop_scope="session", autouse=True)
-async def authorizer() -> AsyncGenerator[Authorization, None]:
-    """Initializes casbin at the start of the testing session."""
-    yield await Authorization.initialize()
+@pytest.fixture
+def authorizer() -> Generator[Authorization]:
+    yield Authorization()
 
 
 @pytest.fixture

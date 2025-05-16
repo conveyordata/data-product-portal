@@ -1,4 +1,3 @@
-import pytest
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -15,9 +14,8 @@ from app.roles.schema import Role, Scope
 from app.users.schema import User
 
 
-@pytest.mark.asyncio(loop_scope="session")
 class TestAuth:
-    async def test_add(self, authorizer: Authorization):
+    def test_add(self, authorizer: Authorization):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
@@ -32,12 +30,12 @@ class TestAuth:
         assert not authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
-        await DataProductAuthAssignment(assignment).add()
+        DataProductAuthAssignment(assignment).add()
         assert authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
-    async def test_remove(self, authorizer: Authorization):
+    def test_remove(self, authorizer: Authorization):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
@@ -52,16 +50,16 @@ class TestAuth:
         assert not authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
-        await DataProductAuthAssignment(assignment).add()
+        DataProductAuthAssignment(assignment).add()
         assert authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
-        await DataProductAuthAssignment(assignment).remove()
+        DataProductAuthAssignment(assignment).remove()
         assert not authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
-    async def test_swap(self, authorizer: Authorization):
+    def test_swap(self, authorizer: Authorization):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
@@ -74,13 +72,13 @@ class TestAuth:
             decision=DecisionStatus.APPROVED,
         )
 
-        await DataProductAuthAssignment(assignment).add()
+        DataProductAuthAssignment(assignment).add()
         assert authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
         assignment.role_id = new_role.id
-        await DataProductAuthAssignment(assignment, previous_role_id=role.id).swap()
+        DataProductAuthAssignment(assignment, previous_role_id=role.id).swap()
 
         assert not authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)

@@ -44,21 +44,21 @@ def get_datasets(
 
 
 @router.get("/namespace_suggestion")
-async def get_dataset_namespace_suggestion(
+def get_dataset_namespace_suggestion(
     name: str, db: Session = Depends(get_db_session)
 ) -> NamespaceSuggestion:
     return DatasetService().dataset_namespace_suggestion(name, db)
 
 
 @router.get("/validate_namespace")
-async def validate_dataset_namespace(
+def validate_dataset_namespace(
     namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
     return DatasetService().validate_dataset_namespace(namespace, db)
 
 
 @router.get("/namespace_length_limits")
-async def get_dataset_namespace_length_limits() -> NamespaceLengthLimits:
+def get_dataset_namespace_length_limits() -> NamespaceLengthLimits:
     return DatasetService().dataset_namespace_length_limits()
 
 
