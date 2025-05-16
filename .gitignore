@@ -165,3 +165,4 @@ tmp/
 .terraform*
 terraform.tfstate
 state.tf
+node_modules/
