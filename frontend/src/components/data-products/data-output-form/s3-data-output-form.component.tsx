@@ -23,9 +23,6 @@ export function S3DataOutputForm({ form, namespace, identifiers = [], sourceAlig
 
     useEffect(() => {
         form.setFieldValue(configurationFieldName('suffix'), sourceAligned ? '' : namespace);
-        if (!form.isFieldTouched(configurationFieldName('path'))) {
-            form.setFieldValue(configurationFieldName('path'), '');
-        }
     }, [form, sourceAligned, namespace]);
 
     return (

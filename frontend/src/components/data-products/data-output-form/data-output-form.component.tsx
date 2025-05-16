@@ -74,7 +74,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     // Form
     const [form] = Form.useForm();
-    const sourceAligned = Form.useWatch('is_source_aligned', form);
+    const sourceAligned = Form.useWatch('sourceAligned', form);
     const dataOutputNameValue = Form.useWatch('name', form);
 
     // Namespace validation
@@ -149,6 +149,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const onDataPlatformClick = (dropdown: CustomDropdownItemProps<DataPlatforms>) => {
         if (selectedDataPlatform !== dropdown) {
+            form.setFieldsValue({ configuration: undefined, result: undefined });
             setSelectedDataPlatform(dropdown);
 
             if (dropdown.children?.length === 0) {
@@ -165,6 +166,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const onConfigurationClick = (dropdown: CustomDropdownItemProps<DataPlatforms>) => {
         if (!platformsLoading) {
             if (selectedConfiguration !== dropdown) {
+                form.setFieldsValue({ configuration: undefined, result: undefined });
                 setSelectedConfiguration(dropdown);
                 setIdentifiers(platformServiceConfigMap.get(dropdown.value)?.configuration);
             }
@@ -205,15 +207,28 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     );
 
     // Result string
-    const setResultString: FormProps<DataOutputCreateFormSchema>['onValuesChange'] = useDebouncedCallback(
-        async (changed, values) => {
-            if (changed.configuration) {
-                const result = await fetchResultString(values).unwrap();
-                form.setFieldValue('result', result);
-            }
-        },
-        DEBOUNCE,
-    );
+    const setResultString = useDebouncedCallback((values: DataOutputCreateFormSchema) => {
+        form.validateFields(['configuration'], { validateOnly: true, recursive: true })
+            .then(() => {
+                const request = {
+                    platform_id: values.platform_id,
+                    service_id: values.service_id,
+                    configuration: values.configuration,
+                };
+                return fetchResultString(request).unwrap();
+            })
+            .then((result) => form.setFieldValue('result', result))
+            .catch(() => form.setFieldValue('result', undefined));
+    }, DEBOUNCE);
+
+    const onValuesChange: FormProps<DataOutputCreateFormSchema>['onValuesChange'] = (
+        changed,
+        values: DataOutputCreateFormSchema,
+    ) => {
+        if (changed.configuration || (values.configuration && changed.sourceAligned)) {
+            setResultString(values);
+        }
+    };
 
     return (
         <Form
@@ -222,7 +237,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             layout="vertical"
             onFinish={onSubmit}
             onFinishFailed={onSubmitFailed}
-            onValuesChange={setResultString}
+            onValuesChange={onValuesChange}
             autoComplete={'off'}
             requiredMark={'optional'}
             labelWrap

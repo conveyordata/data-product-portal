@@ -7,6 +7,7 @@ import {
     DataOutputDatasetAccessResponse,
     DataOutputDatasetRemoveRequest,
     DataOutputDatasetRemoveResponse,
+    DataOutputResultStringRequest,
 } from '@/types/data-output';
 import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import { DataOutputUpdateRequest, DataOutputUpdateResponse } from '@/types/data-output/data-output-update.contract';
@@ -161,7 +162,7 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 method: 'GET',
             }),
         }),
-        getDataOutputResultString: builder.query<string, DataOutputCreate>({
+        getDataOutputResultString: builder.query<string, DataOutputResultStringRequest>({
             query: (data) => ({
                 url: ApiUrl.DataOutputResultString,
                 method: 'POST',

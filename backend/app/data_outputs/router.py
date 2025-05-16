@@ -7,7 +7,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataOutputResolver
 from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
 from app.data_outputs.schema_request import (
-    DataOutputCreate,
+    DataOutputResultStringRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
@@ -38,9 +38,9 @@ def get_data_output_namespace_length_limits() -> NamespaceLengthLimits:
 
 @router.post("/result_string")
 def get_data_output_result_string(
-    output: DataOutputCreate, db: Session = Depends(get_db_session)
+    request: DataOutputResultStringRequest, db: Session = Depends(get_db_session)
 ) -> str:
-    return DataOutputService().get_data_output_result_string(output, db)
+    return DataOutputService().get_data_output_result_string(request, db)
 
 
 @router.get("/{id}")

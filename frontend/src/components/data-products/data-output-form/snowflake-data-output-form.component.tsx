@@ -18,7 +18,7 @@ type Props = {
 
 export function SnowflakeDataOutputForm({ form, identifiers = [], namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
-    const entireDatabase = Form.useWatch('entire_database', form);
+    const entireDatabase = Form.useWatch(configurationFieldName('entire_database'), form);
 
     const databaseOptions = (sourceAligned ? identifiers : [namespace]).map((database) => ({
         label: database,
@@ -70,9 +70,9 @@ export function SnowflakeDataOutputForm({ form, identifiers = [], namespace, sou
             >
                 <Input />
             </ConfigurationFormItem>
-            <Form.Item name={'entire_database'} valuePropName="checked" initialValue={true}>
+            <ConfigurationFormItem name={'entire_database'} valuePropName="checked" initialValue={true}>
                 <Checkbox>{t('Include entire database')}</Checkbox>
-            </Form.Item>
+            </ConfigurationFormItem>
             <ConfigurationFormItem
                 required
                 name={'table'}

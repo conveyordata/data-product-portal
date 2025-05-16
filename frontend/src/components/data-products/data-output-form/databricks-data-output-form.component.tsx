@@ -18,7 +18,7 @@ type Props = {
 
 export function DatabricksDataOutputForm({ form, identifiers = [], namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
-    const entireCatalog = Form.useWatch('entire_catalog', form);
+    const entireCatalog = Form.useWatch(configurationFieldName('entire_catalog'), form);
 
     const catalogOptions = (sourceAligned ? identifiers : [namespace]).map((catalog) => ({
         label: catalog,
@@ -70,9 +70,9 @@ export function DatabricksDataOutputForm({ form, identifiers = [], namespace, so
             >
                 <Input />
             </ConfigurationFormItem>
-            <Form.Item name={'entire_catalog'} valuePropName="checked" initialValue={true}>
+            <ConfigurationFormItem name={'entire_catalog'} valuePropName="checked" initialValue={true}>
                 <Checkbox>{t('Include entire catalog')}</Checkbox>
-            </Form.Item>
+            </ConfigurationFormItem>
             <ConfigurationFormItem
                 required
                 name={'table'}

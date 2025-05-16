@@ -541,5 +541,8 @@
     "Namespace contains invalid characters": "Namespace contains invalid characters",
     "Unknown namespace validation error": "Unknown namespace validation error",
     "This namespace is already in use": "This namespace is already in use",
-    "Please input a namespace": "Please input a namespace"
+    "Please input a namespace": "Please input a namespace",
+    "The namespace of the data output": "The namespace of the data output",
+    "The path on S3 you can access through this data output": "The path on S3 you can access through this data output",
+    "The path can only contain letters, numbers, dots, underscores, dashes and slashes": "The path can only contain letters, numbers, dots, underscores, dashes and slashes"
 }

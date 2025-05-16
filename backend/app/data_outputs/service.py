@@ -19,6 +19,7 @@ from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
 from app.data_outputs.schema_request import (
     DataOutputCreate,
+    DataOutputResultStringRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
@@ -297,13 +298,13 @@ class DataOutputService:
 
     def get_data_output_result_string(
         self,
-        data_output: DataOutputCreate,
+        request: DataOutputResultStringRequest,
         db: Session,
     ) -> str:
         template = db.scalar(
             select(PlatformService.template).where(
-                PlatformService.id == data_output.service_id,
-                PlatformService.platform_id == data_output.platform_id,
+                PlatformService.id == request.service_id,
+                PlatformService.platform_id == request.platform_id,
             )
         )
 
@@ -313,4 +314,4 @@ class DataOutputService:
                 detail="Template not found for the given platform and service",
             )
 
-        return data_output.configuration.output_result_string(template)
+        return request.configuration.output_result_string(template)

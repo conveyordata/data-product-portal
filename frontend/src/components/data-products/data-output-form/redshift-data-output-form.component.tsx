@@ -18,7 +18,7 @@ type Props = {
 
 export function RedshiftDataOutputForm({ form, identifiers = [], namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
-    const entireSchema = Form.useWatch('entire_schema', form);
+    const entireSchema = Form.useWatch(configurationFieldName('entire_schema'), form);
 
     const databaseOptions = (sourceAligned ? identifiers : [namespace]).map((database) => ({
         label: database,
@@ -70,9 +70,9 @@ export function RedshiftDataOutputForm({ form, identifiers = [], namespace, sour
             >
                 <Input />
             </ConfigurationFormItem>
-            <Form.Item name={'entire_schema'} valuePropName="checked" initialValue={true}>
+            <ConfigurationFormItem name={'entire_schema'} valuePropName="checked" initialValue={true}>
                 <Checkbox>{t('Include entire schema')}</Checkbox>
-            </Form.Item>
+            </ConfigurationFormItem>
             <ConfigurationFormItem
                 required
                 name={'table'}
