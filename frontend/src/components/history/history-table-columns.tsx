@@ -1,11 +1,10 @@
-import { CaretRightOutlined } from '@ant-design/icons';
 import type { TableColumnsType } from 'antd';
-import { Flex, Typography } from 'antd';
+import { Typography } from 'antd';
 import dayjs from 'dayjs';
 import type { TFunction } from 'i18next';
 
 import { EventContract } from '@/types/events/event.contract';
-import { getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
+import { getTargetDisplayLabel } from '@/utils/history.helper';
 
 export interface HistoryColumnsProps {
     t: TFunction;
@@ -22,22 +21,13 @@ export const getHistoryColumns = ({ t }: HistoryColumnsProps): TableColumnsType<
     {
         title: t('Involved entities'),
         key: 'Detail',
-        width: '30%',
+        width: '25%',
         render: (record: EventContract) => {
-            const subjectLabel = getSubjectDisplayLabel(t, record);
             const targetLabel = getTargetDisplayLabel(t, record);
 
             if (targetLabel) {
-                return (
-                    <Flex vertical>
-                        <Typography.Text>{subjectLabel}</Typography.Text>
-                        <Typography.Text>
-                            <CaretRightOutlined /> {targetLabel}
-                        </Typography.Text>
-                    </Flex>
-                );
+                return <Typography.Text>{targetLabel}</Typography.Text>;
             }
-            return <Typography.Text>{subjectLabel}</Typography.Text>;
         },
     },
     {
@@ -51,7 +41,7 @@ export const getHistoryColumns = ({ t }: HistoryColumnsProps): TableColumnsType<
         title: t('Timestamp'),
         dataIndex: 'created_on',
         key: 'created_on',
-        width: '15%',
+        width: '20%',
         render: (created_on: string) => `${dayjs(created_on).format('YYYY-MM-DD HH:mm')} ${t('UTC')}`,
     },
 ];
