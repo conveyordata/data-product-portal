@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -102,7 +102,6 @@ def get_user_datasets(
 )
 def create_dataset(
     dataset: DatasetCreateUpdate,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
@@ -129,7 +128,6 @@ def create_dataset(
         )
         decide_assignment(
             id=resp.id,
-            background_tasks=background_tasks,
             request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
             db=db,
             user=authenticated_user,
@@ -154,13 +152,10 @@ def create_dataset(
     ],
 )
 def remove_dataset(
-    id: UUID, background_tasks: BackgroundTasks, db: Session = Depends(get_db_session)
-):
+    id: UUID, db: Session = Depends(get_db_session)
+) -> None:
     DatasetService().remove_dataset(id, db)
-    background_tasks.add_task(
-        Authorization().clear_assignments_for_resource,
-        resource_id=str(id),
-    )
+    Authorization().clear_assignments_for_resource(resource_id=str(id))
     return
 
 

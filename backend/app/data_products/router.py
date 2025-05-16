@@ -106,7 +106,6 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
 )
 def create_data_product(
     data_product: DataProductCreate,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
@@ -137,7 +136,6 @@ def create_data_product(
         )
         decide_assignment(
             id=resp.id,
-            background_tasks=background_tasks,
             request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
             db=db,
             user=authenticated_user,
@@ -164,14 +162,10 @@ def create_data_product(
 )
 def remove_data_product(
     id: UUID,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
 ):
     DataProductService().remove_data_product(id, db)
-    background_tasks.add_task(
-        Authorization().clear_assignments_for_resource,
-        resource_id=str(id),
-    )
+    Authorization().clear_assignments_for_resource(resource_id=str(id))
     return
 
 
