@@ -55,7 +55,7 @@ from app.environment_platform_configurations.model import (
 from app.environments.model import Environment as EnvironmentModel
 from app.events.enum import Type
 from app.events.model import Event as EventModel
-from app.events.schema import Event
+from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
@@ -113,7 +113,7 @@ class DataProductService:
             data_product.lifecycle = default_lifecycle
         return data_product
 
-    def get_event_history(self, id: UUID, db: Session) -> list[Event]:
+    def get_event_history(self, id: UUID, db: Session) -> list[EventGet]:
         return EventService().get_history(db, id, Type.DATA_PRODUCT)
 
     def get_data_products(self, db: Session) -> list[DataProductsGet]:

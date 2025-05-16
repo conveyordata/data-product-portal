@@ -33,7 +33,7 @@ from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
 from app.events.enum import Type
 from app.events.model import Event as EventModel
-from app.events.schema import Event
+from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.role_assignments.enums import DecisionStatus
@@ -112,7 +112,7 @@ class DataOutputService:
             id,
         )
 
-    def get_event_history(self, id: UUID, db: Session) -> list[Event]:
+    def get_event_history(self, id: UUID, db: Session) -> list[EventGet]:
         return EventService().get_history(db, id, Type.DATA_OUTPUT)
 
     def create_data_output(

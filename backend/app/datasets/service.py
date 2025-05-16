@@ -27,7 +27,7 @@ from app.datasets.schema_request import (
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.events.enum import Type
 from app.events.model import Event as EventModel
-from app.events.schema import Event
+from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
@@ -113,7 +113,7 @@ class DatasetService:
                 dataset.lifecycle = default_lifecycle
         return datasets
 
-    def get_event_history(self, id: UUID, db: Session) -> list[Event]:
+    def get_event_history(self, id: UUID, db: Session) -> list[EventGet]:
         return EventService().get_history(db, id, Type.DATASET)
 
     def get_user_datasets(self, user_id: UUID, db: Session) -> Sequence[DatasetsGet]:

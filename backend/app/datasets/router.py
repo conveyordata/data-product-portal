@@ -21,7 +21,7 @@ from app.datasets.schema_request import (
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
 from app.dependencies import only_dataset_owners
-from app.events.schema import Event
+from app.events.schema_response import EventGet
 from app.graph.graph import Graph
 from app.role_assignments.dataset.router import create_assignment, decide_assignment
 from app.role_assignments.dataset.schema import (
@@ -80,7 +80,9 @@ def get_user_datasets(
 
 
 @router.get("/{id}/history")
-def get_event_history(id: UUID, db: Session = Depends(get_db_session)) -> list[Event]:
+def get_event_history(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> list[EventGet]:
     return DatasetService().get_event_history(id, db)
 
 

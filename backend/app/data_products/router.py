@@ -25,7 +25,7 @@ from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.dependencies import OnlyWithProductAccessID
-from app.events.schema import Event
+from app.events.schema_response import EventGet
 from app.graph.graph import Graph
 from app.role_assignments.data_product.router import (
     create_assignment,
@@ -78,7 +78,9 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
 
 
 @router.get("/{id}/history")
-def get_event_history(id: UUID, db: Session = Depends(get_db_session)) -> list[Event]:
+def get_event_history(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> list[EventGet]:
     return DataProductService().get_event_history(id, db)
 
 
