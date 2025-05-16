@@ -3,7 +3,7 @@ import { TFunction } from 'i18next';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
+import { HISTORY_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useGetDataOutputHistoryQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductHistoryQuery } from '@/store/features/data-products/data-products-api-slice';
@@ -81,7 +81,7 @@ export function HistoryTab({ id, type }: Props) {
     }, [history, searchTerm, t]);
 
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
-        initialPagination: TABLE_SUBSECTION_PAGINATION,
+        initialPagination: HISTORY_PAGINATION,
     });
 
     const onChange: TableProps<EventContract>['onChange'] = (pagination) => {
