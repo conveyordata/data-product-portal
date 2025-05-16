@@ -43,7 +43,7 @@ class DataProductMembershipService:
         data_product_membership = DataProductMembership(
             user_id=user.id,
             role=DataProductUserRole.MEMBER,
-            requested_by_id=user_id,
+            requested_by_id=authenticated_user.id,
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.memberships.append(data_product_membership)
