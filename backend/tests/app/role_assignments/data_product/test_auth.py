@@ -20,17 +20,13 @@ class TestAuth:
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
-        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+        DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
 
-        assert not authorizer.has_resource_role(
-            user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
-        )
-        DataProductAuthAssignment(assignment).add()
         assert authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
@@ -47,10 +43,6 @@ class TestAuth:
             decision=DecisionStatus.APPROVED,
         )
 
-        assert not authorizer.has_resource_role(
-            user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
-        )
-        DataProductAuthAssignment(assignment).add()
         assert authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )

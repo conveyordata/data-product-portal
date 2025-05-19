@@ -170,26 +170,20 @@ class TestDataProductRoleAssignmentsRouter:
         data = response.json()
         assert data["role"]["id"] == str(new_role.id)
 
-    def test_delete_data_product_with_role_assignment(
-        self, client: TestClient, authorizer
-    ):
+    def test_delete_data_product_with_role_assignment(self, client: TestClient):
         user = UserFactory(external_id="sub")
         data_product: DataProduct = DataProductMembershipFactory(
             user=user,
         ).data_product
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        role: Role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE],
+        )
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
-        )
-        authorizer.sync_role_permissions(
-            role_id=str(role.id),
-            actions=[AuthorizationAction.DATA_PRODUCT__DELETE],
-        )
-        authorizer.assign_resource_role(
-            user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
         response = client.get(f"{ENDPOINT}")

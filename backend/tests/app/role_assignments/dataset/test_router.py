@@ -172,19 +172,14 @@ class TestDatasetRoleAssignmentsRouter:
     def test_delete_dataset_with_role_assignment(self, client: TestClient, authorizer):
         user = UserFactory(external_id="sub")
         dataset: Dataset = DatasetFactory(owners=[user])
-        role: Role = RoleFactory(scope=Scope.DATASET)
+        role: Role = RoleFactory(
+            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
+        )
         DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
-        )
-        authorizer.sync_role_permissions(
-            role_id=str(role.id),
-            actions=[AuthorizationAction.DATASET__DELETE],
-        )
-        authorizer.assign_resource_role(
-            user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
         response = client.get(f"{ENDPOINT}")

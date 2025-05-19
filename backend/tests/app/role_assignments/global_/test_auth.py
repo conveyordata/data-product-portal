@@ -14,16 +14,12 @@ class TestAuth:
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
-        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+        GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
 
-        assert not authorizer.has_global_role(
-            user_id=str(user.id), role_id=str(role.id)
-        )
-        GlobalAuthAssignment(assignment).add()
         assert authorizer.has_global_role(user_id=str(user.id), role_id=str(role.id))
 
     def test_add_admin(self, authorizer: Authorization):
@@ -50,10 +46,10 @@ class TestAuth:
             decision=DecisionStatus.APPROVED,
         )
 
-        assert not authorizer.has_global_role(
-            user_id=str(user.id), role_id=str(role.id)
-        )
-        GlobalAuthAssignment(assignment).add()
+        # assert not authorizer.has_global_role(
+        #     user_id=str(user.id), role_id=str(role.id)
+        # )
+        # GlobalAuthAssignment(assignment).add()
         assert authorizer.has_global_role(user_id=str(user.id), role_id=str(role.id))
         GlobalAuthAssignment(assignment).remove()
         assert not authorizer.has_global_role(
