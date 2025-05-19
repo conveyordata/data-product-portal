@@ -50,9 +50,15 @@ def request_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return RoleAssignmentService(db=db, user=user).request_role_assignment(
-        request, background_tasks
+    service = RoleAssignmentService(db=db, user=user)
+    role_assignment = service.request_role_assignment(request)
+
+    background_tasks.add_task(
+        service.send_role_assignment_request_email,
+        role_assignment,
     )
+
+    return role_assignment
 
 
 @router.delete("/{id}")

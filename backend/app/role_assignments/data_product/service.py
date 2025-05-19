@@ -4,7 +4,7 @@ from typing import List, Optional, Sequence
 from uuid import UUID
 
 import emailgen
-from fastapi import BackgroundTasks, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy import asc, func, select
 from sqlalchemy.orm import Session
 
@@ -156,7 +156,6 @@ class RoleAssignmentService:
     def request_role_assignment(
         self,
         request: CreateRoleAssignment,
-        background_tasks: BackgroundTasks,
     ):
         existing_assignment = self.db.scalar(
             select(DataProductRoleAssignment).where(
@@ -179,6 +178,12 @@ class RoleAssignmentService:
                 )
 
         role_assignment = self.create_assignment(request)
+        return role_assignment
+
+    def send_role_assignment_request_email(
+        self,
+        role_assignment: DataProductRoleAssignment,
+    ) -> None:
 
         url = (
             f"{settings.HOST.rstrip('/')}/data-products/"
@@ -201,8 +206,8 @@ class RoleAssignmentService:
                 ),
             ]
         )
-        background_tasks.add_task(
-            send_mail,
+
+        send_mail(
             owners,
             action,
             url,
@@ -210,4 +215,4 @@ class RoleAssignmentService:
             f"{role_assignment.user.last_name} wants "
             f"to join {role_assignment.data_product.name}",
         )
-        return role_assignment
+        return
