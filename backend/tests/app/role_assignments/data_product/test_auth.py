@@ -20,6 +20,10 @@ class TestAuth:
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
+        assert not authorizer.has_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
+        )
+
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
@@ -35,6 +39,10 @@ class TestAuth:
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        assert not authorizer.has_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
+        )
 
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,

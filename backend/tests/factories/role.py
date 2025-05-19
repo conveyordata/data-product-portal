@@ -3,6 +3,7 @@ from tests import test_session
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
+from app.roles import ADMIN_UUID
 from app.roles.model import Role
 from app.roles.schema import Prototype
 
@@ -25,5 +26,8 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
     @factory.post_generation
     def sync_role(self, create, extracted, **kwargs):
         authorizer = Authorization()
-        authorizer.sync_role_permissions(role_id=str(self.id), actions=self.permissions)
+        if self.id != ADMIN_UUID:
+            authorizer.sync_role_permissions(
+                role_id=str(self.id), actions=self.permissions
+            )
         test_session.commit()

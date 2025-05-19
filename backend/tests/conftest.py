@@ -15,8 +15,6 @@ from app.data_product_memberships.model import DataProductUserRole
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.main import app
-from app.role_assignments.data_product.schema import RoleAssignment
-from app.role_assignments.global_.auth import GlobalAuthAssignment
 from app.roles import ADMIN_UUID
 from app.roles.schema import Prototype, Scope
 
@@ -125,10 +123,7 @@ def clear_db(session: scoped_session[Session]) -> None:
 def admin() -> UserFactory:
     role = RoleFactory(scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID)
     user = UserFactory(external_id="sub", is_admin=True)
-    assignment: RoleAssignment = GlobalRoleAssignmentFactory(
-        user_id=user.id, role_id=role.id
-    )
-    GlobalAuthAssignment(assignment).add()
+    GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
     return user
 
 

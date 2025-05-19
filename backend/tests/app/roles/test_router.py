@@ -67,9 +67,6 @@ class TestRolesRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_update_admin_role(self, client: TestClient):
-        # admin: Role = RoleFactory(
-        #     scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID
-        # )
         illegal = client.patch(
             ENDPOINT,
             json={
