@@ -204,20 +204,20 @@ files = [
 simpleeval = ">=0.9.11"
 
 [[package]]
-name = "casbin-async-sqlalchemy-adapter"
-version = "1.7.0"
-description = "Asynchronous SQLAlchemy Adapter for PyCasbin"
+name = "casbin-sqlalchemy-adapter"
+version = "1.4.0"
+description = "SQLAlchemy Adapter for PyCasbin"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.3"
 groups = ["main"]
 files = [
-    {file = "casbin_async_sqlalchemy_adapter-1.7.0-py3-none-any.whl", hash = "sha256:d0a1ede29303a11eaa79e258579536b45267373cbd8f03e047ae1a399b92344b"},
-    {file = "casbin_async_sqlalchemy_adapter-1.7.0.tar.gz", hash = "sha256:c946bdbb6c1f9a458fc75e86ac5565fd5f0c07704b78d4b57c257b97a06b5c68"},
+    {file = "casbin_sqlalchemy_adapter-1.4.0-py3-none-any.whl", hash = "sha256:a3e4e5d05e47fc6e04995ac26d36f53243f87ac9e3c66b24874ce6353e784897"},
+    {file = "casbin_sqlalchemy_adapter-1.4.0.tar.gz", hash = "sha256:3cc439e3911a0f0c0de66ffde7e0de0586be1e1c772302e003d84164f4bfe291"},
 ]
 
 [package.dependencies]
-casbin = ">=1.34.0"
-SQLAlchemy = ">=1.4.0"
+casbin = ">=0.8.1"
+SQLAlchemy = ">=1.2.18"
 
 [[package]]
 name = "certifi"
@@ -1409,25 +1409,6 @@ pluggy = ">=1.5,<2"
 dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
-name = "pytest-asyncio"
-version = "0.26.0"
-description = "Pytest support for asyncio"
-optional = false
-python-versions = ">=3.9"
-groups = ["test"]
-files = [
-    {file = "pytest_asyncio-0.26.0-py3-none-any.whl", hash = "sha256:7b51ed894f4fbea1340262bdae5135797ebbe21d8638978e35d31c6d19f72fb0"},
-    {file = "pytest_asyncio-0.26.0.tar.gz", hash = "sha256:c4df2a697648241ff39e7f0e4a73050b03f123f760673956cf0d72a4990e312f"},
-]
-
-[package.dependencies]
-pytest = ">=8.2,<9"
-
-[package.extras]
-docs = ["sphinx (>=5.3)", "sphinx-rtd-theme (>=1)"]
-testing = ["coverage (>=6.2)", "hypothesis (>=5.7.1)"]
-
-[[package]]
 name = "pytest-cov"
 version = "6.1.1"
 description = "Pytest plugin for measuring coverage."
@@ -1929,4 +1910,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "acec8b8c138f211ce339f0917e8df01da0746c6760d9746ac74aec638f9f5828"
+content-hash = "3404a210e2bc78b64f192d27903629e835dede754d17126656ae67160889de1b"

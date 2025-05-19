@@ -13,8 +13,10 @@ spec:
       {{- include "data-product-portal.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap_backend.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret_backend.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -36,6 +38,8 @@ spec:
           command: ["python", "-m", "app.db_tool", "migrate"]
           envFrom:
             - configMapRef:
+                name: {{ include "data-product-portal.fullname" . }}
+            - secretRef:
                 name: {{ include "data-product-portal.fullname" . }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}

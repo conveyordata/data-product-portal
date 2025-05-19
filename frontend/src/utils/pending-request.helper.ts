@@ -13,6 +13,7 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useDecideRoleAssignmentMutation } from '@/store/features/role-assignments/roles-api-slice';
 import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
 import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
+import { DataProductMembershipRoleRequest } from '@/types/data-product-membership';
 import { DecisionStatus } from '@/types/roles';
 
 export const usePendingActionHandlers = () => {
@@ -97,11 +98,12 @@ export const usePendingActionHandlers = () => {
     );
 
     const handleGrantAccessToDataProduct = useCallback(
-        async (assignment_id: string) => {
+        async (request: DataProductMembershipRoleRequest) => {
             try {
                 await decideroleAssignment({
-                    role_assignment_id: assignment_id,
+                    role_assignment_id: request.assignment_id,
                     decision_status: DecisionStatus.Approved,
+                    data_product_id: request.data_product_id,
                 }).unwrap();
                 dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
             } catch (_error) {
@@ -112,11 +114,12 @@ export const usePendingActionHandlers = () => {
     );
 
     const handleDenyAccessToDataProduct = useCallback(
-        async (assignment_id: string) => {
+        async (request: DataProductMembershipRoleRequest) => {
             try {
                 await decideroleAssignment({
-                    role_assignment_id: assignment_id,
+                    role_assignment_id: request.assignment_id,
                     decision_status: DecisionStatus.Denied,
+                    data_product_id: request.data_product_id,
                 }).unwrap();
                 dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
             } catch (_error) {

@@ -9,6 +9,7 @@ import pytz
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.device_flows.exceptions import (
@@ -176,11 +177,9 @@ class DeviceFlowService:
     def request_user_code_processing(
         self, user_code: str, request: Request, db: Session
     ):
-        device_flows = (
-            db.query(DeviceFlowModel)
-            .filter(DeviceFlowModel.user_code == user_code)
-            .all()
-        )
+        device_flows = db.scalars(
+            select(DeviceFlowModel).where(DeviceFlowModel.user_code == user_code)
+        ).all()
 
         if not device_flows or len(device_flows) != 1:
             raise ExpiredDeviceCodeError("Device code not found")
@@ -249,9 +248,9 @@ class DeviceFlowService:
         )
 
     def process_authz_code_callback(self, authz_code: str, state: str, db: Session):
-        devices = (
-            db.query(DeviceFlowModel).filter(DeviceFlowModel.authz_state == state).all()
-        )
+        devices = db.scalars(
+            select(DeviceFlowModel).where(DeviceFlowModel.authz_state == state)
+        ).all()
         if len(devices) != 1:
             self.logger.debug("Not exactly one device flow found with this state")
             return HTTPException(

@@ -6,7 +6,6 @@ Create Date: 2025-04-16 16:58:38.284751
 
 """
 
-import asyncio
 from datetime import datetime
 from enum import Enum
 from typing import Optional, Sequence, Union
@@ -87,14 +86,13 @@ class RoleMigrationService:
         self.role_service = RoleService(db)
         self.data_product_membership = data_product_membership
 
-    async def migrate(self):
+    def migrate(self):
         self._transfer_product_memberships()
         self._transfer_dataset_memberships()
         self._transfer_global_memberships()
 
-        await Authorization.initialize()
         auth_service = AuthorizationService(db=self.db)
-        await auth_service.reload_enforcer()
+        auth_service.reload_enforcer()
         Authorization.deregister()
 
     def _transfer_product_memberships(self):
@@ -215,7 +213,7 @@ def upgrade() -> None:
         db=session, data_product_membership=data_product_membership
     )
     service.role_service.initialize_prototype_roles()
-    asyncio.run(service.migrate())
+    service.migrate()
 
 
 def downgrade() -> None:
