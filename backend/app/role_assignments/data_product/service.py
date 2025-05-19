@@ -157,10 +157,8 @@ class RoleAssignmentService:
         role_assignment = self.create_assignment(request)
 
         url = (
-            settings.HOST.strip("/")
-            + "/data-products/"
-            + str(role_assignment.data_product_id)
-            + "#team"
+            f"{settings.HOST.rstrip('/')}/data-products/"
+            f"{role_assignment.data_product_id}#team"
         )
         owners = [
             User.model_validate(owner)
