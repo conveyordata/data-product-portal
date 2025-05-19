@@ -10,7 +10,7 @@ import { HistoryTab } from '@/components/history/history-tab';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
-import { EventObject } from '@/types/events/event-object-type';
+import { EventReferenceEntity } from '@/types/events/event-object-type';
 
 import styles from './data-output-tabs.module.scss';
 import { TechnologiesTab } from './technologies-tab/technologies-tab';
@@ -69,7 +69,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 label: t('History'),
                 key: TabKeys.History,
                 icon: <HistoryOutlined />,
-                children: <HistoryTab id={dataOutputId} type={EventObject.DataOutput} />,
+                children: <HistoryTab id={dataOutputId} type={EventReferenceEntity.DataOutput} />,
             },
         ];
     }, [dataOutputId, t]);

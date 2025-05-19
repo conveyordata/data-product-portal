@@ -1,8 +1,8 @@
-export const EventObject = {
+export const EventReferenceEntity = {
     Dataset: 'dataset',
     DataProduct: 'data_product',
     DataOutput: 'data_output',
     User: 'user',
 } as const;
 
-export type EventObject = (typeof EventObject)[keyof typeof EventObject];
+export type EventReferenceEntity = (typeof EventReferenceEntity)[keyof typeof EventReferenceEntity];

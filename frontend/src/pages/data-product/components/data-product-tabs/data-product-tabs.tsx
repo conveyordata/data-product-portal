@@ -20,7 +20,7 @@ import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/dataset-tab/dataset-tab.tsx';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
-import { EventObject } from '@/types/events/event-object-type';
+import { EventReferenceEntity } from '@/types/events/event-object-type';
 
 import styles from './data-product-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
@@ -93,7 +93,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 label: t('History'),
                 key: TabKeys.History,
                 icon: <HistoryOutlined />,
-                children: <HistoryTab id={dataProductId} type={EventObject.DataProduct} />,
+                children: <HistoryTab id={dataProductId} type={EventReferenceEntity.DataProduct} />,
             },
         ];
     }, [dataProductId, t]);

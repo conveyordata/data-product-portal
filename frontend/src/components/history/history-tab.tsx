@@ -9,7 +9,7 @@ import { useGetDataOutputHistoryQuery } from '@/store/features/data-outputs/data
 import { useGetDataProductHistoryQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice';
 import { EventContract } from '@/types/events/event.contract';
-import { EventObject } from '@/types/events/event-object-type';
+import { EventReferenceEntity } from '@/types/events/event-object-type';
 import { getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
 
 import { Searchbar } from '../form';
@@ -18,7 +18,7 @@ import { getHistoryColumns } from './history-table-columns';
 
 type Props = {
     id: string;
-    type: EventObject;
+    type: EventReferenceEntity;
 };
 
 type SearchForm = {
@@ -44,29 +44,29 @@ function filterHistory(events: EventContract[], searchTerm: string, t: TFunction
 
 export function HistoryTab({ id, type }: Props) {
     const { data: dataOutputHistoryData, isLoading: isFetchingDataOutputHistory } = useGetDataOutputHistoryQuery(id, {
-        skip: !id || type != EventObject.DataOutput,
+        skip: !id || type != EventReferenceEntity.DataOutput,
     });
     const { data: dataProductHistoryData, isLoading: isFetchingDataProductHistory } = useGetDataProductHistoryQuery(
         id,
-        { skip: !id || type != EventObject.DataProduct },
+        { skip: !id || type != EventReferenceEntity.DataProduct },
     );
     const { data: datasetHistoryData, isLoading: isFetchingDatasetHistory } = useGetDatasetHistoryQuery(id, {
-        skip: !id || type != EventObject.Dataset,
+        skip: !id || type != EventReferenceEntity.Dataset,
     });
 
     let history: EventContract[] | undefined;
     let isFetching;
 
     switch (type) {
-        case EventObject.DataProduct:
+        case EventReferenceEntity.DataProduct:
             history = dataProductHistoryData;
             isFetching = isFetchingDataProductHistory;
             break;
-        case EventObject.Dataset:
+        case EventReferenceEntity.Dataset:
             history = datasetHistoryData;
             isFetching = isFetchingDatasetHistory;
             break;
-        case EventObject.DataOutput:
+        case EventReferenceEntity.DataOutput:
             history = dataOutputHistoryData;
             isFetching = isFetchingDataOutputHistory;
             break;

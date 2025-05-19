@@ -1,18 +1,18 @@
 import { TFunction } from 'i18next';
 
 import { EventContract } from '@/types/events/event.contract';
-import { EventObject } from '@/types/events/event-object-type';
+import { EventReferenceEntity } from '@/types/events/event-object-type';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 
-export function getTypeDisplayName(t: TFunction, type: EventObject): string {
+export function getTypeDisplayName(t: TFunction, type: EventReferenceEntity): string {
     switch (type) {
-        case EventObject.Dataset:
+        case EventReferenceEntity.Dataset:
             return t('Dataset');
-        case EventObject.DataProduct:
+        case EventReferenceEntity.DataProduct:
             return t('Data Product');
-        case EventObject.DataOutput:
+        case EventReferenceEntity.DataOutput:
             return t('Data Output');
-        case EventObject.User:
+        case EventReferenceEntity.User:
             return t('User');
     }
 }
@@ -22,19 +22,19 @@ export function getSubjectDisplayLabel(t: TFunction, record: EventContract): str
     const displayType = ` ${getTypeDisplayName(t, subject_type)}`;
 
     if (deleted_subject_identifier) {
-        return subject_type == EventObject.User
+        return subject_type == EventReferenceEntity.User
             ? deleted_subject_identifier
             : `${deleted_subject_identifier} ${displayType}`;
     }
 
     switch (subject_type) {
-        case EventObject.User:
+        case EventReferenceEntity.User:
             return record.user.email;
-        case EventObject.DataProduct:
+        case EventReferenceEntity.DataProduct:
             return record.data_product.name + displayType;
-        case EventObject.DataOutput:
+        case EventReferenceEntity.DataOutput:
             return record.data_output.name + displayType;
-        case EventObject.Dataset:
+        case EventReferenceEntity.Dataset:
             return record.dataset.name + displayType;
     }
 }
@@ -49,32 +49,36 @@ export function getTargetDisplayLabel(t: TFunction, record: EventContract): stri
     const displayType = ` ${getTypeDisplayName(t, target_type)}`;
 
     if (deleted_target_identifier) {
-        return target_type == EventObject.User
+        return target_type == EventReferenceEntity.User
             ? deleted_target_identifier
             : `${deleted_target_identifier} ${displayType}`;
     }
 
     switch (target_type) {
-        case EventObject.User:
+        case EventReferenceEntity.User:
             return record.user.email;
-        case EventObject.DataProduct:
+        case EventReferenceEntity.DataProduct:
             return record.data_product.name + displayType;
-        case EventObject.DataOutput:
+        case EventReferenceEntity.DataOutput:
             return record.data_output.name + displayType;
-        case EventObject.Dataset:
+        case EventReferenceEntity.Dataset:
             return record.dataset.name + displayType;
     }
 }
 
-export function getEventObjectLinkPath(id: string, dataProductId: string | null, type: EventObject): string | null {
+export function getEventReferenceEntityLinkPath(
+    id: string,
+    dataProductId: string | null,
+    type: EventReferenceEntity,
+): string | null {
     switch (type) {
-        case EventObject.Dataset:
+        case EventReferenceEntity.Dataset:
             return createDatasetIdPath(id);
-        case EventObject.DataProduct:
+        case EventReferenceEntity.DataProduct:
             return createDataProductIdPath(id);
-        case EventObject.DataOutput:
+        case EventReferenceEntity.DataOutput:
             return dataProductId ? createDataOutputIdPath(id, dataProductId) : null;
-        case EventObject.User:
+        case EventReferenceEntity.User:
             return null;
     }
 }
