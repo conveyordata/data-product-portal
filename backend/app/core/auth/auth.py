@@ -16,13 +16,13 @@ from app.users.schema_request import UserCreate
 
 
 def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> User:
-    db_user = db.query(UserModel).filter(UserModel.external_id == token.sub).first()
+    db_user = db.scalar(select(UserModel).where(UserModel.external_id == token.sub))
     if db_user:
         db_user.email = oidc_user.email
         db_user.first_name = oidc_user.name
         db_user.last_name = oidc_user.family_name
     else:
-        db_user = db.query(UserModel).filter(UserModel.email == oidc_user.email).first()
+        db_user = db.scalar(select(UserModel).where(UserModel.email == oidc_user.email))
         if db_user:
             db_user.external_id = oidc_user.sub
             db_user.first_name = oidc_user.name

@@ -48,7 +48,7 @@ class DataOutput(Base, BaseORM):
         back_populates="data_output",
         cascade="all, delete-orphan",
         order_by="DataOutputDatasetAssociation.status.desc()",
-        lazy="joined",
+        lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(
         secondary=tag_data_output_table, back_populates="data_outputs", lazy="joined"
