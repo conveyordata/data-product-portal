@@ -120,16 +120,15 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_get_conveyor_ide_url(self, client, authorizer):
+    def test_get_conveyor_ide_url(self, client, authorizer):
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
@@ -162,16 +161,15 @@ class TestDataProductsRouter:
 
         assert response.status_code == 403
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_update_data_product(self, payload, client, authorizer):
+    def test_update_data_product(self, payload, client, authorizer):
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         update_payload = deepcopy(payload)
@@ -186,21 +184,20 @@ class TestDataProductsRouter:
         response = self.update_data_product_about(client, data_product.id)
         assert response.status_code == 403
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_update_data_product_about_remove_all_members(
+    def test_update_data_product_about_remove_all_members(
         self, payload, client, authorizer
     ):
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[
                 AuthorizationAction.DATA_PRODUCT__DELETE_USER,
                 AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
             ],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         update_payload = deepcopy(payload)
@@ -208,21 +205,20 @@ class TestDataProductsRouter:
         response = self.update_data_product(client, update_payload, data_product.id)
         assert response.status_code == 422
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_update_data_product_about_remove_last_owner(
+    def test_update_data_product_about_remove_last_owner(
         self, payload, client, authorizer
     ):
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[
                 AuthorizationAction.DATA_PRODUCT__DELETE_USER,
                 AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
             ],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         update_payload = deepcopy(payload)
@@ -237,16 +233,15 @@ class TestDataProductsRouter:
         response = self.update_data_product(client, update_payload, data_product.id)
         assert response.status_code == 422
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_update_data_product_about(self, client, authorizer):
+    def test_update_data_product_about(self, client, authorizer):
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         response = self.update_data_product_about(client, data_product.id)
@@ -257,16 +252,15 @@ class TestDataProductsRouter:
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 403
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_remove_data_product(self, client, authorizer):
+    def test_remove_data_product(self, client, authorizer):
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__DELETE],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         response = self.delete_data_product(client, data_product.id)
@@ -279,16 +273,15 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 403
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_update_status(self, client, authorizer):
+    def test_update_status(self, client, authorizer):
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         response = self.get_data_product_by_id(client, data_product.id)
@@ -311,18 +304,15 @@ class TestDataProductsRouter:
         data_product = self.delete_data_product(client, self.invalid_id)
         assert data_product.status_code == 403
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_data_product_set_custom_setting_wrong_scope(
-        self, client, authorizer
-    ):
+    def test_data_product_set_custom_setting_wrong_scope(self, client, authorizer):
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         setting = DataProductSettingFactory(scope="dataset")
@@ -337,16 +327,15 @@ class TestDataProductsRouter:
         response = client.post(f"{ENDPOINT}/{data_product.id}/settings/{setting.id}")
         assert response.status_code == 403
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_dataset_set_custom_setting(self, client, authorizer):
+    def test_dataset_set_custom_setting(self, client, authorizer):
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         setting = DataProductSettingFactory()
@@ -379,17 +368,16 @@ class TestDataProductsRouter:
         response = client.get(f"{ENDPOINT}/{data_product.id}/role")
         assert response.status_code == 403
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_get_aws_role(self, client, authorizer):
+    def test_get_aws_role(self, client, authorizer):
         env = EnvironmentFactory(name="production")
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         response = client.get(
@@ -398,17 +386,16 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json() == env.context.replace("{{}}", data_product.namespace)
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_get_signin_url_not_implemented(self, client, authorizer):
+    def test_get_signin_url_not_implemented(self, client, authorizer):
         EnvironmentFactory(name="production")
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         response = client.get(
@@ -418,18 +405,17 @@ class TestDataProductsRouter:
             response.status_code == 501 or response.status_code == 400
         )  # TODO Add actual AWS test through mocking
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_get_databricks_url(self, client, authorizer):
+    def test_get_databricks_url(self, client, authorizer):
         env = EnvironmentFactory(name="production")
         platform = PlatformFactory(name="Databricks")
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         EnvPlatformConfigFactory(
@@ -540,20 +526,17 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["validity"] == NamespaceValidityType.VALID
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_update_data_product_duplicate_namespace(
-        self, payload, client, authorizer
-    ):
+    def test_update_data_product_duplicate_namespace(self, payload, client, authorizer):
         namespace = "namespace"
         DataProductFactory(namespace=namespace)
         user = UserFactory(external_id="sub")
         data_product = DataProductMembershipFactory(user=user).data_product
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        await authorizer.sync_role_permissions(
+        authorizer.sync_role_permissions(
             role_id=str(role.id),
             actions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
         update_payload = deepcopy(payload)

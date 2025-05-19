@@ -122,18 +122,18 @@ def clear_db(session: scoped_session[Session]) -> None:
 
 
 @pytest.fixture
-async def admin() -> UserFactory:
+def admin() -> UserFactory:
     role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
     user = UserFactory(external_id="sub", is_admin=True)
     assignment: RoleAssignment = GlobalRoleAssignmentFactory(
         user_id=user.id, role_id=role.id
     )
-    await GlobalAuthAssignment(assignment).add()
+    GlobalAuthAssignment(assignment).add()
     return user
 
 
 @pytest.fixture
-def authorizer() -> Generator[Authorization]:
+def authorizer() -> Generator[Authorization, None, None]:
     yield Authorization()
 
 
