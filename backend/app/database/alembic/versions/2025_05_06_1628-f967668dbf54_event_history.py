@@ -6,21 +6,12 @@ Create Date: 2025-05-06 16:28:28.024986
 
 """
 
-from enum import Enum
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 
 from app.shared.model import utcnow
-
-
-class EventReferenceEntity(str, Enum):
-    DATA_PRODUCT = "data_product"
-    DATASET = "dataset"
-    DATA_OUTPUT = "data_output"
-    USER = "user"
-
 
 # revision identifiers, used by Alembic.
 revision: str = "f967668dbf54"
@@ -31,13 +22,32 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
+        "event_reference_entities",
+        sa.Column("key", sa.String, primary_key=True, nullable=False),
+    )
+    op.bulk_insert(
+        sa.table("event_reference_entities", sa.column("key", sa.String)),
+        [{"key": k} for k in ("DATA_PRODUCT", "DATASET", "DATA_OUTPUT", "USER")],
+    )
+
+    op.create_table(
         "events",
         sa.Column("id", sa.UUID, primary_key=True, nullable=False),
         sa.Column("name", sa.String, nullable=False),
         sa.Column("subject_id", sa.UUID),
         sa.Column("target_id", sa.UUID, nullable=True),
-        sa.Column("subject_type", sa.Enum(EventReferenceEntity)),
-        sa.Column("target_type", sa.Enum(EventReferenceEntity), nullable=True),
+        sa.Column(
+            "subject_type",
+            sa.String,
+            sa.ForeignKey("event_reference_entities.key"),
+            nullable=False,
+        ),
+        sa.Column(
+            "target_type",
+            sa.String,
+            sa.ForeignKey("event_reference_entities.key"),
+            nullable=True,
+        ),
         sa.Column("deleted_subject_identifier", sa.String, nullable=True),
         sa.Column("deleted_target_identifier", sa.String, nullable=True),
         sa.Column("actor_id", sa.UUID, sa.ForeignKey("users.id"), nullable=False),
@@ -56,4 +66,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("events")
-    op.execute('DROP TYPE "eventreferencetype"')
+    op.drop_table("event_reference_entities")

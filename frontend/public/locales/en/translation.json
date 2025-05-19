@@ -591,5 +591,6 @@
     "Dataset about updated": "Dataset about updated",
     "Dataset status updated": "Dataset status updated",
     "User added to dataset": "User added to dataset",
-    "User removed from dataset": "User removed from dataset"
+    "User removed from dataset": "User removed from dataset",
+    "External involved entity": "External involved entity"
 }
