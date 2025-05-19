@@ -7,7 +7,7 @@ from app.database.database import get_db_session
 
 class TestAuthorizationService:
 
-    def test_clear_casbin_table(self, authorizer: Authorization, enable_authorizer):
+    def test_clear_casbin_table(self, authorizer: Authorization):
         db = next(get_db_session())
 
         existing = len(db.query(CasbinRule).all())

@@ -9,7 +9,7 @@ ANY_ACT: AuthorizationAction = cast(AuthorizationAction, 0)
 
 class TestAuthorization:
 
-    def test_everyone_role(self, authorizer: Authorization, enable_authorizer):
+    def test_everyone_role(self, authorizer: Authorization):
         allowed = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
         denied = AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS
 
@@ -22,7 +22,7 @@ class TestAuthorization:
         authorizer.sync_everyone_role_permissions(actions=[])
         assert authorizer.has_access(sub=ANY, dom=ANY, obj=ANY, act=allowed) is False
 
-    def test_resource_role(self, authorizer: Authorization, enable_authorizer):
+    def test_resource_role(self, authorizer: Authorization):
         role = "test_role"
         user = "test_user"
         obj = "test_resource"
@@ -43,7 +43,7 @@ class TestAuthorization:
         authorizer.revoke_resource_role(user_id=user, role_id=role, resource_id=obj)
         assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=allowed) is False
 
-    def test_domain_role(self, authorizer: Authorization, enable_authorizer):
+    def test_domain_role(self, authorizer: Authorization):
         role = "test_role"
         user = "test_user"
         dom = "test_domain"
@@ -64,7 +64,7 @@ class TestAuthorization:
         authorizer.revoke_domain_role(user_id=user, role_id=role, domain_id=dom)
         assert authorizer.has_access(sub=user, dom=dom, obj=ANY, act=allowed) is False
 
-    def test_global_role(self, authorizer: Authorization, enable_authorizer):
+    def test_global_role(self, authorizer: Authorization):
         user = "test_user"
         role = "test_role"
         act = AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS
@@ -78,7 +78,7 @@ class TestAuthorization:
         authorizer.revoke_global_role(user_id=user, role_id=role)
         assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
 
-    def test_admin_role(self, authorizer: Authorization, enable_authorizer):
+    def test_admin_role(self, authorizer: Authorization):
         user = "test_user"
 
         assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=ANY_ACT) is False
@@ -89,7 +89,7 @@ class TestAuthorization:
         authorizer.revoke_admin_role(user_id=user)
         assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=ANY_ACT) is False
 
-    def test_role_removal(self, authorizer: Authorization, enable_authorizer):
+    def test_role_removal(self, authorizer: Authorization):
         role = "test_role"
         user = "test_user"
         obj = "test_resource"
@@ -104,7 +104,7 @@ class TestAuthorization:
         authorizer.remove_role_permissions(role_id=role)
         assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=act) is False
 
-    def test_multiple_permissions(self, authorizer: Authorization, enable_authorizer):
+    def test_multiple_permissions(self, authorizer: Authorization):
         role = "test_role"
         user = "test_user"
         obj = "test_resource"

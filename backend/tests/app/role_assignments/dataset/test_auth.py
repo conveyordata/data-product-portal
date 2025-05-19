@@ -19,18 +19,16 @@ class TestAuth:
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-
-        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+        assert not authorizer.has_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
+        )
+        DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
 
-        assert not authorizer.has_resource_role(
-            user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
-        )
-        DatasetAuthAssignment(assignment).add()
         assert authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
@@ -39,7 +37,9 @@ class TestAuth:
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
-
+        assert not authorizer.has_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
+        )
         assignment: RoleAssignment = DatasetRoleAssignmentFactory(
             dataset_id=dataset.id,
             user_id=user.id,
@@ -47,10 +47,6 @@ class TestAuth:
             decision=DecisionStatus.APPROVED,
         )
 
-        assert not authorizer.has_resource_role(
-            user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
-        )
-        DatasetAuthAssignment(assignment).add()
         assert authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
