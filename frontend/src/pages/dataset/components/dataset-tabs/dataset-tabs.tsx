@@ -17,7 +17,7 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { EventReferenceEntity } from '@/types/events/event-object-type.ts';
+import { EventReferenceEntity } from '@/types/events/event-reference-entity.ts';
 
 import { AboutTab } from './about-tab/about-tab.tsx';
 import styles from './dataset-tabs.module.scss';

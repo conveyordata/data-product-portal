@@ -51,12 +51,6 @@ def upgrade() -> None:
         sa.Column("deleted_subject_identifier", sa.String, nullable=True),
         sa.Column("deleted_target_identifier", sa.String, nullable=True),
         sa.Column("actor_id", sa.UUID, sa.ForeignKey("users.id"), nullable=False),
-        sa.Column(
-            "domain_id",
-            sa.UUID,
-            sa.ForeignKey("domains.id", ondelete="CASCADE"),
-            nullable=False,
-        ),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),

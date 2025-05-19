@@ -157,7 +157,6 @@ class DataOutputService:
                 target_id=model.owner_id,
                 target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=model.owner.domain_id,
             ),
         )
         db.commit()
@@ -186,7 +185,6 @@ class DataOutputService:
                 target_id=data_output.owner_id,
                 target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=data_output.owner.domain_id,
             ),
         )
         db.delete(data_output)
@@ -210,7 +208,6 @@ class DataOutputService:
                 target_id=current_data_output.owner.id,
                 target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=current_data_output.owner.domain.id,
             ),
         )
         db.commit()
@@ -260,7 +257,6 @@ class DataOutputService:
                 target_id=dataset_id,
                 target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=data_output.owner.domain_id,
             ),
         )
         db.commit()
@@ -322,7 +318,6 @@ class DataOutputService:
                 target_id=dataset_id,
                 target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=data_output.owner.domain.id,
             ),
         )
         db.commit()
@@ -353,7 +348,6 @@ class DataOutputService:
                 target_id=current_data_output.owner.id,
                 target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=current_data_output.owner.domain.id,
             ),
         )
         db.commit()

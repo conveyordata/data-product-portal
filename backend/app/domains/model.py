@@ -6,7 +6,6 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.database.database import Base, ensure_exists
-from app.events.model import Event
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -24,12 +23,6 @@ class Domain(Base, BaseORM):
     # Relationships
     datasets: Mapped[list["Dataset"]] = relationship(lazy="raise")
     data_products: Mapped[list["DataProduct"]] = relationship(lazy="raise")
-    events: Mapped[list["Event"]] = relationship(
-        "Event",
-        back_populates="domain",
-        foreign_keys="Event.domain_id",
-        cascade="all, delete-orphan",
-    )
 
     @property
     def data_product_count(self) -> int:

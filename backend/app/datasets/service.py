@@ -174,7 +174,6 @@ class DatasetService:
                     target_id=owner.id,
                     target_type=EventReferenceEntity.USER,
                     actor_id=authenticated_user.id,
-                    domain_id=model.domain.id,
                 ),
             )
         db.add(
@@ -183,7 +182,6 @@ class DatasetService:
                 subject_id=model.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=model.domain_id,
             ),
         )
         db.commit()
@@ -209,7 +207,6 @@ class DatasetService:
                 subject_id=dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=dataset.domain_id,
             ),
         )
         db.delete(dataset)
@@ -256,7 +253,6 @@ class DatasetService:
                             target_id=owner_id,
                             target_type=EventReferenceEntity.USER,
                             actor_id=authenticated_user.id,
-                            domain_id=current_dataset.domain_id,
                         ),
                     )
                 for owner_id in owners_to_add:
@@ -268,7 +264,6 @@ class DatasetService:
                             target_id=owner_id,
                             target_type=EventReferenceEntity.USER,
                             actor_id=authenticated_user.id,
-                            domain_id=current_dataset.domain_id,
                         ),
                     )
 
@@ -283,7 +278,6 @@ class DatasetService:
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=dataset.domain_id,
             ),
         )
         db.commit()
@@ -305,7 +299,6 @@ class DatasetService:
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=current_dataset.domain.id,
             ),
         )
         db.commit()
@@ -325,7 +318,6 @@ class DatasetService:
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=current_dataset.domain.id,
             ),
         )
         db.commit()
@@ -350,7 +342,6 @@ class DatasetService:
                 actor_id=authenticated_user.id,
                 target_id=user.id,
                 target_type=EventReferenceEntity.USER,
-                domain_id=dataset.domain.id,
             ),
         )
         db.commit()
@@ -382,7 +373,6 @@ class DatasetService:
                 actor_id=authenticated_user.id,
                 target_id=user.id,
                 target_type=EventReferenceEntity.USER,
-                domain_id=dataset.domain.id,
             ),
         )
         db.commit()

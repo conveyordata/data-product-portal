@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import type { TFunction } from 'i18next';
 
 import { EventContract } from '@/types/events/event.contract';
-import { EventReferenceEntity } from '@/types/events/event-object-type';
+import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 
 import { HistoryTableLink } from './history-table-link';
 

@@ -237,7 +237,6 @@ class DataProductService:
                 subject_id=model.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=model.domain_id,
             ),
         )
         db.commit()
@@ -270,7 +269,6 @@ class DataProductService:
                 subject_id=data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=data_product.domain_id,
             ),
         )
         db.delete(data_product)
@@ -318,7 +316,6 @@ class DataProductService:
                             target_id=user.id,
                             target_type=EventReferenceEntity.USER,
                             actor_id=authenticated_user.id,
-                            domain_id=data_product.domain.id,
                         ),
                     )
                 membership.role = membership_item["role"]
@@ -335,7 +332,6 @@ class DataProductService:
                         target_id=user.id,
                         target_type=EventReferenceEntity.USER,
                         actor_id=authenticated_user.id,
-                        domain_id=data_product.domain.id,
                     ),
                 )
 
@@ -352,7 +348,6 @@ class DataProductService:
                     target_id=membership.user_id,
                     target_type=EventReferenceEntity.USER,
                     actor_id=authenticated_user.id,
-                    domain_id=data_product.domain.id,
                 ),
             )
 
@@ -403,7 +398,6 @@ class DataProductService:
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=data_product.domain_id,
             ),
         )
         db.commit()
@@ -425,7 +419,6 @@ class DataProductService:
                 subject_id=current_data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=current_data_product.domain.id,
             ),
         )
         db.commit()
@@ -445,7 +438,6 @@ class DataProductService:
                 subject_id=current_data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
-                domain_id=current_data_product.domain.id,
             ),
         )
         db.commit()
@@ -544,7 +536,6 @@ class DataProductService:
                 target_id=dataset.id,
                 target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=data_product.domain.id,
             ),
         )
         db.commit()
@@ -588,7 +579,6 @@ class DataProductService:
                 target_id=data_product_dataset.dataset_id,
                 target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
-                domain_id=data_product.domain.id,
             ),
         )
         data_product.dataset_links.remove(data_product_dataset)

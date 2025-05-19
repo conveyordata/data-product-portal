@@ -9,7 +9,7 @@ import { useGetDataOutputHistoryQuery } from '@/store/features/data-outputs/data
 import { useGetDataProductHistoryQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice';
 import { EventContract } from '@/types/events/event.contract';
-import { EventReferenceEntity } from '@/types/events/event-object-type';
+import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import { getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
 
 import { Searchbar } from '../form';

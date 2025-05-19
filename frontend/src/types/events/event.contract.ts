@@ -1,9 +1,8 @@
 import { DataOutputContract } from '../data-output';
 import { DataProductContract } from '../data-product';
 import { DatasetContract } from '../dataset';
-import { DomainContract } from '../domain';
 import { UserContract } from '../users';
-import { EventReferenceEntity } from './event-object-type';
+import { EventReferenceEntity } from './event-reference-entity';
 
 export interface EventContract {
     name: string;
@@ -17,7 +16,6 @@ export interface EventContract {
     user: UserContract;
     dataset: DatasetContract;
     data_output: DataOutputContract;
-    domain: DomainContract;
     actor: UserContract;
     created_on: string;
 }

@@ -63,7 +63,6 @@ class RoleAssignmentService:
                 target_id=role_assignment.user_id,
                 target_type=EventReferenceEntity.USER,
                 actor_id=authenticated_user.id,
-                domain_id=role_assignment.data_product.domain_id,
             )
         )
         self.db.commit()
@@ -79,7 +78,6 @@ class RoleAssignmentService:
                 target_id=assignment.user_id,
                 target_type=EventReferenceEntity.USER,
                 actor_id=authenticated_user.id,
-                domain_id=assignment.data_product.domain_id,
             ),
         )
         self.db.delete(assignment)
@@ -109,7 +107,6 @@ class RoleAssignmentService:
                     target_id=assignment.user_id,
                     target_type=EventReferenceEntity.USER,
                     actor_id=authenticated_user.id,
-                    domain_id=assignment.data_product.domain_id,
                 ),
             )
         else:
@@ -121,7 +118,6 @@ class RoleAssignmentService:
                     target_id=assignment.user_id,
                     target_type=EventReferenceEntity.USER,
                     actor_id=authenticated_user.id,
-                    domain_id=assignment.data_product.domain_id,
                 ),
             )
         self.db.commit()

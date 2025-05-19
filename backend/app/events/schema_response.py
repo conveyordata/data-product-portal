@@ -6,7 +6,6 @@ from pydantic import NaiveDatetime
 from app.data_outputs.schema_response import BaseDataOutputGet
 from app.data_products.schema_response import BaseDataProductGet
 from app.datasets.schema_response import BaseDatasetGet
-from app.domains.schema import Domain
 from app.events.enum import EventReferenceEntity
 from app.shared.schema import ORMModel
 from app.users.schema import User
@@ -20,7 +19,6 @@ class BaseEventGet(ORMModel):
     subject_type: EventReferenceEntity
     target_type: Optional[EventReferenceEntity] = None
     actor_id: UUID
-    domain_id: Optional[UUID] = None
     created_on: NaiveDatetime
 
 
@@ -30,6 +28,5 @@ class EventGet(BaseEventGet):
     actor: User
     data_product: Optional[BaseDataProductGet] = None
     user: Optional[User] = None
-    domain: Optional[Domain] = None
     dataset: Optional[BaseDatasetGet] = None
     data_output: Optional[BaseDataOutputGet] = None

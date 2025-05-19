@@ -15,7 +15,6 @@ class Event(ORMModel):
     subject_type: EventReferenceEntity
     target_type: Optional[EventReferenceEntity] = None
     actor_id: UUID
-    domain_id: Optional[UUID] = None
     id: UUID
     deleted_subject_identifier: Optional[str] = None
     deleted_target_identifier: Optional[str] = None

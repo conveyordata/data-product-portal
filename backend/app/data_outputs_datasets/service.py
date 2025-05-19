@@ -53,7 +53,6 @@ class DataOutputDatasetService:
                 target_id=current_link.data_output_id,
                 target_type=EventReferenceEntity.DATA_OUTPUT,
                 actor_id=authenticated_user.id,
-                domain_id=current_link.dataset.domain_id,
             ),
         )
         RefreshInfrastructureLambda().trigger()
@@ -85,7 +84,6 @@ class DataOutputDatasetService:
                 target_id=current_link.data_output_id,
                 target_type=EventReferenceEntity.DATA_OUTPUT,
                 actor_id=authenticated_user.id,
-                domain_id=current_link.dataset.domain_id,
             ),
         )
         db.commit()
@@ -118,7 +116,6 @@ class DataOutputDatasetService:
                 target_id=current_link.data_output_id,
                 target_type=EventReferenceEntity.DATA_OUTPUT,
                 actor_id=authenticated_user.id,
-                domain_id=current_link.dataset.domain_id,
             ),
         )
         data_output.dataset_links.remove(current_link)

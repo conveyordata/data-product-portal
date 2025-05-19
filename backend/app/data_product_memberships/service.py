@@ -55,7 +55,6 @@ class DataProductMembershipService:
                 target_id=user.id,
                 target_type=EventReferenceEntity.USER,
                 actor_id=authenticated_user.id,
-                domain_id=data_product.domain.id,
             ),
         )
         db.commit()

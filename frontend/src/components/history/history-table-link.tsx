@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router';
 
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import type { EventContract } from '@/types/events/event.contract';
-import { EventReferenceEntity } from '@/types/events/event-object-type';
+import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import { getEventReferenceEntityLinkPath, getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
 
 import { LoadingSpinner } from '../loading/loading-spinner/loading-spinner';

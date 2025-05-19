@@ -1,7 +1,7 @@
 import { TFunction } from 'i18next';
 
 import { EventContract } from '@/types/events/event.contract';
-import { EventReferenceEntity } from '@/types/events/event-object-type';
+import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 
 export function getTypeDisplayName(t: TFunction, type: EventReferenceEntity): string {
