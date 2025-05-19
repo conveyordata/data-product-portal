@@ -1,4 +1,3 @@
-import pytest
 from tests.factories import (
     DatasetFactory,
     DatasetRoleAssignmentFactory,
@@ -15,9 +14,8 @@ from app.roles.schema import Role, Scope
 from app.users.schema import User
 
 
-@pytest.mark.asyncio(loop_scope="session")
 class TestAuth:
-    async def test_add(self, authorizer: Authorization):
+    def test_add(self, authorizer: Authorization):
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -32,12 +30,12 @@ class TestAuth:
         assert not authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
-        await DatasetAuthAssignment(assignment).add()
+        DatasetAuthAssignment(assignment).add()
         assert authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
-    async def test_remove(self, authorizer: Authorization):
+    def test_remove(self, authorizer: Authorization):
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -52,16 +50,16 @@ class TestAuth:
         assert not authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
-        await DatasetAuthAssignment(assignment).add()
+        DatasetAuthAssignment(assignment).add()
         assert authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
-        await DatasetAuthAssignment(assignment).remove()
+        DatasetAuthAssignment(assignment).remove()
         assert not authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
-    async def test_swap(self, authorizer: Authorization):
+    def test_swap(self, authorizer: Authorization):
         dataset: Dataset = DatasetFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -74,13 +72,13 @@ class TestAuth:
             decision=DecisionStatus.APPROVED,
         )
 
-        await DatasetAuthAssignment(assignment).add()
+        DatasetAuthAssignment(assignment).add()
         assert authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
         assignment.role_id = new_role.id
-        await DatasetAuthAssignment(assignment, previous_role_id=role.id).swap()
+        DatasetAuthAssignment(assignment, previous_role_id=role.id).swap()
 
         assert not authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)

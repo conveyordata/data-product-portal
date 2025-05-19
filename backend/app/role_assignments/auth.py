@@ -11,11 +11,11 @@ from app.role_assignments.enums import DecisionStatus
 
 
 class AuthAssignment(Protocol):
-    async def add(self) -> None: ...
+    def add(self) -> None: ...
 
-    async def remove(self) -> None: ...
+    def remove(self) -> None: ...
 
-    async def swap(self) -> None: ...
+    def swap(self) -> None: ...
 
 
 @dataclass
@@ -45,32 +45,32 @@ class ResourceAuthAssignment(AuthAssignment):
 
         return assignment.role_id
 
-    async def add(self) -> None:
+    def add(self) -> None:
         authorizer = Authorization()
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
             resource_id=str(self.resource_id),
         )
 
-    async def remove(self) -> None:
+    def remove(self) -> None:
         authorizer = Authorization()
-        await authorizer.revoke_resource_role(
+        authorizer.revoke_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
             resource_id=str(self.resource_id),
         )
 
-    async def swap(self) -> None:
+    def swap(self) -> None:
         assert self.previous_role_id is not None
 
         authorizer = Authorization()
-        await authorizer.revoke_resource_role(
+        authorizer.revoke_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.previous_role_id),
             resource_id=str(self.resource_id),
         )
-        await authorizer.assign_resource_role(
+        authorizer.assign_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
             resource_id=str(self.resource_id),
