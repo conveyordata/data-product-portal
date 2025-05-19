@@ -135,5 +135,4 @@ def admin() -> UserFactory:
 @pytest.fixture
 def authorizer() -> Generator[Authorization, None, None]:
     AuthorizationService._clear_casbin_table()
-    auth = Authorization()
-    yield auth
+    yield Authorization()
