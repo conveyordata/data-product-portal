@@ -7,6 +7,7 @@ from tests.factories import (
 )
 from tests.factories.data_product_membership import DataProductMembershipFactory
 
+from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProduct
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
@@ -169,7 +170,9 @@ class TestDataProductRoleAssignmentsRouter:
         data = response.json()
         assert data["role"]["id"] == str(new_role.id)
 
-    def test_delete_data_product_with_role_assignment(self, client: TestClient):
+    def test_delete_data_product_with_role_assignment(
+        self, client: TestClient, authorizer
+    ):
         user = UserFactory(external_id="sub")
         data_product: DataProduct = DataProductMembershipFactory(
             user=user,
@@ -180,6 +183,13 @@ class TestDataProductRoleAssignmentsRouter:
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
+        )
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATA_PRODUCT__DELETE],
+        )
+        authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(data_product.id)
         )
 
         response = client.get(f"{ENDPOINT}")

@@ -6,6 +6,7 @@ from tests.factories import (
     UserFactory,
 )
 
+from app.core.authz.actions import AuthorizationAction
 from app.datasets.model import Dataset
 from app.role_assignments.dataset.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
@@ -168,7 +169,7 @@ class TestDatasetRoleAssignmentsRouter:
         data = response.json()
         assert data["role"]["id"] == str(new_role.id)
 
-    def test_delete_dataset_with_role_assignment(self, client: TestClient):
+    def test_delete_dataset_with_role_assignment(self, client: TestClient, authorizer):
         user = UserFactory(external_id="sub")
         dataset: Dataset = DatasetFactory(owners=[user])
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -177,6 +178,13 @@ class TestDatasetRoleAssignmentsRouter:
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
+        )
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.DATASET__DELETE],
+        )
+        authorizer.assign_resource_role(
+            user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
 
         response = client.get(f"{ENDPOINT}")

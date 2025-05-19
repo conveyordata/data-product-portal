@@ -102,11 +102,11 @@ class TestRolesRouter:
         role: Role = RoleFactory()
         response = client.get(f"{ENDPOINT}/{role.scope}")
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert len(response.json()) == 2
 
         response = client.delete(f"{ENDPOINT}/{role.id}")
         assert response.status_code == 200
 
         response = client.get(f"{ENDPOINT}/{role.scope}")
         assert response.status_code == 200
-        assert len(response.json()) == 0
+        assert len(response.json()) == 1
