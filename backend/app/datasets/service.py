@@ -25,7 +25,7 @@ from app.datasets.schema_request import (
     DatasetStatusUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
-from app.events.enum import EventReferenceEntity
+from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.events.schema_response import EventGet
 from app.events.service import EventService
@@ -168,7 +168,7 @@ class DatasetService:
         for owner in model.owners:
             db.add(
                 EventModel(
-                    name="Dataset creation: owner added",
+                    name=EventType.DATASET_CREATION_OWNER_ADDED,
                     subject_id=model.id,
                     subject_type=EventReferenceEntity.DATASET,
                     target_id=owner.id,
@@ -178,7 +178,7 @@ class DatasetService:
             )
         db.add(
             EventModel(
-                name="Dataset created",
+                name=EventType.DATASET_CREATED,
                 subject_id=model.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
@@ -203,7 +203,7 @@ class DatasetService:
         dataset.tags = []
         db.add(
             EventModel(
-                name="Dataset removed",
+                name=EventType.DATASET_REMOVED,
                 subject_id=dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
@@ -247,7 +247,7 @@ class DatasetService:
                 for owner_id in owners_to_remove:
                     db.add(
                         EventModel(
-                            name="Dataset update: owner removed",
+                            name=EventType.DATASET_UPDATE_OWNER_REMOVED,
                             subject_id=current_dataset.id,
                             subject_type=EventReferenceEntity.DATASET,
                             target_id=owner_id,
@@ -258,7 +258,7 @@ class DatasetService:
                 for owner_id in owners_to_add:
                     db.add(
                         EventModel(
-                            name="Dataset update: owner added",
+                            name=EventType.DATASET_UPDATE_OWNER_ADDED,
                             subject_id=current_dataset.id,
                             subject_type=EventReferenceEntity.DATASET,
                             target_id=owner_id,
@@ -274,7 +274,7 @@ class DatasetService:
                 setattr(current_dataset, k, v) if v else None
         db.add(
             EventModel(
-                name="Dataset updated",
+                name=EventType.DATASET_UPDATED,
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
@@ -295,7 +295,7 @@ class DatasetService:
         current_dataset.about = dataset.about
         db.add(
             EventModel(
-                name="Dataset about updated",
+                name=EventType.DATASET_ABOUT_UPDATED,
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
@@ -314,7 +314,7 @@ class DatasetService:
         current_dataset.status = dataset.status
         db.add(
             EventModel(
-                name="Dataset status updated",
+                name=EventType.DATASET_STATUS_UPDATED,
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
@@ -336,7 +336,7 @@ class DatasetService:
         dataset.owners.append(user)
         db.add(
             EventModel(
-                name="User added to dataset",
+                name=EventType.USER_ADDED_TO_DATASET,
                 subject_id=dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
@@ -367,7 +367,7 @@ class DatasetService:
         dataset.owners.remove(user)
         db.add(
             EventModel(
-                name="User removed from dataset",
+                name=EventType.USER_REMOVED_FROM_DATASET,
                 subject_id=dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,

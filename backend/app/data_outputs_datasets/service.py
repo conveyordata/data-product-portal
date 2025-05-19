@@ -14,7 +14,7 @@ from app.data_outputs_datasets.model import (
 from app.data_outputs_datasets.schema_response import DataOutputDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.events.enum import EventReferenceEntity
+from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
@@ -47,7 +47,7 @@ class DataOutputDatasetService:
         current_link.approved_on = datetime.now(tz=pytz.utc)
         db.add(
             EventModel(
-                name="Data output link to dataset approved",
+                name=EventType.DATA_OUTPUT_LINK_TO_DATASET_APPROVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,
@@ -78,7 +78,7 @@ class DataOutputDatasetService:
         current_link.denied_on = datetime.now(tz=pytz.utc)
         db.add(
             EventModel(
-                name="Data output link to dataset denied",
+                name=EventType.DATA_OUTPUT_LINK_TO_DATASET_DENIED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,
@@ -110,7 +110,7 @@ class DataOutputDatasetService:
         data_output = ensure_data_output_exists(linked_data_output.id, db)
         db.add(
             EventModel(
-                name="Data output link to dataset removed",
+                name=EventType.DATA_OUTPUT_LINK_TO_DATASET_REMOVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,

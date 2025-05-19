@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.database import ensure_exists
-from app.events.enum import EventReferenceEntity
+from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.data_product.schema import (
@@ -57,7 +57,7 @@ class RoleAssignmentService:
         self.db.flush()
         self.db.add(
             EventModel(
-                name="Data product membership created",
+                name=EventType.DATA_PRODUCT_MEMBERSHIP_CREATED,
                 subject_id=role_assignment.data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=role_assignment.user_id,
@@ -72,7 +72,7 @@ class RoleAssignmentService:
         assignment = self.get_assignment(id_)
         self.db.add(
             EventModel(
-                name="Data product membership removed",
+                name=EventType.DATA_PRODUCT_MEMBERSHIP_REMOVED,
                 subject_id=assignment.data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=assignment.user_id,
@@ -98,9 +98,9 @@ class RoleAssignmentService:
             self.db.add(
                 EventModel(
                     name=(
-                        "Data product membership approved"
+                        EventType.DATA_PRODUCT_MEMBERSHIP_APPROVED
                         if assignment.decision == DecisionStatus.APPROVED
-                        else "Data product membership denied"
+                        else EventType.DATA_PRODUCT_MEMBERSHIP_DENIED
                     ),
                     subject_id=assignment.data_product_id,
                     subject_type=EventReferenceEntity.DATA_PRODUCT,
@@ -112,7 +112,7 @@ class RoleAssignmentService:
         else:
             self.db.add(
                 EventModel(
-                    name="Data product membership updated",
+                    name=EventType.DATA_PRODUCT_MEMBERSHIP_UPDATED,
                     subject_id=assignment.data_product_id,
                     subject_type=EventReferenceEntity.DATA_PRODUCT,
                     target_id=assignment.user_id,

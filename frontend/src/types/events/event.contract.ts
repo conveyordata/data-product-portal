@@ -3,9 +3,10 @@ import { DataProductContract } from '../data-product';
 import { DatasetContract } from '../dataset';
 import { UserContract } from '../users';
 import { EventReferenceEntity } from './event-reference-entity';
+import { EventType } from './event-types';
 
 export interface EventContract {
-    name: string;
+    name: EventType;
     deleted_subject_identifier: string;
     deleted_target_identifier: string;
     subject_type: EventReferenceEntity;

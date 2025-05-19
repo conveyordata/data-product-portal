@@ -4,6 +4,8 @@ import type { TFunction } from 'i18next';
 
 import { EventContract } from '@/types/events/event.contract';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import { EventType } from '@/types/events/event-types';
+import { getEventTypeDisplayName } from '@/utils/history.helper';
 
 import { HistoryTableLink } from './history-table-link';
 
@@ -19,7 +21,7 @@ export const getHistoryColumns = ({ t, resourceId, type }: HistoryColumnsProps):
         dataIndex: 'name',
         key: 'name',
         width: '30%',
-        render: (event: string) => t(event) || t('No title available'),
+        render: (name: EventType) => getEventTypeDisplayName(t, name) || t('No title available'),
     },
     {
         title: t('External involved entity'),

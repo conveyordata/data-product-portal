@@ -15,7 +15,7 @@ from app.data_product_memberships.schema_response import DataProductMembershipsG
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
-from app.events.enum import EventReferenceEntity
+from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
@@ -49,7 +49,7 @@ class DataProductMembershipService:
         data_product.memberships.append(data_product_membership)
         db.add(
             EventModel(
-                name="Data product membership requested",
+                name=EventType.DATA_PRODUCT_MEMBERSHIP_REQUESTED,
                 subject_id=data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=user.id,

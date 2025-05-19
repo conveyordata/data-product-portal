@@ -31,7 +31,7 @@ from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
-from app.events.enum import EventReferenceEntity
+from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.events.schema_response import EventGet
 from app.events.service import EventService
@@ -151,7 +151,7 @@ class DataOutputService:
         db.flush()
         db.add(
             EventModel(
-                name="Data output created",
+                name=EventType.DATA_OUTPUT_CREATED,
                 subject_id=model.id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=model.owner_id,
@@ -179,7 +179,7 @@ class DataOutputService:
         data_output.dataset_links = []
         db.add(
             EventModel(
-                name="Data output removed",
+                name=EventType.DATA_OUTPUT_REMOVED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=data_output.owner_id,
@@ -202,7 +202,7 @@ class DataOutputService:
         current_data_output.status = data_output.status
         db.add(
             EventModel(
-                name="Data output status updated",
+                name=EventType.DATA_OUTPUT_STATUS_UPDATED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=current_data_output.owner.id,
@@ -251,7 +251,7 @@ class DataOutputService:
         data_output.dataset_links.append(dataset_link)
         db.add(
             EventModel(
-                name="Data output link requested to dataset",
+                name=EventType.DATA_OUTPUT_LINK_REQUESTED_TO_DATASET,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=dataset_id,
@@ -312,7 +312,7 @@ class DataOutputService:
         data_output.dataset_links.remove(data_output_dataset)
         db.add(
             EventModel(
-                name="Data output link removed from dataset",
+                name=EventType.DATA_OUTPUT_LINK_REMOVED_FROM_DATASET,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=dataset_id,
@@ -342,7 +342,7 @@ class DataOutputService:
 
         db.add(
             EventModel(
-                name="Data output updated",
+                name=EventType.DATA_OUTPUT_UPDATED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=current_data_output.owner.id,

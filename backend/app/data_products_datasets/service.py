@@ -14,7 +14,7 @@ from app.data_products_datasets.model import (
 from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.events.enum import EventReferenceEntity
+from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
@@ -36,7 +36,7 @@ class DataProductDatasetService:
         current_link.approved_on = datetime.now(tz=pytz.utc)
         db.add(
             EventModel(
-                name="Data product link to dataset approved",
+                name=EventType.DATA_PRODUCT_LINK_TO_DATASET_APPROVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,
@@ -62,7 +62,7 @@ class DataProductDatasetService:
         current_link.denied_on = datetime.now(tz=pytz.utc)
         db.add(
             EventModel(
-                name="Data product link to dataset denied",
+                name=EventType.DATA_PRODUCT_LINK_TO_DATASET_DENIED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,
@@ -80,7 +80,7 @@ class DataProductDatasetService:
         data_product = ensure_data_product_exists(linked_data_product.id, db)
         db.add(
             EventModel(
-                name="Data product link to dataset removed",
+                name=EventType.DATA_PRODUCT_LINK_TO_DATASET_REMOVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,

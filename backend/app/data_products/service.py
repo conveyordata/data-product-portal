@@ -53,7 +53,7 @@ from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
 from app.environments.model import Environment as EnvironmentModel
-from app.events.enum import EventReferenceEntity
+from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.events.schema_response import EventGet
 from app.events.service import EventService
@@ -233,7 +233,7 @@ class DataProductService:
         db.flush()
         db.add(
             EventModel(
-                name="Data product created",
+                name=EventType.DATA_PRODUCT_CREATED,
                 subject_id=model.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
@@ -265,7 +265,7 @@ class DataProductService:
             db.delete(output)
         db.add(
             EventModel(
-                name="Data product deleted",
+                name=EventType.DATA_PRODUCT_DELETED,
                 subject_id=data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
@@ -310,7 +310,7 @@ class DataProductService:
                 if membership.role != membership_item["role"]:
                     db.add(
                         EventModel(
-                            name="Data product update: membership updated",
+                            name=EventType.DATA_PRODUCT_UPDATE_MEMBERSHIP_UPDATED,
                             subject_id=data_product.id,
                             subject_type=EventReferenceEntity.DATA_PRODUCT,
                             target_id=user.id,
@@ -326,7 +326,7 @@ class DataProductService:
                 data_product.memberships.append(new_membership)
                 db.add(
                     EventModel(
-                        name="Data product update: membership added",
+                        name=EventType.DATA_PRODUCT_UPDATE_MEMBERSHIP_ADDED,
                         subject_id=data_product.id,
                         subject_type=EventReferenceEntity.DATA_PRODUCT,
                         target_id=user.id,
@@ -342,7 +342,7 @@ class DataProductService:
             data_product.memberships.remove(membership)
             db.add(
                 EventModel(
-                    name="Data product update: membership removed",
+                    name=EventType.DATA_PRODUCT_UPDATE_MEMBERSHIP_REMOVED,
                     subject_id=data_product.id,
                     subject_type=EventReferenceEntity.DATA_PRODUCT,
                     target_id=membership.user_id,
@@ -394,7 +394,7 @@ class DataProductService:
 
         db.add(
             EventModel(
-                name="Data product updated",
+                name=EventType.DATA_PRODUCT_UPDATED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
@@ -415,7 +415,7 @@ class DataProductService:
         current_data_product.about = data_product.about
         db.add(
             EventModel(
-                name="Data product about updated",
+                name=EventType.DATA_PRODUCT_ABOUT_UPDATED,
                 subject_id=current_data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
@@ -527,9 +527,9 @@ class DataProductService:
         db.add(
             EventModel(
                 name=(
-                    "Data product requested access to dataset"
+                    EventType.DATA_PRODUCT_REQUESTED_ACCESS_TO_DATASET
                     if dataset.access_type != DatasetAccessType.PUBLIC
-                    else "Data product linked to dataset"
+                    else EventType.DATA_PRODUCT_LINKED_TO_DATASET
                 ),
                 subject_id=data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
@@ -570,9 +570,9 @@ class DataProductService:
         db.add(
             EventModel(
                 name=(
-                    "Data product access request to dataset removed"
+                    EventType.DATA_PRODUCT_ACCESS_REQUEST_TO_DATASET_REMOVED
                     if data_product_dataset.status != DecisionStatus.APPROVED
-                    else "Data product unlinked from dataset"
+                    else EventType.DATA_PRODUCT_UNLINKED_FROM_DATASET
                 ),
                 subject_id=data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
