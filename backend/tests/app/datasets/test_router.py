@@ -41,11 +41,13 @@ def dataset_payload():
 class TestDatasetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_dataset(self, session, dataset_payload, client):
+    def test_create_dataset(self, session, dataset_payload, client, authorizer):
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id="sub")
-        role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATASET],
         )
         assignment: RoleAssignment = GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -57,30 +59,104 @@ class TestDatasetsRouter:
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
-    def test_create_dataset_no_owner_role(self, dataset_payload, client):
+    def test_create_dataset_no_owner_role(
+        self, session, dataset_payload, client, authorizer
+    ):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATASET],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 400
 
-    def test_create_dataset_no_owners(self, dataset_payload, client):
+    def test_create_dataset_no_owners(
+        self, session, dataset_payload, client, authorizer
+    ):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATASET],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
         create_payload = deepcopy(dataset_payload)
         create_payload["owners"] = []
         created_dataset = self.create_default_dataset(client, create_payload)
         assert created_dataset.status_code == 422
 
-    def test_create_dataset_duplicate_namespace(self, dataset_payload, client):
+    def test_create_dataset_duplicate_namespace(
+        self, session, dataset_payload, client, authorizer
+    ):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATASET],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
         DatasetFactory(namespace=dataset_payload["namespace"])
 
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 400
 
-    def test_create_dataset_invalid_characters_namespace(self, dataset_payload, client):
+    def test_create_dataset_invalid_characters_namespace(
+        self, session, dataset_payload, client, authorizer
+    ):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATASET],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
         create_payload = deepcopy(dataset_payload)
         create_payload["namespace"] = "!"
 
         created_dataset = self.create_default_dataset(client, create_payload)
         assert created_dataset.status_code == 400
 
-    def test_create_dataset_invalid_length_namespace(self, dataset_payload, client):
+    def test_create_dataset_invalid_length_namespace(
+        self, session, dataset_payload, client, authorizer
+    ):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATASET],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
         create_payload = deepcopy(dataset_payload)
         create_payload["namespace"] = "a" * 256
 

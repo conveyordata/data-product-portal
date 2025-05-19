@@ -18,10 +18,14 @@ from tests.factories.environment import EnvironmentFactory
 from tests.factories.lifecycle import LifecycleFactory
 from tests.factories.platform import PlatformFactory
 from tests.factories.role import RoleFactory
+from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
 from app.data_product_memberships.enums import DataProductUserRole
+from app.role_assignments.data_product.schema import RoleAssignment
+from app.role_assignments.enums import DecisionStatus
+from app.role_assignments.global_.auth import GlobalAuthAssignment
 from app.roles.schema import Scope
 from app.roles.service import RoleService
 
@@ -55,23 +59,75 @@ def payload():
 class TestDataProductsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_data_product(self, payload, client, session):
+    def test_create_data_product(self, payload, client, session, authorizer):
         RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
 
-    def test_create_data_product_no_owner_role(self, payload, client):
+    def test_create_data_product_no_owner_role(
+        self, session, payload, client, authorizer
+    ):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 400
 
-    def test_create_data_product_no_members(self, payload, client):
+    def test_create_data_product_no_members(self, session, payload, client, authorizer):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
         create_payload = deepcopy(payload)
         create_payload["memberships"] = []
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 422
 
-    def test_create_data_product_no_owner(self, payload, client):
+    def test_create_data_product_no_owner(self, session, payload, client, authorizer):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
         user = UserFactory()
         memberships = [
             {
@@ -85,20 +141,68 @@ class TestDataProductsRouter:
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 422
 
-    def test_create_data_product_duplicate_namespace(self, payload, client):
+    def test_create_data_product_duplicate_namespace(
+        self, session, payload, client, authorizer
+    ):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
+
         DataProductFactory(namespace=payload["namespace"])
 
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 400
 
-    def test_create_data_product_invalid_characters_namespace(self, payload, client):
+    def test_create_data_product_invalid_characters_namespace(
+        self, session, payload, client, authorizer
+    ):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
+
         create_payload = deepcopy(payload)
         create_payload["namespace"] = "!"
 
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 400
 
-    def test_create_data_product_invalid_length_namespace(self, payload, client):
+    def test_create_data_product_invalid_length_namespace(
+        self, session, payload, client, authorizer
+    ):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.GLOBAL)
+        authorizer.sync_role_permissions(
+            role_id=str(role.id),
+            actions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        assignment: RoleAssignment = GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        GlobalAuthAssignment(assignment).add()
+
         create_payload = deepcopy(payload)
         create_payload["namespace"] = "a" * 256
 

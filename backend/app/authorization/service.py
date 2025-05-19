@@ -37,7 +37,8 @@ class AuthorizationService:
         self._sync_dataset_assignments()
         self._sync_global_assignments()
 
-    def _clear_casbin_table(self) -> None:
+    @staticmethod
+    def _clear_casbin_table() -> None:
         """Clears the database table used by casbin. Use with caution!
         This means the casbin table will be out of sync with the role assignments.
         """

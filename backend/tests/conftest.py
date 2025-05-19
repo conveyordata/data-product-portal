@@ -8,6 +8,7 @@ from starlette.routing import _DefaultLifespan
 from tests.factories.role import RoleFactory
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
+from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz.authorization import Authorization
 from app.data_product_memberships.model import DataProductUserRole
@@ -17,7 +18,7 @@ from app.main import app
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.global_.auth import GlobalAuthAssignment
 from app.roles import ADMIN_UUID
-from app.roles.schema import Scope
+from app.roles.schema import Prototype, Scope
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
@@ -118,12 +119,11 @@ def clear_db(session: scoped_session[Session]) -> None:
     for table in reversed(Base.metadata.sorted_tables):
         session.execute(table.delete())
     session.commit()
-    # settings.AUTHORIZER_ENABLED = False
 
 
 @pytest.fixture
 def admin() -> UserFactory:
-    role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
+    role = RoleFactory(scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID)
     user = UserFactory(external_id="sub", is_admin=True)
     assignment: RoleAssignment = GlobalRoleAssignmentFactory(
         user_id=user.id, role_id=role.id
@@ -134,12 +134,6 @@ def admin() -> UserFactory:
 
 @pytest.fixture
 def authorizer() -> Generator[Authorization, None, None]:
-    yield Authorization()
-
-
-@pytest.fixture
-def enable_authorizer():
-    pass
-    # settings.AUTHORIZER_ENABLED = True
-    # yield
-    # settings.AUTHORIZER_ENABLED = False
+    AuthorizationService._clear_casbin_table()
+    auth = Authorization()
+    yield auth
