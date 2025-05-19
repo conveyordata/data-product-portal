@@ -73,6 +73,26 @@ class RoleAssignmentService:
         return self.db.scalars(query).all()
 
     def create_assignment(self, request: CreateRoleAssignment) -> RoleAssignment:
+        existing_assignment = self.db.scalar(
+            select(DataProductRoleAssignment).where(
+                DataProductRoleAssignment.user_id == request.user_id,
+                DataProductRoleAssignment.data_product_id == request.data_product_id,
+            )
+        )
+        if existing_assignment:
+            if existing_assignment.decision == DecisionStatus.DENIED:
+                self.db.delete(existing_assignment)
+                self.db.flush()
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        "Role assignment already"
+                        " exists for"
+                        " this user and data product."
+                    ),
+                )
+
         role_assignment = DataProductRoleAssignment(
             **request.model_dump(),
             requested_on=datetime.now(),
@@ -128,33 +148,6 @@ class RoleAssignmentService:
             .all()
         )
         return actions
-
-    def request_role_assignment(
-        self,
-        request: CreateRoleAssignment,
-    ):
-        existing_assignment = self.db.scalar(
-            select(DataProductRoleAssignment).where(
-                DataProductRoleAssignment.user_id == request.user_id,
-                DataProductRoleAssignment.data_product_id == request.data_product_id,
-            )
-        )
-        if existing_assignment:
-            if existing_assignment.decision == DecisionStatus.DENIED:
-                self.db.delete(existing_assignment)
-                self.db.flush()
-            else:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=(
-                        "Role assignment already"
-                        " exists for"
-                        " this user and data product."
-                    ),
-                )
-
-        role_assignment = self.create_assignment(request)
-        return role_assignment
 
     def send_role_assignment_request_email(
         self,

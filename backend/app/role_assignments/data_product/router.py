@@ -50,7 +50,7 @@ def request_assignment(
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
-    role_assignment = service.request_role_assignment(request)
+    role_assignment = service.create_assignment(request)
 
     background_tasks.add_task(
         service.send_role_assignment_request_email,
