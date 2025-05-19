@@ -144,6 +144,6 @@ export function getEventTypeDisplayName(t: TFunction, type: EventType): string {
             return t('Removed user from the dataset:');
 
         default:
-            return 'Unknown';
+            return t('Unknown');
     }
 }
