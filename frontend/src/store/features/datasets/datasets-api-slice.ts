@@ -17,7 +17,7 @@ import {
     NamespaceValidationResponse,
 } from '@/types/namespace/namespace';
 
-export const datasetTags: string[] = [TagTypes.Dataset, TagTypes.UserDatasets, TagTypes.DataProduct];
+export const datasetTags: string[] = [TagTypes.Dataset, TagTypes.UserDatasets, TagTypes.DataProduct, TagTypes.History];
 
 export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: datasetTags }).injectEndpoints({
     endpoints: (builder) => ({
@@ -56,7 +56,10 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 url: buildUrl(ApiUrl.DatasetHistory, { datasetId: id }),
                 method: 'GET',
             }),
-            providesTags: (_, __, id) => [{ type: TagTypes.Dataset as const, id }],
+            providesTags: (_, __, id) => [
+                { type: TagTypes.Dataset as const, id },
+                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
+            ],
         }),
         createDataset: builder.mutation<DatasetCreateResponse, DatasetCreateRequest>({
             query: (dataset) => ({
@@ -77,6 +80,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
             invalidatesTags: [
                 { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
         updateDataset: builder.mutation<

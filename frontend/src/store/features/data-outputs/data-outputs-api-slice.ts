@@ -24,6 +24,7 @@ export const dataOutputTags: string[] = [
     TagTypes.DataProduct,
     TagTypes.UserDatasets,
     TagTypes.UserDataOutputs,
+    TagTypes.History,
 ];
 
 export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dataOutputTags }).injectEndpoints({
@@ -74,6 +75,7 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
             providesTags: (_, __, id) => [
                 { type: TagTypes.DataOutput as const, id: id },
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
         getDataOutputGraphData: builder.query<GraphContract, string>({
@@ -127,7 +129,10 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 url: buildUrl(ApiUrl.DataOutputGet, { dataOutputId: id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: [{ type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
+            ],
         }),
         removeDatasetFromDataOutput: builder.mutation<DataOutputDatasetRemoveResponse, DataOutputDatasetRemoveRequest>({
             query: ({ dataOutputId, datasetId }) => ({
