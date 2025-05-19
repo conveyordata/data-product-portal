@@ -202,11 +202,9 @@ class DataOutputService:
         current_data_output.status = data_output.status
         db.add(
             EventModel(
-                name=EventType.DATA_OUTPUT_STATUS_UPDATED,
+                name=EventType.DATA_OUTPUT_UPDATED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
-                target_id=current_data_output.owner.id,
-                target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
             ),
         )
@@ -251,7 +249,7 @@ class DataOutputService:
         data_output.dataset_links.append(dataset_link)
         db.add(
             EventModel(
-                name=EventType.DATA_OUTPUT_LINK_REQUESTED_TO_DATASET,
+                name=EventType.DATA_OUTPUT_DATASET_LINK_REQUESTED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=dataset_id,
@@ -312,7 +310,7 @@ class DataOutputService:
         data_output.dataset_links.remove(data_output_dataset)
         db.add(
             EventModel(
-                name=EventType.DATA_OUTPUT_LINK_REMOVED_FROM_DATASET,
+                name=EventType.DATA_OUTPUT_DATASET_LINK_REMOVED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=dataset_id,
@@ -345,8 +343,6 @@ class DataOutputService:
                 name=EventType.DATA_OUTPUT_UPDATED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
-                target_id=current_data_output.owner.id,
-                target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
             ),
         )

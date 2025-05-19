@@ -10,7 +10,7 @@ import { useGetDataProductHistoryQuery } from '@/store/features/data-products/da
 import { useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice';
 import { EventContract } from '@/types/events/event.contract';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
-import { getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
+import { getEventTypeDisplayName, getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
 
 import { Searchbar } from '../form';
 import styles from './history-tab.module.scss';
@@ -36,7 +36,7 @@ function filterHistory(events: EventContract[], searchTerm: string, t: TFunction
         return (
             subjectLabel?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
             targetLabel?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-            event.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            getEventTypeDisplayName(t, event.name).toLowerCase().includes(searchTerm?.toLowerCase()) ||
             event.actor.email.toLowerCase().includes(searchTerm?.toLowerCase())
         );
     });

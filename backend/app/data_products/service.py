@@ -265,7 +265,7 @@ class DataProductService:
             db.delete(output)
         db.add(
             EventModel(
-                name=EventType.DATA_PRODUCT_DELETED,
+                name=EventType.DATA_PRODUCT_REMOVED,
                 subject_id=data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
@@ -310,7 +310,7 @@ class DataProductService:
                 if membership.role != membership_item["role"]:
                     db.add(
                         EventModel(
-                            name=EventType.DATA_PRODUCT_UPDATE_MEMBERSHIP_UPDATED,
+                            name=EventType.DATA_PRODUCT_MEMBERSHIP_UPDATED,
                             subject_id=data_product.id,
                             subject_type=EventReferenceEntity.DATA_PRODUCT,
                             target_id=user.id,
@@ -326,7 +326,7 @@ class DataProductService:
                 data_product.memberships.append(new_membership)
                 db.add(
                     EventModel(
-                        name=EventType.DATA_PRODUCT_UPDATE_MEMBERSHIP_ADDED,
+                        name=EventType.DATA_PRODUCT_MEMBERSHIP_CREATED,
                         subject_id=data_product.id,
                         subject_type=EventReferenceEntity.DATA_PRODUCT,
                         target_id=user.id,
@@ -342,7 +342,7 @@ class DataProductService:
             data_product.memberships.remove(membership)
             db.add(
                 EventModel(
-                    name=EventType.DATA_PRODUCT_UPDATE_MEMBERSHIP_REMOVED,
+                    name=EventType.DATA_PRODUCT_MEMBERSHIP_REMOVED,
                     subject_id=data_product.id,
                     subject_type=EventReferenceEntity.DATA_PRODUCT,
                     target_id=membership.user_id,
@@ -415,7 +415,7 @@ class DataProductService:
         current_data_product.about = data_product.about
         db.add(
             EventModel(
-                name=EventType.DATA_PRODUCT_ABOUT_UPDATED,
+                name=EventType.DATA_PRODUCT_UPDATED,
                 subject_id=current_data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
@@ -527,9 +527,9 @@ class DataProductService:
         db.add(
             EventModel(
                 name=(
-                    EventType.DATA_PRODUCT_REQUESTED_ACCESS_TO_DATASET
+                    EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
                     if dataset.access_type != DatasetAccessType.PUBLIC
-                    else EventType.DATA_PRODUCT_LINKED_TO_DATASET
+                    else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
                 ),
                 subject_id=data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
@@ -570,9 +570,9 @@ class DataProductService:
         db.add(
             EventModel(
                 name=(
-                    EventType.DATA_PRODUCT_ACCESS_REQUEST_TO_DATASET_REMOVED
+                    EventType.DATA_PRODUCT_DATASET_LINK_REMOVED
                     if data_product_dataset.status != DecisionStatus.APPROVED
-                    else EventType.DATA_PRODUCT_UNLINKED_FROM_DATASET
+                    else EventType.DATA_PRODUCT_DATASET_LINK_DENIED
                 ),
                 subject_id=data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,

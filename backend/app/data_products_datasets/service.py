@@ -36,7 +36,7 @@ class DataProductDatasetService:
         current_link.approved_on = datetime.now(tz=pytz.utc)
         db.add(
             EventModel(
-                name=EventType.DATA_PRODUCT_LINK_TO_DATASET_APPROVED,
+                name=EventType.DATA_PRODUCT_DATASET_LINK_APPROVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,
@@ -62,7 +62,7 @@ class DataProductDatasetService:
         current_link.denied_on = datetime.now(tz=pytz.utc)
         db.add(
             EventModel(
-                name=EventType.DATA_PRODUCT_LINK_TO_DATASET_DENIED,
+                name=EventType.DATA_PRODUCT_DATASET_LINK_DENIED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,
@@ -80,7 +80,7 @@ class DataProductDatasetService:
         data_product = ensure_data_product_exists(linked_data_product.id, db)
         db.add(
             EventModel(
-                name=EventType.DATA_PRODUCT_LINK_TO_DATASET_REMOVED,
+                name=EventType.DATA_PRODUCT_DATASET_LINK_REMOVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,

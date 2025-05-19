@@ -6,7 +6,12 @@ import { useNavigate } from 'react-router';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import type { EventContract } from '@/types/events/event.contract';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
-import { getEventReferenceEntityLinkPath, getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
+import {
+    getEventReferenceEntityLinkPath,
+    getEventTypeDisplayName,
+    getSubjectDisplayLabel,
+    getTargetDisplayLabel,
+} from '@/utils/history.helper';
 
 import { LoadingSpinner } from '../loading/loading-spinner/loading-spinner';
 
@@ -16,7 +21,7 @@ interface HistoryTableLinkProps {
     type: EventReferenceEntity;
 }
 
-export function HistoryTableLink({ record, resourceId, type }: HistoryTableLinkProps): ReactNode | null {
+export function HistoryTableEventName({ record, resourceId, type }: HistoryTableLinkProps): ReactNode | null {
     const { target_id, subject_id, subject_type, target_type, deleted_subject_identifier, deleted_target_identifier } =
         record;
     const { t } = useTranslation();
@@ -44,19 +49,26 @@ export function HistoryTableLink({ record, resourceId, type }: HistoryTableLinkP
         );
 
         if (subject_type == EventReferenceEntity.User) {
-            return <Typography.Text> {getTargetDisplayLabel(t, record)}</Typography.Text>;
+            return (
+                <Typography.Text>
+                    {getEventTypeDisplayName(t, record.name)} {getTargetDisplayLabel(t, record)}
+                </Typography.Text>
+            );
         }
         return (
-            <Button
-                type="link"
-                disabled={!!deleted_subject_identifier}
-                style={{ paddingLeft: 0 }}
-                onClick={() => {
-                    if (path) navigate(path);
-                }}
-            >
-                {getSubjectDisplayLabel(t, record)}
-            </Button>
+            <Typography.Text>
+                {getEventTypeDisplayName(t, record.name)}{' '}
+                <Button
+                    type="link"
+                    disabled={!!deleted_subject_identifier}
+                    style={{ paddingLeft: 0 }}
+                    onClick={() => {
+                        if (path) navigate(path);
+                    }}
+                >
+                    {getSubjectDisplayLabel(t, record)}
+                </Button>
+            </Typography.Text>
         );
     }
 
@@ -68,21 +80,28 @@ export function HistoryTableLink({ record, resourceId, type }: HistoryTableLinkP
         );
 
         if (target_type == EventReferenceEntity.User) {
-            return <Typography.Text> {getTargetDisplayLabel(t, record)}</Typography.Text>;
+            return (
+                <Typography.Text>
+                    {getEventTypeDisplayName(t, record.name)} {getTargetDisplayLabel(t, record)}
+                </Typography.Text>
+            );
         }
         return (
-            <Button
-                type="link"
-                disabled={!!deleted_target_identifier}
-                style={{ paddingLeft: 0 }}
-                onClick={() => {
-                    if (path) navigate(path);
-                }}
-            >
-                {getTargetDisplayLabel(t, record)}
-            </Button>
+            <Typography.Text>
+                {getEventTypeDisplayName(t, record.name)}{' '}
+                <Button
+                    type="link"
+                    disabled={!!deleted_target_identifier}
+                    style={{ paddingLeft: 0 }}
+                    onClick={() => {
+                        if (path) navigate(path);
+                    }}
+                >
+                    {getTargetDisplayLabel(t, record)}
+                </Button>
+            </Typography.Text>
         );
     }
 
-    return <Typography.Text type="secondary">{t('None')}</Typography.Text>;
+    return <Typography.Text>{getEventTypeDisplayName(t, record.name)}</Typography.Text>;
 }

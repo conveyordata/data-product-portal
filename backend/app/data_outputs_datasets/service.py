@@ -47,7 +47,7 @@ class DataOutputDatasetService:
         current_link.approved_on = datetime.now(tz=pytz.utc)
         db.add(
             EventModel(
-                name=EventType.DATA_OUTPUT_LINK_TO_DATASET_APPROVED,
+                name=EventType.DATA_OUTPUT_DATASET_LINK_APPROVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,
@@ -78,7 +78,7 @@ class DataOutputDatasetService:
         current_link.denied_on = datetime.now(tz=pytz.utc)
         db.add(
             EventModel(
-                name=EventType.DATA_OUTPUT_LINK_TO_DATASET_DENIED,
+                name=EventType.DATA_OUTPUT_DATASET_LINK_DENIED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,
@@ -110,7 +110,7 @@ class DataOutputDatasetService:
         data_output = ensure_data_output_exists(linked_data_output.id, db)
         db.add(
             EventModel(
-                name=EventType.DATA_OUTPUT_LINK_TO_DATASET_REMOVED,
+                name=EventType.DATA_OUTPUT_DATASET_LINK_REMOVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,

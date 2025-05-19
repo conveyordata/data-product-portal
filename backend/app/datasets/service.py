@@ -168,7 +168,7 @@ class DatasetService:
         for owner in model.owners:
             db.add(
                 EventModel(
-                    name=EventType.DATASET_CREATION_OWNER_ADDED,
+                    name=EventType.DATASET_USER_ADDED,
                     subject_id=model.id,
                     subject_type=EventReferenceEntity.DATASET,
                     target_id=owner.id,
@@ -247,7 +247,7 @@ class DatasetService:
                 for owner_id in owners_to_remove:
                     db.add(
                         EventModel(
-                            name=EventType.DATASET_UPDATE_OWNER_REMOVED,
+                            name=EventType.DATASET_USER_REMOVED,
                             subject_id=current_dataset.id,
                             subject_type=EventReferenceEntity.DATASET,
                             target_id=owner_id,
@@ -258,7 +258,7 @@ class DatasetService:
                 for owner_id in owners_to_add:
                     db.add(
                         EventModel(
-                            name=EventType.DATASET_UPDATE_OWNER_ADDED,
+                            name=EventType.DATASET_USER_ADDED,
                             subject_id=current_dataset.id,
                             subject_type=EventReferenceEntity.DATASET,
                             target_id=owner_id,
@@ -295,7 +295,7 @@ class DatasetService:
         current_dataset.about = dataset.about
         db.add(
             EventModel(
-                name=EventType.DATASET_ABOUT_UPDATED,
+                name=EventType.DATASET_UPDATED,
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
@@ -314,7 +314,7 @@ class DatasetService:
         current_dataset.status = dataset.status
         db.add(
             EventModel(
-                name=EventType.DATASET_STATUS_UPDATED,
+                name=EventType.DATASET_UPDATED,
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
@@ -336,7 +336,7 @@ class DatasetService:
         dataset.owners.append(user)
         db.add(
             EventModel(
-                name=EventType.USER_ADDED_TO_DATASET,
+                name=EventType.DATASET_USER_ADDED,
                 subject_id=dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
@@ -367,7 +367,7 @@ class DatasetService:
         dataset.owners.remove(user)
         db.add(
             EventModel(
-                name=EventType.USER_REMOVED_FROM_DATASET,
+                name=EventType.DATASET_USER_REMOVED,
                 subject_id=dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
