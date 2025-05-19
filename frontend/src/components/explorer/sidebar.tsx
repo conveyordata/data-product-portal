@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 
 import styles from './sidebar.module.scss';
 
-
 export type SidebarFilters = {
     dataProductsEnabled: boolean;
     datasetsEnabled: boolean;
@@ -158,7 +157,6 @@ export function Sidebar({
                                     <br />
                                     Description: {nodeData.description}
                                     <br />
-
                                     {nodeData.members?.length > 0 && (
                                         <>
                                             Members: <br />

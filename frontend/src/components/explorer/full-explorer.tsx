@@ -16,7 +16,11 @@ import styles from './explorer.module.scss';
 import { SidebarFilters, Sidebar } from './sidebar';
 import { parseEdges, LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common';
 
-function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, domainsEnabled: boolean = true): Node[] {
+function parseFullNodes(
+    nodes: NodeContract[],
+    defaultNodePosition: XYPosition,
+    domainsEnabled: boolean = true,
+): Node[] {
     // Regular nodes and domain nodes. In domain nodes, we count how many children they have so we can estimate their size.
     let regular_nodes = nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
@@ -61,10 +65,12 @@ function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, 
                 deletable: false,
                 type: node.type,
                 // Only set parentId if domains are enabled and there is a domain_id in the node
-                ...(domainsEnabled && node.data.domain_id ? {
-                    parentId: node.data.domain_id,
-                    extent: 'parent', // node not draggable outside of the parent
-                } : {}),
+                ...(domainsEnabled && node.data.domain_id
+                    ? {
+                          parentId: node.data.domain_id,
+                          //extent: 'parent', // node not draggable outside of the parent
+                      }
+                    : {}),
                 data: {
                     name: node.data.name,
                     id: node.data.id,
@@ -78,53 +84,108 @@ function parseFullNodes(nodes: NodeContract[], defaultNodePosition: XYPosition, 
         });
 
     // count how many children each parent has
-    let childCounts = regular_nodes.reduce((acc: Record<string, number>, node) => {
-        if (node.parentId) {
-            if (!acc[node.parentId]) {
-                acc[node.parentId] = 0;
-            }
-            acc[node.parentId]++;
-        }
-        return acc;
-    }, {});
+    //let childCounts = regular_nodes.reduce((acc: Record<string, number>, node) => {
+    //    if (node.parentId) {
+    //        if (!acc[node.parentId]) {
+    //            acc[node.parentId] = 0;
+    //        }
+    //        acc[node.parentId]++;
+    //    }
+    //    return acc;
+    //}, {});
 
     // Only include domain nodes if domains are enabled
     let domain_nodes = domainsEnabled
         ? nodes
-            .filter((node) => node.type === CustomNodeTypes.DomainNode)
-            .map((node) => {
-                const childCount = childCounts[node.id] || 1;
-                const width = Math.max(200, childCount * 120); // Base width of 400px, 200px per child
-                return {
-                    id: node.id,
-                    position: defaultNodePosition,
-                    draggable: true,
-                    deletable: false,
-                    type: 'group', // TODO: double use of the 'type' field by reactflow and ourselves
-                    style: {
-                        // TODO: calculate this based on the number of nodes in the domain
-                        width: width,
-                        height: width * 0.6,
-                        backgroundColor: 'rgba(0, 255, 42, 0.1)',
-                        border: '1px solid rgba(0, 255, 42, 0.5)',
-                        borderRadius: '8em',
-                    },
-                    data: {
-                        name: node.data.name,
-                        id: node.data.id,
-                        icon_key: node.data.icon_key,
-                        isMainNode: node.isMain,
-                        description: node.data.description,
-                        extent: 'parent',
-                        type: 'group',
-                    },
-                };
-            })
+              .filter((node) => node.type === CustomNodeTypes.DomainNode)
+              .map((node) => {
+                  //const childCount = childCounts[node.id] || 1;
+                  //const width = Math.max(200, childCount * 120); // Base width of 400px, 200px per child
+                  return {
+                      id: node.id,
+                      position: defaultNodePosition,
+                      draggable: true,
+                      deletable: false,
+                      type: 'group', // TODO: double use of the 'type' field by reactflow and ourselves
+                      style: {
+                          width: 10,
+                          height: 10 * 0.6,
+                          backgroundColor: 'rgba(0, 255, 42, 0.1)',
+                          border: '1px solid rgba(0, 255, 42, 0.5)',
+                          borderRadius: '8em',
+                      },
+                      data: {
+                          name: node.data.name,
+                          id: node.data.id,
+                          icon_key: node.data.icon_key,
+                          isMainNode: node.isMain,
+                          description: node.data.description,
+                          extent: 'parent',
+                          type: 'group',
+                      },
+                  };
+              })
         : [];
 
     let result = [...domain_nodes, ...regular_nodes];
 
     console.log('result', result);
+    return result;
+}
+
+function calculateDomainPositions(
+    regular_nodes: Node[],
+): Record<string, { minX: number; maxX: number; minY: number; maxY: number }> {
+    // TODO: does not work yet but we are disabling domains for now
+    console.log('Calculating domain positions');
+    // Calculate the positions of the domains based on their children
+    let domainPositions = regular_nodes.reduce(
+        (acc: Record<string, { minX: number; maxX: number; minY: number; maxY: number }>, node) => {
+            if (node.parentId) {
+                if (!acc[node.parentId]) {
+                    console.log('adding new domain position', node);
+                    acc[node.parentId] = {
+                        minX: node.position.x,
+                        maxX: node.position.x,
+                        minY: node.position.y,
+                        maxY: node.position.y,
+                    };
+                } else {
+                    console.log('processing node', node);
+                    console.log('with position', node.position.x, node.position.y);
+                    console.log('position', node.position);
+                    acc[node.parentId].minX = Math.min(acc[node.parentId].minX, node.position.x);
+                    acc[node.parentId].maxX = Math.max(acc[node.parentId].maxX, node.position.x);
+                    acc[node.parentId].minY = Math.min(acc[node.parentId].minY, node.position.y);
+                    acc[node.parentId].maxY = Math.max(acc[node.parentId].maxY, node.position.y);
+                }
+            }
+            return acc;
+        },
+        {},
+    );
+    console.log('domain positions', domainPositions);
+    return domainPositions;
+}
+
+function setDomainPositions(nodes: Node[]) {
+    // TODO: does not work yet but we are disabling domains for now
+    // Calculate the positions of the domains based on their children
+    let result = Object.assign({}, nodes);
+    const domainNodePositions = calculateDomainPositions(result);
+    // Set the positions and sizes of the domain nodes
+    result.forEach((node) => {
+        if (node.type === 'group') {
+            const domainPosition = domainNodePositions[node.id];
+            if (domainPosition) {
+                node.position.x = domainPosition.maxX;
+                node.position.y = 500;
+                node.style!.width = Math.max(200, (domainPosition.maxX - domainPosition.minX) * 1.0);
+                node.style!.height = Math.max(200, (domainPosition.maxY - domainPosition.minY) * 1.0);
+            }
+        }
+    });
+
     return result;
 }
 
@@ -159,6 +220,8 @@ function InternalFullExplorer() {
             const nodes = parseFullNodes(graph.nodes, defaultNodePosition, sidebarFilters.domainsEnabled);
             const edges = parseEdges(graph.edges);
             setNodesAndEdges(nodes, edges);
+            //const new_nodes = setDomainPositions(nodes);  // TODO: does not work yet but we are disabling domain nodes for now
+            //setNodesAndEdges(new_nodes, edges);
         }
     }, [defaultNodePosition, graph, setNodesAndEdges, sidebarFilters.domainsEnabled]);
 
