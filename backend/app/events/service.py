@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.data_outputs.model import DataOutput
 from app.data_products.model import DataProduct
 from app.datasets.model import Dataset
-from app.events.enum import Type
+from app.events.enum import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.users.model import User
 
@@ -17,7 +17,8 @@ def _backup_user_name_on_delete(mapper, connection, target):
         update(EventModel.__table__)
         .where(
             and_(
-                EventModel.subject_id == target.id, EventModel.subject_type == Type.USER
+                EventModel.subject_id == target.id,
+                EventModel.subject_type == EventReferenceEntity.USER,
             )
         )
         .values(deleted_subject_identifier=target.email)
@@ -25,7 +26,10 @@ def _backup_user_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
         .where(
-            and_(EventModel.target_id == target.id, EventModel.target_type == Type.USER)
+            and_(
+                EventModel.target_id == target.id,
+                EventModel.target_type == EventReferenceEntity.USER,
+            )
         )
         .values(deleted_target_identifier=target.email)
     )
@@ -38,7 +42,7 @@ def _backup_dataset_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.subject_id == target.id,
-                EventModel.subject_type == Type.DATASET,
+                EventModel.subject_type == EventReferenceEntity.DATASET,
             )
         )
         .values(deleted_subject_identifier=target.name)
@@ -48,7 +52,7 @@ def _backup_dataset_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.target_id == target.id,
-                EventModel.target_type == Type.DATASET,
+                EventModel.target_type == EventReferenceEntity.DATASET,
             )
         )
         .values(deleted_target_identifier=target.name)
@@ -62,7 +66,7 @@ def _backup_data_product_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.subject_id == target.id,
-                EventModel.subject_type == Type.DATA_PRODUCT,
+                EventModel.subject_type == EventReferenceEntity.DATA_PRODUCT,
             )
         )
         .values(deleted_subject_identifier=target.name)
@@ -72,7 +76,7 @@ def _backup_data_product_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.target_id == target.id,
-                EventModel.target_type == Type.DATA_PRODUCT,
+                EventModel.target_type == EventReferenceEntity.DATA_PRODUCT,
             )
         )
         .values(deleted_target_identifier=target.name)
@@ -86,7 +90,7 @@ def _backup_data_output_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.subject_id == target.id,
-                EventModel.subject_type == Type.DATA_OUTPUT,
+                EventModel.subject_type == EventReferenceEntity.DATA_OUTPUT,
             )
         )
         .values(deleted_subject_identifier=target.name)
@@ -96,7 +100,7 @@ def _backup_data_output_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.target_id == target.id,
-                EventModel.target_type == Type.DATA_OUTPUT,
+                EventModel.target_type == EventReferenceEntity.DATA_OUTPUT,
             )
         )
         .values(deleted_target_identifier=target.name)
@@ -105,7 +109,7 @@ def _backup_data_output_name_on_delete(mapper, connection, target):
 
 class EventService:
 
-    def get_history(self, db: Session, id: UUID, type: Type):
+    def get_history(self, db: Session, id: UUID, type: EventReferenceEntity):
         return db.scalars(
             select(EventModel)
             .where(

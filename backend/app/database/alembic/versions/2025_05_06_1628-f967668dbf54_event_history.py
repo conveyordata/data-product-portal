@@ -15,7 +15,7 @@ from alembic import op
 from app.shared.model import utcnow
 
 
-class Type(str, Enum):
+class EventReferenceEntity(str, Enum):
     DATA_PRODUCT = "data_product"
     DATASET = "dataset"
     DATA_OUTPUT = "data_output"
@@ -36,8 +36,8 @@ def upgrade() -> None:
         sa.Column("name", sa.String, nullable=False),
         sa.Column("subject_id", sa.UUID),
         sa.Column("target_id", sa.UUID, nullable=True),
-        sa.Column("subject_type", sa.Enum(Type)),
-        sa.Column("target_type", sa.Enum(Type), nullable=True),
+        sa.Column("subject_type", sa.Enum(EventReferenceEntity)),
+        sa.Column("target_type", sa.Enum(EventReferenceEntity), nullable=True),
         sa.Column("deleted_subject_identifier", sa.String, nullable=True),
         sa.Column("deleted_target_identifier", sa.String, nullable=True),
         sa.Column("actor_id", sa.UUID, sa.ForeignKey("users.id"), nullable=False),
@@ -56,4 +56,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("events")
-    op.execute('DROP TYPE "type"')
+    op.execute('DROP TYPE "eventreferencetype"')

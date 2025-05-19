@@ -31,7 +31,7 @@ from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
 from app.datasets.model import ensure_dataset_exists
-from app.events.enum import Type
+from app.events.enum import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.events.schema_response import EventGet
 from app.events.service import EventService
@@ -113,7 +113,7 @@ class DataOutputService:
         )
 
     def get_event_history(self, id: UUID, db: Session) -> list[EventGet]:
-        return EventService().get_history(db, id, Type.DATA_OUTPUT)
+        return EventService().get_history(db, id, EventReferenceEntity.DATA_OUTPUT)
 
     def create_data_output(
         self,
@@ -153,9 +153,9 @@ class DataOutputService:
             EventModel(
                 name="Data output created",
                 subject_id=model.id,
-                subject_type=Type.DATA_OUTPUT,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=model.owner_id,
-                target_type=Type.DATA_PRODUCT,
+                target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=model.owner.domain_id,
             ),
@@ -182,9 +182,9 @@ class DataOutputService:
             EventModel(
                 name="Data output removed",
                 subject_id=id,
-                subject_type=Type.DATA_OUTPUT,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=data_output.owner_id,
-                target_type=Type.DATA_PRODUCT,
+                target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=data_output.owner.domain_id,
             ),
@@ -206,9 +206,9 @@ class DataOutputService:
             EventModel(
                 name="Data output status updated",
                 subject_id=id,
-                subject_type=Type.DATA_OUTPUT,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=current_data_output.owner.id,
-                target_type=Type.DATA_PRODUCT,
+                target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=current_data_output.owner.domain.id,
             ),
@@ -256,9 +256,9 @@ class DataOutputService:
             EventModel(
                 name="Data output link requested to dataset",
                 subject_id=id,
-                subject_type=Type.DATA_OUTPUT,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=dataset_id,
-                target_type=Type.DATASET,
+                target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 domain_id=data_output.owner.domain_id,
             ),
@@ -318,9 +318,9 @@ class DataOutputService:
             EventModel(
                 name="Data output link removed from dataset",
                 subject_id=id,
-                subject_type=Type.DATA_OUTPUT,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=dataset_id,
-                target_type=Type.DATASET,
+                target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 domain_id=data_output.owner.domain.id,
             ),
@@ -349,9 +349,9 @@ class DataOutputService:
             EventModel(
                 name="Data output updated",
                 subject_id=id,
-                subject_type=Type.DATA_OUTPUT,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=current_data_output.owner.id,
-                target_type=Type.DATA_PRODUCT,
+                target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=current_data_output.owner.domain.id,
             ),

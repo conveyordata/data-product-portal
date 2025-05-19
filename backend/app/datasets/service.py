@@ -25,7 +25,7 @@ from app.datasets.schema_request import (
     DatasetStatusUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
-from app.events.enum import Type
+from app.events.enum import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.events.schema_response import EventGet
 from app.events.service import EventService
@@ -114,7 +114,7 @@ class DatasetService:
         return datasets
 
     def get_event_history(self, id: UUID, db: Session) -> list[EventGet]:
-        return EventService().get_history(db, id, Type.DATASET)
+        return EventService().get_history(db, id, EventReferenceEntity.DATASET)
 
     def get_user_datasets(self, user_id: UUID, db: Session) -> Sequence[DatasetsGet]:
         return (
@@ -170,9 +170,9 @@ class DatasetService:
                 EventModel(
                     name="Dataset creation: owner added",
                     subject_id=model.id,
-                    subject_type=Type.DATASET,
+                    subject_type=EventReferenceEntity.DATASET,
                     target_id=owner.id,
-                    target_type=Type.USER,
+                    target_type=EventReferenceEntity.USER,
                     actor_id=authenticated_user.id,
                     domain_id=model.domain.id,
                 ),
@@ -181,7 +181,7 @@ class DatasetService:
             EventModel(
                 name="Dataset created",
                 subject_id=model.id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 domain_id=model.domain_id,
             ),
@@ -207,7 +207,7 @@ class DatasetService:
             EventModel(
                 name="Dataset removed",
                 subject_id=dataset.id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 domain_id=dataset.domain_id,
             ),
@@ -252,9 +252,9 @@ class DatasetService:
                         EventModel(
                             name="Dataset update: owner removed",
                             subject_id=current_dataset.id,
-                            subject_type=Type.DATASET,
+                            subject_type=EventReferenceEntity.DATASET,
                             target_id=owner_id,
-                            target_type=Type.USER,
+                            target_type=EventReferenceEntity.USER,
                             actor_id=authenticated_user.id,
                             domain_id=current_dataset.domain_id,
                         ),
@@ -264,9 +264,9 @@ class DatasetService:
                         EventModel(
                             name="Dataset update: owner added",
                             subject_id=current_dataset.id,
-                            subject_type=Type.DATASET,
+                            subject_type=EventReferenceEntity.DATASET,
                             target_id=owner_id,
-                            target_type=Type.USER,
+                            target_type=EventReferenceEntity.USER,
                             actor_id=authenticated_user.id,
                             domain_id=current_dataset.domain_id,
                         ),
@@ -281,7 +281,7 @@ class DatasetService:
             EventModel(
                 name="Dataset updated",
                 subject_id=current_dataset.id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 domain_id=dataset.domain_id,
             ),
@@ -303,7 +303,7 @@ class DatasetService:
             EventModel(
                 name="Dataset about updated",
                 subject_id=current_dataset.id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 domain_id=current_dataset.domain.id,
             ),
@@ -323,7 +323,7 @@ class DatasetService:
             EventModel(
                 name="Dataset status updated",
                 subject_id=current_dataset.id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 domain_id=current_dataset.domain.id,
             ),
@@ -346,10 +346,10 @@ class DatasetService:
             EventModel(
                 name="User added to dataset",
                 subject_id=dataset.id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 target_id=user.id,
-                target_type=Type.USER,
+                target_type=EventReferenceEntity.USER,
                 domain_id=dataset.domain.id,
             ),
         )
@@ -378,10 +378,10 @@ class DatasetService:
             EventModel(
                 name="User removed from dataset",
                 subject_id=dataset.id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 target_id=user.id,
-                target_type=Type.USER,
+                target_type=EventReferenceEntity.USER,
                 domain_id=dataset.domain.id,
             ),
         )

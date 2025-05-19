@@ -14,7 +14,7 @@ from app.data_products_datasets.model import (
 from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.events.enum import Type
+from app.events.enum import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
@@ -38,9 +38,9 @@ class DataProductDatasetService:
             EventModel(
                 name="Data product link to dataset approved",
                 subject_id=current_link.dataset_id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,
-                target_type=Type.DATA_PRODUCT,
+                target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=current_link.dataset.domain_id,
             ),
@@ -65,9 +65,9 @@ class DataProductDatasetService:
             EventModel(
                 name="Data product link to dataset denied",
                 subject_id=current_link.dataset_id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,
-                target_type=Type.DATA_PRODUCT,
+                target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=current_link.dataset.domain_id,
             ),
@@ -84,9 +84,9 @@ class DataProductDatasetService:
             EventModel(
                 name="Data product link to dataset removed",
                 subject_id=current_link.dataset_id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,
-                target_type=Type.DATA_PRODUCT,
+                target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=current_link.dataset.domain_id,
             ),

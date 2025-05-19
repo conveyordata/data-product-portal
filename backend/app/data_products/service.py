@@ -53,7 +53,7 @@ from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
 from app.environments.model import Environment as EnvironmentModel
-from app.events.enum import Type
+from app.events.enum import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.events.schema_response import EventGet
 from app.events.service import EventService
@@ -114,7 +114,7 @@ class DataProductService:
         return data_product
 
     def get_event_history(self, id: UUID, db: Session) -> list[EventGet]:
-        return EventService().get_history(db, id, Type.DATA_PRODUCT)
+        return EventService().get_history(db, id, EventReferenceEntity.DATA_PRODUCT)
 
     def get_data_products(self, db: Session) -> list[DataProductsGet]:
         default_lifecycle = db.scalar(
@@ -235,7 +235,7 @@ class DataProductService:
             EventModel(
                 name="Data product created",
                 subject_id=model.id,
-                subject_type=Type.DATA_PRODUCT,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=model.domain_id,
             ),
@@ -268,7 +268,7 @@ class DataProductService:
             EventModel(
                 name="Data product deleted",
                 subject_id=data_product.id,
-                subject_type=Type.DATA_PRODUCT,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=data_product.domain_id,
             ),
@@ -314,9 +314,9 @@ class DataProductService:
                         EventModel(
                             name="Data product update: membership updated",
                             subject_id=data_product.id,
-                            subject_type=Type.DATA_PRODUCT,
+                            subject_type=EventReferenceEntity.DATA_PRODUCT,
                             target_id=user.id,
-                            target_type=Type.USER,
+                            target_type=EventReferenceEntity.USER,
                             actor_id=authenticated_user.id,
                             domain_id=data_product.domain.id,
                         ),
@@ -331,9 +331,9 @@ class DataProductService:
                     EventModel(
                         name="Data product update: membership added",
                         subject_id=data_product.id,
-                        subject_type=Type.DATA_PRODUCT,
+                        subject_type=EventReferenceEntity.DATA_PRODUCT,
                         target_id=user.id,
-                        target_type=Type.USER,
+                        target_type=EventReferenceEntity.USER,
                         actor_id=authenticated_user.id,
                         domain_id=data_product.domain.id,
                     ),
@@ -348,9 +348,9 @@ class DataProductService:
                 EventModel(
                     name="Data product update: membership removed",
                     subject_id=data_product.id,
-                    subject_type=Type.DATA_PRODUCT,
+                    subject_type=EventReferenceEntity.DATA_PRODUCT,
                     target_id=membership.user_id,
-                    target_type=Type.USER,
+                    target_type=EventReferenceEntity.USER,
                     actor_id=authenticated_user.id,
                     domain_id=data_product.domain.id,
                 ),
@@ -401,7 +401,7 @@ class DataProductService:
             EventModel(
                 name="Data product updated",
                 subject_id=id,
-                subject_type=Type.DATA_PRODUCT,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=data_product.domain_id,
             ),
@@ -423,7 +423,7 @@ class DataProductService:
             EventModel(
                 name="Data product about updated",
                 subject_id=current_data_product.id,
-                subject_type=Type.DATA_PRODUCT,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=current_data_product.domain.id,
             ),
@@ -443,7 +443,7 @@ class DataProductService:
             EventModel(
                 name="Data product status updated",
                 subject_id=current_data_product.id,
-                subject_type=Type.DATA_PRODUCT,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
                 domain_id=current_data_product.domain.id,
             ),
@@ -540,9 +540,9 @@ class DataProductService:
                     else "Data product linked to dataset"
                 ),
                 subject_id=data_product.id,
-                subject_type=Type.DATA_PRODUCT,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=dataset.id,
-                target_type=Type.DATASET,
+                target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 domain_id=data_product.domain.id,
             ),
@@ -584,9 +584,9 @@ class DataProductService:
                     else "Data product unlinked from dataset"
                 ),
                 subject_id=data_product.id,
-                subject_type=Type.DATA_PRODUCT,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=data_product_dataset.dataset_id,
-                target_type=Type.DATASET,
+                target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
                 domain_id=data_product.domain.id,
             ),

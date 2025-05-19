@@ -15,7 +15,7 @@ from app.data_product_memberships.schema_response import DataProductMembershipsG
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.service import DataProductService
-from app.events.enum import Type
+from app.events.enum import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
@@ -51,9 +51,9 @@ class DataProductMembershipService:
             EventModel(
                 name="Data product membership requested",
                 subject_id=data_product.id,
-                subject_type=Type.DATA_PRODUCT,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=user.id,
-                target_type=Type.USER,
+                target_type=EventReferenceEntity.USER,
                 actor_id=authenticated_user.id,
                 domain_id=data_product.domain.id,
             ),

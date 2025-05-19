@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.database import ensure_exists
-from app.events.enum import Type
+from app.events.enum import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.data_product.schema import (
@@ -59,9 +59,9 @@ class RoleAssignmentService:
             EventModel(
                 name="Data product membership created",
                 subject_id=role_assignment.data_product_id,
-                subject_type=Type.DATA_PRODUCT,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=role_assignment.user_id,
-                target_type=Type.USER,
+                target_type=EventReferenceEntity.USER,
                 actor_id=authenticated_user.id,
                 domain_id=role_assignment.data_product.domain_id,
             )
@@ -75,9 +75,9 @@ class RoleAssignmentService:
             EventModel(
                 name="Data product membership removed",
                 subject_id=assignment.data_product_id,
-                subject_type=Type.DATA_PRODUCT,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=assignment.user_id,
-                target_type=Type.USER,
+                target_type=EventReferenceEntity.USER,
                 actor_id=authenticated_user.id,
                 domain_id=assignment.data_product.domain_id,
             ),
@@ -105,9 +105,9 @@ class RoleAssignmentService:
                         else "Data product membership denied"
                     ),
                     subject_id=assignment.data_product_id,
-                    subject_type=Type.DATA_PRODUCT,
+                    subject_type=EventReferenceEntity.DATA_PRODUCT,
                     target_id=assignment.user_id,
-                    target_type=Type.USER,
+                    target_type=EventReferenceEntity.USER,
                     actor_id=authenticated_user.id,
                     domain_id=assignment.data_product.domain_id,
                 ),
@@ -117,9 +117,9 @@ class RoleAssignmentService:
                 EventModel(
                     name="Data product membership updated",
                     subject_id=assignment.data_product_id,
-                    subject_type=Type.DATA_PRODUCT,
+                    subject_type=EventReferenceEntity.DATA_PRODUCT,
                     target_id=assignment.user_id,
-                    target_type=Type.USER,
+                    target_type=EventReferenceEntity.USER,
                     actor_id=authenticated_user.id,
                     domain_id=assignment.data_product.domain_id,
                 ),

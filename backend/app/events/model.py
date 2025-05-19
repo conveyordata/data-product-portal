@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
-from app.events.enum import Type
+from app.events.enum import EventReferenceEntity
 
 if TYPE_CHECKING:
     from app.datasets.model import Dataset
@@ -26,8 +26,8 @@ class Event(Base, BaseORM):
     subject_id = Column(UUID(as_uuid=True))
     deleted_target_identifier: Mapped[str] = mapped_column(nullable=True)
     target_id = Column(UUID(as_uuid=True))
-    subject_type = Column(Enum(Type))
-    target_type = Column(Enum(Type))
+    subject_type = Column(Enum(EventReferenceEntity))
+    target_type = Column(Enum(EventReferenceEntity))
     actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     domain_id = Column(UUID(as_uuid=True), ForeignKey("domains.id"))
     domain: Mapped["Domain"] = relationship("Domain")

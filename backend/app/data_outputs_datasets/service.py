@@ -14,7 +14,7 @@ from app.data_outputs_datasets.model import (
 from app.data_outputs_datasets.schema_response import DataOutputDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.events.enum import Type
+from app.events.enum import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
@@ -49,9 +49,9 @@ class DataOutputDatasetService:
             EventModel(
                 name="Data output link to dataset approved",
                 subject_id=current_link.dataset_id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,
-                target_type=Type.DATA_OUTPUT,
+                target_type=EventReferenceEntity.DATA_OUTPUT,
                 actor_id=authenticated_user.id,
                 domain_id=current_link.dataset.domain_id,
             ),
@@ -81,9 +81,9 @@ class DataOutputDatasetService:
             EventModel(
                 name="Data output link to dataset denied",
                 subject_id=current_link.dataset_id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,
-                target_type=Type.DATA_OUTPUT,
+                target_type=EventReferenceEntity.DATA_OUTPUT,
                 actor_id=authenticated_user.id,
                 domain_id=current_link.dataset.domain_id,
             ),
@@ -114,9 +114,9 @@ class DataOutputDatasetService:
             EventModel(
                 name="Data output link to dataset removed",
                 subject_id=current_link.dataset_id,
-                subject_type=Type.DATASET,
+                subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,
-                target_type=Type.DATA_OUTPUT,
+                target_type=EventReferenceEntity.DATA_OUTPUT,
                 actor_id=authenticated_user.id,
                 domain_id=current_link.dataset.domain_id,
             ),
