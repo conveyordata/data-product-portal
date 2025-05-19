@@ -45,7 +45,7 @@ def create_assignment(
 @router.post("/request")
 def request_assignment(
     request: CreateRoleAssignment,
-    background_tasks: "BackgroundTasks",
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
