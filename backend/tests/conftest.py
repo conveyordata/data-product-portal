@@ -29,6 +29,7 @@ def setup_and_teardown_database():
     from app.db_tool import init  # noqa: E402
 
     init(force=True)
+
     yield
 
 
@@ -117,6 +118,7 @@ def clear_db(session: scoped_session[Session]) -> None:
     for table in reversed(Base.metadata.sorted_tables):
         session.execute(table.delete())
     session.commit()
+    AuthorizationService._clear_casbin_table()
 
 
 @pytest.fixture
@@ -129,5 +131,4 @@ def admin() -> UserFactory:
 
 @pytest.fixture
 def authorizer() -> Generator[Authorization, None, None]:
-    AuthorizationService._clear_casbin_table()
     yield Authorization()
