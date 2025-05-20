@@ -1,12 +1,11 @@
 import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
     useGetDataOutputByIdQuery,
     useGetDataOutputNamespaceLengthLimitsQuery,
@@ -16,10 +15,10 @@ import {
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
-import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
-import { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
-import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
+import type { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
+import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 
 import styles from './data-output-form.module.scss';
@@ -40,22 +39,34 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
         skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
     });
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
-    const currentUser = useSelector(selectCurrentUser);
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
     const [deleteDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
     const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
-    const canEditForm = Boolean(
-        dataProduct &&
-            currentUser?.id &&
-            (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
+
+    const { data: update_access } = useCheckAccessQuery(
+        {
+            resource: dataProduct?.id,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+        },
+        { skip: !dataProduct?.id },
     );
-    const canFillInForm = canEditForm;
+    const { data: delete_access } = useCheckAccessQuery(
+        {
+            resource: dataProduct?.id,
+            action: AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+        },
+        { skip: !dataProduct?.id },
+    );
+
+    const canEdit = mode === 'edit' && (update_access?.allowed ?? false);
+    const canDelete = mode === 'edit' && (delete_access?.allowed ?? false);
+
     const isLoading = isFetchingInitialValues || isFetchingTags;
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
     const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
 
     const handleDeleteDataProduct = async () => {
-        if (canEditForm && currentDataOutput) {
+        if (canDelete && currentDataOutput) {
             try {
                 await deleteDataOutput(currentDataOutput?.id).unwrap();
                 dispatchMessage({ content: t('Data output deleted successfully'), type: 'success' });
@@ -71,7 +82,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
             if (dataOutputId && currentDataOutput) {
-                if (!canEditForm) {
+                if (!canEdit) {
                     dispatchMessage({ content: t('You are not allowed to edit this data output'), type: 'error' });
                     return;
                 }
@@ -131,7 +142,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             autoComplete={'off'}
             requiredMark={'optional'}
             labelWrap
-            disabled={isLoading || !canFillInForm}
+            disabled={!canEdit}
         >
             <Form.Item<DataOutputCreateFormSchema>
                 name={'name'}
@@ -186,7 +197,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                         type="primary"
                         htmlType={'submit'}
                         loading={isUpdating}
-                        disabled={isLoading || !canFillInForm}
+                        disabled={!canEdit}
                     >
                         {mode === 'edit' ? t('Edit') : t('Create')}
                     </Button>
@@ -195,11 +206,11 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                         type="default"
                         onClick={onCancel}
                         loading={isUpdating}
-                        disabled={isLoading || !canFillInForm}
+                        disabled={!canEdit}
                     >
                         {t('Cancel')}
                     </Button>
-                    {canEditForm && (
+                    {canDelete && (
                         <Popconfirm
                             title={t('Are you sure you want to delete this data output?')}
                             onConfirm={handleDeleteDataProduct}

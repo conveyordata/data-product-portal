@@ -1,12 +1,10 @@
-import { Flex, Table, TableColumnsType, TableProps } from 'antd';
+import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
@@ -16,26 +14,18 @@ import {
     useUpdateRoleAssignmentMutation,
 } from '@/store/features/role-assignments/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { RoleContract } from '@/types/roles';
-import { RoleAssignmentContract } from '@/types/roles/role.contract';
-import { UserContract } from '@/types/users';
+import type { RoleContract } from '@/types/roles';
+import type { RoleAssignmentContract } from '@/types/roles/role.contract';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 
 import styles from './team-table.module.scss';
 
 type Props = {
-    isCurrentUserDataProductOwner: boolean;
     dataProductId: string;
     dataProductUsers: RoleAssignmentContract[];
 };
-
-function canPerformTeamActions(isCurrentUserDataProductOwner: boolean, userId: string, currentUserId: string) {
-    return isCurrentUserDataProductOwner && userId !== currentUserId;
-}
-
-export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataProductUsers }: Props) {
+export function TeamTable({ dataProductId, dataProductUsers }: Props) {
     const { t } = useTranslation();
-    const currentUser = useSelector(selectCurrentUser) as UserContract;
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
     const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] = useDeleteRoleAssignmentMutation();
     const [updateRoleAssignment] = useUpdateRoleAssignmentMutation();
@@ -120,7 +110,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     const handleRejectMembership = useCallback(
         async (id: string) => {
             if (!dataProduct) return;
-            handleDenyAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
+            await handleDenyAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
         },
         [dataProduct, handleDenyAccessToDataProduct],
     );
@@ -128,7 +118,7 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     const handleAcceptMembership = useCallback(
         async (id: string) => {
             if (!dataProduct) return;
-            handleGrantAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
+            await handleGrantAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
         },
         [dataProduct, handleGrantAccessToDataProduct],
     );
@@ -140,8 +130,6 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
             onRoleChange: handleRoleChange,
             isRemovingUser: isRemovingUserFromDataProduct,
             dataProductUsers: dataProductUsers,
-            canPerformTeamActions: (userId: string) =>
-                canPerformTeamActions(isCurrentUserDataProductOwner, userId, currentUser.id),
             isLoading: isLoadingDataProduct,
             onRejectMembershipRequest: handleRejectMembership,
             onAcceptMembershipRequest: handleAcceptMembership,
@@ -156,8 +144,6 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         isRemovingUserFromDataProduct,
         dataProductUsers,
         isLoadingDataProduct,
-        currentUser.id,
-        isCurrentUserDataProductOwner,
         canEditUserNew,
         canRemoveUserNew,
         canApproveUserNew,

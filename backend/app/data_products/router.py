@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -35,7 +36,7 @@ from app.role_assignments.data_product.schema import (
     DecideRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Scope
+from app.roles.schema import Prototype, Scope
 from app.roles.service import RoleService
 from app.users.schema import User
 
@@ -43,7 +44,7 @@ router = APIRouter(prefix="/data_products", tags=["data_products"])
 
 
 @router.get("")
-def get_data_products(db: Session = Depends(get_db_session)) -> list[DataProductsGet]:
+def get_data_products(db: Session = Depends(get_db_session)) -> Sequence[DataProductsGet]:
     return DataProductService().get_data_products(db)
 
 
@@ -67,7 +68,7 @@ def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
 @router.get("/user/{user_id}")
 def get_user_data_products(
     user_id: UUID, db: Session = Depends(get_db_session)
-) -> list[DataProductsGet]:
+) -> Sequence[DataProductsGet]:
     return DataProductService().get_user_data_products(user_id, db)
 
 
@@ -109,30 +110,23 @@ def create_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    created_data_product = DataProductService().create_data_product(
-        data_product, db, authenticated_user
-    )
-    owner_role = [
-        role
-        for role in RoleService(db).get_roles(Scope.DATA_PRODUCT)
-        if role.name.lower() == "owner"
-    ]
-    if len(owner_role) == 1:
-        owner_role = owner_role[0]
-    else:
+    created_data_product = DataProductService().create_data_product(data_product, db)
+    owner_role = RoleService(db).find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER)
+    if not owner_role:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Owner role not found",
         )
-    for membership in created_data_product.memberships:
+
+    for owner in data_product.owners:
         resp = create_assignment(
             CreateRoleAssignment(
                 data_product_id=created_data_product.id,
-                user_id=membership.user_id,
+                user_id=owner,
                 role_id=owner_role.id,
             ),
-            db,
-            authenticated_user,
+            db=db,
+            user=authenticated_user,
         )
         decide_assignment(
             id=resp.id,
@@ -190,7 +184,7 @@ def remove_data_product(
 )
 def update_data_product(
     id: UUID, data_product: DataProductUpdate, db: Session = Depends(get_db_session)
-):
+) -> dict[str, UUID]:
     return DataProductService().update_data_product(id, data_product, db)
 
 
@@ -433,7 +427,7 @@ def get_databricks_workspace_url(
 @router.get("/{id}/data_outputs")
 def get_data_outputs(
     id: UUID, db: Session = Depends(get_db_session)
-) -> list[DataOutputGet]:
+) -> Sequence[DataOutputGet]:
     return DataProductService().get_data_outputs(id, db)
 
 
@@ -461,7 +455,7 @@ def set_value_for_data_product(
     value: str,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
-):
+) -> None:
     return DataProductSettingService().set_value_for_product(
         setting_id, id, value, authenticated_user, db
     )

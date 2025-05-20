@@ -42,9 +42,8 @@ export function DataProductsTable() {
     );
     const { data: access } = useCheckAccessQuery(
         { action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT },
-        { skip: !currentUser },
     );
-    const canCreateDataProduct = access?.allowed || false;
+    const canCreateDataProduct = access?.allowed ?? false;
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);

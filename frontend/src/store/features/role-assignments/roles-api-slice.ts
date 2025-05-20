@@ -10,7 +10,7 @@ export const roleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTyp
     endpoints: (builder) => ({
         getRoleAssignment: builder.query<
             RoleAssignmentContract[],
-            { data_product_id: string; user_id: string | undefined }
+            { data_product_id: string; user_id?: string; decision?: DecisionStatus }
         >({
             query: (request) => ({
                 url: ApiUrl.RoleAssignmentsDataProductGet,
@@ -18,6 +18,7 @@ export const roleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTyp
                 params: {
                     data_product_id: request.data_product_id,
                     ...(request.user_id ? { user_id: request.user_id } : {}),
+                    ...(request.decision ? { decision: request.decision } : {}),
                 },
             }),
             providesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],

@@ -16,13 +16,13 @@ class DataProductCreate(ORMModel):
     description: str
     type_id: UUID
     about: Optional[str] = None
-    memberships: Annotated[list[DataProductMembershipCreate], MinLen(1)]
+    owners: Annotated[list[UUID], MinLen(1)]
     domain_id: UUID
     tag_ids: list[UUID]
     lifecycle_id: UUID
 
-    @field_validator("memberships", mode="after")
     @classmethod
+    @field_validator("owners", mode="after")
     def contains_owner(
         cls, value: list[DataProductMembershipCreate]
     ) -> list[DataProductMembershipCreate]:

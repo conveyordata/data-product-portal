@@ -12,7 +12,6 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { getCanUserAccessDataProductData } from '@/utils/data-product-user-role.helper.ts';
 
 type Props = {
     dataProductId: string;
@@ -23,6 +22,7 @@ export function AboutTab({ dataProductId }: Props) {
     const { data: dataProduct, isFetching } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataProductAbout, { isLoading }] = useUpdateDataProductAboutMutation();
+
     const { data: edit_access } = useCheckAccessQuery(
         {
             resource: dataProductId,
@@ -30,21 +30,17 @@ export function AboutTab({ dataProductId }: Props) {
         },
         { skip: !dataProductId },
     );
+    const canEdit = edit_access?.allowed ?? false;
 
-    const canEditNew = edit_access?.allowed;
     if (isFetching) {
         return <LoadingSpinner />;
     }
-
     if (!dataProduct || !currentUser) {
         return <EmptyList />;
     }
 
-    const canEdit =
-        getCanUserAccessDataProductData(currentUser?.id, dataProduct?.memberships) || Boolean(currentUser?.is_admin);
-
     async function handleSubmit(content: string) {
-        if (canEdit || canEditNew) {
+        if (canEdit) {
             try {
                 await updateDataProductAbout({ dataProductId: dataProductId, about: content }).unwrap();
                 dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
@@ -62,7 +58,7 @@ export function AboutTab({ dataProductId }: Props) {
             onSubmit={handleSubmit}
             isLoading={isFetching}
             isSubmitting={isLoading}
-            isDisabled={!canEditNew}
+            isDisabled={!canEdit}
         />
     );
 }

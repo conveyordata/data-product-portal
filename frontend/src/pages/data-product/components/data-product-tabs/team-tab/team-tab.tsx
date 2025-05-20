@@ -20,38 +20,32 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { RoleAssignmentContract } from '@/types/roles/role.contract';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 
 import styles from './team-tab.module.scss';
+
+function filterUsers(users: RoleAssignmentContract[], searchTerm: string): RoleAssignmentContract[] {
+    if (!searchTerm) return users;
+
+    return users.filter((membership) => {
+        const searchString = searchTerm.toLowerCase();
+        return (
+            membership?.user?.email?.toLowerCase()?.includes(searchString) ||
+            membership?.user?.first_name?.toLowerCase()?.includes(searchString) ||
+            membership?.user?.last_name?.toLowerCase()?.includes(searchString)
+        );
+    });
+}
 
 type Props = {
     dataProductId: string;
 };
-
-function filterUsers(users: RoleAssignmentContract[], searchTerm: string) {
-    if (!searchTerm) return users;
-    if (!users) return [];
-
-    return (
-        users.filter((membership) => {
-            const searchString = searchTerm.toLowerCase();
-            return (
-                membership?.user?.email?.toLowerCase()?.includes(searchString) ||
-                membership?.user?.first_name?.toLowerCase()?.includes(searchString) ||
-                membership?.user?.last_name?.toLowerCase()?.includes(searchString)
-            );
-        }) ?? []
-    );
-}
-
 export function TeamTab({ dataProductId }: Props) {
+    const { t } = useTranslation();
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
-    const { t } = useTranslation();
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const { data: roleAssignments, isFetching } = useGetRoleAssignmentQuery({
         data_product_id: dataProductId,
-        user_id: undefined,
     });
     const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateRoleAssignmentMutation();
     const [searchForm] = Form.useForm<SearchForm>();
@@ -72,12 +66,6 @@ export function TeamTab({ dataProductId }: Props) {
     );
 
     const canAddUserNew = access?.allowed || false;
-
-    const isDataProductOwner = useMemo(() => {
-        if (!dataProduct || !user) return false;
-
-        return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct, user]);
 
     const handleGrantAccessToDataProduct = useCallback(
         async (user: UserContract, role_id: string) => {
@@ -106,7 +94,7 @@ export function TeamTab({ dataProductId }: Props) {
                     placeholder={t('Search users by email or name')}
                     actionButton={
                         <Button
-                            disabled={!(canAddUserNew || isDataProductOwner)}
+                            disabled={!canAddUserNew}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}
@@ -115,11 +103,7 @@ export function TeamTab({ dataProductId }: Props) {
                         </Button>
                     }
                 />
-                <TeamTable
-                    isCurrentUserDataProductOwner={isDataProductOwner}
-                    dataProductId={dataProductId}
-                    dataProductUsers={filteredUsers}
-                />
+                <TeamTable dataProductId={dataProductId} dataProductUsers={filteredUsers} />
             </Flex>
             {isVisible && (
                 <UserPopup
