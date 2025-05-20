@@ -85,6 +85,7 @@
     "npm": ">= 10.1"
   },
   "overrides": {
+    "rimraf": "^4.0.0",
     "zustand": {
       "use-sync-external-store": "^1.4.0"
     }
