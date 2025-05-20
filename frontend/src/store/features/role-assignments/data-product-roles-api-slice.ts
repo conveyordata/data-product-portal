@@ -6,17 +6,17 @@ import { RoleAssignmentContract, RoleAssignmentCreateContract } from '@/types/ro
 
 export const roleTags: string[] = [TagTypes.Role];
 
-export const roleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: roleTags }).injectEndpoints({
+export const dataProductRoleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: roleTags }).injectEndpoints({
     endpoints: (builder) => ({
         getRoleAssignment: builder.query<
             RoleAssignmentContract[],
-            { data_product_id: string; user_id?: string; decision?: DecisionStatus }
+            { data_product_id?: string; user_id?: string; decision?: DecisionStatus }
         >({
             query: (request) => ({
                 url: ApiUrl.RoleAssignmentsDataProductGet,
                 method: 'GET',
                 params: {
-                    data_product_id: request.data_product_id,
+                    ...(request.data_product_id ? { data_product_id: request.data_product_id } : {}),
                     ...(request.user_id ? { user_id: request.user_id } : {}),
                     ...(request.decision ? { decision: request.decision } : {}),
                 },
@@ -87,4 +87,4 @@ export const {
     useDeleteRoleAssignmentMutation,
     useCreateRoleAssignmentMutation,
     useDecideRoleAssignmentMutation,
-} = roleAssignmentsApiSlice;
+} = dataProductRoleAssignmentsApiSlice;

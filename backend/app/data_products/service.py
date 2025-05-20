@@ -55,6 +55,7 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
+from app.role_assignments.data_product.service import RoleAssignmentService
 from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.tags.model import Tag as TagModel
@@ -182,6 +183,7 @@ class DataProductService:
 
         data_product_schema = data_product.parse_pydantic_schema()
         tags = self._get_tags(db, data_product_schema.pop("tag_ids", []))
+        _ = data_product_schema.pop("owners", [])
         model = DataProductModel(**data_product_schema, tags=tags)
         db.add(model)
         db.commit()
