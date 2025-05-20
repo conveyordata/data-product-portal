@@ -64,9 +64,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
-    const { data: create_access } = useCheckAccessQuery(
-        { action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT },
-    );
+    const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const { data: update_access } = useCheckAccessQuery(
         {
             resource: dataProductId,

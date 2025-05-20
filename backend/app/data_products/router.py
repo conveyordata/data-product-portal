@@ -44,7 +44,9 @@ router = APIRouter(prefix="/data_products", tags=["data_products"])
 
 
 @router.get("")
-def get_data_products(db: Session = Depends(get_db_session)) -> Sequence[DataProductsGet]:
+def get_data_products(
+    db: Session = Depends(get_db_session),
+) -> Sequence[DataProductsGet]:
     return DataProductService().get_data_products(db)
 
 

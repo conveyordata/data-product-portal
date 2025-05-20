@@ -40,9 +40,7 @@ export function DataProductsTable() {
         currentUser?.id || '',
         { skip: !currentUser },
     );
-    const { data: access } = useCheckAccessQuery(
-        { action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT },
-    );
+    const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const canCreateDataProduct = access?.allowed ?? false;
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
