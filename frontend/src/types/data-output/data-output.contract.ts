@@ -33,6 +33,7 @@ export interface DataOutputContract {
     dataset_links: DataOutputDatasetLink[];
     tag_ids: string[];
     tags: TagContract[];
+    result_string: string;
 }
 
 export interface DataOutputModel extends DataOutputContract {}

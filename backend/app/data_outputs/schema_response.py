@@ -1,10 +1,13 @@
 from uuid import UUID
 
+from pydantic import Field, computed_field
+
 from app.data_output_configuration.schema_union import DataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_products.schema import DataProduct
 from app.datasets.schema import Dataset
+from app.platform_services.schema import PlatformService
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 
@@ -22,6 +25,13 @@ class BaseDataOutputGet(ORMModel):
     # Nested schemas
     configuration: DataOutputConfiguration
     owner: DataProduct
+
+    # Excluded
+    service: PlatformService = Field(exclude=True)
+
+    @computed_field
+    def result_string(self) -> str:
+        return self.configuration.output_result_string(self.service.template)
 
 
 class DatasetLink(DataOutputDatasetAssociation):
