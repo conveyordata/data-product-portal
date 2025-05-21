@@ -528,7 +528,7 @@ class DataProductService:
             EventModel(
                 name=(
                     EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
-                    if dataset.access_type != DatasetAccessType.PUBLIC
+                    if approval_status == DecisionStatus.PENDING
                     else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
                 ),
                 subject_id=data_product.id,
