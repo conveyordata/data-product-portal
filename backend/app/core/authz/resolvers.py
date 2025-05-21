@@ -99,7 +99,7 @@ class DataProductNameResolver(SubjectResolver):
         obj = DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_product = (
-                db.scalars(select(DataProduct).where(DataProduct.name == obj))
+                db.scalars(select(DataProduct).where(DataProduct.namespace == obj))
                 .unique()
                 .one_or_none()
             )
