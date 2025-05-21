@@ -119,7 +119,9 @@ def create_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    created_data_product = DataProductService().create_data_product(data_product, db, authenticated_user)
+    created_data_product = DataProductService().create_data_product(
+        data_product, db, authenticated_user
+    )
     owner_role = RoleService(db).find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER)
     if not owner_role:
         raise HTTPException(
