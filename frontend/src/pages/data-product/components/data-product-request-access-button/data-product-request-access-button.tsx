@@ -8,7 +8,7 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useCreateRoleAssignmentMutation } from '@/store/features/role-assignments/roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
-import { UserContract } from '@/types/users';
+import type { UserContract } from '@/types/users';
 
 import styles from './data-product-request-access-button.module.scss';
 
@@ -18,16 +18,15 @@ type Props = {
 };
 
 export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props) => {
-    const { isVisible, handleOpen, handleClose } = useModal();
     const { t } = useTranslation();
+    const { isVisible, handleOpen, handleClose } = useModal();
     const [requestAccessToDataProduct, { isLoading: isRequestingAccess }] = useCreateRoleAssignmentMutation();
     const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
 
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
-
     const isLoading = isFetchingUsers || isRequestingAccess;
 
-    const filteredUserIds = useMemo(() => {
+    const userIdsToHide = useMemo(() => {
         return users.filter((user) => user.id !== userId).map((user) => user.id);
     }, [users, userId]);
 
@@ -60,7 +59,7 @@ export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props)
                     isOpen={isVisible}
                     onClose={handleClose}
                     isLoading={isLoading}
-                    userIdsToHide={filteredUserIds}
+                    userIdsToHide={userIdsToHide}
                     roles={DATA_PRODUCT_ROLES || []}
                     item={{
                         action: handleRequestAccessToDataProduct,
