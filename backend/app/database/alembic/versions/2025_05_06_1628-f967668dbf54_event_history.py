@@ -56,8 +56,12 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime),
         sa.PrimaryKeyConstraint("id"),
     )
+    op.create_index("index_events_subject", "events", ["subject_type", "subject_id"])
+    op.create_index("index_events_target", "events", ["target_type", "target_id"])
 
 
 def downgrade() -> None:
+    op.drop_index("index_events_subject", table_name="events")
+    op.drop_index("index_events_target", table_name="events")
     op.drop_table("events")
     op.drop_table("event_reference_entities")
