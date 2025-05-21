@@ -32,28 +32,24 @@ class Event(Base, BaseORM):
 
     # Conditional relationships based on subject_type
     data_product: Mapped["DataProduct"] = relationship(
-        "DataProduct",
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(DataProduct.id), Event.subject_type == 'DATA_PRODUCT'), "
         "and_(Event.target_id == foreign(DataProduct.id), "
         "Event.target_type == 'DATA_PRODUCT'))",
     )
     user: Mapped["User"] = relationship(
-        "User",
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(User.id), Event.subject_type == 'USER')"
         ",and_(Event.target_id == foreign(User.id), "
         "Event.target_type == 'USER'))",
     )
     dataset: Mapped["Dataset"] = relationship(
-        "Dataset",
         primaryjoin="or_(and_(Event.subject_id == foreign(Dataset.id),"
         " Event.subject_type == 'DATASET'),"
         "and_(Event.target_id == foreign(Dataset.id),"
         " Event.target_type == 'DATASET'))",
     )
     data_output: Mapped["DataOutput"] = relationship(
-        "DataOutput",
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(DataOutput.id), Event.subject_type == 'DATA_OUTPUT'),"
         "and_(Event.target_id == foreign(DataOutput.id),"
