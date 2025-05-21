@@ -185,7 +185,9 @@ class TestDataProductRoleAssignmentsRouter:
         data = response.json()
         assert len(data) == 0
 
-    def test_data_product_membership_history(self, client):
+    def test_history_event_created_on_data_product_role_assignment_requested(
+        self, client: TestClient
+    ):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
@@ -195,28 +197,71 @@ class TestDataProductRoleAssignmentsRouter:
             "user_id": str(user.id),
             "role_id": str(role.id),
         }
-        assignment_requested = self.create_data_product_role_assignment(client, json)
-        assignment_id = assignment_requested.json().get("id")
-        assert assignment_id is not None
-        response = self.get_data_product_history(client, data_product.id)
-        assert len(response.json()) == 1
-
-        response = self.approve_data_product_role_assignment(client, assignment_id)
+        response = self.create_data_product_role_assignment(client, json)
         assert response.status_code == 200
-        response = self.get_data_product_history(client, data_product.id)
-        assert len(response.json()) == 2
 
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_product_role_assignment_approved(
+        self, client: TestClient
+    ):
+        data_product: DataProduct = DataProductFactory()
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+
+        response = self.approve_data_product_role_assignment(client, assignment.id)
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_product_role_assignment_modified(
+        self, client: TestClient
+    ):
+        data_product: DataProduct = DataProductFactory()
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         new_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        json = {"role_id": str(new_role.id)}
-        response = self.modify_data_product_role_assignment(client, assignment_id, json)
-        assert response.status_code == 200
-        response = self.get_data_product_history(client, data_product.id)
-        assert len(response.json()) == 3
 
-        response = self.delete_data_product_role_assignment(client, assignment_id)
+        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        json = {"role_id": str(new_role.id)}
+        response = self.modify_data_product_role_assignment(client, assignment.id, json)
         assert response.status_code == 200
-        response = self.get_data_product_history(client, data_product.id)
-        assert len(response.json()) == 4
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_product_role_assignment_removed(
+        self, client: TestClient
+    ):
+        data_product: DataProduct = DataProductFactory()
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        response = self.delete_data_product_role_assignment(client, assignment.id)
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
 
     @staticmethod
     def delete_data_product(client, data_product_id):
