@@ -10,6 +10,7 @@ export enum ApiUrl {
     DataOutputGraph = '/api/data_outputs/:dataOutputId/graph',
     DataOutputNamespaceSuggestion = '/api/data_outputs/namespace_suggestion',
     DataOutputNamespaceLimits = '/api/data_outputs/namespace_length_limits',
+    DataOutputResultString = '/api/data_outputs/result_string',
     DataProducts = '/api/data_products',
     DataProductsDataOutput = '/api/data_products/:dataProductId/data_outputs',
     DataProductGet = '/api/data_products/:dataProductId',

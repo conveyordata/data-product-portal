@@ -503,7 +503,10 @@ class DataProductService:
         return (
             db.scalars(
                 select(DataOutputModel)
-                .options(joinedload(DataOutputModel.dataset_links))
+                .options(
+                    joinedload(DataOutputModel.dataset_links),
+                    joinedload(DataOutputModel.environment_configurations),
+                )
                 .filter(DataOutputModel.owner_id == id)
             )
             .unique()

@@ -12,5 +12,6 @@ class Environment(Base, BaseORM):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, primary_key=True)
+    acronym = Column(String, unique=True)
     context = Column(String)
     is_default = Column(Boolean, default=False)

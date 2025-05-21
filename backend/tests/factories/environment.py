@@ -9,5 +9,6 @@ class EnvironmentFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     name = "dev"
+    acronym = factory.Faker("word")
     context = "environment_context{{}}"
     is_default = False

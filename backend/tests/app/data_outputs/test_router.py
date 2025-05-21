@@ -13,6 +13,9 @@ from tests.factories.tags import TagFactory
 from tests.factories.user import UserFactory
 
 from app.core.authz.actions import AuthorizationAction
+from app.data_output_configuration.data_output_types import DataOutputTypes
+from app.data_output_configuration.s3.schema import S3DataOutput
+from app.data_outputs.schema_request import DataOutputResultStringRequest
 from app.roles.schema import Scope
 
 ENDPOINT = "/api/data_outputs"
@@ -307,6 +310,26 @@ class TestDataOutputsRouter:
         response = self.create_data_output(client, create_payload)
         assert response.status_code == 400
 
+    def test_get_result_string(self, client):
+        service = PlatformServiceFactory(
+            result_string_template="{bucket}/{suffix}/{path}"
+        )
+        configuration = S3DataOutput(
+            bucket="bucket",
+            suffix="suffix",
+            path="path",
+            configuration_type=DataOutputTypes.S3DataOutput,
+        )
+        request = DataOutputResultStringRequest(
+            platform_id=service.platform.id,
+            service_id=service.id,
+            configuration=configuration,
+        ).model_dump(mode="json")
+
+        response = self.get_data_output_result_string(client, request)
+        assert response.status_code == 200
+        assert response.json() == "bucket/suffix/path"
+
     @staticmethod
     def create_data_output(client, default_data_output_payload):
         return client.post(
@@ -338,3 +361,7 @@ class TestDataOutputsRouter:
     @staticmethod
     def get_namespace_length_limits(client):
         return client.get(f"{ENDPOINT}/namespace_length_limits")
+
+    @staticmethod
+    def get_data_output_result_string(client, payload):
+        return client.post(f"{ENDPOINT}/result_string", json=payload)

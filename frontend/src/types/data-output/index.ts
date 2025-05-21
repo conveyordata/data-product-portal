@@ -19,6 +19,7 @@ export type {
     DataOutputDatasetRemoveRequest,
     DataOutputDatasetRemoveResponse,
 } from './data-output-dataset-remove.contract.ts';
+export type { DataOutputResultStringRequest } from './data-output-result-string-request.contract.ts';
 export type { DataOutputsGetContract } from './data-outputs-get.contract.ts';
 export type { DatabricksDataOutput, DatabricksDataOutputContract } from './databricks-data-output.contract.ts';
 export type { DataOutputDatasetLink } from './dataset-link.contract.ts';

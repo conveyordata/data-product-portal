@@ -10,8 +10,6 @@ export type DataOutputCreate = Pick<
 };
 
 export type DataOutputCreateFormSchema = DataOutputCreate & {
-    owner: string;
-    is_source_aligned: boolean;
     result: string;
 };
 

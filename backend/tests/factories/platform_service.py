@@ -11,5 +11,7 @@ class PlatformServiceFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     name = factory.Faker("word")
+    result_string_template = factory.Faker("word")
+    technical_info_template = factory.Faker("word")
 
     platform = factory.SubFactory(PlatformFactory)

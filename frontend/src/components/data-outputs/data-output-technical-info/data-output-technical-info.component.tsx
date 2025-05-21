@@ -3,15 +3,10 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetEnvironmentPlatformServiceConfigQuery } from '@/store/features/environments/environments-api-slice';
-import { DataOutputContract } from '@/types/data-output';
+import { DataOutputConfigurationTypes } from '@/types/data-output/data-output.contract';
 import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
 
-import { getDatabricksTechnicalInformationColumns } from './data-output-table-databricks-columns';
-import { getGlueTechnicalInformationColumns } from './data-output-table-glue-columns';
-import { getRedshiftTechnicalInformationColumns } from './data-output-table-redshift-columns';
-import { getS3TechnicalInformationColumns } from './data-output-table-s3-columns';
-import { getSnowflakeTechnicalInformationColumns } from './data-output-table-snowflake-columns';
+import { getTechnicalInformationColumns } from './data-output-table-columns';
 import styles from './data-output-technical-info.module.scss';
 
 type Props = {
@@ -20,51 +15,40 @@ type Props = {
 
 export function DataOutputTechnicalInfo({ data_output_id }: Props) {
     const { t } = useTranslation();
-    const { data: data_output, isLoading: isLoadingDataOutput } = useGetDataOutputByIdQuery(data_output_id);
-    const { data: environmentConfig, isFetching: isLoadingConfig } = useGetEnvironmentPlatformServiceConfigQuery(
-        {
-            platformId: data_output!.platform_id,
-            serviceId: data_output!.service_id,
-        },
-        {
-            skip: !data_output,
-        },
-    );
-    const technicalInfo: TechnicalInfoContract[] = useMemo(
-        () =>
-            (environmentConfig ?? []).map((env) => {
-                return {
-                    environmentConfig: env,
-                    data_output: data_output ?? ({} as DataOutputContract),
-                };
-            }),
-        [data_output, environmentConfig],
-    );
+    const { data: data_output, isLoading } = useGetDataOutputByIdQuery(data_output_id);
+    const technicalInfo = data_output?.technical_info || [];
+
+    const info_column = useMemo(() => {
+        switch (data_output?.configuration.configuration_type) {
+            case DataOutputConfigurationTypes.S3DataOutput:
+                return 'Path';
+            case DataOutputConfigurationTypes.GlueDataOutput:
+                return 'Database';
+            case DataOutputConfigurationTypes.DatabricksDataOutput:
+                return 'Schema';
+            case DataOutputConfigurationTypes.SnowflakeDataOutput:
+                return 'Schema';
+            case DataOutputConfigurationTypes.RedshiftDataOutput:
+                return 'Schema';
+            default:
+                return 'Info';
+        }
+    }, [data_output]);
 
     const columns: TableColumnsType<TechnicalInfoContract> = useMemo(() => {
-        switch (data_output?.configuration.configuration_type) {
-            case 'S3DataOutput':
-                return getS3TechnicalInformationColumns({ t });
-            case 'GlueDataOutput':
-                return getGlueTechnicalInformationColumns({ t });
-            case 'DatabricksDataOutput':
-                return getDatabricksTechnicalInformationColumns({ t });
-            case 'SnowflakeDataOutput':
-                return getSnowflakeTechnicalInformationColumns({ t });
-            case 'RedshiftDataOutput':
-                return getRedshiftTechnicalInformationColumns({ t });
-            default:
-                return [];
-        }
-    }, [t, data_output]);
+        return getTechnicalInformationColumns({
+            t,
+            info_column,
+        });
+    }, [t, info_column]);
 
     return (
         <Table<TechnicalInfoContract>
-            loading={isLoadingDataOutput || isLoadingConfig}
+            loading={isLoading}
             className={styles.dataOutputListTable}
             columns={columns}
             dataSource={technicalInfo}
-            rowKey={({ environmentConfig }) => environmentConfig.id}
+            rowKey={(info) => info.environment_id}
             pagination={false}
             rowClassName={styles.tableRow}
             size={'small'}
