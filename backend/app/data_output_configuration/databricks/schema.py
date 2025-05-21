@@ -1,4 +1,4 @@
-from typing import Literal, Self
+from typing import Literal, Optional, Self
 
 from pydantic import model_validator
 
@@ -8,6 +8,9 @@ from app.data_output_configuration.databricks.model import (
     DatabricksDataOutput as DatabricksDataOutputModel,
 )
 from app.data_products.schema import DataProduct
+from app.environment_platform_service_configurations.schemas.databricks_schema import (
+    DatabricksConfig,
+)
 
 
 class DatabricksDataOutput(BaseDataOutputConfiguration):
@@ -37,3 +40,10 @@ class DatabricksDataOutput(BaseDataOutputConfiguration):
 
     def on_create(self):
         pass
+
+    def get_configuration(
+        self, configs: list[DatabricksConfig]
+    ) -> Optional[DatabricksConfig]:
+        return next(
+            (config for config in configs if config.identifier == self.catalog), None
+        )

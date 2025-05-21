@@ -1,4 +1,4 @@
-from typing import Literal, Self
+from typing import Literal, Optional, Self
 
 from pydantic import model_validator
 
@@ -8,6 +8,9 @@ from app.data_output_configuration.redshift.model import (
     RedshiftDataOutput as RedshiftDataOutputModel,
 )
 from app.data_products.schema import DataProduct
+from app.environment_platform_service_configurations.schemas.redshift_schema import (
+    RedshiftConfig,
+)
 
 
 class RedshiftDataOutput(BaseDataOutputConfiguration):
@@ -38,10 +41,17 @@ class RedshiftDataOutput(BaseDataOutputConfiguration):
     def on_create(self):
         pass
 
-    def output_result_string(self, template):
+    def render_template(self, template, **context):
         return ".".join(
             [
                 part.rstrip("_")
-                for part in super().output_result_string(template).split(".")
+                for part in super().render_template(template, **context).split(".")
             ]
+        )
+
+    def get_configuration(
+        self, configs: list[RedshiftConfig]
+    ) -> Optional[RedshiftConfig]:
+        return next(
+            (config for config in configs if config.identifier == self.database), None
         )

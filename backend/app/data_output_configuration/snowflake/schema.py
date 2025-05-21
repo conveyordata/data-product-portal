@@ -1,4 +1,4 @@
-from typing import Literal, Self
+from typing import Literal, Optional, Self
 
 from pydantic import model_validator
 
@@ -8,6 +8,9 @@ from app.data_output_configuration.snowflake.model import (
     SnowflakeDataOutput as SnowflakeDataOutputModel,
 )
 from app.data_products.schema import DataProduct
+from app.environment_platform_service_configurations.schemas.snowflake_schema import (
+    SnowflakeConfig,
+)
 
 
 class SnowflakeDataOutput(BaseDataOutputConfiguration):
@@ -38,5 +41,12 @@ class SnowflakeDataOutput(BaseDataOutputConfiguration):
     def on_create(self):
         pass
 
-    def output_result_string(self, template):
-        return super().output_result_string(template).replace("-", "_")
+    def render_template(self, template, **context) -> str:
+        return super().render_template(template, **context).replace("-", "_")
+
+    def get_configuration(
+        self, configs: list[SnowflakeConfig]
+    ) -> Optional[SnowflakeConfig]:
+        return next(
+            (config for config in configs if config.identifier == self.database), None
+        )

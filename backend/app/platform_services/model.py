@@ -16,7 +16,8 @@ class PlatformService(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)
-    template = Column(String)
+    result_string_template = Column(String)
+    technical_info_template = Column(String)
     platform_id: Mapped[UUID] = mapped_column(ForeignKey("platforms.id"))
 
     platform: Mapped["Platform"] = relationship(backref="services")

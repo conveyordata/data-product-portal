@@ -519,7 +519,11 @@ class DataProductService:
 
     def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
         return (
-            db.scalars(select(DataOutputModel).filter(DataOutputModel.owner_id == id))
+            db.scalars(
+                select(DataOutputModel)
+                .options(joinedload(DataOutputModel.environment_configurations))
+                .filter(DataOutputModel.owner_id == id)
+            )
             .unique()
             .all()
         )

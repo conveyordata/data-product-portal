@@ -5,7 +5,7 @@ import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.email.send_mail import send_mail
@@ -101,13 +101,22 @@ class DataOutputService:
         return tags
 
     def get_data_outputs(self, db: Session) -> list[DataOutputsGet]:
-        data_outputs = db.scalars(select(DataOutputModel)).unique().all()
+        data_outputs = (
+            db.scalars(
+                select(DataOutputModel).options(
+                    joinedload(DataOutputModel.environment_configurations)
+                )
+            )
+            .unique()
+            .all()
+        )
         return data_outputs
 
     def get_data_output(self, id: UUID, db: Session) -> DataOutputGet:
         return db.get(
             DataOutputModel,
             id,
+            options=[joinedload(DataOutputModel.environment_configurations)],
         )
 
     def create_data_output(
@@ -302,7 +311,7 @@ class DataOutputService:
         db: Session,
     ) -> str:
         template = db.scalar(
-            select(PlatformService.template).where(
+            select(PlatformService.result_string_template).where(
                 PlatformService.id == request.service_id,
                 PlatformService.platform_id == request.platform_id,
             )
@@ -314,4 +323,4 @@ class DataOutputService:
                 detail="Template not found for the given platform and service",
             )
 
-        return request.configuration.output_result_string(template)
+        return request.configuration.render_template(template)

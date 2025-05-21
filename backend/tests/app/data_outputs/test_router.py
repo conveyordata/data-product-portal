@@ -234,7 +234,9 @@ class TestDataOutputsRouter:
         assert response.status_code == 400
 
     def test_get_result_string(self, client):
-        service = PlatformServiceFactory(template="{bucket}/{suffix}/{path}")
+        service = PlatformServiceFactory(
+            result_string_template="{bucket}/{suffix}/{path}"
+        )
         configuration = S3DataOutput(
             bucket="bucket",
             suffix="suffix",
