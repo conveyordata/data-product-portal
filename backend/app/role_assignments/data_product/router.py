@@ -1,26 +1,23 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-import emailgen
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action
-from app.core.email.send_mail import send_mail
 from app.database.database import get_db_session
+from app.role_assignments.data_product import email
 from app.role_assignments.data_product.auth import DataProductAuthAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     DecideRoleAssignment,
     ModifyRoleAssignment,
-    RoleAssignment,
     RoleAssignmentResponse,
     UpdateRoleAssignment,
 )
 from app.role_assignments.data_product.service import RoleAssignmentService
 from app.role_assignments.enums import DecisionStatus
-from app.settings import settings
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_product")
@@ -64,38 +61,11 @@ def create_assignment(
         return role_assignment
 
     background_tasks.add_task(
-        _send_role_assignment_request_email,
+        email.send_role_assignment_request_email,
         role_assignment,
         approvers,
     )
     return role_assignment
-
-
-def _send_role_assignment_request_email(
-    role_assignment: RoleAssignment, approvers: Sequence[User]
-) -> None:
-    url = (
-        f"{settings.HOST.rstrip('/')}/data-products/"
-        f"{role_assignment.data_product_id}#team"
-    )
-    action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
-    action.add_row(
-        [
-            f"{role_assignment.user.first_name} {role_assignment.user.last_name}",
-            "Wants to join ",
-            role_assignment.data_product.name,
-            ", ".join([f"{user.first_name} {user.last_name}" for user in approvers]),
-        ]
-    )
-
-    return send_mail(
-        approvers,
-        action,
-        url,
-        f"Action Required: {role_assignment.user.first_name} "
-        f"{role_assignment.user.last_name} wants "
-        f"to join {role_assignment.data_product.name}",
-    )
 
 
 @router.delete("/{id}")
