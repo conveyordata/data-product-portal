@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -5,9 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataOutputDatasetAssociationResolver
-from app.data_outputs_datasets.schema_response import DataOutputDatasetAssociationsGet
 from app.data_outputs_datasets.service import DataOutputDatasetService
 from app.database.database import get_db_session
+from app.pending_actions.schema import DataOutputDatasetPendingAction
 from app.users.schema import User
 
 router = APIRouter(
@@ -80,5 +81,5 @@ def remove_data_output_link(
 def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> list[DataOutputDatasetAssociationsGet]:
+) -> Sequence[DataOutputDatasetPendingAction]:
     return DataOutputDatasetService().get_user_pending_actions(db, authenticated_user)
