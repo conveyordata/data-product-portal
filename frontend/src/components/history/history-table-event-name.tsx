@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import type { EventContract } from '@/types/events/event.contract';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import {
@@ -12,8 +11,6 @@ import {
     getSubjectDisplayLabel,
     getTargetDisplayLabel,
 } from '@/utils/history.helper';
-
-import { LoadingSpinner } from '../loading/loading-spinner/loading-spinner';
 
 interface HistoryTableLinkProps {
     record: EventContract;
@@ -26,25 +23,11 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
         record;
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { data: subjectDataOutput, isFetching: subjectFetching } = useGetDataOutputByIdQuery(subject_id, {
-        skip: !!deleted_subject_identifier || subject_type != EventReferenceEntity.DataOutput,
-    });
-    const { data: targetDataOutput, isFetching: targetFetching } = useGetDataOutputByIdQuery(target_id, {
-        skip: !!deleted_target_identifier || target_type != EventReferenceEntity.DataOutput,
-    });
-
-    if (
-        (record.target_type === EventReferenceEntity.DataOutput ||
-            record.subject_type === EventReferenceEntity.DataOutput) &&
-        (targetFetching || subjectFetching)
-    ) {
-        return <LoadingSpinner />;
-    }
 
     if (!(subject_id === resourceId && type === subject_type)) {
         const path = getEventReferenceEntityLinkPath(
             subject_id,
-            subject_type == EventReferenceEntity.DataOutput ? (subjectDataOutput?.owner_id ?? null) : null,
+            subject_type == EventReferenceEntity.DataOutput ? (record.data_output?.owner_id ?? null) : null,
             subject_type,
         );
 
@@ -75,7 +58,7 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
     if (target_id && !(target_id === resourceId && type === target_type)) {
         const path = getEventReferenceEntityLinkPath(
             target_id,
-            target_type == EventReferenceEntity.DataOutput ? (targetDataOutput?.owner_id ?? null) : null,
+            target_type == EventReferenceEntity.DataOutput ? (record.data_output?.owner_id ?? null) : null,
             target_type,
         );
 
