@@ -31,7 +31,6 @@ from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.schema_request import (
@@ -55,8 +54,8 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
-from app.role_assignments.data_product.service import RoleAssignmentService
 from app.role_assignments.enums import DecisionStatus
+from app.roles.schema import Prototype
 from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
@@ -118,7 +117,7 @@ class DataProductService:
                 select(DataProductModel)
                 .options(
                     joinedload(DataProductModel.dataset_links).lazyload("*"),
-                    joinedload(DataProductModel.memberships).lazyload("*"),
+                    joinedload(DataProductModel.assignments).lazyload("*"),
                     joinedload(DataProductModel.data_outputs).lazyload("*"),
                 )
                 .order_by(asc(DataProductModel.name))
@@ -135,9 +134,9 @@ class DataProductService:
     def get_owners(self, id: UUID, db: Session) -> Sequence[User]:
         data_product = ensure_data_product_exists(id, db)
         user_ids = [
-            membership.user_id
-            for membership in data_product.memberships
-            if membership.role == DataProductUserRole.OWNER
+            assignment.user_id
+            for assignment in data_product.assignments
+            if assignment.role.prototype == Prototype.OWNER
         ]
         return db.scalars(select(UserModel).filter(UserModel.id.in_(user_ids))).all()
 
@@ -149,12 +148,12 @@ class DataProductService:
                 select(DataProductModel)
                 .options(
                     joinedload(DataProductModel.dataset_links).lazyload("*"),
-                    joinedload(DataProductModel.memberships).lazyload("*"),
+                    joinedload(DataProductModel.assignments).lazyload("*"),
                     joinedload(DataProductModel.data_outputs).lazyload("*"),
                 )
                 .filter(
-                    DataProductModel.memberships.any(
-                        user_id=user_id, status=DecisionStatus.APPROVED
+                    DataProductModel.assignments.any(
+                        user_id=user_id, decision=DecisionStatus.APPROVED
                     )
                 )
                 .order_by(asc(DataProductModel.name))

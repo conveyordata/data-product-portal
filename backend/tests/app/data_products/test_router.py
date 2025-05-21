@@ -24,8 +24,6 @@ from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
-from app.data_product_memberships.enums import DataProductUserRole
-from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Scope
 from app.roles.service import RoleService
 
@@ -64,7 +62,6 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
@@ -79,7 +76,6 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 400
@@ -94,7 +90,6 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         create_payload = deepcopy(payload)
@@ -112,7 +107,6 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         DataProductFactory(namespace=payload["namespace"])
@@ -132,7 +126,6 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         create_payload = deepcopy(payload)
@@ -153,7 +146,6 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         create_payload = deepcopy(payload)
@@ -185,9 +177,9 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
 
         response = self.get_conveyor_ide_url(client, data_product.id)
@@ -196,6 +188,11 @@ class TestDataProductsRouter:
     def test_get_data_product_by_user_id(self, client):
         user = UserFactory(external_id="sub")
         data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=RoleFactory().id,
+        )
 
         response = self.get_data_product_by_user_id(client, user.id)
         assert response.status_code == 200
@@ -226,9 +223,9 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         update_payload = deepcopy(payload)
         update_payload["name"] = "Updated Data Product"
@@ -253,9 +250,9 @@ class TestDataProductsRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         update_payload = deepcopy(payload)
         update_payload["owners"] = []
@@ -270,9 +267,9 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = self.update_data_product_about(client, data_product.id)
         assert response.status_code == 200
@@ -290,9 +287,9 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__DELETE],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
@@ -312,13 +309,13 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = self.get_data_product_by_id(client, data_product.id)
         assert response.json()["status"] == "pending"
-        response = self.update_data_product_status(
+        _ = self.update_data_product_status(
             client, {"status": "active"}, data_product.id
         )
         response = self.get_data_product_by_id(client, data_product.id)
@@ -344,9 +341,9 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         setting = DataProductSettingFactory(scope="dataset")
         with pytest.raises(IntegrityError):
@@ -368,9 +365,9 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         setting = DataProductSettingFactory()
         response = client.post(
@@ -411,9 +408,9 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = client.get(
             f"{ENDPOINT}/{data_product.id}/role?environment=production"
@@ -430,9 +427,9 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = client.get(
             f"{ENDPOINT}/{data_product.id}/signin_url?environment=production"
@@ -451,9 +448,9 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         EnvPlatformConfigFactory(
             environment=env,
@@ -469,7 +466,7 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json() == "test_1.com"
 
-    def test_get_namespace_suggestion_subsitution(self, client):
+    def test_get_namespace_suggestion_substitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
         body = response.json()
@@ -573,9 +570,9 @@ class TestDataProductsRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         update_payload = deepcopy(payload)
         update_payload["namespace"] = namespace

@@ -14,7 +14,6 @@ from app.core.namespace.validation import (
 from app.data_outputs.schema_request import DataOutputCreate
 from app.data_outputs.schema_response import DataOutputGet
 from app.data_outputs.service import DataOutputService
-from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.service import DataProductSettingService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -150,7 +149,6 @@ def create_data_product(
         }
     },
     dependencies=[
-        Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
         Depends(
             Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
         ),
@@ -159,7 +157,7 @@ def create_data_product(
 def remove_data_product(
     id: UUID,
     db: Session = Depends(get_db_session),
-):
+) -> None:
     DataProductService().remove_data_product(id, db)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
     return
@@ -300,7 +298,6 @@ def update_data_product_status(
         },
     },
     dependencies=[
-        Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
@@ -338,7 +335,6 @@ def link_dataset_to_data_product(
         },
     },
     dependencies=[
-        Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
@@ -443,7 +439,6 @@ def get_graph_data(
 @router.post(
     "/{id}/settings/{setting_id}",
     dependencies=[
-        Depends(OnlyWithProductAccessID([DataProductUserRole.OWNER])),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_SETTINGS, DataProductResolver
