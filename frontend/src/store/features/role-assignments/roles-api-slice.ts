@@ -49,18 +49,6 @@ export const roleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTyp
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        requestRoleAssignment: builder.mutation<RoleAssignmentContract, RoleAssignmentCreateContract>({
-            query: (request) => ({
-                url: ApiUrl.RoleAssignmentsDataProductRequest,
-                method: 'POST',
-                data: request,
-            }),
-            invalidatesTags: (_, _error, request) => [
-                { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.DataProduct as const, id: request.data_product_id },
-                { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-            ],
-        }),
         decideRoleAssignment: builder.mutation<
             RoleAssignmentContract,
             { role_assignment_id: string; decision_status: DecisionStatus; data_product_id: string }
@@ -97,6 +85,5 @@ export const {
     useUpdateRoleAssignmentMutation,
     useDeleteRoleAssignmentMutation,
     useCreateRoleAssignmentMutation,
-    useRequestRoleAssignmentMutation,
     useDecideRoleAssignmentMutation,
 } = roleAssignmentsApiSlice;

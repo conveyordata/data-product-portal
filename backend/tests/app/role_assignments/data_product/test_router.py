@@ -212,7 +212,7 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.get(f"{ENDPOINT_PENDING_ACTIONS}")
         assert response.json() == []
 
-    def test_request_data_product_role_assignment(self, client):
+    def test_request_data_product_role_assignment_with_accept_permission(self, client):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory(external_id="sub")
         role: Role = RoleFactory(
@@ -229,7 +229,7 @@ class TestDataProductRoleAssignmentsRouter:
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}/request",
+            f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
                 "user_id": str(user_requester.id),
@@ -240,7 +240,51 @@ class TestDataProductRoleAssignmentsRouter:
 
         response = client.get(f"{ENDPOINT_PENDING_ACTIONS}")
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert len(response.json()) == 0
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 2
+        assert (
+            data[0].get("decision") != DecisionStatus.PENDING
+            and data[1].get("decision") != DecisionStatus.PENDING
+        )
+
+    def test_request_data_product_role_assignment_without_accept_permission(
+        self, client
+    ):
+        data_product: DataProduct = DataProductFactory()
+        user: User = UserFactory(external_id="sub")
+        role: Role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+        user_requester: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}",
+            json={
+                "data_product_id": str(data_product.id),
+                "user_id": str(user_requester.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 200
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 2
+        assert (
+            data[0].get("decision") == DecisionStatus.PENDING
+            or data[1].get("decision") == DecisionStatus.PENDING
+        )
 
     @staticmethod
     def delete_data_product(client, data_product_id):
