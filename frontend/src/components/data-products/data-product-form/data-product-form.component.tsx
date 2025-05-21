@@ -80,14 +80,10 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         { skip: !dataProductId },
     );
 
-    console.log(create_access, update_access, delete_access);
-
     const canCreate = mode === 'create' && (create_access?.allowed ?? false);
     const canEdit = mode === 'edit' && (update_access?.allowed ?? false);
     const canDelete = mode === 'edit' && (delete_access?.allowed ?? false);
     const canSubmit = canCreate || canEdit;
-
-    console.log(canCreate, canEdit, canDelete);
 
     const isLoading =
         isCreating ||

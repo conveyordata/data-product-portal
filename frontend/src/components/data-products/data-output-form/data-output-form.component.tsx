@@ -36,14 +36,14 @@ import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
 import { S3DataOutputForm } from './s3-data-output-form.component';
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 
+const DEBOUNCE = 500;
+
 type Props = {
     mode: 'create';
-    formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>>;
+    formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration> | null>;
     dataProductId: string;
     modalCallbackOnSubmit: () => void;
 };
-
-const DEBOUNCE = 500;
 
 export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit }: Props) {
     const { t } = useTranslation();
@@ -113,6 +113,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         dispatchMessage({ content: errorMessage, type: 'error' });
                     }
                 }
+
+                // TODO: platform_id and service_id can be undefined when nothing is selected
                 const request: DataOutputCreate = {
                     name: values.name,
                     namespace: values.namespace,
