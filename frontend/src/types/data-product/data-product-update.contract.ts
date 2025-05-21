@@ -1,6 +1,6 @@
 import { DataProductCreate, DataProductCreateResponse } from '@/types/data-product';
 
-export type DataProductUpdateRequest = DataProductCreate;
+export type DataProductUpdateRequest = Omit<DataProductCreate, 'owners'>;
 
 export type DataProductUpdateResponse = DataProductCreateResponse;
 

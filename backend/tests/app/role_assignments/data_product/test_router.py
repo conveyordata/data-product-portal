@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from fastapi.testclient import TestClient
 from tests.factories import (
     DataProductFactory,
@@ -11,7 +13,7 @@ from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProduct
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Role, Scope
+from app.roles.schema import Prototype, Role, Scope
 from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/data_product"
@@ -62,7 +64,6 @@ class TestDataProductRoleAssignmentsRouter:
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         response = client.get(f"{ENDPOINT}")
@@ -75,6 +76,28 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()) == 0
+
+    def test_delete_last_owner_assignment(self, client: TestClient):
+        data_product: DataProduct = DataProductFactory()
+        user_1: User = UserFactory()
+        user_2: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
+        assignment_1 = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user_1.id,
+            role_id=role.id,
+        )
+        assignment_2 = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user_2.id,
+            role_id=role.id,
+        )
+
+        response = client.delete(f"{ENDPOINT}/{assignment_1.id}")
+        assert response.status_code == HTTPStatus.OK
+
+        response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
+        assert response.status_code == HTTPStatus.FORBIDDEN
 
     def test_decide_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()

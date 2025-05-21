@@ -14,15 +14,16 @@ class GlobalRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     id = factory.Faker("uuid4")
     user_id = factory.Faker("uuid4")
     role_id = factory.Faker("uuid4")
-    decision = DecisionStatus.PENDING
+    decision = DecisionStatus.APPROVED
 
     @factory.post_generation
     def sync_role(self, create, extracted, **kwargs):
-        authorizer = Authorization()
-        if self.role_id == ADMIN_UUID:
-            authorizer.assign_admin_role(user_id=str(self.user_id))
-        else:
-            authorizer.assign_global_role(
-                role_id=str(self.role_id), user_id=str(self.user_id)
-            )
-        test_session.commit()
+        if self.decision == DecisionStatus.APPROVED:
+            authorizer = Authorization()
+            if self.role_id == ADMIN_UUID:
+                authorizer.assign_admin_role(user_id=str(self.user_id))
+            else:
+                authorizer.assign_global_role(
+                    role_id=str(self.role_id), user_id=str(self.user_id)
+                )
+            test_session.commit()

@@ -11,6 +11,7 @@ from app.data_product_types.model import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
+from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
 from app.tags.model import Tag, tag_data_product_table
@@ -59,6 +60,13 @@ class DataProduct(Base, BaseORM):
         "DataProductMembership.role",
         lazy="joined",
     )
+    assignments: Mapped[list["DataProductRoleAssignment"]] = relationship(
+        back_populates="data_product",
+        cascade="all, delete-orphan",
+        order_by="DataProductRoleAssignment.decision, "
+        "DataProductRoleAssignment.requested_on",
+        lazy="joined",
+    )
     dataset_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
         back_populates="data_product",
@@ -85,12 +93,12 @@ class DataProduct(Base, BaseORM):
 
     @property
     def user_count(self) -> int:
-        approved_memberships = [
-            membership
-            for membership in self.memberships
-            if membership.status == DecisionStatus.APPROVED
+        approved_assignments = [
+            assignment
+            for assignment in self.assignments
+            if assignment.decision == DecisionStatus.APPROVED
         ]
-        return len(approved_memberships)
+        return len(approved_assignments)
 
     @property
     def dataset_count(self) -> int:

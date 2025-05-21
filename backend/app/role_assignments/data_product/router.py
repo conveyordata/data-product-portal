@@ -25,11 +25,12 @@ router = APIRouter(prefix="/data_product")
 def list_assignments(
     data_product_id: Optional[UUID] = None,
     user_id: Optional[UUID] = None,
+    decision: Optional[DecisionStatus] = None,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[RoleAssignmentResponse]:
     return RoleAssignmentService(db=db, user=user).list_assignments(
-        data_product_id=data_product_id, user_id=user_id
+        data_product_id=data_product_id, user_id=user_id, decision=decision
     )
 
 

@@ -7,7 +7,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
-import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import {
     useCreateDataOutputMutation,
@@ -17,14 +17,14 @@ import {
 import {
     useGetDataProductByIdQuery,
     useLazyValidateDataOutputNamespaceQuery,
-} from '@/store/features/data-products/data-products-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+} from '@/store/features/data-products/data-products-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import type { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
 import { DataOutputStatus } from '@/types/data-output/data-output.contract';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
-import { createDataProductIdPath } from '@/types/navigation.ts';
+import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { getDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
@@ -36,14 +36,14 @@ import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
 import { S3DataOutputForm } from './s3-data-output-form.component';
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 
+const DEBOUNCE = 500;
+
 type Props = {
     mode: 'create';
-    formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>>;
+    formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration> | null>;
     dataProductId: string;
     modalCallbackOnSubmit: () => void;
 };
-
-const DEBOUNCE = 500;
 
 export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit }: Props) {
     const { t } = useTranslation();
@@ -113,6 +113,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         dispatchMessage({ content: errorMessage, type: 'error' });
                     }
                 }
+
+                // TODO: platform_id and service_id can be undefined when nothing is selected
                 const request: DataOutputCreate = {
                     name: values.name,
                     namespace: values.namespace,

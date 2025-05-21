@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 
 from app.data_outputs.model import DataOutput
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
-from app.data_product_memberships.model import DataProductMembership
 from app.data_products.model import DataProduct
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
@@ -64,25 +63,6 @@ class DataOutputResolver(SubjectResolver):
             )
             if data_output:
                 return data_output.owner_id
-        return cls.DEFAULT
-
-
-class DataProductMembershipResolver(SubjectResolver):
-    model: Model = DataProduct
-
-    @classmethod
-    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
-        obj = DataProductResolver.resolve(request, key, db)
-        if obj != cls.DEFAULT:
-            membership = (
-                db.scalars(
-                    select(DataProductMembership).where(DataProductMembership.id == obj)
-                )
-                .unique()
-                .one_or_none()
-            )
-            if membership:
-                return membership.data_product_id
         return cls.DEFAULT
 
 

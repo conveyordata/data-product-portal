@@ -1,37 +1,28 @@
-import { Flex, Table, type TableColumnsType, TableProps } from 'antd';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
-import { useModal } from '@/hooks/use-modal.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import {
-    useRemoveDataOutputMutation,
-    useRemoveDatasetFromDataOutputMutation,
-} from '@/store/features/data-outputs/data-outputs-api-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
+import { useRemoveDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataOutputsGetContract } from '@/types/data-output';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import type { DataOutputsGetContract } from '@/types/data-output';
 
-import { AddDatasetPopup } from '../add-dataset-popup/add-dataset-popup.tsx';
 import styles from './data-output-table.module.scss';
 import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
 
 type Props = {
-    isCurrentUserDataProductOwner: boolean;
     dataProductId: string;
     dataOutputs: DataOutputsGetContract;
 };
-
-export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, dataOutputs }: Props) {
+export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
-
-    const [removeDatasetFromDataOutput] = useRemoveDatasetFromDataOutputMutation();
     const [removeDataOutput] = useRemoveDataOutputMutation();
 
-    const [dataOutput, setDataOutput] = useState<string | undefined>(undefined);
-    const { isVisible, handleOpen, handleClose } = useModal();
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
@@ -59,34 +50,21 @@ export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, 
         [removeDataOutput, t],
     );
 
-    const handleRemoveDatasetFromDataOutput = useCallback(
-        async (datasetId: string, dataOutputId: string, name: string) => {
-            try {
-                await removeDatasetFromDataOutput({ datasetId, dataOutputId: dataOutputId }).unwrap();
-                dispatchMessage({
-                    content: t('Dataset {{name}} has been removed from data output', { name }),
-                    type: 'success',
-                });
-            } catch (error) {
-                console.error('Failed to remove dataset from data output', error);
-            }
+    const { data: deleteDataOutput } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
         },
-        [removeDatasetFromDataOutput, t],
+        { skip: !dataProductId },
     );
 
     const columns: TableColumnsType<DataOutputsGetContract[0]> = useMemo(() => {
         return getDataProductDataOutputsColumns({
             t,
-            handleOpen: (id) => {
-                setDataOutput(id);
-                handleOpen();
-            },
+            canRemove: deleteDataOutput?.allowed ?? false,
             onRemoveDataOutput: handleRemoveDataOutput,
-            onRemoveDatasetFromDataOutput: handleRemoveDatasetFromDataOutput,
-            isDisabled: !isCurrentUserDataProductOwner,
-            //isLoading: () => {},//isRemovingDataOutputFromDataProduct,
         });
-    }, [t, handleRemoveDataOutput, handleRemoveDatasetFromDataOutput, handleOpen, isCurrentUserDataProductOwner]);
+    }, [t, deleteDataOutput, handleRemoveDataOutput]);
 
     if (!dataProduct) return null;
 
@@ -117,9 +95,6 @@ export function DataOutputTable({ isCurrentUserDataProductOwner, dataProductId, 
                     size={'small'}
                 />
             </Flex>
-            {isVisible && dataOutput && (
-                <AddDatasetPopup onClose={handleClose} isOpen={isVisible} dataOutputId={dataOutput} />
-            )}
         </>
     );
 }
