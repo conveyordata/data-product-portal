@@ -120,6 +120,7 @@ def create_data_product(
 
     for owner in data_product.owners:
         resp = create_assignment(
+            created_data_product.id,
             CreateRoleAssignment(
                 data_product_id=created_data_product.id,
                 user_id=owner,

@@ -71,7 +71,7 @@ class RoleAssignmentService:
 
     def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
         role = self.db.get(Role, request.role_id)
-        if role is None or role.scope != Scope.DATASET:
+        if role and role.scope != Scope.DATASET:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Role not found for this scope",

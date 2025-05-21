@@ -119,6 +119,7 @@ def create_dataset(
         )
     for owner in new_dataset.owners:
         resp = create_assignment(
+            new_dataset.id,
             CreateRoleAssignment(
                 dataset_id=new_dataset.id, user_id=owner.id, role_id=owner_role.id
             ),
