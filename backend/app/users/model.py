@@ -27,7 +27,7 @@ class User(Base, BaseORM):
     last_name = Column(String)
     is_admin = Column(Boolean, server_default="false", nullable=False)
     events: Mapped[list["Event"]] = relationship(
-        "Event", back_populates="actor", foreign_keys="Event.actor_id"
+        "Event", back_populates="actor", foreign_keys="Event.actor_id", lazy="raise"
     )
     data_product_memberships: Mapped[list["DataProductMembership"]] = relationship(
         "DataProductMembership",
