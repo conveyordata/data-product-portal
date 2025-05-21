@@ -120,4 +120,3 @@ class EventService:
             )
             .order_by(EventModel.created_on.desc())
         ).all()
-
