@@ -1,7 +1,7 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -47,7 +47,6 @@ def create_assignment(
 @router.delete("/{id}")
 def delete_assignment(
     id: UUID,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> None:
@@ -56,7 +55,7 @@ def delete_assignment(
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
-        background_tasks.add_task(DataProductAuthAssignment(assignment).remove)
+        DataProductAuthAssignment(assignment).remove()
     return None
 
 
@@ -64,7 +63,6 @@ def delete_assignment(
 def decide_assignment(
     id: UUID,
     request: DecideRoleAssignment,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
@@ -88,7 +86,7 @@ def decide_assignment(
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
-        background_tasks.add_task(DataProductAuthAssignment(assignment).add)
+        DataProductAuthAssignment(assignment).add()
 
     return assignment
 
@@ -97,7 +95,6 @@ def decide_assignment(
 def modify_assigned_role(
     id: UUID,
     request: ModifyRoleAssignment,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
@@ -109,8 +106,6 @@ def modify_assigned_role(
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
-        background_tasks.add_task(
-            DataProductAuthAssignment(assignment, previous_role_id=original_role).swap
-        )
+        DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()
 
     return assignment

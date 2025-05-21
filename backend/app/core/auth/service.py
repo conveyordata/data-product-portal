@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.credentials import AWSCredentials
@@ -22,8 +23,13 @@ class AuthService:
                     environment = env.name
                     break
         data_product_id = (
-            db.query(DataProductModel)
-            .get_one(DataProductModel.namespace, data_product_name)
+            db.execute(
+                select(DataProductModel).where(
+                    DataProductModel.namespace == data_product_name
+                )
+            )
+            .unique()
+            .scalar_one()
             .id
         )
         role_arn = DataProductService().get_data_product_role_arn(

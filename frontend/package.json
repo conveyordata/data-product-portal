@@ -19,7 +19,7 @@
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@dagrejs/dagre": "^1.1.4",
     "@fontsource/inter": "^5.2.5",
-    "@reduxjs/toolkit": "^2.8.1",
+    "@reduxjs/toolkit": "^2.8.2",
     "@tiptap/extension-bubble-menu": "^2.12.0",
     "@tiptap/extension-document": "^2.12.0",
     "@tiptap/extension-hard-break": "^2.12.0",
@@ -35,12 +35,12 @@
     "@tiptap/pm": "^2.12.0",
     "@tiptap/react": "^2.12.0",
     "@tiptap/starter-kit": "^2.12.0",
-    "@xyflow/react": "^12.6.1",
-    "antd": "^5.25.1",
+    "@xyflow/react": "^12.6.4",
+    "antd": "^5.25.2",
     "axios": "^1.9.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "i18next": "^25.1.2",
+    "i18next": "^25.2.0",
     "i18next-http-backend": "^3.0.2",
     "oidc-client-ts": "^3.2.1",
     "react": "^19.1.0",
@@ -52,7 +52,7 @@
     "react-router": "^7.6.0"
   },
   "devDependencies": {
-    "@types/node": "^22.15.17",
+    "@types/node": "^22.15.21",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
@@ -67,15 +67,15 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "i18next-parser": "^9.3.0",
-    "msw": "^2.8.2",
+    "msw": "^2.8.4",
     "prettier": "3.5.3",
-    "sass": "^1.88.0",
+    "sass": "^1.89.0",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vite-plugin-svgr": "^4.3.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-musl": "^4.40.2"
+    "@rollup/rollup-linux-x64-musl": "^4.41.0"
   },
   "volta": {
     "node": "20.12.2"
@@ -85,6 +85,9 @@
     "npm": ">= 10.1"
   },
   "overrides": {
+    "i18next-parser": {
+      "rimraf": "^4.0.0"
+    },
     "zustand": {
       "use-sync-external-store": "^1.4.0"
     }
