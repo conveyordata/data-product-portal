@@ -169,7 +169,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
             initials = getInitials(action.user.first_name, action.user.last_name);
             request = {
                 type: PendingActionTypes.DataProductMembership as PendingActionTypes.DataProductMembership,
-                request: action.id,
+                request: { assignment_id: action.id, data_product_id: action.data_product_id },
             };
             break;
 

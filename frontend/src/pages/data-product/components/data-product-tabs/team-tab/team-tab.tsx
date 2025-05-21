@@ -9,49 +9,52 @@ import { useModal } from '@/hooks/use-modal.tsx';
 import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useAddDataProductMembershipMutation } from '@/store/features/data-product-memberships/data-product-memberships-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import {
+    useCreateRoleAssignmentMutation,
+    useGetRoleAssignmentQuery,
+} from '@/store/features/role-assignments/data-product-roles-api-slice';
+import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { DataProductMembershipRole, DataProductUserMembership } from '@/types/data-product-membership';
+import { RoleAssignmentContract } from '@/types/roles/role.contract';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
 
 import styles from './team-tab.module.scss';
+
+function filterUsers(users: RoleAssignmentContract[], searchTerm: string): RoleAssignmentContract[] {
+    if (!searchTerm) return users;
+
+    return users.filter((membership) => {
+        const searchString = searchTerm.toLowerCase();
+        return (
+            membership?.user?.email?.toLowerCase()?.includes(searchString) ||
+            membership?.user?.first_name?.toLowerCase()?.includes(searchString) ||
+            membership?.user?.last_name?.toLowerCase()?.includes(searchString)
+        );
+    });
+}
 
 type Props = {
     dataProductId: string;
 };
-
-function filterUsers(users: DataProductUserMembership[], searchTerm: string) {
-    if (!searchTerm) return users;
-    if (!users) return [];
-
-    return (
-        users.filter((membership) => {
-            const searchString = searchTerm.toLowerCase();
-            return (
-                membership?.user?.email?.toLowerCase()?.includes(searchString) ||
-                membership?.user?.first_name?.toLowerCase()?.includes(searchString) ||
-                membership?.user?.last_name?.toLowerCase()?.includes(searchString)
-            );
-        }) ?? []
-    );
-}
-
 export function TeamTab({ dataProductId }: Props) {
+    const { t } = useTranslation();
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
-    const { t } = useTranslation();
-    const { data: dataProduct, isFetching } = useGetDataProductByIdQuery(dataProductId);
-    const [addUserToDataProduct, { isLoading: isAddingUser }] = useAddDataProductMembershipMutation();
+    const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
+    const { data: roleAssignments, isFetching } = useGetRoleAssignmentQuery({
+        data_product_id: dataProductId,
+    });
+    const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateRoleAssignmentMutation();
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
+    const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
 
     const filteredUsers = useMemo(() => {
-        return filterUsers(dataProduct?.memberships ?? [], searchTerm);
-    }, [dataProduct?.memberships, searchTerm]);
+        return filterUsers(roleAssignments ?? [], searchTerm);
+    }, [searchTerm, roleAssignments]);
     const dataProductUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
 
     const { data: access } = useCheckAccessQuery(
@@ -64,19 +67,13 @@ export function TeamTab({ dataProductId }: Props) {
 
     const canAddUserNew = access?.allowed || false;
 
-    const isDataProductOwner = useMemo(() => {
-        if (!dataProduct || !user) return false;
-
-        return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct, user]);
-
     const handleGrantAccessToDataProduct = useCallback(
-        async (user: UserContract) => {
+        async (user: UserContract, role_id: string) => {
             try {
                 await addUserToDataProduct({
-                    dataProductId: dataProductId,
+                    data_product_id: dataProductId,
                     user_id: user.id,
-                    role: DataProductMembershipRole.Member,
+                    role_id: role_id,
                 }).unwrap();
                 dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
             } catch (_error) {
@@ -90,14 +87,14 @@ export function TeamTab({ dataProductId }: Props) {
 
     return (
         <>
-            <Flex vertical className={styles.container}>
+            <Flex vertical className={`${styles.container} ${filteredUsers.length === 0 && styles.paginationGap}`}>
                 <Searchbar
                     form={searchForm}
-                    formItemProps={{ initialValue: '' }}
+                    formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
                     placeholder={t('Search users by email or name')}
                     actionButton={
                         <Button
-                            disabled={!(canAddUserNew || isDataProductOwner)}
+                            disabled={!canAddUserNew}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}
@@ -106,11 +103,7 @@ export function TeamTab({ dataProductId }: Props) {
                         </Button>
                     }
                 />
-                <TeamTable
-                    isCurrentUserDataProductOwner={isDataProductOwner}
-                    dataProductId={dataProductId}
-                    dataProductUsers={filteredUsers}
-                />
+                <TeamTable dataProductId={dataProductId} dataProductUsers={filteredUsers} />
             </Flex>
             {isVisible && (
                 <UserPopup
@@ -118,6 +111,7 @@ export function TeamTab({ dataProductId }: Props) {
                     onClose={handleClose}
                     isLoading={isFetching || isAddingUser}
                     userIdsToHide={dataProductUserIds}
+                    roles={DATA_PRODUCT_ROLES || []}
                     item={{
                         action: handleGrantAccessToDataProduct,
                         label: t('Grant Access'),

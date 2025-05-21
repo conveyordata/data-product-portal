@@ -6,16 +6,15 @@ import {
     useRejectDataOutputLinkMutation,
 } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
 import {
-    useDenyMembershipAccessMutation,
-    useGrantMembershipAccessMutation,
-} from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
-import {
     useApproveDataProductLinkMutation,
     useRejectDataProductLinkMutation,
 } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { useDecideRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
 import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
+import { DataProductMembershipRoleRequest } from '@/types/data-product-membership';
+import { DecisionStatus } from '@/types/roles';
 
 export const usePendingActionHandlers = () => {
     const { t } = useTranslation();
@@ -24,8 +23,7 @@ export const usePendingActionHandlers = () => {
     const [rejectDataProductLink, { isLoading: isRejectingDataProductLink }] = useRejectDataProductLinkMutation();
     const [approveDataOutputLink, { isLoading: isApprovingDataOutputLink }] = useApproveDataOutputLinkMutation();
     const [rejectDataOutputLink, { isLoading: isRejectingDataOutputLink }] = useRejectDataOutputLinkMutation();
-    const [grantMembershipAccess, { isLoading: isGrantingMembershipAccess }] = useGrantMembershipAccessMutation();
-    const [denyMembershipAccess, { isLoading: isDenyingMembershipAccess }] = useDenyMembershipAccessMutation();
+    const [decideroleAssignment, { isLoading: isDecidingRoleAssignment }] = useDecideRoleAssignmentMutation();
 
     const handleAcceptDataProductDatasetLink = useCallback(
         async (request: DataProductDatasetLinkRequest) => {
@@ -100,27 +98,35 @@ export const usePendingActionHandlers = () => {
     );
 
     const handleGrantAccessToDataProduct = useCallback(
-        async (membershipId: string) => {
+        async (request: DataProductMembershipRoleRequest) => {
             try {
-                await grantMembershipAccess({ membershipId }).unwrap();
+                await decideroleAssignment({
+                    role_assignment_id: request.assignment_id,
+                    decision_status: DecisionStatus.Approved,
+                    data_product_id: request.data_product_id,
+                }).unwrap();
                 dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
             }
         },
-        [grantMembershipAccess, t],
+        [decideroleAssignment, t],
     );
 
     const handleDenyAccessToDataProduct = useCallback(
-        async (membershipId: string) => {
+        async (request: DataProductMembershipRoleRequest) => {
             try {
-                await denyMembershipAccess({ membershipId }).unwrap();
+                await decideroleAssignment({
+                    role_assignment_id: request.assignment_id,
+                    decision_status: DecisionStatus.Denied,
+                    data_product_id: request.data_product_id,
+                }).unwrap();
                 dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
             }
         },
-        [denyMembershipAccess, t],
+        [decideroleAssignment, t],
     );
 
     return {
@@ -135,7 +141,6 @@ export const usePendingActionHandlers = () => {
         isRejectingDataProductLink,
         isApprovingDataOutputLink,
         isRejectingDataOutputLink,
-        isGrantingMembershipAccess,
-        isDenyingMembershipAccess,
+        isDecidingRoleAssignment,
     };
 };

@@ -1,12 +1,13 @@
-import { Badge, Button, Popconfirm, TableColumnsType } from 'antd';
-import { TFunction } from 'i18next';
+import { Badge, type TableColumnsType } from 'antd';
+import type { TFunction } from 'i18next';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title';
 import { DatasetTitle } from '@/components/datasets/dataset-title/dataset-title';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import { DatasetLink } from '@/types/data-product';
+import { DatasetActionButton } from '@/pages/data-product/components/data-product-tabs/dataset-tab/components/dataset-table/dataset-action-button.component.tsx';
+import type { DatasetLink } from '@/types/data-product';
 import { createDatasetIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
@@ -18,20 +19,8 @@ import styles from './dataset-table.module.scss';
 type Props = {
     t: TFunction;
     datasetLinks: DatasetLink[];
-    onRemoveDataProductDatasetLink: (datasetId: string, name: string) => void;
-    onCancelDataProductDatasetLinkRequest: (datasetId: string, name: string) => void;
-    isLoading?: boolean;
-    isDisabled?: boolean;
 };
-
-export const getDataProductDatasetsColumns = ({
-    onRemoveDataProductDatasetLink,
-    onCancelDataProductDatasetLinkRequest,
-    t,
-    datasetLinks,
-    isDisabled,
-    isLoading,
-}: Props): TableColumnsType<DatasetLink> => {
+export const getDataProductDatasetsColumns = ({ t, datasetLinks }: Props): TableColumnsType<DatasetLink> => {
     const sorter = new Sorter<DatasetLink>();
     return [
         {
@@ -75,37 +64,8 @@ export const getDataProductDatasetsColumns = ({
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, { dataset, dataset_id, status }) => {
-                const buttonText = status === DecisionStatus.Pending ? t('Cancel') : t('Remove');
-                const popupTitle = status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Dataset');
-                const popupDescription =
-                    status === DecisionStatus.Pending
-                        ? t('Are you sure you want to cancel the request to link {{name}} to the data product?', {
-                              name: dataset.name,
-                          })
-                        : t('Are you sure you want to remove {{name}} from the data product?', {
-                              name: dataset.name,
-                          });
-                const onConfirm =
-                    status === DecisionStatus.Pending
-                        ? onCancelDataProductDatasetLinkRequest
-                        : onRemoveDataProductDatasetLink;
-                return (
-                    <Popconfirm
-                        title={popupTitle}
-                        description={popupDescription}
-                        onConfirm={() => onConfirm(dataset_id, dataset.name)}
-                        placement={'leftTop'}
-                        okText={t('Confirm')}
-                        cancelText={t('Cancel')}
-                        okButtonProps={{ loading: isLoading }}
-                        autoAdjustOverflow={true}
-                    >
-                        <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
-                            {buttonText}
-                        </Button>
-                    </Popconfirm>
-                );
+            render: (_, { dataset, data_product_id, status }) => {
+                return <DatasetActionButton dataset={dataset} dataProductId={data_product_id} status={status} />;
             },
         },
     ];

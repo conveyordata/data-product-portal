@@ -7,9 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_outputs.model import DataOutput as DataOutputModel
-from app.data_product_memberships.enums import (
-    DataProductUserRole,
-)
+from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_memberships.model import (
     DataProductMembership as DataProductMembershipModel,
 )
@@ -24,7 +22,9 @@ from app.settings import settings
 from app.users.schema import User
 
 
-async def only_for_admin(authenticated_user: User = Depends(get_authenticated_user)):
+def only_for_admin(
+    authenticated_user: User = Depends(get_authenticated_user),
+):
     if settings.AUTHORIZER_ENABLED:
         return
     if not authenticated_user.is_admin:
@@ -55,7 +55,7 @@ def only_dataset_owners(
         )
 
 
-async def only_dataproduct_dataset_link_owners(
+def only_dataproduct_dataset_link_owners(
     id: UUID,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
@@ -78,7 +78,7 @@ async def only_dataproduct_dataset_link_owners(
         )
 
 
-async def only_data_output_owners(
+def only_data_output_owners(
     id: UUID,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
@@ -96,7 +96,7 @@ async def only_data_output_owners(
     )
 
 
-async def only_product_membership_owners(
+def only_product_membership_owners(
     id: UUID,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),

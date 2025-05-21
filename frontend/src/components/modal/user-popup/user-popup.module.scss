@@ -12,3 +12,16 @@
 .user-name {
     font-weight: globals.$font-weight-normal;
 }
+
+.roleDropdown {
+    width: 40%;
+    white-space: normal;
+    .ant-select-selection-item {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+    }
+    .ant-select-dropdown {
+        white-space: normal;
+    }
+}

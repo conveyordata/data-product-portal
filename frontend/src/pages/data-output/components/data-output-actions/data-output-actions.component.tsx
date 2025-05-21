@@ -6,15 +6,12 @@ import { useTranslation } from 'react-i18next';
 import collibraLogo from '@/assets/icons/collibra-logo.svg?react';
 import datahubLogo from '@/assets/icons/datahub-logo.svg?react';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './data-output-actions.module.scss';
-
-type Props = {
-    dataOutputId: string;
-    isCurrentDataOutputOwner: boolean;
-};
 
 const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[] => [
     {
@@ -25,7 +22,11 @@ const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[]
     { label: t('Datahub'), value: DataPlatforms.Datahub, icon: datahubLogo, disabled: true },
 ];
 
-export function DataOutputActions({ dataOutputId, isCurrentDataOutputOwner }: Props) {
+type Props = {
+    dataProductId: string | undefined;
+    dataOutputId: string;
+};
+export function DataOutputActions({ dataProductId, dataOutputId }: Props) {
     const { t } = useTranslation();
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
 
@@ -35,10 +36,18 @@ export function DataOutputActions({ dataOutputId, isCurrentDataOutputOwner }: Pr
         console.log(dataPlatform, environment, dataOutputId);
     }
 
+    const { data: readAccess } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS,
+        },
+        { skip: !dataProductId },
+    );
+
     return (
         <Flex vertical className={styles.actionsContainer}>
             <DataAccessTileGrid
-                canAccessData={isCurrentDataOutputOwner}
+                canAccessData={readAccess?.allowed ?? false}
                 dataPlatforms={dataPlatforms}
                 onDataPlatformClick={handleAccessToData}
                 isDisabled

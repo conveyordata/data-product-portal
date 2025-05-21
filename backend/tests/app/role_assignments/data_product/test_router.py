@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from fastapi.testclient import TestClient
 from tests.factories import (
     DataProductFactory,
@@ -5,14 +7,17 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.factories.data_product_membership import DataProductMembershipFactory
 
-from app.data_products.schema import DataProduct
+from app.core.authz.actions import AuthorizationAction
+from app.data_products.model import DataProduct
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Role, Scope
+from app.roles.schema import Prototype, Role, Scope
 from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/data_product"
+ENDPOINT_DATA_PRODUCT = "/api/data_products"
 
 
 class TestDataProductRoleAssignmentsRouter:
@@ -59,7 +64,6 @@ class TestDataProductRoleAssignmentsRouter:
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         response = client.get(f"{ENDPOINT}")
@@ -72,6 +76,28 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()) == 0
+
+    def test_delete_last_owner_assignment(self, client: TestClient):
+        data_product: DataProduct = DataProductFactory()
+        user_1: User = UserFactory()
+        user_2: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
+        assignment_1 = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user_1.id,
+            role_id=role.id,
+        )
+        assignment_2 = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user_2.id,
+            role_id=role.id,
+        )
+
+        response = client.delete(f"{ENDPOINT}/{assignment_1.id}")
+        assert response.status_code == HTTPStatus.OK
+
+        response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
+        assert response.status_code == HTTPStatus.FORBIDDEN
 
     def test_decide_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
@@ -166,3 +192,36 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 200
         data = response.json()
         assert data["role"]["id"] == str(new_role.id)
+
+    def test_delete_data_product_with_role_assignment(self, client: TestClient):
+        user = UserFactory(external_id="sub")
+        data_product: DataProduct = DataProductMembershipFactory(
+            user=user,
+        ).data_product
+        role: Role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+
+        response = self.delete_data_product(client, data_product.id)
+        assert response.status_code == 200
+
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 0
+
+    @staticmethod
+    def delete_data_product(client, data_product_id):
+        return client.delete(f"{ENDPOINT_DATA_PRODUCT}/{data_product_id}")

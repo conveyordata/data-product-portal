@@ -5,17 +5,23 @@ from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_product import DataProductFactory
 from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.platform_service import PlatformServiceFactory
+from tests.factories.role import RoleFactory
+from tests.factories.role_assignment_data_product import (
+    DataProductRoleAssignmentFactory,
+)
 from tests.factories.tags import TagFactory
 from tests.factories.user import UserFactory
+
+from app.core.authz.actions import AuthorizationAction
+from app.roles.schema import Scope
 
 ENDPOINT = "/api/data_outputs"
 
 
 @pytest.fixture
 def data_output_payload():
-    data_product = DataProductMembershipFactory(
-        user=UserFactory(external_id="sub")
-    ).data_product
+    user = UserFactory(external_id="sub")
+    data_product = DataProductMembershipFactory(user=user).data_product
     service = PlatformServiceFactory()
     tag = TagFactory()
 
@@ -34,6 +40,7 @@ def data_output_payload():
         "service_id": str(service.id),
         "status": "pending",
         "tag_ids": [str(tag.id)],
+        "user_id": str(user.id),
     }
 
 
@@ -64,8 +71,34 @@ def data_output_payload_not_owner():
 class TestDataOutputsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_data_output(self, data_output_payload, client):
+    def test_create_data_output_source_aligned(self, data_output_payload, client):
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=data_output_payload["owner_id"],
+        )
         created_data_output = self.create_data_output(client, data_output_payload)
+        assert created_data_output.status_code == 200
+        assert "id" in created_data_output.json()
+
+    def test_create_data_output_product_aligned(self, data_output_payload, client):
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=data_output_payload["owner_id"],
+        )
+        payload = deepcopy(data_output_payload)
+        payload["sourceAligned"] = False
+
+        created_data_output = self.create_data_output(client, payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
@@ -92,10 +125,16 @@ class TestDataOutputsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_output.id)
 
-    def test_update_data_product(self, client):
-        data_product = DataProductMembershipFactory(
-            user=UserFactory(external_id="sub")
-        ).data_product
+    def test_update_data_output(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductMembershipFactory(user=user).data_product
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
         tag = TagFactory()
         data_output = DataOutputFactory(owner=data_product)
         update_payload = {
@@ -121,9 +160,15 @@ class TestDataOutputsRouter:
         assert response.status_code == 403
 
     def test_remove_data_output(self, client):
-        data_product = DataProductMembershipFactory(
-            user=UserFactory(external_id="sub")
-        ).data_product
+        user = UserFactory(external_id="sub")
+        data_product = DataProductMembershipFactory(user=user).data_product
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
         data_output = DataOutputFactory(owner=data_product)
         response = self.delete_data_output(client, data_output.id)
         assert response.status_code == 200
@@ -134,9 +179,15 @@ class TestDataOutputsRouter:
         assert response.status_code == 403
 
     def test_update_status(self, client):
-        data_product = DataProductMembershipFactory(
-            user=UserFactory(external_id="sub")
-        ).data_product
+        user = UserFactory(external_id="sub")
+        data_product = DataProductMembershipFactory(user=user).data_product
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
         data_output = DataOutputFactory(owner=data_product)
         response = self.get_data_output_by_id(client, data_output.id)
         assert response.json()["status"] == "active"
@@ -199,7 +250,16 @@ class TestDataOutputsRouter:
         assert response.json()["max_length"] > 1
 
     def test_create_data_output_duplicate_namespace(self, data_output_payload, client):
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+        )
         owner = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=owner.id,
+        )
         DataOutputFactory(
             namespace=data_output_payload["namespace"],
             owner=owner,
@@ -214,6 +274,15 @@ class TestDataOutputsRouter:
     def test_create_data_output_invalid_characters_namespace(
         self, data_output_payload, client
     ):
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=data_output_payload["owner_id"],
+        )
         create_payload = deepcopy(data_output_payload)
         create_payload["namespace"] = "!"
 
@@ -223,6 +292,15 @@ class TestDataOutputsRouter:
     def test_create_data_output_invalid_length_namespace(
         self, data_output_payload, client
     ):
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=data_output_payload["owner_id"],
+        )
         create_payload = deepcopy(data_output_payload)
         create_payload["namespace"] = "a" * 256
 

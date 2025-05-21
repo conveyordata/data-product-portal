@@ -40,11 +40,8 @@ export function DataProductsTable() {
         currentUser?.id || '',
         { skip: !currentUser },
     );
-    const { data: access } = useCheckAccessQuery(
-        { action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT },
-        { skip: !currentUser },
-    );
-    const canCreateDataProduct = access?.allowed || false;
+    const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
+    const canCreateDataProduct = access?.allowed ?? false;
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -92,11 +89,7 @@ export function DataProductsTable() {
                 </Form>
                 <Space>
                     <Link to={ApplicationPaths.DataProductNew}>
-                        <Button
-                            className={styles.formButton}
-                            type={'primary'}
-                            disabled={!(canCreateDataProduct || true)}
-                        >
+                        <Button className={styles.formButton} type={'primary'} disabled={!canCreateDataProduct}>
                             {t('Create Data Product')}
                         </Button>
                     </Link>

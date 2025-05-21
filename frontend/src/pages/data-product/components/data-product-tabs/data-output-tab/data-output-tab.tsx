@@ -1,25 +1,18 @@
 import { Button, Flex, Form } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { Searchbar } from '@/components/form';
-import { useModal } from '@/hooks/use-modal.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useModal } from '@/hooks/use-modal';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
-import { SearchForm } from '@/types/shared';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
+import type { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
+import type { SearchForm } from '@/types/shared';
 
 import { AddDataOutputPopup } from './components/add-data-output-popup/add-data-output-popup';
 import { DataOutputTable } from './components/data-output-table/data-output-table.component';
 import styles from './data-output-tab.module.scss';
-
-type Props = {
-    dataProductId: string;
-};
 
 function filterDataOutputs(data_outputs: DataOutputsGetContract, searchTerm: string) {
     return (
@@ -31,10 +24,12 @@ function filterDataOutputs(data_outputs: DataOutputsGetContract, searchTerm: str
     );
 }
 
+type Props = {
+    dataProductId: string;
+};
 export function DataOutputTab({ dataProductId }: Props) {
-    const { isVisible, handleOpen, handleClose } = useModal();
-    const user = useSelector(selectCurrentUser);
     const { t } = useTranslation();
+    const { isVisible, handleOpen, handleClose } = useModal();
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -50,25 +45,21 @@ export function DataOutputTab({ dataProductId }: Props) {
         },
         { skip: !dataProductId },
     );
-
-    const canCreateDataOutputNew = access?.allowed || false;
-
-    const isDataProductOwner = useMemo(() => {
-        if (!dataProduct || !user) return false;
-
-        return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct, user]);
+    const canCreateDataOutput = access?.allowed || false;
 
     return (
         <>
-            <Flex vertical className={styles.container}>
+            <Flex
+                vertical
+                className={`${styles.container} ${filteredDataOutputs.length === 0 && styles.paginationGap}`}
+            >
                 <Searchbar
                     placeholder={t('Search data outputs by name')}
-                    formItemProps={{ initialValue: '' }}
+                    formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
                     form={searchForm}
                     actionButton={
                         <Button
-                            disabled={!(canCreateDataOutputNew || isDataProductOwner)}
+                            disabled={!canCreateDataOutput}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}
@@ -78,11 +69,7 @@ export function DataOutputTab({ dataProductId }: Props) {
                     }
                 />
 
-                <DataOutputTable
-                    dataProductId={dataProductId}
-                    dataOutputs={filteredDataOutputs}
-                    isCurrentUserDataProductOwner={isDataProductOwner}
-                />
+                <DataOutputTable dataProductId={dataProductId} dataOutputs={filteredDataOutputs} />
             </Flex>
             {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </>

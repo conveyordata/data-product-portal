@@ -1,6 +1,6 @@
 import { EditOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Space } from 'antd';
-import { FormInstance } from 'antd/lib';
+import { Button, Form, type FormInstance, Input, Space } from 'antd';
+import type { Rule } from 'antd/es/form';
 import { useTranslation } from 'react-i18next';
 
 import { NamespaceValidationResponse, ValidationType } from '@/types/namespace/namespace';
@@ -34,6 +34,35 @@ export function NamespaceFormItem({
 }: Props) {
     const { t } = useTranslation();
 
+    const validationRules: Rule[] = [
+        {
+            required: canEditNamespace,
+            message: t('Please input a namespace'),
+        },
+        {
+            validator: async (_, value) => {
+                if (!canEditNamespace && !value) {
+                    return Promise.resolve();
+                }
+
+                const validationResponse = await validateNamespace(value);
+
+                switch (validationResponse.validity) {
+                    case ValidationType.VALID:
+                        return Promise.resolve();
+                    case ValidationType.INVALID_LENGTH:
+                        return Promise.reject(new Error(t('Namespace is too long')));
+                    case ValidationType.INVALID_CHARACTERS:
+                        return Promise.reject(new Error(t('Namespace contains invalid characters')));
+                    case ValidationType.DUPLICATE_NAMESPACE:
+                        return Promise.reject(new Error(t('This namespace is already in use')));
+                    default:
+                        return Promise.reject(new Error(t('Unknown namespace validation error')));
+                }
+            },
+        },
+    ];
+
     return (
         <Form.Item label={t('Namespace')} tooltip={tooltip} required>
             <Space.Compact direction="horizontal" className={styles.namespaceFormField}>
@@ -43,44 +72,7 @@ export function NamespaceFormItem({
                     hasFeedback
                     validateFirst
                     validateDebounce={DEBOUNCE}
-                    rules={
-                        validationRequired
-                            ? [
-                                  {
-                                      required: canEditNamespace,
-                                      message: t('Please input a namespace'),
-                                  },
-                                  {
-                                      validator: async (_, value) => {
-                                          if (!canEditNamespace && !value) {
-                                              return Promise.resolve();
-                                          }
-
-                                          const validationResponse = await validateNamespace(value);
-
-                                          switch (validationResponse.validity) {
-                                              case ValidationType.VALID:
-                                                  return Promise.resolve();
-                                              case ValidationType.INVALID_LENGTH:
-                                                  return Promise.reject(new Error(t('Namespace is too long')));
-                                              case ValidationType.INVALID_CHARACTERS:
-                                                  return Promise.reject(
-                                                      new Error(t('Namespace contains invalid characters')),
-                                                  );
-                                              case ValidationType.DUPLICATE_NAMESPACE:
-                                                  return Promise.reject(
-                                                      new Error(t('This namespace is already in use')),
-                                                  );
-                                              default:
-                                                  return Promise.reject(
-                                                      new Error(t('Unknown namespace validation error')),
-                                                  );
-                                          }
-                                      },
-                                  },
-                              ]
-                            : []
-                    }
+                    rules={validationRequired ? validationRules : []}
                 >
                     <Input
                         disabled={!canEditNamespace}
