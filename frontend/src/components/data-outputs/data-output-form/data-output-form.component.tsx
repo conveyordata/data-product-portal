@@ -87,7 +87,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     return;
                 }
 
-                // TODO Figure out what fields are updateable and which are not
+                // TODO Figure out what fields are updatable and which are not
                 const request: DataOutputUpdateRequest = {
                     name: values.name,
                     description: values.description,
@@ -142,7 +142,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             autoComplete={'off'}
             requiredMark={'optional'}
             labelWrap
-            disabled={!canEdit}
+            disabled={isLoading || !canEdit}
         >
             <Form.Item<DataOutputCreateFormSchema>
                 name={'name'}
@@ -197,7 +197,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                         type="primary"
                         htmlType={'submit'}
                         loading={isUpdating}
-                        disabled={!canEdit}
+                        disabled={isLoading || !canEdit}
                     >
                         {mode === 'edit' ? t('Edit') : t('Create')}
                     </Button>
@@ -206,7 +206,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                         type="default"
                         onClick={onCancel}
                         loading={isUpdating}
-                        disabled={!canEdit}
+                        disabled={isLoading || !canEdit}
                     >
                         {t('Cancel')}
                     </Button>
