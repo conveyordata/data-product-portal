@@ -65,8 +65,6 @@ def upgrade() -> None:
                 db=session,
                 user=api_bot,
             )
-        else:
-            print(f"User {api_bot.email} already has the admin role.")
 
 
 def downgrade() -> None:
