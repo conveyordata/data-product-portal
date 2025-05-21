@@ -434,7 +434,7 @@ class DataProductService:
         current_data_product.status = data_product.status
         db.add(
             EventModel(
-                name="Data product status updated",
+                name=EventType.DATA_PRODUCT_UPDATED,
                 subject_id=current_data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
