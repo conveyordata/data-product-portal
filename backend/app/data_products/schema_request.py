@@ -7,20 +7,19 @@ from app.data_products.status import DataProductStatus
 from app.shared.schema import ORMModel
 
 
-class DataProductCreate(ORMModel):
+class DataProductUpdate(ORMModel):
     name: str
     namespace: str
     description: str
     type_id: UUID
     about: Optional[str] = None
-    owners: Annotated[list[UUID], MinLen(1)]
     domain_id: UUID
     tag_ids: list[UUID]
     lifecycle_id: UUID
 
 
-class DataProductUpdate(DataProductCreate):
-    pass
+class DataProductCreate(DataProductUpdate):
+    owners: Annotated[list[UUID], MinLen(1)]
 
 
 class DataProductAboutUpdate(ORMModel):

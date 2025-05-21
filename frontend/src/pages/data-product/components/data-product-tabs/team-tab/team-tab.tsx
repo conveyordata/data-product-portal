@@ -14,7 +14,7 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import {
     useCreateRoleAssignmentMutation,
     useGetRoleAssignmentQuery,
-} from '@/store/features/role-assignments/roles-api-slice';
+} from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { RoleAssignmentContract } from '@/types/roles/role.contract';

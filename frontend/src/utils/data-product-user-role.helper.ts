@@ -1,4 +1,4 @@
-import { useGetRoleAssignmentQuery } from '@/store/features/role-assignments/roles-api-slice.ts';
+import { useGetRoleAssignmentQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { DecisionStatus } from '@/types/roles';
 import { Prototype } from '@/types/roles/role.contract';
 import type { UserContract } from '@/types/users';

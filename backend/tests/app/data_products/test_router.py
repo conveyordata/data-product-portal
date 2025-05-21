@@ -67,7 +67,7 @@ class TestDataProductsRouter:
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
 
-    def test_create_data_product_no_owner_role(self, session, payload, client):
+    def test_create_data_product_no_owner_role(self, payload, client):
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -238,26 +238,6 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         response = self.update_data_product_about(client, data_product.id)
         assert response.status_code == 403
-
-    def test_update_data_product_about_remove_last_owner(self, payload, client):
-        user = UserFactory(external_id="sub")
-        data_product = DataProductFactory()
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[
-                AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
-                AuthorizationAction.DATA_PRODUCT__DELETE_USER,
-            ],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-        update_payload = deepcopy(payload)
-        update_payload["owners"] = []
-        response = self.update_data_product(client, update_payload, data_product.id)
-        assert response.status_code == 422
 
     def test_update_data_product_about(self, client):
         user = UserFactory(external_id="sub")

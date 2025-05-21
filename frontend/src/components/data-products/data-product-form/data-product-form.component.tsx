@@ -1,4 +1,4 @@
-import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
+import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Space } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -80,9 +80,14 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         { skip: !dataProductId },
     );
 
+    console.log(create_access, update_access, delete_access);
+
     const canCreate = mode === 'create' && (create_access?.allowed ?? false);
     const canEdit = mode === 'edit' && (update_access?.allowed ?? false);
     const canDelete = mode === 'edit' && (delete_access?.allowed ?? false);
+    const canSubmit = canCreate || canEdit;
+
+    console.log(canCreate, canEdit, canDelete);
 
     const isLoading =
         isCreating ||
@@ -230,7 +235,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             autoComplete={'off'}
             requiredMark={'optional'}
             labelWrap
-            disabled={isLoading || !canCreate}
+            disabled={isLoading || !canSubmit}
         >
             <Form.Item<DataProductCreateFormSchema>
                 name={'name'}
@@ -357,26 +362,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
             <Form.Item>
-                <Space>
-                    <Button
-                        className={styles.formButton}
-                        type="primary"
-                        htmlType={'submit'}
-                        loading={isCreating || isUpdating}
-                        disabled={isLoading || !canCreate}
-                    >
-                        {mode === 'edit' ? t('Edit') : t('Create')}
-                    </Button>
-                    <Button
-                        className={styles.formButton}
-                        type="default"
-                        onClick={onCancel}
-                        loading={isCreating || isUpdating}
-                        disabled={isLoading || !canCreate}
-                    >
-                        {t('Cancel')}
-                    </Button>
-                    {canDelete && (
+                <Row>
+                    <Col>
                         <Popconfirm
                             title={t('Are you sure you want to delete this data product?')}
                             onConfirm={handleDeleteDataProduct}
@@ -388,13 +375,36 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                                 type="default"
                                 danger
                                 loading={isArchiving}
-                                disabled={isLoading}
+                                disabled={isLoading || !canDelete}
                             >
                                 {t('Delete')}
                             </Button>
                         </Popconfirm>
-                    )}
-                </Space>
+                    </Col>
+                    <Col flex="auto" />
+                    <Col>
+                        <Space>
+                            <Button
+                                className={styles.formButton}
+                                type="default"
+                                onClick={onCancel}
+                                loading={isCreating || isUpdating}
+                                disabled={isLoading}
+                            >
+                                {t('Cancel')}
+                            </Button>
+                            <Button
+                                className={styles.formButton}
+                                type="primary"
+                                htmlType={'submit'}
+                                loading={isCreating || isUpdating}
+                                disabled={isLoading || !canSubmit}
+                            >
+                                {mode === 'edit' ? t('Save') : t('Create')}
+                            </Button>
+                        </Space>
+                    </Col>
+                </Row>
             </Form.Item>
         </Form>
     );

@@ -12,7 +12,7 @@ import {
     useDeleteRoleAssignmentMutation,
     useLazyGetRoleAssignmentQuery,
     useUpdateRoleAssignmentMutation,
-} from '@/store/features/role-assignments/roles-api-slice';
+} from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { RoleContract } from '@/types/roles';
 import type { RoleAssignmentContract } from '@/types/roles/role.contract';
