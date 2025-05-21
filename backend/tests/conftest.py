@@ -1,19 +1,22 @@
-from typing import Any, AsyncGenerator, Generator
+from typing import Any, Generator
 from unittest.mock import MagicMock
 
 import pytest
-import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, scoped_session
 from starlette.routing import _DefaultLifespan
+from tests.factories.role import RoleFactory
+from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
+from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz.authorization import Authorization
 from app.data_product_memberships.model import DataProductUserRole
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.main import app
-from app.settings import settings
+from app.roles import ADMIN_UUID
+from app.roles.schema import Prototype, Scope
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
@@ -26,6 +29,7 @@ def setup_and_teardown_database():
     from app.db_tool import init  # noqa: E402
 
     init(force=True)
+
     yield
 
 
@@ -114,21 +118,17 @@ def clear_db(session: scoped_session[Session]) -> None:
     for table in reversed(Base.metadata.sorted_tables):
         session.execute(table.delete())
     session.commit()
+    AuthorizationService._clear_casbin_table()
 
 
 @pytest.fixture
 def admin() -> UserFactory:
-    return UserFactory(external_id="sub", is_admin=True)
-
-
-@pytest_asyncio.fixture(loop_scope="session", autouse=True)
-async def authorizer() -> AsyncGenerator[Authorization, None]:
-    """Initializes casbin at the start of the testing session."""
-    yield await Authorization.initialize()
+    role = RoleFactory(scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID)
+    user = UserFactory(external_id="sub", is_admin=True)
+    GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+    return user
 
 
 @pytest.fixture
-def enable_authorizer():
-    settings.AUTHORIZER_ENABLED = True
-    yield
-    settings.AUTHORIZER_ENABLED = False
+def authorizer() -> Generator[Authorization, None, None]:
+    yield Authorization()

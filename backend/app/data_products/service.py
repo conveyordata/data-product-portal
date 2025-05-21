@@ -78,10 +78,10 @@ class DataProductService:
             options=[
                 joinedload(DataProductModel.dataset_links)
                 .joinedload(DataProductDatasetModel.dataset)
-                .joinedload(DatasetModel.data_output_links)
-                .joinedload(DataOutputDatasetAssociation.data_output),
-                joinedload(DataProductModel.memberships),
-                joinedload(DataProductModel.data_outputs),
+                .joinedload(DatasetModel.data_output_links),
+                joinedload(DataProductModel.data_outputs).joinedload(
+                    DataOutputModel.dataset_links
+                ),
             ],
         )
 
@@ -119,9 +119,9 @@ class DataProductService:
             db.scalars(
                 select(DataProductModel)
                 .options(
-                    joinedload(DataProductModel.dataset_links),
-                    joinedload(DataProductModel.memberships),
-                    joinedload(DataProductModel.data_outputs),
+                    joinedload(DataProductModel.dataset_links).lazyload("*"),
+                    joinedload(DataProductModel.memberships).lazyload("*"),
+                    joinedload(DataProductModel.data_outputs).lazyload("*"),
                 )
                 .order_by(asc(DataProductModel.name))
             )
@@ -135,9 +135,7 @@ class DataProductService:
         return dps
 
     def get_owners(self, id: UUID, db: Session) -> List[User]:
-        data_product = ensure_data_product_exists(
-            id, db, options=[joinedload(DataProductModel.memberships)]
-        )
+        data_product = ensure_data_product_exists(id, db)
         user_ids = [
             membership.user_id
             for membership in data_product.memberships
@@ -152,9 +150,9 @@ class DataProductService:
             db.scalars(
                 select(DataProductModel)
                 .options(
-                    joinedload(DataProductModel.memberships),
-                    joinedload(DataProductModel.dataset_links),
-                    joinedload(DataProductModel.data_outputs),
+                    joinedload(DataProductModel.dataset_links).lazyload("*"),
+                    joinedload(DataProductModel.memberships).lazyload("*"),
+                    joinedload(DataProductModel.data_outputs).lazyload("*"),
                 )
                 .filter(
                     DataProductModel.memberships.any(
@@ -228,25 +226,13 @@ class DataProductService:
         return model
 
     def remove_data_product(self, id: UUID, db: Session):
-        data_product = db.get(
-            DataProductModel,
-            id,
-            options=[
-                joinedload(DataProductModel.memberships),
-                joinedload(DataProductModel.dataset_links),
-                joinedload(DataProductModel.data_outputs),
-            ],
-        )
+        data_product = db.get(DataProductModel, id)
         if not data_product:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data Product {id} not found",
             )
-        data_product.memberships = []
-        data_product.dataset_links = []
-        for output in data_product.data_outputs:
-            output.dataset_links = []
-            db.delete(output)
+
         db.delete(data_product)
         db.commit()
 
@@ -292,13 +278,7 @@ class DataProductService:
     def update_data_product(
         self, id: UUID, data_product: DataProductUpdate, db: Session
     ):
-        current_data_product = ensure_data_product_exists(
-            id,
-            db,
-            options=[
-                joinedload(DataProductModel.memberships),
-            ],
-        )
+        current_data_product = ensure_data_product_exists(id, db)
         update_data_product = data_product.model_dump(exclude_unset=True)
 
         if (
@@ -457,8 +437,10 @@ class DataProductService:
 
     def get_data_product_role_arn(self, id: UUID, environment: str, db: Session) -> str:
         environment_context = (
-            db.query(EnvironmentModel)
-            .get_one(EnvironmentModel.name, environment)
+            db.execute(
+                select(EnvironmentModel).where(EnvironmentModel.name == environment)
+            )
+            .scalar_one()
             .context
         )
         namespace = db.get(DataProductModel, id).namespace
@@ -521,7 +503,10 @@ class DataProductService:
         return (
             db.scalars(
                 select(DataOutputModel)
-                .options(joinedload(DataOutputModel.environment_configurations))
+                .options(
+                    joinedload(DataOutputModel.dataset_links),
+                    joinedload(DataOutputModel.environment_configurations),
+                )
                 .filter(DataOutputModel.owner_id == id)
             )
             .unique()
@@ -569,8 +554,15 @@ class DataProductService:
             id,
             options=[
                 joinedload(DataProductModel.dataset_links),
-                joinedload(DataProductModel.data_outputs),
+                joinedload(DataProductModel.data_outputs)
+                .joinedload(DataOutputModel.dataset_links)
+                .joinedload(DataOutputDatasetAssociation.dataset)
+                .joinedload(DatasetModel.data_product_links),
             ],
+            # As this is also called from the DataOutputService, we need to ensure
+            # that the DataOutput for which this is called is not loaded from cache,
+            # but instead loaded anew with all necessary fields eagerly loaded
+            populate_existing=True,
         )
         nodes = [
             Node(

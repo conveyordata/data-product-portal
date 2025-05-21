@@ -57,12 +57,14 @@ class DataProduct(Base, BaseORM):
         order_by="DataProductMembership.status, "
         "DataProductMembership.requested_on, "
         "DataProductMembership.role",
+        lazy="joined",
     )
     dataset_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
         back_populates="data_product",
         cascade="all, delete-orphan",
         order_by="DataProductDatasetAssociation.status.desc()",
+        lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(
         secondary=tag_data_product_table, back_populates="data_products", lazy="joined"
@@ -78,6 +80,7 @@ class DataProduct(Base, BaseORM):
         "DataOutput",
         back_populates="owner",
         cascade="all, delete-orphan",
+        lazy="raise",
     )
 
     @property
