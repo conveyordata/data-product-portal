@@ -20,6 +20,7 @@ import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/dataset-tab/dataset-tab.tsx';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
+import { useGetDataProductHistoryQuery } from '@/store/features/data-products/data-products-api-slice';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 
 import styles from './data-product-tabs.module.scss';
@@ -41,7 +42,10 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
-
+    const { data: dataProductHistoryData, isLoading: isFetchingDataProductHistory } = useGetDataProductHistoryQuery(
+        dataProductId,
+        { skip: !dataProductId },
+    );
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
 
     useEffect(() => {
@@ -93,10 +97,17 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 label: t('History'),
                 key: TabKeys.History,
                 icon: <HistoryOutlined />,
-                children: <HistoryTab id={dataProductId} type={EventReferenceEntity.DataProduct} />,
+                children: (
+                    <HistoryTab
+                        id={dataProductId}
+                        type={EventReferenceEntity.DataProduct}
+                        history={dataProductHistoryData}
+                        isFetching={isFetchingDataProductHistory}
+                    />
+                ),
             },
         ];
-    }, [dataProductId, t]);
+    }, [dataProductId, t, dataProductHistoryData, isFetchingDataProductHistory]);
 
     if (isLoading) {
         return <LoadingSpinner />;

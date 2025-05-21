@@ -17,6 +17,7 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+import { useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity.ts';
 
 import { AboutTab } from './about-tab/about-tab.tsx';
@@ -41,6 +42,10 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
 
     const location = useLocation();
     const navigate = useNavigate();
+
+    const { data: datasetHistoryData, isLoading: isFetchingDatasetHistory } = useGetDatasetHistoryQuery(datasetId, {
+        skip: !datasetId,
+    });
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
 
     useEffect(() => {
@@ -92,10 +97,17 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 label: t('History'),
                 key: TabKeys.History,
                 icon: <HistoryOutlined />,
-                children: <HistoryTab id={datasetId} type={EventReferenceEntity.Dataset} />,
+                children: (
+                    <HistoryTab
+                        id={datasetId}
+                        type={EventReferenceEntity.Dataset}
+                        history={datasetHistoryData}
+                        isFetching={isFetchingDatasetHistory}
+                    />
+                ),
             },
         ];
-    }, [datasetId, t]);
+    }, [datasetId, t, datasetHistoryData, isFetchingDatasetHistory]);
 
     if (isLoading) {
         return <LoadingSpinner />;

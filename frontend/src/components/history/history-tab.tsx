@@ -5,9 +5,6 @@ import { useTranslation } from 'react-i18next';
 
 import { HISTORY_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import { useGetDataOutputHistoryQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { useGetDataProductHistoryQuery } from '@/store/features/data-products/data-products-api-slice';
-import { useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice';
 import { EventContract } from '@/types/events/event.contract';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import { getEventTypeDisplayName, getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
@@ -19,6 +16,8 @@ import { getHistoryColumns } from './history-table-columns';
 type Props = {
     id: string;
     type: EventReferenceEntity;
+    history?: EventContract[];
+    isFetching: boolean;
 };
 
 type SearchForm = {
@@ -42,36 +41,7 @@ function filterHistory(events: EventContract[], searchTerm: string, t: TFunction
     });
 }
 
-export function HistoryTab({ id, type }: Props) {
-    const { data: dataOutputHistoryData, isLoading: isFetchingDataOutputHistory } = useGetDataOutputHistoryQuery(id, {
-        skip: !id || type != EventReferenceEntity.DataOutput,
-    });
-    const { data: dataProductHistoryData, isLoading: isFetchingDataProductHistory } = useGetDataProductHistoryQuery(
-        id,
-        { skip: !id || type != EventReferenceEntity.DataProduct },
-    );
-    const { data: datasetHistoryData, isLoading: isFetchingDatasetHistory } = useGetDatasetHistoryQuery(id, {
-        skip: !id || type != EventReferenceEntity.Dataset,
-    });
-
-    let history: EventContract[] | undefined;
-    let isFetching;
-
-    switch (type) {
-        case EventReferenceEntity.DataProduct:
-            history = dataProductHistoryData;
-            isFetching = isFetchingDataProductHistory;
-            break;
-        case EventReferenceEntity.Dataset:
-            history = datasetHistoryData;
-            isFetching = isFetchingDatasetHistory;
-            break;
-        case EventReferenceEntity.DataOutput:
-            history = dataOutputHistoryData;
-            isFetching = isFetchingDataOutputHistory;
-            break;
-    }
-
+export function HistoryTab({ id, type, history = [], isFetching }: Props) {
     const { t } = useTranslation();
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
