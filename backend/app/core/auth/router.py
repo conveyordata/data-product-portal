@@ -5,8 +5,7 @@ from app.core.auth.auth import authorize_user
 from app.core.auth.credentials import AWSCredentials
 from app.core.auth.device_flows.router import router as device
 from app.core.auth.service import AuthService
-from app.core.authz.authorization import Authorization
-from app.core.authz.authorization import AuthorizationAction as Action
+from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import DataProductNameResolver
 from app.database.database import get_db_session
 from app.users.schema import User
