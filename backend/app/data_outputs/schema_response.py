@@ -16,7 +16,7 @@ from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 
 
-class TechnologicalInfo(ORMModel):
+class TechnicalInfo(ORMModel):
     environment_id: UUID
     environment: str
     info: Optional[str]
@@ -47,8 +47,8 @@ class BaseDataOutputGet(ORMModel):
         return self.configuration.render_template(self.service.result_string_template)
 
     @computed_field
-    def technological_info(self) -> list[TechnologicalInfo]:
-        technological_info_list = []
+    def technical_info(self) -> list[TechnicalInfo]:
+        technical_info_list = []
         for environment_configuration in self.environment_configurations:
             configuration = self.configuration.get_configuration(
                 environment_configuration.config
@@ -59,14 +59,14 @@ class BaseDataOutputGet(ORMModel):
             info = self.configuration.render_template(
                 self.service.technical_info_template, **context
             )
-            technological_info_list.append(
-                TechnologicalInfo(
+            technical_info_list.append(
+                TechnicalInfo(
                     environment_id=environment_configuration.environment.id,
                     environment=environment_configuration.environment.name,
                     info=info,
                 )
             )
-        return technological_info_list
+        return technical_info_list
 
 
 class DatasetLink(DataOutputDatasetAssociation):

@@ -33,7 +33,7 @@ def upgrade() -> None:
     }
 
     technical_info_templates = {
-        "S3": "{bucket_arn}/{bucket}/{suffix}/{path}",
+        "S3": "{bucket_arn}/{bucket}/{suffix}/{path}/*",
         "Glue": "{database}__{database_suffix}.{table}",
         "Snowflake": "{database}.{schema}.{table}",
         "Databricks": "{catalog}.{schema}.{table}",

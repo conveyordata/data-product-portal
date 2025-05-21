@@ -2,6 +2,7 @@ import { DataProductContract } from '@/types/data-product';
 import { TagContract } from '@/types/tag';
 
 import { DataOutputConfiguration } from '.';
+import { TechnicalInfoContract } from './data-output-technical-info.contract';
 import { DataOutputDatasetLink } from './dataset-link.contract';
 
 export enum DataOutputConfigurationTypes {
@@ -34,6 +35,7 @@ export interface DataOutputContract {
     tag_ids: string[];
     tags: TagContract[];
     result_string: string;
+    technical_info: TechnicalInfoContract[];
 }
 
 export interface DataOutputModel extends DataOutputContract {}
