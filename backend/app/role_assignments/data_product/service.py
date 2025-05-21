@@ -3,7 +3,7 @@ from http import HTTPStatus
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -16,7 +16,7 @@ from app.role_assignments.data_product.schema import (
 )
 from app.role_assignments.enums import DecisionStatus
 from app.roles.model import Role
-from app.roles.schema import Prototype
+from app.roles.schema import Prototype, Scope
 from app.users.schema import User
 
 
@@ -47,9 +47,18 @@ class RoleAssignmentService:
 
         return self.db.scalars(query).all()
 
-    def create_assignment(self, request: CreateRoleAssignment) -> RoleAssignment:
+    def create_assignment(
+        self, data_product_id: UUID, request: CreateRoleAssignment
+    ) -> RoleAssignment:
+        role = self.db.get(Role, request.role_id)
+        if role is None or role.scope != Scope.DATA_PRODUCT:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Role not found for this scope",
+            )
         role_assignment = DataProductRoleAssignment(
             **request.model_dump(),
+            data_product_id=data_product_id,
             requested_on=datetime.now(),
             requested_by_id=self.user.id,
         )
@@ -86,6 +95,12 @@ class RoleAssignmentService:
         return self.db.scalar(query)
 
     def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
+        role = self.db.get(Role, request.role_id)
+        if role is None or role.scope != Scope.DATASET:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Role not found for this scope",
+            )
         assignment = self.get_assignment(request.id)
 
         if (role_id := request.role_id) is not None:

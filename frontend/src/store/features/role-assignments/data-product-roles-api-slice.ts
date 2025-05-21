@@ -27,9 +27,12 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
             }),
             createRoleAssignment: builder.mutation<RoleAssignmentContract, RoleAssignmentCreateContract>({
                 query: (request) => ({
-                    url: ApiUrl.RoleAssignmentsDataProductGet,
+                    url: buildUrl(ApiUrl.RoleAssignmentsDataProductDelete, { id: request.data_product_id }),
                     method: 'POST',
-                    data: request,
+                    data: {
+                        role_id: request.role_id,
+                        user_id: request.user_id,
+                    },
                 }),
                 invalidatesTags: (_, _error, request) => [
                     { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
