@@ -7,7 +7,7 @@ from tests.factories import (
 )
 from tests.factories.data_product_membership import DataProductMembershipFactory
 
-from app.core.authz import Action
+from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProduct
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
@@ -176,7 +176,10 @@ class TestDataProductRoleAssignmentsRouter:
         data_product: DataProduct = DataProductMembershipFactory(
             user=user,
         ).data_product
-        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        role: Role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE],
+        )
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
@@ -217,7 +220,7 @@ class TestDataProductRoleAssignmentsRouter:
         user: User = UserFactory(external_id="sub")
         role: Role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
+            permissions=[AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST],
         )
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
@@ -257,7 +260,7 @@ class TestDataProductRoleAssignmentsRouter:
         user: User = UserFactory(external_id="sub")
         role: Role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_USER],
+            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_USER],
         )
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,

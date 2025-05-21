@@ -11,7 +11,7 @@ ENDPOINT = "/api/authz"
 
 
 class TestAuthorizationRouter:
-    def test_check_access(self, client: TestClient, enable_authorizer):
+    def test_check_access(self, client: TestClient):
         action = AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION
         response = client.get(f"{ENDPOINT}/access/{action}")
         assert response.status_code == 200
@@ -20,7 +20,7 @@ class TestAuthorizationRouter:
         assert access.allowed is False
 
     def test_check_access_authorized(
-        self, client: TestClient, authorizer: Authorization, enable_authorizer
+        self, client: TestClient, authorizer: Authorization
     ):
         user = UserFactory(external_id="sub")
         role_id = uuid.uuid4()

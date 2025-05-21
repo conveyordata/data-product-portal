@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from tests.factories import RoleFactory
 
 from app.roles import ADMIN_UUID
-from app.roles.schema import Prototype, Role, Scope
+from app.roles.schema import Role, Scope
 
 ENDPOINT = "/api/roles"
 
@@ -67,13 +67,10 @@ class TestRolesRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_update_admin_role(self, client: TestClient):
-        admin: Role = RoleFactory(
-            scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID
-        )
         illegal = client.patch(
             ENDPOINT,
             json={
-                "id": str(admin.id),
+                "id": str(ADMIN_UUID),
                 "permissions": [101, 102],
             },
         )
@@ -86,21 +83,20 @@ class TestRolesRouter:
         legal = client.patch(
             ENDPOINT,
             json={
-                "id": str(admin.id),
+                "id": str(ADMIN_UUID),
                 "description": "admins can have a custom description",
             },
         )
         assert legal.status_code == 200
 
         data = legal.json()
-        assert data["id"] == str(admin.id)
-        assert data["name"] == admin.name
-        assert data["scope"] == admin.scope
+        assert data["id"] == str(ADMIN_UUID)
+        assert data["scope"] == Scope.GLOBAL
         assert data["description"] == "admins can have a custom description"
 
     @pytest.mark.usefixtures("admin")
     def test_delete_role(self, client: TestClient):
-        role: Role = RoleFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
         response = client.get(f"{ENDPOINT}/{role.scope}")
         assert response.status_code == 200
         assert len(response.json()) == 1
