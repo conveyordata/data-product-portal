@@ -1,8 +1,6 @@
-import { DataOutputDatasetLinkRequest } from '../data-output-dataset';
-import { DataProductDatasetLinkRequest } from '../data-product-dataset';
-import { DataProductMembershipRoleRequest } from '../data-product-membership';
 import { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '../data-output-dataset';
 import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '../data-product-dataset';
+import { DataProductMembershipRoleRequest } from '../data-product-membership';
 import { RoleAssignmentContract } from '../roles/role.contract';
 
 export enum PendingActionTypes {

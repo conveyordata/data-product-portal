@@ -1,21 +1,26 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter,  Depends, HTTPException, status
+import emailgen
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz import Action
+from app.core.email.send_mail import send_mail
 from app.database.database import get_db_session
 from app.role_assignments.data_product.auth import DataProductAuthAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     DecideRoleAssignment,
     ModifyRoleAssignment,
+    RoleAssignment,
     RoleAssignmentResponse,
     UpdateRoleAssignment,
 )
 from app.role_assignments.data_product.service import RoleAssignmentService
 from app.role_assignments.enums import DecisionStatus
+from app.settings import settings
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_product")
@@ -44,14 +49,11 @@ def create_assignment(
     service = RoleAssignmentService(db=db, user=user)
     role_assignment = service.create_assignment(request)
 
-    owners = [
-        User.model_validate(owner)
-        for owner in service.get_data_product_request_resolvers(
-            role_assignment.data_product_id
-        )
-    ]
-    permitted_user = next((owner.id for owner in owners if owner.id == user.id), None)
-    if permitted_user:
+    approvers = service.users_with_authz_action(
+        data_product_id=role_assignment.data_product_id,
+        action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+    )
+    if user.id in (approver.id for approver in approvers):
         service.update_assignment(
             UpdateRoleAssignment(
                 id=role_assignment.id,
@@ -62,11 +64,38 @@ def create_assignment(
         return role_assignment
 
     background_tasks.add_task(
-        service.send_role_assignment_request_email,
+        _send_role_assignment_request_email,
         role_assignment,
-        owners,
+        approvers,
     )
     return role_assignment
+
+
+def _send_role_assignment_request_email(
+    role_assignment: RoleAssignment, approvers: Sequence[User]
+) -> None:
+    url = (
+        f"{settings.HOST.rstrip('/')}/data-products/"
+        f"{role_assignment.data_product_id}#team"
+    )
+    action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
+    action.add_row(
+        [
+            f"{role_assignment.user.first_name} {role_assignment.user.last_name}",
+            "Wants to join ",
+            role_assignment.data_product.name,
+            ", ".join([f"{user.first_name} {user.last_name}" for user in approvers]),
+        ]
+    )
+
+    return send_mail(
+        approvers,
+        action,
+        url,
+        f"Action Required: {role_assignment.user.first_name} "
+        f"{role_assignment.user.last_name} wants "
+        f"to join {role_assignment.data_product.name}",
+    )
 
 
 @router.delete("/{id}")

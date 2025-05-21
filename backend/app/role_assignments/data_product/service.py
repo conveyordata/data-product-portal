@@ -1,27 +1,23 @@
 from datetime import datetime
-from http import HTTPStatus
-from typing import List, Optional, Sequence
+from typing import Optional, Sequence
 from uuid import UUID
 
-import emailgen
 from fastapi import HTTPException, status
 from sqlalchemy import asc, func, select
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action
-from app.core.email.send_mail import send_mail
 from app.database.database import ensure_exists
+from app.pending_actions.schema import DataProductRoleAssignmentPendingAction
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     RoleAssignment,
-    RoleAssignmentResponse,
     UpdateRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
 from app.roles.model import Role
 from app.roles.schema import Prototype
-from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -31,7 +27,9 @@ class RoleAssignmentService:
         self.db = db
         self.user = user
 
-    def get_data_product_request_resolvers(self, data_product_id: UUID) -> List[User]:
+    def users_with_authz_action(
+        self, data_product_id: UUID, action: Action
+    ) -> Sequence[User]:
         return (
             self.db.scalars(
                 select(UserModel)
@@ -43,9 +41,7 @@ class RoleAssignmentService:
                 .where(
                     DataProductRoleAssignment.data_product_id == data_product_id,
                     DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
-                    Role.permissions.contains(
-                        [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
-                    ),
+                    Role.permissions.contains([action]),
                 )
             )
             .unique()
@@ -89,8 +85,7 @@ class RoleAssignmentService:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=(
-                        "Role assignment already"
-                        " exists for"
+                        "Role assignment already exists for"
                         " this user and data product."
                     ),
                 )
@@ -114,7 +109,7 @@ class RoleAssignmentService:
             and self.count_owners(assignment.data_product_id) <= 1
         ):
             raise HTTPException(
-                HTTPStatus.FORBIDDEN,
+                status.HTTP_403_FORBIDDEN,
                 "A data product must always be owned by at least one user",
             )
 
@@ -145,14 +140,14 @@ class RoleAssignmentService:
         self.db.commit()
         return assignment
 
-    def get_user_pending_data_product_assignments(
-        self, authenticated_user: User
-    ) -> Sequence[RoleAssignmentResponse]:
+    def get_pending_data_product_role_assignments(
+        self,
+    ) -> Sequence[DataProductRoleAssignmentPendingAction]:
         data_product_ids = (
             select(DataProductRoleAssignment.data_product_id)
             .join(DataProductRoleAssignment.role)
             .where(
-                DataProductRoleAssignment.user_id == authenticated_user.id,
+                DataProductRoleAssignment.user_id == self.user.id,
                 DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
                 Role.permissions.contains(
                     [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
@@ -172,33 +167,3 @@ class RoleAssignmentService:
             .all()
         )
         return actions
-
-    def send_role_assignment_request_email(
-        self, role_assignment: DataProductRoleAssignment, owners: list[User]
-    ) -> None:
-
-        url = (
-            f"{settings.HOST.rstrip('/')}/data-products/"
-            f"{role_assignment.data_product_id}#team"
-        )
-        action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
-        action.add_row(
-            [
-                f"{role_assignment.user.first_name} {role_assignment.user.last_name}",
-                "Wants to join ",
-                role_assignment.data_product.name,
-                ", ".join(
-                    [f"{owner.first_name} {owner.last_name}" for owner in owners]
-                ),
-            ]
-        )
-
-        send_mail(
-            owners,
-            action,
-            url,
-            f"Action Required: {role_assignment.user.first_name} "
-            f"{role_assignment.user.last_name} wants "
-            f"to join {role_assignment.data_product.name}",
-        )
-        return

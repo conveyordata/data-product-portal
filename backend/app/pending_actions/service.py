@@ -1,4 +1,5 @@
 from itertools import chain
+from typing import Sequence
 
 from sqlalchemy.orm import Session
 
@@ -13,22 +14,22 @@ class PendingActionsService:
 
     def get_user_pending_actions(
         self, db: Session, authenticated_user: User
-    ) -> list[PendingAction]:
+    ) -> Sequence[PendingAction]:
         data_product_dataset_actions = (
             DataProductDatasetService().get_user_pending_actions(db, authenticated_user)
         )
         data_output_dataset_actions = (
             DataOutputDatasetService().get_user_pending_actions(db, authenticated_user)
         )
-        data_product_membership_role_actions = RoleAssignmentService(
+        data_product_role_assignment_actions = RoleAssignmentService(
             db=db, user=authenticated_user
-        ).get_user_pending_data_product_assignments(authenticated_user)
+        ).get_pending_data_product_role_assignments()
 
         return sorted(
             chain(
                 data_product_dataset_actions,
                 data_output_dataset_actions,
-                data_product_membership_role_actions,
+                data_product_role_assignment_actions,
             ),
             key=lambda action: (action.requested_on is None, action.requested_on),
         )

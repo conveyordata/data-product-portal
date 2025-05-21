@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -14,5 +16,5 @@ router = APIRouter(prefix="/pending_actions", tags=["pending_actions"])
 def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> list[PendingAction]:
+) -> Sequence[PendingAction]:
     return PendingActionsService().get_user_pending_actions(db, authenticated_user)

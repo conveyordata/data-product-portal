@@ -7,7 +7,6 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-from tests.factories.data_product_membership import DataProductMembershipFactory
 
 from app.core.authz import Action
 from app.data_products.model import DataProduct
@@ -196,18 +195,15 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_delete_data_product_with_role_assignment(self, client: TestClient):
         user = UserFactory(external_id="sub")
-        data_product: DataProduct = DataProductMembershipFactory(
-            user=user,
-        ).data_product
+        data_product: DataProduct = DataProductFactory()
         role: Role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE],
+            permissions=[Action.DATA_PRODUCT__DELETE],
         )
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         response = client.get(f"{ENDPOINT}")
@@ -225,15 +221,12 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_get_pending_actions_no_action(self, client):
         user = UserFactory(external_id="sub")
-        data_product: DataProduct = DataProductMembershipFactory(
-            user=user,
-        ).data_product
+        data_product: DataProduct = DataProductFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         response = client.get(f"{ENDPOINT_PENDING_ACTIONS}")
         assert response.json() == []
@@ -249,7 +242,6 @@ class TestDataProductRoleAssignmentsRouter:
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         user_requester: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
@@ -289,7 +281,6 @@ class TestDataProductRoleAssignmentsRouter:
             data_product_id=data_product.id,
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         user_requester: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)

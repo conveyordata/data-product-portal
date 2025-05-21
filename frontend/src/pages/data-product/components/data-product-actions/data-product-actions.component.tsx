@@ -20,7 +20,6 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { DecisionStatus } from '@/types/roles';
 import { getDataPlatforms } from '@/utils/data-platforms';
-import { getCanUserAccessDataProductData } from '@/utils/data-product-user-role.helper.ts';
 
 import styles from './data-product-actions.module.scss';
 
@@ -140,7 +139,9 @@ export function DataProductActions({ dataProductId }: Props) {
     return (
         <>
             <Flex vertical className={styles.actionsContainer}>
-                {canRequestAccess && allowRequesting && <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />}
+                {canRequestAccess && allowRequesting && (
+                    <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />
+                )}
                 <Flex vertical className={styles.accessDataContainer}>
                     <DataAccessTileGrid
                         canAccessData={canReadIntegrations}
