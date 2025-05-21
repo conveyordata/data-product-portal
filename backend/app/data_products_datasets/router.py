@@ -8,7 +8,6 @@ from app.core.authz import Action, Authorization, DataProductDatasetAssociationR
 from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
 from app.data_products_datasets.service import DataProductDatasetService
 from app.database.database import get_db_session
-from app.dependencies import only_dataproduct_dataset_link_owners
 from app.users.schema import User
 
 router = APIRouter(
@@ -19,7 +18,6 @@ router = APIRouter(
 @router.post(
     "/approve/{id}",
     dependencies=[
-        Depends(only_dataproduct_dataset_link_owners),
         Depends(
             Authorization.enforce(
                 Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
@@ -41,7 +39,6 @@ def approve_data_product_link(
 @router.post(
     "/deny/{id}",
     dependencies=[
-        Depends(only_dataproduct_dataset_link_owners),
         Depends(
             Authorization.enforce(
                 Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
@@ -63,7 +60,6 @@ def deny_data_product_link(
 @router.post(
     "/remove/{id}",
     dependencies=[
-        Depends(only_dataproduct_dataset_link_owners),
         Depends(
             Authorization.enforce(
                 Action.DATASET__REVOKE_DATAPRODUCT_ACCESS,

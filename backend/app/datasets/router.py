@@ -20,7 +20,6 @@ from app.datasets.schema_request import (
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
-from app.dependencies import only_dataset_owners
 from app.graph.graph import Graph
 from app.role_assignments.dataset.router import create_assignment, decide_assignment
 from app.role_assignments.dataset.schema import (
@@ -147,7 +146,6 @@ def create_dataset(
         }
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
     ],
 )
@@ -168,7 +166,6 @@ def remove_dataset(id: UUID, db: Session = Depends(get_db_session)) -> None:
         }
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(
             Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
         ),
@@ -191,7 +188,6 @@ def update_dataset(
         }
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(
             Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
         ),
@@ -214,7 +210,6 @@ def update_dataset_about(
         }
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(Authorization.enforce(Action.DATASET__UPDATE_STATUS, DatasetResolver)),
     ],
 )
@@ -241,7 +236,6 @@ def update_dataset_status(
         },
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(Authorization.enforce(Action.DATASET__CREATE_USER, DatasetResolver)),
     ],
 )
@@ -270,7 +264,6 @@ def add_user_to_dataset(
         },
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(Authorization.enforce(Action.DATASET__DELETE_USER, DatasetResolver)),
     ],
 )
@@ -292,7 +285,6 @@ def get_graph_data(
 @router.post(
     "/{id}/settings/{setting_id}",
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(
             Authorization.enforce(Action.DATASET__UPDATE_SETTINGS, DatasetResolver)
         ),

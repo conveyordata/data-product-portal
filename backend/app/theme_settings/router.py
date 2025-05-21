@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 
 from .schema import ThemeSettings
 from .service import ThemeSettingsService
@@ -19,7 +18,6 @@ def get_settings(db: Session = Depends(get_db_session)) -> ThemeSettings:
 @router.put(
     "",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
             Authorization.enforce(
                 Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
