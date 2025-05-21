@@ -5,8 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz.authorization import Authorization
-from app.core.authz.authorization import AuthorizationAction as Action
+from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import DataProductResolver
 from app.database.database import get_db_session
 from app.role_assignments.enums import DecisionStatus
