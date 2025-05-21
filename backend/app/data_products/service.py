@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import List
+from typing import Sequence
 from urllib import parse
 from uuid import UUID
 
@@ -31,9 +31,6 @@ from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.data_product_memberships.enums import DataProductUserRole
-from app.data_product_memberships.model import DataProductMembership
-from app.data_product_memberships.schema_request import DataProductMembershipCreate
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.schema_request import (
@@ -62,11 +59,11 @@ from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
 from app.role_assignments.enums import DecisionStatus
+from app.roles.schema import Prototype
 from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User as UserModel
-from app.users.model import ensure_user_exists
 from app.users.schema import User
 
 
@@ -116,7 +113,7 @@ class DataProductService:
     def get_event_history(self, id: UUID, db: Session) -> list[EventGet]:
         return EventService().get_history(db, id, EventReferenceEntity.DATA_PRODUCT)
 
-    def get_data_products(self, db: Session) -> list[DataProductsGet]:
+    def get_data_products(self, db: Session) -> Sequence[DataProductsGet]:
         default_lifecycle = db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
@@ -127,7 +124,7 @@ class DataProductService:
                 select(DataProductModel)
                 .options(
                     joinedload(DataProductModel.dataset_links).lazyload("*"),
-                    joinedload(DataProductModel.memberships).lazyload("*"),
+                    joinedload(DataProductModel.assignments).lazyload("*"),
                     joinedload(DataProductModel.data_outputs).lazyload("*"),
                 )
                 .order_by(asc(DataProductModel.name))
@@ -141,29 +138,29 @@ class DataProductService:
                 dp.lifecycle = default_lifecycle
         return dps
 
-    def get_owners(self, id: UUID, db: Session) -> List[User]:
+    def get_owners(self, id: UUID, db: Session) -> Sequence[User]:
         data_product = ensure_data_product_exists(id, db)
         user_ids = [
-            membership.user_id
-            for membership in data_product.memberships
-            if membership.role == DataProductUserRole.OWNER
+            assignment.user_id
+            for assignment in data_product.assignments
+            if assignment.role.prototype == Prototype.OWNER
         ]
         return db.scalars(select(UserModel).filter(UserModel.id.in_(user_ids))).all()
 
     def get_user_data_products(
         self, user_id: UUID, db: Session
-    ) -> list[DataProductsGet]:
+    ) -> Sequence[DataProductsGet]:
         return (
             db.scalars(
                 select(DataProductModel)
                 .options(
                     joinedload(DataProductModel.dataset_links).lazyload("*"),
-                    joinedload(DataProductModel.memberships).lazyload("*"),
+                    joinedload(DataProductModel.assignments).lazyload("*"),
                     joinedload(DataProductModel.data_outputs).lazyload("*"),
                 )
                 .filter(
-                    DataProductModel.memberships.any(
-                        user_id=user_id, status=DecisionStatus.APPROVED
+                    DataProductModel.assignments.any(
+                        user_id=user_id, decision=DecisionStatus.APPROVED
                     )
                 )
                 .order_by(asc(DataProductModel.name))
@@ -172,32 +169,8 @@ class DataProductService:
             .all()
         )
 
-    def _update_users(
-        self,
-        data_product: DataProductCreate,
-        db: Session,
-        memberships: list[DataProductMembershipCreate] = [],
-    ) -> DataProductCreate:
-        if not memberships:
-            memberships = data_product.memberships
-        data_product.memberships = []
-        for membership in memberships:
-            user = ensure_user_exists(membership.user_id, db)
-            data_product.memberships.append(
-                DataProductMembershipCreate(
-                    user_id=user.id,
-                    role=membership.role,
-                )
-            )
-
-        return data_product
-
     def _get_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
-        tags = []
-        for tag_id in tag_ids:
-            tag = ensure_tag_exists(tag_id, db)
-            tags.append(tag)
-        return tags
+        return [ensure_tag_exists(tag_id, db) for tag_id in tag_ids]
 
     def create_data_product(
         self,
@@ -215,18 +188,10 @@ class DataProductService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        data_product = self._update_users(data_product, db)
         data_product_schema = data_product.parse_pydantic_schema()
         tags = self._get_tags(db, data_product_schema.pop("tag_ids", []))
+        _ = data_product_schema.pop("owners", [])
         model = DataProductModel(**data_product_schema, tags=tags)
-
-        for membership in model.memberships:
-            membership.status = DecisionStatus.APPROVED
-            membership.requested_by_id = authenticated_user.id
-            membership.requested_on = datetime.now(tz=pytz.utc)
-            membership.approved_by_id = authenticated_user.id
-            membership.approved_on = datetime.now(tz=pytz.utc)
-
         db.add(model)
         db.flush()
         db.add(
@@ -241,7 +206,9 @@ class DataProductService:
         RefreshInfrastructureLambda().trigger()
         return model
 
-    def remove_data_product(self, id: UUID, db: Session, authenticated_user: User):
+    def remove_data_product(
+        self, id: UUID, db: Session, authenticated_user: User
+    ) -> None:
         data_product = db.get(DataProductModel, id)
         if not data_product:
             raise HTTPException(
@@ -259,90 +226,13 @@ class DataProductService:
         db.delete(data_product)
         db.commit()
 
-    def _create_new_membership(
-        self,
-        user: User,
-        role: DataProductUserRole,
-        authenticated_user: User,
-    ) -> DataProductMembership:
-        return DataProductMembership(
-            user_id=user.id,
-            role=role,
-            status=DecisionStatus.APPROVED,
-            requested_by_id=user.id,
-            requested_on=datetime.now(tz=pytz.utc),
-            approved_by_id=authenticated_user.id,
-            approved_on=datetime.now(tz=pytz.utc),
-        )
-
-    def _update_memberships(
-        self,
-        data_product: DataProductModel,
-        membership_data: List[dict],
-        db: Session,
-        authenticated_user: User,
-    ):
-        existing_memberships = data_product.memberships
-        request_user_ids = set(m["user_id"] for m in membership_data)
-
-        for membership_item in membership_data:
-            user = ensure_user_exists(membership_item["user_id"], db)
-            membership = next(
-                (m for m in existing_memberships if m.user_id == user.id),
-                None,
-            )
-            if membership:
-                if membership.role != membership_item["role"]:
-                    db.add(
-                        EventModel(
-                            name=EventType.DATA_PRODUCT_MEMBERSHIP_UPDATED,
-                            subject_id=data_product.id,
-                            subject_type=EventReferenceEntity.DATA_PRODUCT,
-                            target_id=user.id,
-                            target_type=EventReferenceEntity.USER,
-                            actor_id=authenticated_user.id,
-                        ),
-                    )
-                membership.role = membership_item["role"]
-            else:
-                new_membership = self._create_new_membership(
-                    user, membership_item["role"], authenticated_user
-                )
-                data_product.memberships.append(new_membership)
-                db.add(
-                    EventModel(
-                        name=EventType.DATA_PRODUCT_MEMBERSHIP_CREATED,
-                        subject_id=data_product.id,
-                        subject_type=EventReferenceEntity.DATA_PRODUCT,
-                        target_id=user.id,
-                        target_type=EventReferenceEntity.USER,
-                        actor_id=authenticated_user.id,
-                    ),
-                )
-
-        memberships_to_remove = [
-            m for m in existing_memberships if m.user_id not in request_user_ids
-        ]
-        for membership in memberships_to_remove:
-            data_product.memberships.remove(membership)
-            db.add(
-                EventModel(
-                    name=EventType.DATA_PRODUCT_MEMBERSHIP_REMOVED,
-                    subject_id=data_product.id,
-                    subject_type=EventReferenceEntity.DATA_PRODUCT,
-                    target_id=membership.user_id,
-                    target_type=EventReferenceEntity.USER,
-                    actor_id=authenticated_user.id,
-                ),
-            )
-
     def update_data_product(
         self,
         id: UUID,
         data_product: DataProductUpdate,
         db: Session,
         authenticated_user: User,
-    ):
+    ) -> dict[str, UUID]:
         current_data_product = ensure_data_product_exists(id, db)
         update_data_product = data_product.model_dump(exclude_unset=True)
 
@@ -361,11 +251,7 @@ class DataProductService:
             )
 
         for k, v in update_data_product.items():
-            if k == "memberships":
-                self._update_memberships(
-                    current_data_product, v, db, authenticated_user
-                )
-            elif k == "tag_ids":
+            if k == "tag_ids":
                 new_tags = self._get_tags(db, v)
                 current_data_product.tags = new_tags
             else:
@@ -389,7 +275,7 @@ class DataProductService:
         data_product: DataProductAboutUpdate,
         db: Session,
         authenticated_user: User,
-    ):
+    ) -> None:
         current_data_product = ensure_data_product_exists(id, db)
         current_data_product.about = data_product.about
         db.add(
@@ -408,7 +294,7 @@ class DataProductService:
         data_product: DataProductStatusUpdate,
         db: Session,
         authenticated_user: User,
-    ):
+    ) -> None:
         current_data_product = ensure_data_product_exists(id, db)
         current_data_product.status = data_product.status
         db.add(
@@ -427,7 +313,7 @@ class DataProductService:
         data_product: DataProductModel,
         authenticated_user: User,
         background_tasks: BackgroundTasks,
-    ):
+    ) -> None:
         url = (
             settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-product"
         )
@@ -464,7 +350,7 @@ class DataProductService:
         authenticated_user: User,
         db: Session,
         background_tasks: BackgroundTasks,
-    ):
+    ) -> dict[str, UUID]:
         dataset = ensure_dataset_exists(
             dataset_id,
             db,
@@ -527,8 +413,12 @@ class DataProductService:
         return {"id": dataset_link.id}
 
     def unlink_dataset_from_data_product(
-        self, id: UUID, dataset_id: UUID, db: Session, authenticated_user: User
-    ):
+        self,
+        id: UUID,
+        dataset_id: UUID,
+        db: Session,
+        authenticated_user: User,
+    ) -> None:
         ensure_dataset_exists(dataset_id, db)
         data_product = ensure_data_product_exists(
             id, db, options=[joinedload(DataProductModel.dataset_links)]
@@ -628,7 +518,7 @@ class DataProductService:
         data_product = db.get(DataProductModel, id)
         return CONVEYOR_SERVICE.generate_ide_url(data_product.namespace)
 
-    def get_data_outputs(self, id: UUID, db: Session) -> list[DataOutputGet]:
+    def get_data_outputs(self, id: UUID, db: Session) -> Sequence[DataOutputGet]:
         return (
             db.scalars(
                 select(DataOutputModel)

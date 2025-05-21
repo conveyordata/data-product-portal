@@ -1,8 +1,10 @@
 from datetime import datetime
+from http import HTTPStatus
 from typing import Optional, Sequence
 from uuid import UUID
 
-from sqlalchemy import select
+from fastapi import HTTPException
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database.database import ensure_exists
@@ -15,6 +17,8 @@ from app.role_assignments.data_product.schema import (
     UpdateRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
+from app.roles.model import Role
+from app.roles.schema import Prototype
 from app.users.schema import User
 
 
@@ -70,6 +74,17 @@ class RoleAssignmentService:
 
     def delete_assignment(self, id_: UUID, authenticated_user: User) -> RoleAssignment:
         assignment = self.get_assignment(id_)
+
+        if (
+            assignment.role is not None
+            and assignment.role.prototype == Prototype.OWNER
+            and assignment.decision == DecisionStatus.APPROVED
+            and self.count_owners(assignment.data_product_id) <= 1
+        ):
+            raise HTTPException(
+                HTTPStatus.FORBIDDEN,
+                "A data product must always be owned by at least one user",
+            )
         self.db.add(
             EventModel(
                 name=EventType.DATA_PRODUCT_MEMBERSHIP_REMOVED,
@@ -83,6 +98,16 @@ class RoleAssignmentService:
         self.db.delete(assignment)
         self.db.commit()
         return assignment
+
+    def count_owners(self, data_product_id: UUID) -> int:
+        query = (
+            select(func.count())
+            .select_from(DataProductRoleAssignment)
+            .where(DataProductRoleAssignment.data_product_id == data_product_id)
+            .join(Role)
+            .where(Role.prototype == Prototype.OWNER)
+        )
+        return self.db.scalar(query)
 
     def update_assignment(
         self, request: UpdateRoleAssignment, authenticated_user: User

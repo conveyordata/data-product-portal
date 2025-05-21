@@ -11,7 +11,6 @@ from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz.authorization import Authorization
-from app.data_product_memberships.model import DataProductUserRole
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.main import app
@@ -87,12 +86,7 @@ def default_data_product_payload() -> dict[str, Any]:
         "namespace": "test-data_product",
         "tags": [],
         "type_id": str(data_product_type.id),
-        "memberships": [
-            {
-                "user_id": str(user.id),
-                "role": DataProductUserRole.OWNER.value,
-            }
-        ],
+        "owners": [str(user.id)],
         "domain_id": str(domain.id),
     }
 

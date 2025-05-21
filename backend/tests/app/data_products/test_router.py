@@ -11,7 +11,6 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.data_product_setting import DataProductSettingFactory
 from tests.factories.env_platform_config import EnvPlatformConfigFactory
 from tests.factories.environment import EnvironmentFactory
@@ -25,8 +24,6 @@ from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
-from app.data_product_memberships.enums import DataProductUserRole
-from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Scope
 from app.roles.service import RoleService
 
@@ -46,12 +43,7 @@ def payload():
         "namespace": "namespace",
         "tag_ids": [str(tag.id)],
         "type_id": str(data_product_type.id),
-        "memberships": [
-            {
-                "user_id": str(user.id),
-                "role": DataProductUserRole.OWNER.value,
-            }
-        ],
+        "owners": [str(user.id)],
         "lifecycle_id": str(lifecycle.id),
         "domain_id": str(domain.id),
     }
@@ -70,13 +62,12 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
 
-    def test_create_data_product_no_owner_role(self, session, payload, client):
+    def test_create_data_product_no_owner_role(self, payload, client):
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -85,12 +76,11 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 400
 
-    def test_create_data_product_no_members(self, session, payload, client):
+    def test_create_data_product_no_owners(self, session, payload, client):
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id="sub")
         role = RoleFactory(
@@ -100,35 +90,10 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
-        create_payload = deepcopy(payload)
-        create_payload["memberships"] = []
-        created_data_product = self.create_data_product(client, create_payload)
-        assert created_data_product.status_code == 422
 
-    def test_create_data_product_no_owner(self, session, payload, client):
-        RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id="sub")
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
-        )
-        GlobalRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            decision=DecisionStatus.APPROVED,
-        )
-        user = UserFactory()
-        memberships = [
-            {
-                "user_id": str(user.id),
-                "role": DataProductUserRole.MEMBER.value,
-            }
-        ]
         create_payload = deepcopy(payload)
-        create_payload["memberships"] = memberships
-
+        create_payload["owners"] = []
         created_data_product = self.create_data_product(client, create_payload)
         assert created_data_product.status_code == 422
 
@@ -142,7 +107,6 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         DataProductFactory(namespace=payload["namespace"])
@@ -162,7 +126,6 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         create_payload = deepcopy(payload)
@@ -183,7 +146,6 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         create_payload = deepcopy(payload)
@@ -209,15 +171,15 @@ class TestDataProductsRouter:
 
     def test_get_conveyor_ide_url(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
 
         response = self.get_conveyor_ide_url(client, data_product.id)
@@ -225,7 +187,12 @@ class TestDataProductsRouter:
 
     def test_get_data_product_by_user_id(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=RoleFactory().id,
+        )
 
         response = self.get_data_product_by_user_id(client, user.id)
         assert response.status_code == 200
@@ -233,8 +200,7 @@ class TestDataProductsRouter:
         assert response.json()[0]["id"] == str(data_product.id)
 
     def test_get_data_outputs(self, client):
-        user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
         response = self.get_data_outputs(client, data_product.id)
         assert response.status_code == 200
@@ -251,15 +217,15 @@ class TestDataProductsRouter:
 
     def test_update_data_product(self, payload, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         update_payload = deepcopy(payload)
         update_payload["name"] = "Updated Data Product"
@@ -273,64 +239,17 @@ class TestDataProductsRouter:
         response = self.update_data_product_about(client, data_product.id)
         assert response.status_code == 403
 
-    def test_update_data_product_about_remove_all_members(self, payload, client):
-        user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[
-                AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
-                AuthorizationAction.DATA_PRODUCT__DELETE_USER,
-            ],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
-        )
-        update_payload = deepcopy(payload)
-        update_payload["memberships"] = []
-        response = self.update_data_product(client, update_payload, data_product.id)
-        assert response.status_code == 422
-
-    def test_update_data_product_about_remove_last_owner(self, payload, client):
-        user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[
-                AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
-                AuthorizationAction.DATA_PRODUCT__DELETE_USER,
-            ],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
-        )
-        update_payload = deepcopy(payload)
-        user = UserFactory()
-        memberships = [
-            {
-                "user_id": str(user.id),
-                "role": DataProductUserRole.MEMBER.value,
-            }
-        ]
-        update_payload["memberships"] = memberships
-        response = self.update_data_product(client, update_payload, data_product.id)
-        assert response.status_code == 422
-
     def test_update_data_product_about(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = self.update_data_product_about(client, data_product.id)
         assert response.status_code == 200
@@ -342,15 +261,15 @@ class TestDataProductsRouter:
 
     def test_remove_data_product(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__DELETE],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
@@ -364,19 +283,19 @@ class TestDataProductsRouter:
 
     def test_update_status(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = self.get_data_product_by_id(client, data_product.id)
         assert response.json()["status"] == "pending"
-        response = self.update_data_product_status(
+        _ = self.update_data_product_status(
             client, {"status": "active"}, data_product.id
         )
         response = self.get_data_product_by_id(client, data_product.id)
@@ -396,15 +315,15 @@ class TestDataProductsRouter:
 
     def test_data_product_set_custom_setting_wrong_scope(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         setting = DataProductSettingFactory(scope="dataset")
         with pytest.raises(IntegrityError):
@@ -420,15 +339,15 @@ class TestDataProductsRouter:
 
     def test_dataset_set_custom_setting(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         setting = DataProductSettingFactory()
         response = client.post(
@@ -463,15 +382,15 @@ class TestDataProductsRouter:
     def test_get_aws_role(self, client):
         env = EnvironmentFactory(name="production")
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = client.get(
             f"{ENDPOINT}/{data_product.id}/role?environment=production"
@@ -482,15 +401,15 @@ class TestDataProductsRouter:
     def test_get_signin_url_not_implemented(self, client):
         EnvironmentFactory(name="production")
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = client.get(
             f"{ENDPOINT}/{data_product.id}/signin_url?environment=production"
@@ -503,15 +422,15 @@ class TestDataProductsRouter:
         env = EnvironmentFactory(name="production")
         platform = PlatformFactory(name="Databricks")
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         EnvPlatformConfigFactory(
             environment=env,
@@ -529,18 +448,19 @@ class TestDataProductsRouter:
 
     def test_retain_deleted_data_product_name_in_history(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
-        data_product_id = data_product.id
-        data_product_name = data_product.name
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__DELETE],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
+        data_product_id = data_product.id
+        data_product_name = data_product.name
+
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
 
@@ -548,7 +468,7 @@ class TestDataProductsRouter:
         assert len(response.json()) == 1
         assert response.json()[0]["deleted_subject_identifier"] == data_product_name
 
-    def test_get_namespace_suggestion_subsitution(self, client):
+    def test_get_namespace_suggestion_substitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
         body = response.json()
@@ -646,15 +566,15 @@ class TestDataProductsRouter:
         namespace = "namespace"
         DataProductFactory(namespace=namespace)
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         update_payload = deepcopy(payload)
         update_payload["namespace"] = namespace
@@ -674,7 +594,6 @@ class TestDataProductsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
@@ -687,35 +606,37 @@ class TestDataProductsRouter:
 
     def test_history_event_created_on_data_product_update(self, payload, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         update_payload = deepcopy(payload)
         update_payload["name"] = "Updated Data Product"
         response = self.update_data_product(client, update_payload, data_product.id)
+
         assert response.status_code == 200
+        assert response.json()["id"] == str(data_product.id)
 
         history = self.get_data_product_history(client, data_product.id).json()
-        assert len(history) == 3
+        assert len(history) == 1
 
     def test_history_event_created_on_data_product_about_update(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = self.update_data_product_about(client, data_product.id)
         assert response.status_code == 200
@@ -725,15 +646,15 @@ class TestDataProductsRouter:
 
     def test_history_event_created_on_data_product_status_update(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = self.update_data_product_status(
             client, {"status": "active"}, data_product.id
@@ -745,15 +666,15 @@ class TestDataProductsRouter:
 
     def test_history_event_created_on_data_product_deletion(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__DELETE],
         )
         DataProductRoleAssignmentFactory(
-            user_id=str(user.id),
-            role_id=str(role.id),
-            data_product_id=str(data_product.id),
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
         )
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200

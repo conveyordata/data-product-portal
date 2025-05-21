@@ -1,9 +1,9 @@
-import { Button, FormInstance, Space } from 'antd';
-import { ReactNode, RefObject } from 'react';
+import { Button, type FormInstance, Space } from 'antd';
+import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
-import { DataOutputCreateFormSchema } from '@/types/data-output';
+import { type DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
 
 import styles from './data-product-data-output-link-popup.module.scss';
 
@@ -12,7 +12,7 @@ type Props = {
     isOpen: boolean;
     title: ReactNode;
     children: ReactNode;
-    formRef: RefObject<FormInstance<DataOutputCreateFormSchema>>;
+    formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration> | null>;
 };
 
 export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef, children }: Props) {

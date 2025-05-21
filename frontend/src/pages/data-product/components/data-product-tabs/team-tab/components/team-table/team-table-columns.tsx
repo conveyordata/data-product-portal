@@ -1,10 +1,10 @@
-import { Badge, Button, Popconfirm, Space, TableColumnsType } from 'antd';
-import { TFunction } from 'i18next';
+import { Badge, Button, Popconfirm, Space, type TableColumnsType } from 'antd';
+import type { TFunction } from 'i18next';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form.tsx';
-import { DecisionStatus, RoleContract } from '@/types/roles';
-import { RoleAssignmentContract } from '@/types/roles/role.contract';
+import { DecisionStatus, type RoleContract } from '@/types/roles';
+import type { RoleAssignmentContract } from '@/types/roles/role.contract';
 import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -17,13 +17,11 @@ type Props = {
     onRoleChange: (role: RoleContract, membershipId: string, userId: string) => void;
     isRemovingUser: boolean;
     dataProductUsers: RoleAssignmentContract[];
-    canPerformTeamActions: (userId: string) => boolean;
     isLoading?: boolean;
     canEdit?: boolean;
     canRemove?: boolean;
     canApprove?: boolean;
 };
-
 export const getDataProductUsersTableColumns = ({
     t,
     onRemoveMembership,
@@ -33,8 +31,6 @@ export const getDataProductUsersTableColumns = ({
     onRoleChange,
     isRemovingUser,
     dataProductUsers,
-    canPerformTeamActions,
-    // hasCurrentUserMembership,
     canEdit,
     canRemove,
     canApprove,
@@ -122,11 +118,7 @@ export const getDataProductUsersTableColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button
-                                    loading={isLoading}
-                                    disabled={isLoading || !(canApprove || canPerformTeamActions(user.id))}
-                                    type={'link'}
-                                >
+                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
                                     {t('Accept')}
                                 </Button>
                             </Popconfirm>
@@ -142,11 +134,7 @@ export const getDataProductUsersTableColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button
-                                    loading={isLoading}
-                                    disabled={isLoading || !(canApprove || canPerformTeamActions(user.id))}
-                                    type={'link'}
-                                >
+                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
                                     {t('Reject')}
                                 </Button>
                             </Popconfirm>
@@ -164,11 +152,7 @@ export const getDataProductUsersTableColumns = ({
                             okButtonProps={{ loading: isRemovingUser }}
                             autoAdjustOverflow={true}
                         >
-                            <Button
-                                loading={isRemovingUser}
-                                disabled={isRemovingUser || !(canRemove || canPerformTeamActions(user.id))}
-                                type={'link'}
-                            >
+                            <Button loading={isRemovingUser} disabled={isRemovingUser || !canRemove} type={'link'}>
                                 {t('Remove')}
                             </Button>
                         </Popconfirm>
