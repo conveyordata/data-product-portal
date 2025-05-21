@@ -31,7 +31,7 @@ class RoleAssignmentService:
         self.db = db
         self.user = user
 
-    def _get_data_product_request_resolvers(self, data_product_id: UUID) -> List[User]:
+    def get_data_product_request_resolvers(self, data_product_id: UUID) -> List[User]:
         return (
             self.db.scalars(
                 select(UserModel)
@@ -174,20 +174,13 @@ class RoleAssignmentService:
         return actions
 
     def send_role_assignment_request_email(
-        self,
-        role_assignment: DataProductRoleAssignment,
+        self, role_assignment: DataProductRoleAssignment, owners: list[User]
     ) -> None:
 
         url = (
             f"{settings.HOST.rstrip('/')}/data-products/"
             f"{role_assignment.data_product_id}#team"
         )
-        owners = [
-            User.model_validate(owner)
-            for owner in self._get_data_product_request_resolvers(
-                role_assignment.data_product_id
-            )
-        ]
         action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
         action.add_row(
             [
