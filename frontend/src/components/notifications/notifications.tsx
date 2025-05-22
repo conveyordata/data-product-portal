@@ -1,5 +1,5 @@
 import { BellOutlined, CloseOutlined } from '@ant-design/icons';
-import { Badge, Button, Dropdown, Flex, type MenuProps, Space, theme, Typography } from 'antd';
+import { Badge, Button, Dropdown, Flex, type MenuProps, Space, theme } from 'antd';
 import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ import {
 } from '@/store/features/notifications/notifications-api-slice';
 import { NotificationContract } from '@/types/notifications/notification.contract';
 
+import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
 
 export function Notifications() {
@@ -44,18 +45,10 @@ export function Notifications() {
             t: TFunction,
             handleRemoveNotification: (id: string) => void,
         ) => {
-            const navigatePath = '/';
+            //const navigatePath = '/';
             return {
                 key: notification.id,
-                label: (
-                    <Flex>
-                        <Typography.Text>
-                            {t('{{name}}', {
-                                name: notification.event.name,
-                            })}
-                        </Typography.Text>
-                    </Flex>
-                ),
+                label: <NotificationDescription record={notification.event} />,
                 extra: (
                     <Button
                         type="link"
@@ -67,7 +60,6 @@ export function Notifications() {
                         <CloseOutlined />
                     </Button>
                 ),
-                onClick: () => navigate(navigatePath),
             };
         },
         [],
