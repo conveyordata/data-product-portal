@@ -314,7 +314,7 @@ class DataProductService:
                 detail=f"Dataset {dataset_id} already exists in data product {id}",
             )
 
-        if not dataset.isVisibleToUser(authenticated_user):
+        if not dataset.is_visible_to_user(authenticated_user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private dataset",
