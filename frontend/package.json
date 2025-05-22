@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm run copy-config && vite",
+    "dev": "npm run copy-config && vite --force",
     "build": "vite build",
     "build:prd": "vite build --mode production",
     "copy-config": "cp config.local.js public/config.js",

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { UserPopup } from '@/components/modal/user-popup/user-popup';
 import { useModal } from '@/hooks/use-modal';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useCreateRoleAssignmentMutation } from '@/store/features/role-assignments/roles-api-slice';
+import { useCreateRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
 import type { UserContract } from '@/types/users';

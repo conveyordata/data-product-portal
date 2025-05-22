@@ -2,21 +2,21 @@ import { Badge, Button, Popconfirm, Space, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
-import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form.tsx';
+import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form';
 import { DecisionStatus, type RoleContract } from '@/types/roles';
 import type { RoleAssignmentContract } from '@/types/roles/role.contract';
-import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper.ts';
+import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    onRemoveMembership: (userId: string) => void;
-    onAcceptMembershipRequest: (userId: string) => void;
-    onRejectMembershipRequest: (userId: string) => void;
-    onRoleChange: (role: RoleContract, membershipId: string, userId: string) => void;
-    isRemovingUser: boolean;
     dataProductUsers: RoleAssignmentContract[];
+    onRemoveUserAccess: (assignmentId: string) => void;
+    onAcceptAccessRequest: (assignmentId: string) => void;
+    onRejectAccessRequest: (assignmentId: string) => void;
+    onRoleChange: (role: RoleContract, assignmentId: string) => void;
+    isRemovingUser: boolean;
     isLoading?: boolean;
     canEdit?: boolean;
     canRemove?: boolean;
@@ -24,9 +24,9 @@ type Props = {
 };
 export const getDataProductUsersTableColumns = ({
     t,
-    onRemoveMembership,
-    onAcceptMembershipRequest,
-    onRejectMembershipRequest,
+    onRemoveUserAccess,
+    onAcceptAccessRequest,
+    onRejectAccessRequest,
     isLoading = false,
     onRoleChange,
     isRemovingUser,
@@ -62,17 +62,14 @@ export const getDataProductUsersTableColumns = ({
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: RoleContract, { user, id, decision }) => {
+            render: (role: RoleContract, { user, id, decision }: RoleAssignmentContract) => {
                 const isApproved = decision === DecisionStatus.Approved;
                 return (
                     <RoleChangeForm
                         initialRole={role}
                         userId={user.id}
                         dataProductUsers={dataProductUsers}
-                        onRoleChange={(role) => {
-                            console.log(role);
-                            onRoleChange(role, id, user.id);
-                        }}
+                        onRoleChange={(role) => onRoleChange(role, id)}
                         isDisabled={!canEdit || !isApproved}
                     />
                 );
@@ -102,7 +99,7 @@ export const getDataProductUsersTableColumns = ({
             title: t('Actions'),
             key: 'action',
             hidden: !(canRemove || canApprove),
-            render: (_, { user, id, decision }) => (
+            render: (_, { user, id, decision }: RoleAssignmentContract) => (
                 <Space>
                     {decision === DecisionStatus.Pending ? (
                         <Space>
@@ -111,7 +108,7 @@ export const getDataProductUsersTableColumns = ({
                                 description={t('Are you sure you want to allow access to user {{name}}?', {
                                     name: user.first_name,
                                 })}
-                                onConfirm={() => onAcceptMembershipRequest(id)}
+                                onConfirm={() => onAcceptAccessRequest(id)}
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
@@ -127,7 +124,7 @@ export const getDataProductUsersTableColumns = ({
                                 description={t('Are you sure you want to deny access to user {{name}}?', {
                                     name: user.first_name,
                                 })}
-                                onConfirm={() => onRejectMembershipRequest(id)}
+                                onConfirm={() => onRejectAccessRequest(id)}
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
@@ -145,7 +142,7 @@ export const getDataProductUsersTableColumns = ({
                             description={t('Are you sure you want to remove {{name}} from the data product?', {
                                 name: user.first_name,
                             })}
-                            onConfirm={() => onRemoveMembership(id)}
+                            onConfirm={() => onRemoveUserAccess(id)}
                             placement={'leftTop'}
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
