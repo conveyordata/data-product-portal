@@ -10,7 +10,7 @@ export const pendingActionsTags: string[] = [
     TagTypes.UserDatasets,
     TagTypes.Role,
 ];
-export const dataProductsDatasetsApiSlice = baseApiSlice
+export const pendingActionsDatasetsApiSlice = baseApiSlice
     .enhanceEndpoints({ addTagTypes: pendingActionsTags })
     .injectEndpoints({
         endpoints: (builder) => ({
@@ -31,4 +31,4 @@ export const dataProductsDatasetsApiSlice = baseApiSlice
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetPendingActionsQuery } = dataProductsDatasetsApiSlice;
+export const { useGetPendingActionsQuery } = pendingActionsDatasetsApiSlice;
