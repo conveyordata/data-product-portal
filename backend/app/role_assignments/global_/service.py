@@ -39,12 +39,7 @@ class RoleAssignmentService:
         return self.db.scalars(query).all()
 
     def create_assignment(self, request: RoleAssignmentRequest) -> RoleAssignment:
-        role = self.db.get(Role, request.role_id)
-        if role is None or role.scope != Scope.GLOBAL:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Role not found for this scope",
-            )
+        self.ensure_is_global_scope(request.role_id)
         role_assignment = GlobalRoleAssignment(
             **request.model_dump(),
             requested_on=datetime.now(),
@@ -60,13 +55,16 @@ class RoleAssignmentService:
         self.db.commit()
         return assignment
 
-    def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
-        role = self.db.get(Role, request.role_id)
+    def ensure_is_global_scope(self, role_id: Optional[UUID]) -> None:
+        role = self.db.get(Role, role_id)
         if role and role.scope != Scope.GLOBAL:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Role not found for this scope",
             )
+
+    def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
+        self.ensure_is_global_scope(request.role_id)
         assignment = self.get_assignment(request.id)
 
         if (role_id := request.role_id) is not None:

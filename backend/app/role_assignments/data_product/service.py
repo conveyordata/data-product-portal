@@ -50,12 +50,7 @@ class RoleAssignmentService:
     def create_assignment(
         self, data_product_id: UUID, request: CreateRoleAssignment
     ) -> RoleAssignment:
-        role = self.db.get(Role, request.role_id)
-        if role is None or role.scope != Scope.DATA_PRODUCT:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Role not found for this scope",
-            )
+        self.ensure_is_data_product_scope(request.role_id)
         role_assignment = DataProductRoleAssignment(
             **request.model_dump(),
             data_product_id=data_product_id,
@@ -94,13 +89,16 @@ class RoleAssignmentService:
         )
         return self.db.scalar(query)
 
-    def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
-        role = self.db.get(Role, request.role_id)
+    def ensure_is_data_product_scope(self, role_id: Optional[UUID]) -> None:
+        role = self.db.get(Role, role_id)
         if role and role.scope != Scope.DATA_PRODUCT:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Role not found for this scope",
             )
+
+    def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
+        self.ensure_is_data_product_scope(request.role_id)
         assignment = self.get_assignment(request.id)
 
         if (role_id := request.role_id) is not None:
