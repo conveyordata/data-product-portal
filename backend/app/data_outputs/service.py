@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional, Sequence
 from uuid import UUID
 
 import emailgen
@@ -49,7 +50,7 @@ class DataOutputService:
         authenticated_user: User,
         owner_id: UUID,
         db: Session,
-    ):
+    ) -> None:
         product = db.get(DataProductModel, owner_id)
         if authenticated_user.is_admin:
             return
@@ -99,8 +100,8 @@ class DataOutputService:
             tags.append(tag)
         return tags
 
-    def get_data_outputs(self, db: Session) -> list[DataOutputsGet]:
-        data_outputs = (
+    def get_data_outputs(self, db: Session) -> Sequence[DataOutputsGet]:
+        return (
             db.scalars(
                 select(DataOutputModel).options(
                     joinedload(DataOutputModel.dataset_links)
@@ -109,9 +110,8 @@ class DataOutputService:
             .unique()
             .all()
         )
-        return data_outputs
 
-    def get_data_output(self, id: UUID, db: Session) -> DataOutputGet:
+    def get_data_output(self, id: UUID, db: Session) -> Optional[DataOutputGet]:
         return db.get(
             DataOutputModel, id, options=[joinedload(DataOutputModel.dataset_links)]
         )

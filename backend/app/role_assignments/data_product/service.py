@@ -1,13 +1,14 @@
 from datetime import datetime
-from http import HTTPStatus
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import HTTPException
-from sqlalchemy import func, select
+from fastapi import HTTPException, status
+from sqlalchemy import asc, func, select
 from sqlalchemy.orm import Session
 
+from app.core.authz import Action
 from app.database.database import ensure_exists
+from app.pending_actions.schema import DataProductRoleAssignmentPendingAction
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
@@ -17,6 +18,7 @@ from app.role_assignments.data_product.schema import (
 from app.role_assignments.enums import DecisionStatus
 from app.roles.model import Role
 from app.roles.schema import Prototype
+from app.users.model import User as UserModel
 from app.users.schema import User
 
 
@@ -48,6 +50,25 @@ class RoleAssignmentService:
         return self.db.scalars(query).all()
 
     def create_assignment(self, request: CreateRoleAssignment) -> RoleAssignment:
+        existing_assignment = self.db.scalar(
+            select(DataProductRoleAssignment).where(
+                DataProductRoleAssignment.user_id == request.user_id,
+                DataProductRoleAssignment.data_product_id == request.data_product_id,
+            )
+        )
+        if existing_assignment:
+            if existing_assignment.decision == DecisionStatus.DENIED:
+                self.db.delete(existing_assignment)
+                self.db.flush()
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        "Role assignment already exists for"
+                        " this user and data product."
+                    ),
+                )
+
         role_assignment = DataProductRoleAssignment(
             **request.model_dump(),
             requested_on=datetime.now(),
@@ -59,34 +80,15 @@ class RoleAssignmentService:
 
     def delete_assignment(self, id_: UUID) -> RoleAssignment:
         assignment = self.get_assignment(id_)
-
-        if (
-            assignment.role is not None
-            and assignment.role.prototype == Prototype.OWNER
-            and assignment.decision == DecisionStatus.APPROVED
-            and self.count_owners(assignment.data_product_id) <= 1
-        ):
-            raise HTTPException(
-                HTTPStatus.FORBIDDEN,
-                "A data product must always be owned by at least one user",
-            )
+        self._guard_against_illegal_owner_removal(assignment)
 
         self.db.delete(assignment)
         self.db.commit()
         return assignment
 
-    def count_owners(self, data_product_id: UUID) -> int:
-        query = (
-            select(func.count())
-            .select_from(DataProductRoleAssignment)
-            .where(DataProductRoleAssignment.data_product_id == data_product_id)
-            .join(Role)
-            .where(Role.prototype == Prototype.OWNER)
-        )
-        return self.db.scalar(query)
-
     def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
+        self._guard_against_illegal_owner_removal(assignment)
 
         if (role_id := request.role_id) is not None:
             assignment.role_id = role_id
@@ -97,3 +99,74 @@ class RoleAssignmentService:
 
         self.db.commit()
         return assignment
+
+    def _guard_against_illegal_owner_removal(self, assignment: RoleAssignment) -> None:
+        if (
+            assignment.role is not None
+            and assignment.role.prototype == Prototype.OWNER
+            and assignment.decision == DecisionStatus.APPROVED
+            and self._count_owners(assignment.data_product_id) <= 1
+        ):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "A data product must always be owned by at least one user",
+            )
+
+    def _count_owners(self, data_product_id: UUID) -> int:
+        query = (
+            select(func.count())
+            .select_from(DataProductRoleAssignment)
+            .where(DataProductRoleAssignment.data_product_id == data_product_id)
+            .join(Role)
+            .where(Role.prototype == Prototype.OWNER)
+        )
+        return self.db.scalar(query)
+
+    def get_pending_data_product_role_assignments(
+        self,
+    ) -> Sequence[DataProductRoleAssignmentPendingAction]:
+        data_product_ids = (
+            select(DataProductRoleAssignment.data_product_id)
+            .join(DataProductRoleAssignment.role)
+            .where(
+                DataProductRoleAssignment.user_id == self.user.id,
+                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                Role.permissions.contains(
+                    [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
+                ),
+            )
+            .scalar_subquery()
+        )
+
+        actions = (
+            self.db.scalars(
+                select(DataProductRoleAssignment)
+                .filter(DataProductRoleAssignment.decision == DecisionStatus.PENDING)
+                .filter(DataProductRoleAssignment.data_product_id.in_(data_product_ids))
+                .order_by(asc(DataProductRoleAssignment.requested_on))
+            )
+            .unique()
+            .all()
+        )
+        return actions
+
+    def users_with_authz_action(
+        self, data_product_id: UUID, action: Action
+    ) -> Sequence[User]:
+        return (
+            self.db.scalars(
+                select(UserModel)
+                .join(
+                    DataProductRoleAssignment,
+                    DataProductRoleAssignment.user_id == UserModel.id,
+                )
+                .join(Role, DataProductRoleAssignment.role_id == Role.id)
+                .where(
+                    DataProductRoleAssignment.data_product_id == data_product_id,
+                    DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                    Role.permissions.contains([action]),
+                )
+            )
+            .unique()
+            .all()
+        )

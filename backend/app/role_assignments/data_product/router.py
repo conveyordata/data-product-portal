@@ -1,11 +1,13 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz import Action
 from app.database.database import get_db_session
+from app.role_assignments.data_product import email
 from app.role_assignments.data_product.auth import DataProductAuthAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
@@ -16,7 +18,7 @@ from app.role_assignments.data_product.schema import (
 )
 from app.role_assignments.data_product.service import RoleAssignmentService
 from app.role_assignments.enums import DecisionStatus
-from app.users.model import User
+from app.users.schema import User
 
 router = APIRouter(prefix="/data_product")
 
@@ -37,10 +39,33 @@ def list_assignments(
 @router.post("")
 def create_assignment(
     request: CreateRoleAssignment,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return RoleAssignmentService(db=db, user=user).create_assignment(request)
+    service = RoleAssignmentService(db=db, user=user)
+    role_assignment = service.create_assignment(request)
+
+    approvers = service.users_with_authz_action(
+        data_product_id=role_assignment.data_product_id,
+        action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+    )
+    if user.id in (approver.id for approver in approvers):
+        service.update_assignment(
+            UpdateRoleAssignment(
+                id=role_assignment.id,
+                role_id=role_assignment.role_id,
+                decision=DecisionStatus.APPROVED,
+            )
+        )
+        return role_assignment
+
+    background_tasks.add_task(
+        email.send_role_assignment_request_email,
+        role_assignment,
+        approvers,
+    )
+    return role_assignment
 
 
 @router.delete("/{id}")
@@ -54,6 +79,26 @@ def delete_assignment(
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).remove()
     return None
+
+
+@router.patch("/{id}")
+def modify_assigned_role(
+    id: UUID,
+    request: ModifyRoleAssignment,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> RoleAssignmentResponse:
+    service = RoleAssignmentService(db=db, user=user)
+    original_role = service.get_assignment(id).role_id
+
+    assignment = service.update_assignment(
+        UpdateRoleAssignment(id=id, role_id=request.role_id)
+    )
+
+    if assignment.decision is DecisionStatus.APPROVED:
+        DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()
+
+    return assignment
 
 
 @router.patch("/{id}/decide")
@@ -84,25 +129,5 @@ def decide_assignment(
 
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).add()
-
-    return assignment
-
-
-@router.patch("/{id}/role")
-def modify_assigned_role(
-    id: UUID,
-    request: ModifyRoleAssignment,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
-    original_role = service.get_assignment(id).role_id
-
-    assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id)
-    )
-
-    if assignment.decision is DecisionStatus.APPROVED:
-        DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()
 
     return assignment

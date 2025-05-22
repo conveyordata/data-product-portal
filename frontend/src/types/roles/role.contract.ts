@@ -40,4 +40,8 @@ export interface RoleAssignmentContract {
     user: UserContract;
     role: RoleContract;
     decision: DecisionStatus;
+    requested_on?: string;
+    requested_by?: UserContract;
+    decided_on?: string;
+    decided_by?: UserContract;
 }
