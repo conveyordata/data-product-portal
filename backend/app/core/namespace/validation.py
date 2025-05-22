@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Optional
+from typing import ClassVar, Final, Optional
 
 from pydantic import BaseModel
 from sqlalchemy import UUID, and_, exists, select
@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.data_outputs.model import DataOutput
 from app.data_product_settings.enums import DataProductSettingScope
 from app.data_product_settings.model import DataProductSetting
+from app.database.database import Base
 from app.settings import settings
 
 
@@ -32,15 +33,17 @@ class NamespaceLengthLimits(BaseModel):
 
 
 class NamespaceValidator:
-    def __init__(self, model):
-        self.max_length = settings.NAMESPACE_MAX_LENGTH
+    max_length: ClassVar[Final[int]] = settings.NAMESPACE_MAX_LENGTH
+
+    def __init__(self, model: Base):
         self.model = model
 
-    def _namespace_from_name(self, name: str) -> str:
+    @classmethod
+    def _namespace_from_name(cls, name: str) -> str:
         namespace = re.sub(
             r"[^a-z0-9+=,.@_-]", "", name.lower().replace(" ", "-")
         ).strip("-")
-        return namespace[: settings.NAMESPACE_MAX_LENGTH]
+        return namespace[: cls.max_length]
 
     def _is_unique(
         self,
@@ -50,11 +53,12 @@ class NamespaceValidator:
     ) -> bool:
         return not db.scalar(select(exists().where(self.model.namespace == namespace)))
 
+    @classmethod
     def namespace_suggestion(
-        self,
+        cls,
         name: str,
     ) -> NamespaceSuggestion:
-        namespace = self._namespace_from_name(name)
+        namespace = cls._namespace_from_name(name)
 
         return NamespaceSuggestion(
             namespace=namespace,
@@ -77,11 +81,12 @@ class NamespaceValidator:
 
         return NamespaceValidation(validity=validity)
 
+    @classmethod
     def namespace_length_limits(
-        self,
+        cls,
     ) -> NamespaceLengthLimits:
         return NamespaceLengthLimits(
-            max_length=self.max_length,
+            max_length=cls.max_length,
         )
 
 
