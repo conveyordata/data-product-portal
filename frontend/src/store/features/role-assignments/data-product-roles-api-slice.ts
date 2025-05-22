@@ -42,7 +42,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                 { role_assignment_id: string; role_id: string; data_product_id: string }
             >({
                 query: (request) => ({
-                    url: buildUrl(ApiUrl.RoleAssignmentsDataProductUpdate, {
+                    url: buildUrl(ApiUrl.RoleAssignmentsDataProduct, {
                         assignmentId: request.role_assignment_id,
                     }),
                     method: 'PATCH',
@@ -73,7 +73,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
             }),
             deleteRoleAssignment: builder.mutation<void, { role_assignment_id: string; data_product_id: string }>({
                 query: (request) => ({
-                    url: buildUrl(ApiUrl.RoleAssignmentsDataProductDelete, {
+                    url: buildUrl(ApiUrl.RoleAssignmentsDataProduct, {
                         assignmentId: request.role_assignment_id,
                     }),
                     method: 'DELETE',

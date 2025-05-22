@@ -187,11 +187,29 @@ class TestDataProductRoleAssignmentsRouter:
         )
 
         response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/role", json={"role_id": str(new_role.id)}
+            f"{ENDPOINT}/{assignment.id}", json={"role_id": str(new_role.id)}
         )
         assert response.status_code == 200
         data = response.json()
         assert data["role"]["id"] == str(new_role.id)
+
+    def test_modify_last_owner(self, client: TestClient):
+        data_product: DataProduct = DataProductFactory()
+        user: User = UserFactory()
+        owner: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.CUSTOM)
+
+        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=owner.id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        response = client.patch(
+            f"{ENDPOINT}/{assignment.id}", json={"role_id": str(role.id)}
+        )
+        assert response.status_code == 403
 
     def test_delete_data_product_with_role_assignment(self, client: TestClient):
         user = UserFactory(external_id="sub")

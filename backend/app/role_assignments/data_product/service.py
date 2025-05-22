@@ -27,27 +27,6 @@ class RoleAssignmentService:
         self.db = db
         self.user = user
 
-    def users_with_authz_action(
-        self, data_product_id: UUID, action: Action
-    ) -> Sequence[User]:
-        return (
-            self.db.scalars(
-                select(UserModel)
-                .join(
-                    DataProductRoleAssignment,
-                    DataProductRoleAssignment.user_id == UserModel.id,
-                )
-                .join(Role, DataProductRoleAssignment.role_id == Role.id)
-                .where(
-                    DataProductRoleAssignment.data_product_id == data_product_id,
-                    DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
-                    Role.permissions.contains([action]),
-                )
-            )
-            .unique()
-            .all()
-        )
-
     def get_assignment(self, id_: UUID) -> RoleAssignment:
         return ensure_exists(id_, self.db, DataProductRoleAssignment)
 
@@ -101,34 +80,15 @@ class RoleAssignmentService:
 
     def delete_assignment(self, id_: UUID) -> RoleAssignment:
         assignment = self.get_assignment(id_)
-
-        if (
-            assignment.role is not None
-            and assignment.role.prototype == Prototype.OWNER
-            and assignment.decision == DecisionStatus.APPROVED
-            and self.count_owners(assignment.data_product_id) <= 1
-        ):
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                "A data product must always be owned by at least one user",
-            )
+        self._guard_against_illegal_owner_removal(assignment)
 
         self.db.delete(assignment)
         self.db.commit()
         return assignment
 
-    def count_owners(self, data_product_id: UUID) -> int:
-        query = (
-            select(func.count())
-            .select_from(DataProductRoleAssignment)
-            .where(DataProductRoleAssignment.data_product_id == data_product_id)
-            .join(Role)
-            .where(Role.prototype == Prototype.OWNER)
-        )
-        return self.db.scalar(query)
-
     def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
+        self._guard_against_illegal_owner_removal(assignment)
 
         if (role_id := request.role_id) is not None:
             assignment.role_id = role_id
@@ -139,6 +99,28 @@ class RoleAssignmentService:
 
         self.db.commit()
         return assignment
+
+    def _guard_against_illegal_owner_removal(self, assignment: RoleAssignment) -> None:
+        if (
+            assignment.role is not None
+            and assignment.role.prototype == Prototype.OWNER
+            and assignment.decision == DecisionStatus.APPROVED
+            and self._count_owners(assignment.data_product_id) <= 1
+        ):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "A data product must always be owned by at least one user",
+            )
+
+    def _count_owners(self, data_product_id: UUID) -> int:
+        query = (
+            select(func.count())
+            .select_from(DataProductRoleAssignment)
+            .where(DataProductRoleAssignment.data_product_id == data_product_id)
+            .join(Role)
+            .where(Role.prototype == Prototype.OWNER)
+        )
+        return self.db.scalar(query)
 
     def get_pending_data_product_role_assignments(
         self,
@@ -167,3 +149,24 @@ class RoleAssignmentService:
             .all()
         )
         return actions
+
+    def users_with_authz_action(
+        self, data_product_id: UUID, action: Action
+    ) -> Sequence[User]:
+        return (
+            self.db.scalars(
+                select(UserModel)
+                .join(
+                    DataProductRoleAssignment,
+                    DataProductRoleAssignment.user_id == UserModel.id,
+                )
+                .join(Role, DataProductRoleAssignment.role_id == Role.id)
+                .where(
+                    DataProductRoleAssignment.data_product_id == data_product_id,
+                    DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                    Role.permissions.contains([action]),
+                )
+            )
+            .unique()
+            .all()
+        )
