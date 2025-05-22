@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Sequence
+from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -27,7 +27,9 @@ class RoleAssignmentService:
         self.db = db
         self.user = user
 
-    def get_data_product_request_resolvers(self, data_product_id: UUID) -> Sequence[User]:
+    def get_data_product_request_resolvers(
+        self, data_product_id: UUID
+    ) -> Sequence[User]:
         return (
             self.db.scalars(
                 select(UserModel)
