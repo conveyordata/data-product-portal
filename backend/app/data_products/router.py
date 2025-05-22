@@ -211,11 +211,8 @@ def create_data_output(
     id: UUID,
     data_output: DataOutputCreate,
     db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DataOutputService().create_data_output(
-        id, data_output, db, authenticated_user
-    )
+    return DataOutputService(db).create_data_output(id, data_output)
 
 
 @router.get("/{id}/data_output/validate_namespace")
