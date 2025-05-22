@@ -27,7 +27,7 @@ class RoleAssignmentService:
         self.db = db
         self.user = user
 
-    def get_data_product_request_resolvers(self, data_product_id: UUID) -> List[User]:
+    def get_data_product_request_resolvers(self, data_product_id: UUID) -> Sequence[User]:
         return (
             self.db.scalars(
                 select(UserModel)
