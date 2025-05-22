@@ -14,7 +14,7 @@ from tests.factories import (
     UserFactory,
 )
 
-from app.core.authz.actions import AuthorizationAction
+from app.core.authz import Action
 from app.roles.schema import Scope
 
 ENDPOINT = "/api/data_outputs"
@@ -78,7 +78,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -94,7 +94,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -140,7 +140,7 @@ class TestDataOutputsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -174,7 +174,7 @@ class TestDataOutputsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__DELETE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -193,7 +193,7 @@ class TestDataOutputsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -264,7 +264,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
         )
         owner = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -288,7 +288,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -306,7 +306,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -328,25 +328,27 @@ class TestDataOutputsRouter:
         )
 
     @staticmethod
-    def get_data_output_by_id(client: TestClient, data_output_id):
+    def get_data_output_by_id(client: TestClient, data_output_id) -> Response:
         return client.get(f"{ENDPOINT}/{data_output_id}")
 
     @staticmethod
-    def update_data_output(client: TestClient, payload, data_output_id):
+    def update_data_output(client: TestClient, payload, data_output_id) -> Response:
         return client.put(f"{ENDPOINT}/{data_output_id}", json=payload)
 
     @staticmethod
-    def delete_data_output(client: TestClient, data_output_id):
+    def delete_data_output(client: TestClient, data_output_id) -> Response:
         return client.delete(f"{ENDPOINT}/{data_output_id}")
 
     @staticmethod
-    def update_data_output_status(client: TestClient, status, data_output_id):
+    def update_data_output_status(
+        client: TestClient, status, data_output_id
+    ) -> Response:
         return client.put(f"{ENDPOINT}/{data_output_id}/status", json=status)
 
     @staticmethod
-    def get_namespace_suggestion(client: TestClient, name):
+    def get_namespace_suggestion(client: TestClient, name) -> Response:
         return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
-    def get_namespace_length_limits(client: TestClient):
+    def get_namespace_length_limits(client: TestClient) -> Response:
         return client.get(f"{ENDPOINT}/namespace_length_limits")

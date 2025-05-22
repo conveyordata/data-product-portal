@@ -2,7 +2,7 @@ from sqlalchemy.orm import joinedload
 from tests import test_session
 from tests.factories import (
     DataProductDatasetAssociationFactory,
-    DataProductMembershipFactory,
+    DataProductFactory,
     DatasetFactory,
     UserFactory,
 )
@@ -18,22 +18,22 @@ class TestDatasetsModel:
         ds = self.get_dataset(ds)
         assert ds.is_visible_to_user(user) is False
 
-    def test_get_private_dataset_by_owner(self, client):
+    def test_get_private_dataset_by_owner(self):
         ds_owner = UserFactory(external_id="sub")
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[ds_owner])
         ds = self.get_dataset(ds)
         assert ds.is_visible_to_user(ds_owner) is True
 
-    def test_get_private_dataset_by_admin(self, client):
+    def test_get_private_dataset_by_admin(self):
         admin = UserFactory(external_id="sub", is_admin=True)
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         ds = self.get_dataset(ds)
         assert ds.is_visible_to_user(admin) is True
 
-    def test_get_private_dataset_by_member_of_consuming_data_product(self, client):
+    def test_get_private_dataset_by_member_of_consuming_data_product(self):
         user = UserFactory(external_id="sub")
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
-        dp = DataProductMembershipFactory(user=user).data_product
+        dp = DataProductFactory()
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
         ds = self.get_dataset(ds)
         assert ds.is_visible_to_user(user) is True

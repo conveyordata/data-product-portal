@@ -1,10 +1,10 @@
-from tests.factories.data_product import DataProductFactory
-from tests.factories.environment import EnvironmentFactory
-from tests.factories.role import RoleFactory
-from tests.factories.role_assignment_data_product import (
+from tests.factories import (
+    DataProductFactory,
     DataProductRoleAssignmentFactory,
+    EnvironmentFactory,
+    RoleFactory,
+    UserFactory,
 )
-from tests.factories.user import UserFactory
 
 from app.core.authz.actions import AuthorizationAction
 from app.roles.schema import Scope
