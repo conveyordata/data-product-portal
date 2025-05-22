@@ -12,6 +12,7 @@ from app.database.database import Base, ensure_exists
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
 from app.domains.model import Domain
+from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM, utcnow
 from app.tags.model import Tag, tag_dataset_table
@@ -50,6 +51,13 @@ class Dataset(Base, BaseORM):
     # Relationships
     owners: Mapped[list["User"]] = relationship(
         secondary=datasets_owner_table, back_populates="owned_datasets", lazy="joined"
+    )
+    assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        order_by="DatasetRoleAssignment.decision, "
+        "DatasetRoleAssignment.requested_on",
+        lazy="joined",
     )
     data_product_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",

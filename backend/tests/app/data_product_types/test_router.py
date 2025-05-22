@@ -1,6 +1,5 @@
 import pytest
-from tests.factories import DataProductTypeFactory
-from tests.factories.data_product import DataProductFactory
+from tests.factories import DataProductFactory, DataProductTypeFactory
 
 from app.data_product_types.enums import DataProductIconKey
 

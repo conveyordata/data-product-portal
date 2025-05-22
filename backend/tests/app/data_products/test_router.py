@@ -4,25 +4,23 @@ from copy import deepcopy
 import pytest
 from sqlalchemy.exc import IntegrityError
 from tests.factories import (
+    DataOutputFactory,
     DataProductFactory,
+    DataProductRoleAssignmentFactory,
+    DataProductSettingFactory,
     DataProductTypeFactory,
     DomainFactory,
+    EnvironmentFactory,
+    EnvPlatformConfigFactory,
+    GlobalRoleAssignmentFactory,
+    LifecycleFactory,
+    PlatformFactory,
+    RoleFactory,
     TagFactory,
     UserFactory,
 )
-from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_product_setting import DataProductSettingFactory
-from tests.factories.env_platform_config import EnvPlatformConfigFactory
-from tests.factories.environment import EnvironmentFactory
-from tests.factories.lifecycle import LifecycleFactory
-from tests.factories.platform import PlatformFactory
-from tests.factories.role import RoleFactory
-from tests.factories.role_assignment_data_product import (
-    DataProductRoleAssignmentFactory,
-)
-from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
-from app.core.authz.actions import AuthorizationAction
+from app.core.authz import Action
 from app.core.namespace.validation import NamespaceValidityType
 from app.roles.schema import Scope
 from app.roles.service import RoleService
@@ -57,7 +55,7 @@ class TestDataProductsRouter:
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -71,7 +69,7 @@ class TestDataProductsRouter:
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -85,7 +83,7 @@ class TestDataProductsRouter:
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -102,7 +100,7 @@ class TestDataProductsRouter:
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -121,7 +119,7 @@ class TestDataProductsRouter:
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -141,7 +139,7 @@ class TestDataProductsRouter:
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT],
+            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
         )
         GlobalRoleAssignmentFactory(
             user_id=user.id,
@@ -174,7 +172,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
+            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,
@@ -220,7 +218,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,
@@ -244,7 +242,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,
@@ -264,7 +262,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE],
+            permissions=[Action.DATA_PRODUCT__DELETE],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,
@@ -286,7 +284,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS],
+            permissions=[Action.DATA_PRODUCT__UPDATE_STATUS],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,
@@ -318,7 +316,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS],
+            permissions=[Action.DATA_PRODUCT__UPDATE_SETTINGS],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,
@@ -342,7 +340,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS],
+            permissions=[Action.DATA_PRODUCT__UPDATE_SETTINGS],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,
@@ -385,7 +383,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
+            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,
@@ -404,7 +402,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
+            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,
@@ -425,7 +423,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
+            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,
@@ -547,7 +545,7 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES],
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id,

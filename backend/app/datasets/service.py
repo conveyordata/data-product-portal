@@ -107,7 +107,7 @@ class DatasetService:
             )
             .unique()
             .all()
-            if dataset.isVisibleToUser(user)
+            if dataset.is_visible_to_user(user)
         ]
 
         for dataset in datasets:
