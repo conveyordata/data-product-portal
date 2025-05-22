@@ -2,11 +2,16 @@ from typing import Annotated, Optional
 from uuid import UUID
 
 from annotated_types import MinLen
+from pydantic import Field, computed_field
 
 from app.data_outputs.schema import DataOutput as DataOutputBaseSchema
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_product_lifecycles.schema import DataProductLifeCycle
-from app.data_product_settings.schema import DataProductSettingValue
+from app.data_product_settings.schema import (
+    DataProductSetting,
+    DataProductSettingValue,
+    Setting,
+)
 from app.data_products.schema import DataProduct
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.enums import DatasetAccessType
@@ -45,6 +50,27 @@ class BaseDatasetGet(ORMModel):
     data_product_settings: list[DataProductSettingValue]
     data_output_links: list[DataOutputLink]
     owners: Annotated[list[User], MinLen(1)]
+
+    # Exluded fields
+    all_custom_settings: list[DataProductSetting] = Field(exclude=True)
+
+    @computed_field
+    def settings(self) -> list[Setting]:
+        return [
+            next(
+                (
+                    Setting(
+                        **setting.model_dump(),
+                        value=setting_value.value,
+                        isDefault=False
+                    )
+                    for setting_value in self.data_product_settings
+                    if setting_value.data_product_setting_id == setting.id
+                ),
+                Setting(**setting.model_dump(), value=setting.default, isDefault=True),
+            )
+            for setting in self.all_custom_settings
+        ]
 
 
 class DatasetGet(BaseDatasetGet):

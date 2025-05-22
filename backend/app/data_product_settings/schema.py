@@ -29,3 +29,8 @@ class DataProductSettingValue(ORMModel):
 
     # Nested schemas
     data_product_setting: DataProductSetting
+
+
+class Setting(DataProductSetting):
+    value: str
+    isDefault: bool

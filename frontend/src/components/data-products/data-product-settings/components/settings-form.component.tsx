@@ -28,7 +28,7 @@ export function SettingsForm({ setting, initialValue, updateSetting }: Props) {
             case 'checkbox':
                 return initialValue === 'true';
             case 'tags':
-                return initialValue.split(',');
+                return initialValue !== '' ? initialValue.split(',') : [];
             case 'input':
                 return initialValue;
         }

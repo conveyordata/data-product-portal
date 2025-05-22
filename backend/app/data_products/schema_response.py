@@ -1,10 +1,16 @@
 from typing import Optional
 from uuid import UUID
 
+from pydantic import Field, computed_field
+
 from app.data_outputs.schema import DataOutput
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_product_lifecycles.schema import DataProductLifeCycle
-from app.data_product_settings.schema import DataProductSettingValue
+from app.data_product_settings.schema import (
+    DataProductSetting,
+    DataProductSettingValue,
+    Setting,
+)
 from app.data_product_types.schema import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
@@ -26,7 +32,28 @@ class BaseDataProductGet(ORMModel):
     domain: Domain
     type: DataProductType
     lifecycle: Optional[DataProductLifeCycle]
-    data_product_settings: list[DataProductSettingValue]
+    data_product_settings: list[DataProductSettingValue] = Field(deprecated=True)
+
+    # Exluded fields
+    all_custom_settings: list[DataProductSetting] = Field(exclude=True)
+
+    @computed_field
+    def settings(self) -> list[Setting]:
+        return [
+            next(
+                (
+                    Setting(
+                        **setting.model_dump(),
+                        value=setting_value.value,
+                        isDefault=False
+                    )
+                    for setting_value in self.data_product_settings
+                    if setting_value.data_product_setting_id == setting.id
+                ),
+                Setting(**setting.model_dump(), value=setting.default, isDefault=True),
+            )
+            for setting in self.all_custom_settings
+        ]
 
 
 class DataOutputLinks(DataOutput):

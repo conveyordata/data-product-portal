@@ -31,6 +31,8 @@ from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
+from app.data_product_settings.enums import DataProductSettingScope
+from app.data_product_settings.model import DataProductSetting
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.schema_request import (
@@ -104,6 +106,14 @@ class DataProductService:
 
         if not data_product.lifecycle:
             data_product.lifecycle = default_lifecycle
+
+        data_product_settings = db.scalars(
+            select(DataProductSetting).where(
+                DataProductSetting.scope == DataProductSettingScope.DATAPRODUCT
+            )
+        ).all()
+        data_product.all_custom_settings = data_product_settings
+
         return data_product
 
     def get_data_products(self, db: Session) -> Sequence[DataProductsGet]:
@@ -112,6 +122,13 @@ class DataProductService:
                 DataProductLifeCycleModel.is_default
             )
         )
+
+        data_product_settings = db.scalars(
+            select(DataProductSetting).where(
+                DataProductSetting.scope == DataProductSettingScope.DATAPRODUCT
+            )
+        ).all()
+
         dps = (
             db.scalars(
                 select(DataProductModel)
@@ -127,6 +144,7 @@ class DataProductService:
         )
 
         for dp in dps:
+            dp.all_custom_settings = data_product_settings
             if not dp.lifecycle:
                 dp.lifecycle = default_lifecycle
         return dps
@@ -143,7 +161,19 @@ class DataProductService:
     def get_user_data_products(
         self, user_id: UUID, db: Session
     ) -> Sequence[DataProductsGet]:
-        return (
+        default_lifecycle = db.scalar(
+            select(DataProductLifeCycleModel).filter(
+                DataProductLifeCycleModel.is_default
+            )
+        )
+
+        data_product_settings = db.scalars(
+            select(DataProductSetting).where(
+                DataProductSetting.scope == DataProductSettingScope.DATAPRODUCT
+            )
+        ).all()
+
+        dps = (
             db.scalars(
                 select(DataProductModel)
                 .options(
@@ -161,6 +191,12 @@ class DataProductService:
             .unique()
             .all()
         )
+
+        for dp in dps:
+            dp.all_custom_settings = data_product_settings
+            if not dp.lifecycle:
+                dp.lifecycle = default_lifecycle
+        return dps
 
     def _get_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
         return [ensure_tag_exists(tag_id, db) for tag_id in tag_ids]

@@ -16,6 +16,8 @@ from app.core.namespace.validation import (
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
+from app.data_product_settings.enums import DataProductSettingScope
+from app.data_product_settings.model import DataProductSetting
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema_request import (
@@ -72,6 +74,13 @@ class DatasetService:
             )
             dataset.lifecycle = default_lifecycle
 
+        dataset_settings = db.scalars(
+            select(DataProductSetting).where(
+                DataProductSetting.scope == DataProductSettingScope.DATASET
+            )
+        ).all()
+        dataset.all_custom_settings = dataset_settings
+
         return dataset
 
     def get_datasets(self, db: Session, user: User) -> Sequence[DatasetsGet]:
@@ -80,6 +89,13 @@ class DatasetService:
                 DataProductLifeCycleModel.is_default
             )
         )
+
+        dataset_settings = db.scalars(
+            select(DataProductSetting).where(
+                DataProductSetting.scope == DataProductSettingScope.DATASET
+            )
+        ).all()
+
         datasets = [
             dataset
             for dataset in db.scalars(
@@ -96,12 +112,25 @@ class DatasetService:
         ]
 
         for dataset in datasets:
+            dataset.all_custom_settings = dataset_settings
             if not dataset.lifecycle:
                 dataset.lifecycle = default_lifecycle
         return datasets
 
     def get_user_datasets(self, user_id: UUID, db: Session) -> Sequence[DatasetsGet]:
-        return (
+        default_lifecycle = db.scalar(
+            select(DataProductLifeCycleModel).filter(
+                DataProductLifeCycleModel.is_default
+            )
+        )
+
+        dataset_settings = db.scalars(
+            select(DataProductSetting).where(
+                DataProductSetting.scope == DataProductSettingScope.DATASET
+            )
+        ).all()
+
+        datasets = (
             db.scalars(
                 select(DatasetModel)
                 .options(
@@ -114,6 +143,12 @@ class DatasetService:
             .unique()
             .all()
         )
+
+        for dataset in datasets:
+            dataset.all_custom_settings = dataset_settings
+            if not dataset.lifecycle:
+                dataset.lifecycle = default_lifecycle
+        return datasets
 
     def _update_owners(
         self, dataset: DatasetCreateUpdate, db: Session, owner_ids: Iterable[UUID] = ()
