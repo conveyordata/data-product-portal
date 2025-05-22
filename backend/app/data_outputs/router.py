@@ -10,7 +10,6 @@ from app.data_outputs.schema_request import DataOutputStatusUpdate, DataOutputUp
 from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
-from app.dependencies import only_data_output_owners
 from app.graph.graph import Graph
 from app.users.schema import User
 
@@ -48,7 +47,6 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
         }
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__DELETE_DATA_OUTPUT,
@@ -76,7 +74,6 @@ def remove_data_output(
         }
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
@@ -102,7 +99,6 @@ def update_data_output(
         }
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
@@ -136,7 +132,6 @@ def update_data_output_status(
         },
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
@@ -174,7 +169,6 @@ def link_dataset_to_data_output(
         },
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,

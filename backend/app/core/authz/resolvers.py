@@ -49,6 +49,23 @@ class DatasetResolver(SubjectResolver):
     model: Model = Dataset
 
 
+class DataProductNameResolver(SubjectResolver):
+    model: Model = DataProduct
+
+    @classmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        obj = DataProductResolver.resolve(request, key, db)
+        if obj != cls.DEFAULT:
+            data_product = (
+                db.scalars(select(DataProduct).where(DataProduct.namespace == obj))
+                .unique()
+                .one_or_none()
+            )
+            if data_product:
+                return data_product.id
+        return cls.DEFAULT
+
+
 class DataOutputResolver(SubjectResolver):
     model: Model = DataProduct
 

@@ -24,7 +24,6 @@ from app.data_products.schema_request import (
 from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
-from app.dependencies import OnlyWithProductAccessID
 from app.graph.graph import Graph
 from app.role_assignments.data_product.router import (
     create_assignment,
@@ -174,7 +173,6 @@ def remove_data_product(
         }
     },
     dependencies=[
-        Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
@@ -238,7 +236,6 @@ async def validate_data_output_namespace(
         }
     },
     dependencies=[
-        Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
@@ -265,7 +262,6 @@ def update_data_product_about(
         }
     },
     dependencies=[
-        Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_STATUS, DataProductResolver
@@ -354,7 +350,6 @@ def unlink_dataset_from_data_product(
 @router.get(
     "/{id}/role",
     dependencies=[
-        Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
@@ -369,7 +364,6 @@ def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) 
 @router.get(
     "/{id}/signin_url",
     dependencies=[
-        Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
@@ -391,7 +385,6 @@ def get_signin_url(
 @router.get(
     "/{id}/conveyor_ide_url",
     dependencies=[
-        Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
@@ -406,7 +399,6 @@ def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str
 @router.get(
     "/{id}/databricks_workspace_url",
     dependencies=[
-        Depends(OnlyWithProductAccessID()),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver

@@ -1,6 +1,13 @@
-from tests.factories.data_product_membership import DataProductMembershipFactory
+from tests.factories.data_product import DataProductFactory
 from tests.factories.environment import EnvironmentFactory
+from tests.factories.role import RoleFactory
+from tests.factories.role_assignment_data_product import (
+    DataProductRoleAssignmentFactory,
+)
 from tests.factories.user import UserFactory
+
+from app.core.authz.actions import AuthorizationAction
+from app.roles.schema import Scope
 
 ENDPOINT = "/api/auth"
 
@@ -13,9 +20,17 @@ class TestAuthRouter:
 
     def test_aws_credentials(self, client):
         EnvironmentFactory(name="production")
-        data_product = DataProductMembershipFactory(
-            user=UserFactory(external_id="sub")
-        ).data_product
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
         response = client.get(
             f"{ENDPOINT}/aws_credentials?data_product_name"
             f"={data_product.namespace}"

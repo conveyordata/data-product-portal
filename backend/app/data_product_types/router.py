@@ -14,7 +14,6 @@ from app.data_product_types.schema_response import (
 )
 from app.data_product_types.service import DataProductTypeService
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 
 router = APIRouter(prefix="/data_product_types", tags=["data_product_types"])
 
@@ -54,7 +53,6 @@ def get_data_product_type(
         },
     },
     dependencies=[
-        Depends(only_for_admin),
         Depends(
             Authorization.enforce(
                 Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
@@ -71,7 +69,6 @@ def create_data_product_type(
 @router.put(
     "/{id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
             Authorization.enforce(
                 Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
@@ -90,7 +87,6 @@ def update_data_product_type(
 @router.delete(
     "/{id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
             Authorization.enforce(
                 Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
@@ -105,7 +101,6 @@ def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)):
 @router.put(
     "/migrate/{from_id}/{to_id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
             Authorization.enforce(
                 Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
