@@ -3,7 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DataProductResolver
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 from app.tags.schema_request import TagCreate, TagUpdate
 from app.tags.schema_response import TagsGet
@@ -21,9 +22,7 @@ def get_tags(db: Session = Depends(get_db_session)) -> list[TagsGet]:
     "",
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -37,9 +36,7 @@ def create_tag(
     "/{id}",
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -51,9 +48,7 @@ def update_tag(id: UUID, tag: TagUpdate, db: Session = Depends(get_db_session)):
     "/{id}",
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )

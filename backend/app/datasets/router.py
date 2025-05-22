@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
+from app.core.authz.resolvers import EmptyResolver
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -96,7 +97,7 @@ def get_user_datasets(
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATASET, DatasetResolver)),
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATASET, EmptyResolver)),
     ],
 )
 def create_dataset(

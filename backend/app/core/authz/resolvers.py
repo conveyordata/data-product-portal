@@ -43,6 +43,12 @@ class SubjectResolver(ABC):
         return cls.DEFAULT if domain is None else str(domain)
 
 
+class EmptyResolver(SubjectResolver):
+    @classmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        return cls.DEFAULT
+
+
 class DataProductResolver(SubjectResolver):
     model: Model = DataProduct
 

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
+from app.core.authz.resolvers import EmptyResolver
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -98,11 +99,7 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
         },
     },
     dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.GLOBAL__CREATE_DATAPRODUCT, DataProductResolver
-            )
-        )
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATAPRODUCT, EmptyResolver))
     ],
 )
 def create_data_product(
