@@ -1,22 +1,27 @@
 from datetime import datetime
-from http import HTTPStatus
-from typing import Optional, Sequence
+from typing import List, Optional, Sequence
 from uuid import UUID
 
+import emailgen
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import asc, func, select
 from sqlalchemy.orm import Session
 
+from app.core.authz import Action
+from app.core.email.send_mail import send_mail
 from app.database.database import ensure_exists
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     RoleAssignment,
+    RoleAssignmentResponse,
     UpdateRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
 from app.roles.model import Role
 from app.roles.schema import Prototype, Scope
+from app.settings import settings
+from app.users.model import User as UserModel
 from app.users.schema import User
 
 
@@ -24,6 +29,27 @@ class RoleAssignmentService:
     def __init__(self, db: Session, user: User) -> None:
         self.db = db
         self.user = user
+
+    def get_data_product_request_resolvers(self, data_product_id: UUID) -> List[User]:
+        return (
+            self.db.scalars(
+                select(UserModel)
+                .join(
+                    DataProductRoleAssignment,
+                    DataProductRoleAssignment.user_id == UserModel.id,
+                )
+                .join(Role, DataProductRoleAssignment.role_id == Role.id)
+                .where(
+                    DataProductRoleAssignment.data_product_id == data_product_id,
+                    DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                    Role.permissions.contains(
+                        [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
+                    ),
+                )
+            )
+            .unique()
+            .all()
+        )
 
     def get_assignment(self, id_: UUID) -> RoleAssignment:
         return ensure_exists(id_, self.db, DataProductRoleAssignment)
@@ -51,6 +77,26 @@ class RoleAssignmentService:
         self, data_product_id: UUID, request: CreateRoleAssignment
     ) -> RoleAssignment:
         self.ensure_is_data_product_scope(request.role_id)
+        existing_assignment = self.db.scalar(
+            select(DataProductRoleAssignment).where(
+                DataProductRoleAssignment.user_id == request.user_id,
+                DataProductRoleAssignment.data_product_id == request.data_product_id,
+            )
+        )
+        if existing_assignment:
+            if existing_assignment.decision == DecisionStatus.DENIED:
+                self.db.delete(existing_assignment)
+                self.db.flush()
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        "Role assignment already"
+                        " exists for"
+                        " this user and data product."
+                    ),
+                )
+
         role_assignment = DataProductRoleAssignment(
             **request.model_dump(),
             data_product_id=data_product_id,
@@ -71,8 +117,8 @@ class RoleAssignmentService:
             and self.count_owners(assignment.data_product_id) <= 1
         ):
             raise HTTPException(
-                HTTPStatus.FORBIDDEN,
-                "A data product must always be owned by at least one user",
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="A data product must always be owned by at least one user",
             )
 
         self.db.delete(assignment)
@@ -110,3 +156,61 @@ class RoleAssignmentService:
 
         self.db.commit()
         return assignment
+
+    def get_user_pending_data_product_assignments(
+        self, authenticated_user: User
+    ) -> Sequence[RoleAssignmentResponse]:
+        data_product_ids = (
+            select(DataProductRoleAssignment.data_product_id)
+            .join(DataProductRoleAssignment.role)
+            .where(
+                DataProductRoleAssignment.user_id == authenticated_user.id,
+                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                Role.permissions.contains(
+                    [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
+                ),
+            )
+            .scalar_subquery()
+        )
+
+        actions = (
+            self.db.scalars(
+                select(DataProductRoleAssignment)
+                .filter(DataProductRoleAssignment.decision == DecisionStatus.PENDING)
+                .filter(DataProductRoleAssignment.data_product_id.in_(data_product_ids))
+                .order_by(asc(DataProductRoleAssignment.requested_on))
+            )
+            .unique()
+            .all()
+        )
+        return actions
+
+    def send_role_assignment_request_email(
+        self, role_assignment: DataProductRoleAssignment, owners: list[User]
+    ) -> None:
+
+        url = (
+            f"{settings.HOST.rstrip('/')}/data-products/"
+            f"{role_assignment.data_product_id}#team"
+        )
+        action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
+        action.add_row(
+            [
+                f"{role_assignment.user.first_name} {role_assignment.user.last_name}",
+                "Wants to join ",
+                role_assignment.data_product.name,
+                ", ".join(
+                    [f"{owner.first_name} {owner.last_name}" for owner in owners]
+                ),
+            ]
+        )
+
+        send_mail(
+            owners,
+            action,
+            url,
+            f"Action Required: {role_assignment.user.first_name} "
+            f"{role_assignment.user.last_name} wants "
+            f"to join {role_assignment.data_product.name}",
+        )
+        return

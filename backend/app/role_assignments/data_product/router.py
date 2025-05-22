@@ -1,7 +1,7 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -21,7 +21,7 @@ from app.role_assignments.data_product.schema import (
 )
 from app.role_assignments.data_product.service import RoleAssignmentService
 from app.role_assignments.enums import DecisionStatus
-from app.users.model import User
+from app.users.schema import User
 
 router = APIRouter(prefix="/data_product")
 
@@ -52,10 +52,36 @@ def list_assignments(
 def create_assignment(
     id: UUID,
     request: CreateRoleAssignment,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return RoleAssignmentService(db=db, user=user).create_assignment(id, request)
+    service = RoleAssignmentService(db=db, user=user)
+    role_assignment = service.create_assignment(id, request)
+
+    owners = [
+        User.model_validate(owner)
+        for owner in service.get_data_product_request_resolvers(
+            role_assignment.data_product_id
+        )
+    ]
+    permitted_user = next((owner.id for owner in owners if owner.id == user.id), None)
+    if permitted_user:
+        service.update_assignment(
+            UpdateRoleAssignment(
+                id=role_assignment.id,
+                role_id=role_assignment.role_id,
+                decision=DecisionStatus.APPROVED,
+            )
+        )
+        return role_assignment
+
+    background_tasks.add_task(
+        service.send_role_assignment_request_email,
+        role_assignment,
+        owners,
+    )
+    return role_assignment
 
 
 @router.delete(

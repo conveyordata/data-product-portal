@@ -518,5 +518,8 @@
     "Available": "Available",
     "Rejected": "Rejected",
     "Approved": "Approved",
-    "Denied": "Denied"
+    "Denied": "Denied",
+    "Could not remove Type": "Could not remove Type",
+    "Request Role": "Request Role",
+    "User has requested access to the data product": "User has requested access to the data product",
 }

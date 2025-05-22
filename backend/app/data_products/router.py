@@ -104,6 +104,7 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
 )
 def create_data_product(
     data_product: DataProductCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
@@ -125,6 +126,7 @@ def create_data_product(
             ),
             db=db,
             user=authenticated_user,
+            background_tasks=background_tasks,
         )
         decide_assignment(
             id=resp.id,
