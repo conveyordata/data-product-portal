@@ -4,7 +4,7 @@ import { TagContract } from '@/types/tag';
 import { UserContract } from '@/types/users';
 
 import { DataProductLifeCycleContract } from '../data-product-lifecycle';
-import { DataProductSettingValueContract } from '../data-product-setting';
+import { CustomSettingValueContract, DataProductSettingValueContract } from '../data-product-setting';
 
 export enum DatasetStatus {
     Pending = 'pending',
@@ -39,6 +39,7 @@ export interface DatasetContract {
     domain: DomainContract;
     namespace: string;
     data_product_settings: DataProductSettingValueContract[];
+    settings: CustomSettingValueContract[];
 }
 
 export interface DatasetModel extends DatasetContract {}

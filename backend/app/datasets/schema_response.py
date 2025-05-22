@@ -62,12 +62,12 @@ class BaseDatasetGet(ORMModel):
                     Setting(
                         **setting.model_dump(),
                         value=setting_value.value,
-                        isDefault=False
+                        is_default=False
                     )
                     for setting_value in self.data_product_settings
                     if setting_value.data_product_setting_id == setting.id
                 ),
-                Setting(**setting.model_dump(), value=setting.default, isDefault=True),
+                Setting(**setting.model_dump(), value=setting.default, is_default=True),
             )
             for setting in self.all_custom_settings
         ]

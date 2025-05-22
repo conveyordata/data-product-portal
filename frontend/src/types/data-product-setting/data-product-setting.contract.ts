@@ -29,3 +29,17 @@ export interface DataProductSettingValueContract {
 export interface DataProductSettingValueForm {
     [id: string]: string;
 }
+
+export interface CustomSettingValueContract {
+    id: string;
+    namespace: string;
+    order: number;
+    name: string;
+    tooltip: string;
+    default: string;
+    type: DataProductSettingType;
+    category: string;
+    scope: DataProductSettingScope;
+    value: string;
+    is_default: boolean;
+}

@@ -1,4 +1,5 @@
 export type {
+    CustomSettingValueContract,
     DataProductSettingContract,
     DataProductSettingModel,
     DataProductSettingScope,

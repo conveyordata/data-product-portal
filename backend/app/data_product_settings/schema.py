@@ -33,4 +33,4 @@ class DataProductSettingValue(ORMModel):
 
 class Setting(DataProductSetting):
     value: str
-    isDefault: bool
+    is_default: bool

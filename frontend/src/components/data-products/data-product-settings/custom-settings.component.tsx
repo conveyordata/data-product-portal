@@ -1,29 +1,20 @@
-import { Divider, Flex, Space, Typography } from 'antd';
+import { Card, Divider, Flex, Space, Typography } from 'antd';
 
-import { DataProductSettingContract, DataProductSettingValueContract } from '@/types/data-product-setting';
+import { CustomSettingValueContract } from '@/types/data-product-setting';
 
-import { SettingsCard } from './components/settings-card.component';
+import { SettingsCardHeader } from './components/settings-card-header.component';
+import { SettingsForm } from './components/settings-form.component';
 import styles from './data-product-settings.module.scss';
 
 type Props = {
-    settings?: DataProductSettingContract[];
-    settingValues?: DataProductSettingValueContract[];
+    settings?: CustomSettingValueContract[];
     updateSetting: (setting_id: string, value: string) => void;
 };
 
-export function CustomSettings({ settings = [], settingValues = [], updateSetting }: Props) {
-    const settingsWithValues = settings.map((setting) => {
-        const settingsValue = settingValues.find((settingValue) => settingValue.data_product_setting_id === setting.id);
-        return {
-            setting: setting,
-            value: settingsValue?.value ?? setting.default,
-            isDefault: !settingsValue,
-        };
-    });
-
+export function CustomSettings({ settings = [], updateSetting }: Props) {
     const groupedSettings = Object.entries(
-        settingsWithValues.reduce<Record<string, typeof settingsWithValues>>((acc, item) => {
-            const category = item.setting.category;
+        settings.reduce<Record<string, typeof settings>>((acc, item) => {
+            const category = item.category;
             if (!acc[category]) {
                 acc[category] = [];
             }
@@ -35,11 +26,25 @@ export function CustomSettings({ settings = [], settingValues = [], updateSettin
     return (
         <Flex vertical>
             {groupedSettings.map(([category, categorySettings = []], index) => (
-                <Flex vertical className={styles.container}>
+                <Flex key={category} vertical className={styles.container}>
                     <Typography.Title level={3}>{category}</Typography.Title>
                     <Space direction="vertical">
                         {categorySettings.map((setting) => (
-                            <SettingsCard {...setting} updateSetting={updateSetting} />
+                            <Card key={setting.id} size="small">
+                                <SettingsCardHeader
+                                    isDefault={setting.is_default}
+                                    resetToDefault={() => console.log('Set to default')}
+                                />
+
+                                <Typography.Title level={4}>{setting.name}</Typography.Title>
+                                <Typography.Text type="secondary">{setting.tooltip}</Typography.Text>
+
+                                <SettingsForm
+                                    setting={setting}
+                                    initialValue={setting.value}
+                                    updateSetting={updateSetting}
+                                />
+                            </Card>
                         ))}
                     </Space>
                     {groupedSettings.length - 1 != index && <Divider />}
