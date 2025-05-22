@@ -1,5 +1,6 @@
 import smtplib
 from email.mime.text import MIMEText
+from typing import Sequence
 
 import emailgen
 
@@ -20,7 +21,9 @@ generator = emailgen.Generator(
 )
 
 
-def send_mail(recipients: list[User], action: emailgen.Table, url: str, subject: str):
+def send_mail(
+    recipients: Sequence[User], action: emailgen.Table, url: str, subject: str
+):
     for recipient in recipients:
         try:
             email = emailgen.Email(f"{recipient.first_name}")

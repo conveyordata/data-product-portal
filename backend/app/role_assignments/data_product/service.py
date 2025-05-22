@@ -2,25 +2,22 @@ from datetime import datetime
 from typing import List, Optional, Sequence
 from uuid import UUID
 
-import emailgen
 from fastapi import HTTPException, status
 from sqlalchemy import asc, func, select
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action
-from app.core.email.send_mail import send_mail
 from app.database.database import ensure_exists
+from app.pending_actions.schema import DataProductRoleAssignmentPendingAction
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     RoleAssignment,
-    RoleAssignmentResponse,
     UpdateRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
 from app.roles.model import Role
 from app.roles.schema import Prototype, Scope
-from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -80,7 +77,7 @@ class RoleAssignmentService:
         existing_assignment = self.db.scalar(
             select(DataProductRoleAssignment).where(
                 DataProductRoleAssignment.user_id == request.user_id,
-                DataProductRoleAssignment.data_product_id == request.data_product_id,
+                DataProductRoleAssignment.data_product_id == data_product_id,
             )
         )
         if existing_assignment:
@@ -109,43 +106,16 @@ class RoleAssignmentService:
 
     def delete_assignment(self, id_: UUID) -> RoleAssignment:
         assignment = self.get_assignment(id_)
-
-        if (
-            assignment.role is not None
-            and assignment.role.prototype == Prototype.OWNER
-            and assignment.decision == DecisionStatus.APPROVED
-            and self.count_owners(assignment.data_product_id) <= 1
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="A data product must always be owned by at least one user",
-            )
+        self._guard_against_illegal_owner_removal(assignment)
 
         self.db.delete(assignment)
         self.db.commit()
         return assignment
 
-    def count_owners(self, data_product_id: UUID) -> int:
-        query = (
-            select(func.count())
-            .select_from(DataProductRoleAssignment)
-            .where(DataProductRoleAssignment.data_product_id == data_product_id)
-            .join(Role)
-            .where(Role.prototype == Prototype.OWNER)
-        )
-        return self.db.scalar(query)
-
-    def ensure_is_data_product_scope(self, role_id: Optional[UUID]) -> None:
-        role = self.db.get(Role, role_id)
-        if role and role.scope != Scope.DATA_PRODUCT:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Role not found for this scope",
-            )
-
     def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
         self.ensure_is_data_product_scope(request.role_id)
         assignment = self.get_assignment(request.id)
+        self._guard_against_illegal_owner_removal(assignment)
 
         if (role_id := request.role_id) is not None:
             assignment.role_id = role_id
@@ -157,14 +127,44 @@ class RoleAssignmentService:
         self.db.commit()
         return assignment
 
-    def get_user_pending_data_product_assignments(
-        self, authenticated_user: User
-    ) -> Sequence[RoleAssignmentResponse]:
+    def ensure_is_data_product_scope(self, role_id: Optional[UUID]) -> None:
+        role = self.db.get(Role, role_id)
+        if role and role.scope != Scope.DATA_PRODUCT:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Role not found for this scope",
+            )
+
+    def _guard_against_illegal_owner_removal(self, assignment: RoleAssignment) -> None:
+        if (
+            assignment.role is not None
+            and assignment.role.prototype == Prototype.OWNER
+            and assignment.decision == DecisionStatus.APPROVED
+            and self._count_owners(assignment.data_product_id) <= 1
+        ):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "A data product must always be owned by at least one user",
+            )
+
+    def _count_owners(self, data_product_id: UUID) -> int:
+        query = (
+            select(func.count())
+            .select_from(DataProductRoleAssignment)
+            .where(DataProductRoleAssignment.data_product_id == data_product_id)
+            .join(Role)
+            .where(Role.prototype == Prototype.OWNER)
+        )
+        return self.db.scalar(query)
+
+    def get_pending_data_product_role_assignments(
+        self,
+    ) -> Sequence[DataProductRoleAssignmentPendingAction]:
         data_product_ids = (
             select(DataProductRoleAssignment.data_product_id)
             .join(DataProductRoleAssignment.role)
             .where(
-                DataProductRoleAssignment.user_id == authenticated_user.id,
+                DataProductRoleAssignment.user_id == self.user.id,
                 DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
                 Role.permissions.contains(
                     [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
@@ -185,32 +185,23 @@ class RoleAssignmentService:
         )
         return actions
 
-    def send_role_assignment_request_email(
-        self, role_assignment: DataProductRoleAssignment, owners: list[User]
-    ) -> None:
-
-        url = (
-            f"{settings.HOST.rstrip('/')}/data-products/"
-            f"{role_assignment.data_product_id}#team"
+    def users_with_authz_action(
+        self, data_product_id: UUID, action: Action
+    ) -> Sequence[User]:
+        return (
+            self.db.scalars(
+                select(UserModel)
+                .join(
+                    DataProductRoleAssignment,
+                    DataProductRoleAssignment.user_id == UserModel.id,
+                )
+                .join(Role, DataProductRoleAssignment.role_id == Role.id)
+                .where(
+                    DataProductRoleAssignment.data_product_id == data_product_id,
+                    DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                    Role.permissions.contains([action]),
+                )
+            )
+            .unique()
+            .all()
         )
-        action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
-        action.add_row(
-            [
-                f"{role_assignment.user.first_name} {role_assignment.user.last_name}",
-                "Wants to join ",
-                role_assignment.data_product.name,
-                ", ".join(
-                    [f"{owner.first_name} {owner.last_name}" for owner in owners]
-                ),
-            ]
-        )
-
-        send_mail(
-            owners,
-            action,
-            url,
-            f"Action Required: {role_assignment.user.first_name} "
-            f"{role_assignment.user.last_name} wants "
-            f"to join {role_assignment.data_product.name}",
-        )
-        return

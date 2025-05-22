@@ -45,10 +45,8 @@ export enum ApiUrl {
     RolesGet = '/api/roles/:scope',
     RolesDelete = '/api/roles/:id',
     RoleAssignmentsDataProductGet = '/api/role_assignments/data_product',
-    RoleAssignmentsDataProductRequest = '/api/role_assignments/data_product/request',
-    RoleAssignmentsDataProductDelete = '/api/role_assignments/data_product/:id',
-    RoleAssignmentsDataProductUpdate = '/api/role_assignments/data_product/:id/role',
-    RoleAssignmentsDataProductDecide = '/api/role_assignments/data_product/:id/decide',
+    RoleAssignmentsDataProduct = '/api/role_assignments/data_product/:assignmentId',
+    RoleAssignmentsDataProductDecide = '/api/role_assignments/data_product/:assignmentId/decide',
     Tags = '/api/tags',
     TagsId = '/api/tags/:tagId',
     Environments = '/api/envs',
@@ -95,8 +93,12 @@ export type DynamicPathParams =
     | 'platformId'
     | 'serviceId'
     | 'environmentId'
-    | 'configId';
+    | 'configId'
+    | 'assignmentId';
 
-export function buildUrl(url: string, pathParams: Record<DynamicPathParams | string, string>): string {
-    return Object.keys(pathParams).reduce((acc, key) => acc.replace(`:${key}`, pathParams[key]), url);
+export function buildUrl(url: string, pathParams: Partial<Record<DynamicPathParams, string>>): string {
+    return Object.keys(pathParams).reduce((acc, key) => {
+        const value = pathParams[key as DynamicPathParams];
+        return value ? acc.replace(`:${key}`, value) : acc;
+    }, url);
 }

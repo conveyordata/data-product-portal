@@ -11,6 +11,7 @@ from app.core.authz.resolvers import (
     DataProductRoleAssignmentResolver,
 )
 from app.database.database import get_db_session
+from app.role_assignments.data_product import email
 from app.role_assignments.data_product.auth import DataProductAuthAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
@@ -59,14 +60,11 @@ def create_assignment(
     service = RoleAssignmentService(db=db, user=user)
     role_assignment = service.create_assignment(id, request)
 
-    owners = [
-        User.model_validate(owner)
-        for owner in service.get_data_product_request_resolvers(
-            role_assignment.data_product_id
-        )
-    ]
-    permitted_user = next((owner.id for owner in owners if owner.id == user.id), None)
-    if permitted_user:
+    approvers = service.users_with_authz_action(
+        data_product_id=role_assignment.data_product_id,
+        action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+    )
+    if user.id in (approver.id for approver in approvers):
         service.update_assignment(
             UpdateRoleAssignment(
                 id=role_assignment.id,
@@ -77,9 +75,9 @@ def create_assignment(
         return role_assignment
 
     background_tasks.add_task(
-        service.send_role_assignment_request_email,
+        email.send_role_assignment_request_email,
         role_assignment,
-        owners,
+        approvers,
     )
     return role_assignment
 
@@ -105,6 +103,36 @@ def delete_assignment(
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).remove()
     return None
+
+
+@router.patch(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_USER,
+                resolver=DataProductRoleAssignmentResolver,
+            )
+        )
+    ],
+)
+def modify_assigned_role(
+    id: UUID,
+    request: ModifyRoleAssignment,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> RoleAssignmentResponse:
+    service = RoleAssignmentService(db=db, user=user)
+    original_role = service.get_assignment(id).role_id
+
+    assignment = service.update_assignment(
+        UpdateRoleAssignment(id=id, role_id=request.role_id)
+    )
+
+    if assignment.decision is DecisionStatus.APPROVED:
+        DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()
+
+    return assignment
 
 
 @router.patch(
@@ -145,35 +173,5 @@ def decide_assignment(
 
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).add()
-
-    return assignment
-
-
-@router.patch(
-    "/{id}/role",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_USER,
-                resolver=DataProductRoleAssignmentResolver,
-            )
-        )
-    ],
-)
-def modify_assigned_role(
-    id: UUID,
-    request: ModifyRoleAssignment,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
-    original_role = service.get_assignment(id).role_id
-
-    assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id)
-    )
-
-    if assignment.decision is DecisionStatus.APPROVED:
-        DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()
 
     return assignment

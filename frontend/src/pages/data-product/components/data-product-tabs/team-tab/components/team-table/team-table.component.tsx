@@ -10,7 +10,6 @@ import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
     useDeleteRoleAssignmentMutation,
-    useLazyGetRoleAssignmentQuery,
     useUpdateRoleAssignmentMutation,
 } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
@@ -31,7 +30,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
     const [updateRoleAssignment] = useUpdateRoleAssignmentMutation();
 
     const { handleGrantAccessToDataProduct, handleDenyAccessToDataProduct } = usePendingActionHandlers();
-    const [lazyGetRolesAssignments] = useLazyGetRoleAssignmentQuery();
+
     const { data: edit_access } = useCheckAccessQuery(
         {
             resource: dataProductId,
@@ -54,9 +53,9 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         { skip: !dataProductId },
     );
 
-    const canApproveUserNew = approve_access?.allowed || false;
-    const canEditUserNew = edit_access?.allowed || false;
-    const canRemoveUserNew = remove_access?.allowed || false;
+    const canApproveUser = approve_access?.allowed || false;
+    const canEditUser = edit_access?.allowed || false;
+    const canRemoveUser = remove_access?.allowed || false;
 
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
         initialPagination: TABLE_SUBSECTION_PAGINATION,
@@ -75,7 +74,10 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
             try {
                 if (!dataProduct) return;
 
-                await deleteRoleAssignment({ id, data_product_id: dataProduct.id }).unwrap();
+                console.log('Going to run the deletion');
+                console.log('ID object:', id);
+                await deleteRoleAssignment({ role_assignment_id: id, data_product_id: dataProduct.id }).unwrap();
+                console.log('Deletion done');
                 dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
@@ -85,16 +87,11 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
     );
 
     const handleRoleChange = useCallback(
-        async (role: RoleContract, _: string, userId: string) => {
+        async (role: RoleContract, assignmentId: string) => {
             if (!dataProduct) return;
             try {
-                const roles = await lazyGetRolesAssignments({
-                    data_product_id: dataProduct.id,
-                    user_id: userId,
-                }).unwrap();
-                const currentRole = roles[0];
                 await updateRoleAssignment({
-                    role_assignment_id: currentRole.id,
+                    role_assignment_id: assignmentId,
                     role_id: role.id,
                     data_product_id: dataProduct.id,
                 }).unwrap();
@@ -104,7 +101,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
                 dispatchMessage({ content: t('Failed to update user role'), type: 'error' });
             }
         },
-        [dataProduct, t, updateRoleAssignment, lazyGetRolesAssignments],
+        [dataProduct, t, updateRoleAssignment],
     );
 
     const handleRejectMembership = useCallback(
@@ -126,16 +123,16 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
     const columns: TableColumnsType<RoleAssignmentContract> = useMemo(() => {
         return getDataProductUsersTableColumns({
             t,
-            onRemoveMembership: handleRemoveUserAccess,
+            dataProductUsers: dataProductUsers,
+            onRemoveUserAccess: handleRemoveUserAccess,
+            onRejectAccessRequest: handleRejectMembership,
+            onAcceptAccessRequest: handleAcceptMembership,
             onRoleChange: handleRoleChange,
             isRemovingUser: isRemovingUserFromDataProduct,
-            dataProductUsers: dataProductUsers,
             isLoading: isLoadingDataProduct,
-            onRejectMembershipRequest: handleRejectMembership,
-            onAcceptMembershipRequest: handleAcceptMembership,
-            canEdit: canEditUserNew,
-            canRemove: canRemoveUserNew,
-            canApprove: canApproveUserNew,
+            canEdit: canEditUser,
+            canRemove: canRemoveUser,
+            canApprove: canApproveUser,
         });
     }, [
         t,
@@ -144,9 +141,9 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         isRemovingUserFromDataProduct,
         dataProductUsers,
         isLoadingDataProduct,
-        canEditUserNew,
-        canRemoveUserNew,
-        canApproveUserNew,
+        canEditUser,
+        canRemoveUser,
+        canApproveUser,
         handleAcceptMembership,
         handleRejectMembership,
     ]);

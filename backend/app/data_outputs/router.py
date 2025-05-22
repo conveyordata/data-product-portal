@@ -1,6 +1,7 @@
+from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
 
 
 @router.get("")
-def get_data_outputs(db: Session = Depends(get_db_session)) -> list[DataOutputsGet]:
+def get_data_outputs(db: Session = Depends(get_db_session)) -> Sequence[DataOutputsGet]:
     return DataOutputService().get_data_outputs(db)
 
 
@@ -33,7 +34,12 @@ def get_data_output_namespace_length_limits() -> NamespaceLengthLimits:
 
 @router.get("/{id}")
 def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutputGet:
-    return DataOutputService().get_data_output(id, db)
+    output = DataOutputService().get_data_output(id, db)
+    if output is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Data output not found"
+        )
+    return output
 
 
 @router.delete(
