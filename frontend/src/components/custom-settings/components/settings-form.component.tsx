@@ -3,7 +3,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import { DataProductSettingContract } from '@/types/data-product-setting';
 
-import styles from './settings-card.module.scss';
+import styles from '../custom-settings.module.scss';
 
 type Props = {
     setting: DataProductSettingContract;

@@ -4,7 +4,7 @@ import { CustomSettingValueContract } from '@/types/data-product-setting';
 
 import { SettingsCardHeader } from './components/settings-card-header.component';
 import { SettingsForm } from './components/settings-form.component';
-import styles from './data-product-settings.module.scss';
+import styles from './custom-settings.module.scss';
 
 type Props = {
     settings?: CustomSettingValueContract[];

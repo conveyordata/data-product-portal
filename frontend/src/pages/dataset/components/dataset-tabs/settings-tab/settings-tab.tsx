@@ -1,7 +1,7 @@
 import { Flex } from 'antd';
 import { useCallback } from 'react';
 
-import { CustomSettings } from '@/components/data-products/data-product-settings/custom-settings.component';
+import { CustomSettings } from '@/components/custom-settings/custom-settings.component';
 import { useCreateDatasetSettingValueMutation } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
