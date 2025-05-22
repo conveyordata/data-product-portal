@@ -2,13 +2,17 @@ import uuid
 from copy import deepcopy
 
 import pytest
-from tests.factories import DatasetFactory, DomainFactory, UserFactory
-from tests.factories.data_product_membership import DataProductMembershipFactory
-from tests.factories.data_product_setting import DataProductSettingFactory
-from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
-from tests.factories.role import RoleFactory
-from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
-from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
+from tests.factories import (
+    DataProductDatasetAssociationFactory,
+    DataProductFactory,
+    DataProductSettingFactory,
+    DatasetFactory,
+    DatasetRoleAssignmentFactory,
+    DomainFactory,
+    GlobalRoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
@@ -460,9 +464,8 @@ class TestDatasetsRouter:
         assert response.status_code == 200
 
     def test_get_private_dataset_by_member_of_consuming_data_product(self, client):
-        user = UserFactory(external_id="sub")
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
-        dp = DataProductMembershipFactory(user=user).data_product
+        dp = DataProductFactory()
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
 
         response = self.get_dataset_by_id(client, ds.id)
@@ -489,16 +492,15 @@ class TestDatasetsRouter:
         assert len(response.json()) == 1
 
     def test_get_private_datasets_by_member_of_consuming_data_product(self, client):
-        user = UserFactory(external_id="sub")
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
-        dp = DataProductMembershipFactory(user=user).data_product
+        dp = DataProductFactory()
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
 
         response = client.get(ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 1
 
-    def test_get_namespace_suggestion_subsitution(self, client):
+    def test_get_namespace_suggestion_substitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
         body = response.json()
