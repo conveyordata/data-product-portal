@@ -17,7 +17,7 @@ class GraphService:
         # get all datasets
         dataset_gets = DatasetService().get_datasets(db=db, user=user)
         # get all data outputs
-        data_outputs = DataOutputService().get_data_outputs(db=db)
+        data_outputs = DataOutputService(db).get_data_outputs()
 
         # Nodes are { data products + datasets + data outputs }
         data_product_nodes = [

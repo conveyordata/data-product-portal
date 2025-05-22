@@ -3,15 +3,16 @@ from copy import deepcopy
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_product import DataProductFactory
-from tests.factories.platform_service import PlatformServiceFactory
-from tests.factories.role import RoleFactory
-from tests.factories.role_assignment_data_product import (
+from httpx import Response
+from tests.factories import (
+    DataOutputFactory,
+    DataProductFactory,
     DataProductRoleAssignmentFactory,
+    PlatformServiceFactory,
+    RoleFactory,
+    TagFactory,
+    UserFactory,
 )
-from tests.factories.tags import TagFactory
-from tests.factories.user import UserFactory
 
 from app.core.authz.actions import AuthorizationAction
 from app.roles.schema import Scope
@@ -163,7 +164,7 @@ class TestDataOutputsRouter:
         )
         assert response.status_code == 403
 
-    def test_remove_data_output_no_member(self, client: TestClient):
+    def test_remove_data_output_no_access(self, client: TestClient):
         data_output = DataOutputFactory()
         response = self.delete_data_output(client, data_output.id)
         assert response.status_code == 403
@@ -319,7 +320,7 @@ class TestDataOutputsRouter:
         assert response.status_code == 400
 
     @staticmethod
-    def create_data_output(client: TestClient, default_data_output_payload):
+    def create_data_output(client: TestClient, default_data_output_payload) -> Response:
         return client.post(
             f"/api/data_products/"
             f"{default_data_output_payload.get('owner_id')}/data_output",
