@@ -8,6 +8,7 @@ from app.data_products.model import DataProduct
 from app.datasets.model import Dataset
 from app.events.enum import EventReferenceEntity
 from app.events.model import Event as EventModel
+from app.events.schema import CreateEvent
 from app.users.model import User
 
 
@@ -108,6 +109,12 @@ def _backup_data_output_name_on_delete(mapper, connection, target):
 
 
 class EventService:
+
+    def create_event(self, db: Session, event: CreateEvent) -> UUID:
+        event = EventModel(**event.parse_pydantic_schema())
+        db.add(event)
+        db.flush()
+        return event.id
 
     def get_history(self, db: Session, id: UUID, type: EventReferenceEntity):
         return db.scalars(
