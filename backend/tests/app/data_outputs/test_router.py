@@ -5,7 +5,6 @@ import pytest
 from fastapi.testclient import TestClient
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_product import DataProductFactory
-from tests.factories.data_product_membership import DataProductMembershipFactory
 from tests.factories.platform_service import PlatformServiceFactory
 from tests.factories.role import RoleFactory
 from tests.factories.role_assignment_data_product import (
@@ -23,7 +22,7 @@ ENDPOINT = "/api/data_outputs"
 @pytest.fixture
 def data_output_payload():
     user = UserFactory(external_id="sub")
-    data_product = DataProductMembershipFactory(user=user).data_product
+    data_product = DataProductFactory()
     service = PlatformServiceFactory()
     tag = TagFactory()
 
@@ -137,7 +136,7 @@ class TestDataOutputsRouter:
 
     def test_update_data_output(self, client: TestClient):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
@@ -171,7 +170,7 @@ class TestDataOutputsRouter:
 
     def test_remove_data_output(self, client: TestClient):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT],
@@ -190,7 +189,7 @@ class TestDataOutputsRouter:
 
     def test_update_status(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
