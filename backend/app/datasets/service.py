@@ -59,7 +59,7 @@ class DatasetService:
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
             )
 
-        if not dataset.isVisibleToUser(user):
+        if not dataset.is_visible_to_user(user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private dataset",

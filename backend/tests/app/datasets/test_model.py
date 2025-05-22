@@ -16,19 +16,19 @@ class TestDatasetsModel:
         user = UserFactory(external_id="sub")
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         ds = self.get_dataset(ds)
-        assert ds.isVisibleToUser(user) is False
+        assert ds.is_visible_to_user(user) is False
 
     def test_get_private_dataset_by_owner(self, client):
         ds_owner = UserFactory(external_id="sub")
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[ds_owner])
         ds = self.get_dataset(ds)
-        assert ds.isVisibleToUser(ds_owner) is True
+        assert ds.is_visible_to_user(ds_owner) is True
 
     def test_get_private_dataset_by_admin(self, client):
         admin = UserFactory(external_id="sub", is_admin=True)
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         ds = self.get_dataset(ds)
-        assert ds.isVisibleToUser(admin) is True
+        assert ds.is_visible_to_user(admin) is True
 
     def test_get_private_dataset_by_member_of_consuming_data_product(self, client):
         user = UserFactory(external_id="sub")
@@ -36,7 +36,7 @@ class TestDatasetsModel:
         dp = DataProductMembershipFactory(user=user).data_product
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
         ds = self.get_dataset(ds)
-        assert ds.isVisibleToUser(user) is True
+        assert ds.is_visible_to_user(user) is True
 
     @staticmethod
     def get_dataset(dataset: Dataset) -> Dataset:
