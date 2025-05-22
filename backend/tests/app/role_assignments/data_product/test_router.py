@@ -41,7 +41,7 @@ class TestDataProductRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__ASSIGN_ROLE],
+            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_USER],
         )
         DataProductRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
@@ -68,7 +68,7 @@ class TestDataProductRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE_USER],
         )
         DataProductRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
@@ -97,7 +97,7 @@ class TestDataProductRoleAssignmentsRouter:
         user = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE_USER],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=authz_role.id, data_product_id=data_product.id
@@ -127,7 +127,7 @@ class TestDataProductRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATA_PRODUCT__DECIDE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST],
         )
         DataProductRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
@@ -156,7 +156,7 @@ class TestDataProductRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATA_PRODUCT__DECIDE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST],
         )
         DataProductRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
@@ -183,7 +183,7 @@ class TestDataProductRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATA_PRODUCT__DECIDE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST],
         )
         DataProductRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
@@ -208,7 +208,7 @@ class TestDataProductRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATA_PRODUCT__DECIDE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST],
         )
         DataProductRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
@@ -233,7 +233,7 @@ class TestDataProductRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_USER],
         )
         DataProductRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id

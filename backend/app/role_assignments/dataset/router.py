@@ -42,7 +42,7 @@ def list_assignments(
     "/{id}",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.DATASET__ASSIGN_ROLE, resolver=DatasetResolver)
+            Authorization.enforce(Action.DATASET__CREATE_USER, resolver=DatasetResolver)
         )
     ],
 )
@@ -60,7 +60,7 @@ def create_assignment(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__DELETE_ROLE_ASSIGNMENT,
+                Action.DATASET__DELETE_USER,
                 resolver=DatasetRoleAssignmentResolver,
             )
         )
@@ -83,7 +83,7 @@ def delete_assignment(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__DECIDE_ROLE_ASSIGNMENT,
+                Action.DATASET__APPROVE_USER_REQUEST,
                 resolver=DatasetRoleAssignmentResolver,
             )
         )
@@ -125,7 +125,7 @@ def decide_assignment(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATASET__UPDATE_ROLE_ASSIGNMENT,
+                Action.DATASET__UPDATE_USER,
                 resolver=DatasetRoleAssignmentResolver,
             )
         )

@@ -44,7 +44,7 @@ def list_assignments(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__ASSIGN_ROLE, resolver=DataProductResolver
+                Action.DATA_PRODUCT__CREATE_USER, resolver=DataProductResolver
             )
         )
     ],
@@ -63,7 +63,7 @@ def create_assignment(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__DELETE_ROLE_ASSIGNMENT,
+                Action.DATA_PRODUCT__DELETE_USER,
                 resolver=DataProductRoleAssignmentResolver,
             )
         )
@@ -86,7 +86,7 @@ def delete_assignment(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__DECIDE_ROLE_ASSIGNMENT,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
                 resolver=DataProductRoleAssignmentResolver,
             )
         )
@@ -128,7 +128,7 @@ def decide_assignment(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_ROLE_ASSIGNMENT,
+                Action.DATA_PRODUCT__UPDATE_USER,
                 resolver=DataProductRoleAssignmentResolver,
             )
         )
