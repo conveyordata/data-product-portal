@@ -29,7 +29,7 @@ class TestGlobalRoleAssignmentsRouter:
     def test_create_assignment(self, client: TestClient):
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__ASSIGN_ROLE]
+            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -51,7 +51,7 @@ class TestGlobalRoleAssignmentsRouter:
     def test_create_assignment_admin(self, client: TestClient):
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
-            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__ASSIGN_ROLE]
+            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -74,7 +74,7 @@ class TestGlobalRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__DELETE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.GLOBAL__DELETE_USER],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -100,7 +100,7 @@ class TestGlobalRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__DECIDE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -125,7 +125,7 @@ class TestGlobalRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__DECIDE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -148,7 +148,7 @@ class TestGlobalRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__DECIDE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -169,7 +169,7 @@ class TestGlobalRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__UPDATE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -193,7 +193,7 @@ class TestGlobalRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__UPDATE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
@@ -217,7 +217,7 @@ class TestGlobalRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__UPDATE_ROLE_ASSIGNMENT],
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()

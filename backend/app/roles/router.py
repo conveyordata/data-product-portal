@@ -31,9 +31,7 @@ def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> Sequence[R
     },
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_ROLE_CONFIGURATION, EmptyResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -58,9 +56,7 @@ def create_role(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_ROLE_CONFIGURATION, EmptyResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -83,9 +79,7 @@ def update_role(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_ROLE_CONFIGURATION, EmptyResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )

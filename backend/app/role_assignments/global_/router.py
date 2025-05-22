@@ -38,7 +38,7 @@ def list_assignments(
     "",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.GLOBAL__ASSIGN_ROLE, resolver=EmptyResolver)
+            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
         )
     ],
 )
@@ -57,9 +57,7 @@ def create_assignment(
     "/{id}",
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__DELETE_ROLE_ASSIGNMENT, resolver=EmptyResolver
-            )
+            Authorization.enforce(Action.GLOBAL__DELETE_USER, resolver=EmptyResolver)
         )
     ],
 )
@@ -79,9 +77,7 @@ def delete_assignment(
     "/{id}/decide",
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__DECIDE_ROLE_ASSIGNMENT, resolver=EmptyResolver
-            )
+            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
         )
     ],
 )
@@ -114,9 +110,7 @@ def decide_assignment(
     "/{id}/role",
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_ROLE_ASSIGNMENT, resolver=EmptyResolver
-            )
+            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
         )
     ],
 )
