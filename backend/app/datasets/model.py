@@ -89,7 +89,7 @@ class Dataset(Base, BaseORM):
         ]
         return len(accepted_product_links)
 
-    def isVisibleToUser(self, user: "User"):
+    def is_visible_to_user(self, user: "User"):
         if (
             self.access_type != DatasetAccessType.PRIVATE
             or user.is_admin
