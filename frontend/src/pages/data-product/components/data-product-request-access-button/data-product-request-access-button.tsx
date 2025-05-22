@@ -18,8 +18,8 @@ type Props = {
 };
 
 export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props) => {
-    const { t } = useTranslation();
     const { isVisible, handleOpen, handleClose } = useModal();
+    const { t } = useTranslation();
     const [requestAccessToDataProduct, { isLoading: isRequestingAccess }] = useCreateRoleAssignmentMutation();
     const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
 

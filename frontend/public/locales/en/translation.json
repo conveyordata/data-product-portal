@@ -519,5 +519,6 @@
     "Available": "Available",
     "Rejected": "Rejected",
     "Approved": "Approved",
-    "Denied": "Denied"
+    "Denied": "Denied",
+    "Could not remove Type": "Could not remove Type"
 }

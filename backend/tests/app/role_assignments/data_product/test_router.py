@@ -38,13 +38,20 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_create_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}",
+            f"{ENDPOINT}/{str(data_product.id)}",
             json={
-                "data_product_id": str(data_product.id),
                 "user_id": str(user.id),
                 "role_id": str(role.id),
             },
@@ -58,6 +65,14 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_delete_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATA_PRODUCT__DELETE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
@@ -68,17 +83,25 @@ class TestDataProductRoleAssignmentsRouter:
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert len(response.json()) == 2
 
         response = client.delete(f"{ENDPOINT}/{assignment.id}")
         assert response.status_code == 200
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
-        assert len(response.json()) == 0
+        assert len(response.json()) == 1
 
     def test_delete_last_owner_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
+        user = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATA_PRODUCT__DELETE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
         user_1: User = UserFactory()
         user_2: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
@@ -101,6 +124,14 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
@@ -122,6 +153,14 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment_already_decided(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
@@ -141,6 +180,14 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment_idempotency(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
@@ -158,6 +205,14 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment_no_role(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
         user: User = UserFactory()
         assignment: RoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
@@ -175,6 +230,14 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_modify_assigned_role(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         new_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
@@ -256,7 +319,10 @@ class TestDataProductRoleAssignmentsRouter:
         user: User = UserFactory(external_id="sub")
         role1: Role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
+            permissions=[
+                Action.DATA_PRODUCT__CREATE_USER,
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+            ],
         )
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
@@ -267,9 +333,8 @@ class TestDataProductRoleAssignmentsRouter:
         role2: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}",
+            f"{ENDPOINT}/{str(data_product.id)}",
             json={
-                "data_product_id": str(data_product.id),
                 "user_id": str(user_requester.id),
                 "role_id": str(role2.id),
             },
@@ -306,9 +371,8 @@ class TestDataProductRoleAssignmentsRouter:
         role2: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
         response = client.post(
-            f"{ENDPOINT}",
+            f"{ENDPOINT}/{str(data_product.id)}",
             json={
-                "data_product_id": str(data_product.id),
                 "user_id": str(user_requester.id),
                 "role_id": str(role2.id),
             },

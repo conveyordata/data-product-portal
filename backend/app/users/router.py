@@ -3,7 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DataProductResolver
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 from app.users.schema_request import UserCreate
 from app.users.schema_response import UsersGet
@@ -28,7 +29,7 @@ def get_users(db: Session = Depends(get_db_session)) -> list[UsersGet]:
         }
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__DELETE_USER, DataProductResolver)),
+        Depends(Authorization.enforce(Action.GLOBAL__DELETE_USER, EmptyResolver)),
     ],
 )
 def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
@@ -46,7 +47,7 @@ def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_USER, DataProductResolver)),
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_USER, EmptyResolver)),
     ],
 )
 def create_user(

@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.auth import GlobalAuthAssignment
@@ -32,7 +34,14 @@ def list_assignments(
     return RoleAssignmentService(db=db, user=user).list_assignments(user_id=user_id)
 
 
-@router.post("")
+@router.post(
+    "",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
+        )
+    ],
+)
 def create_assignment(
     request: CreateRoleAssignment,
     db: Session = Depends(get_db_session),
@@ -44,7 +53,14 @@ def create_assignment(
     )
 
 
-@router.delete("/{id}")
+@router.delete(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__DELETE_USER, resolver=EmptyResolver)
+        )
+    ],
+)
 def delete_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -57,7 +73,14 @@ def delete_assignment(
     return None
 
 
-@router.patch("/{id}/decide")
+@router.patch(
+    "/{id}/decide",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
+        )
+    ],
+)
 def decide_assignment(
     id: UUID,
     request: DecideRoleAssignment,
@@ -83,7 +106,14 @@ def decide_assignment(
     return assignment
 
 
-@router.patch("/{id}/role")
+@router.patch(
+    "/{id}/role",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
+        )
+    ],
+)
 def modify_assigned_role(
     id: UUID,
     request: ModifyRoleAssignment,

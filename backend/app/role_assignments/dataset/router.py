@@ -5,6 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import (
+    DatasetResolver,
+    DatasetRoleAssignmentResolver,
+)
 from app.database.database import get_db_session
 from app.role_assignments.dataset.auth import DatasetAuthAssignment
 from app.role_assignments.dataset.schema import (
@@ -33,16 +38,34 @@ def list_assignments(
     )
 
 
-@router.post("")
+@router.post(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.DATASET__CREATE_USER, resolver=DatasetResolver)
+        )
+    ],
+)
 def create_assignment(
+    id: UUID,
     request: CreateRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return RoleAssignmentService(db=db, user=user).create_assignment(request)
+    return RoleAssignmentService(db=db, user=user).create_assignment(id, request)
 
 
-@router.delete("/{id}")
+@router.delete(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATASET__DELETE_USER,
+                resolver=DatasetRoleAssignmentResolver,
+            )
+        )
+    ],
+)
 def delete_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -55,7 +78,17 @@ def delete_assignment(
     return None
 
 
-@router.patch("/{id}/decide")
+@router.patch(
+    "/{id}/decide",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATASET__APPROVE_USER_REQUEST,
+                resolver=DatasetRoleAssignmentResolver,
+            )
+        )
+    ],
+)
 def decide_assignment(
     id: UUID,
     request: DecideRoleAssignment,
@@ -87,7 +120,17 @@ def decide_assignment(
     return assignment
 
 
-@router.patch("/{id}/role")
+@router.patch(
+    "/{id}/role",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATASET__UPDATE_USER,
+                resolver=DatasetRoleAssignmentResolver,
+            )
+        )
+    ],
+)
 def modify_assigned_role(
     id: UUID,
     request: ModifyRoleAssignment,

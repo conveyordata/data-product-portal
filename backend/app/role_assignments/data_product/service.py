@@ -17,7 +17,7 @@ from app.role_assignments.data_product.schema import (
 )
 from app.role_assignments.enums import DecisionStatus
 from app.roles.model import Role
-from app.roles.schema import Prototype
+from app.roles.schema import Prototype, Scope
 from app.users.model import User as UserModel
 from app.users.schema import User
 
@@ -26,6 +26,29 @@ class RoleAssignmentService:
     def __init__(self, db: Session, user: User) -> None:
         self.db = db
         self.user = user
+
+    def get_data_product_request_resolvers(
+        self, data_product_id: UUID
+    ) -> Sequence[User]:
+        return (
+            self.db.scalars(
+                select(UserModel)
+                .join(
+                    DataProductRoleAssignment,
+                    DataProductRoleAssignment.user_id == UserModel.id,
+                )
+                .join(Role, DataProductRoleAssignment.role_id == Role.id)
+                .where(
+                    DataProductRoleAssignment.data_product_id == data_product_id,
+                    DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                    Role.permissions.contains(
+                        [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
+                    ),
+                )
+            )
+            .unique()
+            .all()
+        )
 
     def get_assignment(self, id_: UUID) -> RoleAssignment:
         return ensure_exists(id_, self.db, DataProductRoleAssignment)
@@ -49,11 +72,14 @@ class RoleAssignmentService:
 
         return self.db.scalars(query).all()
 
-    def create_assignment(self, request: CreateRoleAssignment) -> RoleAssignment:
+    def create_assignment(
+        self, data_product_id: UUID, request: CreateRoleAssignment
+    ) -> RoleAssignment:
+        self.ensure_is_data_product_scope(request.role_id)
         existing_assignment = self.db.scalar(
             select(DataProductRoleAssignment).where(
                 DataProductRoleAssignment.user_id == request.user_id,
-                DataProductRoleAssignment.data_product_id == request.data_product_id,
+                DataProductRoleAssignment.data_product_id == data_product_id,
             )
         )
         if existing_assignment:
@@ -64,13 +90,15 @@ class RoleAssignmentService:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=(
-                        "Role assignment already exists for"
+                        "Role assignment already"
+                        " exists for"
                         " this user and data product."
                     ),
                 )
 
         role_assignment = DataProductRoleAssignment(
             **request.model_dump(),
+            data_product_id=data_product_id,
             requested_on=datetime.now(),
             requested_by_id=self.user.id,
         )
@@ -87,6 +115,7 @@ class RoleAssignmentService:
         return assignment
 
     def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
+        self.ensure_is_data_product_scope(request.role_id)
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)
 
@@ -99,6 +128,14 @@ class RoleAssignmentService:
 
         self.db.commit()
         return assignment
+
+    def ensure_is_data_product_scope(self, role_id: Optional[UUID]) -> None:
+        role = self.db.get(Role, role_id)
+        if role and role.scope != Scope.DATA_PRODUCT:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Role not found for this scope",
+            )
 
     def _guard_against_illegal_owner_removal(self, assignment: RoleAssignment) -> None:
         if (
