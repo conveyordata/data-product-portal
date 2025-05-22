@@ -555,5 +555,9 @@
     "Dataset removed": "Dataset removed",
     "Added user to the dataset:": "Added user to the dataset:",
     "Removed user from the dataset:": "Removed user from the dataset:",
-    "Denied": "Denied"
+    "Denied": "Denied",
+    "Notifications": "Notifications",
+    "You currently have no notifications": "You currently have no notifications",
+    "Notification has been removed": "Notification has been removed",
+    "Failed to remove notification": "Failed to remove notification"
 }

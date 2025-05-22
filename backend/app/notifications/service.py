@@ -1,3 +1,4 @@
+from itertools import chain
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -7,14 +8,14 @@ from sqlalchemy.orm import Session, joinedload
 from app.data_products.model import ensure_data_product_exists
 from app.datasets.model import ensure_dataset_exists
 from app.notifications.model import Notification as NotificationModel
-from app.notifications.schema import Notification
+from app.notifications.schema_response import NotificationGet
 from app.users.schema import User
 
 
 class NotificationService:
     def get_user_notifications(
         self, db: Session, authenticated_user: User
-    ) -> list[Notification]:
+    ) -> list[NotificationGet]:
         return db.scalars(
             select(NotificationModel)
             .options(
@@ -52,8 +53,7 @@ class NotificationService:
     ):
         dataset = ensure_dataset_exists(dataset_id, db)
         receivers = set(
-            [owner.id for owner in dataset.owners],
-            bonus_receiver_ids,
+            chain((owner.id for owner in dataset.owners), bonus_receiver_ids)
         )
         for receiver in receivers:
             notification = NotificationModel(user_id=receiver, event_id=event_id)
@@ -68,8 +68,10 @@ class NotificationService:
     ):
         data_product = ensure_data_product_exists(data_product_id, db)
         receivers = set(
-            [assignment.user_id for assignment in data_product.assignments],
-            bonus_receiver_ids,
+            chain(
+                (assignment.user_id for assignment in data_product.assignments),
+                bonus_receiver_ids,
+            )
         )
         for receiver in receivers:
             notification = NotificationModel(user_id=receiver, event_id=event_id)

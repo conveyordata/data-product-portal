@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from app.data_outputs.model import DataOutput
     from app.data_products.model import DataProduct
 
+from app.notifications.model import Notification
 from app.shared.model import BaseORM
 
 
@@ -29,6 +30,13 @@ class Event(Base, BaseORM):
     target_type = Column(Enum(EventReferenceEntity))
     actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     actor: Mapped["User"] = relationship("User")
+
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        back_populates="event",
+        foreign_keys="Notification.event_id",
+        lazy="raise",
+    )
 
     # Conditional relationships based on subject_type
     data_product: Mapped["DataProduct"] = relationship(

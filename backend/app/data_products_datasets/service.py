@@ -14,6 +14,7 @@ from app.data_products_datasets.schema_response import DataProductDatasetAssocia
 from app.datasets.model import Dataset as DatasetModel
 from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
+from app.notifications.service import NotificationService
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -32,15 +33,18 @@ class DataProductDatasetService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        db.add(
-            EventModel(
-                name=EventType.DATA_PRODUCT_DATASET_LINK_APPROVED,
-                subject_id=current_link.dataset_id,
-                subject_type=EventReferenceEntity.DATASET,
-                target_id=current_link.data_product_id,
-                target_type=EventReferenceEntity.DATA_PRODUCT,
-                actor_id=authenticated_user.id,
-            ),
+        event = EventModel(
+            name=EventType.DATA_PRODUCT_DATASET_LINK_APPROVED,
+            subject_id=current_link.dataset_id,
+            subject_type=EventReferenceEntity.DATASET,
+            target_id=current_link.data_product_id,
+            target_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        )
+        db.add(event)
+        db.flush()
+        NotificationService().create_dataset_notifications(
+            db, current_link.dataset_id, event.id, [current_link.requested_by_id]
         )
         RefreshInfrastructureLambda().trigger()
         db.commit()

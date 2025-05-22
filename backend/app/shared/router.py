@@ -15,6 +15,7 @@ from app.datasets.router import router as dataset
 from app.domains.router import router as domain
 from app.environments.router import router as environment
 from app.graph.router import router as graph
+from app.notifications.router import router as notification
 from app.platforms.router import router as platform
 from app.role_assignments.router import router as role_assignment
 from app.roles.router import router as role
@@ -47,3 +48,4 @@ router.include_router(role)
 router.include_router(role_assignment)
 router.include_router(theme_settings)
 router.include_router(graph)
+router.include_router(notification)

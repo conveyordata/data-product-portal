@@ -85,6 +85,8 @@ export enum ApiUrl {
     ThemeSettings = '/api/theme_settings',
     AccessCheck = '/api/authz/access',
     Graph = '/api/graph',
+    Notifications = '/api/notifications',
+    NotificationDelete = '/api/notifications/:notificationId',
 }
 
 export type DynamicPathParams =

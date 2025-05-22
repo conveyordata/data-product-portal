@@ -21,6 +21,7 @@ export enum TagTypes {
     Version = 'Version',
     ThemeSettings = 'ThemeSettings',
     History = 'History',
+    Notifications = 'Notifications',
 }
 
 export const STATIC_TAG_ID = {

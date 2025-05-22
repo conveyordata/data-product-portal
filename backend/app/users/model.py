@@ -9,6 +9,7 @@ from app.data_product_memberships.model import DataProductMembership
 from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
 from app.datasets.model import datasets_owner_table
+from app.notifications.model import Notification
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -29,6 +30,12 @@ class User(Base, BaseORM):
     is_admin = Column(Boolean, server_default="false", nullable=False)
     events: Mapped[list["Event"]] = relationship(
         "Event", back_populates="actor", foreign_keys="Event.actor_id", lazy="raise"
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        back_populates="user",
+        foreign_keys="Notification.user_id",
+        lazy="raise",
     )
 
     # Relationships - Data Products
