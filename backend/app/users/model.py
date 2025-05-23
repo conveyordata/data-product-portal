@@ -5,7 +5,6 @@ from sqlalchemy import UUID, Boolean, Column, String
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.database.database import Base, ensure_exists
-from app.database.deprecated_models.data_product_membership import DataProductMembership
 from app.datasets.model import datasets_owner_table
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.shared.model import BaseORM
@@ -25,40 +24,6 @@ class User(Base, BaseORM):
     first_name = Column(String)
     last_name = Column(String)
     is_admin = Column(Boolean, server_default="false", nullable=False)
-
-    # Relationships - Data Products
-    data_product_memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
-        foreign_keys="DataProductMembership.user_id",
-        back_populates="user",
-        lazy="raise",
-        passive_deletes=True,
-        cascade="none",
-    )
-    approved_memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
-        foreign_keys="DataProductMembership.approved_by_id",
-        back_populates="approved_by",
-        lazy="raise",
-        passive_deletes=True,
-        cascade="none",
-    )
-    denied_memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
-        foreign_keys="DataProductMembership.denied_by_id",
-        back_populates="denied_by",
-        lazy="raise",
-        passive_deletes=True,
-        cascade="none",
-    )
-    requested_memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
-        foreign_keys="DataProductMembership.requested_by_id",
-        back_populates="requested_by",
-        lazy="raise",
-        passive_deletes=True,
-        cascade="none",
-    )
 
     # Relationships - Datasets
     owned_datasets: Mapped[list["Dataset"]] = relationship(

@@ -46,29 +46,24 @@ class DataProductMembership(Base, BaseORM):
     # Relationships
     user: Mapped["User"] = relationship(
         foreign_keys=[user_id],
-        back_populates="data_product_memberships",
         order_by="User.last_name, User.first_name",
         lazy="joined",
     )
     data_product: Mapped["DataProduct"] = relationship(
         "DataProduct",
-        back_populates="memberships",
         order_by="DataProduct.name",
         lazy="joined",
     )
     requested_by: Mapped["User"] = relationship(
         foreign_keys=[requested_by_id],
-        back_populates="requested_memberships",
         lazy="joined",
     )
     approved_by: Mapped["User"] = relationship(
         foreign_keys=[approved_by_id],
-        back_populates="approved_memberships",
         lazy="joined",
     )
     denied_by: Mapped["User"] = relationship(
         foreign_keys=[denied_by_id],
-        back_populates="denied_memberships",
         lazy="joined",
     )
 

@@ -10,7 +10,6 @@ from app.data_product_types.model import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
-from app.database.deprecated_models.data_product_membership import DataProductMembership
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
@@ -50,16 +49,6 @@ class DataProduct(Base, BaseORM):
     )
     domain: Mapped["Domain"] = relationship(
         back_populates="data_products", lazy="joined"
-    )
-    memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
-        back_populates="data_product",
-        order_by="DataProductMembership.status, "
-        "DataProductMembership.requested_on, "
-        "DataProductMembership.role",
-        lazy="raise",
-        passive_deletes=True,
-        cascade="none",
     )
     assignments: Mapped[list["DataProductRoleAssignment"]] = relationship(
         back_populates="data_product",
