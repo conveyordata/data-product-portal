@@ -92,7 +92,7 @@ const blueThemeConfig: ThemeConfig = {
 const datamindedThemeConfig: ThemeConfig = {
     components: {
         Layout: {
-            siderBg: '#2F4044',
+            siderBg: '#080635',
             bodyBg: '#FFF',
             headerBg: token.colorBgContainer,
         },
@@ -102,9 +102,9 @@ const datamindedThemeConfig: ThemeConfig = {
         },
         Menu: {
             colorPrimaryBg: '#543EDC',
-            darkItemBg: '#2F4044',
+            darkItemBg: '#080635',
             itemBorderRadius: 10,
-            darkPopupBg: '#2F4044',
+            darkPopupBg: '#080635',
             subMenuItemBorderRadius: 10,
             itemMarginInline: 5,
         },
@@ -136,6 +136,7 @@ const datamindedThemeConfig: ThemeConfig = {
         colorPrimaryText: '#543EDC',
         colorPrimaryTextHover: '#543EDC',
         colorPrimaryTextActive: '#543EDC',
+        colorLink: '#543EDC',
         // Success
         colorSuccess: token.green6,
         colorSuccessBg: token.green1,
