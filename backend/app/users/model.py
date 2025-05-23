@@ -2,10 +2,8 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import UUID, Boolean, Column, String
-from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
 from app.database.deprecated_models.data_product_membership import DataProductMembership
 from app.datasets.model import datasets_owner_table
@@ -60,9 +58,6 @@ class User(Base, BaseORM):
         lazy="raise",
         passive_deletes=True,
         cascade="none",
-    )
-    data_products: Mapped[list["DataProduct"]] = association_proxy(
-        "data_product_memberships", "data_product"
     )
 
     # Relationships - Datasets
