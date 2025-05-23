@@ -2,10 +2,8 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import UUID, Boolean, Column, String
-from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.dataset.model import DatasetRoleAssignment
