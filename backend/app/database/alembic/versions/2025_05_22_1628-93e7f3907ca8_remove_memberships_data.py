@@ -43,12 +43,6 @@ def downgrade():
         "data_product_memberships",
         sa.Column("id", UUID, primary_key=True),
         sa.Column(
-            "role",
-            sa.Enum("owner", "member", name="dataproductuserrole"),
-            nullable=False,
-            server_default="member",
-        ),
-        sa.Column(
             "data_product_id", UUID(as_uuid=True), sa.ForeignKey("data_products.id")
         ),
         sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id")),
