@@ -5,13 +5,14 @@ import pytest
 from tests.factories import (
     DataProductDatasetAssociationFactory,
     DataProductFactory,
+    DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,
     GlobalRoleAssignmentFactory,
     RoleFactory,
-    UserFactory, DataProductRoleAssignmentFactory,
+    UserFactory,
 )
 
 from app.core.authz.actions import AuthorizationAction
@@ -470,7 +471,7 @@ class TestDatasetsRouter:
         user = UserFactory(external_id="sub")
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
         DataProductRoleAssignmentFactory(
-            data_product_id = dp.id, user_id=user.id, role_id=role.id
+            data_product_id=dp.id, user_id=user.id, role_id=role.id
         )
 
         response = self.get_dataset_by_id(client, ds.id)

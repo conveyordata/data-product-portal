@@ -19,7 +19,6 @@ from app.tags.model import Tag, tag_dataset_table
 
 if TYPE_CHECKING:
     from app.data_product_settings.model import DataProductSettingValue
-    from app.users.model import User
 
 datasets_owner_table = Table(
     "datasets_owners",
@@ -49,9 +48,6 @@ class Dataset(Base, BaseORM):
     domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
 
     # Relationships
-    owners: Mapped[list["User"]] = relationship(
-        secondary=datasets_owner_table, back_populates="owned_datasets", lazy="joined"
-    )
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
         back_populates="dataset",
         cascade="all, delete-orphan",
