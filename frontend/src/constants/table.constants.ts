@@ -11,3 +11,9 @@ export const TABLE_SUBSECTION_PAGINATION: TablePaginationConfig = {
     pageSize: 5,
     total: 0,
 };
+
+export const HISTORY_PAGINATION: TablePaginationConfig = {
+    current: 1,
+    pageSize: 7,
+    total: 0,
+};

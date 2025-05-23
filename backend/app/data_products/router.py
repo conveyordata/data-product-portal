@@ -25,6 +25,7 @@ from app.data_products.schema_request import (
 from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
+from app.events.schema_response import EventGet
 from app.graph.graph import Graph
 from app.role_assignments.data_product.router import (
     create_assignment,
@@ -78,6 +79,13 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
     return DataProductService().get_data_product(id, db)
 
 
+@router.get("/{id}/history")
+def get_event_history(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> list[EventGet]:
+    return DataProductService().get_event_history(id, db)
+
+
 @router.post(
     "",
     responses={
@@ -108,7 +116,9 @@ def create_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    created_data_product = DataProductService().create_data_product(data_product, db)
+    created_data_product = DataProductService().create_data_product(
+        data_product, db, authenticated_user
+    )
     owner_role = RoleService(db).find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER)
     if not owner_role:
         raise HTTPException(
@@ -156,8 +166,9 @@ def create_data_product(
 def remove_data_product(
     id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DataProductService().remove_data_product(id, db)
+    DataProductService().remove_data_product(id, db, authenticated_user)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
     return
 
@@ -181,9 +192,14 @@ def remove_data_product(
     ],
 )
 def update_data_product(
-    id: UUID, data_product: DataProductUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    data_product: DataProductUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DataProductService().update_data_product(id, data_product, db)
+    return DataProductService().update_data_product(
+        id, data_product, db, authenticated_user
+    )
 
 
 @router.post(
@@ -247,8 +263,11 @@ def update_data_product_about(
     id: UUID,
     data_product: DataProductAboutUpdate,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductService().update_data_product_about(id, data_product, db)
+    return DataProductService().update_data_product_about(
+        id, data_product, db, authenticated_user
+    )
 
 
 @router.put(
@@ -273,8 +292,11 @@ def update_data_product_status(
     id: UUID,
     data_product: DataProductStatusUpdate,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductService().update_data_product_status(id, data_product, db)
+    return DataProductService().update_data_product_status(
+        id, data_product, db, authenticated_user
+    )
 
 
 @router.post(
@@ -343,8 +365,11 @@ def unlink_dataset_from_data_product(
     id: UUID,
     dataset_id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataProductService().unlink_dataset_from_data_product(id, dataset_id, db)
+    return DataProductService().unlink_dataset_from_data_product(
+        id, dataset_id, db, authenticated_user
+    )
 
 
 @router.get(

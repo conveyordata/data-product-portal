@@ -11,6 +11,7 @@ from app.data_outputs.schema_request import DataOutputStatusUpdate, DataOutputUp
 from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
+from app.events.schema_response import EventGet
 from app.graph.graph import Graph
 from app.users.schema import User
 
@@ -40,6 +41,13 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
             status_code=status.HTTP_404_NOT_FOUND, detail="Data output not found"
         )
     return output
+
+
+@router.get("/{id}/history")
+def get_event_history(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> list[EventGet]:
+    return DataOutputService().get_event_history(id, db)
 
 
 @router.delete(
@@ -89,9 +97,14 @@ def remove_data_output(
     ],
 )
 def update_data_output(
-    id: UUID, data_output: DataOutputUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    data_output: DataOutputUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataOutputService().update_data_output(id, data_output, db)
+    return DataOutputService().update_data_output(
+        id, data_output, db, authenticated_user
+    )
 
 
 @router.put(
@@ -117,8 +130,11 @@ def update_data_output_status(
     id: UUID,
     data_output: DataOutputStatusUpdate,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return DataOutputService().update_data_output_status(id, data_output, db)
+    return DataOutputService().update_data_output_status(
+        id, data_output, db, authenticated_user
+    )
 
 
 @router.post(

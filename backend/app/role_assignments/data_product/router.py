@@ -58,7 +58,7 @@ def create_assignment(
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
-    role_assignment = service.create_assignment(id, request)
+    role_assignment = service.create_assignment(id, request, user)
 
     approvers = service.users_with_authz_action(
         data_product_id=role_assignment.data_product_id,
@@ -70,7 +70,8 @@ def create_assignment(
                 id=role_assignment.id,
                 role_id=role_assignment.role_id,
                 decision=DecisionStatus.APPROVED,
-            )
+            ),
+            user,
         )
         return role_assignment
 
@@ -98,7 +99,9 @@ def delete_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> None:
-    assignment = RoleAssignmentService(db=db, user=user).delete_assignment(id)
+    assignment = RoleAssignmentService(db=db, user=user).delete_assignment(
+        id, authenticated_user=user
+    )
 
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).remove()
@@ -126,7 +129,7 @@ def modify_assigned_role(
     original_role = service.get_assignment(id).role_id
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id)
+        UpdateRoleAssignment(id=id, role_id=request.role_id), user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
@@ -168,7 +171,7 @@ def decide_assignment(
         )
 
     assignment = RoleAssignmentService(db=db, user=user).update_assignment(
-        UpdateRoleAssignment(id=id, decision=request.decision)
+        UpdateRoleAssignment(id=id, decision=request.decision), authenticated_user=user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:

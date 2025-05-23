@@ -12,6 +12,8 @@ from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.datasets.model import Dataset as DatasetModel
+from app.events.enum import EventReferenceEntity, EventType
+from app.events.model import Event as EventModel
 from app.pending_actions.schema import DataOutputDatasetPendingAction
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
@@ -42,6 +44,16 @@ class DataOutputDatasetService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
+        db.add(
+            EventModel(
+                name=EventType.DATA_OUTPUT_DATASET_LINK_APPROVED,
+                subject_id=current_link.dataset_id,
+                subject_type=EventReferenceEntity.DATASET,
+                target_id=current_link.data_output_id,
+                target_type=EventReferenceEntity.DATA_OUTPUT,
+                actor_id=authenticated_user.id,
+            ),
+        )
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
@@ -63,6 +75,16 @@ class DataOutputDatasetService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
+        db.add(
+            EventModel(
+                name=EventType.DATA_OUTPUT_DATASET_LINK_DENIED,
+                subject_id=current_link.dataset_id,
+                subject_type=EventReferenceEntity.DATASET,
+                target_id=current_link.data_output_id,
+                target_type=EventReferenceEntity.DATA_OUTPUT,
+                actor_id=authenticated_user.id,
+            ),
+        )
         db.commit()
 
     def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
@@ -80,7 +102,16 @@ class DataOutputDatasetService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only dataset owners can execute this action",
             )
-
+        db.add(
+            EventModel(
+                name=EventType.DATA_OUTPUT_DATASET_LINK_REMOVED,
+                subject_id=current_link.dataset_id,
+                subject_type=EventReferenceEntity.DATASET,
+                target_id=current_link.data_output_id,
+                target_type=EventReferenceEntity.DATA_OUTPUT,
+                actor_id=authenticated_user.id,
+            ),
+        )
         db.delete(current_link)
         RefreshInfrastructureLambda().trigger()
         db.commit()
