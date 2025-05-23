@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, raiseload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
@@ -13,8 +13,15 @@ from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
 )
+from app.data_outputs.model import DataOutput
+from app.data_outputs_datasets.model import (
+    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+)
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
+)
+from app.data_products_datasets.model import (
+    DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
@@ -91,8 +98,16 @@ class DatasetService:
             for dataset in db.scalars(
                 select(DatasetModel)
                 .options(
-                    joinedload(DatasetModel.data_output_links),
-                    joinedload(DatasetModel.data_product_links),
+                    joinedload(DatasetModel.data_product_links)
+                    .joinedload(DataProductDatasetAssociationModel.data_product)
+                    .raiseload("*"),
+                    joinedload(DatasetModel.data_output_links)
+                    .joinedload(DataOutputDatasetAssociationModel.data_output)
+                    .options(
+                        joinedload(DataOutput.configuration),
+                        joinedload(DataOutput.owner),
+                        raiseload("*"),
+                    ),
                 )
                 .order_by(asc(DatasetModel.name))
             )
@@ -114,8 +129,14 @@ class DatasetService:
             db.scalars(
                 select(DatasetModel)
                 .options(
-                    joinedload(DatasetModel.data_product_links),
-                    joinedload(DatasetModel.data_output_links),
+                    joinedload(DatasetModel.data_product_links).raiseload("*"),
+                    joinedload(DatasetModel.data_output_links)
+                    .joinedload(DataOutputDatasetAssociationModel.data_output)
+                    .options(
+                        joinedload(DataOutput.configuration),
+                        joinedload(DataOutput.owner),
+                        raiseload("*"),
+                    ),
                 )
                 .filter(DatasetModel.owners.any(id=user_id))
                 .order_by(asc(DatasetModel.name))

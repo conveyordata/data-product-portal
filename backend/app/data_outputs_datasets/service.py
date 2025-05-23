@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Sequence
 from uuid import UUID
 
 import pytz
@@ -10,10 +11,10 @@ from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLamb
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_outputs_datasets.schema_response import DataOutputDatasetAssociationsGet
 from app.datasets.model import Dataset as DatasetModel
 from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
+from app.pending_actions.schema import DataOutputDatasetPendingAction
 from app.role_assignments.enums import DecisionStatus
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -117,7 +118,7 @@ class DataOutputDatasetService:
 
     def get_user_pending_actions(
         self, db: Session, authenticated_user: User
-    ) -> list[DataOutputDatasetAssociationsGet]:
+    ) -> Sequence[DataOutputDatasetPendingAction]:
         return (
             db.scalars(
                 select(DataOutputDatasetAssociationModel)

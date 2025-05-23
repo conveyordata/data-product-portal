@@ -123,9 +123,9 @@ class DataProductService:
             db.scalars(
                 select(DataProductModel)
                 .options(
-                    joinedload(DataProductModel.dataset_links).lazyload("*"),
-                    joinedload(DataProductModel.assignments).lazyload("*"),
-                    joinedload(DataProductModel.data_outputs).lazyload("*"),
+                    joinedload(DataProductModel.dataset_links).raiseload("*"),
+                    joinedload(DataProductModel.assignments).raiseload("*"),
+                    joinedload(DataProductModel.data_outputs).raiseload("*"),
                 )
                 .order_by(asc(DataProductModel.name))
             )
@@ -139,7 +139,12 @@ class DataProductService:
         return dps
 
     def get_owners(self, id: UUID, db: Session) -> Sequence[User]:
-        data_product = ensure_data_product_exists(id, db)
+        data_product = ensure_data_product_exists(
+            id,
+            db,
+            options=[joinedload(DataProductModel.assignments)],
+            populate_existing=True,
+        )
         user_ids = [
             assignment.user_id
             for assignment in data_product.assignments
@@ -154,9 +159,9 @@ class DataProductService:
             db.scalars(
                 select(DataProductModel)
                 .options(
-                    joinedload(DataProductModel.dataset_links).lazyload("*"),
-                    joinedload(DataProductModel.assignments).lazyload("*"),
-                    joinedload(DataProductModel.data_outputs).lazyload("*"),
+                    joinedload(DataProductModel.dataset_links).raiseload("*"),
+                    joinedload(DataProductModel.assignments).raiseload("*"),
+                    joinedload(DataProductModel.data_outputs).raiseload("*"),
                 )
                 .filter(
                     DataProductModel.assignments.any(
@@ -522,7 +527,11 @@ class DataProductService:
         return (
             db.scalars(
                 select(DataOutputModel)
-                .options(joinedload(DataOutputModel.dataset_links))
+                .options(
+                    joinedload(DataOutputModel.dataset_links)
+                    .joinedload(DataOutputDatasetAssociation.dataset)
+                    .raiseload("*"),
+                )
                 .filter(DataOutputModel.owner_id == id)
             )
             .unique()

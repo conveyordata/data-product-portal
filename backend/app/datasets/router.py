@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
+from app.core.authz.resolvers import EmptyResolver
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -20,7 +21,6 @@ from app.datasets.schema_request import (
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
-from app.dependencies import only_dataset_owners
 from app.events.schema_response import EventGet
 from app.graph.graph import Graph
 from app.role_assignments.dataset.router import create_assignment, decide_assignment
@@ -105,7 +105,7 @@ def get_event_history(
         },
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATASET, DatasetResolver)),
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_DATASET, EmptyResolver)),
     ],
 )
 def create_dataset(
@@ -128,6 +128,7 @@ def create_dataset(
         )
     for owner in new_dataset.owners:
         resp = create_assignment(
+            new_dataset.id,
             CreateRoleAssignment(
                 dataset_id=new_dataset.id, user_id=owner.id, role_id=owner_role.id
             ),
@@ -155,7 +156,6 @@ def create_dataset(
         }
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
     ],
 )
@@ -180,7 +180,6 @@ def remove_dataset(
         }
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(
             Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
         ),
@@ -206,7 +205,6 @@ def update_dataset(
         }
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(
             Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
         ),
@@ -232,7 +230,6 @@ def update_dataset_about(
         }
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(Authorization.enforce(Action.DATASET__UPDATE_STATUS, DatasetResolver)),
     ],
 )
@@ -262,7 +259,6 @@ def update_dataset_status(
         },
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(Authorization.enforce(Action.DATASET__CREATE_USER, DatasetResolver)),
     ],
 )
@@ -292,7 +288,6 @@ def add_user_to_dataset(
         },
     },
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(Authorization.enforce(Action.DATASET__DELETE_USER, DatasetResolver)),
     ],
 )
@@ -317,7 +312,6 @@ def get_graph_data(
 @router.post(
     "/{id}/settings/{setting_id}",
     dependencies=[
-        Depends(only_dataset_owners),
         Depends(
             Authorization.enforce(Action.DATASET__UPDATE_SETTINGS, DatasetResolver)
         ),
