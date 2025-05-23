@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DataProductContract } from '@/types/data-product';
 
+import { NodeContext } from './node-context';
 import styles from './sidebar.module.scss';
 
 export type SidebarFilters = {
@@ -71,7 +72,7 @@ export function Sidebar({
         return {
             name: String(data.name || ''),
             domain: String(data.domain || ''),
-            members: Array.isArray(data.members) ? data.members : [],
+            assignments: Array.isArray(data.assignments) ? data.assignments : [],
             description: String(data.description || ''),
         };
     }
@@ -127,6 +128,7 @@ export function Sidebar({
                 {t('Data Outputs')}
             </Tag.CheckableTag>
             <Select
+                className={styles.select}
                 showSearch
                 placeholder={String('Select a node')}
                 onSelect={(value: string) => {
@@ -135,7 +137,6 @@ export function Sidebar({
                 filterOption={(input: string, option?: { value: string; label: string }) =>
                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                 }
-                className={styles.select}
             >
                 {nodes.map((node) => (
                     <Select.Option key={node.id} label={node.data.name} value={node.id}>
@@ -143,41 +144,7 @@ export function Sidebar({
                     </Select.Option>
                 ))}
             </Select>
-
-            <div className={styles.p}>
-                {nodeId && (
-                    <>
-                        {(() => {
-                            const nodeData = getNodeDataForSideBar(nodeId);
-                            if (!nodeData) return null;
-
-                            return (
-                                <div>
-                                    Name: {nodeData.name}
-                                    <br />
-                                    Domain: {nodeData.domain}
-                                    <br />
-                                    Description: {nodeData.description}
-                                    <br />
-                                    {nodeData.members?.length > 0 && (
-                                        <>
-                                            Members: <br />
-                                            <ul>
-                                                {nodeData.members.map((member: string) => (
-                                                    <li key={member}>
-                                                        {member}
-                                                        <br />
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </>
-                                    )}
-                                </div>
-                            );
-                        })()}
-                    </>
-                )}
-            </div>
+            <NodeContext className={styles.p} nodeId={nodeId} getNodeDataForSideBar={getNodeDataForSideBar} />
         </div>
     );
 }

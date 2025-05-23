@@ -52,7 +52,7 @@ function parseFullNodes(
                     extra_attributes = {
                         targetHandlePosition: Position.Left,
                         nodeToolbarActions: node.isMain ? '' : <LinkToDataProductNode id={node.data.id} />,
-                        members: node.data.members,
+                        assignments: node.data.assignments,
                     };
                     break;
                 default:

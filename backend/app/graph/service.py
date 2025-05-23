@@ -35,6 +35,7 @@ class GraphService:
                 select(DataProduct).options(
                     joinedload(DataProduct.dataset_links),
                     joinedload(DataProduct.data_outputs),
+                    joinedload(DataProduct.assignments),
                 )
             )
             .unique()
@@ -80,12 +81,7 @@ class GraphService:
                     link_to_id=data_product_get.id,
                     domain=data_product_get.domain.name,
                     domain_id=data_product_get.domain.id,
-                    members=[
-                        membership.user.email
-                        for membership in data_product_get.memberships
-                        # TODO Don't use memberships here + take role into
-                        # account + take pending status into account
-                    ],
+                    assignments=data_product_get.assignments,
                     description=data_product_get.description,
                 ),
                 type=NodeType.dataProductNode,
@@ -102,6 +98,7 @@ class GraphService:
                     link_to_id=dataset_get.id,
                     domain=dataset_get.domain.name,
                     domain_id=dataset_get.domain.id,
+                    # assignments=dataset_get.assignments,
                     description=dataset_get.description,
                 ),
                 type=NodeType.datasetNode,
