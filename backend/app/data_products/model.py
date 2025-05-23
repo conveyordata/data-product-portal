@@ -10,7 +10,6 @@ from app.data_product_types.model import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
-from app.database.deprecated_models.data_product_membership import DataProductMembership
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
