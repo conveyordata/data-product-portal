@@ -6,8 +6,8 @@ Create Date: 2025-05-22 16:28:46.744343
 
 """
 
-from enum import UNIQUE, StrEnum, verify
 import uuid
+from enum import UNIQUE, StrEnum, verify
 from typing import Sequence, Union
 
 import sqlalchemy as sa
