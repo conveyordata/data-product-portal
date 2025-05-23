@@ -11,7 +11,8 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects.postgresql import UUID, ENUM as PG_ENUM
+from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM
+from sqlalchemy.dialects.postgresql import UUID
 
 from app.shared.model import utcnow  # for server_default
 
