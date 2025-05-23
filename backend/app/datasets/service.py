@@ -29,7 +29,8 @@ from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
-    DatasetCreateUpdate,
+    DatasetCreate,
+    DatasetUpdate,
     DatasetStatusUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
@@ -153,7 +154,7 @@ class DatasetService:
 
     def create_dataset(
         self,
-        dataset: DatasetCreateUpdate,
+        dataset: DatasetCreate,
     ) -> DatasetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -185,7 +186,7 @@ class DatasetService:
         self.db.commit()
         RefreshInfrastructureLambda().trigger()
 
-    def update_dataset(self, id: UUID, dataset: DatasetCreateUpdate) -> dict[str, UUID]:
+    def update_dataset(self, id: UUID, dataset: DatasetUpdate) -> dict[str, UUID]:
         current_dataset = ensure_dataset_exists(id, self.db)
         updated_dataset = dataset.model_dump(exclude_unset=True)
 
