@@ -11,7 +11,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ENUM as PG_ENUM
 
 from app.shared.model import utcnow  # for server_default
 
@@ -36,6 +36,7 @@ class DataProductUserRole(str, Enum):
 
 def upgrade():
     op.drop_table("data_product_memberships")
+    op.execute("DROP TYPE dataproductuserrole;")
 
 
 def downgrade():
@@ -51,7 +52,7 @@ def downgrade():
         ),
         sa.Column(
             "status",
-            sa.Enum(name="decisionstatus"),
+            PG_ENUM(name="decisionstatus", create_type=False),
             nullable=False,
             server_default="PENDING",
         ),
@@ -65,4 +66,3 @@ def downgrade():
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime),
     )
-    op.create_table("data_product_memberships")
