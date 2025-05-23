@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.data_product_memberships.enums import DataProductUserRole
 from app.database.database import Base
 from app.role_assignments.enums import DecisionStatus
 
@@ -12,8 +11,14 @@ if TYPE_CHECKING:
     from app.data_products.model import DataProduct
 
 import uuid
+from enum import Enum as ObjectEnum
 
 from app.shared.model import BaseORM, utcnow
+
+
+class DataProductUserRole(str, ObjectEnum):
+    OWNER = "owner"
+    MEMBER = "member"
 
 
 class DataProductMembership(Base, BaseORM):
@@ -44,27 +49,32 @@ class DataProductMembership(Base, BaseORM):
         back_populates="data_product_memberships",
         order_by="User.last_name, User.first_name",
         lazy="joined",
+        passive_deletes=True,
     )
     data_product: Mapped["DataProduct"] = relationship(
         "DataProduct",
         back_populates="memberships",
         order_by="DataProduct.name",
         lazy="joined",
+        passive_deletes=True,
     )
     requested_by: Mapped["User"] = relationship(
         foreign_keys=[requested_by_id],
         back_populates="requested_memberships",
         lazy="joined",
+        passive_deletes=True,
     )
     approved_by: Mapped["User"] = relationship(
         foreign_keys=[approved_by_id],
         back_populates="approved_memberships",
         lazy="joined",
+        passive_deletes=True,
     )
     denied_by: Mapped["User"] = relationship(
         foreign_keys=[denied_by_id],
         back_populates="denied_memberships",
         lazy="joined",
+        passive_deletes=True,
     )
 
     __table_args__ = (

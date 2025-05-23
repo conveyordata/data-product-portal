@@ -5,12 +5,12 @@ from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.data_product_memberships.model import DataProductMembership
 from app.data_product_settings.model import DataProductSettingValue
 from app.data_product_types.model import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
+from app.database.deprecated_models.data_product_membership import DataProductMembership
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
@@ -54,11 +54,12 @@ class DataProduct(Base, BaseORM):
     memberships: Mapped[list["DataProductMembership"]] = relationship(
         "DataProductMembership",
         back_populates="data_product",
-        cascade="all, delete-orphan",
         order_by="DataProductMembership.status, "
         "DataProductMembership.requested_on, "
         "DataProductMembership.role",
-        lazy="joined",
+        lazy="raise",
+        passive_deletes=True,
+        cascade="none",
     )
     assignments: Mapped[list["DataProductRoleAssignment"]] = relationship(
         back_populates="data_product",

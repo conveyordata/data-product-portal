@@ -112,9 +112,9 @@ class Dataset(Base, BaseORM):
         }
 
         user_data_products = {
-            membership.data_product
-            for membership in user.data_product_memberships
-            if membership.status == DecisionStatus.APPROVED
+            assignment.data_product
+            for assignment in user.data_product_role_assignments
+            if assignment.decision == DecisionStatus.APPROVED
         }
 
         return bool(consuming_data_products & user_data_products)
