@@ -87,5 +87,9 @@ class RoleAssignmentService:
         return assignment
 
     def has_assignment(self, dataset_id: UUID) -> bool:
-        assignments = self.list_assignments(dataset_id=dataset_id, user_id=self.user.id, decision=DecisionStatus.APPROVED)
+        assignments = self.list_assignments(
+            dataset_id=dataset_id,
+            user_id=self.user.id,
+            decision=DecisionStatus.APPROVED,
+        )
         return len(assignments) > 0
