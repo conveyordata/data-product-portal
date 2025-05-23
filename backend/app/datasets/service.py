@@ -348,10 +348,10 @@ class DatasetService:
     def dataset_namespace_length_limits(cls) -> NamespaceLengthLimits:
         return NamespaceValidator.namespace_length_limits()
 
-    def is_visible_to_user(self, dataset: DatasetModel, user: "User") -> bool:
+    def is_visible_to_user(self, dataset: DatasetModel, user: User) -> bool:
         if (
             dataset.access_type != DatasetAccessType.PRIVATE
-            or Authorization().has_admin_role(user_id=user.id)
+            or Authorization().has_admin_role(user_id=str(user.id))
             or DatasetRoleAssignmentService(db=self.db, user=user).has_assignment(
                 dataset_id=dataset.id
             )
@@ -365,9 +365,9 @@ class DatasetService:
         }
 
         user_data_products = {
-            membership.data_product
-            for membership in user.data_product_memberships
-            if membership.status == DecisionStatus.APPROVED
+            assignment.data_product
+            for assignment in user.data_product_roles
+            if assignment.decision == DecisionStatus.APPROVED
         }
 
         return bool(consuming_data_products & user_data_products)
