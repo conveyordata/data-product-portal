@@ -27,29 +27,6 @@ class RoleAssignmentService:
         self.db = db
         self.user = user
 
-    def get_data_product_request_resolvers(
-        self, data_product_id: UUID
-    ) -> Sequence[User]:
-        return (
-            self.db.scalars(
-                select(UserModel)
-                .join(
-                    DataProductRoleAssignment,
-                    DataProductRoleAssignment.user_id == UserModel.id,
-                )
-                .join(Role, DataProductRoleAssignment.role_id == Role.id)
-                .where(
-                    DataProductRoleAssignment.data_product_id == data_product_id,
-                    DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
-                    Role.permissions.contains(
-                        [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
-                    ),
-                )
-            )
-            .unique()
-            .all()
-        )
-
     def get_assignment(self, id_: UUID) -> RoleAssignment:
         return ensure_exists(id_, self.db, DataProductRoleAssignment)
 

@@ -17,7 +17,8 @@ from app.database.database import get_db_session
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
     DatasetCreate,
-    DatasetStatusUpdate, DatasetUpdate,
+    DatasetStatusUpdate,
+    DatasetUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService

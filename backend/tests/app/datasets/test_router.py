@@ -562,9 +562,7 @@ class TestDatasetsRouter:
             permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
         )
         ds = DatasetFactory()
-        DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, dataset_id=ds.id
-        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         update_payload = {
             "name": "new_name",
             "namespace": namespace,
