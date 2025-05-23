@@ -12,9 +12,10 @@ import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
 import { useGetGraphDataQuery } from '@/store/features/graph/graph-api-slice.ts';
 import type { NodeContract } from '@/types/graph/graph-contract.ts';
 
-import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode, parseEdges } from './common';
+import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common';
 import styles from './explorer.module.scss';
 import { Sidebar, SidebarFilters } from './sidebar';
+import { parseEdges } from './utils';
 
 function parseFullNodes(
     nodes: NodeContract[],

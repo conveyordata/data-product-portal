@@ -14,8 +14,9 @@ import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
 import type { NodeContract } from '@/types/graph/graph-contract.ts';
 
-import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode, parseEdges } from './common.tsx';
+import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common.tsx';
 import styles from './explorer.module.scss';
+import { parseEdges } from './utils.tsx';
 
 type Props = {
     id: string;

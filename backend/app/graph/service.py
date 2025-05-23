@@ -83,6 +83,8 @@ class GraphService:
                     members=[
                         membership.user.email
                         for membership in data_product_get.memberships
+                        # TODO Don't use memberships here + take role into
+                        # account + take pending status into account
                     ],
                     description=data_product_get.description,
                 ),
