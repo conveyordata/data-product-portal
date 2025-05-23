@@ -339,3 +339,26 @@ class DatasetService:
         }
 
         return bool(consuming_data_products & user_data_products)
+
+    @classmethod
+    def is_visible_to_user(cls, dataset: DatasetModel, user: "User", db: Session) -> bool:
+        if (
+                dataset.access_type != DatasetAccessType.PRIVATE
+                or user.is_admin()
+                or DatasetRoleAssignmentService(db=db, user=user).has_assignment(dataset_id=self.id)
+        ):
+            return True
+
+        consuming_data_products = {
+            link.data_product
+            for link in dataset.data_product_links
+            if link.status == DecisionStatus.APPROVED
+        }
+
+        user_data_products = {
+            membership.data_product
+            for membership in user.data_product_memberships
+            if membership.status == DecisionStatus.APPROVED
+        }
+
+        return bool(consuming_data_products & user_data_products)
