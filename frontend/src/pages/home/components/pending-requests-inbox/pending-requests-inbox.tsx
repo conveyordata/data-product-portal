@@ -186,9 +186,8 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
 export function PendingRequestsInbox() {
     const { t } = useTranslation();
     const {
-        token: { colorInfo: dataProductColor, colorInfoActive: datasetColor },
+        token: { colorPrimary: dataProductColor, colorPrimaryActive: datasetColor },
     } = theme.useToken();
-
     const [activeTab, setActiveTab] = useState<CustomPendingRequestsTabKey>('all');
     const [selectedTypes, setSelectedTypes] = useState<Set<PendingActionTypes>>(new Set());
 

@@ -4,6 +4,7 @@
     @include globals.no-select();
     cursor: pointer;
     color: globals.$blue-1;
+    font-family: globals.$font-family-logo;
     font-weight: globals.$font-weight-bold;
     line-height: unset;
 

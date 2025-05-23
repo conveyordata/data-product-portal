@@ -89,6 +89,106 @@ const blueThemeConfig: ThemeConfig = {
     cssVar: true,
 };
 
+const datamindedThemeConfig: ThemeConfig = {
+    components: {
+        Layout: {
+            siderBg: '#080635',
+            bodyBg: '#FFF',
+            headerBg: token.colorBgContainer,
+        },
+        Button: {
+            borderRadius: 10,
+            primaryShadow: 'none',
+        },
+        Menu: {
+            colorPrimaryBg: '#543EDC',
+            darkItemBg: '#080635',
+            itemBorderRadius: 10,
+            darkPopupBg: '#080635',
+            subMenuItemBorderRadius: 10,
+            itemMarginInline: 5,
+        },
+        Table: {
+            headerBorderRadius: 8,
+        },
+        Input: {
+            activeShadow: 'none',
+        },
+        Badge: {
+            colorInfo: '#E6B14B',
+        },
+    },
+    token: {
+        fontFamily: 'DM Sans, sans-serif',
+        fontSize: 14,
+        fontSizeHeading1: 38,
+        fontSizeHeading2: 30,
+        fontSizeHeading3: 24,
+        fontSizeHeading4: 20,
+        fontSizeHeading5: 16,
+        fontWeightStrong: 600,
+        // -------- Brand Colors ---------
+        // Primary
+        colorPrimary: '#543EDC',
+        colorPrimaryBg: '#543EDC',
+        colorPrimaryBgHover: '#543EDC',
+        colorPrimaryBorder: '#543EDC',
+        colorPrimaryBorderHover: '#543EDC',
+        colorPrimaryHover: '#543EDC',
+        colorPrimaryActive: '#543EDC',
+        colorPrimaryText: '#543EDC',
+        colorPrimaryTextHover: '#543EDC',
+        colorPrimaryTextActive: '#543EDC',
+        colorLink: '#543EDC',
+        // Success
+        colorSuccess: token.green6,
+        colorSuccessBg: token.green1,
+        colorSuccessBgHover: token.green2,
+        colorSuccessBorder: token.green3,
+        colorSuccessBorderHover: token.green4,
+        colorSuccessHover: token.green4,
+        colorSuccessActive: token.green7,
+        colorSuccessText: token.green6,
+        colorSuccessTextHover: token.green5,
+        colorSuccessTextActive: token.green7,
+        // Warning
+        colorWarning: token.gold6,
+        colorWarningBg: token.gold1,
+        colorWarningBgHover: token.gold2,
+        colorWarningBorder: token.gold3,
+        colorWarningBorderHover: token.gold4,
+        colorWarningHover: token.gold4,
+        colorWarningActive: token.gold7,
+        colorWarningText: token.gold6,
+        colorWarningTextHover: token.gold5,
+        colorWarningTextActive: token.gold7,
+        // Error
+        colorError: '#FF4D4F',
+        colorErrorBg: '#FFF2F0',
+        colorErrorBgHover: '#FFF1F0',
+        colorErrorBorder: '#FFCCC7',
+        colorErrorBorderHover: '#FFA39E',
+        colorErrorHover: '#FF7875',
+        colorErrorActive: '#D9363E',
+        colorErrorText: '#FF4D4F',
+        colorErrorTextHover: '#FF7875',
+        colorErrorTextActive: '#D9363E',
+        colorErrorOutline: '#FF2696',
+        // Info
+        colorInfo: token.colorPrimary,
+        colorInfoBg: token.colorPrimaryBg,
+        colorInfoBgHover: token.colorPrimaryBgHover,
+        colorInfoBorder: token.colorPrimaryBorder,
+        colorInfoBorderHover: token.colorPrimaryBorderHover,
+        colorInfoHover: token.colorPrimaryHover,
+        colorInfoActive: token.colorPrimaryActive,
+        colorInfoText: token.colorPrimaryText,
+        colorInfoTextHover: token.colorPrimaryTextHover,
+        colorInfoTextActive: token.colorPrimaryTextActive,
+    },
+    cssVar: true,
+};
+
 const greenThemeConfig: ThemeConfig = {
     components: {
         Layout: {
@@ -180,4 +280,4 @@ const greenThemeConfig: ThemeConfig = {
     cssVar: true,
 };
 
-export { blueThemeConfig, greenThemeConfig };
+export { blueThemeConfig, datamindedThemeConfig, greenThemeConfig };
