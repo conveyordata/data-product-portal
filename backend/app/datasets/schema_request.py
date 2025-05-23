@@ -22,6 +22,7 @@ class DatasetUpdate(ORMModel):
 class DatasetCreate(DatasetUpdate):
     owners: Annotated[list[UUID], MinLen(1)]
 
+
 class DatasetAboutUpdate(ORMModel):
     about: str
 

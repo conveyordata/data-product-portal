@@ -13,15 +13,15 @@ from app.data_products_datasets.model import (
 )
 from app.datasets.model import Dataset as DatasetModel
 from app.pending_actions.schema import DataProductDatasetPendingAction
+from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.enums import DecisionStatus
-from app.users.model import User as UserModel
 from app.users.schema import User
 
 
 class DataProductDatasetService:
     def approve_data_product_link(
         self, id: UUID, db: Session, authenticated_user: User
-    ):
+    ) -> None:
         current_link = db.get(DataProductDatasetAssociationModel, id)
         if current_link.status != DecisionStatus.PENDING:
             raise HTTPException(
@@ -34,7 +34,9 @@ class DataProductDatasetService:
         RefreshInfrastructureLambda().trigger()
         db.commit()
 
-    def deny_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
+    def deny_data_product_link(
+        self, id: UUID, db: Session, authenticated_user: User
+    ) -> None:
         current_link = db.get(DataProductDatasetAssociationModel, id)
         if (
             current_link.status != DecisionStatus.PENDING
@@ -49,7 +51,7 @@ class DataProductDatasetService:
         current_link.denied_on = datetime.now(tz=pytz.utc)
         db.commit()
 
-    def remove_data_product_link(self, id: UUID, db: Session, authenticated_user: User):
+    def remove_data_product_link(self, id: UUID, db: Session) -> None:
         current_link = db.get(DataProductDatasetAssociationModel, id)
 
         if not current_link:
@@ -73,7 +75,9 @@ class DataProductDatasetService:
                 )
                 .where(
                     DataProductDatasetAssociationModel.dataset.has(
-                        DatasetModel.owners.any(UserModel.id == authenticated_user.id)
+                        DatasetModel.assignments.any(
+                            DatasetRoleAssignment.user_id == authenticated_user.id
+                        )
                     )
                 )
                 .order_by(asc(DataProductDatasetAssociationModel.requested_on))

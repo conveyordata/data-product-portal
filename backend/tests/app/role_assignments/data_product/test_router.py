@@ -1,5 +1,4 @@
-from http import HTTPStatus
-
+from fastapi import status
 from fastapi.testclient import TestClient
 from tests.factories import (
     DataProductFactory,
@@ -144,8 +143,8 @@ class TestDataProductRoleAssignmentsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=authz_role.id, data_product_id=data_product.id
         )
-        user_1: User = UserFactory()
-        user_2: User = UserFactory()
+
+        user_1, user_2 = UserFactory.create_batch(2)
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
         assignment_1 = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
@@ -159,10 +158,10 @@ class TestDataProductRoleAssignmentsRouter:
         )
 
         response = client.delete(f"{ENDPOINT}/{assignment_1.id}")
-        assert response.status_code == HTTPStatus.OK
+        assert response.status_code == status.HTTP_200_OK
 
         response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
-        assert response.status_code == HTTPStatus.FORBIDDEN
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_decide_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()

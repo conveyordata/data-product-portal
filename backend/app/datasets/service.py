@@ -30,14 +30,13 @@ from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
     DatasetCreate,
-    DatasetUpdate,
     DatasetStatusUpdate,
+    DatasetUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.dataset.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
@@ -205,9 +204,7 @@ class DatasetService:
             )
 
         for k, v in updated_dataset.items():
-            if k == "owners":
-                current_dataset = self._update_owners(current_dataset, v)
-            elif k == "tag_ids":
+            if k == "tag_ids":
                 new_tags = self._fetch_tags(v)
                 current_dataset.tags = new_tags
             else:
