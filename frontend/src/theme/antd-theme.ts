@@ -114,6 +114,9 @@ const datamindedThemeConfig: ThemeConfig = {
         Input: {
             activeShadow: 'none',
         },
+        Badge: {
+            colorInfo: '#E6B14B',
+        },
     },
     token: {
         fontFamily: 'DM Sans, sans-serif',
