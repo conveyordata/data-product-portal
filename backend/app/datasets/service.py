@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, raiseload
-
+from app.role_assignments.dataset.service import RoleAssignmentService as DatasetRoleAssignmentService
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
@@ -23,6 +23,7 @@ from app.data_product_lifecycles.model import (
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
+from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema_request import (
@@ -365,3 +366,26 @@ class DatasetService:
 
     def dataset_namespace_length_limits(self) -> NamespaceLengthLimits:
         return self.namespace_validator.namespace_length_limits()
+
+    @classmethod
+    def is_visible_to_user(cls, dataset: DatasetModel, user: "User", db: Session) -> bool:
+        if (
+                dataset.access_type != DatasetAccessType.PRIVATE
+                or user.is_admin()
+                or DatasetRoleAssignmentService(db=db, user=user).has_assignment(dataset_id=self.id)
+        ):
+            return True
+
+        consuming_data_products = {
+            link.data_product
+            for link in dataset.data_product_links
+            if link.status == DecisionStatus.APPROVED
+        }
+
+        user_data_products = {
+            membership.data_product
+            for membership in user.data_product_memberships
+            if membership.status == DecisionStatus.APPROVED
+        }
+
+        return bool(consuming_data_products & user_data_products)

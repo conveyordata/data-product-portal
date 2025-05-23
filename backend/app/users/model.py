@@ -5,7 +5,6 @@ from sqlalchemy import UUID, Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.core.authz import Authorization
 from app.data_product_memberships.model import DataProductMembership
 from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
@@ -109,9 +108,6 @@ class User(Base, BaseORM):
         back_populates="approved_by",
         lazy="raise",
     )
-
-    def is_admin(self) -> bool:
-        return Authorization().has_admin_role(user_id=str(self.id))
 
 
 def ensure_user_exists(user_id: UUID, db: Session) -> User:

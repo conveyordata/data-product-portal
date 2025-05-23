@@ -13,7 +13,6 @@ from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
 from app.domains.model import Domain
 from app.role_assignments.dataset.model import DatasetRoleAssignment
-from app.role_assignments.dataset.service import RoleAssignmentService as DatasetRoleAssignmentService
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM, utcnow
 from app.tags.model import Tag, tag_dataset_table
@@ -97,28 +96,6 @@ class Dataset(Base, BaseORM):
             if link.status == DecisionStatus.APPROVED
         ]
         return len(accepted_product_links)
-
-    def is_visible_to_user(self, user: User, db: Session) -> bool:
-        if (
-            self.access_type != DatasetAccessType.PRIVATE
-            or user.is_admin()
-            or DatasetRoleAssignmentService(db=db, user=user).has_assignment(dataset_id=self.id)
-        ):
-            return True
-
-        consuming_data_products = {
-            link.data_product
-            for link in self.data_product_links
-            if link.status == DecisionStatus.APPROVED
-        }
-
-        user_data_products = {
-            membership.data_product
-            for membership in user.data_product_memberships
-            if membership.status == DecisionStatus.APPROVED
-        }
-
-        return bool(consuming_data_products & user_data_products)
 
 
 def ensure_dataset_exists(dataset_id: UUID, db: Session, **kwargs) -> Dataset:
