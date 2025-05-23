@@ -1,15 +1,16 @@
+from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataOutputResolver
 from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
-from app.data_outputs.schema import DataOutput, DataOutputStatusUpdate, DataOutputUpdate
+from app.data_outputs.schema_request import DataOutputStatusUpdate, DataOutputUpdate
+from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
-from app.dependencies import only_data_output_owners
 from app.graph.graph import Graph
 from app.users.schema import User
 
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
 
 
 @router.get("")
-def get_data_outputs(db: Session = Depends(get_db_session)) -> list[DataOutput]:
+def get_data_outputs(db: Session = Depends(get_db_session)) -> Sequence[DataOutputsGet]:
     return DataOutputService().get_data_outputs(db)
 
 
@@ -32,8 +33,13 @@ def get_data_output_namespace_length_limits() -> NamespaceLengthLimits:
 
 
 @router.get("/{id}")
-def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutput:
-    return DataOutputService().get_data_output(id, db)
+def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutputGet:
+    output = DataOutputService().get_data_output(id, db)
+    if output is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Data output not found"
+        )
+    return output
 
 
 @router.delete(
@@ -47,7 +53,6 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
         }
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__DELETE_DATA_OUTPUT,
@@ -75,7 +80,6 @@ def remove_data_output(
         }
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
@@ -101,7 +105,6 @@ def update_data_output(
         }
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
@@ -135,7 +138,6 @@ def update_data_output_status(
         },
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
@@ -173,7 +175,6 @@ def link_dataset_to_data_output(
         },
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,

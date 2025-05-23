@@ -1,49 +1,41 @@
-import { Badge, Button, Popconfirm, Space, TableColumnsType } from 'antd';
-import { TFunction } from 'i18next';
+import { Badge, Button, Popconfirm, Space, type TableColumnsType } from 'antd';
+import type { TFunction } from 'i18next';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
-import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form.tsx';
-import {
-    DataProductMembershipRole,
-    DataProductMembershipStatus,
-    DataProductUserMembership,
-} from '@/types/data-product-membership';
-import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper.ts';
+import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form';
+import { DecisionStatus, type RoleContract } from '@/types/roles';
+import type { RoleAssignmentContract } from '@/types/roles/role.contract';
+import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    onRemoveMembership: (userId: string) => void;
-    onAcceptMembershipRequest: (userId: string) => void;
-    onRejectMembershipRequest: (userId: string) => void;
-    onRoleChange: (role: DataProductMembershipRole, membershipId: string) => void;
+    dataProductUsers: RoleAssignmentContract[];
+    onRemoveUserAccess: (assignmentId: string) => void;
+    onAcceptAccessRequest: (assignmentId: string) => void;
+    onRejectAccessRequest: (assignmentId: string) => void;
+    onRoleChange: (role: RoleContract, assignmentId: string) => void;
     isRemovingUser: boolean;
-    dataProductUsers: DataProductUserMembership[];
-    canPerformTeamActions: (userId: string) => boolean;
     isLoading?: boolean;
-    hasCurrentUserMembership: boolean;
     canEdit?: boolean;
     canRemove?: boolean;
     canApprove?: boolean;
 };
-
 export const getDataProductUsersTableColumns = ({
     t,
-    onRemoveMembership,
-    onAcceptMembershipRequest,
-    onRejectMembershipRequest,
+    onRemoveUserAccess,
+    onAcceptAccessRequest,
+    onRejectAccessRequest,
     isLoading = false,
     onRoleChange,
     isRemovingUser,
     dataProductUsers,
-    canPerformTeamActions,
-    hasCurrentUserMembership,
     canEdit,
     canRemove,
     canApprove,
-}: Props): TableColumnsType<DataProductUserMembership> => {
-    const sorter = new Sorter<DataProductUserMembership>();
+}: Props): TableColumnsType<RoleAssignmentContract> => {
+    const sorter = new Sorter<RoleAssignmentContract>();
     return [
         {
             title: t('Id'),
@@ -53,8 +45,8 @@ export const getDataProductUsersTableColumns = ({
         {
             title: t('Name'),
             dataIndex: 'user.first_name',
-            render: (_, { user, status }) => {
-                const isNotApproved = status !== DataProductMembershipStatus.Approved;
+            render: (_, { user, decision: status }) => {
+                const isNotApproved = status !== DecisionStatus.Approved;
                 return (
                     <UserAvatar
                         name={`${user.first_name} ${user.last_name}`}
@@ -70,64 +62,60 @@ export const getDataProductUsersTableColumns = ({
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: DataProductMembershipRole, { user, id, status }) => {
-                const isApproved = status === DataProductMembershipStatus.Approved;
+            render: (role: RoleContract, { user, id, decision }: RoleAssignmentContract) => {
+                const isApproved = decision === DecisionStatus.Approved;
                 return (
                     <RoleChangeForm
                         initialRole={role}
                         userId={user.id}
                         dataProductUsers={dataProductUsers}
                         onRoleChange={(role) => onRoleChange(role, id)}
-                        isDisabled={!(canEdit || canPerformTeamActions(user.id)) || !isApproved}
+                        isDisabled={!canEdit || !isApproved}
                     />
                 );
             },
             width: '25%',
-            ...new FilterSettings(dataProductUsers, (membership) => membership.role),
-            sorter: sorter.stringSorter((membership) => membership.role),
+            ...new FilterSettings(dataProductUsers, (membership) => membership.role.name),
+            sorter: sorter.stringSorter((membership) => membership.role.name),
         },
         {
             title: t('Status'),
-            dataIndex: 'status',
-            render: (status: DataProductMembershipStatus) => {
+            dataIndex: 'decision',
+            render: (decision: DecisionStatus) => {
                 return (
                     <Badge
-                        status={getDataProductMembershipBadgeStatus(status)}
-                        text={getDataProductMembershipStatusLabel(t, status)}
+                        status={getDataProductMembershipBadgeStatus(decision)}
+                        text={getDataProductMembershipStatusLabel(t, decision)}
                     />
                 );
             },
             width: '20%',
             ...new FilterSettings(dataProductUsers, (membership) =>
-                getDataProductMembershipStatusLabel(t, membership.status),
+                getDataProductMembershipStatusLabel(t, membership.decision),
             ),
-            sorter: sorter.stringSorter((membership) => getDataProductMembershipStatusLabel(t, membership.status)),
+            sorter: sorter.stringSorter((membership) => getDataProductMembershipStatusLabel(t, membership.decision)),
         },
         {
             title: t('Actions'),
             key: 'action',
-            hidden: !hasCurrentUserMembership,
-            render: (_, { user, status, id }) => (
+            hidden: !(canRemove || canApprove),
+            render: (_, { user, id, decision }: RoleAssignmentContract) => (
                 <Space>
-                    {status === DataProductMembershipStatus.Pending ? (
+                    {decision === DecisionStatus.Pending ? (
                         <Space>
                             <Popconfirm
                                 title={t('Allow User')}
                                 description={t('Are you sure you want to allow access to user {{name}}?', {
                                     name: user.first_name,
                                 })}
-                                onConfirm={() => onAcceptMembershipRequest(id)}
+                                onConfirm={() => onAcceptAccessRequest(id)}
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button
-                                    loading={isLoading}
-                                    disabled={isLoading || !(canApprove || canPerformTeamActions(user.id))}
-                                    type={'link'}
-                                >
+                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
                                     {t('Accept')}
                                 </Button>
                             </Popconfirm>
@@ -136,18 +124,14 @@ export const getDataProductUsersTableColumns = ({
                                 description={t('Are you sure you want to deny access to user {{name}}?', {
                                     name: user.first_name,
                                 })}
-                                onConfirm={() => onRejectMembershipRequest(id)}
+                                onConfirm={() => onRejectAccessRequest(id)}
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button
-                                    loading={isLoading}
-                                    disabled={isLoading || !(canApprove || canPerformTeamActions(user.id))}
-                                    type={'link'}
-                                >
+                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
                                     {t('Reject')}
                                 </Button>
                             </Popconfirm>
@@ -158,18 +142,14 @@ export const getDataProductUsersTableColumns = ({
                             description={t('Are you sure you want to remove {{name}} from the data product?', {
                                 name: user.first_name,
                             })}
-                            onConfirm={() => onRemoveMembership(id)}
+                            onConfirm={() => onRemoveUserAccess(id)}
                             placement={'leftTop'}
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
                             okButtonProps={{ loading: isRemovingUser }}
                             autoAdjustOverflow={true}
                         >
-                            <Button
-                                loading={isRemovingUser}
-                                disabled={isRemovingUser || !(canRemove || canPerformTeamActions(user.id))}
-                                type={'link'}
-                            >
+                            <Button loading={isRemovingUser} disabled={isRemovingUser || !canRemove} type={'link'}>
                                 {t('Remove')}
                             </Button>
                         </Popconfirm>

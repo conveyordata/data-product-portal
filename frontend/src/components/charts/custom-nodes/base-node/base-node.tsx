@@ -27,17 +27,7 @@ export type BaseNodeProps = Node<{
 }>;
 
 export function BaseNode<T extends BaseNodeProps>({
-    data: {
-        name,
-        isMainNode,
-        icon,
-        borderType = 'round',
-        nodeToolbarActions,
-        isActive = true,
-        domain,
-        members,
-        description,
-    },
+    data: { name, isMainNode, icon, borderType = 'round', nodeToolbarActions, isActive = true },
 }: NodeProps<T>) {
     return (
         <>

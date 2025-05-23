@@ -11,17 +11,18 @@ from app.core.auth.oidc import OIDCIdentity
 from app.database.database import get_db_session
 from app.settings import settings
 from app.users.model import User as UserModel
-from app.users.schema import User, UserCreate
+from app.users.schema import User
+from app.users.schema_request import UserCreate
 
 
 def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> User:
-    db_user = db.query(UserModel).filter(UserModel.external_id == token.sub).first()
+    db_user = db.scalar(select(UserModel).where(UserModel.external_id == token.sub))
     if db_user:
         db_user.email = oidc_user.email
         db_user.first_name = oidc_user.name
         db_user.last_name = oidc_user.family_name
     else:
-        db_user = db.query(UserModel).filter(UserModel.email == oidc_user.email).first()
+        db_user = db.scalar(select(UserModel).where(UserModel.email == oidc_user.email))
         if db_user:
             db_user.external_id = oidc_user.sub
             db_user.first_name = oidc_user.name

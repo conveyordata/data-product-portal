@@ -31,12 +31,7 @@ export enum ApiUrl {
     DataProductDataset = '/api/data_products/:dataProductId/dataset/:datasetId',
     DataProductAbout = '/api/data_products/:dataProductId/about',
     DataProductGraph = '/api/data_products/:dataProductId/graph',
-    DataProductMembershipAdd = '/api/data_product_memberships/create',
-    DataProductMembershipUpdate = '/api/data_product_memberships/:membershipId/role',
     DataProductMembershipRequest = '/api/data_product_memberships/request',
-    DataProductMembershipApprove = '/api/data_product_memberships/:membershipId/approve',
-    DataProductMembershipDeny = '/api/data_product_memberships/:membershipId/deny',
-    DataProductMembershipRemove = '/api/data_product_memberships/:membershipId/remove',
     DataProductMembershipPendingActions = '/api/data_product_memberships/actions',
     DataProductNamespaceValidation = '/api/data_products/validate_namespace',
     DataProductNamespaceSuggestion = '/api/data_products/namespace_suggestion',
@@ -49,6 +44,9 @@ export enum ApiUrl {
     Roles = '/api/roles',
     RolesGet = '/api/roles/:scope',
     RolesDelete = '/api/roles/:id',
+    RoleAssignmentsDataProductGet = '/api/role_assignments/data_product',
+    RoleAssignmentsDataProduct = '/api/role_assignments/data_product/:assignmentId',
+    RoleAssignmentsDataProductDecide = '/api/role_assignments/data_product/:assignmentId/decide',
     Tags = '/api/tags',
     TagsId = '/api/tags/:tagId',
     Environments = '/api/envs',
@@ -74,6 +72,7 @@ export enum ApiUrl {
     DataProductDatasetLinkReject = '/api/data_product_dataset_links/deny/:datasetLinkId',
     DataProductDatasetLinkRemove = '/api/data_product_dataset_links/remove/:datasetLinkId',
     DataProductDatasetPendingActions = '/api/data_product_dataset_links/actions',
+    PendingActions = '/api/pending_actions',
     Platforms = '/api/platforms',
     PlatformsConfigs = '/api/platforms/configs',
     PlatformServices = '/api/platforms/:platformId/services',
@@ -94,8 +93,12 @@ export type DynamicPathParams =
     | 'platformId'
     | 'serviceId'
     | 'environmentId'
-    | 'configId';
+    | 'configId'
+    | 'assignmentId';
 
-export function buildUrl(url: string, pathParams: Record<DynamicPathParams | string, string>): string {
-    return Object.keys(pathParams).reduce((acc, key) => acc.replace(`:${key}`, pathParams[key]), url);
+export function buildUrl(url: string, pathParams: Partial<Record<DynamicPathParams, string>>): string {
+    return Object.keys(pathParams).reduce((acc, key) => {
+        const value = pathParams[key as DynamicPathParams];
+        return value ? acc.replace(`:${key}`, value) : acc;
+    }, url);
 }

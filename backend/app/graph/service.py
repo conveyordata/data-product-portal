@@ -1,17 +1,18 @@
-from typing import List, Optional
+from typing import List
+from uuid import UUID
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.logging.logger import logger
-from app.data_outputs.service import DataOutputService
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
-from app.data_products.service import DataProductService
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
-from app.datasets.service import DatasetService
-from app.domains.service import DomainService
+from app.data_outputs.model import DataOutput
+from app.data_products.model import DataProduct
+from app.datasets.model import Dataset
+from app.domains.model import Domain
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.role_assignments.enums import DecisionStatus
 from app.users.schema import User
 
 
@@ -23,19 +24,50 @@ class GraphService:
         self,
         db: Session,
         user: User,
-        domain_nodes_enabled: Optional[bool] = True,
-        data_product_nodes_enabled: Optional[bool] = True,
-        dataset_nodes_enabled: Optional[bool] = True,
-        data_output_nodes_enabled: Optional[bool] = True,
+        domain_nodes_enabled: bool = True,
+        data_product_nodes_enabled: bool = True,
+        dataset_nodes_enabled: bool = True,
+        data_output_nodes_enabled: bool = True,
     ) -> Graph:
         # get all data products
-        data_product_gets = DataProductService().get_data_products(db=db)
+        data_products = (
+            db.scalars(
+                select(DataProduct).options(
+                    joinedload(DataProduct.dataset_links),
+                    joinedload(DataProduct.data_outputs),
+                )
+            )
+            .unique()
+            .all()
+        )
         # get all datasets
-        dataset_gets = DatasetService().get_datasets(db=db, user=user)
+        datasets = (
+            db.scalars(
+                select(Dataset).options(
+                    joinedload(Dataset.data_product_links),
+                    joinedload(Dataset.data_output_links),
+                )
+            )
+            .unique()
+            .all()
+        )
         # get all data outputs
-        data_outputs = DataOutputService().get_data_outputs(db=db)
         # get all domains - these will be group nodes
-        domain_gets = DomainService().get_domains(db=db)
+        domains = (
+            db.scalars(
+                select(Domain).options(
+                    joinedload(Domain.datasets),
+                    joinedload(Domain.data_products),
+                )
+            )
+            .unique()
+            .all()
+        )
+        data_outputs = (
+            db.scalars(select(DataOutput).options(joinedload(DataOutput.dataset_links)))
+            .unique()
+            .all()
+        )
 
         # Nodes are { data products + datasets + data outputs }
         data_product_nodes = [
@@ -56,7 +88,7 @@ class GraphService:
                 ),
                 type=NodeType.dataProductNode,
             )
-            for data_product_get in data_product_gets
+            for data_product_get in data_products
         ]
         dataset_nodes = [
             Node(
@@ -72,7 +104,7 @@ class GraphService:
                 ),
                 type=NodeType.datasetNode,
             )
-            for dataset_get in dataset_gets
+            for dataset_get in datasets
         ]
         data_output_nodes = [
             Node(
@@ -100,7 +132,7 @@ class GraphService:
                 ),
                 type=NodeType.domainNode,
             )
-            for domain_get in domain_gets
+            for domain_get in domains
         ]
 
         nodes = []
@@ -130,7 +162,7 @@ class GraphService:
             )
 
         # Data outputs -- are bundled in --> data sets. Many-to-many.
-        for dataset_get in dataset_gets:
+        for dataset_get in datasets:
             dataset = dataset_get
             for data_output_link in dataset.data_output_links:
                 data_output = data_output_link.data_output
@@ -139,13 +171,12 @@ class GraphService:
                         id=f"{data_output.id}-{dataset.id}",
                         source=data_output.id,
                         target=dataset.id,
-                        animated=data_output_link.status
-                        == DataOutputDatasetLinkStatus.APPROVED,
+                        animated=data_output_link.status == DecisionStatus.APPROVED,
                     )
                 )
 
         # Data sets -- are consumed by --> data products. Many-to-many.
-        for data_product in data_product_gets:
+        for data_product in data_products:
             for dataset_link in data_product.dataset_links:
                 dataset = dataset_link.dataset
                 edges.append(
@@ -153,8 +184,7 @@ class GraphService:
                         id=f"{data_product.id}-{dataset.id}",
                         source=dataset.id,
                         target=data_product.id,
-                        animated=dataset_link.status
-                        == DataProductDatasetLinkStatus.APPROVED,
+                        animated=dataset_link.status == DecisionStatus.APPROVED,
                     )
                 )
 
@@ -184,7 +214,8 @@ class GraphService:
         """
         Reduce edges: for every disabled node:
         1) remove the edges that point to it and,
-        2) make new ones that bridge the adjacent nodes (all source nodes need to point to all targets).
+        2) make new ones that bridge the adjacent
+           nodes (all source nodes need to point to all targets).
         """
         # Get all disabled nodes
         disabled_nodes: List[Node] = []
@@ -200,26 +231,30 @@ class GraphService:
             self.logger.debug(f"Processing disabled node {disabled_node.data.name}")
             source_edges: List[Edge] = []
             target_edges: List[Edge] = []
-            source_nodes: List[Node] = []
-            target_nodes: List[Node] = []
+            source_nodes: List[str | UUID] = []
+            target_nodes: List[str | UUID] = []
             for edge in edges:
                 if edge.source == disabled_node.id:
                     # This edge starts from a disabled node, so we look at its target
                     self.logger.debug(
-                        f"Edge {edge.id} starts from disabled node {disabled_node.data.name} and will be removed"
+                        f"Edge {edge.id} starts from disabled node "
+                        f"{disabled_node.data.name} and will be removed"
                     )
                     target_edges.append(edge)
                     self.logger.debug(
-                        f"Adding {edge.source} to target nodes for {disabled_node.data.name}"
+                        f"Adding {edge.source} to target "
+                        f"nodes for {disabled_node.data.name}"
                     )
                     target_nodes.append(edge.target)
                 if edge.target == disabled_node.id:
                     self.logger.debug(
-                        f"Edge {edge.id} points to disabled node {disabled_node.data.name} and will be removed"
+                        f"Edge {edge.id} points to disabled node "
+                        f"{disabled_node.data.name} and will be removed"
                     )
                     source_edges.append(edge)
                     self.logger.debug(
-                        f"Adding {edge.source} to source nodes for {disabled_node.data.name}"
+                        f"Adding {edge.source} to source nodes"
+                        f" for {disabled_node.data.name}"
                     )
                     source_nodes.append(edge.source)
             # now we can create new edges between all source nodes and all target nodes
@@ -233,11 +268,13 @@ class GraphService:
                         animated=is_animated,
                     )
                     self.logger.debug(
-                        f"Checking if new edge {new_edge.id} between {source_node} and {target_node} already exists"
+                        f"Checking if new edge {new_edge.id} between "
+                        f"{source_node} and {target_node} already exists"
                     )
                     if new_edge not in edges:
                         self.logger.debug(
-                            f"Adding new edge {new_edge.id} between {source_node} and {target_node}"
+                            f"Adding new edge {new_edge.id} between "
+                            f"{source_node} and {target_node}"
                         )
                         edges.append(new_edge)
             # and remove the old edges

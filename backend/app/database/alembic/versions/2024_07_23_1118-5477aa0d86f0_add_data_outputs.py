@@ -6,6 +6,7 @@ Create Date: 2024-07-23 11:18:30.435296
 
 """
 
+from enum import Enum
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -13,8 +14,14 @@ from alembic import op
 from sqlalchemy import UUID
 
 from app.data_outputs.status import DataOutputStatus
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.shared.model import utcnow
+
+
+class DataOutputDatasetLinkStatus(str, Enum):
+    PENDING_APPROVAL = "pending_approval"
+    APPROVED = "approved"
+    DENIED = "denied"
+
 
 # revision identifiers, used by Alembic.
 revision: str = "5477aa0d86f0"

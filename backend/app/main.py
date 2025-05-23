@@ -1,24 +1,18 @@
 import asyncio
 import time
-from contextlib import asynccontextmanager
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.authorization.service import AuthorizationService
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
-from app.core.authz.authorization import Authorization
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging.logger import logger
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.webhook import call_webhook
-from app.database.database import get_db_session
-from app.roles.service import RoleService
 from app.settings import settings
 from app.shared.router import router
 
@@ -57,22 +51,6 @@ async def log_middleware(request: Request, call_next):
     return response
 
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    db: Session = next(get_db_session())
-
-    # Create mandatory roles
-    RoleService(db=db).initialize_prototype_roles()
-
-    # Initialize Casbin
-    await Authorization.initialize()
-
-    # Ensure all roles are present in Casbin
-    await AuthorizationService(db).reload_enforcer()
-
-    yield
-
-
 backend_analytics()
 app = FastAPI(
     title=TITLE,
@@ -81,7 +59,6 @@ app = FastAPI(
     contact={"name": "Stijn Janssens", "email": "stijn.janssens@dataminded.com"},
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
-    lifespan=lifespan,
     **oidc_kwargs
 )
 

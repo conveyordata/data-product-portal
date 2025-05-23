@@ -16,7 +16,6 @@ import { Datasets } from '@/pages/datasets/datasets.page.tsx';
 import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
 import { ExplorerPage } from '@/pages/explorer/explorer.page.tsx';
 import { Home } from '@/pages/home/home.page.tsx';
-import { RoleConfiguration } from '@/pages/roles/roles.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
 
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
@@ -157,16 +156,6 @@ const router = createBrowserRouter([
                             {
                                 path: ApplicationPaths.EnvironmentConfig,
                                 element: <EnvironmentConfig />,
-                            },
-                        ],
-                    },
-                    {
-                        path: ApplicationPaths.RoleConfiguration,
-                        element: <ProtectedRoute />,
-                        children: [
-                            {
-                                index: true,
-                                element: <RoleConfiguration />,
                             },
                         ],
                     },

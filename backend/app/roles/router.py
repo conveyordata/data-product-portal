@@ -1,11 +1,12 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 from app.roles.auth import AuthRole
 from app.roles.schema import CreateRole, Role, Scope, UpdateRole
 from app.roles.service import RoleService
@@ -28,15 +29,18 @@ def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> Sequence[R
             },
         },
     },
-    dependencies=[Depends(only_for_admin)],
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
 )
 def create_role(
     request: CreateRole,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
 ) -> Role:
     role: Role = RoleService(db).create_role(request)
-    background_tasks.add_task(AuthRole(role).sync)
+    AuthRole(role).sync()
     return role
 
 
@@ -50,15 +54,18 @@ def create_role(
             },
         },
     },
-    dependencies=[Depends(only_for_admin)],
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
 )
 def update_role(
     request: UpdateRole,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
 ) -> Role:
     role: Role = RoleService(db).update_role(request)
-    background_tasks.add_task(AuthRole(role).sync)
+    AuthRole(role).sync()
     return role
 
 
@@ -70,10 +77,12 @@ def update_role(
             "content": {"application/json": {"example": {"detail": "Role not found"}}},
         }
     },
-    dependencies=[Depends(only_for_admin)],
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
 )
-def remove_role(
-    id: UUID, background_tasks: BackgroundTasks, db: Session = Depends(get_db_session)
-) -> None:
+def remove_role(id: UUID, db: Session = Depends(get_db_session)) -> None:
     role: Role = RoleService(db).delete_role(id)
-    background_tasks.add_task(AuthRole(role).remove)
+    AuthRole(role).remove()

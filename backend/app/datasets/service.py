@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, raiseload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
@@ -13,23 +13,28 @@ from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
 )
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
+from app.data_outputs.model import DataOutput
+from app.data_outputs_datasets.model import (
+    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+)
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.data_products_datasets.enums import DataProductDatasetLinkStatus
+from app.data_products_datasets.model import (
+    DataProductDatasetAssociation as DataProductDatasetAssociationModel,
+)
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
-from app.datasets.schema import (
-    Dataset,
+from app.datasets.schema_request import (
     DatasetAboutUpdate,
     DatasetCreateUpdate,
     DatasetStatusUpdate,
 )
-from app.datasets.schema_get import DatasetGet, DatasetsGet
+from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.role_assignments.enums import DecisionStatus
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User, ensure_user_exists
@@ -45,6 +50,7 @@ class DatasetService:
             id,
             options=[
                 joinedload(DatasetModel.data_product_links),
+                joinedload(DatasetModel.data_output_links),
             ],
         )
 
@@ -66,26 +72,41 @@ class DatasetService:
         dataset.rolled_up_tags = rolled_up_tags
 
         if not dataset.lifecycle:
-            default_lifecycle = (
-                db.query(DataProductLifeCycleModel)
-                .filter(DataProductLifeCycleModel.is_default)
-                .first()
+            default_lifecycle = db.scalar(
+                select(DataProductLifeCycleModel).where(
+                    DataProductLifeCycleModel.is_default
+                )
             )
             dataset.lifecycle = default_lifecycle
 
         return dataset
 
     def get_datasets(self, db: Session, user: User) -> Sequence[DatasetsGet]:
-        default_lifecycle = (
-            db.query(DataProductLifeCycleModel)
-            .filter(DataProductLifeCycleModel.is_default)
-            .first()
+        default_lifecycle = db.scalar(
+            select(DataProductLifeCycleModel).filter(
+                DataProductLifeCycleModel.is_default
+            )
         )
         datasets = [
             dataset
             for dataset in db.scalars(
-                select(DatasetModel).order_by(asc(DatasetModel.name))
-            ).all()
+                select(DatasetModel)
+                .options(
+                    joinedload(DatasetModel.data_product_links)
+                    .joinedload(DataProductDatasetAssociationModel.data_product)
+                    .raiseload("*"),
+                    joinedload(DatasetModel.data_output_links)
+                    .joinedload(DataOutputDatasetAssociationModel.data_output)
+                    .options(
+                        joinedload(DataOutput.configuration),
+                        joinedload(DataOutput.owner),
+                        raiseload("*"),
+                    ),
+                )
+                .order_by(asc(DatasetModel.name))
+            )
+            .unique()
+            .all()
             if dataset.isVisibleToUser(user)
         ]
 
@@ -96,11 +117,22 @@ class DatasetService:
 
     def get_user_datasets(self, user_id: UUID, db: Session) -> Sequence[DatasetsGet]:
         return (
-            db.query(DatasetModel)
-            .options(joinedload(DatasetModel.owners))
-            .join(DatasetModel.owners)
-            .filter(DatasetModel.owners.any(id=user_id))
-            .order_by(asc(DatasetModel.name))
+            db.scalars(
+                select(DatasetModel)
+                .options(
+                    joinedload(DatasetModel.data_product_links).raiseload("*"),
+                    joinedload(DatasetModel.data_output_links)
+                    .joinedload(DataOutputDatasetAssociationModel.data_output)
+                    .options(
+                        joinedload(DataOutput.configuration),
+                        joinedload(DataOutput.owner),
+                        raiseload("*"),
+                    ),
+                )
+                .filter(DatasetModel.owners.any(id=user_id))
+                .order_by(asc(DatasetModel.name))
+            )
+            .unique()
             .all()
         )
 
@@ -127,7 +159,7 @@ class DatasetService:
         self,
         dataset: DatasetCreateUpdate,
         db: Session,
-    ) -> Dataset:
+    ) -> DatasetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, db
@@ -138,7 +170,7 @@ class DatasetService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        new_dataset: Dataset = self._update_owners(dataset, db)
+        new_dataset = self._update_owners(dataset, db)
         dataset_schema = new_dataset.parse_pydantic_schema()
         tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
         model = DatasetModel(**dataset_schema, tags=tags)
@@ -149,20 +181,12 @@ class DatasetService:
         return model
 
     def remove_dataset(self, id: UUID, db: Session) -> None:
-        dataset = db.get(
-            DatasetModel,
-            id,
-            options=[joinedload(DatasetModel.data_product_links)],
-        )
+        dataset = db.get(DatasetModel, id)
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
             )
-        dataset.owners = []
-        dataset.data_product_links = []
-        dataset.tags = []
         db.delete(dataset)
-
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
@@ -171,6 +195,20 @@ class DatasetService:
     ) -> dict[str, UUID]:
         current_dataset = ensure_dataset_exists(id, db)
         updated_dataset = dataset.model_dump(exclude_unset=True)
+
+        if (
+            current_dataset.namespace != dataset.namespace
+            and (
+                validity := self.namespace_validator.validate_namespace(
+                    dataset.namespace, db
+                ).validity
+            )
+            != NamespaceValidityType.VALID
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
 
         for k, v in updated_dataset.items():
             if k == "owners":
@@ -233,7 +271,14 @@ class DatasetService:
         RefreshInfrastructureLambda().trigger()
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
-        dataset = db.get(DatasetModel, id)
+        dataset = db.get(
+            DatasetModel,
+            id,
+            options=[
+                joinedload(DatasetModel.data_product_links),
+                joinedload(DatasetModel.data_output_links),
+            ],
+        )
         nodes = [
             Node(
                 id=id,
@@ -260,8 +305,7 @@ class DatasetService:
                     id=f"{downstream_products.id}-{dataset.id}",
                     target=downstream_products.data_product_id,
                     source=dataset.id,
-                    animated=downstream_products.status
-                    == DataProductDatasetLinkStatus.APPROVED,
+                    animated=downstream_products.status == DecisionStatus.APPROVED,
                 )
             )
 
@@ -284,8 +328,7 @@ class DatasetService:
                     id=f"{data_output.id}-{dataset.id}",
                     source=data_output.id,
                     target=dataset.id,
-                    animated=data_output_link.status
-                    == DataOutputDatasetLinkStatus.APPROVED,
+                    animated=data_output_link.status == DecisionStatus.APPROVED,
                 )
             )
             if level >= 2:

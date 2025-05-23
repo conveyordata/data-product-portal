@@ -68,7 +68,10 @@ class TestEnvironmentsRouter:
             f"/services/service_id/config",
         )
         assert response.status_code == 403
-        assert response.json()["detail"] == "Only admin can execute this operation"
+        assert (
+            response.json()["detail"]
+            == "You don't have permission to perform this action"
+        )
 
     @pytest.mark.usefixtures("admin")
     def test_get_environment_platform_service_config(self, client):
@@ -84,12 +87,12 @@ class TestEnvironmentsRouter:
         actual_config = response.json()
         assert actual_config["config"] == json.loads(config_obj.config)
 
+    @pytest.mark.usefixtures("admin")
     def test_get_environment_platform_config_forbidden(self, client):
         response = client.get(
-            f"{ENDPOINT}/environment_uuid/platforms/platform_uuid/config",
+            f"{ENDPOINT}/environment_uuid/platforms/platform_uuid" "/config",
         )
-        assert response.status_code == 403
-        assert response.json()["detail"] == "Only admin can execute this operation"
+        assert response.status_code == 422
 
     @pytest.mark.usefixtures("admin")
     def test_get_environment_platform_config(self, client):

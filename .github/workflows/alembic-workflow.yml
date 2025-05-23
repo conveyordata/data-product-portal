@@ -1,0 +1,78 @@
+name: Alembic Latest Migration Test
+
+on:
+  push:
+    branches: [ "main", "feature/test-latest-migration" ]
+  pull_request:
+    paths:
+      - 'backend/app/database/alembic/**'
+
+permissions:
+  contents: read
+
+jobs:
+  incremental_migration_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Pull Docker Images
+        run: docker compose pull
+
+      - name: Start DB and Backend
+        run: docker compose up -d postgresql backend
+
+      - name: Wait for Services (PostgreSQL and Backend)
+        run: |
+          for service in postgresql backend; do
+            echo "Waiting for $service to be healthy..."
+            for i in {1..30}; do
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' $(docker compose ps -q $service))
+              echo "$service status: $STATUS"
+              if [ "$STATUS" = "healthy" ]; then
+                break
+              fi
+              if [ $i -eq 30 ]; then
+                echo "$service failed to become healthy in time"
+                docker compose logs $service
+                exit 1
+              fi
+              sleep 2
+            done
+          done
+
+      - name: Downgrade to Previous Migration
+        run: docker compose exec backend alembic downgrade -1
+
+      - name: Upgrade to Head Migration
+        run: docker compose exec backend alembic upgrade head
+
+      - name: Start Frontend and Nginx
+        run: docker compose up -d frontend nginx
+
+      - name: Wait for Frontend
+        run: |
+          for service in frontend; do
+            echo "Waiting for $service to be healthy..."
+            for i in {1..30}; do
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' $(docker compose ps -q $service))
+              echo "$service status: $STATUS"
+              if [ "$STATUS" = "healthy" ]; then
+                break
+              fi
+              if [ $i -eq 30 ]; then
+                echo "$service failed to become healthy in time"
+                docker compose logs $service
+                exit 1
+              fi
+              sleep 2
+            done
+          done
+
+      - name: Verify Frontend API is Responding
+        run: |
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080)
+          echo "Frontend HTTP status code: $STATUS_CODE"
+          test "$STATUS_CODE" -eq 200

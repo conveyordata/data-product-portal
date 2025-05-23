@@ -1,5 +1,5 @@
-import type { RadioChangeEvent, TableProps } from 'antd';
-import { Button, Flex, Form, Input, Space, Table, Typography } from 'antd';
+import type { RadioChangeEvent } from 'antd';
+import { Button, Flex, Form, Input, Pagination, Space, Table, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -40,12 +40,9 @@ export function DataProductsTable() {
         currentUser?.id || '',
         { skip: !currentUser },
     );
-    const { data: access } = useCheckAccessQuery(
-        { action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT },
-        { skip: !currentUser },
-    );
-    const canCreateDataProduct = access?.allowed || false;
-    const { pagination, handlePaginationChange, handleTotalChange, resetPagination } = useTablePagination({});
+    const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
+    const canCreateDataProduct = access?.allowed ?? false;
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({});
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
 
@@ -59,8 +56,12 @@ export function DataProductsTable() {
         [t, filteredDataProducts],
     );
 
-    const onChange: TableProps<DataProductsGetContract[0]>['onChange'] = (pagination) => {
-        handlePaginationChange(pagination);
+    const handlePageChange = (page: number, pageSize: number) => {
+        handlePaginationChange({
+            ...pagination,
+            current: page,
+            pageSize,
+        });
     };
 
     const navigateToDataProduct = (dataProductId: string) => {
@@ -69,25 +70,13 @@ export function DataProductsTable() {
 
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
         onQuickFilterChange(value);
-        resetPagination();
     };
 
     useEffect(() => {
         if (!isFetching && !isFetchingUserDataProducts) {
-            if (quickFilter === QuickFilterParticipation.All) {
-                handleTotalChange(dataProducts.length);
-            } else {
-                handleTotalChange(userDataProducts.length);
-            }
+            resetPagination();
         }
-    }, [
-        quickFilter,
-        isFetching,
-        isFetchingUserDataProducts,
-        handleTotalChange,
-        dataProducts.length,
-        userDataProducts.length,
-    ]);
+    }, [filteredDataProducts, isFetching, isFetchingUserDataProducts, resetPagination]);
 
     return (
         <Flex vertical className={styles.tableContainer}>
@@ -100,22 +89,35 @@ export function DataProductsTable() {
                 </Form>
                 <Space>
                     <Link to={ApplicationPaths.DataProductNew}>
-                        <Button
-                            className={styles.formButton}
-                            type={'primary'}
-                            disabled={!(canCreateDataProduct || true)}
-                        >
+                        <Button className={styles.formButton} type={'primary'} disabled={!canCreateDataProduct}>
                             {t('Create Data Product')}
                         </Button>
                     </Link>
                 </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                <TableQuickFilter
-                    value={quickFilter}
-                    onFilterChange={handleQuickFilterChange}
-                    quickFilterOptions={quickFilterOptions}
-                />
+                <Flex align="flex-end" justify="space-between" className={styles.tableBar}>
+                    <TableQuickFilter
+                        value={quickFilter}
+                        onFilterChange={handleQuickFilterChange}
+                        quickFilterOptions={quickFilterOptions}
+                    />
+                    <Pagination
+                        current={pagination.current}
+                        pageSize={pagination.pageSize}
+                        total={filteredDataProducts.length}
+                        onChange={handlePageChange}
+                        size="small"
+                        showTotal={(total, range) =>
+                            t('Showing {{range0}}-{{range1}} of {{total}} data products', {
+                                range0: range[0],
+                                range1: range[1],
+                                total: total,
+                            })
+                        }
+                    />
+                </Flex>
+
                 <Table<DataProductsGetContract[0]>
                     onRow={(record) => ({
                         onClick: () => navigateToDataProduct(record.id),
@@ -123,8 +125,10 @@ export function DataProductsTable() {
                     className={styles.table}
                     columns={columns}
                     dataSource={filteredDataProducts}
-                    onChange={onChange}
-                    pagination={pagination}
+                    pagination={{
+                        ...pagination,
+                        position: [],
+                    }}
                     rowKey={(record) => record.id}
                     loading={isFetching}
                     rowHoverable

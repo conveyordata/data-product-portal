@@ -4,7 +4,6 @@ from .resolvers import (
     DataOutputDatasetAssociationResolver,
     DataOutputResolver,
     DataProductDatasetAssociationResolver,
-    DataProductMembershipResolver,
     DataProductResolver,
     DatasetResolver,
 )
@@ -15,7 +14,6 @@ __all__ = (
     "DataOutputDatasetAssociationResolver",
     "DataOutputResolver",
     "DataProductDatasetAssociationResolver",
-    "DataProductMembershipResolver",
     "DataProductResolver",
     "DatasetResolver",
 )

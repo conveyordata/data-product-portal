@@ -1,23 +1,39 @@
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 
 from app.data_product_types.model import DataProductType as DataProductTypeModel
 from app.data_product_types.model import ensure_data_product_type_exists
-from app.data_product_types.schema_create import (
+from app.data_product_types.schema_request import (
     DataProductTypeCreate,
     DataProductTypeUpdate,
 )
-from app.data_product_types.schema_get import DataProductTypeGet, DataProductTypesGet
+from app.data_product_types.schema_response import (
+    DataProductTypeGet,
+    DataProductTypesGet,
+)
 
 
 class DataProductTypeService:
     def get_data_product_types(self, db: Session) -> list[DataProductTypesGet]:
-        return db.query(DataProductTypeModel).order_by(DataProductTypeModel.name).all()
+        return (
+            db.scalars(
+                select(DataProductTypeModel)
+                .options(joinedload(DataProductTypeModel.data_products))
+                .order_by(DataProductTypeModel.name)
+            )
+            .unique()
+            .all()
+        )
 
     def get_data_product_type(self, id: UUID, db: Session) -> DataProductTypeGet:
-        data_product_type = db.get(DataProductTypeModel, id)
+        data_product_type = db.get(
+            DataProductTypeModel,
+            id,
+            options=[joinedload(DataProductTypeModel.data_products)],
+        )
 
         if not data_product_type:
             raise HTTPException(
@@ -50,7 +66,11 @@ class DataProductTypeService:
         return {"id": id}
 
     def remove_data_product_type(self, id: UUID, db: Session):
-        data_product_type = db.get(DataProductTypeModel, id)
+        data_product_type = db.get(
+            DataProductTypeModel,
+            id,
+            options=[joinedload(DataProductTypeModel.data_products)],
+        )
 
         if data_product_type.data_products:
             raise HTTPException(
@@ -65,7 +85,11 @@ class DataProductTypeService:
         db.commit()
 
     def migrate_data_product_type(self, from_id: UUID, to_id: UUID, db: Session):
-        data_product_type = ensure_data_product_type_exists(from_id, db)
+        data_product_type = ensure_data_product_type_exists(
+            from_id,
+            db,
+            options=[joinedload(DataProductTypeModel.data_products)],
+        )
         new_data_product_type = ensure_data_product_type_exists(to_id, db)
 
         for data_product in data_product_type.data_products:

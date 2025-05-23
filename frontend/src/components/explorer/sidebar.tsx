@@ -1,7 +1,9 @@
 import { Node, useReactFlow } from '@xyflow/react';
-import { Tag, Select } from 'antd';
+import { Select, Tag } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { DataProductContract } from '@/types/data-product';
 
 import styles from './sidebar.module.scss';
 
@@ -63,7 +65,7 @@ export function Sidebar({
         const node = getNode(nodeId);
         if (!node) return null;
 
-        const data = node.data as Record<string, any>;
+        const data = node.data as Record<string, DataProductContract>;
         console.log(node);
 
         return {

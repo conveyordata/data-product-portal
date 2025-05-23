@@ -1,10 +1,12 @@
-from typing import Optional, Sequence
+from typing import Literal, Optional, Sequence, Union, cast
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.auth import GlobalAuthAssignment
@@ -17,7 +19,7 @@ from app.role_assignments.global_.schema import (
     UpdateRoleAssignment,
 )
 from app.role_assignments.global_.service import RoleAssignmentService
-from app.roles.service import ADMIN_UUID
+from app.roles import ADMIN_UUID
 from app.users.schema import User
 
 router = APIRouter(prefix="/global")
@@ -32,38 +34,56 @@ def list_assignments(
     return RoleAssignmentService(db=db, user=user).list_assignments(user_id=user_id)
 
 
-@router.post("")
+@router.post(
+    "",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
+        )
+    ],
+)
 def create_assignment(
     request: CreateRoleAssignment,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    if (role_id := request.role_id) == "admin":
-        role_id = ADMIN_UUID
+    role_id = _resolve_role_id(request.role_id)
     return RoleAssignmentService(db=db, user=user).create_assignment(
         RoleAssignmentRequest(user_id=request.user_id, role_id=role_id)
     )
 
 
-@router.delete("/{id}")
+@router.delete(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__DELETE_USER, resolver=EmptyResolver)
+        )
+    ],
+)
 def delete_assignment(
     id: UUID,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> None:
     assignment = RoleAssignmentService(db=db, user=user).delete_assignment(id)
 
     if assignment.decision is DecisionStatus.APPROVED:
-        background_tasks.add_task(GlobalAuthAssignment(assignment).remove)
+        GlobalAuthAssignment(assignment).remove()
     return None
 
 
-@router.patch("/{id}/decide")
+@router.patch(
+    "/{id}/decide",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
+        )
+    ],
+)
 def decide_assignment(
     id: UUID,
     request: DecideRoleAssignment,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
@@ -81,29 +101,38 @@ def decide_assignment(
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
-        background_tasks.add_task(GlobalAuthAssignment(assignment).add)
+        GlobalAuthAssignment(assignment).add()
 
     return assignment
 
 
-@router.patch("/{id}/role")
+@router.patch(
+    "/{id}/role",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__CREATE_USER, resolver=EmptyResolver)
+        )
+    ],
+)
 def modify_assigned_role(
     id: UUID,
     request: ModifyRoleAssignment,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
-    original = service.get_assignment(id)
+    original_role = service.get_assignment(id).role_id
 
-    if (role_id := request.role_id) == "admin":
-        role_id = ADMIN_UUID
+    role_id = _resolve_role_id(request.role_id)
     assignment = service.update_assignment(UpdateRoleAssignment(id=id, role_id=role_id))
 
     if assignment.decision is DecisionStatus.APPROVED:
-        background_tasks.add_task(
-            GlobalAuthAssignment(assignment, previous=original).swap
-        )
+        GlobalAuthAssignment(assignment, previous_role_id=original_role).swap()
 
     return assignment
+
+
+def _resolve_role_id(role_id: Union[UUID, Literal["admin"]]) -> UUID:
+    if role_id == "admin":
+        return ADMIN_UUID
+    return cast(UUID, role_id)

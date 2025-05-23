@@ -7,16 +7,11 @@ from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM, utcnow
-from app.tags.schema import Tag as TagSchema
 
 if TYPE_CHECKING:
     from app.data_outputs.model import DataOutput
     from app.data_products.model import DataProduct
     from app.datasets.model import Dataset
-
-
-def ensure_tag_exists(tag_id: UUID, db: Session) -> TagSchema:
-    return ensure_exists(tag_id, db, Tag)
 
 
 tag_data_product_table = Table(
@@ -49,14 +44,21 @@ tag_data_output_table = Table(
 
 class Tag(Base, BaseORM):
     __tablename__ = "tags"
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     value = Column(String)
+
+    # Relationships
     datasets: Mapped[list["Dataset"]] = relationship(
-        secondary=tag_dataset_table, lazy="select", back_populates="tags"
+        secondary=tag_dataset_table, lazy="raise", back_populates="tags"
     )
     data_products: Mapped[list["DataProduct"]] = relationship(
-        secondary=tag_data_product_table, lazy="select", back_populates="tags"
+        secondary=tag_data_product_table, lazy="raise", back_populates="tags"
     )
     data_outputs: Mapped[list["DataOutput"]] = relationship(
-        secondary=tag_data_output_table, lazy="select", back_populates="tags"
+        secondary=tag_data_output_table, lazy="raise", back_populates="tags"
     )
+
+
+def ensure_tag_exists(tag_id: UUID, db: Session) -> Tag:
+    return ensure_exists(tag_id, db, Tag)

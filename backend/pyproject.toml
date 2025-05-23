@@ -31,17 +31,17 @@ asgi-correlation-id = "^4.3.4"
 cryptography = "^44.0.2"
 emailgen = "^0.1.1"
 casbin = "^1.41.0"
-casbin-async-sqlalchemy-adapter = "^1.7.0"
+casbin_sqlalchemy_adapter = "^1.4.0"
 asyncpg = "^0.30.0"
 cachetools = "^5.5.2"
 greenlet = "^3.1.0"
+h11 = "^0.16.0"
 
 [tool.poetry.group.test]
 optional = true
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.5"
-pytest-asyncio = "^0.26.0"
 pytest-cov = "^6.1.1"
 pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
@@ -55,6 +55,7 @@ poethepoet = "^0.33.1"
 [tool.poe.tasks]
 test = "pytest -v tests/"
 coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
+compose = "docker compose -f test-compose.yaml up -d"
 
 [build-system]
 requires = ["poetry-core"]

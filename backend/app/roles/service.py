@@ -5,12 +5,11 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.authz.actions import AuthorizationAction
+from app.core.authz import Action
 from app.database.database import ensure_exists
+from app.roles import ADMIN_UUID
 from app.roles.model import Role as RoleModel
 from app.roles.schema import CreateRole, Prototype, Role, Scope, UpdateRole
-
-ADMIN_UUID = UUID(int=0)
 
 
 class RoleService:
@@ -101,10 +100,10 @@ class RoleService:
                     scope=Scope.GLOBAL,
                     description="This is the role that is used as fallback for users that don't have another role",  # noqa: E501
                     permissions=[
-                        AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT,
-                        AuthorizationAction.GLOBAL__CREATE_DATASET,
-                        AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
-                        AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS,
+                        Action.GLOBAL__CREATE_DATAPRODUCT,
+                        Action.GLOBAL__CREATE_DATASET,
+                        Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
+                        Action.GLOBAL__REQUEST_DATASET_ACCESS,
                     ],
                 ),
                 prototype=Prototype.EVERYONE,
@@ -117,19 +116,19 @@ class RoleService:
                     scope=Scope.DATASET,
                     description="The owner of a Dataset",
                     permissions=[
-                        AuthorizationAction.DATASET__UPDATE_PROPERTIES,
-                        AuthorizationAction.DATASET__UPDATE_SETTINGS,
-                        AuthorizationAction.DATASET__UPDATE_STATUS,
-                        AuthorizationAction.DATASET__DELETE,
-                        AuthorizationAction.DATASET__CREATE_USER,
-                        AuthorizationAction.DATASET__UPDATE_USER,
-                        AuthorizationAction.DATASET__DELETE_USER,
-                        AuthorizationAction.DATASET__APPROVE_USER_REQUEST,
-                        AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
-                        AuthorizationAction.DATASET__REVOKE_DATA_OUTPUT_LINK,
-                        AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
-                        AuthorizationAction.DATASET__REVOKE_DATAPRODUCT_ACCESS,
-                        AuthorizationAction.DATASET__READ_INTEGRATIONS,
+                        Action.DATASET__UPDATE_PROPERTIES,
+                        Action.DATASET__UPDATE_SETTINGS,
+                        Action.DATASET__UPDATE_STATUS,
+                        Action.DATASET__DELETE,
+                        Action.DATASET__CREATE_USER,
+                        Action.DATASET__UPDATE_USER,
+                        Action.DATASET__DELETE_USER,
+                        Action.DATASET__APPROVE_USER_REQUEST,
+                        Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+                        Action.DATASET__REVOKE_DATA_OUTPUT_LINK,
+                        Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                        Action.DATASET__REVOKE_DATAPRODUCT_ACCESS,
+                        Action.DATASET__READ_INTEGRATIONS,
                     ],
                 ),
                 prototype=Prototype.OWNER,
@@ -142,21 +141,21 @@ class RoleService:
                     scope=Scope.DATA_PRODUCT,
                     description="The owner of a Data Product",
                     permissions=[
-                        AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
-                        AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS,
-                        AuthorizationAction.DATA_PRODUCT__UPDATE_STATUS,
-                        AuthorizationAction.DATA_PRODUCT__DELETE,
-                        AuthorizationAction.DATA_PRODUCT__CREATE_USER,
-                        AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
-                        AuthorizationAction.DATA_PRODUCT__DELETE_USER,
-                        AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
-                        AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
-                        AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
-                        AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
-                        AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
-                        AuthorizationAction.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
-                        AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
-                        AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS,
+                        Action.DATA_PRODUCT__UPDATE_PROPERTIES,
+                        Action.DATA_PRODUCT__UPDATE_SETTINGS,
+                        Action.DATA_PRODUCT__UPDATE_STATUS,
+                        Action.DATA_PRODUCT__DELETE,
+                        Action.DATA_PRODUCT__CREATE_USER,
+                        Action.DATA_PRODUCT__UPDATE_USER,
+                        Action.DATA_PRODUCT__DELETE_USER,
+                        Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                        Action.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                        Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
+                        Action.DATA_PRODUCT__DELETE_DATA_OUTPUT,
+                        Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                        Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                        Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                        Action.DATA_PRODUCT__READ_INTEGRATIONS,
                     ],
                 ),
                 prototype=Prototype.OWNER,

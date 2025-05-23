@@ -1,76 +1,41 @@
-import { Flex, Table, type TableColumnsType } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-    useGetDataProductByIdQuery,
-    useRemoveDatasetFromDataProductMutation,
-} from '@/store/features/data-products/data-products-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import type { DatasetLink } from '@/types/data-product';
 
 import styles from './dataset-table.module.scss';
 import { getDataProductDatasetsColumns } from './dataset-table-columns.tsx';
 
 type Props = {
-    isCurrentDataProductOwner: boolean;
     dataProductId: string;
     datasets: DatasetLink[];
 };
-
-export function DatasetTable({ isCurrentDataProductOwner, dataProductId, datasets }: Props) {
+export function DatasetTable({ dataProductId, datasets }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const [removeDatasetFromDataProduct, { isLoading: isRemovingDatasetFromDataProduct }] =
-        useRemoveDatasetFromDataProductMutation();
 
-    const handleRemoveDatasetFromDataProduct = useCallback(
-        async (datasetId: string, name: string) => {
-            try {
-                await removeDatasetFromDataProduct({ datasetId, dataProductId: dataProductId }).unwrap();
-                dispatchMessage({
-                    content: t('Dataset {{name}} has been removed from data product', { name }),
-                    type: 'success',
-                });
-            } catch (error) {
-                console.error('Failed to remove dataset from data product', error);
-            }
-        },
-        [dataProductId, removeDatasetFromDataProduct, t],
-    );
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
 
-    const handleCancelDatasetLinkRequest = useCallback(
-        async (datasetId: string, name: string) => {
-            try {
-                await removeDatasetFromDataProduct({ datasetId, dataProductId: dataProductId }).unwrap();
-                dispatchMessage({
-                    content: t('Request to link dataset {{name}} has been cancelled', { name }),
-                    type: 'success',
-                });
-            } catch (error) {
-                console.error('Failed to cancel dataset link request', error);
-            }
-        },
-        [dataProductId, removeDatasetFromDataProduct, t],
-    );
+    const onChange: TableProps<DatasetLink>['onChange'] = (pagination) => {
+        handlePaginationChange(pagination);
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [datasets, resetPagination]);
 
     const columns: TableColumnsType<DatasetLink> = useMemo(() => {
         return getDataProductDatasetsColumns({
-            onRemoveDataProductDatasetLink: handleRemoveDatasetFromDataProduct,
-            onCancelDataProductDatasetLinkRequest: handleCancelDatasetLinkRequest,
             t,
             datasetLinks: datasets,
-            isDisabled: !isCurrentDataProductOwner,
-            isLoading: isRemovingDatasetFromDataProduct,
         });
-    }, [
-        handleRemoveDatasetFromDataProduct,
-        handleCancelDatasetLinkRequest,
-        t,
-        datasets,
-        isCurrentDataProductOwner,
-        isRemovingDatasetFromDataProduct,
-    ]);
+    }, [t, datasets]);
 
     if (!dataProduct) return null;
 
@@ -82,7 +47,19 @@ export function DatasetTable({ isCurrentDataProductOwner, dataProductId, dataset
                 columns={columns}
                 dataSource={datasets}
                 rowKey={({ id }) => id}
-                pagination={false}
+                onChange={onChange}
+                pagination={{
+                    ...pagination,
+                    position: ['topRight'],
+                    size: 'small',
+                    showTotal: (total, range) =>
+                        t('Showing {{range0}}-{{range1}} of {{total}} datasets', {
+                            range0: range[0],
+                            range1: range[1],
+                            total: total,
+                        }),
+                    className: styles.pagination,
+                }}
                 rowClassName={styles.tableRow}
                 size={'small'}
             />

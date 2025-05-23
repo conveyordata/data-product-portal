@@ -1,10 +1,12 @@
 from datetime import datetime
+from typing import Optional, Sequence
 from uuid import UUID
 
 import emailgen
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.email.send_mail import send_mail
@@ -12,26 +14,27 @@ from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
     NamespaceLengthLimits,
     NamespaceSuggestion,
+    NamespaceValidityType,
 )
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.model import ensure_data_output_exists
-from app.data_outputs.schema import (
-    DataOutput,
+from app.data_outputs.schema_request import (
     DataOutputCreate,
-    DataOutputCreateRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
+from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 from app.data_outputs.status import DataOutputStatus
-from app.data_outputs_datasets.enums import DataOutputDatasetLinkStatus
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.data_product_memberships.enums import DataProductUserRole
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
+from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.graph.graph import Graph
+from app.role_assignments.enums import DecisionStatus
 from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
@@ -43,9 +46,12 @@ class DataOutputService:
         self.namespace_validator = DataOutputNamespaceValidator()
 
     def ensure_member(
-        self, authenticated_user: User, data_output: DataOutputCreate, db: Session
-    ):
-        product = db.get(DataProductModel, data_output.owner_id)
+        self,
+        authenticated_user: User,
+        owner_id: UUID,
+        db: Session,
+    ) -> None:
+        product = db.get(DataProductModel, owner_id)
         if authenticated_user.is_admin:
             return
 
@@ -64,7 +70,7 @@ class DataOutputService:
             )
 
     def ensure_owner(
-        self, authenticated_user: User, data_output: DataOutputCreate, db: Session
+        self, authenticated_user: User, data_output: DataOutputModel, db: Session
     ):
         product = db.get(DataProductModel, data_output.owner_id)
         if authenticated_user.is_admin:
@@ -94,29 +100,47 @@ class DataOutputService:
             tags.append(tag)
         return tags
 
-    def get_data_outputs(self, db: Session) -> list[DataOutput]:
-        data_outputs = db.query(DataOutputModel).all()
-        return data_outputs
+    def get_data_outputs(self, db: Session) -> Sequence[DataOutputsGet]:
+        return (
+            db.scalars(
+                select(DataOutputModel).options(
+                    joinedload(DataOutputModel.dataset_links)
+                    .joinedload(DataOutputDatasetAssociationModel.dataset)
+                    .raiseload("*"),
+                )
+            )
+            .unique()
+            .all()
+        )
 
-    def get_data_output(self, id: UUID, db: Session) -> DataOutput:
-        return db.query(DataOutputModel).filter(DataOutputModel.id == id).first()
+    def get_data_output(self, id: UUID, db: Session) -> Optional[DataOutputGet]:
+        return db.get(
+            DataOutputModel, id, options=[joinedload(DataOutputModel.dataset_links)]
+        )
 
     def create_data_output(
         self,
         id: UUID,
-        data_output: DataOutputCreateRequest,
+        data_output: DataOutputCreate,
         db: Session,
         authenticated_user: User,
     ) -> dict[str, UUID]:
-        data_output = DataOutputCreate(
-            **data_output.parse_pydantic_schema(), owner_id=id
-        )
-        self.ensure_member(authenticated_user, data_output, db)
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                data_output.namespace, db, id
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
+        self.ensure_member(authenticated_user, id, db)
 
         if data_output.sourceAligned:
             data_output.status = DataOutputStatus.PENDING
         else:
-            data_product = db.get(DataProductModel, data_output.owner_id)
+            data_product = db.get(DataProductModel, id)
 
             # TODO Figure out if this validation needs to happen either way
             # somehow and let sourcealigned be handled internally there?
@@ -124,7 +148,7 @@ class DataOutputService:
 
         data_output_schema = data_output.parse_pydantic_schema()
         tags = self._get_tags(db, data_output_schema.pop("tag_ids", []))
-        model = DataOutputModel(**data_output_schema, tags=tags)
+        model = DataOutputModel(**data_output_schema, tags=tags, owner_id=id)
 
         db.add(model)
         db.commit()
@@ -144,7 +168,6 @@ class DataOutputService:
                 detail=f"Data Output {id} not found",
             )
         self.ensure_owner(authenticated_user, data_output, db)
-        data_output.dataset_links = []
         db.delete(data_output)
         db.commit()
         RefreshInfrastructureLambda().trigger()
@@ -164,14 +187,18 @@ class DataOutputService:
         db: Session,
         background_tasks: BackgroundTasks,
     ):
-        dataset = ensure_dataset_exists(dataset_id, db)
-        data_output = ensure_data_output_exists(id, db)
+        dataset = ensure_dataset_exists(
+            dataset_id, db, options=[joinedload(DatasetModel.data_product_links)]
+        )
+        data_output = ensure_data_output_exists(
+            id, db, options=[joinedload(DataOutputModel.dataset_links)]
+        )
         self.ensure_owner(authenticated_user, data_output, db)
 
         if dataset.id in [
             link.dataset_id
             for link in data_output.dataset_links
-            if link.status != DataOutputDatasetLinkStatus.DENIED
+            if link.status != DecisionStatus.DENIED
         ]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -184,7 +211,7 @@ class DataOutputService:
                 detail="You do not have access to this private dataset",
             )
         # Data output requests always need to be approved
-        approval_status = DataOutputDatasetLinkStatus.PENDING_APPROVAL
+        approval_status = DecisionStatus.PENDING
 
         dataset_link = DataOutputDatasetAssociationModel(
             dataset_id=dataset_id,
@@ -228,7 +255,9 @@ class DataOutputService:
         self, id: UUID, dataset_id: UUID, authenticated_user: User, db: Session
     ):
         ensure_dataset_exists(dataset_id, db)
-        data_output = ensure_data_output_exists(id, db)
+        data_output = ensure_data_output_exists(
+            id, db, options=[joinedload(DataOutputModel.dataset_links)]
+        )
         self.ensure_owner(authenticated_user, data_output, db)
         data_output_dataset = next(
             (
@@ -264,6 +293,7 @@ class DataOutputService:
 
     def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
         dataOutput = db.get(DataOutputModel, id)
+
         graph = DataProductService().get_graph_data(dataOutput.owner_id, level, db)
 
         for node in graph.nodes:

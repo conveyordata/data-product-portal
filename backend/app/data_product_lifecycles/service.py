@@ -1,24 +1,25 @@
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.data_product_lifecycles.schema import (
-    DataProductLifeCycle,
+from app.data_product_lifecycles.schema_request import (
     DataProductLifeCycleCreate,
     DataProductLifeCycleUpdate,
 )
+from app.data_product_lifecycles.schema_response import DataProductLifeCyclesGet
 
 
 class DataProductLifeCycleService:
-    def get_data_product_lifecycles(self, db: Session) -> list[DataProductLifeCycle]:
-        return (
-            db.query(DataProductLifeCycleModel)
-            .order_by(DataProductLifeCycleModel.name)
-            .all()
-        )
+    def get_data_product_lifecycles(
+        self, db: Session
+    ) -> list[DataProductLifeCyclesGet]:
+        return db.scalars(
+            select(DataProductLifeCycleModel).order_by(DataProductLifeCycleModel.name)
+        ).all()
 
     def create_data_product_lifecycle(
         self, data_product_lifecycle: DataProductLifeCycleCreate, db: Session
@@ -42,6 +43,7 @@ class DataProductLifeCycleService:
         return {"id": id}
 
     def delete_data_product_lifecycle(self, lifecycle_id: UUID, db: Session) -> None:
-        db.query(DataProductLifeCycleModel).filter_by(id=lifecycle_id).delete()
+        lifecycle = db.get(DataProductLifeCycleModel, lifecycle_id)
+        db.delete(lifecycle)
         db.commit()
         return

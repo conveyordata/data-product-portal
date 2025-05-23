@@ -3,21 +3,21 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DataProductResolver
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
     NamespaceValidation,
 )
 from app.data_product_settings.enums import DataProductSettingScope
-from app.data_product_settings.schema import (
-    DataProductSetting,
+from app.data_product_settings.schema_request import (
     DataProductSettingCreate,
     DataProductSettingUpdate,
 )
+from app.data_product_settings.schema_response import DataProductSettingsGet
 from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 
 router = APIRouter(prefix="/data_product_settings", tags=["data_product_settings"])
 
@@ -25,18 +25,15 @@ router = APIRouter(prefix="/data_product_settings", tags=["data_product_settings
 @router.get("")
 def get_data_products_settings(
     db: Session = Depends(get_db_session),
-) -> list[DataProductSetting]:
+) -> list[DataProductSettingsGet]:
     return DataProductSettingService().get_data_product_settings(db)
 
 
 @router.post(
     "",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -71,11 +68,8 @@ def get_data_product_settings_namespace_length_limits() -> NamespaceLengthLimits
 @router.put(
     "/{id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -90,11 +84,8 @@ def update_data_product_setting(
 @router.delete(
     "/{id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )

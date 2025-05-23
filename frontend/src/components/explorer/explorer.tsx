@@ -14,7 +14,7 @@ import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
 import type { NodeContract } from '@/types/graph/graph-contract.ts';
 
-import { parseEdges, LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common.tsx';
+import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode, parseEdges } from './common.tsx';
 import styles from './explorer.module.scss';
 
 type Props = {
@@ -25,7 +25,7 @@ type Props = {
 function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Node[] {
     // TODO: revert to old parseNodes function - separate from parseFullNodes
     // Regular nodes and domain nodes. In domain nodes, we count how many children they have so we can estimate their size.
-    let regular_nodes = nodes
+    const regular_nodes = nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
         .map((node) => {
             let extra_attributes = {};
@@ -82,7 +82,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
         });
 
     // count how many children each parent has
-    let childCounts = regular_nodes.reduce((acc: Record<string, number>, node) => {
+    const childCounts = regular_nodes.reduce((acc: Record<string, number>, node) => {
         if (node.parentId) {
             if (!acc[node.parentId]) {
                 acc[node.parentId] = 0;
@@ -92,7 +92,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
         return acc;
     }, {});
 
-    let domain_nodes = nodes
+    const domain_nodes = nodes
         .filter((node) => node.type === CustomNodeTypes.DomainNode)
         .map((node) => {
             const childCount = childCounts[node.id] || 1;
@@ -123,7 +123,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
             };
         });
 
-    let result = [...domain_nodes, ...regular_nodes];
+    const result = [...domain_nodes, ...regular_nodes];
 
     console.log('result', result);
     return result;

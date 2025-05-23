@@ -3,15 +3,18 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DataProductResolver
-from app.data_product_types.schema_create import (
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
+from app.data_product_types.schema_request import (
     DataProductTypeCreate,
     DataProductTypeUpdate,
 )
-from app.data_product_types.schema_get import DataProductTypeGet, DataProductTypesGet
+from app.data_product_types.schema_response import (
+    DataProductTypeGet,
+    DataProductTypesGet,
+)
 from app.data_product_types.service import DataProductTypeService
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 
 router = APIRouter(prefix="/data_product_types", tags=["data_product_types"])
 
@@ -51,11 +54,8 @@ def get_data_product_type(
         },
     },
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -68,11 +68,8 @@ def create_data_product_type(
 @router.put(
     "/{id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -87,11 +84,8 @@ def update_data_product_type(
 @router.delete(
     "/{id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -102,11 +96,8 @@ def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)):
 @router.put(
     "/migrate/{from_id}/{to_id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )

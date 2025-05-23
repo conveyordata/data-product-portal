@@ -14,13 +14,12 @@ import {
     useGetDataProductSignInUrlMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
+import { useGetRoleAssignmentQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
+import { DecisionStatus } from '@/types/roles';
 import { getDataPlatforms } from '@/utils/data-platforms';
-import {
-    getCanUserAccessDataProductData,
-    getDoesUserHaveAnyDataProductMembership,
-} from '@/utils/data-product-user-role.helper.ts';
 
 import styles from './data-product-actions.module.scss';
 
@@ -32,12 +31,13 @@ export function DataProductActions({ dataProductId }: Props) {
     const { t } = useTranslation();
     const user = useSelector(selectCurrentUser);
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
+    const { data: availablePlatforms, isLoading: isLoadingPlatforms } = useGetAllPlatformsQuery();
     const [getDataProductSignInUrl, { isLoading }] = useGetDataProductSignInUrlMutation();
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
     const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
         useGetDataProductDatabricksWorkspaceUrlMutation();
-    const { data: access } = useCheckAccessQuery(
+
+    const { data: read_integrations } = useCheckAccessQuery(
         {
             resource: dataProductId,
             action: AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS,
@@ -46,16 +46,39 @@ export function DataProductActions({ dataProductId }: Props) {
             skip: !dataProductId,
         },
     );
+    const { data: request_access } = useCheckAccessQuery(
+        {
+            action: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canRequestAccess = request_access?.allowed ?? false;
+    const canReadIntegrations = read_integrations?.allowed ?? false;
+
+    const dataPlatforms = useMemo(() => {
+        const names = availablePlatforms ? availablePlatforms.map((platform) => platform.name.toLowerCase()) : [];
+
+        return getDataPlatforms(t).filter((platform) => names.includes(platform.value));
+    }, [t, availablePlatforms]);
+
+    const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useGetRoleAssignmentQuery({
+        data_product_id: dataProductId,
+        user_id: user?.id,
+    });
+
+    const allowRequesting = useMemo(() => {
+        if (!user?.id || isFetchingRoleAssignments || !roleAssignments) return false;
+
+        return !roleAssignments.some(
+            ({ user: u, decision }) =>
+                u.id === user.id && (decision === DecisionStatus.Pending || decision === DecisionStatus.Approved),
+        );
+    }, [user?.id, isFetchingRoleAssignments, roleAssignments]);
+
     if (!dataProduct || !user) {
         return null;
     }
-
-    const doesUserHaveAnyDataProductMembership = getDoesUserHaveAnyDataProductMembership(
-        user?.id,
-        dataProduct?.memberships,
-    );
-    const canAccessDataProductData = getCanUserAccessDataProductData(user?.id, dataProduct?.memberships);
-    const canAccessNew = access?.allowed || false;
 
     async function handleAccessToData(environment: string, dataPlatform: DataPlatform) {
         switch (dataPlatform) {
@@ -116,17 +139,17 @@ export function DataProductActions({ dataProductId }: Props) {
     return (
         <>
             <Flex vertical className={styles.actionsContainer}>
-                {!doesUserHaveAnyDataProductMembership && (
+                {canRequestAccess && allowRequesting && (
                     <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />
                 )}
                 <Flex vertical className={styles.accessDataContainer}>
                     <DataAccessTileGrid
-                        canAccessData={canAccessNew || canAccessDataProductData}
+                        canAccessData={canReadIntegrations}
                         dataPlatforms={dataPlatforms}
                         onDataPlatformClick={handleAccessToData}
                         onTileClick={handleTileClick}
-                        isDisabled={isLoading || !(canAccessNew || canAccessDataProductData)}
-                        isLoading={isLoading || isConveyorLoading || isDatabricksLoading}
+                        isDisabled={isLoading || !canReadIntegrations}
+                        isLoading={isLoading || isConveyorLoading || isDatabricksLoading || isLoadingPlatforms}
                     />
                 </Flex>
             </Flex>

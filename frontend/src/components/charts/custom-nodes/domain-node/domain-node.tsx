@@ -1,7 +1,7 @@
 import type { Node, NodeProps } from '@xyflow/react';
 import { NodeToolbar, Position } from '@xyflow/react';
 import { Flex, Typography } from 'antd';
-import type { ComponentType, ForwardRefExoticComponent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { DefaultHandle } from '@/components/charts/custom-handles/default-handle.tsx';
 
@@ -18,9 +18,7 @@ export type DomainNodeProps = Node<{
     isActive?: boolean;
 }>;
 
-export function DomainNode<T extends DomainNodeProps>({
-    data: { name, borderType = 'round', nodeToolbarActions, isActive = true },
-}: NodeProps<T>) {
+export function DomainNode<T extends DomainNodeProps>({ data: { name, nodeToolbarActions } }: NodeProps<T>) {
     return (
         <>
             <Flex className={styles.nodeContainer}>

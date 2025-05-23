@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -9,8 +10,8 @@ from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
     NamespaceValidation,
+    NamespaceValidityType,
 )
-from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.enums import DataProductSettingScope
 from app.data_product_settings.model import (
     DataProductSetting as DataProductSettingModel,
@@ -18,12 +19,12 @@ from app.data_product_settings.model import (
 from app.data_product_settings.model import (
     DataProductSettingValue as DataProductSettingValueModel,
 )
-from app.data_product_settings.schema import (
-    DataProductSetting,
+from app.data_product_settings.schema_request import (
+    DataProductSettingCreate,
     DataProductSettingUpdate,
     DataProductSettingValueCreate,
 )
-from app.dependencies import OnlyWithProductAccessDataProductID, only_dataset_owners
+from app.data_product_settings.schema_response import DataProductSettingsGet
 from app.users.schema import User
 
 
@@ -31,12 +32,12 @@ class DataProductSettingService:
     def __init__(self):
         self.namespace_validator = DataProductSettingNamespaceValidator()
 
-    def get_data_product_settings(self, db: Session) -> list[DataProductSetting]:
-        return (
-            db.query(DataProductSettingModel)
-            .order_by(DataProductSettingModel.order, DataProductSettingModel.name)
-            .all()
-        )
+    def get_data_product_settings(self, db: Session) -> list[DataProductSettingsGet]:
+        return db.scalars(
+            select(DataProductSettingModel).order_by(
+                DataProductSettingModel.order, DataProductSettingModel.name
+            )
+        ).all()
 
     def set_value_for_product(
         self,
@@ -48,18 +49,12 @@ class DataProductSettingService:
     ):
         scope = db.get(DataProductSettingModel, setting_id).scope
         if scope == DataProductSettingScope.DATAPRODUCT:
-            OnlyWithProductAccessDataProductID([DataProductUserRole.OWNER])(
-                data_product_id=product_id, authenticated_user=authenticated_user, db=db
-            )
             setting = db.scalars(
                 select(DataProductSettingValueModel).filter_by(
                     data_product_id=product_id, data_product_setting_id=setting_id
                 )
             ).first()
         elif scope == DataProductSettingScope.DATASET:
-            only_dataset_owners(
-                id=product_id, authenticated_user=authenticated_user, db=db
-            )
             setting = db.scalars(
                 select(DataProductSettingValueModel).filter_by(
                     dataset_id=product_id, data_product_setting_id=setting_id
@@ -85,8 +80,18 @@ class DataProductSettingService:
         RefreshInfrastructureLambda().trigger()
 
     def create_data_product_setting(
-        self, setting: DataProductSetting, db: Session
+        self, setting: DataProductSettingCreate, db: Session
     ) -> dict[str, UUID]:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                setting.namespace, db, setting.scope
+            ).validity
+        ) != NamespaceValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
         setting = DataProductSettingModel(**setting.parse_pydantic_schema())
         db.add(setting)
         db.commit()
@@ -95,14 +100,35 @@ class DataProductSettingService:
     def update_data_product_setting(
         self, id: UUID, setting: DataProductSettingUpdate, db: Session
     ) -> dict[str, UUID]:
-        db.query(DataProductSettingModel).filter_by(id=id).update(
-            setting.parse_pydantic_schema()
-        )
+        current_setting = db.get(DataProductSettingModel, id)
+        update_setting = setting.model_dump(exclude_unset=True)
+
+        if (
+            current_setting.namespace != setting.namespace
+            and (
+                validity := self.namespace_validator.validate_namespace(
+                    setting.namespace, db, current_setting.scope
+                ).validity
+            )
+            != NamespaceValidityType.VALID
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
+
+        for k, v in update_setting.items():
+            setattr(current_setting, k, v)
+
         db.commit()
         return {"id": id}
 
     def delete_data_product_setting(self, setting_id: UUID, db: Session):
-        db.query(DataProductSettingModel).filter_by(id=setting_id).delete()
+        data_product_setting = db.get(
+            DataProductSettingModel,
+            setting_id,
+        )
+        db.delete(data_product_setting)
         db.commit()
 
     def validate_data_product_settings_namespace(

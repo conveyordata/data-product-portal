@@ -2,10 +2,8 @@ import { Flex, Form, type FormProps, Select, Switch, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useCreateDataProductSettingValueMutation,
@@ -16,13 +14,11 @@ import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import {
+import type {
     DataProductSettingContract,
     DataProductSettingValueCreateRequest,
     DataProductSettingValueForm,
 } from '@/types/data-product-setting';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
-import { getIsDatasetOwner } from '@/utils/dataset-user.helper';
 
 import styles from './data-product-settings.module.scss';
 
@@ -60,28 +56,15 @@ export function DataProductSettings({ id, scope }: Props) {
         { skip: !id || scope !== 'dataset' },
     );
 
-    const canUpdateProductSettingNew = product_access?.allowed || scope === 'dataset';
-    const canUpdateDatasetSettingNew = dataset_access?.allowed || scope === 'dataproduct';
+    const canUpdateProductSettings = product_access?.allowed || scope === 'dataset';
+    const canUpdateDatasetSettings = dataset_access?.allowed || scope === 'dataproduct';
 
     const [updateDataProductSetting] = useCreateDataProductSettingValueMutation();
     const [updateDatasetSetting] = useCreateDatasetSettingValueMutation();
     const updateSetting = scope === 'dataproduct' ? updateDataProductSetting : updateDatasetSetting;
 
     const [form] = Form.useForm();
-    const user = useSelector(selectCurrentUser);
     const timeoutRef = useRef<Timeout | null>(null);
-
-    const isDataProductOwner = useMemo(() => {
-        if (dataset) return true;
-        if (!dataProduct || !user) return false;
-        return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct, dataset, user]);
-
-    const isDatasetOwner = useMemo(() => {
-        if (dataProduct) return true;
-        if (!dataset || !user) return false;
-        return getIsDatasetOwner(dataset, user.id) || user.is_admin;
-    }, [dataProduct, dataset, user]);
 
     const updatedSettings: (DataProductSettingContract & { value: string })[] = useMemo(() => {
         if (filteredSettings) {
@@ -163,7 +146,7 @@ export function DataProductSettings({ id, scope }: Props) {
         });
     }, [form, updatedSettings]);
 
-    const settingsRender = useMemo(() => {
+    const formContent = useMemo(() => {
         // Group settings by divider
         const groupedSettings = updatedSettings.reduce(
             (groups, setting) => {
@@ -178,7 +161,7 @@ export function DataProductSettings({ id, scope }: Props) {
         );
 
         // Render grouped settings
-        const formContent = Object.entries(groupedSettings).map(([divider, settings]) => (
+        return Object.entries(groupedSettings).map(([divider, settings]) => (
             <Flex key={divider} vertical>
                 <Typography.Title>{divider}</Typography.Title>
                 {settings.map((setting) => {
@@ -240,55 +223,38 @@ export function DataProductSettings({ id, scope }: Props) {
                 })}
             </Flex>
         ));
-        return (
-            <Flex vertical>
-                <Form
-                    form={form}
-                    labelCol={FORM_GRID_WRAPPER_COLS}
-                    wrapperCol={FORM_GRID_WRAPPER_COLS}
-                    layout="horizontal"
-                    onFinish={onSubmit}
-                    onFinishFailed={onSubmitFailed}
-                    autoComplete={'off'}
-                    requiredMark={'optional'}
-                    labelWrap
-                    labelAlign={'left'}
-                    disabled={
-                        isFetching ||
-                        isFetchingDP ||
-                        isFetchingDS ||
-                        !(canUpdateProductSettingNew || isDataProductOwner) ||
-                        !(canUpdateDatasetSettingNew || isDatasetOwner)
-                    }
-                    className={styles.form}
-                    onValuesChange={(_, allValues) => {
-                        // Trigger form submission after 0.5 seconds of unchanged input values
-                        if (timeoutRef.current) {
-                            clearTimeout(timeoutRef.current);
-                        }
+    }, [updatedSettings, t]);
 
-                        timeoutRef.current = setTimeout(() => {
-                            onSubmit(allValues); // Trigger the onSubmit function
-                        }, 500);
-                    }}
-                >
-                    {formContent}
-                </Form>
-            </Flex>
-        );
-    }, [
-        updatedSettings,
-        form,
-        onSubmit,
-        onSubmitFailed,
-        isFetching,
-        isFetchingDP,
-        isFetchingDS,
-        isDataProductOwner,
-        isDatasetOwner,
-        canUpdateProductSettingNew,
-        canUpdateDatasetSettingNew,
-        t,
-    ]);
-    return settingsRender;
+    return (
+        <Flex vertical>
+            <Form
+                form={form}
+                labelCol={FORM_GRID_WRAPPER_COLS}
+                wrapperCol={FORM_GRID_WRAPPER_COLS}
+                layout="horizontal"
+                onFinish={onSubmit}
+                onFinishFailed={onSubmitFailed}
+                autoComplete={'off'}
+                requiredMark={'optional'}
+                labelWrap
+                labelAlign={'left'}
+                disabled={
+                    isFetching || isFetchingDP || isFetchingDS || !canUpdateProductSettings || !canUpdateDatasetSettings
+                }
+                className={styles.form}
+                onValuesChange={(_, allValues) => {
+                    // Trigger form submission after 0.5 seconds of unchanged input values
+                    if (timeoutRef.current) {
+                        clearTimeout(timeoutRef.current);
+                    }
+
+                    timeoutRef.current = setTimeout(() => {
+                        onSubmit(allValues); // Trigger the onSubmit function
+                    }, 500);
+                }}
+            >
+                {formContent}
+            </Form>
+        </Flex>
+    );
 }
