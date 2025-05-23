@@ -12,7 +12,7 @@ from tests.factories import (
     DomainFactory,
     GlobalRoleAssignmentFactory,
     RoleFactory,
-    UserFactory, DataProductRoleAssignmentFactory,
+    UserFactory,
 )
 
 from app.core.authz.actions import AuthorizationAction

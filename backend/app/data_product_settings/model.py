@@ -13,7 +13,6 @@ from app.database.database import Base
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
-    from app.datasets.model import Dataset
     from app.data_products.model import DataProduct
     from app.datasets.model import Dataset
 

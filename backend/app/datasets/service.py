@@ -341,11 +341,16 @@ class DatasetService:
         return bool(consuming_data_products & user_data_products)
 
     @classmethod
-    def is_visible_to_user(cls, dataset: DatasetModel, user: "User", db: Session) -> bool:
+    def dataset_namespace_length_limits(cls) -> NamespaceLengthLimits:
+        return NamespaceValidator.namespace_length_limits()
+
+    def is_visible_to_user(self, dataset: DatasetModel, user: "User") -> bool:
         if (
-                dataset.access_type != DatasetAccessType.PRIVATE
-                or user.is_admin()
-                or DatasetRoleAssignmentService(db=db, user=user).has_assignment(dataset_id=self.id)
+            dataset.access_type != DatasetAccessType.PRIVATE
+            or Authorization().has_admin_role(user_id=user.id)
+            or DatasetRoleAssignmentService(db=self.db, user=user).has_assignment(
+                dataset_id=dataset.id
+            )
         ):
             return True
 
