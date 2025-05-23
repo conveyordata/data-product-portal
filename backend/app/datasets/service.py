@@ -36,6 +36,7 @@ from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.dataset.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
@@ -135,23 +136,12 @@ class DatasetService:
                         raiseload("*"),
                     ),
                 )
-                .filter(DatasetModel.owners.any(id=user_id))
+                .filter(DatasetModel.assignments.any(user_id=user_id))
                 .order_by(asc(DatasetModel.name))
             )
             .unique()
             .all()
         )
-
-    def _update_owners(
-        self, dataset: DatasetCreateUpdate, owner_ids: Iterable[UUID] = ()
-    ) -> DatasetCreateUpdate:
-        if not owner_ids:
-            owner_ids = dataset.owners
-        dataset.owners = []
-        for owner in owner_ids:
-            user = ensure_user_exists(owner, self.db)
-            dataset.owners.append(user)
-        return dataset
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
@@ -175,9 +165,9 @@ class DatasetService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        new_dataset = self._update_owners(dataset)
-        dataset_schema = new_dataset.parse_pydantic_schema()
+        dataset_schema = dataset.parse_pydantic_schema()
         tags = self._fetch_tags(dataset_schema.pop("tag_ids", []))
+        _ = dataset_schema.pop("owners", [])
         model = DatasetModel(**dataset_schema, tags=tags)
 
         self.db.add(model)
