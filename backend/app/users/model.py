@@ -2,11 +2,13 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import UUID, Boolean, Column, String
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
+from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
-from app.datasets.model import datasets_owner_table
 from app.role_assignments.data_product.model import DataProductRoleAssignment
+from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -25,15 +27,34 @@ class User(Base, BaseORM):
     last_name = Column(String)
     is_admin = Column(Boolean, server_default="false", nullable=False)
 
+    # Relationships - Data Products
+    data_product_roles: Mapped[list["DataProductRoleAssignment"]] = relationship(
+        "DataProductRoleAssignment",
+        foreign_keys="DataProductRoleAssignment.user_id",
+        back_populates="user",
+        # Deliberately lazy:
+        #  - Used in limited cases, only on a single user
+        #  - Complicates get_authenticated_user
+        #  - Private dataset test cases become more complex
+        #    (need to manipulate the session to avoid a user being cached with a
+        #     membership field with raise load strategy)
+        lazy="select",
+    )
+    data_products: Mapped[list["DataProduct"]] = association_proxy(
+        "data_product_roles", "data_product"
+    )
+
     # Relationships - Datasets
-    owned_datasets: Mapped[list["Dataset"]] = relationship(
-        secondary=datasets_owner_table,
-        back_populates="owners",
+    dataset_roles: Mapped[list["DatasetRoleAssignment"]] = relationship(
+        "DatasetRoleAssignment",
+        foreign_keys="DatasetRoleAssignment.user_id",
+        back_populates="user",
         # Deliberately lazy:
         #  - Used in limited cases, only on a single user
         #  - Complicates get_authenticated_user
         lazy="select",
     )
+    datasets: Mapped[list["Dataset"]] = association_proxy("dataset_roles", "dataset")
     requested_datasets: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
         foreign_keys="DataProductDatasetAssociation.requested_by_id",
@@ -71,14 +92,6 @@ class User(Base, BaseORM):
         foreign_keys="DataOutputDatasetAssociation.approved_by_id",
         back_populates="approved_by",
         lazy="raise",
-    )
-
-    data_product_role_assignments: Mapped[list["DataProductRoleAssignment"]] = (
-        relationship(
-            "DataProductRoleAssignment",
-            foreign_keys="DataProductRoleAssignment.user_id",
-            back_populates="user",
-        )
     )
 
 

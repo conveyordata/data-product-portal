@@ -63,6 +63,8 @@ class DataOutputService:
             self.db.scalars(
                 select(DataOutputModel).options(
                     joinedload(DataOutputModel.dataset_links)
+                    .joinedload(DataOutputDatasetAssociationModel.dataset)
+                    .raiseload("*"),
                 )
             )
             .unique()

@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
       - name: Get commit hash
         id: vars
-        run: echo "version=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: echo "version=$(git rev-parse --short=7 HEAD)" >> $GITHUB_OUTPUT
     outputs:
         version: ${{ steps.vars.outputs.version }}
   backend:

@@ -5,6 +5,7 @@ import pytest
 from tests.factories import (
     DataProductDatasetAssociationFactory,
     DataProductFactory,
+    DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
     DatasetFactory,
     DatasetRoleAssignmentFactory,
@@ -18,7 +19,7 @@ from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
 from app.datasets.enums import DatasetAccessType
 from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Scope
+from app.roles.schema import Prototype, Scope
 from app.roles.service import RoleService
 
 ENDPOINT = "/api/datasets"
@@ -149,20 +150,23 @@ class TestDatasetsRouter:
         data = response.json()
         assert len(data) == 1
         assert data[0]["id"] == str(ds.id)
-        assert data[0]["owners"][0]["id"] == str(ds.owners[0].id)
 
     def test_get_user_datasets(self, client):
         user_1, user_2 = UserFactory.create_batch(2)
-        DatasetFactory(owners=[user_1])
-        ds = DatasetFactory(owners=[user_1, user_2])
+        ds_1, ds_2 = DatasetFactory.create_batch(2)
+        owner = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        DatasetRoleAssignmentFactory(
+            dataset_id=ds_1.id, user_id=user_1.id, role_id=owner.id
+        )
+        DatasetRoleAssignmentFactory(
+            dataset_id=ds_2.id, user_id=user_2.id, role_id=owner.id
+        )
 
         response = client.get(f"{ENDPOINT}/user/{user_2.id}")
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
-        assert len(data[0]["owners"]) == 2
-        assert str(user_2.id) in [owner["id"] for owner in data[0]["owners"]]
-        assert data[0]["id"] == str(ds.id)
+        assert data[0]["id"] == str(ds_2.id)
 
     def test_update_dataset_not_owner(self, client):
         ds = DatasetFactory()
@@ -467,6 +471,11 @@ class TestDatasetsRouter:
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         dp = DataProductFactory()
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        DataProductRoleAssignmentFactory(
+            data_product_id=dp.id, user_id=user.id, role_id=role.id
+        )
 
         response = self.get_dataset_by_id(client, ds.id)
         assert response.status_code == 200

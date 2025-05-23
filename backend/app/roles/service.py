@@ -75,13 +75,17 @@ class RoleService:
         result.sort()
         return result
 
-    def initialize_prototype_roles(self) -> None:
+    def initialize_prototype_roles(self) -> bool:
         """Initializes the roles that are expected to be present in other parts of the
         application. This function will first check which roles are already present,
         and only create the missing ones.
+
+        Returns: True if a role was added, False otherwise.
         """
+        modified = False
 
         if self.find_prototype(Scope.GLOBAL, Prototype.ADMIN) is None:
+            modified = True
             model = RoleModel(
                 id=ADMIN_UUID,
                 scope=Scope.GLOBAL,
@@ -94,6 +98,7 @@ class RoleService:
             self.db.commit()
 
         if self.find_prototype(Scope.GLOBAL, Prototype.EVERYONE) is None:
+            modified = True
             self.create_role(
                 CreateRole(
                     name="everyone",
@@ -110,6 +115,7 @@ class RoleService:
             )
 
         if self.find_prototype(Scope.DATASET, Prototype.OWNER) is None:
+            modified = True
             self.create_role(
                 CreateRole(
                     name="owner",
@@ -135,6 +141,7 @@ class RoleService:
             )
 
         if self.find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER) is None:
+            modified = True
             self.create_role(
                 CreateRole(
                     name="owner",
@@ -160,6 +167,8 @@ class RoleService:
                 ),
                 prototype=Prototype.OWNER,
             )
+
+        return modified
 
     def find_prototype(self, scope: Scope, prototype: Prototype) -> Optional[Role]:
         return self.db.scalars(

@@ -5,7 +5,11 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz import Action
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import (
+    DataProductResolver,
+    DataProductRoleAssignmentResolver,
+)
 from app.database.database import get_db_session
 from app.role_assignments.data_product import email
 from app.role_assignments.data_product.auth import DataProductAuthAssignment
@@ -36,15 +40,25 @@ def list_assignments(
     )
 
 
-@router.post("")
+@router.post(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__CREATE_USER, resolver=DataProductResolver
+            )
+        )
+    ],
+)
 def create_assignment(
+    id: UUID,
     request: CreateRoleAssignment,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
-    role_assignment = service.create_assignment(request)
+    role_assignment = service.create_assignment(id, request)
 
     approvers = service.users_with_authz_action(
         data_product_id=role_assignment.data_product_id,
@@ -68,7 +82,17 @@ def create_assignment(
     return role_assignment
 
 
-@router.delete("/{id}")
+@router.delete(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__DELETE_USER,
+                resolver=DataProductRoleAssignmentResolver,
+            )
+        )
+    ],
+)
 def delete_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -81,7 +105,17 @@ def delete_assignment(
     return None
 
 
-@router.patch("/{id}")
+@router.patch(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_USER,
+                resolver=DataProductRoleAssignmentResolver,
+            )
+        )
+    ],
+)
 def modify_assigned_role(
     id: UUID,
     request: ModifyRoleAssignment,
@@ -101,7 +135,17 @@ def modify_assigned_role(
     return assignment
 
 
-@router.patch("/{id}/decide")
+@router.patch(
+    "/{id}/decide",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                resolver=DataProductRoleAssignmentResolver,
+            )
+        )
+    ],
+)
 def decide_assignment(
     id: UUID,
     request: DecideRoleAssignment,

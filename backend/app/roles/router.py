@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization
-from app.core.authz.resolvers import DataProductResolver
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 from app.roles.auth import AuthRole
 from app.roles.schema import CreateRole, Role, Scope, UpdateRole
@@ -31,9 +31,7 @@ def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> Sequence[R
     },
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_ROLE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -58,9 +56,7 @@ def create_role(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_ROLE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -83,9 +79,7 @@ def update_role(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_ROLE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DataProductResolver
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 
 from .schema import ThemeSettings
@@ -19,9 +20,7 @@ def get_settings(db: Session = Depends(get_db_session)) -> ThemeSettings:
     "",
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )

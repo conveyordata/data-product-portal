@@ -10,11 +10,11 @@ from app.data_product_settings.enums import (
     DataProductSettingType,
 )
 from app.database.database import Base
-from app.datasets.model import Dataset
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
+    from app.datasets.model import Dataset
 
 
 class DataProductSettingValue(Base, BaseORM):

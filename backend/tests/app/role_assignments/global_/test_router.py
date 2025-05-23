@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
 
+from app.core.authz.actions import AuthorizationAction
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.schema import RoleAssignment
 from app.roles import ADMIN_UUID
@@ -26,6 +27,11 @@ class TestGlobalRoleAssignmentsRouter:
         assert data[0]["id"] == str(assignment.id)
 
     def test_create_assignment(self, client: TestClient):
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
@@ -43,6 +49,11 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
     def test_create_assignment_admin(self, client: TestClient):
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         _: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
 
@@ -60,6 +71,12 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(ADMIN_UUID)
 
     def test_delete_assignment(self, client: TestClient):
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__DELETE_USER],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: RoleAssignment = GlobalRoleAssignmentFactory(
@@ -70,16 +87,22 @@ class TestGlobalRoleAssignmentsRouter:
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
-        assert len(response.json()) == 1
+        assert len(response.json()) == 2
 
         response = client.delete(f"{ENDPOINT}/{assignment.id}")
         assert response.status_code == 200
 
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
-        assert len(response.json()) == 0
+        assert len(response.json()) == 1
 
     def test_decide_assignment(self, client: TestClient):
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: RoleAssignment = GlobalRoleAssignmentFactory(
@@ -99,6 +122,12 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["decision"] == DecisionStatus.APPROVED
 
     def test_decide_assignment_already_decided(self, client: TestClient):
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: RoleAssignment = GlobalRoleAssignmentFactory(
@@ -116,6 +145,12 @@ class TestGlobalRoleAssignmentsRouter:
         assert "already decided" in response.json()["detail"]
 
     def test_decide_assignment_idempotency(self, client: TestClient):
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: RoleAssignment = GlobalRoleAssignmentFactory(
@@ -131,6 +166,12 @@ class TestGlobalRoleAssignmentsRouter:
         assert response.status_code == 200
 
     def test_modify_assigned_role(self, client: TestClient):
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         new_role: Role = RoleFactory(scope=Scope.GLOBAL)
@@ -149,6 +190,12 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(new_role.id)
 
     def test_modify_assigned_role_from_admin(self, client: TestClient):
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         admin: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
         role: Role = RoleFactory(scope=Scope.GLOBAL)
@@ -167,6 +214,12 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
     def test_modify_assigned_role_to_admin(self, client: TestClient):
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         admin: Role = RoleFactory(scope=Scope.GLOBAL, id=ADMIN_UUID)
