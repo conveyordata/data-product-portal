@@ -20,7 +20,7 @@ import {
     useGetGraphDataQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
-import { greenThemeConfig } from '@/theme/antd-theme';
+import { datamindedThemeConfig } from '@/theme/antd-theme';
 import type { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 
@@ -29,7 +29,7 @@ import { Sidebar } from './sidebar';
 
 const { getDesignToken } = theme;
 
-const token = getDesignToken(greenThemeConfig);
+const token = getDesignToken(datamindedThemeConfig);
 
 type Props = {
     id: string;

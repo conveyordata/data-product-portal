@@ -1,11 +1,11 @@
 import { ConfigProvider } from 'antd';
 
 import { AppRoutes } from '@/routes.tsx';
-import { greenThemeConfig } from '@/theme/antd-theme.ts';
+import { datamindedThemeConfig } from '@/theme/antd-theme.ts';
 
 function App() {
     return (
-        <ConfigProvider theme={greenThemeConfig}>
+        <ConfigProvider theme={datamindedThemeConfig}>
             <AppRoutes />
         </ConfigProvider>
     );
