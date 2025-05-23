@@ -145,7 +145,7 @@ function InternalFullExplorer() {
         dataProductsEnabled: true,
         datasetsEnabled: true,
         dataOutputsEnabled: true,
-        domainsEnabled: true,
+        domainsEnabled: false,
     });
 
     const { data: graph, isFetching } = useGetGraphDataQuery(
@@ -168,7 +168,7 @@ function InternalFullExplorer() {
             //const new_nodes = setDomainPositions(nodes);  // TODO: does not work yet but we are disabling domain nodes for now
             //setNodesAndEdges(new_nodes, edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges, sidebarFilters.domainsEnabled]);
+    }, [defaultNodePosition, graph, setNodesAndEdges, sidebarFilters]);
 
     useEffect(() => {
         generateGraph();
