@@ -3,10 +3,14 @@ import uuid
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.data_product_memberships.enums import DataProductUserRole
 from app.database.database import Base
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM, utcnow
+
+
+class DataProductUserRole(str, ObjectEnum):
+    OWNER = "owner"
+    MEMBER = "member"
 
 
 class DataProductMembership(Base, BaseORM):

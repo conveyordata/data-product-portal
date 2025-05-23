@@ -32,13 +32,9 @@ class User(Base, BaseORM):
         "DataProductRoleAssignment",
         foreign_keys="DataProductRoleAssignment.user_id",
         back_populates="user",
-        # Deliberately lazy:
-        #  - Used in limited cases, only on a single user
-        #  - Complicates get_authenticated_user
-        #  - Private dataset test cases become more complex
-        #    (need to manipulate the session to avoid a user being cached with a
-        #     membership field with raise load strategy)
-        lazy="select",
+        lazy="raise",
+        passive_deletes=True,
+        cascade="none",
     )
     data_products: Mapped[list["DataProduct"]] = association_proxy(
         "data_product_roles", "data_product"
@@ -92,6 +88,14 @@ class User(Base, BaseORM):
         foreign_keys="DataOutputDatasetAssociation.approved_by_id",
         back_populates="approved_by",
         lazy="raise",
+    )
+
+    data_product_role_assignments: Mapped[list["DataProductRoleAssignment"]] = (
+        relationship(
+            "DataProductRoleAssignment",
+            foreign_keys="DataProductRoleAssignment.user_id",
+            back_populates="user",
+        )
     )
 
 
