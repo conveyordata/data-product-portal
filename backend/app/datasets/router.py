@@ -29,7 +29,7 @@ from app.role_assignments.dataset.schema import (
     DecideRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Prototype, Scope
+from app.roles.schema import Prototype, Scope, Prototype
 from app.roles.service import RoleService
 from app.users.model import User
 

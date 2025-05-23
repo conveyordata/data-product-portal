@@ -13,6 +13,7 @@ from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
 from app.domains.model import Domain
 from app.role_assignments.dataset.model import DatasetRoleAssignment
+from app.role_assignments.dataset.service import RoleAssignmentService as DatasetRoleAssignmentService
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM, utcnow
 from app.tags.model import Tag, tag_dataset_table
