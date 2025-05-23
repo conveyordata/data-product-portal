@@ -11,7 +11,7 @@ from tests.factories import (
     DomainFactory,
     GlobalRoleAssignmentFactory,
     RoleFactory,
-    UserFactory,
+    UserFactory, DataProductRoleAssignmentFactory,
 )
 
 from app.core.authz.actions import AuthorizationAction
@@ -467,6 +467,11 @@ class TestDatasetsRouter:
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         dp = DataProductFactory()
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        DataProductRoleAssignmentFactory(
+            data_product_id = dp.id, user_id=user.id, role_id=role.id
+        )
 
         response = self.get_dataset_by_id(client, ds.id)
         assert response.status_code == 200

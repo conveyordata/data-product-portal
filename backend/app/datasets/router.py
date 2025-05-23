@@ -28,7 +28,7 @@ from app.role_assignments.dataset.schema import (
     DecideRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Scope
+from app.roles.schema import Scope, Prototype
 from app.roles.service import RoleService
 from app.users.model import User
 
@@ -105,19 +105,14 @@ def create_dataset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    new_dataset = DatasetService().create_dataset(dataset, db)
-    owner_role = [
-        role
-        for role in RoleService(db).get_roles(Scope.DATASET)
-        if role.name.lower() == "owner"
-    ]
-    if len(owner_role) == 1:
-        owner_role = owner_role[0]
-    else:
+    owner_role = RoleService(db).find_prototype(Scope.DATASET, Prototype.OWNER)
+    if owner_role is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Owner role not found",
         )
+
+    new_dataset = DatasetService().create_dataset(dataset, db)
     for owner in new_dataset.owners:
         resp = create_assignment(
             new_dataset.id,
