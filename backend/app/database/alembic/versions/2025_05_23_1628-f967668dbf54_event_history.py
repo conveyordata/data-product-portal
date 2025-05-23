@@ -1,8 +1,8 @@
 """event history
 
 Revision ID: f967668dbf54
-Revises: 7727032896e7
-Create Date: 2025-05-06 16:28:28.024986
+Revises: 6441623a586b
+Create Date: 2025-05-23 16:28:28.024986
 
 """
 
@@ -15,7 +15,7 @@ from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
 revision: str = "f967668dbf54"
-down_revision: Union[str, None] = "7727032896e7"
+down_revision: Union[str, None] = "6441623a586b"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
