@@ -113,11 +113,11 @@ def create_dataset(
         )
 
     new_dataset = DatasetService(db).create_dataset(dataset)
-    for owner in new_dataset.owners:
+    for owner_id in dataset.owners:
         resp = create_assignment(
             new_dataset.id,
             CreateRoleAssignment(
-                dataset_id=new_dataset.id, user_id=owner.id, role_id=owner_role.id
+                dataset_id=new_dataset.id, user_id=owner_id, role_id=owner_role.id
             ),
             db,
             authenticated_user,
