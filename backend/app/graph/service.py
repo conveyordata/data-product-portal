@@ -1,8 +1,9 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 
-from app.data_outputs.service import DataOutputService
-from app.data_products.service import DataProductService
-from app.datasets.service import DatasetService
+from app.data_outputs.model import DataOutput
+from app.data_products.model import DataProduct
+from app.datasets.model import Dataset
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -13,11 +14,33 @@ from app.users.schema import User
 class GraphService:
     def get_graph_data(self, db: Session, user: User) -> Graph:
         # get all data products
-        data_product_gets = DataProductService().get_data_products(db=db)
+        data_products = (
+            db.scalars(
+                select(DataProduct).options(
+                    joinedload(DataProduct.dataset_links),
+                    joinedload(DataProduct.data_outputs),
+                )
+            )
+            .unique()
+            .all()
+        )
         # get all datasets
-        dataset_gets = DatasetService().get_datasets(db=db, user=user)
+        datasets = (
+            db.scalars(
+                select(Dataset).options(
+                    joinedload(Dataset.data_product_links),
+                    joinedload(Dataset.data_output_links),
+                )
+            )
+            .unique()
+            .all()
+        )
         # get all data outputs
-        data_outputs = DataOutputService().get_data_outputs(db=db)
+        data_outputs = (
+            db.scalars(select(DataOutput).options(joinedload(DataOutput.dataset_links)))
+            .unique()
+            .all()
+        )
 
         # Nodes are { data products + datasets + data outputs }
         data_product_nodes = [
@@ -31,7 +54,7 @@ class GraphService:
                 ),
                 type=NodeType.dataProductNode,
             )
-            for data_product_get in data_product_gets
+            for data_product_get in data_products
         ]
         dataset_nodes = [
             Node(
@@ -42,7 +65,7 @@ class GraphService:
                 type=NodeType.datasetNode,
                 link_to_id=dataset_get.id,
             )
-            for dataset_get in dataset_gets
+            for dataset_get in datasets
         ]
         data_output_nodes = [
             Node(
@@ -77,7 +100,7 @@ class GraphService:
             )
 
         # Data outputs -- are bundled in --> data sets. Many-to-many.
-        for dataset_get in dataset_gets:
+        for dataset_get in datasets:
             dataset = dataset_get
             for data_output_link in dataset.data_output_links:
                 data_output = data_output_link.data_output
@@ -91,7 +114,7 @@ class GraphService:
                 )
 
         # Data sets -- are consumed by --> data products. Many-to-many.
-        for data_product in data_product_gets:
+        for data_product in data_products:
             for dataset_link in data_product.dataset_links:
                 dataset = dataset_link.dataset
                 edges.append(
