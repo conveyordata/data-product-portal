@@ -8,17 +8,19 @@ from app.datasets.status import DatasetStatus
 from app.shared.schema import ORMModel
 
 
-class DatasetCreateUpdate(ORMModel):
+class DatasetUpdate(ORMModel):
     name: str
     namespace: str
     description: str
     access_type: DatasetAccessType
     about: Optional[str] = None
     lifecycle_id: Optional[UUID] = None
-    owners: Annotated[list[UUID], MinLen(1)]
     domain_id: UUID
     tag_ids: list[UUID]
 
+
+class DatasetCreate(DatasetUpdate):
+    owners: Annotated[list[UUID], MinLen(1)]
 
 class DatasetAboutUpdate(ORMModel):
     about: str

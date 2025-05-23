@@ -168,7 +168,7 @@ class TestDatasetsRouter:
         assert len(data) == 1
         assert data[0]["id"] == str(ds_2.id)
 
-    def test_update_dataset_not_owner(self, client):
+    def test_update_dataset_no_role(self, client):
         ds = DatasetFactory()
         update_payload = {
             "name": "new_name",
@@ -176,7 +176,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tags": [],
             "access_type": "public",
-            "owners": [str(ds.owners[0].id)],
             "domain_id": str(ds.domain_id),
         }
 
@@ -190,7 +189,7 @@ class TestDatasetsRouter:
             scope=Scope.DATASET,
             permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
         )
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
         update_payload = {
@@ -199,7 +198,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
-            "owners": [str(ds.owners[0].id)],
             "domain_id": str(ds.domain_id),
         }
 
@@ -230,7 +228,7 @@ class TestDatasetsRouter:
 
         assert updated_dataset.status_code == 422
 
-    def test_update_dataset_about_not_owners(self, client):
+    def test_update_dataset_about_no_role(self, client):
         ds = DatasetFactory()
         response = self.update_dataset_about(client, ds.id)
         assert response.status_code == 403
@@ -241,7 +239,7 @@ class TestDatasetsRouter:
             scope=Scope.DATASET,
             permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
         )
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = self.update_dataset_about(client, ds.id)
         assert response.status_code == 200
@@ -379,7 +377,7 @@ class TestDatasetsRouter:
         assert response.status_code == 400
         assert "is already an owner of dataset" in response.json()["detail"]
 
-    def test_update_status_not_owner(self, client):
+    def test_update_status_no_role(self, client):
         ds = DatasetFactory()
         response = self.update_dataset_status(client, {"status": "active"}, ds.id)
         assert response.status_code == 403
@@ -390,13 +388,14 @@ class TestDatasetsRouter:
             scope=Scope.DATASET,
             permissions=[AuthorizationAction.DATASET__UPDATE_STATUS],
         )
-        ds = DatasetFactory(owners=[ds_owner])
+        ds = DatasetFactory()
         DatasetRoleAssignmentFactory(
             user_id=ds_owner.id, role_id=role.id, dataset_id=ds.id
         )
         response = self.get_dataset_by_id(client, ds.id)
         assert response.json()["status"] == "active"
         response = self.update_dataset_status(client, {"status": "pending"}, ds.id)
+        assert response.status_code == 200
         response = self.get_dataset_by_id(client, ds.id)
         assert response.json()["status"] == "pending"
 
@@ -557,14 +556,14 @@ class TestDatasetsRouter:
     def test_update_dataset_duplicate_namespace(self, client):
         namespace = "namespace"
         DatasetFactory(namespace=namespace)
-        ds_owner = UserFactory(external_id="sub")
+        user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
         )
-        ds = DatasetFactory(owners=[ds_owner])
+        ds = DatasetFactory()
         DatasetRoleAssignmentFactory(
-            user_id=ds_owner.id, role_id=role.id, dataset_id=ds.id
+            user_id=user.id, role_id=role.id, dataset_id=ds.id
         )
         update_payload = {
             "name": "new_name",
@@ -572,7 +571,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
-            "owners": [str(ds.owners[0].id)],
             "domain_id": str(ds.domain_id),
         }
 

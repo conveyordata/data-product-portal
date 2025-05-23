@@ -16,8 +16,8 @@ from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
-    DatasetCreateUpdate,
-    DatasetStatusUpdate,
+    DatasetCreate,
+    DatasetStatusUpdate, DatasetUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
@@ -101,7 +101,7 @@ def get_user_datasets(
     ],
 )
 def create_dataset(
-    dataset: DatasetCreateUpdate,
+    dataset: DatasetCreate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
@@ -169,7 +169,7 @@ def remove_dataset(id: UUID, db: Session = Depends(get_db_session)) -> None:
     ],
 )
 def update_dataset(
-    id: UUID, dataset: DatasetCreateUpdate, db: Session = Depends(get_db_session)
+    id: UUID, dataset: DatasetUpdate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
     return DatasetService(db).update_dataset(id, dataset)
 
