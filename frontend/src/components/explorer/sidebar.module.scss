@@ -1,9 +1,29 @@
 @use '@/styles/globals';
 
-.sidebar {
+.sidebarContainer {
+    width: 24em;
+    height: 100%;
+    background-color: globals.$quaternary-color-fill;
+    border: solid 1px globals.$primary-color;
+    border-radius: globals.$border-radius;
+}
+
+.select {
     width: 20em;
-    height: 4em;
+    height: 3em;
     overflow-y: auto;
+    padding: globals.$spacing-s;
+    margin: globals.$spacing-s;
+}
+
+.p {
     margin: globals.$spacing-m;
-    padding: globals.$spacing-m;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.checkableTag {
+    margin-left: 1em;
+    margin-top: 1em;
 }
