@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 
 from app.authorization.service import AuthorizationService
-from app.core.authz import Authorization
 from app.database.database import get_db_session
 
 
@@ -13,5 +12,4 @@ def seed_db(path: str):
     raw_cursor.execute(open(path).read())
 
     raw_connection.commit()
-    Authorization()
     AuthorizationService(db).reload_enforcer()
