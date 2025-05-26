@@ -10,6 +10,9 @@ from sqlalchemy.orm import Session
 from app.database.database import ensure_exists
 from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
+from app.events.schema import CreateEvent
+from app.events.service import EventService
+from app.notifications.service import NotificationService
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
@@ -85,8 +88,10 @@ class RoleAssignmentService:
                 HTTPStatus.FORBIDDEN,
                 "A data product must always be owned by at least one user",
             )
-        self.db.add(
-            EventModel(
+
+        event_id = EventService().create_event(
+            self.db,
+            CreateEvent(
                 name=EventType.DATA_PRODUCT_MEMBERSHIP_REMOVED,
                 subject_id=assignment.data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
@@ -94,6 +99,12 @@ class RoleAssignmentService:
                 target_type=EventReferenceEntity.USER,
                 actor_id=authenticated_user.id,
             ),
+        )
+        NotificationService().create_data_product_notifications(
+            self.db,
+            assignment.data_product_id,
+            event_id,
+            [assignment.requested_by_id],
         )
         self.db.delete(assignment)
         self.db.commit()
@@ -120,8 +131,10 @@ class RoleAssignmentService:
             assignment.decision = decision
             assignment.decided_on = datetime.now()
             assignment.decided_by_id = self.user.id
-            self.db.add(
-                EventModel(
+
+            event_id = EventService().create_event(
+                self.db,
+                CreateEvent(
                     name=(
                         EventType.DATA_PRODUCT_MEMBERSHIP_APPROVED
                         if assignment.decision == DecisionStatus.APPROVED
@@ -134,9 +147,16 @@ class RoleAssignmentService:
                     actor_id=authenticated_user.id,
                 ),
             )
+            NotificationService().create_data_product_notifications(
+                self.db,
+                assignment.data_product_id,
+                event_id,
+                [assignment.requested_by_id],
+            )
         else:
-            self.db.add(
-                EventModel(
+            event_id = EventService().create_event(
+                self.db,
+                CreateEvent(
                     name=EventType.DATA_PRODUCT_MEMBERSHIP_UPDATED,
                     subject_id=assignment.data_product_id,
                     subject_type=EventReferenceEntity.DATA_PRODUCT,
@@ -144,6 +164,12 @@ class RoleAssignmentService:
                     target_type=EventReferenceEntity.USER,
                     actor_id=authenticated_user.id,
                 ),
+            )
+            NotificationService().create_data_product_notifications(
+                self.db,
+                assignment.data_product_id,
+                event_id,
+                [assignment.requested_by_id],
             )
         self.db.commit()
         return assignment
