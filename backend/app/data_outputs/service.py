@@ -2,14 +2,12 @@ from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
 
-import emailgen
 import pytz
-from fastapi import BackgroundTasks, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
-from app.core.email.send_mail import send_mail
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
     NamespaceLengthLimits,
@@ -35,7 +33,6 @@ from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.graph.graph import Graph
 from app.role_assignments.enums import DecisionStatus
-from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.schema import User
@@ -136,8 +133,7 @@ class DataOutputService:
         id: UUID,
         dataset_id: UUID,
         authenticated_user: User,
-        background_tasks: BackgroundTasks,
-    ) -> dict[str, UUID]:
+    ) -> DataOutputDatasetAssociationModel:
         dataset = ensure_dataset_exists(
             dataset_id, self.db, options=[joinedload(DatasetModel.data_product_links)]
         )
@@ -155,17 +151,10 @@ class DataOutputService:
                 detail=f"Dataset {dataset_id} already exists in data product {id}",
             )
 
-        if not dataset.is_visible_to_user(authenticated_user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private dataset",
-            )
-
         # Data output requests always need to be approved
-        approval_status = DecisionStatus.PENDING
         dataset_link = DataOutputDatasetAssociationModel(
             dataset_id=dataset_id,
-            status=approval_status,
+            status=DecisionStatus.PENDING,
             requested_by=authenticated_user,
             requested_on=datetime.now(tz=pytz.utc),
         )
@@ -174,33 +163,7 @@ class DataOutputService:
         self.db.commit()
         self.db.refresh(data_output)
         RefreshInfrastructureLambda().trigger()
-        url = settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-output"
-        action = emailgen.Table(
-            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
-        )
-        action.add_row(
-            [
-                data_output.owner.name,
-                "Wants to provide data to ",
-                dataset.name,
-                ", ".join(
-                    [
-                        f"{owner.first_name} {owner.last_name}"
-                        for owner in dataset.owners
-                    ]
-                ),
-                f"{authenticated_user.first_name} {authenticated_user.last_name}",
-            ]
-        )
-        background_tasks.add_task(
-            send_mail,
-            [User.model_validate(owner) for owner in dataset.owners],
-            action,
-            url,
-            f"Action Required: {data_output.owner.name} wants "
-            f"to provide data to {dataset.name}",
-        )
-        return {"id": dataset_link.id}
+        return dataset_link
 
     def unlink_dataset_from_data_output(self, id: UUID, dataset_id: UUID) -> None:
         ensure_dataset_exists(dataset_id, self.db)

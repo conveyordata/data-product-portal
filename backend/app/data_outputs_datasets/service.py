@@ -7,6 +7,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
+from app.core.authz import Action, Authorization
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
@@ -64,18 +65,18 @@ class DataOutputDatasetService:
         db.commit()
 
     def get_user_pending_actions(
-        self, db: Session, authenticated_user: User
+        self, db: Session, user: User
     ) -> Sequence[DataOutputDatasetPendingAction]:
-        return (
+        requested_associations = (
             db.scalars(
                 select(DataOutputDatasetAssociationModel)
-                .filter(
+                .where(
                     DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
                 )
-                .filter(
+                .where(
                     DataOutputDatasetAssociationModel.dataset.has(
                         DatasetModel.assignments.any(
-                            DatasetRoleAssignment.user_id == authenticated_user.id
+                            DatasetRoleAssignment.user_id == user.id
                         )
                     )
                 )
@@ -84,3 +85,15 @@ class DataOutputDatasetService:
             .unique()
             .all()
         )
+
+        authorizer = Authorization()
+        return [
+            a
+            for a in requested_associations
+            if authorizer.has_access(
+                sub=str(user.id),
+                dom=str(a.dataset.domain),
+                obj=str(a.dataset_id),
+                act=Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+            )
+        ]

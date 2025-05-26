@@ -7,11 +7,13 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataOutputResolver
 from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
+from app.data_outputs import email
 from app.data_outputs.schema_request import DataOutputStatusUpdate, DataOutputUpdate
 from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
 from app.graph.graph import Graph
+from app.role_assignments.dataset.service import RoleAssignmentService
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
@@ -152,9 +154,22 @@ def link_dataset_to_data_output(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> dict[str, UUID]:
-    return DataOutputService(db).link_dataset_to_data_output(
-        id, dataset_id, authenticated_user, background_tasks
+    dataset_link = DataOutputService(db).link_dataset_to_data_output(
+        id, dataset_id, authenticated_user
     )
+
+    approvers = RoleAssignmentService(db, authenticated_user).users_with_authz_action(
+        dataset_link.dataset_id, Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST
+    )
+    background_tasks.add_task(
+        email.send_link_dataset_email(
+            dataset_link.dataset,
+            dataset_link.data_output,
+            requester=authenticated_user,
+            approvers=approvers,
+        )
+    )
+    return {"id": dataset_link.id}
 
 
 @router.delete(

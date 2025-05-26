@@ -28,7 +28,6 @@ class TestDataOutputsDatasetsRouter:
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
         )
-        ds = DatasetFactory(owners=[user])
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -52,7 +51,7 @@ class TestDataOutputsDatasetsRouter:
         user = UserFactory(external_id="sub")
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[user])
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
@@ -99,7 +98,7 @@ class TestDataOutputsDatasetsRouter:
 
     def test_approve_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
@@ -137,7 +136,7 @@ class TestDataOutputsDatasetsRouter:
 
     def test_deny_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
@@ -174,7 +173,7 @@ class TestDataOutputsDatasetsRouter:
 
     def test_remove_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__REVOKE_DATA_OUTPUT_LINK],
@@ -203,7 +202,7 @@ class TestDataOutputsDatasetsRouter:
 
     def test_delete_dataset_with_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(scope=Scope.DATASET, permissions=[Action.DATASET__DELETE])
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataOutputDatasetAssociationFactory(dataset=ds)
@@ -215,7 +214,7 @@ class TestDataOutputsDatasetsRouter:
         assert len(response.json()["dataset_links"]) == 0
 
     def test_get_pending_actions_no_action(self, client):
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+        ds = DatasetFactory()
         DataOutputDatasetAssociationFactory(dataset=ds)
         response = client.get(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
         assert response.json() == []
@@ -224,7 +223,6 @@ class TestDataOutputsDatasetsRouter:
         user = UserFactory(external_id="sub")
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
-        ds = DatasetFactory(owners=[user])
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
@@ -232,6 +230,14 @@ class TestDataOutputsDatasetsRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
+
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 200
         response = client.get(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
