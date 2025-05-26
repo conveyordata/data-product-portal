@@ -138,7 +138,7 @@ export function Notifications() {
     return (
         <Flex>
             <Badge
-                count={notificationItems?.length}
+                count={(notifications ?? []).length}
                 showZero={false}
                 color={colorPrimary}
                 style={{ fontSize: 10 }}
