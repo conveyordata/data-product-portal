@@ -1,5 +1,5 @@
 import { BellOutlined, CloseOutlined } from '@ant-design/icons';
-import { Badge, Button, Dropdown, Flex, type MenuProps, Space, Tag, theme } from 'antd';
+import { Badge, Button, Dropdown, Flex, type MenuProps, Space, Tag, theme, Typography } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +13,8 @@ import { formatDateToNow } from '@/utils/date.helper';
 
 import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
+
+const MAX_ITEMS = 15;
 
 export function Notifications() {
     const {
@@ -75,18 +77,54 @@ export function Notifications() {
     const notificationItems = useMemo(() => {
         if (!notifications || notifications.length === 0) return [];
 
-        return notifications.map((notification, idx) => {
+        const slicedItems = notifications.slice(0, MAX_ITEMS).map((notification, idx) => {
             const prev = notifications[idx - 1];
             const sameActorAsPrevious = idx > 0 && prev.event.actor.id === notification.event.actor.id;
 
             return createNotificationItem(notification, !sameActorAsPrevious, handleRemoveNotification);
         });
-    }, [notifications, createNotificationItem, handleRemoveNotification]);
+
+        const excessLength = notifications.length - MAX_ITEMS;
+
+        if (excessLength > 0) {
+            slicedItems.push({
+                key: 'more-indicator',
+                className: '',
+                label: (
+                    <Typography.Text type="secondary">
+                        {excessLength === 1
+                            ? t('... {{count}} more item', { count: excessLength })
+                            : t('... {{count}} more items', { count: excessLength })}
+                    </Typography.Text>
+                ),
+                extra: <></>,
+            });
+        }
+
+        return slicedItems;
+    }, [notifications, createNotificationItem, handleRemoveNotification, t]);
 
     const items: MenuProps['items'] = [
         {
             type: 'group',
-            label: notificationItems?.length > 0 ? t('Notifications') : t('You currently have no notifications'),
+            label:
+                notificationItems?.length > 0 ? (
+                    <Flex justify="space-between" align="center">
+                        <Typography.Title level={4} className={styles.marginBottom}>
+                            {t('Notifications')}
+                        </Typography.Title>{' '}
+                        <Button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                            }}
+                            className={styles.marginBottom}
+                        >
+                            {t('Delete all')}
+                        </Button>
+                    </Flex>
+                ) : (
+                    t('You currently have no notifications')
+                ),
             children: notificationItems,
         },
     ];
