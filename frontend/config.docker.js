@@ -35,5 +35,6 @@ const config = (() => {
          * This should be a route in the application that handles post-logout actions.
          */
         OIDC_POST_LOGOUT_REDIRECT_URI: '',
+        THEME_CONFIGURATION: 'datamindedthemeconfig',
     };
 })();

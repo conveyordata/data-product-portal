@@ -20,16 +20,11 @@ import {
     useGetGraphDataQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
-import { greenThemeConfig } from '@/theme/antd-theme';
 import type { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 
 import styles from './explorer.module.scss';
 import { Sidebar } from './sidebar';
-
-const { getDesignToken } = theme;
-
-const token = getDesignToken(greenThemeConfig);
 
 type Props = {
     id: string;
@@ -64,6 +59,8 @@ function LinkToDataOutputNode({ id, product_id }: { id: string; product_id: stri
 }
 
 function parseEdges(edges: EdgeContract[]): Edge[] {
+    const { token } = theme.useToken();
+
     return edges.map((edge) => {
         return {
             id: edge.id,

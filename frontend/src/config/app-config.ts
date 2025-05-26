@@ -1,5 +1,7 @@
+import { ThemeConfig } from 'antd';
 import { OidcClientSettings } from 'oidc-client-ts';
 
+import { blueThemeConfig, datamindedThemeConfig, greenThemeConfig } from '@/theme/antd-theme';
 import { LogoutCognitoExtraParams } from '@/types/auth/oidc.ts';
 
 interface Config {
@@ -38,6 +40,12 @@ interface Config {
      * @description This should be a route in your application that handles post-logout actions.
      */
     OIDC_POST_LOGOUT_REDIRECT_URI: string;
+    /**
+     * The Theme configuration for your application.
+     * Pick one from blueThemeConfig, datamindedThemeConfig, greenThemeConfig.
+     * @description This is used to customize the appearance of your application.
+     */
+    THEME_CONFIGURATION: string;
 }
 
 declare global {
@@ -45,6 +53,20 @@ declare global {
 }
 
 export class AppConfig {
+    public static getThemeConfiguration(): ThemeConfig {
+        const themeMapping: Record<string, ThemeConfig> = {
+            bluethemeconfig: blueThemeConfig,
+            datamindedthemeconfig: datamindedThemeConfig,
+            greenthemeconfig: greenThemeConfig,
+        };
+        const theme = themeMapping[config.THEME_CONFIGURATION.toLowerCase()];
+        if (!theme) {
+            throw new Error(`Invalid theme configuration: ${config.THEME_CONFIGURATION}`);
+        }
+
+        return theme;
+    }
+
     public static getApiBaseURL(): string {
         return config.API_BASE_URL;
     }
