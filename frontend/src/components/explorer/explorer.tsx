@@ -20,13 +20,13 @@ import { parseEdges } from './utils.tsx';
 
 type Props = {
     id: string;
-    type: 'dataset' | 'dataproduct' | 'dataoutput' | 'domain';
+    type: 'dataset' | 'dataproduct' | 'dataoutput';
 };
 
 function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Node[] {
     // TODO: revert to old parseNodes function - separate from parseFullNodes
     // Regular nodes and domain nodes. In domain nodes, we count how many children they have so we can estimate their size.
-    const regular_nodes = nodes
+    return nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
         .map((node) => {
             let extra_attributes = {};
@@ -69,8 +69,6 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
                 draggable: true,
                 deletable: false,
                 type: node.type,
-                parentId: '672debaf-31f9-4233-820b-ad2165af044e', // TODO: needs to be the id of the domain node
-                extent: 'parent', // node not draggable outside of the parent
                 data: {
                     name: node.data.name,
                     id: node.data.id,
@@ -81,53 +79,6 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
                 },
             };
         });
-
-    // count how many children each parent has
-    const childCounts = regular_nodes.reduce((acc: Record<string, number>, node) => {
-        if (node.parentId) {
-            if (!acc[node.parentId]) {
-                acc[node.parentId] = 0;
-            }
-            acc[node.parentId]++;
-        }
-        return acc;
-    }, {});
-
-    const domain_nodes = nodes
-        .filter((node) => node.type === CustomNodeTypes.DomainNode)
-        .map((node) => {
-            const childCount = childCounts[node.id] || 1;
-            const width = Math.max(200, childCount * 120); // Base width of 400px, 200px per child
-            return {
-                id: node.id,
-                position: defaultNodePosition,
-                draggable: true,
-                deletable: false,
-                type: 'group', // TODO: double use of the 'type' field by reactflow and ourselves
-                style: {
-                    // TODO: calculate this based on the number of nodes in the domain
-                    width: width,
-                    height: width * 0.6,
-                    backgroundColor: 'rgba(0, 255, 42, 0.1)',
-                    border: '1px solid rgba(0, 255, 42, 0.5)',
-                    borderRadius: '8em',
-                },
-                data: {
-                    name: node.data.name,
-                    id: node.data.id,
-                    icon_key: node.data.icon_key,
-                    isMainNode: node.isMain,
-                    description: node.data.description,
-                    extent: 'parent',
-                    type: 'group',
-                },
-            };
-        });
-
-    const result = [...domain_nodes, ...regular_nodes];
-
-    console.log('result', result);
-    return result;
 }
 
 function InternalExplorer({ id, type }: Props) {
