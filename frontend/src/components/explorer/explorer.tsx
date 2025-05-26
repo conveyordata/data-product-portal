@@ -2,7 +2,7 @@ import '@xyflow/react/dist/base.css';
 
 import type { Edge, Node, XYPosition } from '@xyflow/react';
 import { Position, ReactFlowProvider } from '@xyflow/react';
-import { Button, Flex, theme } from 'antd';
+import { Button, Flex, GlobalToken, theme } from 'antd';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -58,9 +58,7 @@ function LinkToDataOutputNode({ id, product_id }: { id: string; product_id: stri
     );
 }
 
-function parseEdges(edges: EdgeContract[]): Edge[] {
-    const { token } = theme.useToken();
-
+function parseEdges(edges: EdgeContract[], token: GlobalToken): Edge[] {
     return edges.map((edge) => {
         return {
             id: edge.id,
@@ -132,7 +130,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
 function InternalFullExplorer() {
     // Same as InternalExplorer but this one does not filter anything, it shows the full graph
     // Also includes a sidebar to select nodes
-
+    const { token } = theme.useToken();
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
@@ -142,10 +140,10 @@ function InternalFullExplorer() {
     const generateGraph = useCallback(() => {
         if (graph) {
             const nodes = parseNodes(graph.nodes, defaultNodePosition);
-            const edges = parseEdges(graph.edges);
+            const edges = parseEdges(graph.edges, token);
             setNodesAndEdges(nodes, edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges]);
+    }, [defaultNodePosition, graph, setNodesAndEdges, token]);
     useEffect(() => {
         generateGraph();
     }, [generateGraph]);
@@ -172,6 +170,7 @@ function InternalFullExplorer() {
 }
 
 function InternalExplorer({ id, type }: Props) {
+    const { token } = theme.useToken();
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
@@ -197,10 +196,10 @@ function InternalExplorer({ id, type }: Props) {
     const generateGraph = useCallback(() => {
         if (graph) {
             const nodes = parseNodes(graph.nodes, defaultNodePosition);
-            const edges = parseEdges(graph.edges);
+            const edges = parseEdges(graph.edges, token);
             setNodesAndEdges(nodes, edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges]);
+    }, [defaultNodePosition, graph, setNodesAndEdges, token]);
 
     useEffect(() => {
         generateGraph();
