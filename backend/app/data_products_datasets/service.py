@@ -66,8 +66,9 @@ class DataProductDatasetService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = authenticated_user
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        db.add(
-            EventModel(
+        event_id = EventService().create_event(
+            db,
+            CreateEvent(
                 name=EventType.DATA_PRODUCT_DATASET_LINK_DENIED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
@@ -75,6 +76,9 @@ class DataProductDatasetService:
                 target_type=EventReferenceEntity.DATA_PRODUCT,
                 actor_id=authenticated_user.id,
             ),
+        )
+        NotificationService().create_dataset_notifications(
+            db, current_link.dataset_id, event_id, [current_link.requested_by_id]
         )
         db.commit()
 

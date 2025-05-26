@@ -64,7 +64,7 @@ export function NotificationDescription({ record }: NotificationDescriptionProps
                           if (targetPath) navigate(targetPath);
                       }}
                   >
-                      {getSubjectDisplayLabel(t, record)}
+                      {getTargetDisplayLabel(t, record)}
                   </Button>
               );
           })()

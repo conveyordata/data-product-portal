@@ -1,5 +1,5 @@
 import { BellOutlined, CloseOutlined } from '@ant-design/icons';
-import { Badge, Button, Dropdown, Flex, type MenuProps, Space, theme } from 'antd';
+import { Badge, Button, Dropdown, Flex, type MenuProps, Space, Tag, theme } from 'antd';
 import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import {
     useRemoveNotificationMutation,
 } from '@/store/features/notifications/notifications-api-slice';
 import { NotificationContract } from '@/types/notifications/notification.contract';
+import { formatDateToNow } from '@/utils/date.helper';
 
 import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
@@ -43,14 +44,33 @@ export function Notifications() {
             notification: NotificationContract,
             navigate: NavigateFunction,
             t: TFunction,
+            showActor: boolean,
             handleRemoveNotification: (id: string) => void,
         ) => {
             //const navigatePath = '/';
             return {
                 key: notification.id,
-                label: <NotificationDescription record={notification.event} />,
+                className: showActor ? styles.notificationItemWithActor : styles.notificationItem,
+                label: (
+                    <Flex vertical className={styles.notificationContainer}>
+                        {showActor && (
+                            <Flex className={styles.notificationTag}>
+                                <Tag color="default">
+                                    {t('{{name}} {{surname}}, {{date}}:', {
+                                        name: notification.event.actor.first_name,
+                                        surname: notification.event.actor.last_name,
+                                        date: formatDateToNow(notification.event.created_on),
+                                    })}
+                                </Tag>
+                            </Flex>
+                        )}
+
+                        <NotificationDescription record={notification.event} />
+                    </Flex>
+                ),
                 extra: (
                     <Button
+                        className={styles.closeButton}
                         type="link"
                         onClick={(event) => {
                             event.stopPropagation();
@@ -66,11 +86,14 @@ export function Notifications() {
     );
 
     const notificationItems = useMemo(() => {
-        const items = notifications?.map((notification) =>
-            createNotificationItem(notification, navigate, t, handleRemoveNotification),
-        );
+        if (!notifications || notifications.length === 0) return [];
 
-        return items ?? [];
+        return notifications.map((notification, idx) => {
+            const prev = notifications[idx - 1];
+            const sameActorAsPrevious = idx > 0 && prev.event.actor.id === notification.event.actor.id;
+
+            return createNotificationItem(notification, navigate, t, !sameActorAsPrevious, handleRemoveNotification);
+        });
     }, [notifications, createNotificationItem, navigate, t, handleRemoveNotification]);
 
     const items: MenuProps['items'] = [

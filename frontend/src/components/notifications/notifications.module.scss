@@ -9,3 +9,32 @@
     padding-left: 0;
     padding-right: 0;
 }
+
+.notification-container {
+    width: 100%;
+}
+
+.notification-item {
+    padding: 0 !important;
+    margin: 0 !important;
+    padding-left: globals.$spacing-xs !important;
+}
+
+.notification-item-with-actor {
+    padding: 0 !important;
+    margin: 0 !important;
+    margin-top: globals.$spacing-xl !important;
+    padding-left: globals.$spacing-xs !important;
+}
+
+.notification-tag {
+    position: absolute;
+    top: -(globals.$spacing-xl);
+    left: 0;
+    margin-top: globals.$spacing-xs;
+}
+
+.close-button {
+    padding: 0;
+    padding-right: globals.$spacing-s;
+}

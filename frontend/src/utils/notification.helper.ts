@@ -45,9 +45,9 @@ export function getEventTypeNotificationText(t: TFunction, type: EventType): str
         case EventType.DATA_PRODUCT_DATASET_LINK_APPROVED:
             return t('is now linked to the ');
         case EventType.DATA_PRODUCT_DATASET_LINK_DENIED:
-            return t('Denied data product dataset link to the');
+            return t('link denied for the ');
         case EventType.DATA_PRODUCT_DATASET_LINK_REMOVED:
-            return t('Removed product dataset link to the');
+            return t('has removed a link to the ');
 
         case EventType.DATASET_CREATED:
             return t('Dataset created');
