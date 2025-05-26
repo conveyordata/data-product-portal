@@ -9,6 +9,7 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
     DatasetResolver,
     DatasetRoleAssignmentResolver,
+    EmptyResolver,
 )
 from app.database.database import get_db_session
 from app.role_assignments.dataset.auth import DatasetAuthAssignment
@@ -47,6 +48,25 @@ def list_assignments(
     ],
 )
 def create_assignment(
+    id: UUID,
+    request: CreateRoleAssignment,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> RoleAssignmentResponse:
+    return RoleAssignmentService(db=db, user=user).create_assignment(id, request)
+
+
+@router.post(
+    "request/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__REQUEST_DATASET_ACCESS, resolver=EmptyResolver
+            )
+        )
+    ],
+)
+def request_assignment(
     id: UUID,
     request: CreateRoleAssignment,
     db: Session = Depends(get_db_session),
