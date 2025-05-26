@@ -15,12 +15,14 @@
 }
 
 .notification-item {
+    cursor: default !important;
     padding: 0 !important;
     margin: 0 !important;
     padding-left: globals.$spacing-xs !important;
 }
 
 .notification-item-with-actor {
+    cursor: default !important;
     padding: 0 !important;
     margin: 0 !important;
     margin-top: globals.$spacing-xl !important;

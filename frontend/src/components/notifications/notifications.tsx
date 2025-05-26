@@ -1,9 +1,7 @@
 import { BellOutlined, CloseOutlined } from '@ant-design/icons';
 import { Badge, Button, Dropdown, Flex, type MenuProps, Space, Tag, theme } from 'antd';
-import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type NavigateFunction, useNavigate } from 'react-router';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import {
@@ -21,7 +19,6 @@ export function Notifications() {
         token: { colorPrimary },
     } = theme.useToken();
     const { t } = useTranslation();
-    const navigate = useNavigate();
 
     const { data: notifications } = useGetNotificationsQuery();
 
@@ -40,14 +37,7 @@ export function Notifications() {
     );
 
     const createNotificationItem = useCallback(
-        (
-            notification: NotificationContract,
-            navigate: NavigateFunction,
-            t: TFunction,
-            showActor: boolean,
-            handleRemoveNotification: (id: string) => void,
-        ) => {
-            //const navigatePath = '/';
+        (notification: NotificationContract, showActor: boolean, handleRemoveNotification: (id: string) => void) => {
             return {
                 key: notification.id,
                 className: showActor ? styles.notificationItemWithActor : styles.notificationItem,
@@ -56,11 +46,8 @@ export function Notifications() {
                         {showActor && (
                             <Flex className={styles.notificationTag}>
                                 <Tag color="default">
-                                    {t('{{name}} {{surname}}, {{date}}:', {
-                                        name: notification.event.actor.first_name,
-                                        surname: notification.event.actor.last_name,
-                                        date: formatDateToNow(notification.event.created_on),
-                                    })}
+                                    {notification.event.actor.first_name} {notification.event.actor.last_name},{' '}
+                                    {formatDateToNow(notification.event.created_on)}
                                 </Tag>
                             </Flex>
                         )}
@@ -92,9 +79,9 @@ export function Notifications() {
             const prev = notifications[idx - 1];
             const sameActorAsPrevious = idx > 0 && prev.event.actor.id === notification.event.actor.id;
 
-            return createNotificationItem(notification, navigate, t, !sameActorAsPrevious, handleRemoveNotification);
+            return createNotificationItem(notification, !sameActorAsPrevious, handleRemoveNotification);
         });
-    }, [notifications, createNotificationItem, navigate, t, handleRemoveNotification]);
+    }, [notifications, createNotificationItem, handleRemoveNotification]);
 
     const items: MenuProps['items'] = [
         {
