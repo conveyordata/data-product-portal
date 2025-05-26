@@ -45,6 +45,9 @@ database:
   username: postgres
 infrastructure_lambda_arn: ""
 
+# Pick from datamindedthemeconfig, bluethemeconfig, greenthemeconfig
+theme_configuration: "datamindedthemeconfig"
+
 replicaCount: 1
 
 image:
