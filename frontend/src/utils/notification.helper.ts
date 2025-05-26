@@ -5,11 +5,11 @@ import { EventType } from '@/types/events/event-types';
 export function getEventTypeNotificationText(t: TFunction, type: EventType): string {
     switch (type) {
         case EventType.DATA_OUTPUT_CREATED:
-            return '';
+            return 'has been created for the ';
         case EventType.DATA_OUTPUT_UPDATED:
             return '';
         case EventType.DATA_OUTPUT_REMOVED:
-            return '';
+            return 'has been removed from the ';
 
         case EventType.DATA_OUTPUT_DATASET_LINK_REQUESTED:
             return '';
@@ -18,7 +18,7 @@ export function getEventTypeNotificationText(t: TFunction, type: EventType): str
         case EventType.DATA_OUTPUT_DATASET_LINK_DENIED:
             return t('link denied for the ');
         case EventType.DATA_OUTPUT_DATASET_LINK_REMOVED:
-            return '';
+            return t('has been unlinked from the ');
 
         case EventType.DATA_PRODUCT_CREATED:
             return 'has been created';
