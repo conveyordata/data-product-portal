@@ -17,13 +17,13 @@ import {
 } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { RoleAssignmentContract } from '@/types/roles/role.contract';
+import { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 import { SearchForm } from '@/types/shared';
 import { UserContract } from '@/types/users';
 
 import styles from './team-tab.module.scss';
 
-function filterUsers(users: RoleAssignmentContract[], searchTerm: string): RoleAssignmentContract[] {
+function filterUsers(users: DataProductRoleAssignmentContract[], searchTerm: string): DataProductRoleAssignmentContract[] {
     if (!searchTerm) return users;
 
     return users.filter((membership) => {

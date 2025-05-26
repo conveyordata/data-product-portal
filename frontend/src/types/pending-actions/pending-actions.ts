@@ -1,7 +1,7 @@
 import { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '../data-output-dataset';
 import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '../data-product-dataset';
 import { DataProductMembershipRoleRequest } from '../data-product-membership';
-import { RoleAssignmentContract } from '../roles/role.contract';
+import { DataProductRoleAssignmentContract } from '../roles/role.contract';
 
 export enum PendingActionTypes {
     DataProductDataset = 'DataProductDataset',
@@ -17,7 +17,7 @@ export interface DataOutputDatasetPendingAction extends DataOutputDatasetContrac
     pending_action_type: PendingActionTypes.DataOutputDataset;
 }
 
-export interface DataProductRoleAssignmentPendingAction extends RoleAssignmentContract {
+export interface DataProductRoleAssignmentPendingAction extends DataProductRoleAssignmentContract {
     pending_action_type: PendingActionTypes.DataProductRoleAssignment;
 }
 

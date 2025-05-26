@@ -4,14 +4,14 @@ import type { TFunction } from 'i18next';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form';
 import { DecisionStatus, type RoleContract } from '@/types/roles';
-import type { RoleAssignmentContract } from '@/types/roles/role.contract';
+import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    dataProductUsers: RoleAssignmentContract[];
+    dataProductUsers: DataProductRoleAssignmentContract[];
     onRemoveUserAccess: (assignmentId: string) => void;
     onAcceptAccessRequest: (assignmentId: string) => void;
     onRejectAccessRequest: (assignmentId: string) => void;
@@ -34,8 +34,8 @@ export const getDataProductUsersTableColumns = ({
     canEdit,
     canRemove,
     canApprove,
-}: Props): TableColumnsType<RoleAssignmentContract> => {
-    const sorter = new Sorter<RoleAssignmentContract>();
+}: Props): TableColumnsType<DataProductRoleAssignmentContract> => {
+    const sorter = new Sorter<DataProductRoleAssignmentContract>();
     return [
         {
             title: t('Id'),
@@ -62,7 +62,7 @@ export const getDataProductUsersTableColumns = ({
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: RoleContract, { user, id, decision }: RoleAssignmentContract) => {
+            render: (role: RoleContract, { user, id, decision }: DataProductRoleAssignmentContract) => {
                 const isApproved = decision === DecisionStatus.Approved;
                 return (
                     <RoleChangeForm
@@ -99,7 +99,7 @@ export const getDataProductUsersTableColumns = ({
             title: t('Actions'),
             key: 'action',
             hidden: !(canRemove || canApprove),
-            render: (_, { user, id, decision }: RoleAssignmentContract) => (
+            render: (_, { user, id, decision }: DataProductRoleAssignmentContract) => (
                 <Space>
                     {decision === DecisionStatus.Pending ? (
                         <Space>

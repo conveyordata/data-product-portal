@@ -43,7 +43,7 @@ from app.role_assignments.dataset.service import (
 from app.role_assignments.enums import DecisionStatus
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
-from app.users.model import User, ensure_user_exists
+from app.users.model import User
 
 
 class DatasetService:
@@ -222,38 +222,6 @@ class DatasetService:
         current_dataset = ensure_dataset_exists(id, self.db)
         current_dataset.status = dataset.status
         self.db.commit()
-
-    def add_user_to_dataset(self, dataset_id: UUID, user_id: UUID) -> None:
-        dataset = ensure_dataset_exists(dataset_id, self.db)
-        user = ensure_user_exists(user_id, self.db)
-        if user in dataset.owners:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"User {user_id} is already an owner of dataset {dataset_id}",
-            )
-
-        dataset.owners.append(user)
-        self.db.commit()
-        RefreshInfrastructureLambda().trigger()
-
-    def remove_user_from_dataset(self, dataset_id: UUID, user_id: UUID) -> None:
-        dataset = ensure_dataset_exists(dataset_id, self.db)
-        user = ensure_user_exists(user_id, self.db)
-
-        if user not in dataset.owners:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"User {user_id} is not an owner of dataset {dataset_id}",
-            )
-        elif len(dataset.owners) == 1:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Cannot remove the last owner of dataset {dataset_id}",
-            )
-
-        dataset.owners.remove(user)
-        self.db.commit()
-        RefreshInfrastructureLambda().trigger()
 
     def get_graph_data(self, id: UUID, level: int) -> Graph:
         dataset = self.db.get(

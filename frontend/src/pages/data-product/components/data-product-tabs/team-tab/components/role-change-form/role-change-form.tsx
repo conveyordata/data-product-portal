@@ -2,20 +2,20 @@ import { Form, FormProps, Select } from 'antd';
 
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { RoleContract } from '@/types/roles';
-import { RoleAssignmentContract } from '@/types/roles/role.contract';
+import { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 
 import styles from './role-change-form.module.scss';
 
 type Props = {
     userId: string;
     initialRole: RoleContract;
-    dataProductUsers: RoleAssignmentContract[];
+    dataProductUsers: DataProductRoleAssignmentContract[];
     onRoleChange: (role: RoleContract) => void;
     isDisabled?: boolean;
 };
 
 export function RoleChangeForm({ userId, initialRole, onRoleChange, isDisabled = true }: Props) {
-    const [dataProductRoleForm] = Form.useForm<RoleAssignmentContract>();
+    const [dataProductRoleForm] = Form.useForm<DataProductRoleAssignmentContract>();
     const { data: DATA_PRODUCT_ROLES, isLoading } = useGetRolesQuery('data_product', { skip: isDisabled });
 
     const handleRoleChange: FormProps<RoleContract>['onFinish'] = (role) => {
@@ -25,12 +25,12 @@ export function RoleChangeForm({ userId, initialRole, onRoleChange, isDisabled =
         }
     };
     return (
-        <Form<RoleAssignmentContract>
+        <Form<DataProductRoleAssignmentContract>
             form={dataProductRoleForm}
             initialValues={{ role: initialRole.name }}
             disabled={isDisabled}
         >
-            <Form.Item<RoleAssignmentContract> name={'role'} className={styles.selectRoleWrapper}>
+            <Form.Item<DataProductRoleAssignmentContract> name={'role'} className={styles.selectRoleWrapper}>
                 <Select
                     loading={isLoading}
                     onSelect={(roleName: string) => {

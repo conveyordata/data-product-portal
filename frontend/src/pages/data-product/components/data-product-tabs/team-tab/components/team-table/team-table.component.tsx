@@ -14,14 +14,14 @@ import {
 } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { RoleContract } from '@/types/roles';
-import type { RoleAssignmentContract } from '@/types/roles/role.contract';
+import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 
 import styles from './team-table.module.scss';
 
 type Props = {
     dataProductId: string;
-    dataProductUsers: RoleAssignmentContract[];
+    dataProductUsers: DataProductRoleAssignmentContract[];
 };
 export function TeamTable({ dataProductId, dataProductUsers }: Props) {
     const { t } = useTranslation();
@@ -61,7 +61,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
-    const onChange: TableProps<RoleAssignmentContract>['onChange'] = (pagination) => {
+    const onChange: TableProps<DataProductRoleAssignmentContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
@@ -120,7 +120,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         [dataProduct, handleGrantAccessToDataProduct],
     );
 
-    const columns: TableColumnsType<RoleAssignmentContract> = useMemo(() => {
+    const columns: TableColumnsType<DataProductRoleAssignmentContract> = useMemo(() => {
         return getDataProductUsersTableColumns({
             t,
             dataProductUsers: dataProductUsers,
@@ -152,7 +152,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
 
     return (
         <Flex className={styles.teamListContainer}>
-            <Table<RoleAssignmentContract>
+            <Table<DataProductRoleAssignmentContract>
                 loading={isLoadingDataProduct}
                 className={styles.teamListTable}
                 columns={columns}
