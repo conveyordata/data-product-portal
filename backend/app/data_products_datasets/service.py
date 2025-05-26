@@ -26,8 +26,9 @@ class DataProductDatasetService:
         if current_link.status != DecisionStatus.PENDING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Request already approved/denied",
+                detail="Approval request already decided",
             )
+
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
@@ -44,7 +45,7 @@ class DataProductDatasetService:
         ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Request already approved/denied",
+                detail="Approval request already decided",
             )
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = authenticated_user
@@ -65,7 +66,7 @@ class DataProductDatasetService:
         db.commit()
 
     def get_user_pending_actions(
-        self, db: Session, authenticated_user: User
+        self, db: Session, user: User
     ) -> Sequence[DataProductDatasetPendingAction]:
         return (
             db.scalars(
@@ -76,7 +77,7 @@ class DataProductDatasetService:
                 .where(
                     DataProductDatasetAssociationModel.dataset.has(
                         DatasetModel.assignments.any(
-                            DatasetRoleAssignment.user_id == authenticated_user.id
+                            DatasetRoleAssignment.user_id == user.id
                         )
                     )
                 )

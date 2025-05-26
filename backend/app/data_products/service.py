@@ -4,11 +4,10 @@ from typing import Sequence
 from urllib import parse
 from uuid import UUID
 
-import emailgen
 import httpx
 import pytz
 from botocore.exceptions import ClientError
-from fastapi import BackgroundTasks, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
@@ -16,7 +15,6 @@ from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
-from app.core.email.send_mail import send_mail
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
     NamespaceLengthLimits,
@@ -46,6 +44,7 @@ from app.data_products_datasets.model import (
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
+from app.datasets.service import DatasetService
 from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
@@ -56,7 +55,6 @@ from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype
-from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User as UserModel
@@ -251,50 +249,13 @@ class DataProductService:
         current_data_product.status = data_product.status
         db.commit()
 
-    def _send_email_for_dataset_link(
-        self,
-        dataset: DatasetModel,
-        data_product: DataProductModel,
-        authenticated_user: User,
-        background_tasks: BackgroundTasks,
-    ) -> None:
-        url = (
-            settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-product"
-        )
-        action = emailgen.Table(
-            ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
-        )
-        action.add_row(
-            [
-                data_product.name,
-                "Access to consume data from ",
-                dataset.name,
-                ", ".join(
-                    [
-                        f"{owner.first_name} {owner.last_name}"
-                        for owner in dataset.owners
-                    ]
-                ),
-                f"{authenticated_user.first_name} {authenticated_user.last_name}",
-            ]
-        )
-        background_tasks.add_task(
-            send_mail,
-            [User.model_validate(owner) for owner in dataset.owners],
-            action,
-            url,
-            f"Action Required: {data_product.name} wants "
-            f"to consume data from {dataset.name}",
-        )
-
     def link_dataset_to_data_product(
         self,
         id: UUID,
         dataset_id: UUID,
         authenticated_user: User,
         db: Session,
-        background_tasks: BackgroundTasks,
-    ) -> dict[str, UUID]:
+    ) -> DataProductDatasetModel:
         dataset = ensure_dataset_exists(
             dataset_id,
             db,
@@ -314,7 +275,7 @@ class DataProductService:
                 detail=f"Dataset {dataset_id} already exists in data product {id}",
             )
 
-        if not dataset.is_visible_to_user(authenticated_user):
+        if not DatasetService(db).is_visible_to_user(dataset, authenticated_user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private dataset",
@@ -336,11 +297,7 @@ class DataProductService:
         db.commit()
         db.refresh(data_product)
         RefreshInfrastructureLambda().trigger()
-        if dataset.access_type != DatasetAccessType.PUBLIC:
-            self._send_email_for_dataset_link(
-                dataset, data_product, authenticated_user, background_tasks
-            )
-        return {"id": dataset_link.id}
+        return dataset_link
 
     def unlink_dataset_from_data_product(
         self, id: UUID, dataset_id: UUID, db: Session

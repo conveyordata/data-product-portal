@@ -64,7 +64,9 @@ class TestDataProductsDatasetsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[user])
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        role = RoleFactory(scope=Scope.DATASET)
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
         response = self.request_data_product_dataset_link(
             client, data_product.id, ds.id
@@ -108,7 +110,7 @@ class TestDataProductsDatasetsRouter:
 
     def test_approve_data_product_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
@@ -131,7 +133,7 @@ class TestDataProductsDatasetsRouter:
         response = self.approve_default_data_product_dataset_link(client, link.id)
         assert response.status_code == 200
 
-    def test_not_owner_cannot_approved_link(self, client):
+    def test_approved_link_no_role(self, client):
         ds = DatasetFactory()
         link = DataProductDatasetAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
@@ -146,7 +148,7 @@ class TestDataProductsDatasetsRouter:
 
     def test_deny_data_product_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
@@ -168,7 +170,7 @@ class TestDataProductsDatasetsRouter:
         response = self.deny_default_data_product_dataset_link(client, link.id)
         assert response.status_code == 200
 
-    def test_not_owner_cannot_deny_link(self, client):
+    def test_deny_link_no_role(self, client):
         ds = DatasetFactory()
         link = DataProductDatasetAssociationFactory(
             dataset=ds, status=DecisionStatus.PENDING
@@ -183,7 +185,7 @@ class TestDataProductsDatasetsRouter:
 
     def test_remove_data_product_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__REVOKE_DATAPRODUCT_ACCESS],
@@ -219,7 +221,7 @@ class TestDataProductsDatasetsRouter:
 
     def test_delete_dataset_with_product_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(scope=Scope.DATASET, permissions=[Action.DATASET__DELETE])
         DatasetRoleAssignmentFactory(
             user_id=str(user.id), role_id=str(role.id), dataset_id=str(ds.id)
@@ -233,7 +235,7 @@ class TestDataProductsDatasetsRouter:
         assert len(response.json()["dataset_links"]) == 0
 
     def test_get_pending_actions_no_action(self, client):
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+        ds = DatasetFactory()
         DataProductDatasetAssociationFactory(dataset=ds)
         response = client.get(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
         assert response.json() == []
@@ -253,7 +255,9 @@ class TestDataProductsDatasetsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory(owners=[user], access_type=DatasetAccessType.RESTRICTED)
+        ds = DatasetFactory(access_type=DatasetAccessType.RESTRICTED)
+        role = RoleFactory(scope=Scope.DATASET)
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
         response = self.request_data_product_dataset_link(
             client, data_product.id, ds.id
@@ -278,7 +282,7 @@ class TestDataProductsDatasetsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
 
         response = self.request_data_product_dataset_link(
             client, data_product.id, ds.id

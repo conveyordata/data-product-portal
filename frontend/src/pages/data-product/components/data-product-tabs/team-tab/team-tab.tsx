@@ -23,7 +23,10 @@ import { UserContract } from '@/types/users';
 
 import styles from './team-tab.module.scss';
 
-function filterUsers(users: DataProductRoleAssignmentContract[], searchTerm: string): DataProductRoleAssignmentContract[] {
+function filterUsers(
+    users: DataProductRoleAssignmentContract[],
+    searchTerm: string,
+): DataProductRoleAssignmentContract[] {
     if (!searchTerm) return users;
 
     return users.filter((membership) => {

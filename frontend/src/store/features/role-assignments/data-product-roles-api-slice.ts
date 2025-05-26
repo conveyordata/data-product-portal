@@ -2,7 +2,10 @@ import { ApiUrl, buildUrl } from '@/api/api-urls';
 import { baseApiSlice } from '@/store/features/api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
 import { DecisionStatus } from '@/types/roles';
-import type { DataProductRoleAssignmentContract, DataProductRoleAssignmentCreateContract } from '@/types/roles/role.contract';
+import type {
+    DataProductRoleAssignmentContract,
+    DataProductRoleAssignmentCreateContract,
+} from '@/types/roles/role.contract';
 
 export const roleTags: string[] = [TagTypes.Role];
 
@@ -25,7 +28,10 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                 }),
                 providesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
             }),
-            createRoleAssignment: builder.mutation<DataProductRoleAssignmentContract, DataProductRoleAssignmentCreateContract>({
+            createRoleAssignment: builder.mutation<
+                DataProductRoleAssignmentContract,
+                DataProductRoleAssignmentCreateContract
+            >({
                 query: (request) => ({
                     url: buildUrl(ApiUrl.RoleAssignmentsDataProduct, { assignmentId: request.data_product_id }),
                     method: 'POST',
