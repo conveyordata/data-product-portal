@@ -16,8 +16,6 @@ data:
   {{- else }}
   OIDC_ENABLED: "false"
   {{- end }}
-  SMTP_USERNAME: {{ .Values.smtp.username }}
-  SMTP_PASSWORD: {{ .Values.smtp.password }}
   {{- if .Values.smtp.no_login}}
   SMTP_NO_LOGIN: "true"
   {{- else }}
