@@ -26,11 +26,13 @@ from app.datasets.schema_request import (
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.events.enum import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
+from app.events.schema import CreateEvent
 from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.notifications.service import NotificationService
 from app.role_assignments.enums import DecisionStatus
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
@@ -174,14 +176,16 @@ class DatasetService:
                     actor_id=authenticated_user.id,
                 ),
             )
-        db.add(
-            EventModel(
+        event_id = EventService().create_event(
+            db,
+            CreateEvent(
                 name=EventType.DATASET_CREATED,
                 subject_id=model.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
             ),
         )
+        NotificationService().create_dataset_notifications(db, model.id, event_id)
         db.commit()
         RefreshInfrastructureLambda().trigger()
         return model
@@ -192,14 +196,16 @@ class DatasetService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
             )
-        db.add(
-            EventModel(
+        event_id = EventService().create_event(
+            db,
+            CreateEvent(
                 name=EventType.DATASET_REMOVED,
                 subject_id=dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
             ),
         )
+        NotificationService().create_dataset_notifications(db, dataset.id, event_id)
         db.delete(dataset)
         db.commit()
         RefreshInfrastructureLambda().trigger()
@@ -236,8 +242,9 @@ class DatasetService:
                 current_dataset = self._update_owners(current_dataset, db, v)
 
                 for owner_id in owners_to_remove:
-                    db.add(
-                        EventModel(
+                    event_id = EventService().create_event(
+                        db,
+                        CreateEvent(
                             name=EventType.DATASET_USER_REMOVED,
                             subject_id=current_dataset.id,
                             subject_type=EventReferenceEntity.DATASET,
@@ -246,9 +253,13 @@ class DatasetService:
                             actor_id=authenticated_user.id,
                         ),
                     )
+                    NotificationService().create_dataset_notifications(
+                        db, current_dataset.id, event_id, [owner_id]
+                    )
                 for owner_id in owners_to_add:
-                    db.add(
-                        EventModel(
+                    event_id = EventService().create_event(
+                        db,
+                        CreateEvent(
                             name=EventType.DATASET_USER_ADDED,
                             subject_id=current_dataset.id,
                             subject_type=EventReferenceEntity.DATASET,
@@ -256,6 +267,9 @@ class DatasetService:
                             target_type=EventReferenceEntity.USER,
                             actor_id=authenticated_user.id,
                         ),
+                    )
+                    NotificationService().create_dataset_notifications(
+                        db, current_dataset.id, event_id, [owner_id]
                     )
 
             elif k == "tag_ids":
@@ -325,8 +339,10 @@ class DatasetService:
             )
 
         dataset.owners.append(user)
-        db.add(
-            EventModel(
+
+        event_id = EventService().create_event(
+            db,
+            CreateEvent(
                 name=EventType.DATASET_USER_ADDED,
                 subject_id=dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
@@ -335,6 +351,10 @@ class DatasetService:
                 target_type=EventReferenceEntity.USER,
             ),
         )
+        NotificationService().create_dataset_notifications(
+            db, dataset.id, event_id, [user.id]
+        )
+
         db.commit()
         RefreshInfrastructureLambda().trigger()
 
@@ -355,9 +375,9 @@ class DatasetService:
                 detail=f"Cannot remove the last owner of dataset {dataset_id}",
             )
 
-        dataset.owners.remove(user)
-        db.add(
-            EventModel(
+        event_id = EventService().create_event(
+            db,
+            CreateEvent(
                 name=EventType.DATASET_USER_REMOVED,
                 subject_id=dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
@@ -366,6 +386,10 @@ class DatasetService:
                 target_type=EventReferenceEntity.USER,
             ),
         )
+        NotificationService().create_dataset_notifications(
+            db, dataset.id, event_id, [user.id]
+        )
+        dataset.owners.remove(user)
         db.commit()
         RefreshInfrastructureLambda().trigger()
 

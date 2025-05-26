@@ -21,11 +21,11 @@ export function getEventTypeNotificationText(t: TFunction, type: EventType): str
             return '';
 
         case EventType.DATA_PRODUCT_CREATED:
-            return '';
+            return 'has been created';
         case EventType.DATA_PRODUCT_UPDATED:
             return '';
         case EventType.DATA_PRODUCT_REMOVED:
-            return '';
+            return 'has been removed';
 
         case EventType.DATA_PRODUCT_MEMBERSHIP_CREATED:
             return '';
@@ -50,16 +50,15 @@ export function getEventTypeNotificationText(t: TFunction, type: EventType): str
             return t('has removed a link to the ');
 
         case EventType.DATASET_CREATED:
-            return '';
+            return ' has been created';
         case EventType.DATASET_UPDATED:
             return '';
         case EventType.DATASET_REMOVED:
-            return '';
-
+            return ' has been removed';
         case EventType.DATASET_USER_ADDED:
-            return '';
+            return 'membership granted to ';
         case EventType.DATASET_USER_REMOVED:
-            return '';
+            return 'membership revoked for ';
 
         default:
             return '';

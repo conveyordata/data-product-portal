@@ -60,7 +60,7 @@ export function Notifications() {
                             <Flex className={styles.notificationTag}>
                                 <Tag color="default">
                                     {notification.event.actor.first_name} {notification.event.actor.last_name},{' '}
-                                    {formatDateToNow(notification.event.created_on)}
+                                    {formatDateToNow(notification.event.created_on)}:
                                 </Tag>
                             </Flex>
                         )}

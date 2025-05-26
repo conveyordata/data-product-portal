@@ -9,6 +9,7 @@ from app.data_products.model import ensure_data_product_exists
 from app.datasets.model import ensure_dataset_exists
 from app.notifications.model import Notification as NotificationModel
 from app.notifications.schema_response import NotificationGet
+from app.role_assignments.enums import DecisionStatus
 from app.users.schema import User
 
 
@@ -79,7 +80,11 @@ class NotificationService:
         data_product = ensure_data_product_exists(data_product_id, db)
         receivers = set(
             chain(
-                (assignment.user_id for assignment in data_product.assignments),
+                (
+                    assignment.user_id
+                    for assignment in data_product.assignments
+                    if assignment.decision == DecisionStatus.APPROVED
+                ),
                 bonus_receiver_ids,
             )
         )
