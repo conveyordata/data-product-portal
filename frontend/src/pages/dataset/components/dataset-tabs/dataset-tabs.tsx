@@ -58,16 +58,16 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 children: <AboutTab datasetId={datasetId} />,
             },
             {
+                label: t('Team'),
+                key: TabKeys.Team,
+                icon: <TeamOutlined />,
+                children: <TeamTab datasetId={datasetId} />,
+            },
+            {
                 label: t('Producing Data Products'),
                 key: TabKeys.DataOutput,
                 icon: <DataOutputOutlined />,
                 children: <DataOutputTab datasetId={datasetId} />,
-            },
-            {
-                label: t('Dataset Owners'),
-                key: TabKeys.Team,
-                icon: <TeamOutlined />,
-                children: <TeamTab datasetId={datasetId} />,
             },
             {
                 label: t('Consuming Data Products'),

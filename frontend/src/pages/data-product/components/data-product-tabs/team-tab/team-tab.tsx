@@ -17,9 +17,9 @@ import {
 } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
-import { SearchForm } from '@/types/shared';
-import { UserContract } from '@/types/users';
+import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
+import type { SearchForm } from '@/types/shared';
+import type { UserContract } from '@/types/users';
 
 import styles from './team-tab.module.scss';
 
@@ -29,12 +29,13 @@ function filterUsers(
 ): DataProductRoleAssignmentContract[] {
     if (!searchTerm) return users;
 
-    return users.filter((membership) => {
-        const searchString = searchTerm.toLowerCase();
+    const searchString = searchTerm.toLowerCase();
+    return users.filter((assignment) => {
+        const user = assignment?.user;
         return (
-            membership?.user?.email?.toLowerCase()?.includes(searchString) ||
-            membership?.user?.first_name?.toLowerCase()?.includes(searchString) ||
-            membership?.user?.last_name?.toLowerCase()?.includes(searchString)
+            user?.email?.toLowerCase()?.includes(searchString) ||
+            user?.first_name?.toLowerCase()?.includes(searchString) ||
+            user?.last_name?.toLowerCase()?.includes(searchString)
         );
     });
 }
@@ -51,6 +52,7 @@ export function TeamTab({ dataProductId }: Props) {
         data_product_id: dataProductId,
     });
     const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateRoleAssignmentMutation();
+
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
     const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
@@ -68,7 +70,7 @@ export function TeamTab({ dataProductId }: Props) {
         { skip: !dataProductId },
     );
 
-    const canAddUserNew = access?.allowed || false;
+    const canAddUser = access?.allowed || false;
 
     const handleGrantAccessToDataProduct = useCallback(
         async (user: UserContract, role_id: string) => {
@@ -97,10 +99,10 @@ export function TeamTab({ dataProductId }: Props) {
                     placeholder={t('Search users by email or name')}
                     actionButton={
                         <Button
-                            disabled={!canAddUserNew}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}
+                            disabled={!canAddUser}
                         >
                             {t('Add User')}
                         </Button>

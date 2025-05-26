@@ -1,22 +1,30 @@
-import { Form, FormProps, Select } from 'antd';
+import { Form, type FormProps, Select } from 'antd';
 
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
-import { RoleContract } from '@/types/roles';
-import { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
+import type { RoleContract } from '@/types/roles';
 
 import styles from './role-change-form.module.scss';
+
+interface RoleAssignment {
+    role: RoleContract;
+}
 
 type Props = {
     userId: string;
     initialRole: RoleContract;
-    dataProductUsers: DataProductRoleAssignmentContract[];
     onRoleChange: (role: RoleContract) => void;
     isDisabled?: boolean;
+    scope: 'data_product' | 'dataset';
 };
-
-export function RoleChangeForm({ userId, initialRole, onRoleChange, isDisabled = true }: Props) {
-    const [dataProductRoleForm] = Form.useForm<DataProductRoleAssignmentContract>();
-    const { data: DATA_PRODUCT_ROLES, isLoading } = useGetRolesQuery('data_product', { skip: isDisabled });
+export function RoleChangeForm<Type extends RoleAssignment>({
+    userId,
+    initialRole,
+    onRoleChange,
+    isDisabled = true,
+    scope,
+}: Props) {
+    const [dataProductRoleForm] = Form.useForm<Type>();
+    const { data: ROLES, isLoading } = useGetRolesQuery(scope, { skip: isDisabled });
 
     const handleRoleChange: FormProps<RoleContract>['onFinish'] = (role) => {
         console.log(role);
@@ -24,23 +32,20 @@ export function RoleChangeForm({ userId, initialRole, onRoleChange, isDisabled =
             onRoleChange(role);
         }
     };
+
     return (
-        <Form<DataProductRoleAssignmentContract>
-            form={dataProductRoleForm}
-            initialValues={{ role: initialRole.name }}
-            disabled={isDisabled}
-        >
-            <Form.Item<DataProductRoleAssignmentContract> name={'role'} className={styles.selectRoleWrapper}>
+        <Form<Type> form={dataProductRoleForm} initialValues={{ role: initialRole.name }} disabled={isDisabled}>
+            <Form.Item<RoleAssignment> name={'role'} className={styles.selectRoleWrapper}>
                 <Select
                     loading={isLoading}
                     onSelect={(roleName: string) => {
-                        const selectedRole = DATA_PRODUCT_ROLES?.find((role) => role.name === roleName);
+                        const selectedRole = ROLES?.find((role) => role.name === roleName);
                         if (selectedRole) {
                             handleRoleChange(selectedRole);
                         }
                     }}
                 >
-                    {DATA_PRODUCT_ROLES?.map((role) => (
+                    {ROLES?.map((role) => (
                         <Select.Option key={`${role.name}-${userId}`} value={role.name}>
                             {role.name}
                         </Select.Option>

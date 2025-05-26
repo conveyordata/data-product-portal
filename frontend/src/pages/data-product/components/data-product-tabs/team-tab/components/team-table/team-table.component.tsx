@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
+import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
@@ -31,17 +31,17 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
 
     const { handleGrantAccessToDataProduct, handleDenyAccessToDataProduct } = usePendingActionHandlers();
 
-    const { data: edit_access } = useCheckAccessQuery(
-        {
-            resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
-        },
-        { skip: !dataProductId },
-    );
     const { data: approve_access } = useCheckAccessQuery(
         {
             resource: dataProductId,
             action: AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+        },
+        { skip: !dataProductId },
+    );
+    const { data: edit_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
         },
         { skip: !dataProductId },
     );
@@ -74,10 +74,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
             try {
                 if (!dataProduct) return;
 
-                console.log('Going to run the deletion');
-                console.log('ID object:', id);
                 await deleteRoleAssignment({ role_assignment_id: id, data_product_id: dataProduct.id }).unwrap();
-                console.log('Deletion done');
                 dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
@@ -104,20 +101,20 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         [dataProduct, t, updateRoleAssignment],
     );
 
-    const handleRejectMembership = useCallback(
-        async (id: string) => {
-            if (!dataProduct) return;
-            await handleDenyAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
-        },
-        [dataProduct, handleDenyAccessToDataProduct],
-    );
-
     const handleAcceptMembership = useCallback(
         async (id: string) => {
             if (!dataProduct) return;
             await handleGrantAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
         },
         [dataProduct, handleGrantAccessToDataProduct],
+    );
+
+    const handleRejectMembership = useCallback(
+        async (id: string) => {
+            if (!dataProduct) return;
+            await handleDenyAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
+        },
+        [dataProduct, handleDenyAccessToDataProduct],
     );
 
     const columns: TableColumnsType<DataProductRoleAssignmentContract> = useMemo(() => {
@@ -130,9 +127,9 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
             onRoleChange: handleRoleChange,
             isRemovingUser: isRemovingUserFromDataProduct,
             isLoading: isLoadingDataProduct,
+            canApprove: canApproveUser,
             canEdit: canEditUser,
             canRemove: canRemoveUser,
-            canApprove: canApproveUser,
         });
     }, [
         t,
