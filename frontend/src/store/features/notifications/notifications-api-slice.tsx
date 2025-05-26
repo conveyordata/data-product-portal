@@ -38,10 +38,18 @@ export const notificationsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
             }),
             invalidatesTags: [{ type: TagTypes.Notifications as const, id: STATIC_TAG_ID.LIST }],
         }),
+        removeAllNotifications: builder.mutation<void, void>({
+            query: () => ({
+                url: buildUrl(ApiUrl.NotificationDeleteAll, {}),
+                method: 'DELETE',
+            }),
+            invalidatesTags: [{ type: TagTypes.Notifications as const, id: STATIC_TAG_ID.LIST }],
+        }),
     }),
     overrideExisting: false,
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetNotificationsQuery, useRemoveNotificationMutation } = notificationsApiSlice;
+export const { useGetNotificationsQuery, useRemoveNotificationMutation, useRemoveAllNotificationsMutation } =
+    notificationsApiSlice;

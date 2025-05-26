@@ -21,6 +21,14 @@ def get_user_notifications(
     return NotificationService().get_user_notifications(db, authenticated_user)
 
 
+@router.delete("/all")
+def remove_all_user_notifications(
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+):
+    return NotificationService().remove_all_notifications(db, authenticated_user)
+
+
 @router.delete("/{id}", dependencies=[Depends(only_notification_owner)])
 def remove_user_notification(
     id: UUID,

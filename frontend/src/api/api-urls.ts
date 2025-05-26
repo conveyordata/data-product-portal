@@ -87,6 +87,7 @@ export enum ApiUrl {
     Graph = '/api/graph',
     Notifications = '/api/notifications',
     NotificationDelete = '/api/notifications/:notificationId',
+    NotificationDeleteAll = '/api/notifications/all',
 }
 
 export type DynamicPathParams =

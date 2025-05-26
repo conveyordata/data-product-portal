@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import {
     useGetNotificationsQuery,
+    useRemoveAllNotificationsMutation,
     useRemoveNotificationMutation,
 } from '@/store/features/notifications/notifications-api-slice';
 import { NotificationContract } from '@/types/notifications/notification.contract';
@@ -25,6 +26,7 @@ export function Notifications() {
     const { data: notifications } = useGetNotificationsQuery();
 
     const [removeNotification] = useRemoveNotificationMutation();
+    const [removeAllNotifications] = useRemoveAllNotificationsMutation();
 
     const handleRemoveNotification = useCallback(
         async (notificationId: string) => {
@@ -37,6 +39,15 @@ export function Notifications() {
         },
         [removeNotification, t],
     );
+
+    const handleRemoveAllNotifications = useCallback(async () => {
+        try {
+            await removeAllNotifications().unwrap();
+            dispatchMessage({ content: t('Notifications removed'), type: 'success' });
+        } catch (_error) {
+            dispatchMessage({ content: t('Failed to remove notifications'), type: 'error' });
+        }
+    }, [removeAllNotifications, t]);
 
     const createNotificationItem = useCallback(
         (notification: NotificationContract, showActor: boolean, handleRemoveNotification: (id: string) => void) => {
@@ -113,12 +124,7 @@ export function Notifications() {
                         <Typography.Title level={4} className={styles.marginBottom}>
                             {t('Notifications')}
                         </Typography.Title>{' '}
-                        <Button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                            }}
-                            className={styles.marginBottom}
-                        >
+                        <Button onClick={handleRemoveAllNotifications} className={styles.marginBottom}>
                             {t('Delete all')}
                         </Button>
                     </Flex>

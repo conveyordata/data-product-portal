@@ -2,7 +2,7 @@ from itertools import chain
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import desc, select
+from sqlalchemy import delete, desc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.data_products.model import ensure_data_product_exists
@@ -26,7 +26,9 @@ class NotificationService:
             .order_by(desc(NotificationModel.created_on))
         ).all()
 
-    def remove_notification(self, id: UUID, db: Session, authenticated_user: User):
+    def remove_notification(
+        self, id: UUID, db: Session, authenticated_user: User
+    ) -> None:
         notification = db.get(
             NotificationModel,
             id,
@@ -44,13 +46,21 @@ class NotificationService:
         db.delete(notification)
         db.commit()
 
+    def remove_all_notifications(self, db: Session, authenticated_user: User) -> None:
+        db.execute(
+            delete(NotificationModel).where(
+                NotificationModel.user_id == authenticated_user.id
+            )
+        )
+        db.commit()
+
     def create_dataset_notifications(
         self,
         db: Session,
         dataset_id: UUID,
         event_id: UUID,
         bonus_receiver_ids: list[UUID] = [],
-    ):
+    ) -> None:
         dataset = ensure_dataset_exists(dataset_id, db)
         receivers = set(
             chain((owner.id for owner in dataset.owners), bonus_receiver_ids)
@@ -65,7 +75,7 @@ class NotificationService:
         data_product_id: UUID,
         event_id: UUID,
         bonus_receiver_ids: list[UUID] = [],
-    ):
+    ) -> None:
         data_product = ensure_data_product_exists(data_product_id, db)
         receivers = set(
             chain(
