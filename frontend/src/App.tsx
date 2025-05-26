@@ -1,11 +1,12 @@
 import { ConfigProvider } from 'antd';
 
 import { AppRoutes } from '@/routes.tsx';
-import { greenThemeConfig } from '@/theme/antd-theme.ts';
+
+import { AppConfig } from './config/app-config';
 
 function App() {
     return (
-        <ConfigProvider theme={greenThemeConfig}>
+        <ConfigProvider theme={AppConfig.getThemeConfiguration()}>
             <AppRoutes />
         </ConfigProvider>
     );

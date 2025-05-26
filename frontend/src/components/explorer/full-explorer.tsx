@@ -2,7 +2,7 @@ import '@xyflow/react/dist/base.css';
 
 import type { Node, XYPosition } from '@xyflow/react';
 import { Position, ReactFlowProvider } from '@xyflow/react';
-import { Flex } from 'antd';
+import { Flex, theme } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
@@ -140,7 +140,7 @@ function InternalFullExplorer() {
 
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
-
+    const { token } = theme.useToken();
     const [sidebarFilters, setSidebarFilters] = useState<SidebarFilters>({
         dataProductsEnabled: true,
         datasetsEnabled: true,
@@ -163,12 +163,12 @@ function InternalFullExplorer() {
     const generateGraph = useCallback(() => {
         if (graph) {
             const nodes = parseFullNodes(graph.nodes, defaultNodePosition, sidebarFilters.domainsEnabled);
-            const edges = parseEdges(graph.edges);
+            const edges = parseEdges(graph.edges, token);
             setNodesAndEdges(nodes, edges);
             //const new_nodes = setDomainPositions(nodes);  // TODO: does not work yet but we are disabling domain nodes for now
             //setNodesAndEdges(new_nodes, edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges, sidebarFilters]);
+    }, [defaultNodePosition, graph, setNodesAndEdges, sidebarFilters, token]);
 
     useEffect(() => {
         generateGraph();

@@ -2,7 +2,7 @@ import '@xyflow/react/dist/base.css';
 
 import type { Node, XYPosition } from '@xyflow/react';
 import { Position, ReactFlowProvider } from '@xyflow/react';
-import { Flex } from 'antd';
+import { Flex, theme } from 'antd';
 import { useCallback, useEffect } from 'react';
 
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
@@ -55,7 +55,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
                     extra_attributes = {
                         targetHandlePosition: Position.Left,
                         nodeToolbarActions: node.isMain ? '' : <LinkToDataProductNode id={node.data.id} />,
-                        members: node.data.members,
+                        assignments: node.data.assignments,
                         description: node.data.description,
                     };
                     break;
@@ -137,6 +137,7 @@ function InternalExplorer({ id, type }: Props) {
     const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== 'dataproduct' || !id });
     const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== 'dataset' || !id });
     const dataOutputQuery = useGetDataOutputGraphDataQuery(id, { skip: type !== 'dataoutput' || !id });
+    const { token } = theme.useToken();
 
     let graphDataQuery;
 
@@ -156,10 +157,10 @@ function InternalExplorer({ id, type }: Props) {
     const generateGraph = useCallback(() => {
         if (graph) {
             const nodes = parseNodes(graph.nodes, defaultNodePosition);
-            const edges = parseEdges(graph.edges);
+            const edges = parseEdges(graph.edges, token);
             setNodesAndEdges(nodes, edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges]);
+    }, [defaultNodePosition, graph, setNodesAndEdges, token]);
 
     useEffect(() => {
         generateGraph();

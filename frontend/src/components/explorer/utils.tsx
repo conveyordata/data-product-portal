@@ -1,13 +1,9 @@
 import type { Edge } from '@xyflow/react';
-import { theme } from 'antd';
+import { GlobalToken } from 'antd';
 
-import { greenThemeConfig } from '@/theme/antd-theme';
 import type { EdgeContract } from '@/types/graph/graph-contract.ts';
 
-const { getDesignToken } = theme;
-const token = getDesignToken(greenThemeConfig);
-
-function parseEdges(edges: EdgeContract[]): Edge[] {
+function parseEdges(edges: EdgeContract[], token: GlobalToken): Edge[] {
     return edges.map((edge) => {
         return {
             id: edge.id,
