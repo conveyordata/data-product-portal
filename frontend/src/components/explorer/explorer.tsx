@@ -131,13 +131,13 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
 }
 
 function InternalExplorer({ id, type }: Props) {
+    const { token } = theme.useToken();
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
     const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== 'dataproduct' || !id });
     const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== 'dataset' || !id });
     const dataOutputQuery = useGetDataOutputGraphDataQuery(id, { skip: type !== 'dataoutput' || !id });
-    const { token } = theme.useToken();
 
     let graphDataQuery;
 
