@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from tests.factories import (
     DatasetFactory,
     DatasetRoleAssignmentFactory,
+    GlobalRoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
@@ -58,6 +59,47 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["dataset"]["id"] == str(dataset.id)
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
+
+    def test_request_assignment(self, client: TestClient):
+        dataset: Dataset = DatasetFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
+
+        response = client.post(
+            f"{ENDPOINT}/request/{str(dataset.id)}",
+            json={
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["dataset"]["id"] == str(dataset.id)
+        assert data["user"]["id"] == str(user.id)
+        assert data["role"]["id"] == str(role.id)
+
+    def test_request_assignment_no_right(self, client: TestClient):
+        dataset: Dataset = DatasetFactory()
+        UserFactory(external_id="sub")
+
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
+
+        response = client.post(
+            f"{ENDPOINT}/request/{str(dataset.id)}",
+            json={
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 403
 
     def test_delete_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()

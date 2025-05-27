@@ -7,6 +7,7 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 from app.core.authz import Action
 from app.data_products.model import DataProduct
@@ -62,6 +63,47 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["data_product"]["id"] == str(data_product.id)
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
+
+    def test_request_assignment(self, client: TestClient):
+        data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}/request/{str(data_product.id)}",
+            json={
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["data_product"]["id"] == str(data_product.id)
+        assert data["user"]["id"] == str(user.id)
+        assert data["role"]["id"] == str(role.id)
+
+    def test_request_assignment_no_right(self, client: TestClient):
+        data_product: DataProduct = DataProductFactory()
+        UserFactory(external_id="sub")
+
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}/request/{str(data_product.id)}",
+            json={
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 403
 
     def test_delete_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
