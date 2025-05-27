@@ -46,7 +46,10 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
-            requestDataProductRoleAssignment: builder.mutation<DataProductRoleAssignmentContract, DataProductRoleAssignmentCreateContract>({
+            requestDataProductRoleAssignment: builder.mutation<
+                DataProductRoleAssignmentContract,
+                DataProductRoleAssignmentCreateContract
+            >({
                 query: (request) => ({
                     url: buildUrl(ApiUrl.RoleAssignmentsDataProductRequest, { dataProductId: request.data_product_id }),
                     method: 'POST',
