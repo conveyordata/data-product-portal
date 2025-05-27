@@ -4,9 +4,11 @@ import awsLogo from '@/assets/icons/aws-logo.svg?react';
 import redshiftLogo from '@/assets/icons/aws-redshift-logo.svg?react';
 import conveyorLogo from '@/assets/icons/conveyor-logo.svg?react';
 import databricksLogo from '@/assets/icons/databricks-logo.svg?react';
+import githubLogo from '@/assets/icons/github-logo.svg?react';
 import glueLogo from '@/assets/icons/glue-logo.svg?react';
 import s3Logo from '@/assets/icons/s3-logo.svg?react';
-import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
+// import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
+import starburstLogo from '@/assets/icons/starburst-galaxy-logo.svg?react';
 import tableauLogo from '@/assets/icons/tableau-logo.svg?react';
 import { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { CustomDropdownItemProps } from '@/types/shared';
@@ -54,11 +56,20 @@ export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlat
         children: [],
     },
     {
-        label: t('Snowflake'),
+        label: t('Github'),
+        value: DataPlatforms.Github,
+        icon: githubLogo,
+        hasMenu: false,
+        hasConfig: false,
+        children: [],
+    },
+    {
+        label: t('Starburst'),
         value: DataPlatforms.Snowflake,
-        icon: snowflakeLogo,
+        icon: starburstLogo,
         disabled: false,
         hasConfig: true,
+        hasMenu: true,
         children: [],
     },
     {

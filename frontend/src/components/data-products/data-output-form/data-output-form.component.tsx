@@ -75,8 +75,8 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         () =>
             getDataPlatforms(t).filter((platform) => {
                 return (
-                    platformConfig?.map((config) => config.service.name).includes(platform.label) ||
-                    platformConfig?.map((config) => config.platform.name).includes(platform.label)
+                    platformConfig?.map((config) => config.service.name.toLowerCase()).includes(platform.value) ||
+                    platformConfig?.map((config) => config.platform.name.toLowerCase()).includes(platform.value)
                 );
             }),
         [t, platformConfig],

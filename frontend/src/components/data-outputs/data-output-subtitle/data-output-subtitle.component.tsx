@@ -37,7 +37,7 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
             return (
                 <Flex vertical>
                     <div>
-                        <Typography.Text strong>{t('Snowflake schema')}: </Typography.Text>
+                        <Typography.Text strong>{t('Starburst schema')}: </Typography.Text>
                         <Typography.Text>
                             {snowflake_configuration.database}__{snowflake_configuration.schema}
                         </Typography.Text>

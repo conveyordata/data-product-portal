@@ -4,7 +4,8 @@ import databricksBorderIcon from '@/assets/icons/databricks-border-icon.svg?reac
 import glueBorderIcon from '@/assets/icons/glue-border-icon.svg?react';
 import redshiftBorderIcon from '@/assets/icons/redshift-border-icon.svg?react';
 import s3BorderIcon from '@/assets/icons/s3-border-icon.svg?react';
-import snowflakeBorderIcon from '@/assets/icons/snowflake-border-icon.svg?react';
+// import snowflakeBorderIcon from '@/assets/icons/snowflake-border-icon.svg?react';
+import starburstBorderIcon from '@/assets/icons/starburst-border-icon.svg?react';
 
 export function getDataOutputIcon(configuration_type: string | undefined) {
     switch (configuration_type) {
@@ -15,7 +16,7 @@ export function getDataOutputIcon(configuration_type: string | undefined) {
         case 'DatabricksDataOutput':
             return databricksBorderIcon;
         case 'SnowflakeDataOutput':
-            return snowflakeBorderIcon;
+            return starburstBorderIcon;
         case 'RedshiftDataOutput':
             return redshiftBorderIcon;
     }

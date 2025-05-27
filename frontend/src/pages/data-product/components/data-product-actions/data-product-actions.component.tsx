@@ -34,6 +34,9 @@ export function DataProductActions({ dataProductId }: Props) {
     const { data: availablePlatforms, isLoading: isLoadingPlatforms } = useGetAllPlatformsQuery();
     const [getDataProductSignInUrl, { isLoading }] = useGetDataProductSignInUrlMutation();
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
+    const getStarburstUrl = () => {
+        return 'https://dataminded.galaxy.starburst.io/query-editor';
+    };
     const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
         useGetDataProductDatabricksWorkspaceUrlMutation();
 
@@ -56,7 +59,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const dataPlatforms = useMemo(() => {
         const names = availablePlatforms ? availablePlatforms.map((platform) => platform.name.toLowerCase()) : [];
 
-        return getDataPlatforms(t).filter((platform) => names.includes(platform.value));
+        return getDataPlatforms(t).filter((platform) => names.includes(platform.value) || platform.value === 'github');
     }, [t, availablePlatforms]);
 
     const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useGetDataProductRoleAssignmentsQuery({
@@ -103,6 +106,18 @@ export function DataProductActions({ dataProductId }: Props) {
                     dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
                 }
                 break;
+            case DataPlatforms.Snowflake:
+                try {
+                    const signInUrl = getStarburstUrl();
+                    if (signInUrl) {
+                        window.open(signInUrl, '_blank');
+                    } else {
+                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+                    }
+                } catch (_error) {
+                    dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+                }
+                break;
             default:
                 break;
         }
@@ -113,6 +128,24 @@ export function DataProductActions({ dataProductId }: Props) {
             case DataPlatforms.Conveyor:
                 try {
                     const url = await getConveyorUrl({ id: dataProductId }).unwrap();
+                    if (url) {
+                        window.open(url, '_blank');
+                    } else {
+                        dispatchMessage({
+                            type: 'error',
+                            content: t('Failed to get Conveyor url'),
+                        });
+                    }
+                } catch (_error) {
+                    dispatchMessage({
+                        type: 'error',
+                        content: t('Failed to get Conveyor url'),
+                    });
+                }
+                break;
+            case DataPlatforms.Github:
+                try {
+                    const url = 'https://github.com/conveyordata/demo-dpp-starburst';
                     if (url) {
                         window.open(url, '_blank');
                     } else {
