@@ -306,6 +306,7 @@ def update_data_product_status(
 def link_dataset_to_data_product(
     id: UUID,
     dataset_id: UUID,
+    background_tasks: BackgroundTasks,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> dict[str, UUID]:
@@ -319,11 +320,13 @@ def link_dataset_to_data_product(
         ).users_with_authz_action(
             dataset_link.dataset_id, Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST
         )
-        email.send_dataset_link_email(
-            dataset_link.data_product,
-            dataset_link.dataset,
-            requester=authenticated_user,
-            approvers=approvers,
+        background_tasks.add_task(
+            email.send_dataset_link_email(
+                dataset_link.data_product,
+                dataset_link.dataset,
+                requester=authenticated_user,
+                approvers=approvers,
+            )
         )
 
     return {"id": dataset_link.id}
