@@ -62,7 +62,10 @@ export const getDataProductUsersTableColumns = ({
                 );
             },
             width: '50%',
-            sorter: sorter.stringSorter((assignment) => assignment.user.last_name),
+            sorter: sorter.cascadedSorter(
+                sorter.stringSorter((assignment) => assignment.user.last_name),
+                sorter.stringSorter((assignment) => assignment.user.first_name),
+            ),
             defaultSortOrder: 'ascend',
         },
         {
