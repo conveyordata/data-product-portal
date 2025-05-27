@@ -91,7 +91,7 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
         [dataset, t, updateRoleAssignment],
     );
 
-    const handleAcceptMembership = useCallback(
+    const handleAcceptAccessRequest = useCallback(
         async (id: string) => {
             if (!dataset) return;
             await handleGrantAccessToDataset({ assignment_id: id, dataset_id: dataset.id });
@@ -99,7 +99,7 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
         [dataset, handleGrantAccessToDataset],
     );
 
-    const handleRejectMembership = useCallback(
+    const handleRejectAccessRequest = useCallback(
         async (id: string) => {
             if (!dataset) return;
             await handleDenyAccessToDataset({ assignment_id: id, dataset_id: dataset.id });
@@ -112,8 +112,8 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
             t,
             datasetUsers: datasetUsers,
             onRemoveUserAccess: handleRemoveUserAccess,
-            onRejectAccessRequest: handleRejectMembership,
-            onAcceptAccessRequest: handleAcceptMembership,
+            onRejectAccessRequest: handleRejectAccessRequest,
+            onAcceptAccessRequest: handleAcceptAccessRequest,
             onRoleChange: handleRoleChange,
             isRemovingUser: isRemovingUser,
             isLoading: isFetchingDataset,
@@ -126,8 +126,8 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
         canEditUser,
         canRemoveUser,
         datasetUsers,
-        handleAcceptMembership,
-        handleRejectMembership,
+        handleAcceptAccessRequest,
+        handleRejectAccessRequest,
         handleRemoveUserAccess,
         handleRoleChange,
         isFetchingDataset,

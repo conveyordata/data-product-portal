@@ -256,11 +256,14 @@ class TestDataProductsDatasetsRouter:
             data_product_id=data_product.id,
         )
         ds = DatasetFactory(access_type=DatasetAccessType.RESTRICTED)
-        role = RoleFactory(scope=Scope.DATASET)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+        )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
         response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
+            client, data_product_id=data_product.id, dataset_id=ds.id
         )
         assert response.status_code == 200
         response = client.get(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
