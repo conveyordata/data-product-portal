@@ -1,10 +1,10 @@
-import { useGetRoleAssignmentQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
+import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { DecisionStatus } from '@/types/roles';
 import { Prototype } from '@/types/roles/role.contract';
 import type { UserContract } from '@/types/users';
 
 export function useGetDataProductOwners(dataProductId: string | undefined): UserContract[] {
-    const { data: roleAssignments } = useGetRoleAssignmentQuery(
+    const { data: roleAssignments } = useGetDataProductRoleAssignmentsQuery(
         {
             data_product_id: dataProductId!,
             decision: DecisionStatus.Approved,

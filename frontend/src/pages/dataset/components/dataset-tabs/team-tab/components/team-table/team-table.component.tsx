@@ -1,53 +1,57 @@
-import { Flex, Table, TableColumnsType, TableProps } from 'antd';
+import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
-import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
-import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
+import { useTablePagination } from '@/hooks/use-table-pagination';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import {
-    useGetDatasetByIdQuery,
-    useRemoveUserFromDatasetMutation,
-} from '@/store/features/datasets/datasets-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { UserContract } from '@/types/users';
+    useDeleteDatasetRoleAssignmentMutation,
+    useUpdateDatasetRoleAssignmentMutation,
+} from '@/store/features/role-assignments/dataset-roles-api-slice';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import type { DatasetRoleAssignmentContract, RoleContract } from '@/types/roles/role.contract';
+import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
 import styles from './team-table.module.scss';
-import { getDatasetTeamColumns } from './team-table-columns.tsx';
+import { getDatasetTeamColumns } from './team-table-columns';
 
 type Props = {
-    isCurrentDatasetOwner: boolean;
     datasetId: string;
-    datasetUsers: UserContract[];
+    datasetUsers: DatasetRoleAssignmentContract[];
 };
-
-function canPerformTeamActions(isCurrentDatasetOwner: boolean, userId: string, currentUserId: string) {
-    return isCurrentDatasetOwner && userId !== currentUserId;
-}
-
-export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Props) {
+export function TeamTable({ datasetId, datasetUsers }: Props) {
     const { t } = useTranslation();
-    const currentUser = useSelector(selectCurrentUser) as UserContract;
     const { data: dataset, isLoading: isFetchingDataset } = useGetDatasetByIdQuery(datasetId);
-    const [removeDatasetUser, { isLoading: isRemovingOwner }] = useRemoveUserFromDatasetMutation();
+    const [deleteRoleAssignment, { isLoading: isRemovingUser }] = useDeleteDatasetRoleAssignmentMutation();
+    const [updateRoleAssignment] = useUpdateDatasetRoleAssignmentMutation();
 
-    const { data: remove_access } = useCheckAccessQuery(
-        {
-            resource: datasetId,
-            action: AuthorizationAction.DATASET__DELETE_USER,
-        },
-        { skip: !datasetId },
-    );
-    const canRemoveNew = remove_access?.allowed || false;
+    const { handleGrantAccessToDataset, handleDenyAccessToDataset } = usePendingActionHandlers();
+
+    const { data: approve_access } = useCheckAccessQuery({
+        resource: datasetId,
+        action: AuthorizationAction.DATASET__APPROVE_USER_REQUEST,
+    });
+    const { data: edit_access } = useCheckAccessQuery({
+        resource: datasetId,
+        action: AuthorizationAction.DATASET__UPDATE_USER,
+    });
+    const { data: remove_access } = useCheckAccessQuery({
+        resource: datasetId,
+        action: AuthorizationAction.DATASET__DELETE_USER,
+    });
+
+    const canApproveUser = approve_access?.allowed || false;
+    const canEditUser = edit_access?.allowed || false;
+    const canRemoveUser = remove_access?.allowed || false;
 
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
-    const onChange: TableProps<UserContract>['onChange'] = (pagination) => {
+    const onChange: TableProps<DatasetRoleAssignmentContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
@@ -56,35 +60,87 @@ export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Pr
     }, [datasetUsers, resetPagination]);
 
     const handleRemoveUserAccess = useCallback(
-        async (userId: string) => {
+        async (id: string) => {
             try {
                 if (!dataset) return;
-                await removeDatasetUser({ datasetId: dataset.id, userId }).unwrap();
+
+                await deleteRoleAssignment({ role_assignment_id: id, dataset_id: dataset.id }).unwrap();
                 dispatchMessage({ content: t('User access to dataset has been removed'), type: 'success' });
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to remove user access from dataset'), type: 'error' });
+                dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
             }
         },
-        [dataset, removeDatasetUser, t],
+        [dataset, deleteRoleAssignment, t],
     );
 
-    const columns: TableColumnsType<UserContract> = useMemo(() => {
+    const handleRoleChange = useCallback(
+        async (role: RoleContract, assignmentId: string) => {
+            if (!dataset) return;
+            try {
+                await updateRoleAssignment({
+                    role_assignment_id: assignmentId,
+                    role_id: role.id,
+                    dataset_id: dataset.id,
+                }).unwrap();
+                dispatchMessage({ content: t('User role has been updated'), type: 'success' });
+            } catch (_error) {
+                console.log(_error);
+                dispatchMessage({ content: t('Failed to update user role'), type: 'error' });
+            }
+        },
+        [dataset, t, updateRoleAssignment],
+    );
+
+    const handleAcceptMembership = useCallback(
+        async (id: string) => {
+            if (!dataset) return;
+            await handleGrantAccessToDataset({ assignment_id: id, dataset_id: dataset.id });
+        },
+        [dataset, handleGrantAccessToDataset],
+    );
+
+    const handleRejectMembership = useCallback(
+        async (id: string) => {
+            if (!dataset) return;
+            await handleDenyAccessToDataset({ assignment_id: id, dataset_id: dataset.id });
+        },
+        [dataset, handleDenyAccessToDataset],
+    );
+
+    const columns: TableColumnsType<DatasetRoleAssignmentContract> = useMemo(() => {
         return getDatasetTeamColumns({
             t,
+            datasetUsers: datasetUsers,
             onRemoveUserAccess: handleRemoveUserAccess,
-            isRemovingUser: false,
-            canPerformTeamActions: (userId: string) =>
-                canPerformTeamActions(isCurrentDatasetOwner, userId, currentUser.id),
-            canRemove: canRemoveNew,
+            onRejectAccessRequest: handleRejectMembership,
+            onAcceptAccessRequest: handleAcceptMembership,
+            onRoleChange: handleRoleChange,
+            isRemovingUser: isRemovingUser,
+            isLoading: isFetchingDataset,
+            canApprove: canApproveUser,
+            canEdit: canEditUser,
+            canRemove: canRemoveUser,
         });
-    }, [t, handleRemoveUserAccess, isCurrentDatasetOwner, currentUser.id, canRemoveNew]);
+    }, [
+        canApproveUser,
+        canEditUser,
+        canRemoveUser,
+        datasetUsers,
+        handleAcceptMembership,
+        handleRejectMembership,
+        handleRemoveUserAccess,
+        handleRoleChange,
+        isFetchingDataset,
+        isRemovingUser,
+        t,
+    ]);
 
     if (!dataset) return null;
 
     return (
         <Flex className={styles.teamListContainer}>
-            <Table<UserContract>
-                loading={isFetchingDataset || isRemovingOwner}
+            <Table<DatasetRoleAssignmentContract>
+                loading={isFetchingDataset || isRemovingUser}
                 className={styles.teamListTable}
                 columns={columns}
                 dataSource={datasetUsers}
@@ -95,7 +151,7 @@ export function TeamTable({ isCurrentDatasetOwner, datasetId, datasetUsers }: Pr
                     position: ['topRight'],
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} dataset owners', {
+                        t('Showing {{range0}}-{{range1}} of {{total}} team members', {
                             range0: range[0],
                             range1: range[1],
                             total: total,

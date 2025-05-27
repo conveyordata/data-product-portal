@@ -2,16 +2,19 @@ import { ApiUrl, buildUrl } from '@/api/api-urls';
 import { baseApiSlice } from '@/store/features/api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
 import { DecisionStatus } from '@/types/roles';
-import type { RoleAssignmentContract, RoleAssignmentCreateContract } from '@/types/roles/role.contract';
+import type {
+    DataProductRoleAssignmentContract,
+    DataProductRoleAssignmentCreateContract,
+} from '@/types/roles/role.contract';
 
-export const roleTags: string[] = [TagTypes.Role];
+export const roleTags: string[] = [TagTypes.UserDataProducts];
 
 export const dataProductRoleAssignmentsApiSlice = baseApiSlice
     .enhanceEndpoints({ addTagTypes: roleTags })
     .injectEndpoints({
         endpoints: (builder) => ({
-            getRoleAssignment: builder.query<
-                RoleAssignmentContract[],
+            getDataProductRoleAssignments: builder.query<
+                DataProductRoleAssignmentContract[],
                 { data_product_id?: string; user_id?: string; decision?: DecisionStatus }
             >({
                 query: (request) => ({
@@ -23,9 +26,12 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                         ...(request.decision ? { decision: request.decision } : {}),
                     },
                 }),
-                providesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
+                providesTags: [{ type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST }],
             }),
-            createRoleAssignment: builder.mutation<RoleAssignmentContract, RoleAssignmentCreateContract>({
+            createDataProductRoleAssignment: builder.mutation<
+                DataProductRoleAssignmentContract,
+                DataProductRoleAssignmentCreateContract
+            >({
                 query: (request) => ({
                     url: buildUrl(ApiUrl.RoleAssignmentsDataProduct, { assignmentId: request.data_product_id }),
                     method: 'POST',
@@ -40,7 +46,10 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
-            requestRoleAssignment: builder.mutation<RoleAssignmentContract, RoleAssignmentCreateContract>({
+            requestDataProductRoleAssignment: builder.mutation<
+                DataProductRoleAssignmentContract,
+                DataProductRoleAssignmentCreateContract
+            >({
                 query: (request) => ({
                     url: buildUrl(ApiUrl.RoleAssignmentsDataProductRequest, { dataProductId: request.data_product_id }),
                     method: 'POST',
@@ -55,8 +64,8 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
-            updateRoleAssignment: builder.mutation<
-                RoleAssignmentContract,
+            updateDataProductRoleAssignment: builder.mutation<
+                DataProductRoleAssignmentContract,
                 { role_assignment_id: string; role_id: string; data_product_id: string }
             >({
                 query: (request) => ({
@@ -72,8 +81,8 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
-            decideRoleAssignment: builder.mutation<
-                RoleAssignmentContract,
+            decideDataProductRoleAssignment: builder.mutation<
+                DataProductRoleAssignmentContract,
                 { role_assignment_id: string; decision_status: DecisionStatus; data_product_id: string }
             >({
                 query: (request) => ({
@@ -89,7 +98,10 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
-            deleteRoleAssignment: builder.mutation<void, { role_assignment_id: string; data_product_id: string }>({
+            deleteDataProductRoleAssignment: builder.mutation<
+                void,
+                { role_assignment_id: string; data_product_id: string }
+            >({
                 query: (request) => ({
                     url: buildUrl(ApiUrl.RoleAssignmentsDataProduct, {
                         assignmentId: request.role_assignment_id,
@@ -107,10 +119,10 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
     });
 
 export const {
-    useGetRoleAssignmentQuery,
-    useUpdateRoleAssignmentMutation,
-    useDeleteRoleAssignmentMutation,
-    useRequestRoleAssignmentMutation,
-    useCreateRoleAssignmentMutation,
-    useDecideRoleAssignmentMutation,
+    useGetDataProductRoleAssignmentsQuery,
+    useUpdateDataProductRoleAssignmentMutation,
+    useDeleteDataProductRoleAssignmentMutation,
+    useCreateDataProductRoleAssignmentMutation,
+    useDecideDataProductRoleAssignmentMutation,
+    useRequestDataProductRoleAssignmentMutation,
 } = dataProductRoleAssignmentsApiSlice;

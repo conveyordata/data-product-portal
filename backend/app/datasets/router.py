@@ -16,8 +16,9 @@ from app.data_product_settings.service import DataProductSettingService
 from app.database.database import get_db_session
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
-    DatasetCreateUpdate,
+    DatasetCreate,
     DatasetStatusUpdate,
+    DatasetUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
@@ -28,7 +29,7 @@ from app.role_assignments.dataset.schema import (
     DecideRoleAssignment,
 )
 from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Scope
+from app.roles.schema import Prototype, Scope
 from app.roles.service import RoleService
 from app.users.model import User
 
@@ -40,26 +41,26 @@ def get_datasets(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsGet]:
-    return DatasetService().get_datasets(db, user)
+    return DatasetService(db).get_datasets(user)
 
 
 @router.get("/namespace_suggestion")
 def get_dataset_namespace_suggestion(
     name: str, db: Session = Depends(get_db_session)
 ) -> NamespaceSuggestion:
-    return DatasetService().dataset_namespace_suggestion(name, db)
+    return DatasetService(db).dataset_namespace_suggestion(name)
 
 
 @router.get("/validate_namespace")
 def validate_dataset_namespace(
     namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
-    return DatasetService().validate_dataset_namespace(namespace, db)
+    return DatasetService(db).validate_dataset_namespace(namespace)
 
 
 @router.get("/namespace_length_limits")
 def get_dataset_namespace_length_limits() -> NamespaceLengthLimits:
-    return DatasetService().dataset_namespace_length_limits()
+    return DatasetService.dataset_namespace_length_limits()
 
 
 @router.get("/{id}")
@@ -68,14 +69,14 @@ def get_dataset(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> DatasetGet:
-    return DatasetService().get_dataset(id, db, user)
+    return DatasetService(db).get_dataset(id, user)
 
 
 @router.get("/user/{user_id}")
 def get_user_datasets(
     user_id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[DatasetsGet]:
-    return DatasetService().get_user_datasets(user_id, db)
+    return DatasetService(db).get_user_datasets(user_id)
 
 
 @router.post(
@@ -101,29 +102,22 @@ def get_user_datasets(
     ],
 )
 def create_dataset(
-    dataset: DatasetCreateUpdate,
+    dataset: DatasetCreate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    new_dataset = DatasetService().create_dataset(dataset, db)
-    owner_role = [
-        role
-        for role in RoleService(db).get_roles(Scope.DATASET)
-        if role.name.lower() == "owner"
-    ]
-    if len(owner_role) == 1:
-        owner_role = owner_role[0]
-    else:
+    owner_role = RoleService(db).find_prototype(Scope.DATASET, Prototype.OWNER)
+    if owner_role is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Owner role not found",
         )
-    for owner in new_dataset.owners:
+
+    new_dataset = DatasetService(db).create_dataset(dataset)
+    for owner_id in dataset.owners:
         resp = create_assignment(
             new_dataset.id,
-            CreateRoleAssignment(
-                dataset_id=new_dataset.id, user_id=owner.id, role_id=owner_role.id
-            ),
+            CreateRoleAssignment(user_id=owner_id, role_id=owner_role.id),
             db,
             authenticated_user,
         )
@@ -152,7 +146,7 @@ def create_dataset(
     ],
 )
 def remove_dataset(id: UUID, db: Session = Depends(get_db_session)) -> None:
-    DatasetService().remove_dataset(id, db)
+    DatasetService(db).remove_dataset(id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
     return
 
@@ -174,9 +168,9 @@ def remove_dataset(id: UUID, db: Session = Depends(get_db_session)) -> None:
     ],
 )
 def update_dataset(
-    id: UUID, dataset: DatasetCreateUpdate, db: Session = Depends(get_db_session)
+    id: UUID, dataset: DatasetUpdate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
-    return DatasetService().update_dataset(id, dataset, db)
+    return DatasetService(db).update_dataset(id, dataset)
 
 
 @router.put(
@@ -198,7 +192,7 @@ def update_dataset(
 def update_dataset_about(
     id: UUID, dataset: DatasetAboutUpdate, db: Session = Depends(get_db_session)
 ) -> None:
-    return DatasetService().update_dataset_about(id, dataset, db)
+    return DatasetService(db).update_dataset_about(id, dataset)
 
 
 @router.put(
@@ -218,70 +212,14 @@ def update_dataset_about(
 def update_dataset_status(
     id: UUID, dataset: DatasetStatusUpdate, db: Session = Depends(get_db_session)
 ) -> None:
-    return DatasetService().update_dataset_status(id, dataset, db)
-
-
-@router.post(
-    "/{id}/user/{user_id}",
-    responses={
-        400: {
-            "description": "User not found",
-            "content": {
-                "application/json": {"example": {"detail": "User email not found"}}
-            },
-        },
-        404: {
-            "description": "Dataset not found",
-            "content": {
-                "application/json": {"example": {"detail": "Dataset id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__CREATE_USER, DatasetResolver)),
-    ],
-)
-def add_user_to_dataset(
-    id: UUID,
-    user_id: UUID,
-    db: Session = Depends(get_db_session),
-) -> None:
-    return DatasetService().add_user_to_dataset(id, user_id, db)
-
-
-@router.delete(
-    "/{id}/user/{user_id}",
-    responses={
-        400: {
-            "description": "User not found",
-            "content": {
-                "application/json": {"example": {"detail": "User email not found"}}
-            },
-        },
-        404: {
-            "description": "Dataset not found",
-            "content": {
-                "application/json": {"example": {"detail": "Dataset id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__DELETE_USER, DatasetResolver)),
-    ],
-)
-def remove_user_from_dataset(
-    id: UUID,
-    user_id: UUID,
-    db: Session = Depends(get_db_session),
-) -> None:
-    return DatasetService().remove_user_from_dataset(id, user_id, db)
+    return DatasetService(db).update_dataset_status(id, dataset)
 
 
 @router.get("/{id}/graph")
 def get_graph_data(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
-    return DatasetService().get_graph_data(id, level, db)
+    return DatasetService(db).get_graph_data(id, level)
 
 
 @router.post(

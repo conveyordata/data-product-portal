@@ -31,7 +31,7 @@ def approve_data_output_link(
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
+) -> None:
     return DataOutputDatasetService().approve_data_output_link(
         id, db, authenticated_user
     )

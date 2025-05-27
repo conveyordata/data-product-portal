@@ -1,8 +1,8 @@
 import { Flex, Space, Typography } from 'antd';
 import { useNavigate, useParams } from 'react-router';
 
-import { DatasetForm } from '@/components/datasets/components/dataset-form.component.tsx';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { DatasetForm } from '@/components/datasets/dataset-form/dataset-form.component';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 import styles from './dataset-edit.module.scss';

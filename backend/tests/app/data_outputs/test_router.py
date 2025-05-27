@@ -3,18 +3,18 @@ from copy import deepcopy
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_product import DataProductFactory
-from tests.factories.data_product_membership import DataProductMembershipFactory
-from tests.factories.platform_service import PlatformServiceFactory
-from tests.factories.role import RoleFactory
-from tests.factories.role_assignment_data_product import (
+from httpx import Response
+from tests.factories import (
+    DataOutputFactory,
+    DataProductFactory,
     DataProductRoleAssignmentFactory,
+    PlatformServiceFactory,
+    RoleFactory,
+    TagFactory,
+    UserFactory,
 )
-from tests.factories.tags import TagFactory
-from tests.factories.user import UserFactory
 
-from app.core.authz.actions import AuthorizationAction
+from app.core.authz import Action
 from app.roles.schema import Scope
 
 ENDPOINT = "/api/data_outputs"
@@ -23,7 +23,7 @@ ENDPOINT = "/api/data_outputs"
 @pytest.fixture
 def data_output_payload():
     user = UserFactory(external_id="sub")
-    data_product = DataProductMembershipFactory(user=user).data_product
+    data_product = DataProductFactory()
     service = PlatformServiceFactory()
     tag = TagFactory()
 
@@ -78,7 +78,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -94,7 +94,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -137,10 +137,10 @@ class TestDataOutputsRouter:
 
     def test_update_data_output(self, client: TestClient):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -164,17 +164,17 @@ class TestDataOutputsRouter:
         )
         assert response.status_code == 403
 
-    def test_remove_data_output_no_member(self, client: TestClient):
+    def test_remove_data_output_no_access(self, client: TestClient):
         data_output = DataOutputFactory()
         response = self.delete_data_output(client, data_output.id)
         assert response.status_code == 403
 
     def test_remove_data_output(self, client: TestClient):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__DELETE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -190,10 +190,10 @@ class TestDataOutputsRouter:
 
     def test_update_status(self, client):
         user = UserFactory(external_id="sub")
-        data_product = DataProductMembershipFactory(user=user).data_product
+        data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
@@ -264,7 +264,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
         )
         owner = DataProductFactory()
         DataProductRoleAssignmentFactory(
@@ -288,7 +288,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -306,7 +306,7 @@ class TestDataOutputsRouter:
     ):
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
         )
         DataProductRoleAssignmentFactory(
             user_id=data_output_payload["user_id"],
@@ -320,7 +320,7 @@ class TestDataOutputsRouter:
         assert response.status_code == 400
 
     @staticmethod
-    def create_data_output(client: TestClient, default_data_output_payload):
+    def create_data_output(client: TestClient, default_data_output_payload) -> Response:
         return client.post(
             f"/api/data_products/"
             f"{default_data_output_payload.get('owner_id')}/data_output",
@@ -328,25 +328,27 @@ class TestDataOutputsRouter:
         )
 
     @staticmethod
-    def get_data_output_by_id(client: TestClient, data_output_id):
+    def get_data_output_by_id(client: TestClient, data_output_id) -> Response:
         return client.get(f"{ENDPOINT}/{data_output_id}")
 
     @staticmethod
-    def update_data_output(client: TestClient, payload, data_output_id):
+    def update_data_output(client: TestClient, payload, data_output_id) -> Response:
         return client.put(f"{ENDPOINT}/{data_output_id}", json=payload)
 
     @staticmethod
-    def delete_data_output(client: TestClient, data_output_id):
+    def delete_data_output(client: TestClient, data_output_id) -> Response:
         return client.delete(f"{ENDPOINT}/{data_output_id}")
 
     @staticmethod
-    def update_data_output_status(client: TestClient, status, data_output_id):
+    def update_data_output_status(
+        client: TestClient, status, data_output_id
+    ) -> Response:
         return client.put(f"{ENDPOINT}/{data_output_id}/status", json=status)
 
     @staticmethod
-    def get_namespace_suggestion(client: TestClient, name):
+    def get_namespace_suggestion(client: TestClient, name) -> Response:
         return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
-    def get_namespace_length_limits(client: TestClient):
+    def get_namespace_length_limits(client: TestClient) -> Response:
         return client.get(f"{ENDPOINT}/namespace_length_limits")

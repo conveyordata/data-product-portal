@@ -31,8 +31,6 @@ export enum ApiUrl {
     DataProductDataset = '/api/data_products/:dataProductId/dataset/:datasetId',
     DataProductAbout = '/api/data_products/:dataProductId/about',
     DataProductGraph = '/api/data_products/:dataProductId/graph',
-    DataProductMembershipRequest = '/api/data_product_memberships/request',
-    DataProductMembershipPendingActions = '/api/data_product_memberships/actions',
     DataProductNamespaceValidation = '/api/data_products/validate_namespace',
     DataProductNamespaceSuggestion = '/api/data_products/namespace_suggestion',
     DataProductNamespaceLimits = '/api/data_products/namespace_length_limits',
@@ -43,11 +41,15 @@ export enum ApiUrl {
     Authorize = '/api/auth/user',
     Roles = '/api/roles',
     RolesGet = '/api/roles/:scope',
-    RolesDelete = '/api/roles/:id',
+    RolesDelete = '/api/roles/:roleId',
     RoleAssignmentsDataProductGet = '/api/role_assignments/data_product',
     RoleAssignmentsDataProduct = '/api/role_assignments/data_product/:assignmentId',
     RoleAssignmentsDataProductRequest = '/api/role_assignments/data_product/request/:dataProductId',
     RoleAssignmentsDataProductDecide = '/api/role_assignments/data_product/:assignmentId/decide',
+    RoleAssignmentsDatasetGet = '/api/role_assignments/dataset',
+    RoleAssignmentsDataset = '/api/role_assignments/dataset/:assignmentId',
+    RoleAssignmentsDatasetRequest = '/api/role_assignments/dataset/request/:datasetId',
+    RoleAssignmentsDatasetDecide = '/api/role_assignments/dataset/:assignmentId/decide',
     Tags = '/api/tags',
     TagsId = '/api/tags/:tagId',
     Environments = '/api/envs',
@@ -95,6 +97,8 @@ export type DynamicPathParams =
     | 'serviceId'
     | 'environmentId'
     | 'configId'
+    | 'scope'
+    | 'roleId'
     | 'assignmentId';
 
 export function buildUrl(url: string, pathParams: Partial<Record<DynamicPathParams, string>>): string {

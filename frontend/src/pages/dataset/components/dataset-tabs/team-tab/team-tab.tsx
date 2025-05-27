@@ -1,53 +1,70 @@
 import { Button, Flex, Form } from 'antd';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { Searchbar } from '@/components/form';
-import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
-import { useModal } from '@/hooks/use-modal.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useAddUserToDatasetMutation, useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
-import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { SearchForm } from '@/types/shared';
-import { UserContract } from '@/types/users';
-import { getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
+import { UserPopup } from '@/components/modal/user-popup/user-popup';
+import { useModal } from '@/hooks/use-modal';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import {
+    useCreateDatasetRoleAssignmentMutation,
+    useGetDatasetRoleAssignmentsQuery,
+} from '@/store/features/role-assignments/dataset-roles-api-slice';
+import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import type { DatasetRoleAssignmentContract } from '@/types/roles/role.contract';
+import type { SearchForm } from '@/types/shared';
+import type { UserContract } from '@/types/users';
 
 import { TeamTable } from './components/team-table/team-table.component.tsx';
 import styles from './team-tab.module.scss';
+
+function filterUsers(
+    assignments: DatasetRoleAssignmentContract[],
+    searchTerm: string,
+): DatasetRoleAssignmentContract[] {
+    if (!searchTerm) return assignments;
+
+    const searchString = searchTerm.toLowerCase();
+    return (
+        assignments.filter((assignment) => {
+            const user = assignment?.user;
+            return (
+                user?.email?.toLowerCase()?.includes(searchString) ||
+                user?.first_name?.toLowerCase()?.includes(searchString) ||
+                user?.last_name?.toLowerCase()?.includes(searchString)
+            );
+        }) ?? []
+    );
+}
 
 type Props = {
     datasetId: string;
 };
 
-function filterUsers(users: UserContract[], searchTerm: string) {
-    if (!searchTerm) return users;
-    if (!users) return [];
-
-    return (
-        users.filter(
-            (user) =>
-                user?.email?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                user?.first_name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
-                user?.last_name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
-        ) ?? []
-    );
-}
-
 export function TeamTab({ datasetId }: Props) {
     const { t } = useTranslation();
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
-    const { data: dataset, isFetching } = useGetDatasetByIdQuery(datasetId);
-    const [addUserToDataset, { isLoading }] = useAddUserToDatasetMutation();
+    const { data: dataset } = useGetDatasetByIdQuery(datasetId);
+    const { data: roleAssignments, isFetching } = useGetDatasetRoleAssignmentsQuery({
+        dataset_id: datasetId,
+    });
+    const [addUserToDataset, { isLoading: isAddingUser }] = useCreateDatasetRoleAssignmentMutation();
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
     const { data: DATASET_ROLES, isFetching: isLoadingRoles } = useGetRolesQuery('dataset');
-    const datasetOwnerIds = dataset?.owners.map((owner) => owner.id) ?? [];
+
+    const filteredUsers = useMemo(() => {
+        return filterUsers(roleAssignments ?? [], searchTerm);
+    }, [searchTerm, roleAssignments]);
+    const datasetUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
+
     const { data: access } = useCheckAccessQuery(
         {
             resource: datasetId,
@@ -55,26 +72,23 @@ export function TeamTab({ datasetId }: Props) {
         },
         { skip: !datasetId },
     );
-    const canAddNew = access?.allowed || false;
+    const canAddUser = access?.allowed || false;
 
-    const filteredUsers = useMemo(() => {
-        return filterUsers(dataset?.owners ?? [], searchTerm);
-    }, [dataset?.owners, searchTerm]);
-
-    const isDatasetOwner = useMemo(() => {
-        if (!dataset || !user) return false;
-
-        return getIsDatasetOwner(dataset, user.id) || user.is_admin;
-    }, [dataset, user]);
-
-    const handleAddNewUser = async (user: UserContract) => {
-        try {
-            await addUserToDataset({ datasetId, userId: user.id }).unwrap();
-            dispatchMessage({ content: t('User has been added to dataset'), type: 'success' });
-        } catch (_e) {
-            dispatchMessage({ content: t('Failed to add user to dataset'), type: 'error' });
-        }
-    };
+    const handleGrantAccessToDataset = useCallback(
+        async (user: UserContract, role_id: string) => {
+            try {
+                await addUserToDataset({
+                    dataset_id: datasetId,
+                    user_id: user.id,
+                    role_id: role_id,
+                }).unwrap();
+                dispatchMessage({ content: t('User has been granted access to the dataset'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to grant access to the dataset'), type: 'error' });
+            }
+        },
+        [addUserToDataset, datasetId, t],
+    );
 
     if (!dataset || !user) return null;
 
@@ -90,24 +104,24 @@ export function TeamTab({ datasetId }: Props) {
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}
-                            disabled={!(canAddNew || isDatasetOwner)}
+                            disabled={!canAddUser}
                         >
                             {t('Add User')}
                         </Button>
                     }
                 />
-                <TeamTable isCurrentDatasetOwner={isDatasetOwner} datasetUsers={filteredUsers} datasetId={datasetId} />
+                <TeamTable datasetId={datasetId} datasetUsers={filteredUsers} />
             </Flex>
             {isVisible && (
                 <UserPopup
                     isOpen={isVisible}
                     onClose={handleClose}
-                    userIdsToHide={datasetOwnerIds}
-                    isLoading={isFetching || isLoading || isLoadingRoles}
+                    isLoading={isFetching || isAddingUser || isLoadingRoles}
+                    userIdsToHide={datasetUserIds}
                     roles={DATASET_ROLES || []}
                     item={{
-                        action: handleAddNewUser,
-                        label: t('Add User'),
+                        action: handleGrantAccessToDataset,
+                        label: t('Grant Access'),
                     }}
                 />
             )}

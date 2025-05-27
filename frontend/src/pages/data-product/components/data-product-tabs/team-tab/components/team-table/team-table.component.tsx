@@ -4,44 +4,45 @@ import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
+import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
-    useDeleteRoleAssignmentMutation,
-    useUpdateRoleAssignmentMutation,
+    useDeleteDataProductRoleAssignmentMutation,
+    useUpdateDataProductRoleAssignmentMutation,
 } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { RoleContract } from '@/types/roles';
-import type { RoleAssignmentContract } from '@/types/roles/role.contract';
+import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 
 import styles from './team-table.module.scss';
 
 type Props = {
     dataProductId: string;
-    dataProductUsers: RoleAssignmentContract[];
+    dataProductUsers: DataProductRoleAssignmentContract[];
 };
 export function TeamTable({ dataProductId, dataProductUsers }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] = useDeleteRoleAssignmentMutation();
-    const [updateRoleAssignment] = useUpdateRoleAssignmentMutation();
+    const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] =
+        useDeleteDataProductRoleAssignmentMutation();
+    const [updateRoleAssignment] = useUpdateDataProductRoleAssignmentMutation();
 
     const { handleGrantAccessToDataProduct, handleDenyAccessToDataProduct } = usePendingActionHandlers();
 
-    const { data: edit_access } = useCheckAccessQuery(
-        {
-            resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
-        },
-        { skip: !dataProductId },
-    );
     const { data: approve_access } = useCheckAccessQuery(
         {
             resource: dataProductId,
             action: AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+        },
+        { skip: !dataProductId },
+    );
+    const { data: edit_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
         },
         { skip: !dataProductId },
     );
@@ -61,7 +62,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
-    const onChange: TableProps<RoleAssignmentContract>['onChange'] = (pagination) => {
+    const onChange: TableProps<DataProductRoleAssignmentContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
@@ -74,10 +75,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
             try {
                 if (!dataProduct) return;
 
-                console.log('Going to run the deletion');
-                console.log('ID object:', id);
                 await deleteRoleAssignment({ role_assignment_id: id, data_product_id: dataProduct.id }).unwrap();
-                console.log('Deletion done');
                 dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
@@ -104,14 +102,6 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         [dataProduct, t, updateRoleAssignment],
     );
 
-    const handleRejectMembership = useCallback(
-        async (id: string) => {
-            if (!dataProduct) return;
-            await handleDenyAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
-        },
-        [dataProduct, handleDenyAccessToDataProduct],
-    );
-
     const handleAcceptMembership = useCallback(
         async (id: string) => {
             if (!dataProduct) return;
@@ -120,7 +110,15 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         [dataProduct, handleGrantAccessToDataProduct],
     );
 
-    const columns: TableColumnsType<RoleAssignmentContract> = useMemo(() => {
+    const handleRejectMembership = useCallback(
+        async (id: string) => {
+            if (!dataProduct) return;
+            await handleDenyAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
+        },
+        [dataProduct, handleDenyAccessToDataProduct],
+    );
+
+    const columns: TableColumnsType<DataProductRoleAssignmentContract> = useMemo(() => {
         return getDataProductUsersTableColumns({
             t,
             dataProductUsers: dataProductUsers,
@@ -130,9 +128,9 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
             onRoleChange: handleRoleChange,
             isRemovingUser: isRemovingUserFromDataProduct,
             isLoading: isLoadingDataProduct,
+            canApprove: canApproveUser,
             canEdit: canEditUser,
             canRemove: canRemoveUser,
-            canApprove: canApproveUser,
         });
     }, [
         t,
@@ -152,7 +150,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
 
     return (
         <Flex className={styles.teamListContainer}>
-            <Table<RoleAssignmentContract>
+            <Table<DataProductRoleAssignmentContract>
                 loading={isLoadingDataProduct}
                 className={styles.teamListTable}
                 columns={columns}
