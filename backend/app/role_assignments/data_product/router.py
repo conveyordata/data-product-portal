@@ -61,13 +61,12 @@ def create_assignment(
     service = RoleAssignmentService(db=db, user=user)
     role_assignment = service.create_assignment(id, request)
 
+    approvers = ()
     if not (is_admin := Authorization().has_admin_role(user_id=str(user.id))):
         approvers = service.users_with_authz_action(
             data_product_id=role_assignment.data_product_id,
             action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
         )
-    else:
-        approvers = ()
 
     if is_admin or user.id in (approver.id for approver in approvers):
         service.update_assignment(

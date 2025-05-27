@@ -117,9 +117,7 @@ def create_dataset(
     for owner_id in dataset.owners:
         resp = create_assignment(
             new_dataset.id,
-            CreateRoleAssignment(
-                dataset_id=new_dataset.id, user_id=owner_id, role_id=owner_role.id
-            ),
+            CreateRoleAssignment(user_id=owner_id, role_id=owner_role.id),
             db,
             authenticated_user,
         )
@@ -215,62 +213,6 @@ def update_dataset_status(
     id: UUID, dataset: DatasetStatusUpdate, db: Session = Depends(get_db_session)
 ) -> None:
     return DatasetService(db).update_dataset_status(id, dataset)
-
-
-@router.post(
-    "/{id}/user/{user_id}",
-    responses={
-        400: {
-            "description": "User not found",
-            "content": {
-                "application/json": {"example": {"detail": "User email not found"}}
-            },
-        },
-        404: {
-            "description": "Dataset not found",
-            "content": {
-                "application/json": {"example": {"detail": "Dataset id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__CREATE_USER, DatasetResolver)),
-    ],
-)
-def add_user_to_dataset(
-    id: UUID,
-    user_id: UUID,
-    db: Session = Depends(get_db_session),
-) -> None:
-    return DatasetService(db).add_user_to_dataset(id, user_id)
-
-
-@router.delete(
-    "/{id}/user/{user_id}",
-    responses={
-        400: {
-            "description": "User not found",
-            "content": {
-                "application/json": {"example": {"detail": "User email not found"}}
-            },
-        },
-        404: {
-            "description": "Dataset not found",
-            "content": {
-                "application/json": {"example": {"detail": "Dataset id not found"}}
-            },
-        },
-    },
-    dependencies=[
-        Depends(Authorization.enforce(Action.DATASET__DELETE_USER, DatasetResolver)),
-    ],
-)
-def remove_user_from_dataset(
-    id: UUID,
-    user_id: UUID,
-    db: Session = Depends(get_db_session),
-) -> None:
-    return DatasetService(db).remove_user_from_dataset(id, user_id)
 
 
 @router.get("/{id}/graph")
