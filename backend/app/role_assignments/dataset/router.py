@@ -120,6 +120,36 @@ def delete_assignment(
 
 
 @router.patch(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATASET__UPDATE_USER,
+                resolver=DatasetRoleAssignmentResolver,
+            )
+        )
+    ],
+)
+def modify_assigned_role(
+    id: UUID,
+    request: ModifyRoleAssignment,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> RoleAssignmentResponse:
+    service = RoleAssignmentService(db=db, user=user)
+    original_role = service.get_assignment(id).role_id
+
+    assignment = service.update_assignment(
+        UpdateRoleAssignment(id=id, role_id=request.role_id)
+    )
+
+    if assignment.decision is DecisionStatus.APPROVED:
+        DatasetAuthAssignment(assignment, previous_role_id=original_role).swap()
+
+    return assignment
+
+
+@router.patch(
     "/{id}/decide",
     dependencies=[
         Depends(
@@ -157,35 +187,5 @@ def decide_assignment(
 
     if assignment.decision is DecisionStatus.APPROVED:
         DatasetAuthAssignment(assignment).add()
-
-    return assignment
-
-
-@router.patch(
-    "/{id}/role",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATASET__UPDATE_USER,
-                resolver=DatasetRoleAssignmentResolver,
-            )
-        )
-    ],
-)
-def modify_assigned_role(
-    id: UUID,
-    request: ModifyRoleAssignment,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
-    original_role = service.get_assignment(id).role_id
-
-    assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id)
-    )
-
-    if assignment.decision is DecisionStatus.APPROVED:
-        DatasetAuthAssignment(assignment, previous_role_id=original_role).swap()
 
     return assignment
