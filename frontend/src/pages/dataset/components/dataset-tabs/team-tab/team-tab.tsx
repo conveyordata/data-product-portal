@@ -4,19 +4,19 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { Searchbar } from '@/components/form';
-import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
-import { useModal } from '@/hooks/use-modal.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { UserPopup } from '@/components/modal/user-popup/user-popup';
+import { useModal } from '@/hooks/use-modal';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import {
     useCreateRoleAssignmentMutation,
     useGetRoleAssignmentQuery,
-} from '@/store/features/role-assignments/dataset-roles-api-slice.ts';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
-import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DatasetRoleAssignmentContract } from '@/types/roles/role.contract.ts';
+} from '@/store/features/role-assignments/dataset-roles-api-slice';
+import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import type { DatasetRoleAssignmentContract } from '@/types/roles/role.contract';
 import type { SearchForm } from '@/types/shared';
 import type { UserContract } from '@/types/users';
 

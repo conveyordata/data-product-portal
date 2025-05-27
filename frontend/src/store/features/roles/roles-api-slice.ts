@@ -32,7 +32,7 @@ export const rolesApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: roleTa
         }),
         deleteRole: builder.mutation<void, string>({
             query: (id: string) => ({
-                url: buildUrl(ApiUrl.RolesDelete, { id }),
+                url: buildUrl(ApiUrl.RolesDelete, { roleId: id }),
                 method: 'DELETE',
             }),
             invalidatesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],

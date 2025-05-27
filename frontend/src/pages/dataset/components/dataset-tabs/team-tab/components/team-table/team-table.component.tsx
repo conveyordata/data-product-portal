@@ -151,7 +151,7 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
                     position: ['topRight'],
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} dataset owners', {
+                        t('Showing {{range0}}-{{range1}} of {{total}} team members', {
                             range0: range[0],
                             range1: range[1],
                             total: total,

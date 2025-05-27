@@ -23,16 +23,16 @@ import { HistoryTab } from './history-tab/history-tab';
 import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
 
-type Props = {
-    datasetId: string;
-    isLoading: boolean;
-};
-
 type Tab = {
     label: string;
     key: TabKeys;
     icon?: ReactNode;
     children: ReactNode;
+};
+
+type Props = {
+    datasetId: string;
+    isLoading: boolean;
 };
 
 export function DatasetTabs({ datasetId, isLoading }: Props) {

@@ -41,7 +41,7 @@ export enum ApiUrl {
     Authorize = '/api/auth/user',
     Roles = '/api/roles',
     RolesGet = '/api/roles/:scope',
-    RolesDelete = '/api/roles/:id',
+    RolesDelete = '/api/roles/:roleId',
     RoleAssignmentsDataProductGet = '/api/role_assignments/data_product',
     RoleAssignmentsDataProduct = '/api/role_assignments/data_product/:assignmentId',
     RoleAssignmentsDataProductRequest = '/api/role_assignments/data_product/request/:dataProductId',
@@ -96,6 +96,8 @@ export type DynamicPathParams =
     | 'serviceId'
     | 'environmentId'
     | 'configId'
+    | 'scope'
+    | 'roleId'
     | 'assignmentId';
 
 export function buildUrl(url: string, pathParams: Partial<Record<DynamicPathParams, string>>): string {

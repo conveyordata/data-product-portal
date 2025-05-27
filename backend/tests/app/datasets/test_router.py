@@ -329,9 +329,7 @@ class TestDatasetsRouter:
             permissions=[AuthorizationAction.DATASET__UPDATE_SETTINGS],
         )
         ds = DatasetFactory()
-        DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, dataset_id=ds.id
-        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         setting = DataProductSettingFactory(scope="dataset")
 
         response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}?value=false")
@@ -398,7 +396,9 @@ class TestDatasetsRouter:
         dp = DataProductFactory()
         user = UserFactory(external_id="sub")
         role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        DataProductRoleAssignmentFactory(user_id=user.id, role_id=role.id, data_product_id=dp.id)
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=dp.id
+        )
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
 
         response = client.get(ENDPOINT)
