@@ -2,10 +2,10 @@ from fastapi.testclient import TestClient
 from tests.factories import (
     DatasetFactory,
     DatasetRoleAssignmentFactory,
+    GlobalRoleAssignmentFactory,
     RoleFactory,
     UserFactory,
 )
-from tests.factories import GlobalRoleAssignmentFactory
 
 from app.core.authz.actions import AuthorizationAction
 from app.datasets.model import Dataset
