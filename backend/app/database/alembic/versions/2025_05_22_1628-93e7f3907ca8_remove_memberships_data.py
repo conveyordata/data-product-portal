@@ -1,4 +1,4 @@
-"""Remove memberships data
+"""Remove memberships and dataset owners
 
 Revision ID: 93e7f3907ca8
 Revises: 6441623a586b
@@ -36,11 +36,20 @@ class DataProductUserRole(str, Enum):
 
 
 def upgrade():
+    op.drop_table("datasets_owners")
     op.drop_table("data_product_memberships")
     op.execute("DROP TYPE dataproductuserrole;")
 
 
 def downgrade():
+    op.create_table(
+        "datasets_owners",
+        sa.Column("dataset_id", UUID, sa.ForeignKey("datasets.id")),
+        sa.Column("users_id", UUID, sa.ForeignKey("users.id")),
+        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
+        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
+    )
+
     op.create_table(
         "data_product_memberships",
         sa.Column("id", UUID, primary_key=True),
