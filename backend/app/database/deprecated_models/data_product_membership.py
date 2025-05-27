@@ -1,4 +1,5 @@
 import uuid
+from enum import Enum as ObjectEnum
 
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column

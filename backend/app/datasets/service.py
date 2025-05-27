@@ -37,7 +37,6 @@ from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.dataset.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
@@ -337,34 +336,6 @@ class DatasetService:
             assignment.data_product
             for assignment in user.data_product_roles
             if assignment.decision == DecisionStatus.APPROVED
-        }
-
-        return bool(consuming_data_products & user_data_products)
-
-    @classmethod
-    def dataset_namespace_length_limits(cls) -> NamespaceLengthLimits:
-        return NamespaceValidator.namespace_length_limits()
-
-    def is_visible_to_user(self, dataset: DatasetModel, user: "User") -> bool:
-        if (
-            dataset.access_type != DatasetAccessType.PRIVATE
-            or Authorization().has_admin_role(user_id=user.id)
-            or DatasetRoleAssignmentService(db=self.db, user=user).has_assignment(
-                dataset_id=dataset.id
-            )
-        ):
-            return True
-
-        consuming_data_products = {
-            link.data_product
-            for link in dataset.data_product_links
-            if link.status == DecisionStatus.APPROVED
-        }
-
-        user_data_products = {
-            membership.data_product
-            for membership in user.data_product_memberships
-            if membership.status == DecisionStatus.APPROVED
         }
 
         return bool(consuming_data_products & user_data_products)
