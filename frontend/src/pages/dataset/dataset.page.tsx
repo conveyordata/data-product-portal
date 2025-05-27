@@ -65,7 +65,7 @@ export function Dataset() {
                         <Typography.Title level={3}>{dataset?.name}</Typography.Title>
                         <DatasetAccessIcon accessType={dataset.access_type} hasPopover />
                     </Flex>
-                    {(canEdit) && (
+                    {canEdit && (
                         <CircleIconButton
                             icon={<SettingOutlined />}
                             tooltip={t('Edit dataset')}

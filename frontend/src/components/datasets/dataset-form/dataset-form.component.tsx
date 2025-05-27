@@ -1,14 +1,26 @@
-import { Button, CheckboxOptionType, Form, FormProps, Input, Popconfirm, Radio, Select, Space, Tooltip } from 'antd';
+import {
+    Button,
+    type CheckboxOptionType,
+    Col,
+    Form,
+    type FormProps,
+    Input,
+    Popconfirm,
+    Radio,
+    Row,
+    Select,
+    Space,
+    Tooltip,
+} from 'antd';
 import type { TFunction } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import {
     useCreateDatasetMutation,
@@ -23,9 +35,16 @@ import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slic
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
-import { DatasetAccess, DatasetCreateFormSchema, DatasetCreateRequest, DatasetUpdateRequest } from '@/types/dataset';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import {
+    DatasetAccess,
+    DatasetCreateFormSchema,
+    type DatasetCreateRequest,
+    type DatasetUpdateRequest,
+} from '@/types/dataset';
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
 import styles from './dataset-form.module.scss';
@@ -71,7 +90,7 @@ const getAccessTypeOptions = (t: TFunction) => {
 export function DatasetForm({ mode, datasetId }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const currentUser = useSelector(selectCurrentUser);
+
     const { data: currentDataset, isFetching: isFetchingInitialValues } = useGetDatasetByIdQuery(datasetId || '', {
         skip: mode === 'create' || !datasetId,
     });
@@ -92,13 +111,26 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
-    const canEditForm = Boolean(
-        mode === 'edit' &&
-            currentDataset &&
-            currentUser?.id &&
-            (getIsDatasetOwner(currentDataset, currentUser?.id) || currentUser?.is_admin),
+    const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATASET });
+    const { data: update_access } = useCheckAccessQuery(
+        {
+            resource: datasetId,
+            action: AuthorizationAction.DATASET__UPDATE_PROPERTIES,
+        },
+        { skip: !datasetId },
     );
-    const canFillInForm = mode === 'create' || canEditForm;
+    const { data: delete_access } = useCheckAccessQuery(
+        {
+            resource: datasetId,
+            action: AuthorizationAction.DATASET__DELETE,
+        },
+        { skip: !datasetId },
+    );
+
+    const canCreate = mode === 'create' && (create_access?.allowed ?? false);
+    const canEdit = mode === 'edit' && (update_access?.allowed ?? false);
+    const canDelete = mode === 'edit' && (delete_access?.allowed ?? false);
+    const canSubmit = canCreate || canEdit;
 
     const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingTags;
 
@@ -125,7 +157,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
                 navigate(createDatasetIdPath(response.id));
             } else if (mode === 'edit' && datasetId) {
-                if (!canEditForm) {
+                if (!canEdit) {
                     dispatchMessage({ content: t('You are not allowed to edit this dataset'), type: 'error' });
                     return;
                 }
@@ -168,7 +200,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
     };
 
     const handleDeleteDataset = async () => {
-        if (canEditForm && currentDataset) {
+        if (canDelete && currentDataset) {
             try {
                 await deleteDataset(currentDataset?.id).unwrap();
                 dispatchMessage({ content: t('Dataset deleted successfully'), type: 'success' });
@@ -204,6 +236,8 @@ export function DatasetForm({ mode, datasetId }: Props) {
         }
     }, [form, mode, canEditNamespace, namespaceSuggestion, isFetchingNamespaceSuggestion, t]);
 
+    const ownerIds = useGetDatasetOwnerIds(currentDataset?.id);
+
     useEffect(() => {
         if (currentDataset && mode === 'edit') {
             form.setFieldsValue({
@@ -214,10 +248,10 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 domain_id: currentDataset.domain.id,
                 tag_ids: currentDataset.tags.map((tag) => tag.id),
                 lifecycle_id: currentDataset.lifecycle.id,
-                owners: getDatasetOwnerIds(currentDataset),
+                owners: ownerIds,
             });
         }
-    }, [currentDataset, mode, form]);
+    }, [currentDataset, mode, form, ownerIds]);
 
     const validateNamespaceCallback = useCallback(
         (namespace: string) => validateNamespace(namespace).unwrap(),
@@ -235,7 +269,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
             autoComplete={'off'}
             requiredMark={'optional'}
             labelWrap
-            disabled={isLoading || !canFillInForm}
+            disabled={isLoading || !canSubmit}
         >
             <Form.Item<DatasetCreateFormSchema>
                 name={'name'}
@@ -276,8 +310,9 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     mode={'multiple'}
                     options={userSelectOptions}
                     filterOption={selectFilterOptionByLabelAndValue}
-                    allowClear
+                    disabled={mode !== 'create'}
                     tokenSeparators={[',']}
+                    allowClear
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>
@@ -357,26 +392,8 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
             <Form.Item>
-                <Space>
-                    <Button
-                        className={styles.formButton}
-                        type="primary"
-                        htmlType={'submit'}
-                        loading={isCreating || isUpdating}
-                        disabled={isLoading || !canFillInForm}
-                    >
-                        {mode === 'edit' ? t('Edit') : t('Create')}
-                    </Button>
-                    <Button
-                        className={styles.formButton}
-                        type="default"
-                        onClick={onCancel}
-                        loading={isCreating || isUpdating}
-                        disabled={isLoading || !canFillInForm}
-                    >
-                        {t('Cancel')}
-                    </Button>
-                    {canEditForm && (
+                <Row>
+                    <Col>
                         <Popconfirm
                             title={t('Are you sure you want to delete this dataset?')}
                             onConfirm={handleDeleteDataset}
@@ -388,13 +405,36 @@ export function DatasetForm({ mode, datasetId }: Props) {
                                 type="default"
                                 danger
                                 loading={isArchiving}
-                                disabled={isLoading}
+                                disabled={isLoading || !canDelete}
                             >
                                 {t('Delete')}
                             </Button>
                         </Popconfirm>
-                    )}
-                </Space>
+                    </Col>
+                    <Col flex="auto" />
+                    <Col>
+                        <Space>
+                            <Button
+                                className={styles.formButton}
+                                type="default"
+                                onClick={onCancel}
+                                loading={isCreating || isUpdating}
+                                disabled={isLoading}
+                            >
+                                {t('Cancel')}
+                            </Button>
+                            <Button
+                                className={styles.formButton}
+                                type="primary"
+                                htmlType={'submit'}
+                                loading={isCreating || isUpdating}
+                                disabled={isLoading || !canSubmit}
+                            >
+                                {mode === 'edit' ? t('Save') : t('Create')}
+                            </Button>
+                        </Space>
+                    </Col>
+                </Row>
             </Form.Item>
         </Form>
     );

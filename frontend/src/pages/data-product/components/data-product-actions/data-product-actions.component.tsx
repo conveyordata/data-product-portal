@@ -37,11 +37,9 @@ export function DataProductActions({ dataProductId }: Props) {
     const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
         useGetDataProductDatabricksWorkspaceUrlMutation();
 
-    const { data: request_access } = useCheckAccessQuery(
-        {
-            action: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
-        },
-    );
+    const { data: request_access } = useCheckAccessQuery({
+        action: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
+    });
     const { data: read_integrations } = useCheckAccessQuery(
         {
             resource: dataProductId,

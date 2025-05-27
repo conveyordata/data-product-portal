@@ -17,7 +17,7 @@ export function useGetDatasetOwners(datasetId: string | undefined): UserContract
         .map((assignment) => assignment.user);
 }
 
-export function useGetDatasetOwnerIds(dataProductId: string | undefined): string[] {
-    const owners = useGetDatasetOwners(dataProductId);
+export function useGetDatasetOwnerIds(datasetId: string | undefined): string[] {
+    const owners = useGetDatasetOwners(datasetId);
     return owners.map((owner) => owner.id);
 }

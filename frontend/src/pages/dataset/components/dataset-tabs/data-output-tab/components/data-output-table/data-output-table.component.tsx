@@ -15,14 +15,12 @@ import styles from './data-output-table.module.scss';
 import { getDatasetDataProductsColumns } from './data-output-table-columns.tsx';
 
 type Props = {
-    isCurrentDatasetOwner: boolean;
     datasetId: string;
     dataOutputs: DataOutputLink[];
-    currentUserId?: string;
     isLoading?: boolean;
 };
 
-export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs, isLoading }: Props) {
+export function DataOutputTable({ datasetId, dataOutputs, isLoading }: Props) {
     const { t } = useTranslation();
     const {
         handleAcceptDataOutputDatasetLink,
@@ -47,8 +45,8 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
         },
         { skip: !datasetId },
     );
-    const canAcceptNew = accept_access?.allowed || false;
-    const canRevokeNew = revoke_access?.allowed || false;
+    const canAccept = accept_access?.allowed || false;
+    const canRevoke = revoke_access?.allowed || false;
 
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
         initialPagination: TABLE_SUBSECTION_PAGINATION,
@@ -82,27 +80,24 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
 
     const columns: TableColumnsType<DataOutputLink> = useMemo(() => {
         return getDatasetDataProductsColumns({
-            onRemoveDataOutputDatasetLink: handleRemoveDatasetFromDataOutput,
             t,
-            isDisabled: !isCurrentDatasetOwner,
-            canAcceptNew: canAcceptNew,
-            canRevokeNew: canRevokeNew,
-            isLoading: isRemovingDatasetFromDataProduct || isRejectingDataOutputLink || isApprovingDataOutputLink,
-            isCurrentDatasetOwner,
-            onRejectDataOutputDatasetLink: handleRejectDataOutputDatasetLink,
             onAcceptDataOutputDatasetLink: handleAcceptDataOutputDatasetLink,
+            onRejectDataOutputDatasetLink: handleRejectDataOutputDatasetLink,
+            onRemoveDataOutputDatasetLink: handleRemoveDatasetFromDataOutput,
+            isLoading: isRemovingDatasetFromDataProduct || isRejectingDataOutputLink || isApprovingDataOutputLink,
+            canAccept: canAccept,
+            canRevoke: canRevoke,
         });
     }, [
-        handleRemoveDatasetFromDataOutput,
         t,
-        isCurrentDatasetOwner,
+        handleAcceptDataOutputDatasetLink,
+        handleRejectDataOutputDatasetLink,
+        handleRemoveDatasetFromDataOutput,
         isRemovingDatasetFromDataProduct,
         isRejectingDataOutputLink,
         isApprovingDataOutputLink,
-        handleRejectDataOutputDatasetLink,
-        handleAcceptDataOutputDatasetLink,
-        canAcceptNew,
-        canRevokeNew,
+        canAccept,
+        canRevoke,
     ]);
 
     return (
