@@ -264,7 +264,7 @@ class TestDatasetRoleAssignmentsRouter:
         )
 
         response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/role", json={"role_id": str(new_role.id)}
+            f"{ENDPOINT}/{assignment.id}", json={"role_id": str(new_role.id)}
         )
         assert response.status_code == 200
         data = response.json()
