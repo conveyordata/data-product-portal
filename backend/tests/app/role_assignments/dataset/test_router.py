@@ -5,7 +5,7 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
+from tests.factories import GlobalRoleAssignmentFactory
 
 from app.core.authz.actions import AuthorizationAction
 from app.datasets.model import Dataset
