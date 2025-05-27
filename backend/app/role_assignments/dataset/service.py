@@ -123,8 +123,11 @@ class RoleAssignmentService:
         return self.db.scalar(query)
 
     def ensure_is_dataset_scope(self, role_id: Optional[UUID]) -> None:
-        role = self.db.get(Role, role_id)
-        if role and role.scope != Scope.DATASET:
+        if (
+            not role_id
+            or (role := self.db.get(Role, role_id))
+            and role.scope != Scope.DATASET
+        ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Role not found for this scope",

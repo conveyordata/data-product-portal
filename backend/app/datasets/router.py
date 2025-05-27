@@ -121,12 +121,13 @@ def create_dataset(
             db,
             authenticated_user,
         )
-        decide_assignment(
-            id=resp.id,
-            request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
-            db=db,
-            user=authenticated_user,
-        )
+        if resp.decision == DecisionStatus.PENDING:
+            decide_assignment(
+                id=resp.id,
+                request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+                db=db,
+                user=authenticated_user,
+            )
 
     return {"id": new_dataset.id}
 

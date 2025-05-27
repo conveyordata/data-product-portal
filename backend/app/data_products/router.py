@@ -132,12 +132,13 @@ def create_data_product(
             user=authenticated_user,
             background_tasks=background_tasks,
         )
-        decide_assignment(
-            id=resp.id,
-            request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
-            db=db,
-            user=authenticated_user,
-        )
+        if resp.decision == DecisionStatus.PENDING:
+            decide_assignment(
+                id=resp.id,
+                request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
+                db=db,
+                user=authenticated_user,
+            )
     return {"id": created_data_product.id}
 
 
