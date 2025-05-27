@@ -10,8 +10,8 @@ import {
     useRejectDataProductLinkMutation,
 } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { useDecideRoleAssignmentMutation as useDecideDataProductRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
-import { useDecideRoleAssignmentMutation as useDecideDatasetRoleAssignmentMutation } from '@/store/features/role-assignments/dataset-roles-api-slice';
+import { useDecideDataProductRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
+import { useDecideDatasetRoleAssignmentMutation } from '@/store/features/role-assignments/dataset-roles-api-slice';
 import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
 import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { DecisionStatus } from '@/types/roles';

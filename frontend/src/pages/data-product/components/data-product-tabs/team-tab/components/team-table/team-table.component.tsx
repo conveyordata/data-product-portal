@@ -9,8 +9,8 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
-    useDeleteRoleAssignmentMutation,
-    useUpdateRoleAssignmentMutation,
+    useDeleteDataProductRoleAssignmentMutation,
+    useUpdateDataProductRoleAssignmentMutation,
 } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { RoleContract } from '@/types/roles';
@@ -26,8 +26,9 @@ type Props = {
 export function TeamTable({ dataProductId, dataProductUsers }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] = useDeleteRoleAssignmentMutation();
-    const [updateRoleAssignment] = useUpdateRoleAssignmentMutation();
+    const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] =
+        useDeleteDataProductRoleAssignmentMutation();
+    const [updateRoleAssignment] = useUpdateDataProductRoleAssignmentMutation();
 
     const { handleGrantAccessToDataProduct, handleDenyAccessToDataProduct } = usePendingActionHandlers();
 

@@ -12,8 +12,8 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
-    useCreateRoleAssignmentMutation,
-    useGetRoleAssignmentQuery,
+    useCreateDataProductRoleAssignmentMutation,
+    useGetDataProductRoleAssignmentsQuery,
 } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
@@ -48,10 +48,10 @@ export function TeamTab({ dataProductId }: Props) {
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const { data: roleAssignments, isFetching } = useGetRoleAssignmentQuery({
+    const { data: roleAssignments, isFetching } = useGetDataProductRoleAssignmentsQuery({
         data_product_id: dataProductId,
     });
-    const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateRoleAssignmentMutation();
+    const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateDataProductRoleAssignmentMutation();
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);

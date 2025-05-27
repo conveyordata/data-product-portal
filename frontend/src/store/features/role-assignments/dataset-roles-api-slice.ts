@@ -4,11 +4,11 @@ import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
 import { DecisionStatus } from '@/types/roles';
 import type { DatasetRoleAssignmentContract, DatasetRoleAssignmentCreateContract } from '@/types/roles/role.contract';
 
-export const roleTags: string[] = [TagTypes.Role];
+export const roleTags: string[] = [TagTypes.UserDatasets];
 
 export const datasetRoleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: roleTags }).injectEndpoints({
     endpoints: (builder) => ({
-        getRoleAssignment: builder.query<
+        getDatasetRoleAssignments: builder.query<
             DatasetRoleAssignmentContract[],
             { dataset_id?: string; user_id?: string; decision?: DecisionStatus }
         >({
@@ -21,9 +21,12 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ ad
                     ...(request.decision ? { decision: request.decision } : {}),
                 },
             }),
-            providesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
+            providesTags: [{ type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST }],
         }),
-        createRoleAssignment: builder.mutation<DatasetRoleAssignmentContract, DatasetRoleAssignmentCreateContract>({
+        createDatasetRoleAssignment: builder.mutation<
+            DatasetRoleAssignmentContract,
+            DatasetRoleAssignmentCreateContract
+        >({
             query: (request) => ({
                 url: buildUrl(ApiUrl.RoleAssignmentsDataset, { assignmentId: request.dataset_id }),
                 method: 'POST',
@@ -38,7 +41,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ ad
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        updateRoleAssignment: builder.mutation<
+        updateDatasetRoleAssignment: builder.mutation<
             DatasetRoleAssignmentContract,
             { role_assignment_id: string; role_id: string; dataset_id: string }
         >({
@@ -55,7 +58,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ ad
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        decideRoleAssignment: builder.mutation<
+        decideDatasetRoleAssignment: builder.mutation<
             DatasetRoleAssignmentContract,
             { role_assignment_id: string; decision_status: DecisionStatus; dataset_id: string }
         >({
@@ -72,7 +75,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ ad
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        deleteRoleAssignment: builder.mutation<void, { role_assignment_id: string; dataset_id: string }>({
+        deleteDatasetRoleAssignment: builder.mutation<void, { role_assignment_id: string; dataset_id: string }>({
             query: (request) => ({
                 url: buildUrl(ApiUrl.RoleAssignmentsDataset, {
                     assignmentId: request.role_assignment_id,
@@ -90,9 +93,9 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ ad
 });
 
 export const {
-    useGetRoleAssignmentQuery,
-    useUpdateRoleAssignmentMutation,
-    useDeleteRoleAssignmentMutation,
-    useCreateRoleAssignmentMutation,
-    useDecideRoleAssignmentMutation,
+    useGetDatasetRoleAssignmentsQuery,
+    useUpdateDatasetRoleAssignmentMutation,
+    useDeleteDatasetRoleAssignmentMutation,
+    useCreateDatasetRoleAssignmentMutation,
+    useDecideDatasetRoleAssignmentMutation,
 } = datasetRoleAssignmentsApiSlice;

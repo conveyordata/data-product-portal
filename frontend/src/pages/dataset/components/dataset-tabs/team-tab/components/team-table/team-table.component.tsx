@@ -8,8 +8,8 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import {
-    useDeleteRoleAssignmentMutation,
-    useUpdateRoleAssignmentMutation,
+    useDeleteDatasetRoleAssignmentMutation,
+    useUpdateDatasetRoleAssignmentMutation,
 } from '@/store/features/role-assignments/dataset-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { DatasetRoleAssignmentContract, RoleContract } from '@/types/roles/role.contract';
@@ -25,8 +25,8 @@ type Props = {
 export function TeamTable({ datasetId, datasetUsers }: Props) {
     const { t } = useTranslation();
     const { data: dataset, isLoading: isFetchingDataset } = useGetDatasetByIdQuery(datasetId);
-    const [deleteRoleAssignment, { isLoading: isRemovingUser }] = useDeleteRoleAssignmentMutation();
-    const [updateRoleAssignment] = useUpdateRoleAssignmentMutation();
+    const [deleteRoleAssignment, { isLoading: isRemovingUser }] = useDeleteDatasetRoleAssignmentMutation();
+    const [updateRoleAssignment] = useUpdateDatasetRoleAssignmentMutation();
 
     const { handleGrantAccessToDataset, handleDenyAccessToDataset } = usePendingActionHandlers();
 

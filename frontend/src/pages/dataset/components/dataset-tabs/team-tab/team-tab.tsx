@@ -11,8 +11,8 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import {
-    useCreateRoleAssignmentMutation,
-    useGetRoleAssignmentQuery,
+    useCreateDatasetRoleAssignmentMutation,
+    useGetDatasetRoleAssignmentsQuery,
 } from '@/store/features/role-assignments/dataset-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
@@ -51,10 +51,10 @@ export function TeamTab({ datasetId }: Props) {
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
     const { data: dataset } = useGetDatasetByIdQuery(datasetId);
-    const { data: roleAssignments, isFetching } = useGetRoleAssignmentQuery({
+    const { data: roleAssignments, isFetching } = useGetDatasetRoleAssignmentsQuery({
         dataset_id: datasetId,
     });
-    const [addUserToDataset, { isLoading: isAddingUser }] = useCreateRoleAssignmentMutation();
+    const [addUserToDataset, { isLoading: isAddingUser }] = useCreateDatasetRoleAssignmentMutation();
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
