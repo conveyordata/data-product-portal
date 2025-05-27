@@ -92,11 +92,11 @@ class RoleAssignmentService:
         return assignment
 
     def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
-        self.ensure_is_data_product_scope(request.role_id)
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)
 
         if (role_id := request.role_id) is not None:
+            self.ensure_is_data_product_scope(role_id)
             assignment.role_id = role_id
         if (decision := request.decision) is not None:
             assignment.decision = decision
@@ -106,7 +106,7 @@ class RoleAssignmentService:
         self.db.commit()
         return assignment
 
-    def ensure_is_data_product_scope(self, role_id: Optional[UUID]) -> None:
+    def ensure_is_data_product_scope(self, role_id: UUID) -> None:
         role = self.db.get(Role, role_id)
         if role and role.scope != Scope.DATA_PRODUCT:
             raise HTTPException(
