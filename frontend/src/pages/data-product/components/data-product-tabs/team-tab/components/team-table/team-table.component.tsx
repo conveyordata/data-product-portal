@@ -102,7 +102,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         [dataProduct, t, updateRoleAssignment],
     );
 
-    const handleAcceptMembership = useCallback(
+    const handleAcceptAccessRequest = useCallback(
         async (id: string) => {
             if (!dataProduct) return;
             await handleGrantAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
@@ -110,7 +110,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         [dataProduct, handleGrantAccessToDataProduct],
     );
 
-    const handleRejectMembership = useCallback(
+    const handleRejectAccessRequest = useCallback(
         async (id: string) => {
             if (!dataProduct) return;
             await handleDenyAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
@@ -123,8 +123,8 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
             t,
             dataProductUsers: dataProductUsers,
             onRemoveUserAccess: handleRemoveUserAccess,
-            onRejectAccessRequest: handleRejectMembership,
-            onAcceptAccessRequest: handleAcceptMembership,
+            onRejectAccessRequest: handleRejectAccessRequest,
+            onAcceptAccessRequest: handleAcceptAccessRequest,
             onRoleChange: handleRoleChange,
             isRemovingUser: isRemovingUserFromDataProduct,
             isLoading: isLoadingDataProduct,
@@ -142,8 +142,8 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
         canEditUser,
         canRemoveUser,
         canApproveUser,
-        handleAcceptMembership,
-        handleRejectMembership,
+        handleAcceptAccessRequest,
+        handleRejectAccessRequest,
     ]);
 
     if (!dataProduct) return null;

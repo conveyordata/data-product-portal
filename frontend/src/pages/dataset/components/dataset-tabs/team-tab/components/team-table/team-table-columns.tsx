@@ -93,7 +93,7 @@ export const getDatasetTeamColumns = ({
             },
             width: '20%',
             ...new FilterSettings(datasetUsers, (assignment) => getRoleAssignmentStatusLabel(t, assignment.decision)),
-            sorter: sorter.stringSorter((membership) => getRoleAssignmentStatusLabel(t, membership.decision)),
+            sorter: sorter.stringSorter((assignment) => getRoleAssignmentStatusLabel(t, assignment.decision)),
         },
         {
             title: t('Actions'),

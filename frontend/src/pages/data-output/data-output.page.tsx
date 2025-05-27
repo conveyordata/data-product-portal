@@ -56,19 +56,7 @@ export function DataOutput() {
         }
     }
 
-    // useEffect(() => {
-    //     setItemToLocalStorage(LocalStorageKeys.LastVisitedDataOutputs, {
-    //         id: dataOutputId,
-    //         timestamp: Date.now(),
-    //     });
-    // }, []);
-
     if (isLoading) return <LoadingSpinner />;
-
-    // if (!dataOutput) {
-    //     navigate(ApplicationPaths.DataOutputs, { replace: true });
-    //     return null;
-    // }
 
     return (
         <Flex className={styles.dataOutputContainer}>

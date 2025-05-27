@@ -1,12 +1,13 @@
-import { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '../data-output-dataset';
-import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '../data-product-dataset';
-import { DataProductMembershipRoleRequest } from '../data-product-membership';
-import { DataProductRoleAssignmentContract } from '../roles/role.contract';
+import type { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '../data-output-dataset';
+import type { DataProductDatasetContract, DataProductDatasetLinkRequest } from '../data-product-dataset';
+import type { DataProductRoleRequest, DatasetRoleRequest } from '../roles';
+import type { DataProductRoleAssignmentContract, DatasetRoleAssignmentContract } from '../roles/role.contract';
 
 export enum PendingActionTypes {
     DataProductDataset = 'DataProductDataset',
     DataOutputDataset = 'DataOutputDataset',
     DataProductRoleAssignment = 'DataProductRoleAssignment',
+    DatasetRoleAssignment = 'DatasetRoleAssignment',
 }
 
 export interface DataProductDatasetPendingAction extends DataProductDatasetContract {
@@ -21,12 +22,18 @@ export interface DataProductRoleAssignmentPendingAction extends DataProductRoleA
     pending_action_type: PendingActionTypes.DataProductRoleAssignment;
 }
 
+export interface DatasetRoleAssignmentPendingAction extends DatasetRoleAssignmentContract {
+    pending_action_type: PendingActionTypes.DatasetRoleAssignment;
+}
+
 export type PendingAction =
     | DataProductDatasetPendingAction
     | DataOutputDatasetPendingAction
-    | DataProductRoleAssignmentPendingAction;
+    | DataProductRoleAssignmentPendingAction
+    | DatasetRoleAssignmentPendingAction;
 
 export type ActionResolveRequest =
     | { type: PendingActionTypes.DataOutputDataset; request: DataOutputDatasetLinkRequest }
     | { type: PendingActionTypes.DataProductDataset; request: DataProductDatasetLinkRequest }
-    | { type: PendingActionTypes.DataProductRoleAssignment; request: DataProductMembershipRoleRequest };
+    | { type: PendingActionTypes.DataProductRoleAssignment; request: DataProductRoleRequest }
+    | { type: PendingActionTypes.DatasetRoleAssignment; request: DatasetRoleRequest };

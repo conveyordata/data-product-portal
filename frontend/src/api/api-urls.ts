@@ -92,7 +92,6 @@ export type DynamicPathParams =
     | 'userId'
     | 'datasetId'
     | 'datasetLinkId'
-    | 'membershipId'
     | 'platformId'
     | 'serviceId'
     | 'environmentId'
