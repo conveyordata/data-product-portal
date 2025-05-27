@@ -61,7 +61,7 @@ def create_assignment(
     service = RoleAssignmentService(db=db, user=user)
     role_assignment = service.create_assignment(id, request)
 
-    approvers = ()
+    approvers: Sequence[User] = ()
     if not (is_admin := Authorization().has_admin_role(user_id=str(user.id))):
         approvers = service.users_with_authz_action(
             data_product_id=role_assignment.data_product_id,

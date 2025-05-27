@@ -39,7 +39,11 @@ class TestDatasetRoleAssignmentsRouter:
         dataset: Dataset = DatasetFactory()
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
-            scope=Scope.DATASET, permissions=[Action.DATASET__CREATE_USER]
+            scope=Scope.DATASET,
+            permissions=[
+                Action.DATASET__CREATE_USER,
+                Action.DATASET__APPROVE_USER_REQUEST,
+            ],
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
