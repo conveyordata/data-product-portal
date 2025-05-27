@@ -48,6 +48,7 @@ export enum ApiUrl {
     RoleAssignmentsDataProductDecide = '/api/role_assignments/data_product/:assignmentId/decide',
     RoleAssignmentsDatasetGet = '/api/role_assignments/dataset',
     RoleAssignmentsDataset = '/api/role_assignments/dataset/:assignmentId',
+    RoleAssignmentsDatasetRequest = '/api/role_assignments/dataset/request/:datasetId',
     RoleAssignmentsDatasetDecide = '/api/role_assignments/dataset/:assignmentId/decide',
     Tags = '/api/tags',
     TagsId = '/api/tags/:tagId',

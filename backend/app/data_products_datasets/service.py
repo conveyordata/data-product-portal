@@ -7,6 +7,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
+from app.core.authz import Action, Authorization
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
@@ -68,7 +69,7 @@ class DataProductDatasetService:
     def get_user_pending_actions(
         self, db: Session, user: User
     ) -> Sequence[DataProductDatasetPendingAction]:
-        return (
+        requested_associations = (
             db.scalars(
                 select(DataProductDatasetAssociationModel)
                 .where(
@@ -86,3 +87,15 @@ class DataProductDatasetService:
             .unique()
             .all()
         )
+
+        authorizer = Authorization()
+        return [
+            a
+            for a in requested_associations
+            if authorizer.has_access(
+                sub=str(user.id),
+                dom=str(a.dataset.domain),
+                obj=str(a.dataset_id),
+                act=Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            )
+        ]

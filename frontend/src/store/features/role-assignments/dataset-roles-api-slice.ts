@@ -41,6 +41,24 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice.enhanceEndpoints({ ad
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
+        requestDatasetRoleAssignment: builder.mutation<
+            DatasetRoleAssignmentContract,
+            DatasetRoleAssignmentCreateContract
+        >({
+            query: (request) => ({
+                url: buildUrl(ApiUrl.RoleAssignmentsDatasetRequest, { datasetId: request.dataset_id }),
+                method: 'POST',
+                data: {
+                    role_id: request.role_id,
+                    user_id: request.user_id,
+                },
+            }),
+            invalidatesTags: (_, _error, request) => [
+                { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.Dataset as const, id: request.dataset_id },
+                { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+            ],
+        }),
         updateDatasetRoleAssignment: builder.mutation<
             DatasetRoleAssignmentContract,
             { role_assignment_id: string; role_id: string; dataset_id: string }

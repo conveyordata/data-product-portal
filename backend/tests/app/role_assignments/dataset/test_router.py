@@ -70,7 +70,7 @@ class TestDatasetRoleAssignmentsRouter:
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS],
+            permissions=[Action.GLOBAL__REQUEST_DATASET_ACCESS],
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
