@@ -57,7 +57,7 @@ def create_assignment(
 
 
 @router.post(
-    "request/{id}",
+    "/request/{id}",
     dependencies=[
         Depends(
             Authorization.enforce(
