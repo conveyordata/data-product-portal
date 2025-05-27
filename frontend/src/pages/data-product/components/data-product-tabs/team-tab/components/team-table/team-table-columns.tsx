@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next';
 import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-form';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { DecisionStatus, type RoleContract } from '@/types/roles';
-import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
+import { type DataProductRoleAssignmentContract, Prototype } from '@/types/roles/role.contract';
 import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -17,25 +17,30 @@ type Props = {
     onRejectAccessRequest: (assignmentId: string) => void;
     onRoleChange: (role: RoleContract, assignmentId: string) => void;
     isRemovingUser: boolean;
-    isLoading?: boolean;
-    canApprove?: boolean;
-    canEdit?: boolean;
-    canRemove?: boolean;
+    isLoading: boolean;
+    canApprove: boolean;
+    canEdit: boolean;
+    canRemove: boolean;
 };
 export const getDataProductUsersTableColumns = ({
     t,
+    dataProductUsers,
     onRemoveUserAccess,
     onAcceptAccessRequest,
     onRejectAccessRequest,
-    isLoading = false,
+    isLoading,
     onRoleChange,
     isRemovingUser,
-    dataProductUsers,
     canEdit,
     canRemove,
     canApprove,
 }: Props): TableColumnsType<DataProductRoleAssignmentContract> => {
     const sorter = new Sorter<DataProductRoleAssignmentContract>();
+    const numberOfOwners = dataProductUsers.filter(
+        (assignment) => assignment.role.prototype === Prototype.OWNER,
+    ).length;
+    const lockOwners = numberOfOwners <= 1;
+
     return [
         {
             title: t('Id'),
@@ -65,12 +70,14 @@ export const getDataProductUsersTableColumns = ({
             dataIndex: 'role',
             render: (role: RoleContract, { user, id, decision }: DataProductRoleAssignmentContract) => {
                 const isApproved = decision === DecisionStatus.Approved;
+                const disabled = role.prototype === Prototype.OWNER && lockOwners;
+
                 return (
                     <RoleChangeForm<DataProductRoleAssignmentContract>
                         initialRole={role}
                         userId={user.id}
                         onRoleChange={(role) => onRoleChange(role, id)}
-                        isDisabled={!canEdit || !isApproved}
+                        isDisabled={disabled || !canEdit || !isApproved}
                         scope={'data_product'}
                     />
                 );

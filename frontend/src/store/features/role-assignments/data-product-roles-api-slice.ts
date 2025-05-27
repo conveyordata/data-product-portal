@@ -7,10 +7,10 @@ import type {
     DataProductRoleAssignmentCreateContract,
 } from '@/types/roles/role.contract';
 
-export const roleTags: string[] = [TagTypes.UserDataProducts];
+export const assignmentTags: string[] = [TagTypes.DataProductAssignments];
 
 export const dataProductRoleAssignmentsApiSlice = baseApiSlice
-    .enhanceEndpoints({ addTagTypes: roleTags })
+    .enhanceEndpoints({ addTagTypes: assignmentTags })
     .injectEndpoints({
         endpoints: (builder) => ({
             getDataProductRoleAssignments: builder.query<
@@ -26,7 +26,11 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                         ...(request.decision ? { decision: request.decision } : {}),
                     },
                 }),
-                providesTags: [{ type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST }],
+                providesTags: (assignments) =>
+                    (assignments || []).map((assignment) => ({
+                        type: TagTypes.DataProductAssignments as const,
+                        id: assignment.data_product.id,
+                    })),
             }),
             createDataProductRoleAssignment: builder.mutation<
                 DataProductRoleAssignmentContract,
@@ -40,9 +44,9 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                         user_id: request.user_id,
                     },
                 }),
-                invalidatesTags: (_, _error, request) => [
+                invalidatesTags: (_, _error, { data_product_id }) => [
                     { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProduct as const, id: request.data_product_id },
+                    { type: TagTypes.DataProductAssignments as const, id: data_product_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
@@ -58,9 +62,9 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                         user_id: request.user_id,
                     },
                 }),
-                invalidatesTags: (_, _error, request) => [
+                invalidatesTags: (_, _error, { data_product_id }) => [
                     { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProduct as const, id: request.data_product_id },
+                    { type: TagTypes.DataProductAssignments as const, id: data_product_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
@@ -77,7 +81,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                 }),
                 invalidatesTags: (_, _error, { data_product_id }) => [
                     { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProduct as const, id: data_product_id },
+                    { type: TagTypes.DataProductAssignments as const, id: data_product_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
@@ -94,7 +98,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                 }),
                 invalidatesTags: (_, _error, { data_product_id }) => [
                     { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProduct as const, id: data_product_id },
+                    { type: TagTypes.DataProductAssignments as const, id: data_product_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
@@ -110,7 +114,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                 }),
                 invalidatesTags: (_, _error, { data_product_id }) => [
                     { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProduct as const, id: data_product_id },
+                    { type: TagTypes.DataProductAssignments as const, id: data_product_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 ],
             }),
