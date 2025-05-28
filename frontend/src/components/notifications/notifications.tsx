@@ -10,7 +10,7 @@ import {
     useRemoveNotificationMutation,
 } from '@/store/features/notifications/notifications-api-slice';
 import { NotificationContract } from '@/types/notifications/notification.contract';
-import { formatDateToNow } from '@/utils/date.helper';
+import { formatDateToNowFromUTCString } from '@/utils/date.helper';
 
 import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
@@ -60,7 +60,7 @@ export function Notifications() {
                             <Flex className={styles.notificationTag}>
                                 <Tag color="default">
                                     {notification.event.actor.first_name} {notification.event.actor.last_name},{' '}
-                                    {formatDateToNow(notification.event.created_on)}:
+                                    {formatDateToNowFromUTCString(notification.event.created_on)}:
                                 </Tag>
                             </Flex>
                         )}
