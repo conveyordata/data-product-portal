@@ -2,7 +2,7 @@ import '@xyflow/react/dist/base.css';
 
 import type { Edge, Node, XYPosition } from '@xyflow/react';
 import { Position, ReactFlowProvider } from '@xyflow/react';
-import { Button, Flex, theme } from 'antd';
+import { Button, Flex, GlobalToken, theme } from 'antd';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -20,16 +20,11 @@ import {
     useGetGraphDataQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
-import { greenThemeConfig } from '@/theme/antd-theme';
 import type { EdgeContract, NodeContract } from '@/types/graph/graph-contract.ts';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 
 import styles from './explorer.module.scss';
 import { Sidebar } from './sidebar';
-
-const { getDesignToken } = theme;
-
-const token = getDesignToken(greenThemeConfig);
 
 type Props = {
     id: string;
@@ -63,7 +58,7 @@ function LinkToDataOutputNode({ id, product_id }: { id: string; product_id: stri
     );
 }
 
-function parseEdges(edges: EdgeContract[]): Edge[] {
+function parseEdges(edges: EdgeContract[], token: GlobalToken): Edge[] {
     return edges.map((edge) => {
         return {
             id: edge.id,
@@ -135,7 +130,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
 function InternalFullExplorer() {
     // Same as InternalExplorer but this one does not filter anything, it shows the full graph
     // Also includes a sidebar to select nodes
-
+    const { token } = theme.useToken();
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
@@ -145,10 +140,10 @@ function InternalFullExplorer() {
     const generateGraph = useCallback(() => {
         if (graph) {
             const nodes = parseNodes(graph.nodes, defaultNodePosition);
-            const edges = parseEdges(graph.edges);
+            const edges = parseEdges(graph.edges, token);
             setNodesAndEdges(nodes, edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges]);
+    }, [defaultNodePosition, graph, setNodesAndEdges, token]);
     useEffect(() => {
         generateGraph();
     }, [generateGraph]);
@@ -175,6 +170,7 @@ function InternalFullExplorer() {
 }
 
 function InternalExplorer({ id, type }: Props) {
+    const { token } = theme.useToken();
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
 
@@ -200,10 +196,10 @@ function InternalExplorer({ id, type }: Props) {
     const generateGraph = useCallback(() => {
         if (graph) {
             const nodes = parseNodes(graph.nodes, defaultNodePosition);
-            const edges = parseEdges(graph.edges);
+            const edges = parseEdges(graph.edges, token);
             setNodesAndEdges(nodes, edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges]);
+    }, [defaultNodePosition, graph, setNodesAndEdges, token]);
 
     useEffect(() => {
         generateGraph();
