@@ -27,18 +27,18 @@ export function getEventTypeNotificationText(t: TFunction, type: EventType): str
         case EventType.DATA_PRODUCT_REMOVED:
             return 'has been removed';
 
-        case EventType.DATA_PRODUCT_MEMBERSHIP_CREATED:
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED:
             return '';
-        case EventType.DATA_PRODUCT_MEMBERSHIP_UPDATED:
-            return t('membership updated for user ');
-        case EventType.DATA_PRODUCT_MEMBERSHIP_REMOVED:
-            return t('membership removed for user ');
-        case EventType.DATA_PRODUCT_MEMBERSHIP_REQUESTED:
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED:
+            return t('role assignment updated for user ');
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED:
+            return t('role assignment removed for user ');
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REQUESTED:
             return '';
-        case EventType.DATA_PRODUCT_MEMBERSHIP_APPROVED:
-            return t('membership approved for user ');
-        case EventType.DATA_PRODUCT_MEMBERSHIP_DENIED:
-            return t('membership denied for user ');
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_APPROVED:
+            return t('role assignment approved for user ');
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_DENIED:
+            return t('role assignment denied for user ');
 
         case EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED:
             return '';
@@ -55,10 +55,19 @@ export function getEventTypeNotificationText(t: TFunction, type: EventType): str
             return '';
         case EventType.DATASET_REMOVED:
             return ' has been removed';
-        case EventType.DATASET_USER_ADDED:
-            return 'membership granted to ';
-        case EventType.DATASET_USER_REMOVED:
-            return 'membership revoked for ';
+
+        case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
+            return '';
+        case EventType.DATASET_ROLE_ASSIGNMENT_UPDATED:
+            return t('role assignment updated for user ');
+        case EventType.DATASET_ROLE_ASSIGNMENT_REMOVED:
+            return t('role assignment removed for user ');
+        case EventType.DATASET_ROLE_ASSIGNMENT_REQUESTED:
+            return '';
+        case EventType.DATASET_ROLE_ASSIGNMENT_APPROVED:
+            return t('role assignment approved for user ');
+        case EventType.DATASET_ROLE_ASSIGNMENT_DENIED:
+            return t('role assignment denied for user ');
 
         default:
             return '';
