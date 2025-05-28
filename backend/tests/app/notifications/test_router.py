@@ -38,6 +38,13 @@ class TestNotificationsRouter:
         assert response.status_code == 200
         assert len(response.json()) == 0
 
+    def test_delete_notification_other_user(self, client: TestClient):
+        _: User = UserFactory(external_id="sub")
+        notification: Notification = NotificationFactory()
+
+        response = client.delete(f"{ENDPOINT}/{notification.id}")
+        assert response.status_code == 403
+
     def test_delete_all_notifications(self, client: TestClient):
         user: User = UserFactory(external_id="sub")
         _: Notification = NotificationFactory(user=user)
