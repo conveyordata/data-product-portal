@@ -23,11 +23,11 @@ from app.datasets.schema_request import (
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
 from app.graph.graph import Graph
-from app.role_assignments.dataset.router import create_assignment, decide_assignment
 from app.role_assignments.dataset.schema import (
     CreateRoleAssignment,
-    DecideRoleAssignment,
+    UpdateRoleAssignment,
 )
+from app.role_assignments.dataset.service import RoleAssignmentService
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype, Scope
 from app.roles.service import RoleService
@@ -114,18 +114,14 @@ def create_dataset(
         )
 
     new_dataset = DatasetService(db).create_dataset(dataset)
+    assignment_service = RoleAssignmentService(db=db, user=authenticated_user)
     for owner_id in dataset.owners:
-        resp = create_assignment(
+        response = assignment_service.create_assignment(
             new_dataset.id,
             CreateRoleAssignment(user_id=owner_id, role_id=owner_role.id),
-            db,
-            authenticated_user,
         )
-        decide_assignment(
-            id=resp.id,
-            request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
-            db=db,
-            user=authenticated_user,
+        assignment_service.update_assignment(
+            UpdateRoleAssignment(id=response.id, decision=DecisionStatus.APPROVED)
         )
 
     return {"id": new_dataset.id}

@@ -28,14 +28,11 @@ from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.graph.graph import Graph
-from app.role_assignments.data_product.router import (
-    create_assignment,
-    decide_assignment,
-)
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
-    DecideRoleAssignment,
+    UpdateRoleAssignment,
 )
+from app.role_assignments.data_product.service import RoleAssignmentService
 from app.role_assignments.dataset.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
@@ -109,11 +106,9 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
 )
 def create_data_product(
     data_product: DataProductCreate,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    created_data_product = DataProductService().create_data_product(data_product, db)
     owner_role = RoleService(db).find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER)
     if not owner_role:
         raise HTTPException(
@@ -121,22 +116,18 @@ def create_data_product(
             detail="Owner role not found",
         )
 
+    created_data_product = DataProductService().create_data_product(data_product, db)
+    assignment_service = RoleAssignmentService(db=db, user=authenticated_user)
     for owner in data_product.owners:
-        resp = create_assignment(
+        response = assignment_service.create_assignment(
             created_data_product.id,
             CreateRoleAssignment(
                 user_id=owner,
                 role_id=owner_role.id,
             ),
-            db=db,
-            user=authenticated_user,
-            background_tasks=background_tasks,
         )
-        decide_assignment(
-            id=resp.id,
-            request=DecideRoleAssignment(decision=DecisionStatus.APPROVED),
-            db=db,
-            user=authenticated_user,
+        assignment_service.update_assignment(
+            UpdateRoleAssignment(id=response.id, decision=DecisionStatus.APPROVED)
         )
     return {"id": created_data_product.id}
 
