@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm run copy-config && vite",
+    "dev": "npm run copy-config && vite --force",
     "build": "vite build",
     "build:prd": "vite build --mode production",
     "copy-config": "cp config.local.js public/config.js",
@@ -36,28 +36,28 @@
     "@tiptap/react": "^2.12.0",
     "@tiptap/starter-kit": "^2.12.0",
     "@xyflow/react": "^12.6.4",
-    "antd": "^5.25.2",
+    "antd": "^5.25.3",
     "axios": "^1.9.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "i18next": "^25.2.0",
+    "i18next": "^25.2.1",
     "i18next-http-backend": "^3.0.2",
     "oidc-client-ts": "^3.2.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-i18next": "^15.5.1",
+    "react-i18next": "^15.5.2",
     "react-oidc-context": "^3.3.0",
     "react-redux": "^9.2.0",
     "use-debounce": "^10.0.4",
-    "react-router": "^7.6.0"
+    "react-router": "^7.6.1"
   },
   "devDependencies": {
-    "@types/node": "^22.15.21",
-    "@types/react": "^19.1.4",
+    "@types/node": "^22.15.23",
+    "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
-    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/eslint-plugin": "^8.33.0",
     "@typescript-eslint/parser": "^8.32.1",
-    "@vitejs/plugin-react": "^4.4.1",
+    "@vitejs/plugin-react": "^4.5.0",
     "axios-mock-adapter": "^2.1.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.5",
@@ -67,7 +67,7 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "i18next-parser": "^9.3.0",
-    "msw": "^2.8.4",
+    "msw": "^2.8.5",
     "prettier": "3.5.3",
     "sass": "^1.89.0",
     "typescript": "^5.8.3",
@@ -75,7 +75,7 @@
     "vite-plugin-svgr": "^4.3.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-musl": "^4.41.0"
+    "@rollup/rollup-linux-x64-musl": "^4.41.1"
   },
   "volta": {
     "node": "20.12.2"

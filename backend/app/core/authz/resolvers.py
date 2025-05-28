@@ -11,6 +11,8 @@ from app.data_products.model import DataProduct
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
 from app.datasets.model import Dataset
+from app.role_assignments.data_product.model import DataProductRoleAssignment
+from app.role_assignments.dataset.model import DatasetRoleAssignment
 
 Model: TypeAlias = Union[Type[DataProduct], Type[Dataset], Type[DataOutput], None]
 
@@ -41,12 +43,75 @@ class SubjectResolver(ABC):
         return cls.DEFAULT if domain is None else str(domain)
 
 
+class EmptyResolver(SubjectResolver):
+    @classmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        return cls.DEFAULT
+
+
 class DataProductResolver(SubjectResolver):
     model: Model = DataProduct
 
 
+class DatasetRoleAssignmentResolver(SubjectResolver):
+    model: Model = DataProduct
+
+    @classmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        obj = DataProductResolver.resolve(request, key, db)
+        if obj != cls.DEFAULT:
+            assignment = (
+                db.scalars(
+                    select(DatasetRoleAssignment).where(DatasetRoleAssignment.id == obj)
+                )
+                .unique()
+                .one_or_none()
+            )
+            if assignment:
+                return assignment.dataset_id
+        return cls.DEFAULT
+
+
+class DataProductRoleAssignmentResolver(SubjectResolver):
+    model: Model = DataProduct
+
+    @classmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        obj = DataProductResolver.resolve(request, key, db)
+        if obj != cls.DEFAULT:
+            assignment = (
+                db.scalars(
+                    select(DataProductRoleAssignment).where(
+                        DataProductRoleAssignment.id == obj
+                    )
+                )
+                .unique()
+                .one_or_none()
+            )
+            if assignment:
+                return assignment.data_product_id
+        return cls.DEFAULT
+
+
 class DatasetResolver(SubjectResolver):
     model: Model = Dataset
+
+
+class DataProductNameResolver(SubjectResolver):
+    model: Model = DataProduct
+
+    @classmethod
+    def resolve(cls, request: Request, key: str, db: Session = Depends(get_db_session)):
+        obj = DataProductResolver.resolve(request, key, db)
+        if obj != cls.DEFAULT:
+            data_product = (
+                db.scalars(select(DataProduct).where(DataProduct.namespace == obj))
+                .unique()
+                .one_or_none()
+            )
+            if data_product:
+                return data_product.id
+        return cls.DEFAULT
 
 
 class DataOutputResolver(SubjectResolver):

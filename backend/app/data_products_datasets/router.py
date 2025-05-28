@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -5,10 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductDatasetAssociationResolver
-from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
 from app.data_products_datasets.service import DataProductDatasetService
 from app.database.database import get_db_session
-from app.dependencies import only_dataproduct_dataset_link_owners
+from app.pending_actions.schema import DataProductDatasetPendingAction
 from app.users.schema import User
 
 router = APIRouter(
@@ -19,7 +19,6 @@ router = APIRouter(
 @router.post(
     "/approve/{id}",
     dependencies=[
-        Depends(only_dataproduct_dataset_link_owners),
         Depends(
             Authorization.enforce(
                 Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
@@ -41,7 +40,6 @@ def approve_data_product_link(
 @router.post(
     "/deny/{id}",
     dependencies=[
-        Depends(only_dataproduct_dataset_link_owners),
         Depends(
             Authorization.enforce(
                 Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
@@ -54,7 +52,7 @@ def deny_data_product_link(
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
+) -> None:
     return DataProductDatasetService().deny_data_product_link(
         id, db, authenticated_user
     )
@@ -63,7 +61,6 @@ def deny_data_product_link(
 @router.post(
     "/remove/{id}",
     dependencies=[
-        Depends(only_dataproduct_dataset_link_owners),
         Depends(
             Authorization.enforce(
                 Action.DATASET__REVOKE_DATAPRODUCT_ACCESS,
@@ -76,7 +73,7 @@ def remove_data_product_link(
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
+) -> None:
     return DataProductDatasetService().remove_data_product_link(
         id, db, authenticated_user
     )
@@ -86,5 +83,5 @@ def remove_data_product_link(
 def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> list[DataProductDatasetAssociationsGet]:
+) -> Sequence[DataProductDatasetPendingAction]:
     return DataProductDatasetService().get_user_pending_actions(db, authenticated_user)

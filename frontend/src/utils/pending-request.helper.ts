@@ -10,11 +10,12 @@ import {
     useRejectDataProductLinkMutation,
 } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { useDecideRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
-import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
-import { DataProductMembershipRoleRequest } from '@/types/data-product-membership';
+import { useDecideDataProductRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
+import { useDecideDatasetRoleAssignmentMutation } from '@/store/features/role-assignments/dataset-roles-api-slice';
+import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
+import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { DecisionStatus } from '@/types/roles';
+import type { DataProductRoleRequest, DatasetRoleRequest } from '@/types/roles/role-assignment-request.ts';
 
 export const usePendingActionHandlers = () => {
     const { t } = useTranslation();
@@ -23,7 +24,10 @@ export const usePendingActionHandlers = () => {
     const [rejectDataProductLink, { isLoading: isRejectingDataProductLink }] = useRejectDataProductLinkMutation();
     const [approveDataOutputLink, { isLoading: isApprovingDataOutputLink }] = useApproveDataOutputLinkMutation();
     const [rejectDataOutputLink, { isLoading: isRejectingDataOutputLink }] = useRejectDataOutputLinkMutation();
-    const [decideroleAssignment, { isLoading: isDecidingRoleAssignment }] = useDecideRoleAssignmentMutation();
+    const [decideDataProductRoleAssignment, { isLoading: isDecidingDataProductRoleAssignment }] =
+        useDecideDataProductRoleAssignmentMutation();
+    const [decideDatasetRoleAssignment, { isLoading: isDecidingDatasetRoleAssignment }] =
+        useDecideDatasetRoleAssignmentMutation();
 
     const handleAcceptDataProductDatasetLink = useCallback(
         async (request: DataProductDatasetLinkRequest) => {
@@ -98,35 +102,67 @@ export const usePendingActionHandlers = () => {
     );
 
     const handleGrantAccessToDataProduct = useCallback(
-        async (request: DataProductMembershipRoleRequest) => {
+        async (request: DataProductRoleRequest) => {
             try {
-                await decideroleAssignment({
+                await decideDataProductRoleAssignment({
                     role_assignment_id: request.assignment_id,
-                    decision_status: DecisionStatus.Approved,
                     data_product_id: request.data_product_id,
+                    decision_status: DecisionStatus.Approved,
                 }).unwrap();
                 dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
             }
         },
-        [decideroleAssignment, t],
+        [decideDataProductRoleAssignment, t],
     );
 
     const handleDenyAccessToDataProduct = useCallback(
-        async (request: DataProductMembershipRoleRequest) => {
+        async (request: DataProductRoleRequest) => {
             try {
-                await decideroleAssignment({
+                await decideDataProductRoleAssignment({
                     role_assignment_id: request.assignment_id,
-                    decision_status: DecisionStatus.Denied,
                     data_product_id: request.data_product_id,
+                    decision_status: DecisionStatus.Denied,
                 }).unwrap();
                 dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
             }
         },
-        [decideroleAssignment, t],
+        [decideDataProductRoleAssignment, t],
+    );
+
+    const handleGrantAccessToDataset = useCallback(
+        async (request: DatasetRoleRequest) => {
+            try {
+                await decideDatasetRoleAssignment({
+                    role_assignment_id: request.assignment_id,
+                    dataset_id: request.dataset_id,
+                    decision_status: DecisionStatus.Approved,
+                }).unwrap();
+                dispatchMessage({ content: t('User has been granted access to the data product'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to grant user access to the data product'), type: 'error' });
+            }
+        },
+        [decideDatasetRoleAssignment, t],
+    );
+
+    const handleDenyAccessToDataset = useCallback(
+        async (request: DatasetRoleRequest) => {
+            try {
+                await decideDatasetRoleAssignment({
+                    role_assignment_id: request.assignment_id,
+                    dataset_id: request.dataset_id,
+                    decision_status: DecisionStatus.Denied,
+                }).unwrap();
+                dispatchMessage({ content: t('User access to the data product has been denied'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to deny user access to the data product'), type: 'error' });
+            }
+        },
+        [decideDatasetRoleAssignment, t],
     );
 
     return {
@@ -136,11 +172,14 @@ export const usePendingActionHandlers = () => {
         handleRejectDataOutputDatasetLink,
         handleGrantAccessToDataProduct,
         handleDenyAccessToDataProduct,
+        handleGrantAccessToDataset,
+        handleDenyAccessToDataset,
 
         isApprovingDataProductLink,
         isRejectingDataProductLink,
         isApprovingDataOutputLink,
         isRejectingDataOutputLink,
-        isDecidingRoleAssignment,
+        isDecidingDataProductRoleAssignment,
+        isDecidingDatasetRoleAssignment,
     };
 };

@@ -1,41 +1,46 @@
 import { Badge, Button, Popconfirm, Space, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
+import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-form';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
-import { RoleChangeForm } from '@/pages/data-product/components/data-product-tabs/team-tab/components/role-change-form/role-change-form.tsx';
 import { DecisionStatus, type RoleContract } from '@/types/roles';
-import type { RoleAssignmentContract } from '@/types/roles/role.contract';
-import { getDataProductMembershipBadgeStatus, getDataProductMembershipStatusLabel } from '@/utils/status.helper.ts';
+import { type DataProductRoleAssignmentContract, Prototype } from '@/types/roles/role.contract';
+import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    onRemoveMembership: (userId: string) => void;
-    onAcceptMembershipRequest: (userId: string) => void;
-    onRejectMembershipRequest: (userId: string) => void;
-    onRoleChange: (role: RoleContract, membershipId: string, userId: string) => void;
+    dataProductUsers: DataProductRoleAssignmentContract[];
+    onRemoveUserAccess: (assignmentId: string) => void;
+    onAcceptAccessRequest: (assignmentId: string) => void;
+    onRejectAccessRequest: (assignmentId: string) => void;
+    onRoleChange: (role: RoleContract, assignmentId: string) => void;
     isRemovingUser: boolean;
-    dataProductUsers: RoleAssignmentContract[];
-    isLoading?: boolean;
-    canEdit?: boolean;
-    canRemove?: boolean;
-    canApprove?: boolean;
+    isLoading: boolean;
+    canApprove: boolean;
+    canEdit: boolean;
+    canRemove: boolean;
 };
 export const getDataProductUsersTableColumns = ({
     t,
-    onRemoveMembership,
-    onAcceptMembershipRequest,
-    onRejectMembershipRequest,
-    isLoading = false,
+    dataProductUsers,
+    onRemoveUserAccess,
+    onAcceptAccessRequest,
+    onRejectAccessRequest,
+    isLoading,
     onRoleChange,
     isRemovingUser,
-    dataProductUsers,
     canEdit,
     canRemove,
     canApprove,
-}: Props): TableColumnsType<RoleAssignmentContract> => {
-    const sorter = new Sorter<RoleAssignmentContract>();
+}: Props): TableColumnsType<DataProductRoleAssignmentContract> => {
+    const sorter = new Sorter<DataProductRoleAssignmentContract>();
+    const numberOfOwners = dataProductUsers.filter(
+        (assignment) => assignment.role.prototype === Prototype.OWNER,
+    ).length;
+    const lockOwners = numberOfOwners <= 1;
+
     return [
         {
             title: t('Id'),
@@ -57,29 +62,32 @@ export const getDataProductUsersTableColumns = ({
                 );
             },
             width: '50%',
-            sorter: sorter.stringSorter((membership) => membership.user.last_name),
+            sorter: sorter.cascadedSorter(
+                sorter.stringSorter((assignment) => assignment.user.last_name),
+                sorter.stringSorter((assignment) => assignment.user.first_name),
+            ),
+            defaultSortOrder: 'ascend',
         },
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: RoleContract, { user, id, decision }) => {
+            render: (role: RoleContract, { user, id, decision }: DataProductRoleAssignmentContract) => {
                 const isApproved = decision === DecisionStatus.Approved;
+                const disabled = role.prototype === Prototype.OWNER && lockOwners;
+
                 return (
-                    <RoleChangeForm
+                    <RoleChangeForm<DataProductRoleAssignmentContract>
                         initialRole={role}
                         userId={user.id}
-                        dataProductUsers={dataProductUsers}
-                        onRoleChange={(role) => {
-                            console.log(role);
-                            onRoleChange(role, id, user.id);
-                        }}
-                        isDisabled={!canEdit || !isApproved}
+                        onRoleChange={(role) => onRoleChange(role, id)}
+                        isDisabled={disabled || !canEdit || !isApproved}
+                        scope={'data_product'}
                     />
                 );
             },
             width: '25%',
-            ...new FilterSettings(dataProductUsers, (membership) => membership.role.name),
-            sorter: sorter.stringSorter((membership) => membership.role.name),
+            ...new FilterSettings(dataProductUsers, (assignment) => assignment.role.name),
+            sorter: sorter.stringSorter((assignment) => assignment.role.name),
         },
         {
             title: t('Status'),
@@ -87,22 +95,22 @@ export const getDataProductUsersTableColumns = ({
             render: (decision: DecisionStatus) => {
                 return (
                     <Badge
-                        status={getDataProductMembershipBadgeStatus(decision)}
-                        text={getDataProductMembershipStatusLabel(t, decision)}
+                        status={getRoleAssignmentBadgeStatus(decision)}
+                        text={getRoleAssignmentStatusLabel(t, decision)}
                     />
                 );
             },
             width: '20%',
-            ...new FilterSettings(dataProductUsers, (membership) =>
-                getDataProductMembershipStatusLabel(t, membership.decision),
+            ...new FilterSettings(dataProductUsers, (assignment) =>
+                getRoleAssignmentStatusLabel(t, assignment.decision),
             ),
-            sorter: sorter.stringSorter((membership) => getDataProductMembershipStatusLabel(t, membership.decision)),
+            sorter: sorter.stringSorter((assignment) => getRoleAssignmentStatusLabel(t, assignment.decision)),
         },
         {
             title: t('Actions'),
             key: 'action',
             hidden: !(canRemove || canApprove),
-            render: (_, { user, id, decision }) => (
+            render: (_, { user, id, decision }: DataProductRoleAssignmentContract) => (
                 <Space>
                     {decision === DecisionStatus.Pending ? (
                         <Space>
@@ -111,7 +119,7 @@ export const getDataProductUsersTableColumns = ({
                                 description={t('Are you sure you want to allow access to user {{name}}?', {
                                     name: user.first_name,
                                 })}
-                                onConfirm={() => onAcceptMembershipRequest(id)}
+                                onConfirm={() => onAcceptAccessRequest(id)}
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
@@ -127,7 +135,7 @@ export const getDataProductUsersTableColumns = ({
                                 description={t('Are you sure you want to deny access to user {{name}}?', {
                                     name: user.first_name,
                                 })}
-                                onConfirm={() => onRejectMembershipRequest(id)}
+                                onConfirm={() => onRejectAccessRequest(id)}
                                 placement={'leftTop'}
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
@@ -145,7 +153,7 @@ export const getDataProductUsersTableColumns = ({
                             description={t('Are you sure you want to remove {{name}} from the data product?', {
                                 name: user.first_name,
                             })}
-                            onConfirm={() => onRemoveMembership(id)}
+                            onConfirm={() => onRemoveUserAccess(id)}
                             placement={'leftTop'}
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}

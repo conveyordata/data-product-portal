@@ -64,7 +64,7 @@ export const environmentsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             { platformId: string; serviceId: string }
         >({
             query: ({ platformId, serviceId }) => ({
-                url: buildUrl(buildUrl(ApiUrl.EnvPlatformServiceConfigId, { platformId }), { serviceId }),
+                url: buildUrl(ApiUrl.EnvPlatformServiceConfigId, { platformId, serviceId }),
                 method: 'GET',
             }),
             //providesTags: (result) =>

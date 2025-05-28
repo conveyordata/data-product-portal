@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -13,6 +14,8 @@ from app.role_assignments.global_.schema import (
     RoleAssignmentRequest,
     UpdateRoleAssignment,
 )
+from app.roles.model import Role
+from app.roles.schema import Scope
 from app.users.schema import User
 
 
@@ -36,6 +39,7 @@ class RoleAssignmentService:
         return self.db.scalars(query).all()
 
     def create_assignment(self, request: RoleAssignmentRequest) -> RoleAssignment:
+        self.ensure_is_global_scope(request.role_id)
         role_assignment = GlobalRoleAssignment(
             **request.model_dump(),
             requested_on=datetime.now(),
@@ -51,10 +55,19 @@ class RoleAssignmentService:
         self.db.commit()
         return assignment
 
+    def ensure_is_global_scope(self, role_id: UUID) -> None:
+        role = self.db.get(Role, role_id)
+        if role and role.scope != Scope.GLOBAL:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Role not found for this scope",
+            )
+
     def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
 
         if (role_id := request.role_id) is not None:
+            self.ensure_is_global_scope(role_id)
             assignment.role_id = role_id
         if (decision := request.decision) is not None:
             assignment.decision = decision

@@ -1,11 +1,18 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import (
+    DataProductResolver,
+    DataProductRoleAssignmentResolver,
+    EmptyResolver,
+)
 from app.database.database import get_db_session
+from app.role_assignments.data_product import email
 from app.role_assignments.data_product.auth import DataProductAuthAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
@@ -16,7 +23,7 @@ from app.role_assignments.data_product.schema import (
 )
 from app.role_assignments.data_product.service import RoleAssignmentService
 from app.role_assignments.enums import DecisionStatus
-from app.users.model import User
+from app.users.schema import User
 
 router = APIRouter(prefix="/data_product")
 
@@ -34,18 +41,96 @@ def list_assignments(
     )
 
 
-@router.post("")
+@router.post(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__CREATE_USER, resolver=DataProductResolver
+            )
+        )
+    ],
+)
 def create_assignment(
+    id: UUID,
     request: CreateRoleAssignment,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return RoleAssignmentService(db=db, user=user).create_assignment(
-        request, authenticated_user=user
+    service = RoleAssignmentService(db=db, user=user)
+    role_assignment = service.create_assignment(id, request, user)
+
+    approvers: Sequence[User] = ()
+    if not (is_admin := Authorization().has_admin_role(user_id=str(user.id))):
+        approvers = service.users_with_authz_action(
+            data_product_id=role_assignment.data_product_id,
+            action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+        )
+
+    if is_admin or user.id in (approver.id for approver in approvers):
+        service.update_assignment(
+            UpdateRoleAssignment(
+                id=role_assignment.id,
+                role_id=role_assignment.role_id,
+                decision=DecisionStatus.APPROVED,
+            ),
+            user,
+        )
+        return role_assignment
+
+    background_tasks.add_task(
+        email.send_role_assignment_request_email,
+        role_assignment,
+        approvers,
+    )
+    return role_assignment
+
+
+@router.post(
+    "/request/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS, resolver=EmptyResolver
+            )
+        )
+    ],
+)
+def request_assignment(
+    id: UUID,
+    request: CreateRoleAssignment,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> RoleAssignmentResponse:
+    service = RoleAssignmentService(db=db, user=user)
+    role_assignment = service.create_assignment(id, request, user)
+
+    approvers = service.users_with_authz_action(
+        data_product_id=role_assignment.data_product_id,
+        action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
     )
 
+    background_tasks.add_task(
+        email.send_role_assignment_request_email,
+        role_assignment,
+        approvers,
+    )
+    return role_assignment
 
-@router.delete("/{id}")
+
+@router.delete(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__DELETE_USER,
+                resolver=DataProductRoleAssignmentResolver,
+            )
+        )
+    ],
+)
 def delete_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -60,7 +145,47 @@ def delete_assignment(
     return None
 
 
-@router.patch("/{id}/decide")
+@router.patch(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_USER,
+                resolver=DataProductRoleAssignmentResolver,
+            )
+        )
+    ],
+)
+def modify_assigned_role(
+    id: UUID,
+    request: ModifyRoleAssignment,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> RoleAssignmentResponse:
+    service = RoleAssignmentService(db=db, user=user)
+    original_role = service.get_assignment(id).role_id
+
+    assignment = service.update_assignment(
+        UpdateRoleAssignment(id=id, role_id=request.role_id), user
+    )
+
+    if assignment.decision is DecisionStatus.APPROVED:
+        DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()
+
+    return assignment
+
+
+@router.patch(
+    "/{id}/decide",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+                resolver=DataProductRoleAssignmentResolver,
+            )
+        )
+    ],
+)
 def decide_assignment(
     id: UUID,
     request: DecideRoleAssignment,
@@ -88,25 +213,5 @@ def decide_assignment(
 
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).add()
-
-    return assignment
-
-
-@router.patch("/{id}/role")
-def modify_assigned_role(
-    id: UUID,
-    request: ModifyRoleAssignment,
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
-    original_role = service.get_assignment(id).role_id
-
-    assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id), authenticated_user=user
-    )
-
-    if assignment.decision is DecisionStatus.APPROVED:
-        DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()
 
     return assignment

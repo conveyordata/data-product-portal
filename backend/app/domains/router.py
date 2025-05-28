@@ -3,9 +3,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DataProductResolver
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 from app.domains.schema_request import DomainCreate, DomainUpdate
 from app.domains.schema_response import DomainGet, DomainsGet
 from app.domains.service import DomainService
@@ -34,11 +34,8 @@ def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> DomainGet:
         },
     },
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -51,11 +48,8 @@ def create_domain(
 @router.put(
     "/{id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -68,11 +62,8 @@ def update_domain(
 @router.delete(
     "/{id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -83,11 +74,8 @@ def remove_domain(id: UUID, db: Session = Depends(get_db_session)):
 @router.put(
     "/migrate/{from_id}/{to_id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )

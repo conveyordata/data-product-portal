@@ -1,5 +1,6 @@
 export enum TagTypes {
     DataProduct = 'DataProduct',
+    DataProductAssignments = 'DataProductAssignments',
     UserDataProducts = 'UserDataProducts',
     UserDatasets = 'UserDatasets',
     UserDataOutputs = 'UserDataOutputs',
@@ -12,6 +13,7 @@ export enum TagTypes {
     Role = 'Role',
     Environment = 'Environment',
     Dataset = 'Dataset',
+    DatasetAssignments = 'DatasetAssignments',
     Domain = 'Domain',
     DataOutput = 'DataOutput',
     Platform = 'Platform',

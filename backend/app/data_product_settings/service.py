@@ -12,7 +12,6 @@ from app.core.namespace.validation import (
     NamespaceValidation,
     NamespaceValidityType,
 )
-from app.data_product_memberships.enums import DataProductUserRole
 from app.data_product_settings.enums import DataProductSettingScope
 from app.data_product_settings.model import (
     DataProductSetting as DataProductSettingModel,
@@ -26,7 +25,6 @@ from app.data_product_settings.schema_request import (
     DataProductSettingValueCreate,
 )
 from app.data_product_settings.schema_response import DataProductSettingsGet
-from app.dependencies import OnlyWithProductAccessDataProductID, only_dataset_owners
 from app.users.schema import User
 
 
@@ -51,18 +49,12 @@ class DataProductSettingService:
     ):
         scope = db.get(DataProductSettingModel, setting_id).scope
         if scope == DataProductSettingScope.DATAPRODUCT:
-            OnlyWithProductAccessDataProductID([DataProductUserRole.OWNER])(
-                data_product_id=product_id, authenticated_user=authenticated_user, db=db
-            )
             setting = db.scalars(
                 select(DataProductSettingValueModel).filter_by(
                     data_product_id=product_id, data_product_setting_id=setting_id
                 )
             ).first()
         elif scope == DataProductSettingScope.DATASET:
-            only_dataset_owners(
-                id=product_id, authenticated_user=authenticated_user, db=db
-            )
             setting = db.scalars(
                 select(DataProductSettingValueModel).filter_by(
                     dataset_id=product_id, data_product_setting_id=setting_id

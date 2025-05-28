@@ -3,7 +3,7 @@ import { TagContract } from '@/types/tag';
 
 export type DataProductsGetContract = (Omit<
     DataProductContract,
-    'users' | 'data_outputs' | 'dataset_links' | 'owners' | 'tags'
+    'users' | 'data_outputs' | 'dataset_links' | 'tags'
 > & {
     user_count: number;
     owner_count: number;

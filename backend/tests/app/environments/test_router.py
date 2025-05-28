@@ -1,7 +1,6 @@
 import json
 
 import pytest
-from sqlalchemy.exc import DataError
 from tests.factories import (
     EnvironmentFactory,
     EnvPlatformConfigFactory,
@@ -64,11 +63,15 @@ class TestEnvironmentsRouter:
         assert actual_config["config"] == json.loads(config_obj.config)
 
     def test_get_environment_platform_service_config_forbidden(self, client):
-        with pytest.raises(DataError):
-            client.get(
-                f"{ENDPOINT}/environment_uuid/platforms/platform_uuid"
-                f"/services/service_id/config",
-            )
+        response = client.get(
+            f"{ENDPOINT}/environment_uuid/platforms/platform_uuid"
+            f"/services/service_id/config",
+        )
+        assert response.status_code == 403
+        assert (
+            response.json()["detail"]
+            == "You don't have permission to perform this action"
+        )
 
     @pytest.mark.usefixtures("admin")
     def test_get_environment_platform_service_config(self, client):
@@ -84,11 +87,12 @@ class TestEnvironmentsRouter:
         actual_config = response.json()
         assert actual_config["config"] == json.loads(config_obj.config)
 
+    @pytest.mark.usefixtures("admin")
     def test_get_environment_platform_config_forbidden(self, client):
-        with pytest.raises(DataError):
-            client.get(
-                f"{ENDPOINT}/environment_uuid/platforms/platform_uuid/config",
-            )
+        response = client.get(
+            f"{ENDPOINT}/environment_uuid/platforms/platform_uuid" "/config",
+        )
+        assert response.status_code == 422
 
     @pytest.mark.usefixtures("admin")
     def test_get_environment_platform_config(self, client):

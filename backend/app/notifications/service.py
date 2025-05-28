@@ -14,6 +14,7 @@ from app.users.schema import User
 
 
 class NotificationService:
+
     def get_user_notifications(
         self, db: Session, authenticated_user: User
     ) -> list[NotificationGet]:
@@ -39,10 +40,13 @@ class NotificationService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Notification {id} not found",
             )
-        if notification.user_id != authenticated_user.id:
+
+        if not authenticated_user.is_admin and (
+            notification.user_id != authenticated_user.id
+        ):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Notification {id} belongs to another user",
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Notification does not belong to authenticated user",
             )
         db.delete(notification)
         db.commit()
@@ -64,7 +68,14 @@ class NotificationService:
     ) -> None:
         dataset = ensure_dataset_exists(dataset_id, db)
         receivers = set(
-            chain((owner.id for owner in dataset.owners), bonus_receiver_ids)
+            chain(
+                (
+                    assignment.user_id
+                    for assignment in dataset.assignments
+                    if assignment.decision == DecisionStatus.APPROVED
+                ),
+                bonus_receiver_ids,
+            )
         )
         for receiver in receivers:
             notification = NotificationModel(user_id=receiver, event_id=event_id)

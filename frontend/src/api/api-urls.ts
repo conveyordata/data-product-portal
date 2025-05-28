@@ -33,8 +33,6 @@ export enum ApiUrl {
     DataProductAbout = '/api/data_products/:dataProductId/about',
     DataProductHistory = '/api/data_products/:dataProductId/history',
     DataProductGraph = '/api/data_products/:dataProductId/graph',
-    DataProductMembershipRequest = '/api/data_product_memberships/request',
-    DataProductMembershipPendingActions = '/api/data_product_memberships/actions',
     DataProductNamespaceValidation = '/api/data_products/validate_namespace',
     DataProductNamespaceSuggestion = '/api/data_products/namespace_suggestion',
     DataProductNamespaceLimits = '/api/data_products/namespace_length_limits',
@@ -45,11 +43,15 @@ export enum ApiUrl {
     Authorize = '/api/auth/user',
     Roles = '/api/roles',
     RolesGet = '/api/roles/:scope',
-    RolesDelete = '/api/roles/:id',
+    RolesDelete = '/api/roles/:roleId',
     RoleAssignmentsDataProductGet = '/api/role_assignments/data_product',
-    RoleAssignmentsDataProductDelete = '/api/role_assignments/data_product/:id',
-    RoleAssignmentsDataProductUpdate = '/api/role_assignments/data_product/:id/role',
-    RoleAssignmentsDataProductDecide = '/api/role_assignments/data_product/:id/decide',
+    RoleAssignmentsDataProduct = '/api/role_assignments/data_product/:assignmentId',
+    RoleAssignmentsDataProductRequest = '/api/role_assignments/data_product/request/:dataProductId',
+    RoleAssignmentsDataProductDecide = '/api/role_assignments/data_product/:assignmentId/decide',
+    RoleAssignmentsDatasetGet = '/api/role_assignments/dataset',
+    RoleAssignmentsDataset = '/api/role_assignments/dataset/:assignmentId',
+    RoleAssignmentsDatasetRequest = '/api/role_assignments/dataset/request/:datasetId',
+    RoleAssignmentsDatasetDecide = '/api/role_assignments/dataset/:assignmentId/decide',
     Tags = '/api/tags',
     TagsId = '/api/tags/:tagId',
     Environments = '/api/envs',
@@ -76,6 +78,7 @@ export enum ApiUrl {
     DataProductDatasetLinkReject = '/api/data_product_dataset_links/deny/:datasetLinkId',
     DataProductDatasetLinkRemove = '/api/data_product_dataset_links/remove/:datasetLinkId',
     DataProductDatasetPendingActions = '/api/data_product_dataset_links/actions',
+    PendingActions = '/api/pending_actions',
     Platforms = '/api/platforms',
     PlatformsConfigs = '/api/platforms/configs',
     PlatformServices = '/api/platforms/:platformId/services',
@@ -95,12 +98,17 @@ export type DynamicPathParams =
     | 'userId'
     | 'datasetId'
     | 'datasetLinkId'
-    | 'membershipId'
     | 'platformId'
     | 'serviceId'
     | 'environmentId'
-    | 'configId';
+    | 'configId'
+    | 'scope'
+    | 'roleId'
+    | 'assignmentId';
 
-export function buildUrl(url: string, pathParams: Record<DynamicPathParams | string, string>): string {
-    return Object.keys(pathParams).reduce((acc, key) => acc.replace(`:${key}`, pathParams[key]), url);
+export function buildUrl(url: string, pathParams: Partial<Record<DynamicPathParams, string>>): string {
+    return Object.keys(pathParams).reduce((acc, key) => {
+        const value = pathParams[key as DynamicPathParams];
+        return value ? acc.replace(`:${key}`, value) : acc;
+    }, url);
 }

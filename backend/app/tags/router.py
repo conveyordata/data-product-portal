@@ -3,9 +3,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DataProductResolver
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 from app.tags.schema_request import TagCreate, TagUpdate
 from app.tags.schema_response import TagsGet
 from app.tags.service import TagService
@@ -21,11 +21,8 @@ def get_tags(db: Session = Depends(get_db_session)) -> list[TagsGet]:
 @router.post(
     "",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -38,11 +35,8 @@ def create_tag(
 @router.put(
     "/{id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )
@@ -53,11 +47,8 @@ def update_tag(id: UUID, tag: TagUpdate, db: Session = Depends(get_db_session)):
 @router.delete(
     "/{id}",
     dependencies=[
-        Depends(only_for_admin),
         Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_CONFIGURATION, DataProductResolver
-            )
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
         ),
     ],
 )

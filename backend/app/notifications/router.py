@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.database.database import get_db_session
-from app.dependencies import only_notification_owner
 from app.notifications.schema_response import NotificationGet
 from app.notifications.service import NotificationService
 from app.users.schema import User
@@ -29,7 +28,7 @@ def remove_all_user_notifications(
     return NotificationService().remove_all_notifications(db, authenticated_user)
 
 
-@router.delete("/{id}", dependencies=[Depends(only_notification_owner)])
+@router.delete("/{id}")
 def remove_user_notification(
     id: UUID,
     db: Session = Depends(get_db_session),

@@ -6,7 +6,6 @@ from app.core.config.env_var_parser import get_boolean_variable
 from app.data_outputs.router import router as data_outputs
 from app.data_outputs_datasets.router import router as data_output_dataset
 from app.data_product_lifecycles.router import router as data_product_lifecycle
-from app.data_product_memberships.router import router as data_product_membership
 from app.data_product_settings.router import router as data_product_setting
 from app.data_product_types.router import router as data_product_type
 from app.data_products.router import router as data_product
@@ -16,6 +15,7 @@ from app.domains.router import router as domain
 from app.environments.router import router as environment
 from app.graph.router import router as graph
 from app.notifications.router import router as notification
+from app.pending_actions.router import router as pending_action
 from app.platforms.router import router as platform
 from app.role_assignments.router import router as role_assignment
 from app.roles.router import router as role
@@ -34,7 +34,6 @@ router.include_router(dataset)
 router.include_router(data_product)
 router.include_router(data_product_type)
 router.include_router(data_product_lifecycle)
-router.include_router(data_product_membership)
 router.include_router(data_product_setting)
 router.include_router(data_product_dataset)
 router.include_router(data_output_dataset)
@@ -49,3 +48,4 @@ router.include_router(role_assignment)
 router.include_router(theme_settings)
 router.include_router(graph)
 router.include_router(notification)
+router.include_router(pending_action)

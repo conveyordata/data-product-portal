@@ -1,4 +1,5 @@
 import { DataProductContract } from '../data-product';
+import { DatasetContract } from '../dataset';
 import { UserContract } from '../users';
 import { DecisionStatus } from './role-assignment-status';
 
@@ -28,16 +29,38 @@ export interface RoleUpdate {
     permissions?: number[];
 }
 
-export interface RoleAssignmentCreateContract {
+export interface DataProductRoleAssignmentCreateContract {
     data_product_id: string;
     user_id: string;
     role_id: string;
 }
 
-export interface RoleAssignmentContract {
+export interface DataProductRoleAssignmentContract {
     id: string;
     data_product: DataProductContract;
     user: UserContract;
     role: RoleContract;
     decision: DecisionStatus;
+    requested_on?: string;
+    requested_by?: UserContract;
+    decided_on?: string;
+    decided_by?: UserContract;
+}
+
+export interface DatasetRoleAssignmentCreateContract {
+    dataset_id: string;
+    user_id: string;
+    role_id: string;
+}
+
+export interface DatasetRoleAssignmentContract {
+    id: string;
+    dataset: DatasetContract;
+    user: UserContract;
+    role: RoleContract;
+    decision: DecisionStatus;
+    requested_on?: string;
+    requested_by?: UserContract;
+    decided_on?: string;
+    decided_by?: UserContract;
 }

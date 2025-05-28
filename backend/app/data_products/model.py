@@ -5,7 +5,6 @@ from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.data_product_memberships.model import DataProductMembership
 from app.data_product_settings.model import DataProductSettingValue
 from app.data_product_types.model import DataProductType
 from app.data_products.status import DataProductStatus
@@ -51,21 +50,12 @@ class DataProduct(Base, BaseORM):
     domain: Mapped["Domain"] = relationship(
         back_populates="data_products", lazy="joined"
     )
-    memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
-        back_populates="data_product",
-        cascade="all, delete-orphan",
-        order_by="DataProductMembership.status, "
-        "DataProductMembership.requested_on, "
-        "DataProductMembership.role",
-        lazy="joined",
-    )
     assignments: Mapped[list["DataProductRoleAssignment"]] = relationship(
         back_populates="data_product",
         cascade="all, delete-orphan",
         order_by="DataProductRoleAssignment.decision, "
         "DataProductRoleAssignment.requested_on",
-        lazy="joined",
+        lazy="raise",
     )
     dataset_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",

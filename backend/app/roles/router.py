@@ -4,8 +4,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 from app.roles.auth import AuthRole
 from app.roles.schema import CreateRole, Role, Scope, UpdateRole
 from app.roles.service import RoleService
@@ -28,7 +29,11 @@ def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> Sequence[R
             },
         },
     },
-    dependencies=[Depends(only_for_admin)],
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
 )
 def create_role(
     request: CreateRole,
@@ -49,7 +54,11 @@ def create_role(
             },
         },
     },
-    dependencies=[Depends(only_for_admin)],
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
 )
 def update_role(
     request: UpdateRole,
@@ -68,7 +77,11 @@ def update_role(
             "content": {"application/json": {"example": {"detail": "Role not found"}}},
         }
     },
-    dependencies=[Depends(only_for_admin)],
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
 )
 def remove_role(id: UUID, db: Session = Depends(get_db_session)) -> None:
     role: Role = RoleService(db).delete_role(id)
