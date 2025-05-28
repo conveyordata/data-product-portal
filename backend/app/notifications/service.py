@@ -5,10 +5,10 @@ from fastapi import HTTPException, status
 from sqlalchemy import delete, desc, select
 from sqlalchemy.orm import Session, joinedload
 
-from app.data_products.model import ensure_data_product_exists
-from app.datasets.model import ensure_dataset_exists
 from app.notifications.model import Notification as NotificationModel
 from app.notifications.schema_response import NotificationGet
+from app.role_assignments.data_product.model import DataProductRoleAssignment
+from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.users.schema import User
 
@@ -66,14 +66,16 @@ class NotificationService:
         event_id: UUID,
         bonus_receiver_ids: list[UUID] = [],
     ) -> None:
-        dataset = ensure_dataset_exists(dataset_id, db)
+        assignments = db.scalars(
+            select(DatasetRoleAssignment).where(
+                DatasetRoleAssignment.dataset_id == dataset_id,
+                DatasetRoleAssignment.decision == DecisionStatus.APPROVED,
+            )
+        ).all()
+
         receivers = set(
             chain(
-                (
-                    assignment.user_id
-                    for assignment in dataset.assignments
-                    if assignment.decision == DecisionStatus.APPROVED
-                ),
+                (assignment.user_id for assignment in assignments),
                 bonus_receiver_ids,
             )
         )
@@ -88,14 +90,16 @@ class NotificationService:
         event_id: UUID,
         bonus_receiver_ids: list[UUID] = [],
     ) -> None:
-        data_product = ensure_data_product_exists(data_product_id, db)
+        assignments = db.scalars(
+            select(DataProductRoleAssignment).where(
+                DataProductRoleAssignment.data_product_id == data_product_id,
+                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+            )
+        ).all()
+
         receivers = set(
             chain(
-                (
-                    assignment.user_id
-                    for assignment in data_product.assignments
-                    if assignment.decision == DecisionStatus.APPROVED
-                ),
+                (assignment.user_id for assignment in assignments),
                 bonus_receiver_ids,
             )
         )
