@@ -49,7 +49,7 @@ class DataProductMembershipService:
         data_product.memberships.append(data_product_membership)
         db.add(
             EventModel(
-                name=EventType.DATA_PRODUCT_MEMBERSHIP_REQUESTED,
+                name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REQUESTED,
                 subject_id=data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=user.id,

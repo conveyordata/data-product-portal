@@ -88,7 +88,7 @@ class RoleAssignmentService:
         self.db.flush()
         self.db.add(
             EventModel(
-                name=EventType.DATA_PRODUCT_MEMBERSHIP_CREATED,
+                name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,
                 subject_id=role_assignment.data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=role_assignment.user_id,
@@ -105,7 +105,7 @@ class RoleAssignmentService:
 
         self.db.add(
             EventModel(
-                name=EventType.DATA_PRODUCT_MEMBERSHIP_REMOVED,
+                name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED,
                 subject_id=assignment.data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=assignment.user_id,
@@ -133,9 +133,9 @@ class RoleAssignmentService:
             self.db.add(
                 EventModel(
                     name=(
-                        EventType.DATA_PRODUCT_MEMBERSHIP_APPROVED
+                        EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_APPROVED
                         if assignment.decision == DecisionStatus.APPROVED
-                        else EventType.DATA_PRODUCT_MEMBERSHIP_DENIED
+                        else EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_DENIED
                     ),
                     subject_id=assignment.data_product_id,
                     subject_type=EventReferenceEntity.DATA_PRODUCT,
@@ -147,7 +147,7 @@ class RoleAssignmentService:
         else:
             self.db.add(
                 EventModel(
-                    name=EventType.DATA_PRODUCT_MEMBERSHIP_UPDATED,
+                    name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED,
                     subject_id=assignment.data_product_id,
                     subject_type=EventReferenceEntity.DATA_PRODUCT,
                     target_id=assignment.user_id,

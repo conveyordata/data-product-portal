@@ -109,18 +109,18 @@ export function getEventTypeDisplayName(t: TFunction, type: EventType): string {
         case EventType.DATA_PRODUCT_REMOVED:
             return t('Data product removed');
 
-        case EventType.DATA_PRODUCT_MEMBERSHIP_CREATED:
-            return t('Created data product membership for');
-        case EventType.DATA_PRODUCT_MEMBERSHIP_UPDATED:
-            return t('Updated data product membership for');
-        case EventType.DATA_PRODUCT_MEMBERSHIP_REMOVED:
-            return t('Removed data product membership for');
-        case EventType.DATA_PRODUCT_MEMBERSHIP_REQUESTED:
-            return t('Requested data product membership for');
-        case EventType.DATA_PRODUCT_MEMBERSHIP_APPROVED:
-            return t('Approved data product membership for');
-        case EventType.DATA_PRODUCT_MEMBERSHIP_DENIED:
-            return t('Denied data product membership for');
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED:
+            return t('Created data product role assignment for');
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED:
+            return t('Updated data product role assignment for');
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED:
+            return t('Removed data product role assignment for');
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REQUESTED:
+            return t('Requested data product role assignment for');
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_APPROVED:
+            return t('Approved data product role assignment for');
+        case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_DENIED:
+            return t('Denied data product role assignment for');
 
         case EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED:
             return t('Requested data product dataset link to the');
@@ -131,17 +131,25 @@ export function getEventTypeDisplayName(t: TFunction, type: EventType): string {
         case EventType.DATA_PRODUCT_DATASET_LINK_REMOVED:
             return t('Removed product dataset link to the');
 
+        case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
+            return t('Created dataset role assignment for');
+        case EventType.DATASET_ROLE_ASSIGNMENT_UPDATED:
+            return t('Updated dataset role assignment for');
+        case EventType.DATASET_ROLE_ASSIGNMENT_REMOVED:
+            return t('Removed dataset role assignment for');
+        case EventType.DATASET_ROLE_ASSIGNMENT_REQUESTED:
+            return t('Requested dataset role assignment for');
+        case EventType.DATASET_ROLE_ASSIGNMENT_APPROVED:
+            return t('Approved dataset role assignment for');
+        case EventType.DATASET_ROLE_ASSIGNMENT_DENIED:
+            return t('Denied dataset role assignment for');
+
         case EventType.DATASET_CREATED:
             return t('Dataset created');
         case EventType.DATASET_UPDATED:
             return t('Dataset updated');
         case EventType.DATASET_REMOVED:
             return t('Dataset removed');
-
-        case EventType.DATASET_USER_ADDED:
-            return t('Added user to the dataset:');
-        case EventType.DATASET_USER_REMOVED:
-            return t('Removed user from the dataset:');
 
         default:
             return t('Unknown');
