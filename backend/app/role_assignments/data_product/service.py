@@ -121,7 +121,11 @@ class RoleAssignmentService:
             self.db,
             assignment.data_product_id,
             event_id,
-            [assignment.requested_by_id],
+            (
+                [assignment.requested_by_id]
+                if assignment.requested_by_id is not None
+                else []
+            ),
         )
         self.db.delete(assignment)
         self.db.commit()
@@ -160,7 +164,11 @@ class RoleAssignmentService:
                 self.db,
                 assignment.data_product_id,
                 event_id,
-                [assignment.requested_by_id],
+                (
+                    [assignment.requested_by_id]
+                    if assignment.requested_by_id is not None
+                    else []
+                ),
             )
         else:
             event_id = EventService().create_event(
@@ -178,7 +186,11 @@ class RoleAssignmentService:
                 self.db,
                 assignment.data_product_id,
                 event_id,
-                [assignment.requested_by_id],
+                (
+                    [assignment.requested_by_id]
+                    if assignment.requested_by_id is not None
+                    else []
+                ),
             )
         self.db.commit()
         return assignment
