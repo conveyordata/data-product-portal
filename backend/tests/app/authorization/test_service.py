@@ -19,7 +19,7 @@ class TestAuthorizationService:
 
         assert len(db.query(CasbinRule).all()) == 5 + existing, "roles not recorded"
 
-        service = AuthorizationService(db=db)
+        service = AuthorizationService(db)
         service._clear_casbin_table()
 
         assert len(db.query(CasbinRule).all()) == 0, "database not cleared"

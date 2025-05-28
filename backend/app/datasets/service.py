@@ -309,8 +309,9 @@ class DatasetService:
     def validate_dataset_namespace(self, namespace: str) -> NamespaceValidation:
         return self.namespace_validator.validate_namespace(namespace, self.db)
 
-    def dataset_namespace_suggestion(self, name: str) -> NamespaceSuggestion:
-        return self.namespace_validator.namespace_suggestion(name)
+    @classmethod
+    def dataset_namespace_suggestion(cls, name: str) -> NamespaceSuggestion:
+        return NamespaceValidator.namespace_suggestion(name)
 
     @classmethod
     def dataset_namespace_length_limits(cls) -> NamespaceLengthLimits:
@@ -320,8 +321,8 @@ class DatasetService:
         if (
             dataset.access_type != DatasetAccessType.PRIVATE
             or Authorization().has_admin_role(user_id=str(user.id))
-            or DatasetRoleAssignmentService(db=self.db, user=user).has_assignment(
-                dataset_id=dataset.id
+            or DatasetRoleAssignmentService(self.db).has_assignment(
+                dataset_id=dataset.id, user=user
             )
         ):
             return True

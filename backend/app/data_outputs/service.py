@@ -132,7 +132,7 @@ class DataOutputService:
         self,
         id: UUID,
         dataset_id: UUID,
-        authenticated_user: User,
+        actor: User,
     ) -> DataOutputDatasetAssociationModel:
         dataset = ensure_dataset_exists(
             dataset_id, self.db, options=[joinedload(DatasetModel.data_product_links)]
@@ -155,7 +155,7 @@ class DataOutputService:
         dataset_link = DataOutputDatasetAssociationModel(
             dataset_id=dataset_id,
             status=DecisionStatus.PENDING,
-            requested_by=authenticated_user,
+            requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_output.dataset_links.append(dataset_link)
@@ -208,9 +208,7 @@ class DataOutputService:
 
     def get_graph_data(self, id: UUID, level: int) -> Graph:
         data_output = self.db.get(DataOutputModel, id)
-        graph = DataProductService().get_graph_data(
-            data_output.owner_id, level, self.db
-        )
+        graph = DataProductService(self.db).get_graph_data(data_output.owner_id, level)
 
         for node in graph.nodes:
             if node.isMain:
