@@ -3,6 +3,7 @@ import { type ReactNode, useMemo } from 'react';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import type { UserContract } from '@/types/users';
+import { Sorter } from '@/utils/table-sorter.helper.ts';
 
 import styles from './user-access-overview.module.scss';
 
@@ -17,7 +18,12 @@ export function UserAccessOverview({ users = [], title }: Props) {
     const { token } = useToken();
 
     const sorted = useMemo(() => {
-        return [...users].sort((a, b) => a.email.localeCompare(b.email));
+        const sorter = new Sorter<UserContract>();
+        const compareFn = sorter.cascadedSorter(
+            sorter.stringSorter((user) => user.last_name),
+            sorter.stringSorter((user) => user.first_name),
+        );
+        return [...users].sort(compareFn);
     }, [users]);
 
     return (

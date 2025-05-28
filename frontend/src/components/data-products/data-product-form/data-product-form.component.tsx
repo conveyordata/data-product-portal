@@ -359,24 +359,26 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             </Form.Item>
             <Form.Item>
                 <Row>
-                    <Col>
-                        <Popconfirm
-                            title={t('Are you sure you want to delete this data product?')}
-                            onConfirm={handleDeleteDataProduct}
-                            okText={t('Yes')}
-                            cancelText={t('No')}
-                        >
-                            <Button
-                                className={styles.formButton}
-                                type="default"
-                                danger
-                                loading={isArchiving}
-                                disabled={isLoading || !canDelete}
+                    {mode !== 'create' && (
+                        <Col>
+                            <Popconfirm
+                                title={t('Are you sure you want to delete this data product?')}
+                                onConfirm={handleDeleteDataProduct}
+                                okText={t('Yes')}
+                                cancelText={t('No')}
                             >
-                                {t('Delete')}
-                            </Button>
-                        </Popconfirm>
-                    </Col>
+                                <Button
+                                    className={styles.formButton}
+                                    type="default"
+                                    danger
+                                    loading={isArchiving}
+                                    disabled={isLoading || !canDelete}
+                                >
+                                    {t('Delete')}
+                                </Button>
+                            </Popconfirm>
+                        </Col>
+                    )}
                     <Col flex="auto" />
                     <Col>
                         <Space>

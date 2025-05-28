@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next';
 import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-form.tsx';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { DecisionStatus } from '@/types/roles';
-import type { DatasetRoleAssignmentContract, RoleContract } from '@/types/roles/role.contract.ts';
+import { type DatasetRoleAssignmentContract, Prototype, type RoleContract } from '@/types/roles/role.contract.ts';
 import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -17,10 +17,10 @@ type Props = {
     onRejectAccessRequest: (assignmentId: string) => void;
     onRoleChange: (role: RoleContract, assignmentId: string) => void;
     isRemovingUser: boolean;
-    isLoading?: boolean;
-    canApprove?: boolean;
-    canEdit?: boolean;
-    canRemove?: boolean;
+    isLoading: boolean;
+    canApprove: boolean;
+    canEdit: boolean;
+    canRemove: boolean;
 };
 
 export const getDatasetTeamColumns = ({
@@ -37,6 +37,9 @@ export const getDatasetTeamColumns = ({
     canRemove,
 }: Props): TableColumnsType<DatasetRoleAssignmentContract> => {
     const sorter = new Sorter<DatasetRoleAssignmentContract>();
+    const numberOfOwners = datasetUsers.filter((assignment) => assignment.role.prototype === Prototype.OWNER).length;
+    const lockOwners = numberOfOwners <= 1;
+
     return [
         {
             title: t('Id'),
@@ -58,7 +61,10 @@ export const getDatasetTeamColumns = ({
                 );
             },
             width: '50%',
-            sorter: sorter.stringSorter((assignment) => assignment.user.last_name),
+            sorter: sorter.cascadedSorter(
+                sorter.stringSorter((assignment) => assignment.user.last_name),
+                sorter.stringSorter((assignment) => assignment.user.first_name),
+            ),
             defaultSortOrder: 'ascend',
         },
         {
@@ -66,12 +72,14 @@ export const getDatasetTeamColumns = ({
             dataIndex: 'role',
             render: (role: RoleContract, { user, id, decision }: DatasetRoleAssignmentContract) => {
                 const isApproved = decision === DecisionStatus.Approved;
+                const disabled = role.prototype === Prototype.OWNER && lockOwners;
+
                 return (
                     <RoleChangeForm<DatasetRoleAssignmentContract>
                         initialRole={role}
                         userId={user.id}
                         onRoleChange={(role) => onRoleChange(role, id)}
-                        isDisabled={!canEdit || !isApproved}
+                        isDisabled={disabled || !canEdit || !isApproved}
                         scope={'dataset'}
                     />
                 );

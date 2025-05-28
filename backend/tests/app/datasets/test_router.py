@@ -18,7 +18,6 @@ from tests.factories import (
 from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
 from app.datasets.enums import DatasetAccessType
-from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype, Scope
 from app.roles.service import RoleService
 
@@ -54,13 +53,12 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
-    def test_create_dataset_no_owner_role(self, session, dataset_payload, client):
+    def test_create_dataset_no_owner_role(self, dataset_payload, client):
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
@@ -68,7 +66,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 400
@@ -82,7 +79,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         create_payload = deepcopy(dataset_payload)
         create_payload["owners"] = []
@@ -98,7 +94,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         DatasetFactory(namespace=dataset_payload["namespace"])
 
@@ -116,7 +111,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         create_payload = deepcopy(dataset_payload)
         create_payload["namespace"] = "!"
@@ -135,7 +129,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         create_payload = deepcopy(dataset_payload)
         create_payload["namespace"] = "a" * 256
@@ -482,7 +475,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 200

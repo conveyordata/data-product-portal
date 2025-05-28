@@ -1,3 +1,4 @@
+import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from tests.factories import (
@@ -35,15 +36,24 @@ class TestDatasetRoleAssignmentsRouter:
         assert len(data) == 1
         assert data[0]["id"] == str(assignment.id)
 
-    def test_create_assignment(self, client: TestClient):
+    @pytest.mark.parametrize(
+        "permissions",
+        [
+            [
+                Action.DATASET__CREATE_USER,
+            ],
+            [
+                Action.DATASET__CREATE_USER,
+                Action.DATASET__APPROVE_USER_REQUEST,
+            ],
+        ],
+    )
+    def test_create_assignment(self, permissions: list[Action], client: TestClient):
         dataset: Dataset = DatasetFactory()
         me = UserFactory(external_id="sub")
         authz_role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[
-                Action.DATASET__CREATE_USER,
-                Action.DATASET__APPROVE_USER_REQUEST,
-            ],
+            permissions=permissions,
         )
         DatasetRoleAssignmentFactory(
             user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
