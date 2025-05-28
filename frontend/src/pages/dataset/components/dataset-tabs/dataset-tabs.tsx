@@ -25,16 +25,16 @@ import styles from './dataset-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
 
-type Props = {
-    datasetId: string;
-    isLoading: boolean;
-};
-
 type Tab = {
     label: string;
     key: TabKeys;
     icon?: ReactNode;
     children: ReactNode;
+};
+
+type Props = {
+    datasetId: string;
+    isLoading: boolean;
 };
 
 export function DatasetTabs({ datasetId, isLoading }: Props) {
@@ -70,7 +70,7 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 children: <DataOutputTab datasetId={datasetId} />,
             },
             {
-                label: t('Dataset Owners'),
+                label: t('Team'),
                 key: TabKeys.Team,
                 icon: <TeamOutlined />,
                 children: <TeamTab datasetId={datasetId} />,

@@ -1,18 +1,16 @@
 import pytest
 from tests.factories import (
     DataOutputDatasetAssociationFactory,
-    DataProductMembershipFactory,
+    DataOutputFactory,
+    DataProductFactory,
+    DataProductRoleAssignmentFactory,
     DatasetFactory,
+    DatasetRoleAssignmentFactory,
+    RoleFactory,
     UserFactory,
 )
-from tests.factories.data_output import DataOutputFactory
-from tests.factories.role import RoleFactory
-from tests.factories.role_assignment_data_product import (
-    DataProductRoleAssignmentFactory,
-)
-from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
 
-from app.core.authz.actions import AuthorizationAction
+from app.core.authz import Action
 from app.datasets.enums import DatasetAccessType
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Scope
@@ -28,24 +26,22 @@ class TestDataOutputsDatasetsRouter:
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
         )
-        ds = DatasetFactory(owners=[user])
-        membership = DataProductMembershipFactory(user=user)
+        data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=membership.data_product.id
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
-        data_output = DataOutputFactory(owner=membership.data_product)
+        data_output = DataOutputFactory(owner=data_product)
         ds = DatasetFactory()
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 200
 
     def test_request_data_output_link_private_dataset_no_access(self, client):
-        user = UserFactory(external_id="sub")
-        membership = DataProductMembershipFactory(user=user)
-        data_output = DataOutputFactory(owner=membership.data_product)
+        data_product = DataProductFactory()
+        data_output = DataOutputFactory(owner=data_product)
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
@@ -53,33 +49,33 @@ class TestDataOutputsDatasetsRouter:
 
     def test_request_data_output_link_private_dataset(self, client):
         user = UserFactory(external_id="sub")
-        membership = DataProductMembershipFactory(user=user)
-        data_output = DataOutputFactory(owner=membership.data_product)
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[user])
+        data_product = DataProductFactory()
+        data_output = DataOutputFactory(owner=data_product)
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=membership.data_product.id
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 200
 
     def test_request_data_output_remove(self, client):
         user = UserFactory(external_id="sub")
-        membership = DataProductMembershipFactory(user=user)
-        data_output = DataOutputFactory(owner=membership.data_product)
+        data_product = DataProductFactory()
+        data_output = DataOutputFactory(owner=data_product)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
-                AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
-                AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=membership.data_product.id
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
 
@@ -92,8 +88,8 @@ class TestDataOutputsDatasetsRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_request_data_output_link_by_admin(self, client):
-        membership = DataProductMembershipFactory()
-        data_output = DataOutputFactory(owner=membership.data_product)
+        data_product = DataProductFactory()
+        data_output = DataOutputFactory(owner=data_product)
 
         ds = DatasetFactory()
 
@@ -102,10 +98,10 @@ class TestDataOutputsDatasetsRouter:
 
     def test_approve_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -140,10 +136,10 @@ class TestDataOutputsDatasetsRouter:
 
     def test_deny_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataOutputDatasetAssociationFactory(
@@ -177,10 +173,10 @@ class TestDataOutputsDatasetsRouter:
 
     def test_remove_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__REVOKE_DATA_OUTPUT_LINK],
+            permissions=[Action.DATASET__REVOKE_DATA_OUTPUT_LINK],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataOutputDatasetAssociationFactory(dataset=ds)
@@ -197,8 +193,8 @@ class TestDataOutputsDatasetsRouter:
         assert response.status_code == 200
 
     def test_request_dataset_link_with_invalid_dataset_id(self, client):
-        membership = DataProductMembershipFactory(user=UserFactory(external_id="sub"))
-        data_output = DataOutputFactory(owner=membership.data_product)
+        data_product = DataProductFactory()
+        data_output = DataOutputFactory(owner=data_product)
         response = self.request_data_output_dataset_link(
             client, data_output.id, self.invalid_id
         )
@@ -206,10 +202,8 @@ class TestDataOutputsDatasetsRouter:
 
     def test_delete_dataset_with_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
-        role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
-        )
+        ds = DatasetFactory()
+        role = RoleFactory(scope=Scope.DATASET, permissions=[Action.DATASET__DELETE])
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataOutputDatasetAssociationFactory(dataset=ds)
         response = client.get(f"/api/data_outputs/{link.data_output_id}")
@@ -220,23 +214,30 @@ class TestDataOutputsDatasetsRouter:
         assert len(response.json()["dataset_links"]) == 0
 
     def test_get_pending_actions_no_action(self, client):
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
+        ds = DatasetFactory()
         DataOutputDatasetAssociationFactory(dataset=ds)
         response = client.get(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
         assert response.json() == []
 
     def test_get_pending_actions(self, client):
         user = UserFactory(external_id="sub")
-        membership = DataProductMembershipFactory(user=user)
-        data_output = DataOutputFactory(owner=membership.data_product)
-        ds = DatasetFactory(owners=[user])
+        data_product = DataProductFactory()
+        data_output = DataOutputFactory(owner=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=membership.data_product.id
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
+
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 200
         response = client.get(f"{DATA_OUTPUTS_DATASETS_ENDPOINT}/actions")
@@ -247,15 +248,14 @@ class TestDataOutputsDatasetsRouter:
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
-            permissions=[AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
         )
-        ds = DatasetFactory(owners=[user])
-        membership = DataProductMembershipFactory(user=user)
+        data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=membership.data_product.id
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
-        data_output = DataOutputFactory(owner=membership.data_product)
+        data_output = DataOutputFactory(owner=data_product)
         ds = DatasetFactory()
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
@@ -266,10 +266,10 @@ class TestDataOutputsDatasetsRouter:
 
     def test_history_event_created_on_remove_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__REVOKE_DATA_OUTPUT_LINK],
+            permissions=[Action.DATASET__REVOKE_DATA_OUTPUT_LINK],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataOutputDatasetAssociationFactory(dataset=ds)
@@ -282,10 +282,10 @@ class TestDataOutputsDatasetsRouter:
 
     def test_history_event_created_on_approve_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -300,10 +300,10 @@ class TestDataOutputsDatasetsRouter:
 
     def test_history_event_created_on_deny_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         link = DataOutputDatasetAssociationFactory(
@@ -317,18 +317,18 @@ class TestDataOutputsDatasetsRouter:
 
     def test_history_event_created_on_unlink_data_output_link(self, client):
         user = UserFactory(external_id="sub")
-        membership = DataProductMembershipFactory(user=user)
-        data_output = DataOutputFactory(owner=membership.data_product)
+        data_product = DataProductFactory()
+        data_output = DataOutputFactory(owner=data_product)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
-                AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
-                AuthorizationAction.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=membership.data_product.id
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
 

@@ -9,6 +9,7 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
     DataProductResolver,
     DataProductRoleAssignmentResolver,
+    EmptyResolver,
 )
 from app.database.database import get_db_session
 from app.role_assignments.data_product import email
@@ -60,11 +61,14 @@ def create_assignment(
     service = RoleAssignmentService(db=db, user=user)
     role_assignment = service.create_assignment(id, request, user)
 
-    approvers = service.users_with_authz_action(
-        data_product_id=role_assignment.data_product_id,
-        action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
-    )
-    if user.id in (approver.id for approver in approvers):
+    approvers: Sequence[User] = ()
+    if not (is_admin := Authorization().has_admin_role(user_id=str(user.id))):
+        approvers = service.users_with_authz_action(
+            data_product_id=role_assignment.data_product_id,
+            action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+        )
+
+    if is_admin or user.id in (approver.id for approver in approvers):
         service.update_assignment(
             UpdateRoleAssignment(
                 id=role_assignment.id,
@@ -74,6 +78,39 @@ def create_assignment(
             user,
         )
         return role_assignment
+
+    background_tasks.add_task(
+        email.send_role_assignment_request_email,
+        role_assignment,
+        approvers,
+    )
+    return role_assignment
+
+
+@router.post(
+    "/request/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS, resolver=EmptyResolver
+            )
+        )
+    ],
+)
+def request_assignment(
+    id: UUID,
+    request: CreateRoleAssignment,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> RoleAssignmentResponse:
+    service = RoleAssignmentService(db=db, user=user)
+    role_assignment = service.create_assignment(id, request, user)
+
+    approvers = service.users_with_authz_action(
+        data_product_id=role_assignment.data_product_id,
+        action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+    )
 
     background_tasks.add_task(
         email.send_role_assignment_request_email,

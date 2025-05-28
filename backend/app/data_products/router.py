@@ -16,6 +16,7 @@ from app.data_outputs.schema_request import DataOutputCreate
 from app.data_outputs.schema_response import DataOutputGet
 from app.data_outputs.service import DataOutputService
 from app.data_product_settings.service import DataProductSettingService
+from app.data_products import email
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -25,6 +26,7 @@ from app.data_products.schema_request import (
 from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
 from app.database.database import get_db_session
+from app.datasets.enums import DatasetAccessType
 from app.events.schema_response import EventGet
 from app.graph.graph import Graph
 from app.role_assignments.data_product.router import (
@@ -34,6 +36,9 @@ from app.role_assignments.data_product.router import (
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     DecideRoleAssignment,
+)
+from app.role_assignments.dataset.service import (
+    RoleAssignmentService as DatasetRoleAssignmentService,
 )
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype, Scope
@@ -130,7 +135,6 @@ def create_data_product(
         resp = create_assignment(
             created_data_product.id,
             CreateRoleAssignment(
-                data_product_id=created_data_product.id,
                 user_id=owner,
                 role_id=owner_role.id,
             ),
@@ -229,9 +233,7 @@ def create_data_output(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DataOutputService().create_data_output(
-        id, data_output, db, authenticated_user
-    )
+    return DataOutputService(db).create_data_output(id, data_output, authenticated_user)
 
 
 @router.get("/{id}/data_output/validate_namespace")
@@ -264,7 +266,7 @@ def update_data_product_about(
     data_product: DataProductAboutUpdate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
+) -> None:
     return DataProductService().update_data_product_about(
         id, data_product, db, authenticated_user
     )
@@ -293,7 +295,7 @@ def update_data_product_status(
     data_product: DataProductStatusUpdate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
+) -> None:
     return DataProductService().update_data_product_status(
         id, data_product, db, authenticated_user
     )
@@ -330,10 +332,27 @@ def link_dataset_to_data_product(
     background_tasks: BackgroundTasks,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
-):
-    return DataProductService().link_dataset_to_data_product(
-        id, dataset_id, authenticated_user, db, background_tasks
+) -> dict[str, UUID]:
+    dataset_link = DataProductService().link_dataset_to_data_product(
+        id, dataset_id, authenticated_user, db
     )
+
+    if dataset_link.dataset.access_type != DatasetAccessType.PUBLIC:
+        approvers = DatasetRoleAssignmentService(
+            db, authenticated_user
+        ).users_with_authz_action(
+            dataset_link.dataset_id, Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST
+        )
+        background_tasks.add_task(
+            email.send_dataset_link_email(
+                dataset_link.data_product,
+                dataset_link.dataset,
+                requester=authenticated_user,
+                approvers=approvers,
+            )
+        )
+
+    return {"id": dataset_link.id}
 
 
 @router.delete(

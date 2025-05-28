@@ -1,8 +1,10 @@
 import pytest
-from tests.factories import TagFactory
-from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_product import DataProductFactory
-from tests.factories.dataset import DatasetFactory
+from tests.factories import (
+    DataOutputFactory,
+    DataProductFactory,
+    DatasetFactory,
+    TagFactory,
+)
 
 ENDPOINT = "/api/tags"
 

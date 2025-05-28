@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { UserPopup } from '@/components/modal/user-popup/user-popup';
 import { useModal } from '@/hooks/use-modal';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { useCreateRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
+import { useRequestDataProductRoleAssignmentMutation } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
 import type { UserContract } from '@/types/users';
@@ -20,7 +20,8 @@ type Props = {
 export const DataProductRequestAccessButton = ({ dataProductId, userId }: Props) => {
     const { isVisible, handleOpen, handleClose } = useModal();
     const { t } = useTranslation();
-    const [requestAccessToDataProduct, { isLoading: isRequestingAccess }] = useCreateRoleAssignmentMutation();
+    const [requestAccessToDataProduct, { isLoading: isRequestingAccess }] =
+        useRequestDataProductRoleAssignmentMutation();
     const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
 
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
