@@ -30,7 +30,7 @@ jobs:
             echo "Waiting for $service to be healthy..."
             for i in {1..30}; do
               ID=$(docker compose ps -q $service)
-              STATUS=$(docker inspect --format='{{.State.Health.Status}}' ID)
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' $ID)
               echo "$service status: $STATUS"
               if [ "$STATUS" = "healthy" ]; then
                 break
