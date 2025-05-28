@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Boolean, Column, String
+from sqlalchemy import UUID, Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
@@ -25,7 +25,6 @@ class User(Base, BaseORM):
     external_id = Column(String)
     first_name = Column(String)
     last_name = Column(String)
-    is_admin = Column(Boolean, server_default="false", nullable=False)
 
     # Relationships - Data Products
     data_product_roles: Mapped[list["DataProductRoleAssignment"]] = relationship(
