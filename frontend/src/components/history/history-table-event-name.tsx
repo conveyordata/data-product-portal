@@ -18,7 +18,7 @@ interface HistoryTableLinkProps {
     type: EventReferenceEntity;
 }
 
-export function HistoryTableEventName({ record, resourceId, type }: HistoryTableLinkProps): ReactNode | null {
+export function HistoryTableEventName({ record, resourceId, type }: HistoryTableLinkProps): ReactNode {
     const { target_id, subject_id, subject_type, target_type, deleted_subject_identifier, deleted_target_identifier } =
         record;
     const { t } = useTranslation();
