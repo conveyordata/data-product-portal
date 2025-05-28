@@ -144,8 +144,8 @@ class DataProductSettingService:
     def data_product_settings_namespace_suggestion(
         cls, name: str
     ) -> NamespaceSuggestion:
-        return NamespaceValidation.namespace_suggestion(name)
+        return DataProductSettingNamespaceValidator.namespace_suggestion(name)
 
     @classmethod
     def data_product_settings_namespace_length_limits(cls) -> NamespaceLengthLimits:
-        return NamespaceValidation.namespace_length_limits()
+        return DataProductSettingNamespaceValidator.namespace_length_limits()
