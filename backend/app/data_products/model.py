@@ -15,10 +15,10 @@ from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
 from app.tags.model import Tag, tag_data_product_table
 
-if TYPE_CHECKING:
-    from app.data_outputs.model import DataOutput
-    from app.data_product_lifecycles.model import DataProductLifecycle
-    from app.domains.model import Domain
+# if TYPE_CHECKING:
+from app.data_outputs.model import DataOutput
+from app.data_product_lifecycles.model import DataProductLifecycle
+from app.domains.model import Domain
 
 
 class DataProduct(Base, BaseORM):

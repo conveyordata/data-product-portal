@@ -1,5 +1,7 @@
+from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Sequence, TypeAlias, Union
+from uuid import UUID
 
 import casbin_sqlalchemy_adapter as sqlalchemy_adapter
 from cachetools import Cache, LRUCache, cachedmethod
@@ -17,12 +19,8 @@ from app.utils.singleton import Singleton
 from .actions import AuthorizationAction
 from .resolvers import SubjectResolver
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
-    from typing import Sequence, Union, TypeAlias
-    from uuid import UUID
-
 ID: TypeAlias = Union[str, UUID]
+
 
 class Authorization(metaclass=Singleton):
 
@@ -117,7 +115,9 @@ class Authorization(metaclass=Singleton):
         """Creates an entry in the casbin table,
         assigning the user a role for the chosen resource."""
         enforcer: Enforcer = self._enforcer
-        enforcer.add_named_grouping_policy("g", str(user_id), str(role_id), str(resource_id))
+        enforcer.add_named_grouping_policy(
+            "g", str(user_id), str(role_id), str(resource_id)
+        )
         self._after_update()
 
     def revoke_resource_role(
@@ -126,34 +126,42 @@ class Authorization(metaclass=Singleton):
         """Deletes the entry in the casbin table,
         revoking the role for the chosen resource and user."""
         enforcer: Enforcer = self._enforcer
-        enforcer.remove_named_grouping_policy("g", str(user_id), str(role_id), str(resource_id))
+        enforcer.remove_named_grouping_policy(
+            "g", str(user_id), str(role_id), str(resource_id)
+        )
         self._after_update()
 
-    def has_resource_role(
-        self, *, user_id: ID, role_id: ID, resource_id: ID
-    ) -> bool:
+    def has_resource_role(self, *, user_id: ID, role_id: ID, resource_id: ID) -> bool:
         """Determines whether this resource role is assigned to the chosen user."""
         enforcer: Enforcer = self._enforcer
-        return enforcer.has_named_grouping_policy("g", str(user_id), str(role_id), str(resource_id))
+        return enforcer.has_named_grouping_policy(
+            "g", str(user_id), str(role_id), str(resource_id)
+        )
 
     def assign_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> None:
         """Creates an entry in the casbin table,
         assigning the user a role for the chosen domain."""
         enforcer: Enforcer = self._enforcer
-        enforcer.add_named_grouping_policy("g2", str(user_id), str(role_id), str(domain_id))
+        enforcer.add_named_grouping_policy(
+            "g2", str(user_id), str(role_id), str(domain_id)
+        )
         self._after_update()
 
     def revoke_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> None:
         """Deletes the entry in the casbin table,
         revoking the role for the chosen domain and user."""
         enforcer: Enforcer = self._enforcer
-        enforcer.remove_named_grouping_policy("g2", str(user_id), str(role_id), str(domain_id))
+        enforcer.remove_named_grouping_policy(
+            "g2", str(user_id), str(role_id), str(domain_id)
+        )
         self._after_update()
 
     def has_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:
         """Determines whether this domain role is assigned to chosen user."""
         enforcer: Enforcer = self._enforcer
-        return enforcer.has_named_grouping_policy("g2", str(user_id), str(role_id), str(domain_id))
+        return enforcer.has_named_grouping_policy(
+            "g2", str(user_id), str(role_id), str(domain_id)
+        )
 
     def assign_global_role(self, *, user_id: ID, role_id: ID) -> None:
         """Creates an entry in the casbin table,

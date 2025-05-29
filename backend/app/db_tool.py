@@ -29,7 +29,7 @@ def seed_cmd(path: str = typer.Argument(..., help="Path to the seed script.")):
         seed_db(path)
         print("Seeding finished successfully")
     except Exception as e:
-        print("Something went wrong when seeding", e)
+        print("Something went wrong when seeding:\n", e)
 
 
 @app.command()

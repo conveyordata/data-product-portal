@@ -39,8 +39,9 @@ def check_access(
     result = authorizer.has_access(sub=sub, dom=dom, obj=obj, act=action)
     return AccessResponse(allowed=result)
 
+
 @router.get(
-    "/access/is_admin",
+    "/admin",
     responses={
         200: {
             "description": "Admin role assignment",

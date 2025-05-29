@@ -9,8 +9,7 @@ from app.data_output_configuration.base_model import BaseDataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 
-if TYPE_CHECKING:
-    from app.data_products.model import DataProduct
+from app.data_products.model import DataProduct
 
 from app.database.database import Base
 from app.platform_services.schema import PlatformService
