@@ -24,5 +24,6 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.add_column(
-        "users", sa.Column("is_admin", sa.BOOLEAN, server_default="false", nullable=False)
+        "users",
+        sa.Column("is_admin", sa.BOOLEAN, server_default="false", nullable=False),
     )

@@ -8,10 +8,10 @@ from sqlalchemy.orm import Mapped, Session, relationship
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM, utcnow
 
-# if TYPE_CHECKING:
-from app.data_outputs.model import DataOutput
-from app.data_products.model import DataProduct
-from app.datasets.model import Dataset
+if TYPE_CHECKING:
+    from app.data_outputs.model import DataOutput
+    from app.data_products.model import DataProduct
+    from app.datasets.model import Dataset
 
 
 tag_data_product_table = Table(
