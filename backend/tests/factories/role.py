@@ -5,7 +5,7 @@ from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
 from app.roles import ADMIN_UUID
 from app.roles.model import Role
-from app.roles.schema import Prototype
+from app.roles.schema import Prototype, Scope
 
 
 class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -31,3 +31,13 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
                 role_id=str(self.id), actions=self.permissions
             )
         test_session.commit()
+
+    @classmethod
+    def admin(cls) -> "Role":
+        return RoleFactory(
+            id=ADMIN_UUID,
+            scope=Scope.GLOBAL,
+            prototype=Prototype.ADMIN,
+            name="admin",
+            permissions=(),
+        )

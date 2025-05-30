@@ -13,4 +13,3 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     external_id = FuzzyText(length=10)
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
-    is_admin = False
