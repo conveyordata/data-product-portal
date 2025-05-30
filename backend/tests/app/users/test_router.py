@@ -12,7 +12,6 @@ class TestUsersRouter:
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
-        assert data[0]["is_admin"] is False
 
     def test_remove_user_not_admin(self, client):
         user = UserFactory()
@@ -53,7 +52,6 @@ class TestUsersRouter:
                 "external_id": "test-user",
                 "first_name": "test",
                 "last_name": "user",
-                "is_admin": False,
             },
         )
         assert response.status_code == 200

@@ -9,6 +9,7 @@ import headerStyles from '@/components/layout/navbar/navbar.module.scss';
 import { Notifications } from '@/components/notifications/notifications';
 import { AppConfig } from '@/config/app-config.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useIsAdminQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 
 import { DownloadCLIButton } from '../cli-download/cli-download-button.component';
 import styles from './user-menu.module.scss';
@@ -25,6 +26,8 @@ export function UserMenu() {
         token: { colorErrorBorder, colorPrimary },
     } = theme.useToken();
     const userInitials = user?.first_name?.charAt(0) + (user?.last_name ? user.last_name.charAt(0) : '');
+
+    const { data: isAdmin } = useIsAdminQuery();
 
     const handleLogout = async () => {
         if (isAuthDisabled) {
@@ -53,7 +56,7 @@ export function UserMenu() {
             </Flex>
             <Flex className={styles.avatarWrapper}>
                 <Badge
-                    count={user?.is_admin ? t('admin') : 0}
+                    count={isAdmin ? t('admin') : 0}
                     showZero={false}
                     color={colorPrimary}
                     style={{ fontSize: 10 }}
