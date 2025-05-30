@@ -15,6 +15,8 @@ if TYPE_CHECKING:
     from app.data_products.model import DataProduct
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
+    from app.events.model import Event
+    from app.notifications.model import Notification
 
 
 class User(Base, BaseORM):
@@ -26,6 +28,16 @@ class User(Base, BaseORM):
     first_name = Column(String)
     last_name = Column(String)
     is_admin = Column(Boolean, server_default="false", nullable=False)
+    events: Mapped[list["Event"]] = relationship(
+        "Event", back_populates="actor", foreign_keys="Event.actor_id", lazy="raise"
+    )
+
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification",
+        back_populates="user",
+        foreign_keys="Notification.user_id",
+        lazy="raise",
+    )
 
     # Relationships - Data Products
     data_product_roles: Mapped[list["DataProductRoleAssignment"]] = relationship(

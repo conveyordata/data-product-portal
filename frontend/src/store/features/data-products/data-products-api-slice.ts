@@ -20,6 +20,7 @@ import {
     DataProductUpdateRequest,
     DataProductUpdateResponse,
 } from '@/types/data-product';
+import { EventContract } from '@/types/events/event.contract';
 import { GraphContract } from '@/types/graph/graph-contract';
 import {
     NamespaceLengthLimitsResponse,
@@ -32,6 +33,7 @@ export const dataProductTags: string[] = [
     TagTypes.UserDataProducts,
     TagTypes.Dataset,
     TagTypes.UserDatasets,
+    TagTypes.History,
 ];
 
 export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dataProductTags }).injectEndpoints({
@@ -70,6 +72,17 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             providesTags: (_, __, id) => [
                 { type: TagTypes.DataProduct as const, id },
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+            ],
+        }),
+        getDataProductHistory: builder.query<EventContract[], string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataProductHistory, { dataProductId: id }),
+                method: 'GET',
+            }),
+            providesTags: (_, __, id) => [
+                { type: TagTypes.DataProduct as const, id },
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
         getDataProductGraphData: builder.query<GraphContract, string>({
@@ -122,6 +135,7 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             invalidatesTags: [
                 { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
         getDataProductSignInUrl: builder.mutation<DataProductGetSignInUrlResponse, DataProductGetSignInUrlRequest>({
@@ -257,6 +271,7 @@ export const {
     useGetDataProductGraphDataQuery,
     useGetGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
+    useGetDataProductHistoryQuery,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,
     useGetDataProductNamespaceLengthLimitsQuery,

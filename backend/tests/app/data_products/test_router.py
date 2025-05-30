@@ -558,6 +558,129 @@ class TestDataProductsRouter:
 
         assert response.status_code == 400
 
+    def test_history_event_created_on_data_product_creation(
+        self, payload, client, session
+    ):
+        RoleService(db=session).initialize_prototype_roles()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        created_data_product = self.create_data_product(client, payload)
+        assert created_data_product.status_code == 200
+        assert "id" in created_data_product.json()
+
+        history = self.get_data_product_history(
+            client, created_data_product.json().get("id")
+        ).json()
+        assert len(history) == 3
+
+    def test_history_event_created_on_data_product_update(self, payload, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        update_payload = deepcopy(payload)
+        update_payload["name"] = "Updated Data Product"
+        response = self.update_data_product(client, update_payload, data_product.id)
+
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_product_about_update(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        response = self.update_data_product_about(client, data_product.id)
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_product_status_update(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_STATUS],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+
+        response = self.update_data_product_status(
+            client, {"status": "active"}, data_product.id
+        )
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_product_deletion(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        response = self.delete_data_product(client, data_product.id)
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_retain_deleted_data_product_name_in_history(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+
+        data_product_id = data_product.id
+        data_product_name = data_product.name
+
+        response = self.delete_data_product(client, data_product.id)
+        assert response.status_code == 200
+
+        response = self.get_data_product_history(client, data_product_id)
+        assert len(response.json()) == 1
+        assert response.json()[0]["deleted_subject_identifier"] == data_product_name
+
     @staticmethod
     def create_data_product(client, default_data_product_payload):
         return client.post(ENDPOINT, json=default_data_product_payload)
@@ -590,6 +713,10 @@ class TestDataProductsRouter:
     @staticmethod
     def get_data_product_by_user_id(client, user_id):
         return client.get(f"{ENDPOINT}/user/{user_id}")
+
+    @staticmethod
+    def get_data_product_history(client, data_product_id):
+        return client.get(f"{ENDPOINT}/{data_product_id}/history")
 
     @staticmethod
     def get_conveyor_ide_url(client, data_product_id):

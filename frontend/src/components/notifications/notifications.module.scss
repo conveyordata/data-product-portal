@@ -4,3 +4,42 @@
     height: globals.$circle-icon-button-size !important;
     width: globals.$circle-icon-button-size !important;
 }
+
+.event-link {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.width {
+    width: 100%;
+}
+
+.margin-top {
+    margin-top: globals.$spacing-m;
+}
+
+.close-button {
+    padding: 0;
+    margin-left: globals.$spacing-m;
+    margin-right: globals.$spacing-m;
+}
+
+.notification-items {
+    max-height: 80vh;
+    overflow: hidden;
+    overflow-y: auto;
+    border: none !important;
+}
+
+.notification-body {
+    padding-right: 0 !important;
+}
+
+.notification-label {
+    margin-right: globals.$spacing-m;
+    margin-bottom: globals.$spacing-xs;
+}
+
+.empty-label {
+    margin-right: globals.$spacing-m;
+}

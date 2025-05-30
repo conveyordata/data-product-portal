@@ -72,8 +72,11 @@ def deny_data_product_link(
 def remove_data_product_link(
     id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataProductDatasetService().remove_data_product_link(id, db)
+    return DataProductDatasetService().remove_data_product_link(
+        id, db, authenticated_user
+    )
 
 
 @router.get("/actions")
