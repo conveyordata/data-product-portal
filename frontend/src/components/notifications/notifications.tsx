@@ -127,15 +127,20 @@ export function Notifications() {
         return slicedItems;
     }, [notifications, createNotificationItem, handleRemoveNotification, t, maxItems, handleLoadMore]);
 
-    const header =
-        notificationItems?.length > 0 ? (
-            <Flex justify="space-between" align="center" className={styles.notificationLabel}>
-                <Typography.Title level={4}>{t('Notifications')}</Typography.Title>{' '}
-                <Button onClick={handleRemoveAllNotifications}>{t('Delete all')}</Button>
-            </Flex>
-        ) : (
+    const header = useMemo(() => {
+        if (notificationItems?.length > 0) {
+            return (
+                <Flex justify="space-between" align="center" className={styles.notificationLabel}>
+                    <Typography.Title level={4}>{t('Notifications')}</Typography.Title>{' '}
+                    <Button onClick={handleRemoveAllNotifications}>{t('Delete all')}</Button>
+                </Flex>
+            );
+        }
+
+        return (
             <Typography.Text className={styles.emptyLabel}>{t('You currently have no notifications')}</Typography.Text>
         );
+    }, [notificationItems?.length, t, handleRemoveAllNotifications]);
 
     return (
         <Flex>
