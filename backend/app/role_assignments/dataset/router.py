@@ -55,7 +55,7 @@ def create_assignment(
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db, user=user)
-    role_assignment = service.create_assignment(id, request)
+    role_assignment = service.create_assignment(id, request, user)
 
     approvers: Sequence[User] = ()
     if not (is_admin := Authorization().has_admin_role(user_id=str(user.id))):
@@ -70,7 +70,8 @@ def create_assignment(
                 id=role_assignment.id,
                 role_id=role_assignment.role_id,
                 decision=DecisionStatus.APPROVED,
-            )
+            ),
+            user,
         )
         return role_assignment
 
@@ -93,7 +94,7 @@ def request_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return RoleAssignmentService(db=db, user=user).create_assignment(id, request)
+    return RoleAssignmentService(db=db, user=user).create_assignment(id, request, user)
 
 
 @router.delete(
@@ -112,7 +113,7 @@ def delete_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> None:
-    assignment = RoleAssignmentService(db=db, user=user).delete_assignment(id)
+    assignment = RoleAssignmentService(db=db, user=user).delete_assignment(id, user)
 
     if assignment.decision is DecisionStatus.APPROVED:
         DatasetAuthAssignment(assignment).remove()
@@ -140,7 +141,7 @@ def modify_assigned_role(
     original_role = service.get_assignment(id).role_id
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id)
+        UpdateRoleAssignment(id=id, role_id=request.role_id), user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
@@ -182,7 +183,7 @@ def decide_assignment(
         )
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, decision=request.decision)
+        UpdateRoleAssignment(id=id, decision=request.decision), user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
