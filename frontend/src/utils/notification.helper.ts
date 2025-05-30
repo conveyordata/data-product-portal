@@ -5,11 +5,11 @@ import { EventType } from '@/types/events/event-types';
 export function getEventTypeNotificationText(t: TFunction, type: EventType): string {
     switch (type) {
         case EventType.DATA_OUTPUT_CREATED:
-            return 'has been created for the ';
+            return t('has been created for the ');
         case EventType.DATA_OUTPUT_UPDATED:
             return '';
         case EventType.DATA_OUTPUT_REMOVED:
-            return 'has been removed from the ';
+            return t('has been removed from the ');
 
         case EventType.DATA_OUTPUT_DATASET_LINK_REQUESTED:
             return '';
@@ -21,11 +21,11 @@ export function getEventTypeNotificationText(t: TFunction, type: EventType): str
             return t('has been unlinked from the ');
 
         case EventType.DATA_PRODUCT_CREATED:
-            return 'has been created';
+            return t('has been created');
         case EventType.DATA_PRODUCT_UPDATED:
             return '';
         case EventType.DATA_PRODUCT_REMOVED:
-            return 'has been removed';
+            return t('has been removed');
 
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED:
             return '';
@@ -50,11 +50,11 @@ export function getEventTypeNotificationText(t: TFunction, type: EventType): str
             return t('has removed a link to the ');
 
         case EventType.DATASET_CREATED:
-            return ' has been created';
+            return t('has been created');
         case EventType.DATASET_UPDATED:
             return '';
         case EventType.DATASET_REMOVED:
-            return ' has been removed';
+            return t('has been removed');
 
         case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
             return '';

@@ -564,5 +564,17 @@
     "Notification has been removed": "Notification has been removed",
     "Failed to remove notification": "Failed to remove notification",
     "Could not remove Type": "Could not remove Type",
-    "Denied": "Denied"
+    "Denied": "Denied",
+    "has been created for the ": "has been created for the ",
+    "has been removed from the ": "has been removed from the ",
+    "is now linked to the ": "is now linked to the ",
+    "link denied for the ": "link denied for the ",
+    "has been unlinked from the ": "has been unlinked from the ",
+    "has been created": "has been created",
+    "has been removed": "has been removed",
+    "role assignment updated for user ": "role assignment updated for user ",
+    "role assignment removed for user ": "role assignment removed for user ",
+    "role assignment approved for user ": "role assignment approved for user ",
+    "role assignment denied for user ": "role assignment denied for user ",
+    "has removed a link to the ": "has removed a link to the "
 }
