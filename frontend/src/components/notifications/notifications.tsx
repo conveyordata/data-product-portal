@@ -1,6 +1,6 @@
 import { BellOutlined, CloseOutlined } from '@ant-design/icons';
-import { Badge, Button, Dropdown, Flex, type MenuProps, Space, Tag, theme, Typography } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Badge, Button, Flex, Popover, Space, Tag, theme, Typography } from 'antd';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
@@ -15,7 +15,7 @@ import { formatDateToNowFromUTCString } from '@/utils/date.helper';
 import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
 
-const MAX_ITEMS = 15;
+const MAX_ITEMS_DEFAULT = 10;
 
 export function Notifications() {
     const {
@@ -27,6 +27,7 @@ export function Notifications() {
 
     const [removeNotification] = useRemoveNotificationMutation();
     const [removeAllNotifications] = useRemoveAllNotificationsMutation();
+    const [maxItems, setMaxItems] = useState(MAX_ITEMS_DEFAULT);
 
     const handleRemoveNotification = useCallback(
         async (notificationId: string) => {
@@ -50,90 +51,91 @@ export function Notifications() {
     }, [removeAllNotifications, t]);
 
     const createNotificationItem = useCallback(
-        (notification: NotificationContract, showActor: boolean, handleRemoveNotification: (id: string) => void) => {
-            return {
-                key: notification.id,
-                className: showActor ? styles.notificationItemWithActor : styles.notificationItem,
-                label: (
-                    <Flex vertical className={styles.notificationContainer}>
+        (
+            notification: NotificationContract,
+            showActor: boolean,
+            handleRemoveNotification: (id: string) => void,
+            idx: number,
+        ): React.ReactNode => {
+            return (
+                <Flex key={notification.id} justify="space-between" className={styles.width}>
+                    <Flex vertical className={styles.width}>
                         {showActor && (
-                            <Flex className={styles.notificationTag}>
+                            <Flex className={idx === 0 ? '' : styles.marginTop}>
                                 <Tag color="default">
                                     {notification.event.actor.first_name} {notification.event.actor.last_name},{' '}
                                     {formatDateToNowFromUTCString(notification.event.created_on)}:
                                 </Tag>
                             </Flex>
                         )}
-
-                        <NotificationDescription record={notification.event} />
+                        <Flex justify="space-between" className={styles.width}>
+                            <NotificationDescription record={notification.event} />
+                            <Button
+                                className={styles.closeButton}
+                                type="text"
+                                icon={<CloseOutlined />}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveNotification(notification.id);
+                                }}
+                            />
+                        </Flex>
                     </Flex>
-                ),
-                extra: (
+                </Flex>
+            );
+        },
+        [],
+    );
+
+    const handleLoadMore = useCallback(() => {
+        setMaxItems((prev) => prev + MAX_ITEMS_DEFAULT);
+    }, []);
+
+    const notificationItems = useMemo(() => {
+        if (!notifications || notifications.length === 0) return [];
+
+        const slicedItems = notifications.slice(0, maxItems).map((notification, idx) => {
+            const prev = notifications[idx - 1];
+            const sameActorAsPrevious = idx > 0 && prev.event.actor.id === notification.event.actor.id;
+
+            return createNotificationItem(notification, !sameActorAsPrevious, handleRemoveNotification, idx);
+        });
+
+        const excessLength = notifications.length - maxItems;
+
+        if (excessLength > 0) {
+            slicedItems.push(
+                <Flex key={'show-more-indicator'} className={styles.notificationItem}>
                     <Button
                         className={styles.closeButton}
                         type="link"
                         onClick={(event) => {
                             event.stopPropagation();
-                            handleRemoveNotification(notification.id);
+                            handleLoadMore();
                         }}
                     >
-                        <CloseOutlined />
+                        <Typography.Text type="secondary">
+                            {excessLength === 1
+                                ? t('... {{count}} more item', { count: excessLength })
+                                : t('... {{count}} more items', { count: excessLength })}
+                        </Typography.Text>
                     </Button>
-                ),
-            };
-        },
-        [],
-    );
-
-    const notificationItems = useMemo(() => {
-        if (!notifications || notifications.length === 0) return [];
-
-        const slicedItems = notifications.slice(0, MAX_ITEMS).map((notification, idx) => {
-            const prev = notifications[idx - 1];
-            const sameActorAsPrevious = idx > 0 && prev.event.actor.id === notification.event.actor.id;
-
-            return createNotificationItem(notification, !sameActorAsPrevious, handleRemoveNotification);
-        });
-
-        const excessLength = notifications.length - MAX_ITEMS;
-
-        if (excessLength > 0) {
-            slicedItems.push({
-                key: 'more-indicator',
-                className: '',
-                label: (
-                    <Typography.Text type="secondary">
-                        {excessLength === 1
-                            ? t('... {{count}} more item', { count: excessLength })
-                            : t('... {{count}} more items', { count: excessLength })}
-                    </Typography.Text>
-                ),
-                extra: <></>,
-            });
+                </Flex>,
+            );
         }
 
         return slicedItems;
-    }, [notifications, createNotificationItem, handleRemoveNotification, t]);
+    }, [notifications, createNotificationItem, handleRemoveNotification, t, maxItems, handleLoadMore]);
 
-    const items: MenuProps['items'] = [
-        {
-            type: 'group',
-            label:
-                notificationItems?.length > 0 ? (
-                    <Flex justify="space-between" align="center">
-                        <Typography.Title level={4} className={styles.marginBottom}>
-                            {t('Notifications')}
-                        </Typography.Title>{' '}
-                        <Button onClick={handleRemoveAllNotifications} className={styles.marginBottom}>
-                            {t('Delete all')}
-                        </Button>
-                    </Flex>
-                ) : (
-                    t('You currently have no notifications')
-                ),
-            children: notificationItems,
-        },
-    ];
+    const header =
+        notificationItems?.length > 0 ? (
+            <Flex justify="space-between" align="center" className={styles.notificationLabel}>
+                <Typography.Title level={4}>{t('Notifications')}</Typography.Title>{' '}
+                <Button onClick={handleRemoveAllNotifications}>{t('Delete all')}</Button>
+            </Flex>
+        ) : (
+            <Typography.Text className={styles.emptyLabel}>{t('You currently have no notifications')}</Typography.Text>
+        );
 
     return (
         <Flex>
@@ -144,17 +146,23 @@ export function Notifications() {
                 style={{ fontSize: 10 }}
                 size="small"
             >
-                <Dropdown
-                    placement={'bottomRight'}
-                    menu={{
-                        items,
-                    }}
-                    trigger={['click']}
+                <Popover
+                    content={
+                        <div>
+                            {header}
+                            <Flex vertical className={styles.notificationItems}>
+                                {notificationItems}
+                            </Flex>
+                        </div>
+                    }
+                    classNames={{ body: styles.notificationBody }}
+                    trigger="click"
+                    placement="bottomRight"
                 >
                     <Space>
                         <Button shape={'circle'} className={styles.iconButton} icon={<BellOutlined />} />
                     </Space>
-                </Dropdown>
+                </Popover>
             </Badge>
         </Flex>
     );

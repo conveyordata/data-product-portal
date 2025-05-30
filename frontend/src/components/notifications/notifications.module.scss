@@ -10,38 +10,36 @@
     padding-right: 0;
 }
 
-.notification-container {
+.width {
     width: 100%;
 }
 
-.notification-item {
-    cursor: default !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    padding-left: globals.$spacing-xs !important;
-}
-
-.notification-item-with-actor {
-    cursor: default !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    margin-top: globals.$spacing-xl !important;
-    padding-left: globals.$spacing-xs !important;
-}
-
-.notification-tag {
-    position: absolute;
-    top: -(globals.$spacing-xl);
-    left: 0;
+.margin-top {
     margin-top: globals.$spacing-m;
 }
 
 .close-button {
     padding: 0;
-    padding-right: globals.$spacing-s;
+    margin-left: globals.$spacing-m;
+    margin-right: globals.$spacing-m;
 }
 
-.margin-bottom {
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
+.notification-items {
+    max-height: 80vh;
+    overflow: hidden;
+    overflow-y: auto;
+    border: none !important;
+}
+
+.notification-body {
+    padding-right: 0 !important;
+}
+
+.notification-label {
+    margin-right: globals.$spacing-m;
+    margin-bottom: globals.$spacing-xs;
+}
+
+.empty-label {
+    margin-right: globals.$spacing-m;
 }
