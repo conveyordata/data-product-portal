@@ -85,7 +85,7 @@ export const Sidebar = () => {
                 <ProductLogo className={clsx([styles.defaultIcon, styles.sidebarContent, styles.iconWrapper])} />
                 <Flex vertical className={styles.sidebarContent}>
                     <Space className={styles.logoWrapper}>
-                        <Link to={ApplicationPaths.Home}>
+                        <Link to={ApplicationPaths.Home} className={styles.version}>
                             <SidebarLogo />
                             {version ? version.version : ''}
                         </Link>

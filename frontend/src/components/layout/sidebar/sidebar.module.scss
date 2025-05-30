@@ -39,3 +39,8 @@
 .sub-menu-title {
     font-size: globals.$font-header-6;
 }
+
+.version,
+.version:hover {
+    color: globals.$error-color-border;
+}
