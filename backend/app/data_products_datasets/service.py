@@ -20,10 +20,11 @@ from app.users.schema import User
 
 
 class DataProductDatasetService:
-    def approve_data_product_link(
-        self, id: UUID, db: Session, authenticated_user: User
-    ) -> None:
-        current_link = db.get(DataProductDatasetAssociationModel, id)
+    def __init__(self, db: Session):
+        self.db = db
+
+    def approve_data_product_link(self, id: UUID, authenticated_user: User) -> None:
+        current_link = self.db.get(DataProductDatasetAssociationModel, id)
         if current_link.status != DecisionStatus.PENDING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -34,12 +35,10 @@ class DataProductDatasetService:
         current_link.approved_by = authenticated_user
         current_link.approved_on = datetime.now(tz=pytz.utc)
         RefreshInfrastructureLambda().trigger()
-        db.commit()
+        self.db.commit()
 
-    def deny_data_product_link(
-        self, id: UUID, db: Session, authenticated_user: User
-    ) -> None:
-        current_link = db.get(DataProductDatasetAssociationModel, id)
+    def deny_data_product_link(self, id: UUID, actor: User) -> None:
+        current_link = self.db.get(DataProductDatasetAssociationModel, id)
         if (
             current_link.status != DecisionStatus.PENDING
             and current_link.status != DecisionStatus.APPROVED
@@ -49,12 +48,12 @@ class DataProductDatasetService:
                 detail="Approval request already decided",
             )
         current_link.status = DecisionStatus.DENIED
-        current_link.denied_by = authenticated_user
+        current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        db.commit()
+        self.db.commit()
 
-    def remove_data_product_link(self, id: UUID, db: Session) -> None:
-        current_link = db.get(DataProductDatasetAssociationModel, id)
+    def remove_data_product_link(self, id: UUID) -> None:
+        current_link = self.db.get(DataProductDatasetAssociationModel, id)
 
         if not current_link:
             raise HTTPException(
@@ -62,15 +61,15 @@ class DataProductDatasetService:
                 detail=f"Dataset data product link {id} not found",
             )
 
-        db.delete(current_link)
+        self.db.delete(current_link)
+        self.db.commit()
         RefreshInfrastructureLambda().trigger()
-        db.commit()
 
     def get_user_pending_actions(
-        self, db: Session, user: User
+        self, user: User
     ) -> Sequence[DataProductDatasetPendingAction]:
         requested_associations = (
-            db.scalars(
+            self.db.scalars(
                 select(DataProductDatasetAssociationModel)
                 .where(
                     DataProductDatasetAssociationModel.status == DecisionStatus.PENDING

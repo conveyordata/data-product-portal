@@ -83,7 +83,7 @@ class TestDataProductSettingsRouter:
         response = self.remove_data_product_setting(client, data_product_setting.id)
         assert response.status_code == 403
 
-    def test_get_namespace_suggestion_subsitution(self, client):
+    def test_get_namespace_suggestion_substitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
         body = response.json()

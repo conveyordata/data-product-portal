@@ -12,10 +12,13 @@ from app.users.schema import User
 
 
 class GraphService:
-    def get_graph_data(self, db: Session, user: User) -> Graph:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_graph_data(self, user: User) -> Graph:
         # get all data products
         data_products = (
-            db.scalars(
+            self.db.scalars(
                 select(DataProduct).options(
                     joinedload(DataProduct.dataset_links),
                     joinedload(DataProduct.data_outputs),
@@ -26,7 +29,7 @@ class GraphService:
         )
         # get all datasets
         datasets = (
-            db.scalars(
+            self.db.scalars(
                 select(Dataset).options(
                     joinedload(Dataset.data_product_links),
                     joinedload(Dataset.data_output_links),
@@ -37,7 +40,9 @@ class GraphService:
         )
         # get all data outputs
         data_outputs = (
-            db.scalars(select(DataOutput).options(joinedload(DataOutput.dataset_links)))
+            self.db.scalars(
+                select(DataOutput).options(joinedload(DataOutput.dataset_links))
+            )
             .unique()
             .all()
         )

@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -14,8 +15,8 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("")
-def get_users(db: Session = Depends(get_db_session)) -> list[UsersGet]:
-    return UserService().get_users(db)
+def get_users(db: Session = Depends(get_db_session)) -> Sequence[UsersGet]:
+    return UserService(db).get_users()
 
 
 @router.delete(
@@ -33,7 +34,7 @@ def get_users(db: Session = Depends(get_db_session)) -> list[UsersGet]:
     ],
 )
 def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
-    return UserService().remove_user(id, db)
+    return UserService(db).remove_user(id)
 
 
 @router.post(
@@ -53,4 +54,4 @@ def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
 def create_user(
     user: UserCreate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
-    return UserService().create_user(user, db)
+    return UserService(db).create_user(user)

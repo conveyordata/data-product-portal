@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from sqlalchemy import asc, select
@@ -10,27 +11,30 @@ from app.tags.schema_response import TagsGet
 
 
 class TagService:
-    def get_tags(self, db: Session) -> list[TagsGet]:
-        return db.scalars(select(TagModel).order_by(asc(TagModel.value))).all()
+    def __init__(self, db: Session):
+        self.db = db
 
-    def create_tag(self, tag: TagCreate, db: Session) -> dict[str, UUID]:
+    def get_tags(self) -> Sequence[TagsGet]:
+        return self.db.scalars(select(TagModel).order_by(asc(TagModel.value))).all()
+
+    def create_tag(self, tag: TagCreate) -> dict[str, UUID]:
         tag = TagModel(**tag.parse_pydantic_schema())
-        db.add(tag)
-        db.commit()
+        self.db.add(tag)
+        self.db.commit()
 
         return {"id": tag.id}
 
-    def update_tag(self, id: UUID, tag: TagUpdate, db: Session):
-        current_tag = ensure_tag_exists(id, db)
+    def update_tag(self, id: UUID, tag: TagUpdate) -> dict[str, UUID]:
+        current_tag = ensure_tag_exists(id, self.db)
         updated_tag = tag.model_dump(exclude_unset=True)
 
         for attr, value in updated_tag.items():
             setattr(current_tag, attr, value)
 
-        db.commit()
+        self.db.commit()
         return {"id": id}
 
-    def remove_tag(self, id: UUID, db: Session):
-        tag = db.get(TagModel, id)
-        db.delete(tag)
-        db.commit()
+    def remove_tag(self, id: UUID) -> None:
+        tag = self.db.get(TagModel, id)
+        self.db.delete(tag)
+        self.db.commit()

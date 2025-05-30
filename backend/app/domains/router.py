@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -14,13 +15,13 @@ router = APIRouter(prefix="/domains", tags=["domains"])
 
 
 @router.get("")
-def get_domains(db: Session = Depends(get_db_session)) -> list[DomainsGet]:
-    return DomainService().get_domains(db)
+def get_domains(db: Session = Depends(get_db_session)) -> Sequence[DomainsGet]:
+    return DomainService(db).get_domains()
 
 
 @router.get("/{id}")
 def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> DomainGet:
-    return DomainService().get_domain(id, db)
+    return DomainService(db).get_domain(id)
 
 
 @router.post(
@@ -42,7 +43,7 @@ def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> DomainGet:
 def create_domain(
     domain: DomainCreate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
-    return DomainService().create_domain(domain, db)
+    return DomainService(db).create_domain(domain)
 
 
 @router.put(
@@ -55,8 +56,8 @@ def create_domain(
 )
 def update_domain(
     id: UUID, domain: DomainUpdate, db: Session = Depends(get_db_session)
-):
-    return DomainService().update_domain(id, domain, db)
+) -> dict[str, UUID]:
+    return DomainService(db).update_domain(id, domain)
 
 
 @router.delete(
@@ -67,8 +68,8 @@ def update_domain(
         ),
     ],
 )
-def remove_domain(id: UUID, db: Session = Depends(get_db_session)):
-    return DomainService().remove_domain(id, db)
+def remove_domain(id: UUID, db: Session = Depends(get_db_session)) -> None:
+    return DomainService(db).remove_domain(id)
 
 
 @router.put(
@@ -79,5 +80,7 @@ def remove_domain(id: UUID, db: Session = Depends(get_db_session)):
         ),
     ],
 )
-def migrate_domain(from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)):
-    return DomainService().migrate_domain(from_id, to_id, db)
+def migrate_domain(
+    from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)
+) -> None:
+    return DomainService(db).migrate_domain(from_id, to_id)

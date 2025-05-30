@@ -15,4 +15,4 @@ def get_graph_data(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> Graph:
-    return GraphService().get_graph_data(db=db, user=user)
+    return GraphService(db).get_graph_data(user=user)

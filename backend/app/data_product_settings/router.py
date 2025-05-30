@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -25,8 +26,8 @@ router = APIRouter(prefix="/data_product_settings", tags=["data_product_settings
 @router.get("")
 def get_data_products_settings(
     db: Session = Depends(get_db_session),
-) -> list[DataProductSettingsGet]:
-    return DataProductSettingService().get_data_product_settings(db)
+) -> Sequence[DataProductSettingsGet]:
+    return DataProductSettingService(db).get_data_product_settings()
 
 
 @router.post(
@@ -40,13 +41,13 @@ def get_data_products_settings(
 def create_data_product_setting(
     setting: DataProductSettingCreate,
     db: Session = Depends(get_db_session),
-):
-    return DataProductSettingService().create_data_product_setting(setting, db)
+) -> dict[str, UUID]:
+    return DataProductSettingService(db).create_data_product_setting(setting)
 
 
 @router.get("/namespace_suggestion")
 def get_data_product_settings_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return DataProductSettingService().data_product_settings_namespace_suggestion(name)
+    return DataProductSettingService.data_product_settings_namespace_suggestion(name)
 
 
 @router.get("/validate_namespace")
@@ -55,14 +56,14 @@ def validate_data_product_settings_namespace(
     scope: DataProductSettingScope,
     db: Session = Depends(get_db_session),
 ) -> NamespaceValidation:
-    return DataProductSettingService().validate_data_product_settings_namespace(
-        namespace, scope, db
+    return DataProductSettingService(db).validate_data_product_settings_namespace(
+        namespace, scope
     )
 
 
 @router.get("/namespace_length_limits")
 def get_data_product_settings_namespace_length_limits() -> NamespaceLengthLimits:
-    return DataProductSettingService().data_product_settings_namespace_length_limits()
+    return DataProductSettingService.data_product_settings_namespace_length_limits()
 
 
 @router.put(
@@ -77,8 +78,8 @@ def update_data_product_setting(
     id: UUID,
     setting: DataProductSettingUpdate,
     db: Session = Depends(get_db_session),
-):
-    return DataProductSettingService().update_data_product_setting(id, setting, db)
+) -> dict[str, UUID]:
+    return DataProductSettingService(db).update_data_product_setting(id, setting)
 
 
 @router.delete(
@@ -92,5 +93,5 @@ def update_data_product_setting(
 def delete_data_product_setting(
     id: UUID,
     db: Session = Depends(get_db_session),
-):
-    return DataProductSettingService().delete_data_product_setting(id, db)
+) -> None:
+    return DataProductSettingService(db).delete_data_product_setting(id)

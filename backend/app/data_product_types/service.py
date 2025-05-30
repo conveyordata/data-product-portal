@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -17,9 +18,12 @@ from app.data_product_types.schema_response import (
 
 
 class DataProductTypeService:
-    def get_data_product_types(self, db: Session) -> list[DataProductTypesGet]:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_data_product_types(self) -> Sequence[DataProductTypesGet]:
         return (
-            db.scalars(
+            self.db.scalars(
                 select(DataProductTypeModel)
                 .options(joinedload(DataProductTypeModel.data_products))
                 .order_by(DataProductTypeModel.name)
@@ -28,8 +32,8 @@ class DataProductTypeService:
             .all()
         )
 
-    def get_data_product_type(self, id: UUID, db: Session) -> DataProductTypeGet:
-        data_product_type = db.get(
+    def get_data_product_type(self, id: UUID) -> DataProductTypeGet:
+        data_product_type = self.db.get(
             DataProductTypeModel,
             id,
             options=[joinedload(DataProductTypeModel.data_products)],
@@ -44,29 +48,29 @@ class DataProductTypeService:
         return data_product_type
 
     def create_data_product_type(
-        self, data_product_type: DataProductTypeCreate, db: Session
+        self, data_product_type: DataProductTypeCreate
     ) -> dict[str, UUID]:
         data_product_type = DataProductTypeModel(
             **data_product_type.parse_pydantic_schema()
         )
-        db.add(data_product_type)
-        db.commit()
+        self.db.add(data_product_type)
+        self.db.commit()
         return {"id": data_product_type.id}
 
     def update_data_product_type(
-        self, id: UUID, data_product_type: DataProductTypeUpdate, db: Session
+        self, id: UUID, data_product_type: DataProductTypeUpdate
     ) -> dict[str, UUID]:
-        current_data_product_type = db.get(DataProductTypeModel, id)
+        current_data_product_type = self.db.get(DataProductTypeModel, id)
         updated_data_product_type = data_product_type.parse_pydantic_schema()
 
         for attr, value in updated_data_product_type.items():
             setattr(current_data_product_type, attr, value)
 
-        db.commit()
+        self.db.commit()
         return {"id": id}
 
-    def remove_data_product_type(self, id: UUID, db: Session):
-        data_product_type = db.get(
+    def remove_data_product_type(self, id: UUID) -> None:
+        data_product_type = self.db.get(
             DataProductTypeModel,
             id,
             options=[joinedload(DataProductTypeModel.data_products)],
@@ -81,18 +85,18 @@ class DataProductTypeService:
                 ),
             )
 
-        db.delete(data_product_type)
-        db.commit()
+        self.db.delete(data_product_type)
+        self.db.commit()
 
-    def migrate_data_product_type(self, from_id: UUID, to_id: UUID, db: Session):
+    def migrate_data_product_type(self, from_id: UUID, to_id: UUID) -> None:
         data_product_type = ensure_data_product_type_exists(
             from_id,
-            db,
+            self.db,
             options=[joinedload(DataProductTypeModel.data_products)],
         )
-        new_data_product_type = ensure_data_product_type_exists(to_id, db)
+        new_data_product_type = ensure_data_product_type_exists(to_id, self.db)
 
         for data_product in data_product_type.data_products:
             data_product.type_id = new_data_product_type.id
 
-        db.commit()
+        self.db.commit()

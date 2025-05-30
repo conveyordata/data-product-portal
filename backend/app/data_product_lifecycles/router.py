@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -19,8 +20,8 @@ router = APIRouter(prefix="/data_product_lifecycles", tags=["data_product_lifecy
 @router.get("")
 def get_data_products_lifecycles(
     db: Session = Depends(get_db_session),
-) -> list[DataProductLifeCyclesGet]:
-    return DataProductLifeCycleService().get_data_product_lifecycles(db)
+) -> Sequence[DataProductLifeCyclesGet]:
+    return DataProductLifeCycleService(db).get_data_product_lifecycles()
 
 
 @router.post(
@@ -53,8 +54,8 @@ def create_data_product_lifecycle(
     data_product_lifecycle: DataProductLifeCycleCreate,
     db: Session = Depends(get_db_session),
 ) -> dict[str, UUID]:
-    return DataProductLifeCycleService().create_data_product_lifecycle(
-        data_product_lifecycle, db
+    return DataProductLifeCycleService(db).create_data_product_lifecycle(
+        data_product_lifecycle
     )
 
 
@@ -89,8 +90,8 @@ def update_data_product_lifecycle(
     data_product_lifecycle: DataProductLifeCycleUpdate,
     db: Session = Depends(get_db_session),
 ) -> dict[str, UUID]:
-    return DataProductLifeCycleService().update_data_product_lifecycle(
-        id, data_product_lifecycle, db
+    return DataProductLifeCycleService(db).update_data_product_lifecycle(
+        id, data_product_lifecycle
     )
 
 
@@ -105,5 +106,5 @@ def update_data_product_lifecycle(
 def delete_data_product_lifecycle(
     id: UUID,
     db: Session = Depends(get_db_session),
-):
-    return DataProductLifeCycleService().delete_data_product_lifecycle(id, db)
+) -> None:
+    return DataProductLifeCycleService(db).delete_data_product_lifecycle(id)

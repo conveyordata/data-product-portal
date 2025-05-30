@@ -32,9 +32,7 @@ def approve_data_output_link(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataOutputDatasetService().approve_data_output_link(
-        id, db, authenticated_user
-    )
+    return DataOutputDatasetService(db).approve_data_output_link(id, authenticated_user)
 
 
 @router.post(
@@ -52,8 +50,8 @@ def deny_data_output_link(
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
-    return DataOutputDatasetService().deny_data_output_link(id, db, authenticated_user)
+) -> None:
+    return DataOutputDatasetService(db).deny_data_output_link(id, authenticated_user)
 
 
 @router.post(
@@ -70,11 +68,8 @@ def deny_data_output_link(
 def remove_data_output_link(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-):
-    return DataOutputDatasetService().remove_data_output_link(
-        id, db, authenticated_user
-    )
+) -> None:
+    return DataOutputDatasetService(db).remove_data_output_link(id)
 
 
 @router.get("/actions")
@@ -82,4 +77,4 @@ def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> Sequence[DataOutputDatasetPendingAction]:
-    return DataOutputDatasetService().get_user_pending_actions(db, authenticated_user)
+    return DataOutputDatasetService(db).get_user_pending_actions(authenticated_user)

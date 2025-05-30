@@ -29,9 +29,8 @@ router = APIRouter(prefix="/global")
 def list_assignments(
     user_id: Optional[UUID] = None,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
 ) -> Sequence[RoleAssignmentResponse]:
-    return RoleAssignmentService(db=db, user=user).list_assignments(user_id=user_id)
+    return RoleAssignmentService(db).list_assignments(user_id=user_id)
 
 
 @router.post(
@@ -48,8 +47,8 @@ def create_assignment(
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
     role_id = _resolve_role_id(request.role_id)
-    return RoleAssignmentService(db=db, user=user).create_assignment(
-        RoleAssignmentRequest(user_id=request.user_id, role_id=role_id)
+    return RoleAssignmentService(db).create_assignment(
+        RoleAssignmentRequest(user_id=request.user_id, role_id=role_id), actor=user
     )
 
 
@@ -64,9 +63,8 @@ def create_assignment(
 def delete_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
 ) -> None:
-    assignment = RoleAssignmentService(db=db, user=user).delete_assignment(id)
+    assignment = RoleAssignmentService(db).delete_assignment(id)
 
     if assignment.decision is DecisionStatus.APPROVED:
         GlobalAuthAssignment(assignment).remove()
@@ -87,7 +85,7 @@ def decide_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
+    service = RoleAssignmentService(db)
     original = service.get_assignment(id)
 
     if original.decision not in (DecisionStatus.PENDING, request.decision):
@@ -97,7 +95,7 @@ def decide_assignment(
         )
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, decision=request.decision)
+        UpdateRoleAssignment(id=id, decision=request.decision), actor=user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
@@ -120,11 +118,13 @@ def modify_assigned_role(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
+    service = RoleAssignmentService(db)
     original_role = service.get_assignment(id).role_id
 
     role_id = _resolve_role_id(request.role_id)
-    assignment = service.update_assignment(UpdateRoleAssignment(id=id, role_id=role_id))
+    assignment = service.update_assignment(
+        UpdateRoleAssignment(id=id, role_id=role_id), actor=user
+    )
 
     if assignment.decision is DecisionStatus.APPROVED:
         GlobalAuthAssignment(assignment, previous_role_id=original_role).swap()

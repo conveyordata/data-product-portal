@@ -1,5 +1,3 @@
-from typing import cast
-
 from casbin import Enforcer
 from casbin_sqlalchemy_adapter import Adapter, CasbinRule
 from sqlalchemy import delete
@@ -21,7 +19,6 @@ from app.role_assignments.global_.service import (
 )
 from app.roles.auth import AuthRole
 from app.roles.service import RoleService
-from app.users.schema import User
 
 
 class AuthorizationService:
@@ -29,7 +26,7 @@ class AuthorizationService:
         self.db = db
         self.authorizer = Authorization()
 
-    def reload_enforcer(self):
+    def reload_enforcer(self) -> None:
         self._clear_casbin_table()
 
         self._sync_roles()
@@ -56,8 +53,8 @@ class AuthorizationService:
         for role in roles:
             AuthRole(role).sync()
 
-    def _sync_product_assignments(self):
-        service = DataProductRoleAssignmentService(self.db, cast(User, None))
+    def _sync_product_assignments(self) -> None:
+        service = DataProductRoleAssignmentService(self.db)
         product_assignments = service.list_assignments(
             data_product_id=None, user_id=None, decision=DecisionStatus.APPROVED
         )
@@ -65,8 +62,8 @@ class AuthorizationService:
         for assignment in product_assignments:
             DataProductAuthAssignment(assignment).add()
 
-    def _sync_dataset_assignments(self):
-        service = DatasetRoleAssignmentService(self.db, cast(User, None))
+    def _sync_dataset_assignments(self) -> None:
+        service = DatasetRoleAssignmentService(self.db)
         dataset_assignments = service.list_assignments(
             dataset_id=None, user_id=None, decision=DecisionStatus.APPROVED
         )
@@ -74,8 +71,8 @@ class AuthorizationService:
         for assignment in dataset_assignments:
             DatasetAuthAssignment(assignment).add()
 
-    def _sync_global_assignments(self):
-        service = GlobalRoleAssignmentService(self.db, cast(User, None))
+    def _sync_global_assignments(self) -> None:
+        service = GlobalRoleAssignmentService(self.db)
         global_assignments = service.list_assignments(
             user_id=None, decision=DecisionStatus.APPROVED
         )

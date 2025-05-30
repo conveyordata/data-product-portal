@@ -91,8 +91,7 @@ class RoleMigrationService:
         self._transfer_dataset_memberships()
         self._transfer_global_memberships()
 
-        auth_service = AuthorizationService(db=self.db)
-        auth_service.reload_enforcer()
+        AuthorizationService(self.db).reload_enforcer()
         Authorization.deregister()
 
     def _transfer_product_memberships(self):
