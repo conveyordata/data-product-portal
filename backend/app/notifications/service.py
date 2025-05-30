@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import delete, desc, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.authz.authorization import Authorization
 from app.notifications.model import Notification as NotificationModel
 from app.notifications.schema_response import NotificationGet
 from app.role_assignments.data_product.model import DataProductRoleAssignment
@@ -41,9 +42,10 @@ class NotificationService:
                 detail=f"Notification {id} not found",
             )
 
-        if not authenticated_user.is_admin and (
-            notification.user_id != authenticated_user.id
-        ):
+        auth = Authorization()
+        is_admin = auth.has_admin_role(user_id=str(authenticated_user.id))
+        is_owner = notification.user_id == authenticated_user.id
+        if not is_admin and not is_owner:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Notification does not belong to authenticated user",

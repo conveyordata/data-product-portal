@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from tests.factories import (
     UserFactory,
@@ -31,7 +32,7 @@ class TestNotificationsRouter:
         data = response.json()
         assert len(data) == 1
 
-        response = client.delete(f"{ENDPOINT}/{notification.id}")
+        response = self.delete_notification(client, notification.id)
         assert response.status_code == 200
 
         response = client.get(f"{ENDPOINT}")
@@ -42,8 +43,15 @@ class TestNotificationsRouter:
         _: User = UserFactory(external_id="sub")
         notification: Notification = NotificationFactory()
 
-        response = client.delete(f"{ENDPOINT}/{notification.id}")
+        response = self.delete_notification(client, notification.id)
         assert response.status_code == 403
+
+    @pytest.mark.usefixtures("admin")
+    def test_delete_notification_other_user_as_admin(self, client: TestClient):
+        notification: Notification = NotificationFactory()
+
+        response = self.delete_notification(client, notification.id)
+        assert response.status_code == 200
 
     def test_delete_all_notifications(self, client: TestClient):
         user: User = UserFactory(external_id="sub")
@@ -60,3 +68,7 @@ class TestNotificationsRouter:
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()) == 0
+
+    @staticmethod
+    def delete_notification(client, notification_id):
+        return client.delete(f"{ENDPOINT}/{notification_id}")
