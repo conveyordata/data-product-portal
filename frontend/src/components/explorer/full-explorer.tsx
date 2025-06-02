@@ -130,7 +130,6 @@ function parseFullNodes(
 
     const result = [...domain_nodes, ...regular_nodes];
 
-    console.log('result', result);
     return result;
 }
 

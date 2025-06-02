@@ -67,7 +67,6 @@ export function Sidebar({
         if (!node) return null;
 
         const data = node.data as Record<string, DataProductContract>;
-        console.log(node);
 
         return {
             name: String(data.name || ''),
