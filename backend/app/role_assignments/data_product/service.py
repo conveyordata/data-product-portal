@@ -23,9 +23,8 @@ from app.users.schema import User
 
 
 class RoleAssignmentService:
-    def __init__(self, db: Session, user: User) -> None:
+    def __init__(self, db: Session) -> None:
         self.db = db
-        self.user = user
 
     def get_assignment(self, id_: UUID) -> RoleAssignment:
         return ensure_exists(id_, self.db, DataProductRoleAssignment)
@@ -50,7 +49,7 @@ class RoleAssignmentService:
         return self.db.scalars(query).all()
 
     def create_assignment(
-        self, data_product_id: UUID, request: CreateRoleAssignment
+        self, data_product_id: UUID, request: CreateRoleAssignment, actor: User
     ) -> RoleAssignment:
         self.ensure_is_data_product_scope(request.role_id)
         existing_assignment = self.db.scalar(
@@ -77,7 +76,7 @@ class RoleAssignmentService:
             **request.model_dump(),
             data_product_id=data_product_id,
             requested_on=datetime.now(),
-            requested_by_id=self.user.id,
+            requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
         self.db.commit()
@@ -91,7 +90,9 @@ class RoleAssignmentService:
         self.db.commit()
         return assignment
 
-    def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
+    def update_assignment(
+        self, request: UpdateRoleAssignment, actor: User
+    ) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)
 
@@ -101,7 +102,7 @@ class RoleAssignmentService:
         if (decision := request.decision) is not None:
             assignment.decision = decision
             assignment.decided_on = datetime.now()
-            assignment.decided_by_id = self.user.id
+            assignment.decided_by_id = actor.id
 
         self.db.commit()
         return assignment
@@ -137,13 +138,13 @@ class RoleAssignmentService:
         return self.db.scalar(query)
 
     def get_pending_data_product_role_assignments(
-        self,
+        self, user: User
     ) -> Sequence[DataProductRoleAssignmentPendingAction]:
         data_product_ids = (
             select(DataProductRoleAssignment.data_product_id)
             .join(DataProductRoleAssignment.role)
             .where(
-                DataProductRoleAssignment.user_id == self.user.id,
+                DataProductRoleAssignment.user_id == user.id,
                 DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
                 Role.permissions.contains(
                     [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]

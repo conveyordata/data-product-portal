@@ -29,10 +29,13 @@ jobs:
           for service in postgresql backend; do
             echo "Waiting for $service to be healthy..."
             for i in {1..30}; do
-              STATUS=$(docker inspect --format='{{.State.Health.Status}}' $(docker compose ps -q $service))
-              echo "$service status: $STATUS"
-              if [ "$STATUS" = "healthy" ]; then
-                break
+              ID=$(docker compose ps -q $service)
+              if [ "$ID" != "" ]; then
+                STATUS=$(docker inspect --format='{{.State.Health.Status}}' $ID)
+                echo "$service status: $STATUS"
+                if [ "$STATUS" = "healthy" ]; then
+                  break
+                fi
               fi
               if [ $i -eq 30 ]; then
                 echo "$service failed to become healthy in time"

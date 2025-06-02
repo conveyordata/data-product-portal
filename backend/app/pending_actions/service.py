@@ -11,19 +11,19 @@ from app.users.schema import User
 
 
 class PendingActionsService:
+    def __init__(self, db: Session):
+        self.db = db
 
-    def get_user_pending_actions(
-        self, db: Session, authenticated_user: User
-    ) -> Sequence[PendingAction]:
-        data_product_dataset_actions = (
-            DataProductDatasetService().get_user_pending_actions(db, authenticated_user)
-        )
-        data_output_dataset_actions = (
-            DataOutputDatasetService().get_user_pending_actions(db, authenticated_user)
-        )
+    def get_user_pending_actions(self, user: User) -> Sequence[PendingAction]:
+        data_product_dataset_actions = DataProductDatasetService(
+            self.db
+        ).get_user_pending_actions(user)
+        data_output_dataset_actions = DataOutputDatasetService(
+            self.db
+        ).get_user_pending_actions(user)
         data_product_role_assignment_actions = RoleAssignmentService(
-            db=db, user=authenticated_user
-        ).get_pending_data_product_role_assignments()
+            self.db
+        ).get_pending_data_product_role_assignments(user)
 
         return sorted(
             chain(

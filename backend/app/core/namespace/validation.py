@@ -54,10 +54,7 @@ class NamespaceValidator:
         return not db.scalar(select(exists().where(self.model.namespace == namespace)))
 
     @classmethod
-    def namespace_suggestion(
-        cls,
-        name: str,
-    ) -> NamespaceSuggestion:
+    def namespace_suggestion(cls, name: str) -> NamespaceSuggestion:
         namespace = cls._namespace_from_name(name)
 
         return NamespaceSuggestion(
