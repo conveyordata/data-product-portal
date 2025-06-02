@@ -423,6 +423,24 @@ def get_databricks_workspace_url(
     return DataProductService(db).get_databricks_workspace_url(id, environment)
 
 
+@router.get(
+    "/{id}/snowflake_url",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
+        ),
+    ],
+)
+def get_snowflake_url(
+    id: UUID,
+    environment: str,
+    db: Session = Depends(get_db_session),
+) -> str:
+    return DataProductService(db).get_snowflake_url(id, environment)
+
+
 @router.get("/{id}/data_outputs")
 def get_data_outputs(
     id: UUID, db: Session = Depends(get_db_session)

@@ -14,6 +14,8 @@ import {
     DataProductGetConveyorUrlResponse,
     DataProductGetDatabricksWorkspaceUrlRequest,
     DataProductGetDatabricksWorkspaceUrlResponse,
+    DataProductGetSnowflakeUrlRequest,
+    DataProductGetSnowflakeUrlResponse,
     DataProductGetSignInUrlRequest,
     DataProductGetSignInUrlResponse,
     DataProductsGetContract,
@@ -150,6 +152,16 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 params: { environment },
             }),
         }),
+        getDataProductSnowflakeUrl: builder.mutation<
+            DataProductGetSnowflakeUrlResponse,
+            DataProductGetSnowflakeUrlRequest
+        >({
+            query: ({ id, environment }) => ({
+                url: buildUrl(ApiUrl.DataProductSnowflakeUrl, { dataProductId: id }),
+                method: 'GET',
+                params: { environment },
+            }),
+        }),
         requestDatasetAccessForDataProduct: builder.mutation<
             DataProductDatasetAccessResponse,
             DataProductDatasetAccessRequest
@@ -257,6 +269,7 @@ export const {
     useGetDataProductGraphDataQuery,
     useGetGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
+    useGetDataProductSnowflakeUrlMutation,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,
     useGetDataProductNamespaceLengthLimitsQuery,

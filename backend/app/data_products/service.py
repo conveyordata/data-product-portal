@@ -401,13 +401,14 @@ class DataProductService:
             .all()
         )
 
-    def get_databricks_workspace_url(self, id: UUID, environment: str) -> str:
-        data_product = self.db.get(DataProductModel, id)
+    def get_env_platform_config(
+        self, id: UUID, environment: str, platform_name: str
+    ) -> str:
         environment_model = self.db.scalar(
             select(EnvironmentModel).where(EnvironmentModel.name == environment)
         )
         platform = self.db.scalar(
-            select(PlatformModel).where(PlatformModel.name == "Databricks")
+            select(PlatformModel).where(PlatformModel.name == platform_name)
         )
 
         stmt = select(EnvironmentPlatformConfigurationModel).where(
@@ -420,11 +421,15 @@ class DataProductService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for" f"domain {data_product.domain.name}"
+                    f"Missing Platform Environment configuration for {platform_name}"
                 ),
             )
+        return config.config
 
-        config = json.loads(config.config)["workspace_urls"]
+    def get_databricks_workspace_url(self, id: UUID, environment: str) -> str:
+        platform_config = self.get_env_platform_config(id, environment, "Databricks")
+        data_product = self.db.get(DataProductModel, id)
+        config = json.loads(platform_config.config)["workspace_urls"]
         if not str(data_product.domain_id) in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -433,6 +438,15 @@ class DataProductService:
                 ),
             )
         return config[str(data_product.domain_id)]
+
+    def get_snowflake_url(self, id: UUID, environment: str) -> str:
+        config = json.loads(self.get_env_platform_config(id, environment, "Snowflake"))
+        if "login_url" not in config.keys():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=("login_url missing from Snowflake configuration"),
+            )
+        return config["login_url"]
 
     def get_graph_data(self, id: UUID, level: int) -> Graph:
         product = self.db.get(
