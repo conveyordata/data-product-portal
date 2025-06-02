@@ -12,9 +12,10 @@ type Props = {
     description: string;
     domain: string;
     tags: TagModel[];
+    namespace: string;
 };
 
-export function DataProductDescription({ lifecycle, type, description, domain, tags }: Props) {
+export function DataProductDescription({ lifecycle, type, description, domain, tags, namespace }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -24,6 +25,10 @@ export function DataProductDescription({ lifecycle, type, description, domain, t
                     <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Status')}</Typography.Text>
                         <Tag color={lifecycle.color}>{lifecycle.name}</Tag>
+                    </Flex>
+                    <Flex className={styles.statusBadge}>
+                        <Typography.Text strong>{t('Namespace')}</Typography.Text>
+                        <Typography.Text>{namespace}</Typography.Text>
                     </Flex>
                     <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Domain')}</Typography.Text>
