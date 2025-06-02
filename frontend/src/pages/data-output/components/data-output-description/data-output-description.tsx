@@ -13,9 +13,10 @@ type Props = {
     type: string;
     description: string;
     tags: TagModel[];
+    namespace: string;
 };
 
-export function DataOutputDescription({ status, type, description, tags }: Props) {
+export function DataOutputDescription({ status, type, description, tags, namespace }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -29,6 +30,10 @@ export function DataOutputDescription({ status, type, description, tags }: Props
                             text={getStatusLabel(t, status)}
                             className={styles.noSelect}
                         />
+                    </Flex>
+                    <Flex className={styles.statusBadge}>
+                        <Typography.Text strong>{t('Namespace')}</Typography.Text>
+                        <Typography.Text>{namespace}</Typography.Text>
                     </Flex>
                     <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Type')}</Typography.Text>

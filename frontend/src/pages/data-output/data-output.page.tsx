@@ -84,6 +84,7 @@ export function DataOutput() {
                     <Flex vertical className={styles.overview}>
                         <DataOutputDescription
                             status={dataOutput!.status}
+                            namespace={dataOutput!.namespace}
                             type={dataOutput!.configuration.configuration_type!}
                             description={dataOutput!.description}
                             tags={dataOutput!.tags}
