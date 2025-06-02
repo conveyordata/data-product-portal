@@ -13,10 +13,21 @@ export type DatasetNodeProps = Node<{
     sourceHandlePosition?: Position;
     isActive?: boolean;
     domain?: string;
+    onClick: () => void;
 }>;
 
 export function DatasetNode({
-    data: { name, id, isMainNode, nodeToolbarActions, targetHandlePosition, sourceHandlePosition, isActive, domain },
+    data: {
+        name,
+        id,
+        isMainNode,
+        nodeToolbarActions,
+        targetHandlePosition,
+        sourceHandlePosition,
+        isActive,
+        domain,
+        onClick,
+    },
     ...props
 }: NodeProps<DatasetNodeProps>) {
     return (
@@ -33,6 +44,7 @@ export function DatasetNode({
                     sourceHandlePosition,
                     isActive,
                     domain,
+                    onClick,
                 }}
                 {...props}
             />

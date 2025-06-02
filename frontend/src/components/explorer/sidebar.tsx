@@ -1,6 +1,6 @@
 import { Node, useReactFlow } from '@xyflow/react';
 import { Select, Tag } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DataProductContract } from '@/types/data-product';
@@ -15,35 +15,30 @@ export type SidebarFilters = {
     domainsEnabled: boolean;
 };
 
-export function Sidebar({
-    nodes,
-    sidebarFilters,
-    onFilterChange,
-}: {
+type Props = {
     nodes: Node[];
     setNodes: (nodes: Node[] | ((nodes: Node[]) => Node[])) => void;
     sidebarFilters: SidebarFilters;
     onFilterChange: (filters: SidebarFilters) => void;
-}) {
+    nodeId: string | null;
+    setNodeId: (nodeId: string | null) => void; // Function to set the nodeId in the parent component
+};
+
+export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNodeId }: Props) {
     const { setCenter, getNode, setNodes } = useReactFlow();
-    const [nodeId, setNodeId] = useState<string | null>(null);
     const { t } = useTranslation();
-    const selectNode = useCallback(
-        (nodeId: string) => {
-            setNodes((nodes: Node[]) =>
-                nodes.map((node) => ({
-                    ...node,
-                    data: {
-                        ...node.data,
-                        isMainNode: node.id === nodeId, // Mark as the main node (invert SVG colors)
-                    },
-                    selected: node.id === nodeId, // Mark as selected (show tooltip with link)
-                })),
-            );
-            setNodeId(nodeId);
-        },
-        [setNodes],
-    );
+    useMemo(() => {
+        setNodes((nodes: Node[]) =>
+            nodes.map((node) => ({
+                ...node,
+                data: {
+                    ...node.data,
+                    isMainNode: node.id === nodeId, // Mark as the main node (invert SVG colors)
+                },
+                selected: node.id === nodeId, // Mark as selected (show tooltip with link)
+            })),
+        );
+    }, [nodeId, setNodes]);
 
     useEffect(() => {
         if (!nodeId) return;
@@ -131,8 +126,9 @@ export function Sidebar({
                 showSearch
                 placeholder={String('Select a node')}
                 onSelect={(value: string) => {
-                    selectNode(value); // Update the selected node
+                    setNodeId(value); // Use the setNodeId function from the parent
                 }}
+                value={nodeId ?? undefined}
                 filterOption={(input: string, option?: { value: string; label: string }) =>
                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                 }

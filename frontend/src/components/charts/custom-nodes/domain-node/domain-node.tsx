@@ -16,12 +16,13 @@ export type DomainNodeProps = Node<{
     targetHandlePosition?: Position;
     sourceHandlePosition?: Position;
     isActive?: boolean;
+    onClick?: () => void;
 }>;
 
-export function DomainNode<T extends DomainNodeProps>({ data: { name, nodeToolbarActions } }: NodeProps<T>) {
+export function DomainNode<T extends DomainNodeProps>({ data: { name, nodeToolbarActions, onClick } }: NodeProps<T>) {
     return (
         <>
-            <Flex className={styles.nodeContainer}>
+            <Flex className={styles.nodeContainer} onClick={onClick}>
                 <DefaultHandle id={'left_t'} type={'target'} position={Position.Left} isConnectable={false} />
                 <DefaultHandle id={'left_s'} type={'source'} position={Position.Left} isConnectable={false} />
                 <Flex className={styles.nodeWrapper}>

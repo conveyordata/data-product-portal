@@ -1,7 +1,7 @@
 import '@xyflow/react/dist/base.css';
 
 import type { Node, XYPosition } from '@xyflow/react';
-import { Position, ReactFlowProvider } from '@xyflow/react';
+import { Position, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { Flex, theme } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -19,6 +19,7 @@ import { parseEdges } from './utils';
 
 function parseFullNodes(
     nodes: NodeContract[],
+    setNodeId: (id: string) => void,
     defaultNodePosition: XYPosition,
     domainsEnabled: boolean = true,
 ): Node[] {
@@ -79,6 +80,9 @@ function parseFullNodes(
                     isMainNode: node.isMain,
                     domain: node.data.domain,
                     description: node.data.description,
+                    onClick: () => {
+                        setNodeId(node.id);
+                    },
                     ...extra_attributes,
                 },
             };
@@ -139,6 +143,7 @@ function InternalFullExplorer() {
 
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
         useNodeEditor();
+    const currentInstance = useReactFlow();
     const { token } = theme.useToken();
     const [sidebarFilters, setSidebarFilters] = useState<SidebarFilters>({
         dataProductsEnabled: true,
@@ -146,6 +151,13 @@ function InternalFullExplorer() {
         dataOutputsEnabled: true,
         domainsEnabled: false,
     });
+
+    const updateFilter = (filters: SidebarFilters) => {
+        setSidebarFilters(filters);
+        currentInstance.fitView();
+    };
+
+    const [nodeId, setNodeId] = useState<string | null>(null);
 
     const { data: graph, isFetching } = useGetGraphDataQuery(
         {
@@ -161,7 +173,7 @@ function InternalFullExplorer() {
 
     const generateGraph = useCallback(() => {
         if (graph) {
-            const nodes = parseFullNodes(graph.nodes, defaultNodePosition, sidebarFilters.domainsEnabled);
+            const nodes = parseFullNodes(graph.nodes, setNodeId, defaultNodePosition, sidebarFilters.domainsEnabled);
             const edges = parseEdges(graph.edges, token);
             setNodesAndEdges(nodes, edges);
             //const new_nodes = setDomainPositions(nodes);  // TODO: does not work yet but we are disabling domain nodes for now
@@ -182,8 +194,10 @@ function InternalFullExplorer() {
             <Sidebar
                 nodes={nodes}
                 setNodes={setNodes}
-                onFilterChange={setSidebarFilters}
+                onFilterChange={updateFilter}
                 sidebarFilters={sidebarFilters}
+                nodeId={nodeId}
+                setNodeId={setNodeId}
             />
             <NodeEditor
                 nodes={nodes}

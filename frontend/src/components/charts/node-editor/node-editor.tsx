@@ -1,7 +1,7 @@
 import '@xyflow/react/dist/style.css';
 
 import type { Connection, Edge, EdgeChange, Node, NodeChange, ReactFlowProps } from '@xyflow/react';
-import { Background, ConnectionLineType, Controls, ReactFlow, useReactFlow } from '@xyflow/react';
+import { Background, ConnectionLineType, Controls, ReactFlow } from '@xyflow/react';
 import { Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,17 +36,13 @@ export function NodeEditor({
     const { t } = useTranslation();
     const memoizedNodes = useMemo(() => nodes, [nodes]);
     const memoizedEdges = useMemo(() => edges, [edges]);
-    const currentInstance = useReactFlow();
     return (
         <>
             <ReactFlow
                 nodes={memoizedNodes}
                 edges={memoizedEdges}
                 onConnect={onConnect}
-                onNodesChange={(changes: NodeChange[]) => {
-                    currentInstance.fitView(defaultFitViewOptions);
-                    onNodesChange(changes);
-                }}
+                onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 fitView
                 onInit={(instance) => instance.fitView(defaultFitViewOptions)}

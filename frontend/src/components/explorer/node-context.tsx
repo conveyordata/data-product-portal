@@ -1,7 +1,7 @@
 import { List, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { RoleAssignmentContract } from '@/types/roles/role.contract';
+import { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 
 const { Text } = Typography;
 
@@ -14,7 +14,7 @@ export function NodeContext({
     getNodeDataForSideBar: (nodeId: string) => {
         name: string;
         domain: string;
-        assignments: RoleAssignmentContract[];
+        assignments: DataProductRoleAssignmentContract[];
         description: string;
     } | null;
     className?: string;
@@ -38,7 +38,7 @@ export function NodeContext({
                     <Text strong>{t('Members')}:</Text>
                     <List
                         dataSource={nodeData.assignments}
-                        renderItem={(member: RoleAssignmentContract) => (
+                        renderItem={(member: DataProductRoleAssignmentContract) => (
                             <List.Item key={member.id}>
                                 {member.user.first_name} {member.user.last_name} {t(' as ')} {member.role.name}
                             </List.Item>
