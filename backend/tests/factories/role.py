@@ -31,13 +31,3 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
                 role_id=str(self.id), actions=self.permissions
             )
         test_session.commit()
-
-    @classmethod
-    def admin(cls) -> "Role":
-        return RoleFactory(
-            id=ADMIN_UUID,
-            scope=Scope.GLOBAL,
-            prototype=Prototype.ADMIN,
-            name="admin",
-            permissions=(),
-        )

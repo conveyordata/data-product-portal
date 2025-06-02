@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi.testclient import TestClient
-from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
+from tests.factories import UserFactory
 
 from app.authorization.schema import AccessResponse
 from app.core.authz import Action, Authorization
@@ -45,10 +45,7 @@ class TestAuthorizationRouter:
         assert response.status_code == 200
         assert response.json() is False
 
-    def test_is_admin_authorized(self, client: TestClient):
-        user = UserFactory(external_id="sub")
-        role = RoleFactory.admin()
-        GlobalRoleAssignmentFactory(role_id=role.id, user_id=user.id)
+    def test_is_admin_authorized(self, client: TestClient, admin):
         response = client.get(f"{ENDPOINT}/admin")
         assert response.status_code == 200
         assert response.json() is True
