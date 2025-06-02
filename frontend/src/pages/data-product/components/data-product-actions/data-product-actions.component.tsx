@@ -11,8 +11,8 @@ import {
     useGetDataProductByIdQuery,
     useGetDataProductConveyorIDEUrlMutation,
     useGetDataProductDatabricksWorkspaceUrlMutation,
-    useGetDataProductSnowflakeUrlMutation,
     useGetDataProductSignInUrlMutation,
+    useGetDataProductSnowflakeUrlMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';

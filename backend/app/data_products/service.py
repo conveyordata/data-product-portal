@@ -429,7 +429,7 @@ class DataProductService:
     def get_databricks_workspace_url(self, id: UUID, environment: str) -> str:
         platform_config = self.get_env_platform_config(id, environment, "Databricks")
         data_product = self.db.get(DataProductModel, id)
-        config = json.loads(platform_config.config)["workspace_urls"]
+        config = json.loads(platform_config)["workspace_urls"]
         if not str(data_product.domain_id) in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

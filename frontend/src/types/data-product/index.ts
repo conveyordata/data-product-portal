@@ -14,10 +14,6 @@ export type {
     DataProductGetDatabricksWorkspaceUrlResponse,
 } from './data-product-databricks-workspace-url.contract.ts';
 export type {
-    DataProductGetSnowflakeUrlRequest,
-    DataProductGetSnowflakeUrlResponse,
-} from './data-product-snowflake-url.contract.ts';
-export type {
     DataProductDatasetAccessRequest,
     DataProductDatasetAccessResponse,
 } from './data-product-dataset-access.contract.ts';
@@ -30,6 +26,10 @@ export type {
     DataProductGetSignInUrlRequest,
     DataProductGetSignInUrlResponse,
 } from './data-product-sign-in-url.contract.ts';
+export type {
+    DataProductGetSnowflakeUrlRequest,
+    DataProductGetSnowflakeUrlResponse,
+} from './data-product-snowflake-url.contract.ts';
 export type {
     DataProductUpdateFormSchema,
     DataProductUpdateRequest,
