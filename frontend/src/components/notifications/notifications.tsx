@@ -15,7 +15,7 @@ import styles from './notifications.module.scss';
 
 export function Notifications() {
     const {
-        token: { colorError },
+        token: { colorPrimaryTextActive },
     } = theme.useToken();
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -105,7 +105,7 @@ export function Notifications() {
             <Badge
                 count={pendingItems?.length}
                 showZero={false}
-                color={colorError}
+                color={colorPrimaryTextActive}
                 style={{ fontSize: 10 }}
                 size="small"
             >

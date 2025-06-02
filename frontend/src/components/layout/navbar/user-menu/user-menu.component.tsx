@@ -22,7 +22,7 @@ export function UserMenu() {
     const { signoutRedirect } = useAuth();
     const user = useSelector(selectCurrentUser);
     const {
-        token: { colorPrimary, colorErrorBorder, colorText },
+        token: { colorPrimary, colorPrimaryTextActive, colorText },
     } = theme.useToken();
     const userInitials = user?.first_name?.charAt(0) + (user?.last_name ? user.last_name.charAt(0) : '');
 
@@ -55,7 +55,7 @@ export function UserMenu() {
                 <Badge
                     count={user?.is_admin ? t('admin') : 0}
                     showZero={false}
-                    color={colorErrorBorder}
+                    color={colorPrimaryTextActive}
                     style={{ color: colorText, fontSize: 10 }}
                     size="small"
                 >
