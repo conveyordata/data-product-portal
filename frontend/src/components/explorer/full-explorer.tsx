@@ -152,10 +152,15 @@ function InternalFullExplorer() {
         domainsEnabled: false,
     });
 
-    const updateFilter = (filters: SidebarFilters) => {
-        setSidebarFilters(filters);
-        currentInstance.fitView();
-    };
+    useEffect(() => {
+        // Give React Flow time to update its internals
+        const timeout = setTimeout(() => {
+            currentInstance.fitView();
+            setNodeId(null); // Reset nodeId when the graph is updated
+        }, 50); // 50ms is usually enough
+
+        return () => clearTimeout(timeout);
+    }, [sidebarFilters, currentInstance]);
 
     const [nodeId, setNodeId] = useState<string | null>(null);
 
@@ -194,7 +199,7 @@ function InternalFullExplorer() {
             <Sidebar
                 nodes={nodes}
                 setNodes={setNodes}
-                onFilterChange={updateFilter}
+                onFilterChange={setSidebarFilters}
                 sidebarFilters={sidebarFilters}
                 nodeId={nodeId}
                 setNodeId={setNodeId}
