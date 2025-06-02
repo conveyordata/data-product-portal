@@ -117,8 +117,10 @@ def clear_db(session: scoped_session[Session]) -> None:
 
 @pytest.fixture
 def admin() -> UserFactory:
-    role = RoleFactory(scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID)
-    user = UserFactory(external_id="sub", is_admin=True)
+    role = RoleFactory(
+        scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID, name="admin"
+    )
+    user = UserFactory(external_id="sub")
     GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
     return user
 

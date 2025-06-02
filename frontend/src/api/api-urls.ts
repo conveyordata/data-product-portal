@@ -84,6 +84,7 @@ export enum ApiUrl {
     Version = '/api/version',
     ThemeSettings = '/api/theme_settings',
     AccessCheck = '/api/authz/access',
+    AdminCheck = '/api/authz/admin',
     Graph = '/api/graph',
 }
 

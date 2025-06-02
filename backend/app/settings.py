@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     # Authorizer
     AUTHORIZER_ENABLED: bool = True
     AUTHORIZER_CACHE_SIZE: int = 128
+    AUTHORIZER_STARTUP_SYNC: bool = True
 
     # Namespace validation
     NAMESPACE_MAX_LENGTH: int = 64
