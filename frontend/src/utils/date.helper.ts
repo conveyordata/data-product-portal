@@ -22,3 +22,7 @@ export const formatDateToNow = (date: string | number | Date) => {
 export const formatDateToNowFromISOString = (date: string) => {
     return formatDateToNow(parseISO(date));
 };
+
+export const formatDateToNowFromUTCString = (date: string) => {
+    return formatDateToNowFromISOString(`${date}Z`);
+};
