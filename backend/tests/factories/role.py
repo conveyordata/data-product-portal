@@ -5,7 +5,7 @@ from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
 from app.roles import ADMIN_UUID
 from app.roles.model import Role
-from app.roles.schema import Prototype, Scope
+from app.roles.schema import Prototype
 
 
 class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
