@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.auth.auth import get_authenticated_user
 from app.database.database import get_db_session
 from app.graph.graph import Graph
 from app.graph.service import GraphService
-from app.users.schema import User
 
 router = APIRouter(prefix="/graph", tags=["graph"])
 
@@ -13,15 +11,12 @@ router = APIRouter(prefix="/graph", tags=["graph"])
 @router.get("")
 def get_graph_data(
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
     domain_nodes_enabled: bool = True,
     data_product_nodes_enabled: bool = True,
     dataset_nodes_enabled: bool = True,
     data_output_nodes_enabled: bool = True,
 ) -> Graph:
-    return GraphService().get_graph_data(
-        db=db,
-        user=user,
+    return GraphService(db).get_graph_data(
         domain_nodes_enabled=domain_nodes_enabled,
         data_product_nodes_enabled=data_product_nodes_enabled,
         dataset_nodes_enabled=dataset_nodes_enabled,

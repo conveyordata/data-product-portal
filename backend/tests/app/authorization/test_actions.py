@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from app.core.authz.actions import AuthorizationAction
+from app.core.authz import Action
 
 
 class TestAction:
@@ -33,7 +33,7 @@ class TestAction:
                 ts_enum[key] = int(value)
 
         # Extract the Python enum as a dictionary
-        py_enum = {action.name: action.value for action in AuthorizationAction}
+        py_enum = {action.name: action.value for action in Action}
 
         # Compare the two dictionaries
         assert ts_enum == py_enum, (

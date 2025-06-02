@@ -4,6 +4,20 @@ const { getDesignToken } = theme;
 
 const token = getDesignToken();
 
+const spacingTokens = {
+    sizeUnit: 4,
+    sizeStep: 4,
+    marginSM: 16,
+    margin: 24,
+    marginMD: 24,
+    marginLG: 32,
+    marginXL: 32,
+    paddingSM: 16,
+    padding: 24,
+    paddingMD: 24,
+    paddingLG: 32,
+};
+
 const blueThemeConfig: ThemeConfig = {
     components: {
         Layout: {
@@ -85,6 +99,7 @@ const blueThemeConfig: ThemeConfig = {
         colorInfoText: token.colorPrimaryText,
         colorInfoTextHover: token.colorPrimaryTextHover,
         colorInfoTextActive: token.colorPrimaryTextActive,
+        ...spacingTokens,
     },
     cssVar: true,
 };
@@ -185,6 +200,7 @@ const datamindedThemeConfig: ThemeConfig = {
         colorInfoText: token.colorPrimaryText,
         colorInfoTextHover: token.colorPrimaryTextHover,
         colorInfoTextActive: token.colorPrimaryTextActive,
+        ...spacingTokens,
     },
     cssVar: true,
 };
@@ -263,18 +279,7 @@ const greenThemeConfig: ThemeConfig = {
         // -------- Shadow ---------
         boxShadow: '0px 4px 9.2px 3px rgba(94, 94, 94, 0.09)',
         boxShadowSecondary: '2px 7px 9px 0px rgba(116, 111, 111, 0.15)',
-        // -------- Spacing ---------
-        sizeUnit: 4,
-        sizeStep: 4,
-        marginSM: 16,
-        margin: 24,
-        marginMD: 24,
-        marginLG: 32,
-        marginXL: 32,
-        paddingSM: 16,
-        padding: 24,
-        paddingMD: 24,
-        paddingLG: 32,
+        ...spacingTokens,
     },
     algorithm: theme.defaultAlgorithm,
     cssVar: true,

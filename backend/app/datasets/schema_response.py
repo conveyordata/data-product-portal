@@ -1,7 +1,5 @@
-from typing import Annotated, Optional
+from typing import Optional
 from uuid import UUID
-
-from annotated_types import MinLen
 
 from app.data_outputs.schema import DataOutput as DataOutputBaseSchema
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
@@ -14,7 +12,6 @@ from app.datasets.status import DatasetStatus
 from app.domains.schema import Domain
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
-from app.users.schema import User
 
 
 class DataProductLink(DataProductDatasetAssociation):
@@ -44,7 +41,6 @@ class BaseDatasetGet(ORMModel):
     lifecycle: Optional[DataProductLifeCycle]
     data_product_settings: list[DataProductSettingValue]
     data_output_links: list[DataOutputLink]
-    owners: Annotated[list[User], MinLen(1)]
 
 
 class DatasetGet(BaseDatasetGet):

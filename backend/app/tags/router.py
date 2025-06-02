@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -14,8 +15,8 @@ router = APIRouter(prefix="/tags", tags=["tags"])
 
 
 @router.get("")
-def get_tags(db: Session = Depends(get_db_session)) -> list[TagsGet]:
-    return TagService().get_tags(db)
+def get_tags(db: Session = Depends(get_db_session)) -> Sequence[TagsGet]:
+    return TagService(db).get_tags()
 
 
 @router.post(
@@ -29,7 +30,7 @@ def get_tags(db: Session = Depends(get_db_session)) -> list[TagsGet]:
 def create_tag(
     tag: TagCreate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
-    return TagService().create_tag(tag, db)
+    return TagService(db).create_tag(tag)
 
 
 @router.put(
@@ -40,8 +41,10 @@ def create_tag(
         ),
     ],
 )
-def update_tag(id: UUID, tag: TagUpdate, db: Session = Depends(get_db_session)):
-    return TagService().update_tag(id, tag, db)
+def update_tag(
+    id: UUID, tag: TagUpdate, db: Session = Depends(get_db_session)
+) -> dict[str, UUID]:
+    return TagService(db).update_tag(id, tag)
 
 
 @router.delete(
@@ -52,5 +55,5 @@ def update_tag(id: UUID, tag: TagUpdate, db: Session = Depends(get_db_session)):
         ),
     ],
 )
-def remove_tag(id: UUID, db: Session = Depends(get_db_session)):
-    return TagService().remove_tag(id, db)
+def remove_tag(id: UUID, db: Session = Depends(get_db_session)) -> None:
+    return TagService(db).remove_tag(id)

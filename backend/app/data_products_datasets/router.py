@@ -31,9 +31,9 @@ def approve_data_product_link(
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
-    return DataProductDatasetService().approve_data_product_link(
-        id, db, authenticated_user
+) -> None:
+    return DataProductDatasetService(db).approve_data_product_link(
+        id, authenticated_user
     )
 
 
@@ -52,10 +52,8 @@ def deny_data_product_link(
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
-    return DataProductDatasetService().deny_data_product_link(
-        id, db, authenticated_user
-    )
+) -> None:
+    return DataProductDatasetService(db).deny_data_product_link(id, authenticated_user)
 
 
 @router.post(
@@ -69,14 +67,8 @@ def deny_data_product_link(
         ),
     ],
 )
-def remove_data_product_link(
-    id: UUID,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-):
-    return DataProductDatasetService().remove_data_product_link(
-        id, db, authenticated_user
-    )
+def remove_data_product_link(id: UUID, db: Session = Depends(get_db_session)) -> None:
+    return DataProductDatasetService(db).remove_data_product_link(id)
 
 
 @router.get("/actions")
@@ -84,4 +76,4 @@ def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> Sequence[DataProductDatasetPendingAction]:
-    return DataProductDatasetService().get_user_pending_actions(db, authenticated_user)
+    return DataProductDatasetService(db).get_user_pending_actions(authenticated_user)

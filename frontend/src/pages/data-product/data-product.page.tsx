@@ -36,7 +36,7 @@ export function DataProduct() {
         { skip: !dataProductId },
     );
 
-    const canEditProduct = edit_access?.allowed || false;
+    const canEdit = edit_access?.allowed || false;
 
     const dataProductTypeIcon = useMemo(() => {
         return getDataProductTypeIcon(dataProduct?.type?.icon_key);
@@ -80,7 +80,7 @@ export function DataProduct() {
                             {dataProduct?.name}
                         </Typography.Title>
                     </Space>
-                    {canEditProduct && (
+                    {canEdit && (
                         <Space className={styles.editIcon}>
                             <CircleIconButton
                                 icon={<SettingOutlined />}

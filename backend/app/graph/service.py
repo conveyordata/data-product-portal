@@ -13,17 +13,15 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.role_assignments.enums import DecisionStatus
-from app.users.schema import User
 
 
 class GraphService:
-    def __init__(self):
+    def __init__(self, db: Session):
+        self.db = db
         self.logger = logger
 
     def get_graph_data(
         self,
-        db: Session,
-        user: User,
         domain_nodes_enabled: bool = True,
         data_product_nodes_enabled: bool = True,
         dataset_nodes_enabled: bool = True,
@@ -31,7 +29,7 @@ class GraphService:
     ) -> Graph:
         # get all data products
         data_products = (
-            db.scalars(
+            self.db.scalars(
                 select(DataProduct).options(
                     joinedload(DataProduct.dataset_links),
                     joinedload(DataProduct.data_outputs),
@@ -43,7 +41,7 @@ class GraphService:
         )
         # get all datasets
         datasets = (
-            db.scalars(
+            self.db.scalars(
                 select(Dataset).options(
                     joinedload(Dataset.data_product_links),
                     joinedload(Dataset.data_output_links),
@@ -55,7 +53,7 @@ class GraphService:
         # get all data outputs
         # get all domains - these will be group nodes
         domains = (
-            db.scalars(
+            self.db.scalars(
                 select(Domain).options(
                     joinedload(Domain.datasets),
                     joinedload(Domain.data_products),
@@ -65,7 +63,9 @@ class GraphService:
             .all()
         )
         data_outputs = (
-            db.scalars(select(DataOutput).options(joinedload(DataOutput.dataset_links)))
+            self.db.scalars(
+                select(DataOutput).options(joinedload(DataOutput.dataset_links))
+            )
             .unique()
             .all()
         )

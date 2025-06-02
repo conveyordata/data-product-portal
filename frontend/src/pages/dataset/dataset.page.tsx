@@ -1,27 +1,26 @@
 import { SettingOutlined } from '@ant-design/icons';
 import { Flex, Typography } from 'antd';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
-import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
-import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button';
+import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component';
 import { DatasetAccessIcon } from '@/components/datasets/dataset-access-icon/dataset-access-icon';
-import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.tsx';
-import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description.tsx';
-import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { DatasetActions } from '@/pages/dataset/components/dataset-actions/dataset-actions.component';
+import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description';
+import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
-import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
-import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
-import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
+import { ApplicationPaths, DynamicPathParams } from '@/types/navigation';
+import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
+import { useGetDatasetOwners } from '@/utils/dataset-user-role.helper';
+import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper';
+import { getDynamicRoutePath } from '@/utils/routes.helper';
 
 import styles from './dataset.module.scss';
 
@@ -29,27 +28,21 @@ export function Dataset() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { datasetId = '' } = useParams();
-    const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
-    const currentUser = useSelector(selectCurrentUser);
 
-    const datasetOwners = useMemo(() => dataset?.owners || [], [dataset?.owners]);
-    const isDatasetOwner = useMemo(
-        () => datasetOwners.some((owner) => owner.id === currentUser?.id) || Boolean(currentUser?.is_admin),
-        [datasetOwners, currentUser],
-    );
-    const { data: access } = useCheckAccessQuery(
+    const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
+    const { data: edit_access } = useCheckAccessQuery(
         {
             resource: datasetId,
             action: AuthorizationAction.DATASET__UPDATE_PROPERTIES,
         },
         { skip: !datasetId },
     );
-    const canEditNew = access?.allowed || false;
+    const canEdit = edit_access?.allowed || false;
+
+    const datasetOwners = useGetDatasetOwners(dataset?.id);
 
     function navigateToDatasetEditPage() {
-        if (canEditNew || (isDatasetOwner && datasetId)) {
-            navigate(getDynamicRoutePath(ApplicationPaths.DatasetEdit, DynamicPathParams.DatasetId, datasetId));
-        }
+        navigate(getDynamicRoutePath(ApplicationPaths.DatasetEdit, DynamicPathParams.DatasetId, datasetId));
     }
 
     useEffect(() => {
@@ -72,7 +65,7 @@ export function Dataset() {
                         <Typography.Title level={3}>{dataset?.name}</Typography.Title>
                         <DatasetAccessIcon accessType={dataset.access_type} hasPopover />
                     </Flex>
-                    {(canEditNew || isDatasetOwner) && (
+                    {canEdit && (
                         <CircleIconButton
                             icon={<SettingOutlined />}
                             tooltip={t('Edit dataset')}
@@ -101,7 +94,7 @@ export function Dataset() {
             </Flex>
             {/* Sidebar */}
             <Flex vertical className={styles.sidebar}>
-                <DatasetActions datasetId={datasetId} isCurrentDatasetOwner={isDatasetOwner} />
+                <DatasetActions datasetId={datasetId} />
                 {/*  Dataset owners overview */}
                 <UserAccessOverview users={datasetOwners} title={t('Dataset Owners')} />
             </Flex>

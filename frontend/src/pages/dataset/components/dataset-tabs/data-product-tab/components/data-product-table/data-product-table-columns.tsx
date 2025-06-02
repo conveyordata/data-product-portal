@@ -17,27 +17,23 @@ import styles from './data-product-table.module.scss';
 type Props = {
     t: TFunction;
     dataProductLinks: DataProductLink[];
-    onRemoveDataProductDatasetLink: (data_productId: string, name: string, datasetLinkId: string) => void;
     onAcceptDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void;
     onRejectDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void;
-    isCurrentDatasetOwner: boolean;
+    onRemoveDataProductDatasetLink: (data_productId: string, name: string, datasetLinkId: string) => void;
     isLoading?: boolean;
-    isDisabled?: boolean;
-    canApproveNew?: boolean;
-    canRevokeNew?: boolean;
+    canApprove?: boolean;
+    canRevoke?: boolean;
 };
 
 export const getDatasetDataProductsColumns = ({
+    t,
+    dataProductLinks,
     onRemoveDataProductDatasetLink,
     onRejectDataProductDatasetLink,
     onAcceptDataProductDatasetLink,
-    t,
-    dataProductLinks,
-    isDisabled,
     isLoading,
-    isCurrentDatasetOwner,
-    canApproveNew,
-    canRevokeNew,
+    canApprove,
+    canRevoke,
 }: Props): TableColumnsType<DataProductLink> => {
     const sorter = new Sorter<DataProductLink>();
     return [
@@ -80,7 +76,7 @@ export const getDatasetDataProductsColumns = ({
         {
             title: t('Actions'),
             key: 'action',
-            hidden: !isCurrentDatasetOwner,
+            hidden: !canApprove && !canRevoke,
             render: (_, { id, data_product, status, dataset_id, data_product_id }) => {
                 if (status === DecisionStatus.Pending) {
                     return (
@@ -97,11 +93,7 @@ export const getDatasetDataProductsColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button
-                                    loading={isLoading}
-                                    disabled={isLoading || (!canApproveNew && isDisabled)}
-                                    type={'link'}
-                                >
+                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
                                     {t('Accept')}
                                 </Button>
                             </Popconfirm>
@@ -117,11 +109,7 @@ export const getDatasetDataProductsColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button
-                                    loading={isLoading}
-                                    disabled={isLoading || (!canApproveNew && isDisabled)}
-                                    type={'link'}
-                                >
+                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
                                     {t('Reject')}
                                 </Button>
                             </Popconfirm>
@@ -142,11 +130,7 @@ export const getDatasetDataProductsColumns = ({
                             okButtonProps={{ loading: isLoading }}
                             autoAdjustOverflow={true}
                         >
-                            <Button
-                                loading={isLoading}
-                                disabled={isLoading || (!canRevokeNew && isDisabled)}
-                                type={'link'}
-                            >
+                            <Button loading={isLoading} disabled={isLoading || !canRevoke} type={'link'}>
                                 {t('Revoke Access')}
                             </Button>
                         </Popconfirm>

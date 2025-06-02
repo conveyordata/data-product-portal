@@ -58,8 +58,8 @@ export function getDecisionStatusBadgeStatus(status: DecisionStatus): BadgeProps
     }
 }
 
-export function getDataProductMembershipBadgeStatus(role: DecisionStatus): BadgeProps['status'] {
-    switch (role) {
+export function getRoleAssignmentBadgeStatus(status: DecisionStatus): BadgeProps['status'] {
+    switch (status) {
         case DecisionStatus.Approved:
             return 'success';
         case DecisionStatus.Denied:
@@ -69,7 +69,7 @@ export function getDataProductMembershipBadgeStatus(role: DecisionStatus): Badge
     }
 }
 
-export function getDataProductMembershipStatusLabel(t: TFunction, role: DecisionStatus): string {
+export function getRoleAssignmentStatusLabel(t: TFunction, role: DecisionStatus): string {
     switch (role) {
         case DecisionStatus.Approved:
             return t('Approved');

@@ -59,7 +59,7 @@ async def log_middleware(request: Request, call_next):
 async def lifespan(_: FastAPI):
     db = next(database.get_db_session())
     resync = RoleService(db).initialize_prototype_roles()
-    if resync:
+    if resync or settings.AUTHORIZER_STARTUP_SYNC:
         AuthorizationService(db).reload_enforcer()
 
     backend_analytics()

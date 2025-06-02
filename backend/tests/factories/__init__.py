@@ -2,7 +2,6 @@ from .. import test_session
 from .data_output import DataOutputFactory
 from .data_outputs_datasets import DataOutputDatasetAssociationFactory
 from .data_product import DataProductFactory
-from .data_product_membership import DataProductMembershipFactory
 from .data_product_setting import DataProductSettingFactory
 from .data_product_type import DataProductTypeFactory
 from .data_products_datasets import DataProductDatasetAssociationFactory
@@ -28,7 +27,6 @@ factories = [
     DataOutputFactory,
     DataOutputDatasetAssociationFactory,
     DataProductFactory,
-    DataProductMembershipFactory,
     DataProductSettingFactory,
     DataProductTypeFactory,
     DataProductDatasetAssociationFactory,

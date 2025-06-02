@@ -99,7 +99,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const userSelectOptions = dataProductOwners.map((owner) => ({ label: owner.email, value: owner.id }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id }));
 
-    const onSubmit: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
+    const onFinish: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
         try {
             if (mode === 'create') {
                 const request: DataProductCreate = {
@@ -157,7 +157,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     };
 
-    const onSubmitFailed: FormProps<DataProductCreateFormSchema>['onFinishFailed'] = () => {
+    const onFinishFailed: FormProps<DataProductCreateFormSchema>['onFinishFailed'] = () => {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
@@ -221,13 +221,13 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     );
 
     return (
-        <Form
+        <Form<DataProductCreateFormSchema>
             form={form}
             labelCol={FORM_GRID_WRAPPER_COLS}
             wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
-            onFinish={onSubmit}
-            onFinishFailed={onSubmitFailed}
+            onFinish={onFinish}
+            onFinishFailed={onFinishFailed}
             autoComplete={'off'}
             requiredMark={'optional'}
             labelWrap
@@ -359,24 +359,26 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             </Form.Item>
             <Form.Item>
                 <Row>
-                    <Col>
-                        <Popconfirm
-                            title={t('Are you sure you want to delete this data product?')}
-                            onConfirm={handleDeleteDataProduct}
-                            okText={t('Yes')}
-                            cancelText={t('No')}
-                        >
-                            <Button
-                                className={styles.formButton}
-                                type="default"
-                                danger
-                                loading={isArchiving}
-                                disabled={isLoading || !canDelete}
+                    {mode !== 'create' && (
+                        <Col>
+                            <Popconfirm
+                                title={t('Are you sure you want to delete this data product?')}
+                                onConfirm={handleDeleteDataProduct}
+                                okText={t('Yes')}
+                                cancelText={t('No')}
                             >
-                                {t('Delete')}
-                            </Button>
-                        </Popconfirm>
-                    </Col>
+                                <Button
+                                    className={styles.formButton}
+                                    type="default"
+                                    danger
+                                    loading={isArchiving}
+                                    disabled={isLoading || !canDelete}
+                                >
+                                    {t('Delete')}
+                                </Button>
+                            </Popconfirm>
+                        </Col>
+                    )}
                     <Col flex="auto" />
                     <Col>
                         <Space>

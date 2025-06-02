@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -11,9 +12,12 @@ from app.domains.schema_response import DomainGet, DomainsGet
 
 
 class DomainService:
-    def get_domains(self, db: Session) -> list[DomainsGet]:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_domains(self) -> Sequence[DomainsGet]:
         return (
-            db.scalars(
+            self.db.scalars(
                 select(DomainModel)
                 .options(
                     joinedload(DomainModel.datasets),
@@ -25,8 +29,8 @@ class DomainService:
             .all()
         )
 
-    def get_domain(self, id: UUID, db: Session) -> DomainGet:
-        domain = db.get(
+    def get_domain(self, id: UUID) -> DomainGet:
+        domain = self.db.get(
             DomainModel,
             id,
             options=[
@@ -43,26 +47,24 @@ class DomainService:
 
         return domain
 
-    def create_domain(self, domain: DomainCreate, db: Session) -> dict[str, UUID]:
+    def create_domain(self, domain: DomainCreate) -> dict[str, UUID]:
         domain = DomainModel(**domain.parse_pydantic_schema())
-        db.add(domain)
-        db.commit()
+        self.db.add(domain)
+        self.db.commit()
         return {"id": domain.id}
 
-    def update_domain(
-        self, id: UUID, domain: DomainUpdate, db: Session
-    ) -> dict[str, UUID]:
-        current_domain = db.get(DomainModel, id)
+    def update_domain(self, id: UUID, domain: DomainUpdate) -> dict[str, UUID]:
+        current_domain = self.db.get(DomainModel, id)
         updated_domain = domain.parse_pydantic_schema()
 
         for attr, value in updated_domain.items():
             setattr(current_domain, attr, value)
 
-        db.commit()
+        self.db.commit()
         return {"id": id}
 
-    def remove_domain(self, id: UUID, db: Session):
-        domain = db.get(
+    def remove_domain(self, id: UUID) -> None:
+        domain = self.db.get(
             DomainModel,
             id,
             options=[
@@ -80,19 +82,19 @@ class DomainService:
                 ),
             )
 
-        db.delete(domain)
-        db.commit()
+        self.db.delete(domain)
+        self.db.commit()
 
-    def migrate_domain(self, from_id: UUID, to_id: UUID, db: Session):
+    def migrate_domain(self, from_id: UUID, to_id: UUID) -> None:
         domain = ensure_domain_exists(
             from_id,
-            db,
+            self.db,
             options=[
                 joinedload(DomainModel.datasets),
                 joinedload(DomainModel.data_products),
             ],
         )
-        new_domain = ensure_domain_exists(to_id, db)
+        new_domain = ensure_domain_exists(to_id, self.db)
 
         for dataset in domain.datasets:
             dataset.domain_id = new_domain.id
@@ -100,4 +102,4 @@ class DomainService:
         for data_product in domain.data_products:
             data_product.domain_id = new_domain.id
 
-        db.commit()
+        self.db.commit()

@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -22,15 +23,15 @@ router = APIRouter(prefix="/data_product_types", tags=["data_product_types"])
 @router.get("")
 def get_data_products_types(
     db: Session = Depends(get_db_session),
-) -> list[DataProductTypesGet]:
-    return DataProductTypeService().get_data_product_types(db)
+) -> Sequence[DataProductTypesGet]:
+    return DataProductTypeService(db).get_data_product_types()
 
 
 @router.get("/{id}")
 def get_data_product_type(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> DataProductTypeGet:
-    return DataProductTypeService().get_data_product_type(id, db)
+    return DataProductTypeService(db).get_data_product_type(id)
 
 
 @router.post(
@@ -62,7 +63,7 @@ def get_data_product_type(
 def create_data_product_type(
     data_product_type: DataProductTypeCreate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
-    return DataProductTypeService().create_data_product_type(data_product_type, db)
+    return DataProductTypeService(db).create_data_product_type(data_product_type)
 
 
 @router.put(
@@ -77,8 +78,8 @@ def update_data_product_type(
     id: UUID,
     data_product_type: DataProductTypeUpdate,
     db: Session = Depends(get_db_session),
-):
-    return DataProductTypeService().update_data_product_type(id, data_product_type, db)
+) -> dict[str, UUID]:
+    return DataProductTypeService(db).update_data_product_type(id, data_product_type)
 
 
 @router.delete(
@@ -89,8 +90,8 @@ def update_data_product_type(
         ),
     ],
 )
-def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)):
-    return DataProductTypeService().remove_data_product_type(id, db)
+def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)) -> None:
+    return DataProductTypeService(db).remove_data_product_type(id)
 
 
 @router.put(
@@ -103,5 +104,5 @@ def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)):
 )
 def migrate_data_product_type(
     from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)
-):
-    return DataProductTypeService().migrate_data_product_type(from_id, to_id, db)
+) -> None:
+    return DataProductTypeService(db).migrate_data_product_type(from_id, to_id)

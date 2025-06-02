@@ -7,96 +7,80 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
+from app.core.authz import Action, Authorization
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
 from app.datasets.model import Dataset as DatasetModel
 from app.pending_actions.schema import DataOutputDatasetPendingAction
+from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.enums import DecisionStatus
-from app.users.model import User as UserModel
 from app.users.schema import User
 
 
 class DataOutputDatasetService:
-    def approve_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
+    def __init__(self, db: Session):
+        self.db = db
+
+    def approve_data_output_link(self, id: UUID, actor: User) -> None:
+        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Dataset data output link {id} not found",
-            )
-        if (
-            authenticated_user not in current_link.dataset.owners
-            and not authenticated_user.is_admin
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only dataset owners can execute this action",
             )
         if current_link.status != DecisionStatus.PENDING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Request can not be already approved or denied",
             )
+
         current_link.status = DecisionStatus.APPROVED
-        current_link.approved_by = authenticated_user
+        current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
         RefreshInfrastructureLambda().trigger()
-        db.commit()
+        self.db.commit()
 
-    def deny_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
+    def deny_data_output_link(self, id: UUID, actor: User) -> None:
+        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Dataset data output link {id} not found",
             )
-        if (
-            authenticated_user not in current_link.dataset.owners
-            and not authenticated_user.is_admin
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only dataset owners can execute this action",
-            )
+
         current_link.status = DecisionStatus.DENIED
-        current_link.denied_by = authenticated_user
+        current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        db.commit()
+        self.db.commit()
 
-    def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
-
+    def remove_data_output_link(self, id: UUID) -> None:
+        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Dataset data output link {id} not found",
             )
 
-        dataset = current_link.dataset
-        if authenticated_user not in dataset.owners and not authenticated_user.is_admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only dataset owners can execute this action",
-            )
-
-        db.delete(current_link)
+        self.db.delete(current_link)
+        self.db.commit()
         RefreshInfrastructureLambda().trigger()
-        db.commit()
 
     def get_user_pending_actions(
-        self, db: Session, authenticated_user: User
+        self, user: User
     ) -> Sequence[DataOutputDatasetPendingAction]:
-        return (
-            db.scalars(
+        requested_associations = (
+            self.db.scalars(
                 select(DataOutputDatasetAssociationModel)
-                .filter(
+                .where(
                     DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
                 )
-                .filter(
+                .where(
                     DataOutputDatasetAssociationModel.dataset.has(
-                        DatasetModel.owners.any(UserModel.id == authenticated_user.id)
+                        DatasetModel.assignments.any(
+                            DatasetRoleAssignment.user_id == user.id
+                        )
                     )
                 )
                 .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
@@ -104,3 +88,15 @@ class DataOutputDatasetService:
             .unique()
             .all()
         )
+
+        authorizer = Authorization()
+        return [
+            a
+            for a in requested_associations
+            if authorizer.has_access(
+                sub=str(user.id),
+                dom=str(a.dataset.domain),
+                obj=str(a.dataset_id),
+                act=Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST,
+            )
+        ]

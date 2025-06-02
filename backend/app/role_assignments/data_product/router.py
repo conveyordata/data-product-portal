@@ -9,6 +9,7 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
     DataProductResolver,
     DataProductRoleAssignmentResolver,
+    EmptyResolver,
 )
 from app.database.database import get_db_session
 from app.role_assignments.data_product import email
@@ -33,9 +34,8 @@ def list_assignments(
     user_id: Optional[UUID] = None,
     decision: Optional[DecisionStatus] = None,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
 ) -> Sequence[RoleAssignmentResponse]:
-    return RoleAssignmentService(db=db, user=user).list_assignments(
+    return RoleAssignmentService(db).list_assignments(
         data_product_id=data_product_id, user_id=user_id, decision=decision
     )
 
@@ -57,22 +57,59 @@ def create_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
-    role_assignment = service.create_assignment(id, request)
+    service = RoleAssignmentService(db)
+    role_assignment = service.create_assignment(id, request, user)
 
-    approvers = service.users_with_authz_action(
-        data_product_id=role_assignment.data_product_id,
-        action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
-    )
-    if user.id in (approver.id for approver in approvers):
+    approvers: Sequence[User] = ()
+    if not (is_admin := Authorization().has_admin_role(user_id=str(user.id))):
+        approvers = service.users_with_authz_action(
+            data_product_id=role_assignment.data_product_id,
+            action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+        )
+
+    if is_admin or user.id in (approver.id for approver in approvers):
         service.update_assignment(
             UpdateRoleAssignment(
                 id=role_assignment.id,
                 role_id=role_assignment.role_id,
                 decision=DecisionStatus.APPROVED,
-            )
+            ),
+            actor=user,
         )
         return role_assignment
+
+    background_tasks.add_task(
+        email.send_role_assignment_request_email,
+        role_assignment,
+        approvers,
+    )
+    return role_assignment
+
+
+@router.post(
+    "/request/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS, resolver=EmptyResolver
+            )
+        )
+    ],
+)
+def request_assignment(
+    id: UUID,
+    request: CreateRoleAssignment,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> RoleAssignmentResponse:
+    service = RoleAssignmentService(db)
+    role_assignment = service.create_assignment(id, request, user)
+
+    approvers = service.users_with_authz_action(
+        data_product_id=role_assignment.data_product_id,
+        action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
+    )
 
     background_tasks.add_task(
         email.send_role_assignment_request_email,
@@ -96,9 +133,8 @@ def create_assignment(
 def delete_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
 ) -> None:
-    assignment = RoleAssignmentService(db=db, user=user).delete_assignment(id)
+    assignment = RoleAssignmentService(db).delete_assignment(id)
 
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).remove()
@@ -122,11 +158,11 @@ def modify_assigned_role(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
+    service = RoleAssignmentService(db)
     original_role = service.get_assignment(id).role_id
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id)
+        UpdateRoleAssignment(id=id, role_id=request.role_id), actor=user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
@@ -152,7 +188,7 @@ def decide_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
+    service = RoleAssignmentService(db)
     original = service.get_assignment(id)
 
     if original.decision not in (DecisionStatus.PENDING, request.decision):
@@ -167,8 +203,8 @@ def decide_assignment(
             detail="Cannot approve a request that does not have a role assignment",
         )
 
-    assignment = RoleAssignmentService(db=db, user=user).update_assignment(
-        UpdateRoleAssignment(id=id, decision=request.decision)
+    assignment = service.update_assignment(
+        UpdateRoleAssignment(id=id, decision=request.decision), actor=user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
