@@ -208,7 +208,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
     const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
 
-    if (mode === 'edit' && !currentDataProduct) {
+    if (mode === 'edit' && (!currentDataProduct || ownerIds === undefined)) {
         return <Skeleton active />;
     }
 

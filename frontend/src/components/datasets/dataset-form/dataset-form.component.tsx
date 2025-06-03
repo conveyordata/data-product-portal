@@ -246,7 +246,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
     const ownerIds = useGetDatasetOwnerIds(currentDataset?.id);
 
-    if (mode === 'edit' && !currentDataset) {
+    if (mode === 'edit' && (!currentDataset || ownerIds === undefined)) {
         return <Skeleton active />;
     }
 
