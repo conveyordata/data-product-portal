@@ -136,7 +136,10 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
     const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
-    const userSelectOptions = users.map((user) => ({ label: user.email, value: user.id }));
+    const userSelectOptions = users.map((owner) => ({
+        label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
+        value: owner.id,
+    }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
     const onFinish: FormProps<DatasetCreateFormSchema>['onFinish'] = async (values) => {
