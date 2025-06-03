@@ -201,31 +201,28 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
-    const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
-
-    useEffect(() => {
-        if (currentDataProduct && mode === 'edit') {
-            form.setFieldsValue({
-                namespace: currentDataProduct.namespace,
-                name: currentDataProduct.name,
-                description: currentDataProduct.description,
-                type_id: currentDataProduct.type.id,
-                lifecycle_id: currentDataProduct.lifecycle.id,
-                domain_id: currentDataProduct.domain.id,
-                tag_ids: currentDataProduct.tags.map((tag) => tag.id),
-                owners: ownerIds,
-            });
-        }
-    }, [currentDataProduct, form, mode, ownerIds]);
-
     const validateNamespaceCallback = useCallback(
         (namespace: string) => validateNamespace(namespace).unwrap(),
         [validateNamespace],
     );
 
+    const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
+
+    const initialValues = mode === 'edit' ? {
+        name: currentDataProduct?.name,
+        namespace: currentDataProduct?.namespace,
+        description: currentDataProduct?.description,
+        type_id: currentDataProduct?.type.id,
+        lifecycle_id: currentDataProduct?.lifecycle.id,
+        domain_id: currentDataProduct?.domain.id,
+        tag_ids: currentDataProduct?.tags.map((tag) => tag.id),
+        owners: ownerIds,
+    } : {};
+
     return (
         <Form<DataProductCreateFormSchema>
             form={form}
+            labelWrap
             labelCol={FORM_GRID_WRAPPER_COLS}
             wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
@@ -233,8 +230,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             onFinishFailed={onFinishFailed}
             autoComplete={'off'}
             requiredMark={'optional'}
-            labelWrap
             disabled={isLoading || !canSubmit}
+            initialValues={initialValues}
         >
             <Form.Item<DataProductCreateFormSchema>
                 name={'name'}

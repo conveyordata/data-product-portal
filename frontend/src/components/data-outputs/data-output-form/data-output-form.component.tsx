@@ -1,5 +1,4 @@
 import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
@@ -120,20 +119,17 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
         }
     };
 
-    useEffect(() => {
-        if (currentDataOutput) {
-            form.setFieldsValue({
-                namespace: currentDataOutput.namespace,
-                name: currentDataOutput.name,
-                description: currentDataOutput.description,
-                tag_ids: currentDataOutput.tags.map((tag) => tag.id),
-            });
-        }
-    }, [currentDataOutput, form, mode]);
+    const initialValues = {
+        namespace: currentDataOutput?.namespace,
+        name: currentDataOutput?.name,
+        description: currentDataOutput?.description,
+        tag_ids: currentDataOutput?.tags.map((tag) => tag.id),
+    }
 
     return (
         <Form
             form={form}
+            labelWrap
             labelCol={FORM_GRID_WRAPPER_COLS}
             wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
@@ -141,8 +137,8 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             onFinishFailed={onSubmitFailed}
             autoComplete={'off'}
             requiredMark={'optional'}
-            labelWrap
             disabled={isLoading || !canEdit}
+            initialValues={initialValues}
         >
             <Form.Item<DataOutputCreateFormSchema>
                 name={'name'}
