@@ -444,6 +444,31 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json() == "test_1.com"
 
+    def test_get_snowflake_url(self, client):
+        env = EnvironmentFactory(name="production")
+        platform = PlatformFactory(name="Snowflake")
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        EnvPlatformConfigFactory(
+            environment=env,
+            platform=platform,
+            config=json.dumps({"login_url": "test_1.com"}),
+        )
+        response = client.get(
+            f"{ENDPOINT}/{data_product.id}/snowflake_url?" "environment=production"
+        )
+        assert response.status_code == 200
+        assert response.json() == "test_1.com"
+
     def test_get_namespace_suggestion_substitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)

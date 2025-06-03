@@ -12,6 +12,7 @@ import {
     useGetDataProductConveyorIDEUrlMutation,
     useGetDataProductDatabricksWorkspaceUrlMutation,
     useGetDataProductSignInUrlMutation,
+    useGetDataProductSnowflakeUrlMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
@@ -36,6 +37,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
     const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
         useGetDataProductDatabricksWorkspaceUrlMutation();
+    const [getSnowflakeUrl, { isLoading: isSnowflakeLoading }] = useGetDataProductSnowflakeUrlMutation();
 
     const { data: request_access } = useCheckAccessQuery({
         action: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
@@ -103,6 +105,18 @@ export function DataProductActions({ dataProductId }: Props) {
                     dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
                 }
                 break;
+            case DataPlatforms.Snowflake:
+                try {
+                    const signInUrl = await getSnowflakeUrl({ id: dataProductId, environment }).unwrap();
+                    if (signInUrl) {
+                        window.open(signInUrl, '_blank');
+                    } else {
+                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+                    }
+                } catch (_error) {
+                    dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+                }
+                break;
             default:
                 break;
         }
@@ -146,7 +160,13 @@ export function DataProductActions({ dataProductId }: Props) {
                         onDataPlatformClick={handleAccessToData}
                         onTileClick={handleTileClick}
                         isDisabled={isLoading || !canReadIntegrations}
-                        isLoading={isLoading || isConveyorLoading || isDatabricksLoading || isLoadingPlatforms}
+                        isLoading={
+                            isLoading ||
+                            isConveyorLoading ||
+                            isDatabricksLoading ||
+                            isSnowflakeLoading ||
+                            isLoadingPlatforms
+                        }
                     />
                 </Flex>
             </Flex>
