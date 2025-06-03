@@ -46,7 +46,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 method: 'GET',
             }),
             providesTags: (_, __, id) => [
-                { type: TagTypes.Dataset as const, id },
+                { type: TagTypes.Dataset as const, id: id },
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
             ],
         }),

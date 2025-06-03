@@ -102,8 +102,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
     const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
-    const [fetchNamespace, { data: namespaceSuggestion, isFetching: isFetchingNamespaceSuggestion }] =
-        useLazyGetDatasetNamespaceSuggestionQuery();
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDatasetNamespaceSuggestionQuery();
     const [validateNamespace] = useLazyValidateDatasetNamespaceQuery();
     const { data: namespaceLengthLimits } = useGetDatasetNamespaceLengthLimitsQuery();
 
@@ -237,7 +236,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
             form.setFieldValue('namespace', namespaceSuggestion?.namespace);
             form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditNamespace, namespaceSuggestion, isFetchingNamespaceSuggestion, t]);
+    }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
     const validateNamespaceCallback = useCallback(
         (namespace: string) => validateNamespace(namespace).unwrap(),

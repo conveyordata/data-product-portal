@@ -10,13 +10,13 @@ import { DomainsGetContract } from '@/types/domain';
 
 import { CreateDomainModal } from './domain-form-modal.component';
 import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
-import styles from './domain-table.module.scss';
 import { getDomainTableColumns } from './domain-table-columns';
+import styles from './domain-table.module.scss';
 
 export function DomainTable() {
     const { t } = useTranslation();
     const { data = [], isFetching } = useGetAllDomainsQuery();
-    const { pagination, handlePaginationChange } = useTablePagination({});
+    const { pagination, handlePaginationChange } = useTablePagination(data);
     const { isVisible, handleOpen, handleClose } = useModal();
     const {
         isVisible: migrateModalVisible,

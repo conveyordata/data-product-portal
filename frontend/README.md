@@ -109,23 +109,18 @@ In order to run the project in development mode (auto refresh using HMR), execut
   ```
 
 ### Linting and Formatting
-This project has been set up using [eslint](https://eslint.org/) for linting and [prettier](https://prettier.io/) for formatting.
-Respective configuration files are [.eslintrc.cjs](.eslintrc.cjs) and [.prettierrc](.prettierrc).
+This project has been set up using [biome](https://biomejs.dev) for linting and formatting.
+The configuration file is called [biome.json](biome.json).
 For ease of use we advise you to configure your IDE to use the above-mentioned files automatically on format or save actions.
 If you want manual linting/formatting, you can always execute the commands below.
 
-- For linting
-  ```sh
-  npm run lint
-  ```
-- For linting, including automatic fixes
-  ```sh
-  npm run lint:fix
-  ```
-- For formatting
-  ```sh
-  npm run format
-  ```
+```bash
+# To detect issues
+npm run check
+
+# To detect issues and fix them automatically where possible
+npm run check:fix
+```
 
 ### Translations
 Static frontend translations are managed by using [i18next](https://www.i18next.com/).

@@ -22,7 +22,6 @@ export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef
         <FormModal
             title={title}
             onClose={onClose}
-            onOk={() => {}}
             isOpen={isOpen}
             footer={() => (
                 <Space>
