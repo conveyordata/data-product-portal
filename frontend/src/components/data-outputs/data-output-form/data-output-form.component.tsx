@@ -1,4 +1,4 @@
-import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
+import { Button, Form, type FormProps, Input, Popconfirm, Select, Skeleton, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
@@ -78,6 +78,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             }
         }
     };
+
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
             if (dataOutputId && currentDataOutput) {
@@ -119,12 +120,16 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
         }
     };
 
+    if (mode === 'edit' && !currentDataOutput) {
+        return <Skeleton active />;
+    }
+
     const initialValues = {
         namespace: currentDataOutput?.namespace,
         name: currentDataOutput?.name,
         description: currentDataOutput?.description,
         tag_ids: currentDataOutput?.tags.map((tag) => tag.id),
-    }
+    };
 
     return (
         <Form

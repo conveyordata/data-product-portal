@@ -1,4 +1,4 @@
-import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Space } from 'antd';
+import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -208,7 +208,11 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
     const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
 
-    const initialValues = mode === 'edit' ? {
+    if (mode === 'edit' && !currentDataProduct) {
+        return <Skeleton active />;
+    }
+
+    const initialValues = {
         name: currentDataProduct?.name,
         namespace: currentDataProduct?.namespace,
         description: currentDataProduct?.description,
@@ -217,7 +221,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         domain_id: currentDataProduct?.domain.id,
         tag_ids: currentDataProduct?.tags.map((tag) => tag.id),
         owners: ownerIds,
-    } : {};
+    };
 
     return (
         <Form<DataProductCreateFormSchema>

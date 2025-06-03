@@ -9,6 +9,7 @@ import {
     Radio,
     Row,
     Select,
+    Skeleton,
     Space,
     Tooltip,
 } from 'antd';
@@ -245,7 +246,11 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
     const ownerIds = useGetDatasetOwnerIds(currentDataset?.id);
 
-    const initialValues = mode === 'edit' ? {
+    if (mode === 'edit' && !currentDataset) {
+        return <Skeleton active />;
+    }
+
+    const initialValues = {
         name: currentDataset?.name,
         namespace: currentDataset?.namespace,
         description: currentDataset?.description,
@@ -254,7 +259,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
         domain_id: currentDataset?.domain.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
         owners: ownerIds,
-    } : {};
+    };
 
     return (
         <Form<DatasetCreateFormSchema>
