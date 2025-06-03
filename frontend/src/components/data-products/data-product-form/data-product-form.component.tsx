@@ -96,7 +96,10 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
     const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
-    const userSelectOptions = dataProductOwners.map((owner) => ({ label: owner.email, value: owner.id }));
+    const userSelectOptions = dataProductOwners.map((owner) => ({
+        label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
+        value: owner.id,
+    }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id }));
 
     const onFinish: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
