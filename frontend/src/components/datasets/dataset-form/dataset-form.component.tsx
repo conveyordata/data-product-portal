@@ -248,10 +248,17 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 domain_id: currentDataset.domain.id,
                 tag_ids: currentDataset.tags.map((tag) => tag.id),
                 lifecycle_id: currentDataset.lifecycle.id,
+            });
+        }
+    }, [currentDataset, mode, form]);
+
+    useEffect(() => {
+        if (mode === 'edit') {
+            form.setFieldsValue({
                 owners: ownerIds,
             });
         }
-    }, [currentDataset, mode, form, ownerIds]);
+    }, [form, mode, ownerIds]);
 
     const validateNamespaceCallback = useCallback(
         (namespace: string) => validateNamespace(namespace).unwrap(),

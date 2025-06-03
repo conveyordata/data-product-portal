@@ -56,6 +56,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
     const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
     const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductNamespaceSuggestionQuery();
+
+    const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
     const [validateNamespace] = useLazyValidateDataProductNamespaceQuery();
     const { data: namespaceLengthLimits } = useGetDataProductNamespaceLengthLimitsQuery();
 
@@ -198,8 +200,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
-    const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
-
     useEffect(() => {
         if (currentDataProduct && mode === 'edit') {
             form.setFieldsValue({
@@ -210,10 +210,17 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 lifecycle_id: currentDataProduct.lifecycle.id,
                 domain_id: currentDataProduct.domain.id,
                 tag_ids: currentDataProduct.tags.map((tag) => tag.id),
+            });
+        }
+    }, [currentDataProduct, form, mode]);
+
+    useEffect(() => {
+        if (mode === 'edit') {
+            form.setFieldsValue({
                 owners: ownerIds,
             });
         }
-    }, [currentDataProduct, form, mode, ownerIds]);
+    }, [form, mode, ownerIds]);
 
     const validateNamespaceCallback = useCallback(
         (namespace: string) => validateNamespace(namespace).unwrap(),
