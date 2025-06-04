@@ -1,6 +1,6 @@
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types';
 
-import { RoleAssignmentContract } from '../roles/role.contract';
+import { DataProductRoleAssignmentContract } from '../roles/role.contract';
 
 export interface NodeContract {
     id: string;
@@ -11,7 +11,7 @@ export interface NodeContract {
         link_to_id: string | undefined;
         domain: string | undefined;
         domain_id: string | undefined;
-        assignments: Array<RoleAssignmentContract> | undefined;
+        assignments: Array<DataProductRoleAssignmentContract> | undefined;
         description: string | undefined;
     };
     isMain: boolean;
