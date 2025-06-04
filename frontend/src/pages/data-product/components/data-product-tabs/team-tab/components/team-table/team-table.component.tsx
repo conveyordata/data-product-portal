@@ -1,5 +1,5 @@
 import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
@@ -58,17 +58,13 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
     const canEditUser = edit_access?.allowed || false;
     const canRemoveUser = remove_access?.allowed || false;
 
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+    const { pagination, handlePaginationChange } = useTablePagination(dataProductUsers, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
     const onChange: TableProps<DataProductRoleAssignmentContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
-
-    useEffect(() => {
-        resetPagination();
-    }, [dataProductUsers, resetPagination]);
 
     const handleRemoveUserAccess = useCallback(
         async (id: string) => {

@@ -94,12 +94,9 @@ npm run dev
 ### Commands
 
 ```bash
-npm run lint       # Lint code
-npm run lint:fix   # Auto-fix lint issues
-npm run format     # Format code with Prettier
+npm run check       # Lint code
+npm run check:fix   # Auto-fix lint issues
 ```
-
-Make sure your IDE uses `.eslintrc.cjs` and `.prettierrc`.
 
 ---
 

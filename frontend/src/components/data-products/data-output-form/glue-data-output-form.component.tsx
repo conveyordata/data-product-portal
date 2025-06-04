@@ -47,7 +47,7 @@ export function GlueDataOutputForm({ form, identifiers, namespace, sourceAligned
         }
 
         form.setFieldsValue({ result: result });
-    }, [databaseValue, sourceAligned, suffixValue, tableValue, entireSchema, form]);
+    }, [databaseValue, suffixValue, tableValue, entireSchema, form]);
 
     return (
         <div>

@@ -11,7 +11,7 @@ import {
     useGetUserDataProductsQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import { getItemFromLocalStorage, LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
+import { LastVisitedItem, LocalStorageKeys, getItemFromLocalStorage } from '@/utils/local-storage.helper.ts';
 
 import styles from './data-products-inbox.module.scss';
 import { DataProductsList } from './data-products-list.tsx';

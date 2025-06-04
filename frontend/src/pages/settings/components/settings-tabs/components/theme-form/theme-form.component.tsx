@@ -1,6 +1,6 @@
 import { CloseOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
-import { Button, Flex, Form, FormProps, Input, Space, Typography } from 'antd';
-import { useEffect, useState } from 'react';
+import { Button, Flex, Form, type FormProps, Input, Skeleton, Space, Typography } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
@@ -20,12 +20,6 @@ export function ThemeSettingsForm() {
     const [canEditForm, setCanEditForm] = useState(false);
 
     const isLoading = isFetching || isUpdating;
-
-    useEffect(() => {
-        if (data) {
-            form.setFieldsValue(data);
-        }
-    }, [isFetching, data, form]);
 
     const onSubmit: FormProps<ThemeSettings>['onFinish'] = async (values) => {
         try {
@@ -60,6 +54,10 @@ export function ThemeSettingsForm() {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
+    if (!data) {
+        return <Skeleton active />;
+    }
+
     return (
         <Flex vertical className={styles.container}>
             <Flex className={styles.globalSettingsHeader}>
@@ -68,15 +66,15 @@ export function ThemeSettingsForm() {
                     {canEditForm ? (
                         <>
                             <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>
-                                Save
+                                {t('Save')}
                             </Button>
                             <Button icon={<CloseOutlined />} onClick={handleCancel}>
-                                Cancel
+                                {t('Cancel')}
                             </Button>
                         </>
                     ) : (
                         <Button type="default" icon={<EditOutlined />} onClick={handleEdit}>
-                            Edit
+                            {t('Edit')}
                         </Button>
                     )}
                 </Space>

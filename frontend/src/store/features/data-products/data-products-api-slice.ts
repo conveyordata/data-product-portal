@@ -18,9 +18,9 @@ import {
     DataProductGetSignInUrlResponse,
     DataProductGetSnowflakeUrlRequest,
     DataProductGetSnowflakeUrlResponse,
-    DataProductsGetContract,
     DataProductUpdateRequest,
     DataProductUpdateResponse,
+    DataProductsGetContract,
 } from '@/types/data-product';
 import { GraphContract } from '@/types/graph/graph-contract';
 import {

@@ -35,6 +35,11 @@ const config = (() => {
          * This should be a route in the application that handles post-logout actions.
          */
         OIDC_POST_LOGOUT_REDIRECT_URI: '',
+        /**
+         * The Theme configuration for your application.
+         * Pick one from blueThemeConfig, datamindedThemeConfig, greenThemeConfig.
+         * @description This is used to customize the appearance of your application.
+         */
         THEME_CONFIGURATION: 'datamindedthemeconfig',
     };
 })();

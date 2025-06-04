@@ -22,7 +22,7 @@ export function DataOutputPlatformTile<T extends string>({
     isLoading,
     isDisabled,
     isSelected,
-    onTileClick = () => {},
+    onTileClick = (): void => undefined,
 }: Props<T>) {
     const isDisabledDropdown = isDisabled || dataPlatform.disabled;
 

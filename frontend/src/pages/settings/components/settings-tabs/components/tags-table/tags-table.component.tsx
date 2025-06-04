@@ -9,13 +9,13 @@ import { useGetAllTagsQuery, useRemoveTagMutation } from '@/store/features/tags/
 import type { TagContract } from '@/types/tag/tag';
 
 import { CreateTagsModal } from './tags-form-modal.component';
-import styles from './tags-table.module.scss';
 import { getTagsTableColums } from './tags-table-columns';
+import styles from './tags-table.module.scss';
 
 export function TagsTable() {
     const { t } = useTranslation();
     const { data: tags = [], isFetching } = useGetAllTagsQuery();
-    const { pagination, handlePaginationChange } = useTablePagination({});
+    const { pagination, handlePaginationChange } = useTablePagination(tags);
     const { isVisible, handleOpen, handleClose } = useModal();
     const [onRemoveTag, { isLoading: isRemoving }] = useRemoveTagMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
