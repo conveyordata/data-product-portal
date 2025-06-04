@@ -49,7 +49,7 @@ export function RedshiftDataOutputForm({ form, identifiers, namespace, sourceAli
         }
 
         form.setFieldsValue({ result: result });
-    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireSchema, form]);
+    }, [databaseValue, schemaValue, tableValue, entireSchema, form]);
 
     return (
         <div>

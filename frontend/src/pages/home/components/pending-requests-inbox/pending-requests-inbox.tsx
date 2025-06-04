@@ -1,13 +1,12 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
-import { Badge, Col, Empty, Flex, Pagination, theme, Typography } from 'antd';
-import { TFunction } from 'i18next';
-import { useEffect, useMemo, useState } from 'react';
+import { Badge, Col, Empty, Flex, Pagination, Typography, theme } from 'antd';
+import type { TFunction } from 'i18next';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
-import { useListPagination } from '@/hooks/use-list-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
@@ -15,6 +14,8 @@ import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } 
 import { ActionResolveRequest, PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 
+import { DEFAULT_LIST_PAGINATION } from '@/constants/list.constants.ts';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import styles from './pending-requests-inbox.module.scss';
 import { PendingRequestsList } from './pending-requests-list';
 import { CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
@@ -224,7 +225,9 @@ export function PendingRequestsInbox() {
             });
     }, [pendingActions, t, dataProductColor, datasetColor]);
 
-    const { pagination, handlePaginationChange, resetPagination } = useListPagination({});
+    const { pagination, handlePaginationChange } = useTablePagination(pendingItems, {
+        initialPagination: DEFAULT_LIST_PAGINATION,
+    });
 
     const handlePageChange = (page: number, pageSize: number) => {
         handlePaginationChange({
@@ -243,10 +246,6 @@ export function PendingRequestsInbox() {
             return new Date(a.date).getTime() - new Date(b.date).getTime();
         });
     }, [pendingItems, selectedTypes]);
-
-    useEffect(() => {
-        resetPagination();
-    }, [slicedPendingActionItems, resetPagination]);
 
     const handleTabChange = (key: CustomPendingRequestsTabKey) => {
         setActiveTab(key);

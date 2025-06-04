@@ -7,8 +7,8 @@ import { useNavigate } from 'react-router';
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
 import { ActionResolveRequest } from '@/types/pending-actions/pending-actions';
-import { ListPaginationConfig } from '@/types/shared/lists';
 import { formatDate } from '@/utils/date.helper.ts';
+import { PaginationConfig } from 'antd/es/pagination';
 
 type PendingActionItem = {
     key: string;
@@ -26,11 +26,10 @@ type PendingActionItem = {
 
 type PendingRequestsListProps = {
     pendingActionItems: PendingActionItem[];
-    pagination: ListPaginationConfig;
+    pagination: PaginationConfig;
     onAccept: (request: ActionResolveRequest) => void;
     onReject: (request: ActionResolveRequest) => void;
 };
-
 export const PendingRequestsList = ({
     pendingActionItems,
     pagination,

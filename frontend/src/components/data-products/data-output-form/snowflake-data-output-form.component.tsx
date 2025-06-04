@@ -47,7 +47,7 @@ export function SnowflakeDataOutputForm({ form, identifiers, namespace, sourceAl
         }
 
         form.setFieldsValue({ result: result });
-    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireDatabase, form]);
+    }, [databaseValue, schemaValue, tableValue, entireDatabase, form]);
 
     return (
         <div>

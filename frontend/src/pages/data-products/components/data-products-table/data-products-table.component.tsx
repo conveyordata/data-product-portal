@@ -1,6 +1,6 @@
 import type { RadioChangeEvent } from 'antd';
 import { Button, Flex, Form, Input, Pagination, Space, Table, Typography } from 'antd';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
@@ -36,20 +36,17 @@ export function DataProductsTable() {
     const { quickFilter, onQuickFilterChange, quickFilterOptions } = useQuickFilter({});
     const navigate = useNavigate();
     const { data: dataProducts = [], isFetching } = useGetAllDataProductsQuery();
-    const { data: userDataProducts = [], isFetching: isFetchingUserDataProducts } = useGetUserDataProductsQuery(
-        currentUser?.id || '',
-        { skip: !currentUser },
-    );
+    const { data: userDataProducts = [] } = useGetUserDataProductsQuery(currentUser?.id || '', { skip: !currentUser });
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const canCreateDataProduct = access?.allowed ?? false;
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({});
+
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-
     const filteredDataProducts = useMemo(() => {
         const data = quickFilter === QuickFilterParticipation.Me ? userDataProducts : dataProducts;
         return filterDataProducts(data, searchTerm);
     }, [quickFilter, userDataProducts, dataProducts, searchTerm]);
+    const { pagination, handlePaginationChange } = useTablePagination(filteredDataProducts);
 
     const columns = useMemo(
         () => getDataProductTableColumns({ t, dataProducts: filteredDataProducts }),
@@ -71,12 +68,6 @@ export function DataProductsTable() {
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
         onQuickFilterChange(value);
     };
-
-    useEffect(() => {
-        if (!isFetching && !isFetchingUserDataProducts) {
-            resetPagination();
-        }
-    }, [filteredDataProducts, isFetching, isFetchingUserDataProducts, resetPagination]);
 
     return (
         <Flex vertical className={styles.tableContainer}>

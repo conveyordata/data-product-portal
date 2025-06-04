@@ -1,5 +1,5 @@
 import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
@@ -7,8 +7,8 @@ import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import type { DatasetLink } from '@/types/data-product';
 
-import styles from './dataset-table.module.scss';
 import { getDataProductDatasetsColumns } from './dataset-table-columns.tsx';
+import styles from './dataset-table.module.scss';
 
 type Props = {
     dataProductId: string;
@@ -18,17 +18,13 @@ export function DatasetTable({ dataProductId, datasets }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+    const { pagination, handlePaginationChange } = useTablePagination(datasets, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
     const onChange: TableProps<DatasetLink>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
-
-    useEffect(() => {
-        resetPagination();
-    }, [datasets, resetPagination]);
 
     const columns: TableColumnsType<DatasetLink> = useMemo(() => {
         return getDataProductDatasetsColumns({

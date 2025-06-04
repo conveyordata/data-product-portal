@@ -62,13 +62,10 @@ repos:
       name: add-helm-version
       entry: ./add_helm_version.sh
       language: script
-    - id: prettier
-      name: prettier
+    - id: local-biome-check
+      name: biome check
+      entry: bash -c "cd frontend && npx biome check --write --files-ignore-unknown=true --no-errors-on-unmatched"
+      language: system
+      types: [text]
+      files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css|svelte|vue|astro|graphql|gql)$"
       exclude: ^docs/
-      entry: bash -c "cd frontend && npm run format"
-      language: node
-    - id: lint
-      name: lint
-      exclude: ^docs/
-      entry: bash -c "cd frontend && npm run lint"
-      language: node

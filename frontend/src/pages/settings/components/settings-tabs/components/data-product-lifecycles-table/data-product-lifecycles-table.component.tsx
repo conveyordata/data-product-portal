@@ -12,14 +12,14 @@ import {
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 
-import styles from './data-product-lifecycles-table.module.scss';
 import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
+import styles from './data-product-lifecycles-table.module.scss';
 import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.component.tsx';
 
 export function DataProductLifecyclesTable() {
     const { t } = useTranslation();
     const { data: dataProductLifecycles = [], isFetching } = useGetAllDataProductLifecyclesQuery();
-    const { pagination, handlePaginationChange } = useTablePagination({});
+    const { pagination, handlePaginationChange } = useTablePagination(dataProductLifecycles);
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductLifeCycleContract | undefined>(undefined);

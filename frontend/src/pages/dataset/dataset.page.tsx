@@ -81,6 +81,7 @@ export function Dataset() {
                             lifecycle={dataset.lifecycle}
                             description={dataset.description}
                             domain={dataset.domain.name}
+                            namespace={dataset.namespace}
                             accessType={getDatasetAccessTypeLabel(t, dataset.access_type)}
                             tags={[
                                 ...dataset.tags,

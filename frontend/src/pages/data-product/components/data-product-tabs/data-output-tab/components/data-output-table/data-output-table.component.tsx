@@ -1,5 +1,5 @@
 import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
@@ -11,8 +11,8 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputsGetContract } from '@/types/data-output';
 
-import styles from './data-output-table.module.scss';
 import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
+import styles from './data-output-table.module.scss';
 
 type Props = {
     dataProductId: string;
@@ -23,17 +23,13 @@ export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
     const [removeDataOutput] = useRemoveDataOutputMutation();
 
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+    const { pagination, handlePaginationChange } = useTablePagination(dataOutputs, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
     const onChange: TableProps<DataOutputsGetContract[0]>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
-
-    useEffect(() => {
-        resetPagination();
-    }, [dataOutputs, resetPagination]);
 
     const handleRemoveDataOutput = useCallback(
         async (dataOutputId: string, name: string) => {

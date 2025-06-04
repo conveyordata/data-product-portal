@@ -99,6 +99,7 @@ export function DataProduct() {
                             type={dataProduct.type.name}
                             description={dataProduct.description}
                             domain={dataProduct.domain.name}
+                            namespace={dataProduct.namespace}
                             tags={[
                                 ...dataProduct.tags,
                                 ...dataProduct.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),
