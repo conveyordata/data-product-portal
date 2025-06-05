@@ -64,3 +64,19 @@ export interface DatasetRoleAssignmentContract {
     decided_on?: string;
     decided_by?: UserContract;
 }
+
+export interface GlobalRoleAssignmentContract {
+    id: string;
+    user: UserContract;
+    role: RoleContract;
+    decision: DecisionStatus;
+    requested_on?: string;
+    requested_by?: UserContract;
+    decided_on?: string;
+    decided_by?: UserContract;
+}
+
+export interface GlobalRoleAssignmentCreateContract {
+    user_id: string;
+    role_id: string;
+}

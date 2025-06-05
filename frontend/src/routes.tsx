@@ -30,6 +30,7 @@ import { PlatformServiceConfigCreate } from './pages/platform-service-config-cre
 import { PlatformServiceConfig } from './pages/platform-service-config/platform-service-config.page.tsx';
 import { PlatformsConfigs } from './pages/platforms-configs/platforms-configs.page.tsx';
 import { Settings } from './pages/settings/settings.page.tsx';
+import { Users } from './pages/users/users.page.tsx';
 
 const router = createBrowserRouter([
     {
@@ -95,6 +96,10 @@ const router = createBrowserRouter([
                                 element: <DatasetEdit />,
                             },
                         ],
+                    },
+                    {
+                        path: ApplicationPaths.Users,
+                        element: <Users />,
                     },
                     {
                         path: ApplicationPaths.AuditLogs,

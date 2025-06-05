@@ -1,7 +1,9 @@
+from typing import Sequence
 from uuid import UUID
 
 from pydantic import EmailStr
 
+from app.role_assignments.global_.schema import RoleAssignmentResponse
 from app.shared.schema import ORMModel
 
 
@@ -18,4 +20,4 @@ class UserGet(BaseUserGet):
 
 
 class UsersGet(BaseUserGet):
-    pass
+    global_roles: Sequence[RoleAssignmentResponse]

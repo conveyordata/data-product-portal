@@ -1,5 +1,5 @@
-import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Space } from 'antd';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
@@ -56,6 +56,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
     const [deleteDataProduct, { isLoading: isArchiving }] = useRemoveDataProductMutation();
     const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataProductNamespaceSuggestionQuery();
+
+    const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
     const [validateNamespace] = useLazyValidateDataProductNamespaceQuery();
     const { data: namespaceLengthLimits } = useGetDataProductNamespaceLengthLimitsQuery();
 
@@ -96,10 +98,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
     const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
-    const userSelectOptions = dataProductOwners.map((owner) => ({
-        label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
-        value: owner.id,
-    }));
+    const userSelectOptions = dataProductOwners.map((owner) => ({ label: owner.email, value: owner.id }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id }));
 
     const onFinish: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
@@ -201,32 +200,30 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
+    useEffect(() => {
+        if (currentDataProduct && mode === 'edit') {
+            console.log(ownerIds);
+            form.setFieldsValue({
+                namespace: currentDataProduct.namespace,
+                name: currentDataProduct.name,
+                description: currentDataProduct.description,
+                type_id: currentDataProduct.type.id,
+                lifecycle_id: currentDataProduct.lifecycle.id,
+                domain_id: currentDataProduct.domain.id,
+                tag_ids: currentDataProduct.tags.map((tag) => tag.id),
+                owners: ownerIds,
+            });
+        }
+    }, [currentDataProduct, form, mode, ownerIds]);
+
     const validateNamespaceCallback = useCallback(
         (namespace: string) => validateNamespace(namespace).unwrap(),
         [validateNamespace],
     );
 
-    const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
-
-    if (mode === 'edit' && (!currentDataProduct || ownerIds === undefined)) {
-        return <Skeleton active />;
-    }
-
-    const initialValues = {
-        name: currentDataProduct?.name,
-        namespace: currentDataProduct?.namespace,
-        description: currentDataProduct?.description,
-        type_id: currentDataProduct?.type.id,
-        lifecycle_id: currentDataProduct?.lifecycle.id,
-        domain_id: currentDataProduct?.domain.id,
-        tag_ids: currentDataProduct?.tags.map((tag) => tag.id),
-        owners: ownerIds,
-    };
-
     return (
         <Form<DataProductCreateFormSchema>
             form={form}
-            labelWrap
             labelCol={FORM_GRID_WRAPPER_COLS}
             wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
@@ -234,8 +231,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             onFinishFailed={onFinishFailed}
             autoComplete={'off'}
             requiredMark={'optional'}
+            labelWrap
             disabled={isLoading || !canSubmit}
-            initialValues={initialValues}
         >
             <Form.Item<DataProductCreateFormSchema>
                 name={'name'}

@@ -26,6 +26,7 @@
     "Yes": "Yes",
     "No": "No",
     "Delete": "Delete",
+    "Users": "Users",
     "Glue database": "Glue database",
     "Snowflake schema": "Snowflake schema",
     "Databricks schema": "Databricks schema",

@@ -1,6 +1,7 @@
 export enum TagTypes {
     DataProduct = 'DataProduct',
     DataProductAssignments = 'DataProductAssignments',
+    GlobalAssignments = 'GlobalAssignments',
     UserDataProducts = 'UserDataProducts',
     UserDatasets = 'UserDatasets',
     UserDataOutputs = 'UserDataOutputs',
