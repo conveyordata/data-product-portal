@@ -131,11 +131,7 @@ export function Notifications() {
                 style={{ fontSize: 10 }}
                 size="small"
             >
-                <Dropdown
-                    placement={'bottomRight'}
-                    menu={{ items }}
-                    trigger={['click']}
-                >
+                <Dropdown placement={'bottomRight'} menu={{ items }} trigger={['click']}>
                     <Space>
                         <Button shape={'circle'} className={styles.iconButton} icon={<BellOutlined />} />
                     </Space>
