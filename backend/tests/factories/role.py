@@ -13,7 +13,7 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = Role
 
     id = factory.Faker("uuid4")
-    name = factory.Faker("job")
+    name = factory.Faker("word")
     scope = factory.Faker(
         "random_element", elements=("global", "data_product", "dataset")
     )
