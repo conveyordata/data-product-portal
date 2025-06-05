@@ -52,6 +52,7 @@ declare global {
     const config: Config;
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: Fine for the config
 export class AppConfig {
     public static getThemeConfiguration(): ThemeConfig {
         const themeMapping: Record<string, ThemeConfig> = {

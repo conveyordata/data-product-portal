@@ -41,7 +41,7 @@ export const getDataProductDataOutputsColumns = ({
                         popover={{ title: name, content: description }}
                         linkTo={createDataOutputIdPath(id, owner_id)}
                         icon={
-                            <CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration.configuration_type)!} />
+                            <CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration.configuration_type)} />
                         }
                         title={name}
                         subtitle={

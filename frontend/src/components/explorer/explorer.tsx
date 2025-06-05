@@ -3,7 +3,7 @@ import '@xyflow/react/dist/base.css';
 import type { Node, XYPosition } from '@xyflow/react';
 import { Position, ReactFlowProvider } from '@xyflow/react';
 import { Flex, theme } from 'antd';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
@@ -36,7 +36,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
                         nodeToolbarActions: node.isMain ? (
                             ''
                         ) : (
-                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id!} />
+                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id} />
                         ),
                         sourceHandlePosition: Position.Left,
                         isActive: true,
@@ -90,19 +90,16 @@ function InternalExplorer({ id, type }: Props) {
     const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== 'dataset' || !id });
     const dataOutputQuery = useGetDataOutputGraphDataQuery(id, { skip: type !== 'dataoutput' || !id });
 
-    let graphDataQuery;
-
-    switch (type) {
-        case 'dataproduct':
-            graphDataQuery = dataProductQuery;
-            break;
-        case 'dataset':
-            graphDataQuery = datasetQuery;
-            break;
-        case 'dataoutput':
-            graphDataQuery = dataOutputQuery;
-            break;
-    }
+    const graphDataQuery = useMemo(() => {
+        switch (type) {
+            case 'dataproduct':
+                return dataProductQuery;
+            case 'dataset':
+                return datasetQuery;
+            case 'dataoutput':
+                return dataOutputQuery;
+        }
+    }, [dataProductQuery, datasetQuery, dataOutputQuery, type]);
 
     const { data: graph, isFetching } = graphDataQuery;
     const generateGraph = useCallback(() => {

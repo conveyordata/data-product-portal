@@ -39,7 +39,7 @@ export function DataOutputNode({
                     isMainNode,
                     name,
                     id,
-                    icon: getDataOutputIcon(icon_key)!,
+                    icon: getDataOutputIcon(icon_key),
                     borderType: 'square',
                     nodeToolbarActions,
                     targetHandlePosition,

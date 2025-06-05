@@ -34,7 +34,7 @@ function parseFullNodes(
                         nodeToolbarActions: node.isMain ? (
                             ''
                         ) : (
-                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id!} />
+                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id} />
                         ),
                         sourceHandlePosition: Position.Left,
                         isActive: true,
@@ -150,16 +150,6 @@ function InternalFullExplorer() {
         domainsEnabled: false,
     });
 
-    useEffect(() => {
-        // Give React Flow time to update its internals
-        const timeout = setTimeout(() => {
-            currentInstance.fitView();
-            setNodeId(null); // Reset nodeId when the graph is updated
-        }, 50); // 50ms is usually enough
-
-        return () => clearTimeout(timeout);
-    }, [sidebarFilters, currentInstance]);
-
     const [nodeId, setNodeId] = useState<string | null>(null);
 
     const { data: graph, isFetching } = useGetGraphDataQuery(
@@ -169,10 +159,20 @@ function InternalFullExplorer() {
             includeDataOutputs: sidebarFilters.dataOutputsEnabled,
             includeDomains: sidebarFilters.domainsEnabled,
         },
-        {
-            skip: false,
-        },
+        { skip: false },
     );
+
+    useEffect(() => {
+        if (!isFetching) {
+            // Give React Flow time to update its internals
+            const timeout = setTimeout(() => {
+                currentInstance.fitView();
+                setNodeId(null); // Reset nodeId when the graph is updated
+            }, 50); // 50ms is usually enough
+
+            return () => clearTimeout(timeout);
+        }
+    }, [isFetching, currentInstance]);
 
     const generateGraph = useCallback(() => {
         if (graph) {

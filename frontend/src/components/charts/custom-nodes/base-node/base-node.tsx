@@ -15,7 +15,8 @@ export type BaseNodeProps = Node<{
     name: string;
     icon:
         | ComponentType<CustomIconComponentProps | SVGProps<SVGSVGElement>>
-        | ForwardRefExoticComponent<CustomIconComponentProps>;
+        | ForwardRefExoticComponent<CustomIconComponentProps>
+        | undefined;
     borderType?: 'square' | 'round';
     isMainNode?: boolean;
     nodeToolbarActions?: ReactNode;

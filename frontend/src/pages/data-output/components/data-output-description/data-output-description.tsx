@@ -42,7 +42,9 @@ export function DataOutputDescription({ status, type, description, tags, namespa
                 </Space>
                 <Flex>
                     {tags.map((tag) => (
-                        <Tag color="success">{tag.value}</Tag>
+                        <Tag color="success" key={tag.id}>
+                            {tag.value}
+                        </Tag>
                     ))}
                 </Flex>
                 <Space>

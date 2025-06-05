@@ -19,6 +19,7 @@ import type {
     DataProductSettingType,
 } from '@/types/data-product-setting';
 
+import { useTranslation } from 'react-i18next';
 import styles from './data-product-settings-table.module.scss';
 
 const { Option } = Select;
@@ -26,15 +27,6 @@ const { Option } = Select;
 type Mode = 'create' | 'edit';
 
 const DEBOUNCE = 500;
-
-interface CreateSettingModalProps {
-    onClose: () => void;
-    t: TFunction;
-    isOpen: boolean;
-    mode: Mode;
-    scope: DataProductSettingScope;
-    initial?: DataProductSettingContract;
-}
 
 interface DataProductSettingValueForm {
     name: string;
@@ -126,7 +118,15 @@ const initialDefaultValue = (type: DataProductSettingType) => {
     }
 };
 
-export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose, scope, mode, initial }) => {
+type Props = {
+    onClose: () => void;
+    isOpen: boolean;
+    mode: Mode;
+    scope: DataProductSettingScope;
+    initial: DataProductSettingContract;
+};
+export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Props) {
+    const { t } = useTranslation();
     const [form] = Form.useForm();
     const [createDataProductSetting] = useCreateDataProductSettingMutation();
     const [updateDataProductSetting] = useUpdateDataProductSettingMutation();
@@ -168,7 +168,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 await createDataProductSetting(newSetting);
             } else {
                 const updateSetting: DataProductSettingContract = {
-                    ...initial!,
+                    ...initial,
                     ...values,
                     default: values.default.toString(),
                 };
@@ -311,4 +311,4 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
             </Form>
         </FormModal>
     );
-};
+}

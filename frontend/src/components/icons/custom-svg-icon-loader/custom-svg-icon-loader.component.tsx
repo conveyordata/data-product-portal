@@ -8,7 +8,8 @@ import styles from './custom-svg-icon-loader.module.scss';
 type Props = {
     iconComponent:
         | ComponentType<CustomIconComponentProps | SVGProps<SVGSVGElement>>
-        | ForwardRefExoticComponent<CustomIconComponentProps>;
+        | ForwardRefExoticComponent<CustomIconComponentProps>
+        | undefined;
     size?: 'x-small' | 'small' | 'default' | 'large' | 'x-large';
     hasRoundBorder?: boolean;
     hasSquareBorder?: boolean;

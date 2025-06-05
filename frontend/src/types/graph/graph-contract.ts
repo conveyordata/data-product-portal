@@ -8,7 +8,7 @@ export interface NodeContract {
         id: string;
         name: string;
         icon_key: string | undefined;
-        link_to_id: string | undefined;
+        link_to_id: string;
         domain: string | undefined;
         domain_id: string | undefined;
         assignments: Array<DataProductRoleAssignmentContract> | undefined;

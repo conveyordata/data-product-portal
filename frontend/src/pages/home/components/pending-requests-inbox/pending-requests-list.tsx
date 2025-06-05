@@ -10,7 +10,7 @@ import type { ActionResolveRequest } from '@/types/pending-actions/pending-actio
 import { formatDate } from '@/utils/date.helper.ts';
 import type { PaginationConfig } from 'antd/es/pagination';
 
-type PendingActionItem = {
+export type PendingActionItem = {
     key: string;
     description: ReactNode;
     navigatePath: string;

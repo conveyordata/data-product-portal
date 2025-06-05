@@ -91,6 +91,7 @@ export enum ApiUrl {
 
 export type DynamicPathParams =
     | 'dataProductId'
+    | 'dataProductTypeId'
     | 'dataOutputId'
     | 'datasetId'
     | 'datasetLinkId'

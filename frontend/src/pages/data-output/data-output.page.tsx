@@ -56,14 +56,15 @@ export function DataOutput() {
         }
     }
 
-    if (isLoading || !dataOutput || dataOutputOwners === undefined) return <LoadingSpinner />;
+    if (isLoading || !dataOutput || dataOutputOwners === undefined || dataOutputTypeIcon === undefined)
+        return <LoadingSpinner />;
 
     return (
         <Flex className={styles.dataOutputContainer}>
             <Flex vertical className={styles.content}>
                 <Flex className={styles.headerContainer}>
                     <Space className={styles.header}>
-                        <CustomSvgIconLoader iconComponent={dataOutputTypeIcon!} size="large" />
+                        <CustomSvgIconLoader iconComponent={dataOutputTypeIcon} size="large" />
                         <Typography.Title level={3} ellipsis={{ tooltip: dataOutput?.name, rows: 2 }}>
                             {dataOutput.name}
                         </Typography.Title>
@@ -85,7 +86,7 @@ export function DataOutput() {
                         <DataOutputDescription
                             status={dataOutput.status}
                             namespace={dataOutput.namespace}
-                            type={dataOutput.configuration.configuration_type!}
+                            type={dataOutput.configuration.configuration_type}
                             description={dataOutput.description}
                             tags={dataOutput.tags}
                         />

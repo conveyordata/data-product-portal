@@ -3,4 +3,4 @@ export interface DataOutputDatasetRemoveRequest {
     datasetId: string;
 }
 
-export type DataOutputDatasetRemoveResponse = {};
+export type DataOutputDatasetRemoveResponse = object;
