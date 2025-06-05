@@ -68,39 +68,37 @@ export function DataProductSettings({ id, scope }: Props) {
 
     const updatedSettings: (DataProductSettingContract & { value: string })[] = useMemo(() => {
         if (filteredSettings) {
-            if (scope == 'dataproduct') {
+            if (scope === 'dataproduct') {
                 return filteredSettings.map((setting) => {
                     const match = dataProduct?.data_product_settings?.find(
                         (dps) => dps.data_product_setting_id === setting.id,
                     );
                     return match ? { ...setting, value: match.value } : { ...setting, value: setting.default };
                 });
-            } else if (scope == 'dataset') {
+            }
+            if (scope === 'dataset') {
                 return filteredSettings.map((setting) => {
                     const match = dataset?.data_product_settings?.find(
                         (ds) => ds.data_product_setting_id === setting.id,
                     );
                     return match ? { ...setting, value: match.value } : { ...setting, value: setting.default };
                 });
-            } else {
-                return [];
             }
-        } else {
-            return [];
         }
+        return [];
     }, [filteredSettings, scope, dataProduct?.data_product_settings, dataset?.data_product_settings]);
 
     const onSubmit: FormProps<DataProductSettingValueForm>['onFinish'] = useCallback(
         async (values: DataProductSettingValueForm) => {
             try {
-                let id: string = '';
+                let id = '';
                 if (dataProduct) {
                     id = dataProduct.id;
                 }
                 if (dataset) {
                     id = dataset.id;
                 }
-                if (id != '') {
+                if (id !== '') {
                     updatedSettings?.map(async (setting) => {
                         const key = `data_product_settings_id_${setting.id}`;
                         if (values[`value_${setting.id}`].toString() !== setting.value) {

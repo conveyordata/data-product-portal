@@ -1,4 +1,4 @@
-import { IdName } from '../shared';
+import type { IdName } from '../shared';
 
 export interface EnvironmentConfig {
     id: string;

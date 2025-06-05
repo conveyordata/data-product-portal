@@ -1,8 +1,8 @@
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { TagModel } from '@/types/tag';
+import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import type { TagModel } from '@/types/tag';
 
 import styles from './dataset-description.module.scss';
 

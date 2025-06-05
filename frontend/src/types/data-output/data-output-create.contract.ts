@@ -1,4 +1,4 @@
-import { DataOutputContract } from './data-output.contract';
+import type { DataOutputContract } from './data-output.contract';
 
 export type DataOutputCreate = Pick<
     DataOutputContract,

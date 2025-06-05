@@ -102,7 +102,8 @@ export function RolesTable({ scope }: RolesTableProps) {
                     <Text className={styles.permissionInstance}>{record.name}</Text>
                 </QuestionTooltip>
             );
-        } else if (record.type === 'Group') {
+        }
+        if (record.type === 'Group') {
             record = record as PermissionGroup;
             return (
                 <Text className={styles.permissionGroup} strong>

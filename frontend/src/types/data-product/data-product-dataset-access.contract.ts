@@ -3,4 +3,4 @@ export interface DataProductDatasetAccessRequest {
     datasetId: string;
 }
 
-export interface DataProductDatasetAccessResponse {}
+export type DataProductDatasetAccessResponse = {};

@@ -1,5 +1,5 @@
-import { FormInstance } from 'antd';
-import { ReactNode } from 'react';
+import type { FormInstance } from 'antd';
+import type { ReactNode } from 'react';
 
 import { Searchbar } from '@/components/form';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';

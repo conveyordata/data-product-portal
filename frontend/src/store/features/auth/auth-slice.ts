@@ -2,7 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
 import { authApiSlice } from '@/store/features/auth/auth-api-slice.ts';
-import { UserContract } from '@/types/users';
+import type { UserContract } from '@/types/users';
 
 type AuthState = {
     user: UserContract | null;

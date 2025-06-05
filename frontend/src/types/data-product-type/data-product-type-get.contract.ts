@@ -1,6 +1,6 @@
-import { DataProductTypeContract } from '@/types/data-product-type';
+import type { DataProductTypeContract } from '@/types/data-product-type';
 
-import { DataProductContract } from '../data-product';
+import type { DataProductContract } from '../data-product';
 
 export type DataProductTypesGetContract = DataProductTypeContract & {
     data_product_count: number;

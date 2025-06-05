@@ -1,6 +1,6 @@
-import { DataProductContract } from '../data-product';
-import { DatasetContract } from '../dataset';
-import { DomainContract } from './domain.contract';
+import type { DataProductContract } from '../data-product';
+import type { DatasetContract } from '../dataset';
+import type { DomainContract } from './domain.contract';
 
 export type DomainsGetContract = DomainContract & {
     data_product_count: number;

@@ -9,7 +9,7 @@ import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/d
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
+import { type PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
 
 import styles from './notifications.module.scss';
 
@@ -23,7 +23,9 @@ export function Notifications() {
     const { data: pending_actions } = useGetPendingActionsQuery();
 
     const createPendingItem = useCallback((action: PendingAction, navigate: NavigateFunction, t: TFunction) => {
-        let link, description, navigatePath;
+        let link;
+        let description;
+        let navigatePath;
 
         switch (action.pending_action_type) {
             case PendingActionTypes.DataProductDataset:

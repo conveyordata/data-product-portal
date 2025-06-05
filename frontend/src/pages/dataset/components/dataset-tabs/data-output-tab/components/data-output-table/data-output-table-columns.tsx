@@ -1,10 +1,10 @@
-import { Badge, Button, Flex, Popconfirm, TableColumnsType } from 'antd';
-import { TFunction } from 'i18next';
+import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
+import type { TFunction } from 'i18next';
 
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import { DataOutputLink } from '@/types/dataset';
+import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
+import type { DataOutputLink } from '@/types/dataset';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';

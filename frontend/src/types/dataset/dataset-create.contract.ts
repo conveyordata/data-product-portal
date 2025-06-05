@@ -1,4 +1,4 @@
-import { DatasetContract } from '@/types/dataset';
+import type { DatasetContract } from '@/types/dataset';
 
 export type DatasetCreateRequest = Pick<
     DatasetContract,

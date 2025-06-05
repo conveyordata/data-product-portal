@@ -1,4 +1,4 @@
-import { DataProductSettingContract } from '@/types/data-product-setting';
+import type { DataProductSettingContract } from '@/types/data-product-setting';
 
 export type DataProductSettingValueCreateRequest = {
     data_product_id: string;

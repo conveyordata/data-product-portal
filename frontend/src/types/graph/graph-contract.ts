@@ -1,6 +1,6 @@
-import { CustomNodeTypes } from '@/components/charts/node-editor/node-types';
+import type { CustomNodeTypes } from '@/components/charts/node-editor/node-types';
 
-import { DataProductRoleAssignmentContract } from '../roles/role.contract';
+import type { DataProductRoleAssignmentContract } from '../roles/role.contract';
 
 export interface NodeContract {
     id: string;

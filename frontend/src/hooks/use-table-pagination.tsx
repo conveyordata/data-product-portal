@@ -56,7 +56,7 @@ export const useTablePagination = (elements: object[], props: Partial<Props> = {
     };
 
     useEffect(() => {
-        if (elements.length != pagination.total) {
+        if (elements.length !== pagination.total) {
             handleTotalChange(elements.length);
 
             if (pagination.current && pagination.current > elements.length) {

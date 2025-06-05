@@ -1,7 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
+import type { DataOutputDatasetContract, DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
 
 export const dataOutputsDatasetsTags: string[] = [
     TagTypes.DataOutput,

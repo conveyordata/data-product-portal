@@ -1,4 +1,4 @@
-import { Button, Flex, Form, Input, Space, Table, TableProps, Typography } from 'antd';
+import { Button, Flex, Form, Input, Space, Table, type TableProps, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
@@ -6,9 +6,9 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { buildUrl } from '@/api/api-urls';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useGetAllEnvironmentConfigsQuery } from '@/store/features/environments/environments-api-slice';
-import { EnvironmentConfigContract } from '@/types/environment';
-import { ApplicationPaths, DynamicPathParams, createEnvironmentConfigPath } from '@/types/navigation';
-import { SearchForm } from '@/types/shared';
+import type { EnvironmentConfigContract } from '@/types/environment';
+import { ApplicationPaths, type DynamicPathParams, createEnvironmentConfigPath } from '@/types/navigation';
+import type { SearchForm } from '@/types/shared';
 
 import { getEnvironmentConfigTableColumns } from './environment-configs-columns';
 import styles from './environment-configs-table.module.scss';

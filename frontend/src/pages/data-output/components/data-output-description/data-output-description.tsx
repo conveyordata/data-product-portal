@@ -1,8 +1,8 @@
 import { Badge, Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { DataOutputStatus } from '@/types/data-output';
-import { TagModel } from '@/types/tag';
+import type { DataOutputStatus } from '@/types/data-output';
+import type { TagModel } from '@/types/tag';
 import { getDataOutputType } from '@/utils/data-output-type.helper';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 

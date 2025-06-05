@@ -1,7 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { PendingAction } from '@/types/pending-actions/pending-actions';
+import type { PendingAction } from '@/types/pending-actions/pending-actions';
 
 export const pendingActionsTags: string[] = [
     TagTypes.DataProduct,

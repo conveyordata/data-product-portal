@@ -1,4 +1,4 @@
-import { Badge, Button, Flex, Popconfirm, TableColumnsType } from 'antd';
+import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
@@ -6,7 +6,7 @@ import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtit
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component';
-import { DataOutputsGetContract } from '@/types/data-output/data-outputs-get.contract';
+import type { DataOutputsGetContract } from '@/types/data-output/data-outputs-get.contract';
 import { createDataOutputIdPath } from '@/types/navigation';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';

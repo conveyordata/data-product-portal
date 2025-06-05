@@ -1,7 +1,10 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { PlatformServiceConfigCreateRequest, PlatformServiceConfigGetResponse } from '@/types/platform-service-config';
+import type {
+    PlatformServiceConfigCreateRequest,
+    PlatformServiceConfigGetResponse,
+} from '@/types/platform-service-config';
 
 type PlatformServiceConfigRequest = {
     platformId: string;
