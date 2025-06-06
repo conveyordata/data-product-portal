@@ -10,6 +10,6 @@ export interface UserContract {
 
 export type UsersGetContract = Array<
     UserContract & {
-        global_roles: GlobalRoleAssignmentContract[];
+        global_role: GlobalRoleAssignmentContract;
     }
 >;

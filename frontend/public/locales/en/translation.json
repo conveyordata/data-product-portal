@@ -518,5 +518,9 @@
     "Available": "Available",
     "Rejected": "Rejected",
     "Approved": "Approved",
-    "Denied": "Denied"
+    "Denied": "Denied",
+    "Showing {{range0}}-{{range1}} of {{total}} users": "Showing {{range0}}-{{range1}} of {{total}} users",
+    "Search users by name": "Search users by name",
+    "Global Role": "Global Role",
+    "Email": "Email"
 }

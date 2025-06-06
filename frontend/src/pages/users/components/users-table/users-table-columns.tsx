@@ -20,7 +20,7 @@ export const getUserTableColumns = ({
     users: UsersGetContract;
     canAssignRole: boolean;
     allRoles: RoleContract[];
-    onChange: (user_id: string, value: string[], originals: string[]) => void;
+    onChange: (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => void;
 }): TableColumnsType<UsersGetContract[0]> => {
     const sorter = new Sorter<UsersGetContract[0]>();
     return [
@@ -60,35 +60,29 @@ export const getUserTableColumns = ({
         },
         {
             title: t('Global Role'),
-            dataIndex: 'global_roles',
+            dataIndex: 'global_role',
             ellipsis: {
                 showTitle: false,
             },
-            render: (roles: GlobalRoleAssignmentContract[], record) => {
+            render: (role: GlobalRoleAssignmentContract | null, record) => {
                 if (canAssignRole) {
                     const options = allRoles.map((role) => ({
                         label: role.name,
                         value: role.id,
                     }));
-                    const currentRole = roles.map((role: GlobalRoleAssignmentContract) => role.role.name);
-                    const originals = roles.map((role: GlobalRoleAssignmentContract) => role.id);
                     return (
                         <TableCellItem>
                             <Select
-                                mode="multiple"
-                                onChange={(value: string[]) => onChange(record.id, value, originals)}
-                                defaultValue={currentRole}
+                                onChange={(value: string) => onChange(record.id, value, role)}
+                                defaultValue={role?.role.name}
                                 className={styles.select}
                                 options={options}
+                                allowClear
                             />
                         </TableCellItem>
                     );
                 } else {
-                    return (
-                        <TableCellItem
-                            text={roles.map((role: GlobalRoleAssignmentContract) => role.role.name).join(',')}
-                        />
-                    );
+                    return <TableCellItem text={role?.role.name || ''} />;
                 }
             },
             // ...new FilterSettings(data, (user) => (user.email !== null ? user.email : '')),

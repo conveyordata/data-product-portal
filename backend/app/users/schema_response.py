@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Optional
 from uuid import UUID
 
 from pydantic import EmailStr
@@ -20,4 +20,4 @@ class UserGet(BaseUserGet):
 
 
 class UsersGet(BaseUserGet):
-    global_roles: Sequence[RoleAssignmentResponse]
+    global_role: Optional[RoleAssignmentResponse]

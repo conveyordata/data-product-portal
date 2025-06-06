@@ -17,7 +17,7 @@ class UserService:
     def get_users(self) -> Sequence[UsersGet]:
         return self.db.scalars(
             select(UserModel)
-            .outerjoin(UserModel.global_roles)
+            .outerjoin(UserModel.global_role)
             .where(UserModel.email != "systemaccount@noreply.com")
             .order_by(asc(UserModel.last_name), asc(UserModel.first_name))
         ).all()

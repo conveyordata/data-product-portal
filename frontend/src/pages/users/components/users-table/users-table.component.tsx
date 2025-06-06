@@ -53,28 +53,29 @@ export function UsersTable() {
     const [decideGlobalRole] = useDecideGlobalRoleAssignmentMutation();
     const [deleteGlobalRole] = useDeleteGlobalRoleAssignmentMutation();
 
-    const onChangeGlobalRole = (user_id: string, value: string[], originals: string[]) => {
-        originals
-            .filter((roleId) => !value.includes(roleId))
-            .forEach((roleId) => {
-                deleteGlobalRole({
-                    role_assignment_id: roleId,
-                })
-                    .unwrap()
-                    .then(() => {
-                        dispatchMessage({
-                            content: t('Global role removed successfully'),
-                            type: 'success',
-                        });
-                    })
-                    .catch(() => {
-                        dispatchMessage({ content: t('Could not remove global role'), type: 'error' });
+    const onChangeGlobalRole = (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => {
+        if (original?.role.id === value) {
+            return;
+        }
+        if (original !== null && value !== original.role.id) {
+            deleteGlobalRole({
+                role_assignment_id: original.id,
+            })
+                .unwrap()
+                .then(() => {
+                    dispatchMessage({
+                        content: t('Global role removed successfully'),
+                        type: 'success',
                     });
-            });
-        value.map((roleId) =>
+                })
+                .catch(() => {
+                    dispatchMessage({ content: t('Could not remove global role'), type: 'error' });
+                });
+        }
+        if (value) {
             updateGlobalRole({
                 user_id,
-                role_id: roleId,
+                role_id: value,
             })
                 .unwrap()
                 .then((result: GlobalRoleAssignmentContract) => {
@@ -95,8 +96,8 @@ export function UsersTable() {
                 })
                 .catch(() => {
                     dispatchMessage({ content: t('Could not update global role'), type: 'error' });
-                }),
-        );
+                });
+        }
     };
 
     const columns = useMemo(
@@ -108,7 +109,7 @@ export function UsersTable() {
                 allRoles: roles.filter((role) => role.name.toLowerCase() != 'everyone'),
                 onChange: onChangeGlobalRole,
             }),
-        [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole],
+        [t, filteredUsers, roles, canAssignGlobalRole],
     );
 
     const handlePageChange = (page: number, pageSize: number) => {

@@ -43,7 +43,7 @@ class User(Base, BaseORM):
     data_products: Mapped[list["DataProduct"]] = association_proxy(
         "data_product_roles", "data_product"
     )
-    global_roles: Mapped[list["GlobalRoleAssignment"]] = relationship(
+    global_role: Mapped["GlobalRoleAssignment"] = relationship(
         "GlobalRoleAssignment",
         foreign_keys="GlobalRoleAssignment.user_id",
         back_populates="user",
