@@ -43,6 +43,15 @@ def upgrade() -> None:
     bind = op.get_bind()
     session = orm.Session(bind=bind)
 
+    session.execute(
+        sa.text(
+            """
+            UPDATE environments
+            SET acronym = SUBSTRING(name, 1, 3)
+            """
+        )
+    )
+
     for service_name, result_template in result_templates.items():
         session.execute(
             sa.text(
