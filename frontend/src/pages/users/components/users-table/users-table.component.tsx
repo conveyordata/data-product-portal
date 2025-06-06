@@ -176,9 +176,6 @@ export function UsersTable() {
                 </Flex>
 
                 <Table<UsersGetContract[0]>
-                    // onRow={(record) => ({
-                    //     onClick: () => navigateToDataProduct(record.id),
-                    // })}
                     className={styles.table}
                     columns={columns}
                     dataSource={filteredUsers}
