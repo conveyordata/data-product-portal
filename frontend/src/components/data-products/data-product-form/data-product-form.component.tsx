@@ -1,13 +1,12 @@
-import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
+import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
 import {
@@ -23,14 +22,10 @@ import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slic
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
-import { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
-import { DataProductMembershipRole, DataProductUserMembershipCreateContract } from '@/types/data-product-membership';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import type { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateRequest } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
-import {
-    getDataProductMemberMemberships,
-    getDataProductOwnerIds,
-    getIsDataProductOwner,
-} from '@/utils/data-product-user-role.helper.ts';
+import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
 import styles from './data-product-form.module.scss';
@@ -47,14 +42,11 @@ type Props = {
 export function DataProductForm({ mode, dataProductId }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const currentUser = useSelector(selectCurrentUser);
+
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(
         dataProductId || '',
-        {
-            skip: mode === 'create' || !dataProductId,
-        },
+        { skip: mode === 'create' || !dataProductId },
     );
-
     const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
     const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
     const { data: dataProductTypes = [], isFetching: isFetchingDataProductTypes } = useGetAllDataProductTypesQuery();
@@ -72,13 +64,26 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
-    const canEditForm = Boolean(
-        mode === 'edit' &&
-            currentDataProduct &&
-            currentUser?.id &&
-            (getIsDataProductOwner(currentDataProduct, currentUser?.id) || currentUser?.is_admin),
+    const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
+    const { data: update_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
+        },
+        { skip: !dataProductId },
     );
-    const canFillInForm = mode === 'create' || canEditForm;
+    const { data: delete_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__DELETE,
+        },
+        { skip: !dataProductId },
+    );
+
+    const canCreate = mode === 'create' && (create_access?.allowed ?? false);
+    const canEdit = mode === 'edit' && (update_access?.allowed ?? false);
+    const canDelete = mode === 'edit' && (delete_access?.allowed ?? false);
+    const canSubmit = canCreate || canEdit;
 
     const isLoading =
         isCreating ||
@@ -91,22 +96,20 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
     const dataProductTypeSelectOptions = dataProductTypes.map((type) => ({ label: type.name, value: type.id }));
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
-    const userSelectOptions = dataProductOwners.map((owner) => ({ label: owner.email, value: owner.id }));
+    const userSelectOptions = dataProductOwners.map((owner) => ({
+        label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
+        value: owner.id,
+    }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id }));
 
-    const onSubmit: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
+    const onFinish: FormProps<DataProductCreateFormSchema>['onFinish'] = async (values) => {
         try {
-            const owners: DataProductUserMembershipCreateContract[] = values.owners.map((owner_id) => ({
-                user_id: owner_id,
-                role: DataProductMembershipRole.Owner,
-            }));
-
             if (mode === 'create') {
                 const request: DataProductCreate = {
                     name: values.name,
                     namespace: values.namespace,
                     description: values.description,
-                    memberships: owners,
+                    owners: values.owners,
                     lifecycle_id: values.lifecycle_id,
                     type_id: values.type_id,
                     tag_ids: values.tag_ids ?? [],
@@ -117,18 +120,10 @@ export function DataProductForm({ mode, dataProductId }: Props) {
 
                 navigate(createDataProductIdPath(response.id));
             } else if (mode === 'edit' && dataProductId) {
-                if (!canEditForm) {
+                if (!canEdit) {
                     dispatchMessage({ content: t('You are not allowed to edit this data product'), type: 'error' });
                     return;
                 }
-                const dataProductMembers = currentDataProduct
-                    ? getDataProductMemberMemberships(currentDataProduct)
-                    : [];
-                const dataProductOwnerIds = owners.map((owner) => owner.user_id);
-                const filteredMembers = dataProductMembers.filter(
-                    (member) => !dataProductOwnerIds.includes(member.user_id),
-                );
-                const memberships = [...owners, ...filteredMembers];
 
                 const request: DataProductUpdateRequest = {
                     name: values.name,
@@ -138,14 +133,13 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     lifecycle_id: values.lifecycle_id,
                     domain_id: values.domain_id,
                     tag_ids: values.tag_ids,
-                    memberships,
                 };
                 const response = await updateDataProduct({
                     dataProduct: request,
                     data_product_id: dataProductId,
                 }).unwrap();
-                dispatchMessage({ content: t('Data product updated successfully'), type: 'success' });
 
+                dispatchMessage({ content: t('Data product updated successfully'), type: 'success' });
                 navigate(createDataProductIdPath(response.id));
             }
 
@@ -166,12 +160,12 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     };
 
-    const onSubmitFailed: FormProps<DataProductCreateFormSchema>['onFinishFailed'] = () => {
+    const onFinishFailed: FormProps<DataProductCreateFormSchema>['onFinishFailed'] = () => {
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
     const handleDeleteDataProduct = async () => {
-        if (canEditForm && currentDataProduct) {
+        if (canDelete && currentDataProduct) {
             try {
                 await deleteDataProduct(currentDataProduct?.id).unwrap();
                 dispatchMessage({ content: t('Data product deleted successfully'), type: 'success' });
@@ -207,38 +201,41 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         }
     }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
-    useEffect(() => {
-        if (currentDataProduct && mode === 'edit') {
-            form.setFieldsValue({
-                namespace: currentDataProduct.namespace,
-                name: currentDataProduct.name,
-                description: currentDataProduct.description,
-                type_id: currentDataProduct.type.id,
-                lifecycle_id: currentDataProduct.lifecycle.id,
-                domain_id: currentDataProduct.domain.id,
-                tag_ids: currentDataProduct.tags.map((tag) => tag.id),
-                owners: getDataProductOwnerIds(currentDataProduct),
-            });
-        }
-    }, [currentDataProduct, form, mode]);
-
     const validateNamespaceCallback = useCallback(
         (namespace: string) => validateNamespace(namespace).unwrap(),
         [validateNamespace],
     );
 
+    const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
+
+    if (mode === 'edit' && (!currentDataProduct || ownerIds === undefined)) {
+        return <Skeleton active />;
+    }
+
+    const initialValues = {
+        name: currentDataProduct?.name,
+        namespace: currentDataProduct?.namespace,
+        description: currentDataProduct?.description,
+        type_id: currentDataProduct?.type.id,
+        lifecycle_id: currentDataProduct?.lifecycle.id,
+        domain_id: currentDataProduct?.domain.id,
+        tag_ids: currentDataProduct?.tags.map((tag) => tag.id),
+        owners: ownerIds,
+    };
+
     return (
-        <Form
+        <Form<DataProductCreateFormSchema>
             form={form}
+            labelWrap
             labelCol={FORM_GRID_WRAPPER_COLS}
             wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
-            onFinish={onSubmit}
-            onFinishFailed={onSubmitFailed}
+            onFinish={onFinish}
+            onFinishFailed={onFinishFailed}
             autoComplete={'off'}
             requiredMark={'optional'}
-            labelWrap
-            disabled={isLoading || !canFillInForm}
+            disabled={isLoading || !canSubmit}
+            initialValues={initialValues}
         >
             <Form.Item<DataProductCreateFormSchema>
                 name={'name'}
@@ -279,8 +276,9 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     mode={'multiple'}
                     options={userSelectOptions}
                     filterOption={selectFilterOptionByLabelAndValue}
-                    allowClear
+                    disabled={mode !== 'create'}
                     tokenSeparators={[',']}
+                    allowClear
                 />
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema>
@@ -363,46 +361,52 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             >
                 <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            {/* <DataProductSettings dataProductId={dataProductId}/> */}
             <Form.Item>
-                <Space>
-                    <Button
-                        className={styles.formButton}
-                        type="primary"
-                        htmlType={'submit'}
-                        loading={isCreating || isUpdating}
-                        disabled={isLoading || !canFillInForm}
-                    >
-                        {mode === 'edit' ? t('Edit') : t('Create')}
-                    </Button>
-                    <Button
-                        className={styles.formButton}
-                        type="default"
-                        onClick={onCancel}
-                        loading={isCreating || isUpdating}
-                        disabled={isLoading || !canFillInForm}
-                    >
-                        {t('Cancel')}
-                    </Button>
-                    {canEditForm && (
-                        <Popconfirm
-                            title={t('Are you sure you want to delete this data product?')}
-                            onConfirm={handleDeleteDataProduct}
-                            okText={t('Yes')}
-                            cancelText={t('No')}
-                        >
+                <Row>
+                    {mode !== 'create' && (
+                        <Col>
+                            <Popconfirm
+                                title={t('Are you sure you want to delete this data product?')}
+                                onConfirm={handleDeleteDataProduct}
+                                okText={t('Yes')}
+                                cancelText={t('No')}
+                            >
+                                <Button
+                                    className={styles.formButton}
+                                    type="default"
+                                    danger
+                                    loading={isArchiving}
+                                    disabled={isLoading || !canDelete}
+                                >
+                                    {t('Delete')}
+                                </Button>
+                            </Popconfirm>
+                        </Col>
+                    )}
+                    <Col flex="auto" />
+                    <Col>
+                        <Space>
                             <Button
                                 className={styles.formButton}
                                 type="default"
-                                danger
-                                loading={isArchiving}
+                                onClick={onCancel}
+                                loading={isCreating || isUpdating}
                                 disabled={isLoading}
                             >
-                                {t('Delete')}
+                                {t('Cancel')}
                             </Button>
-                        </Popconfirm>
-                    )}
-                </Space>
+                            <Button
+                                className={styles.formButton}
+                                type="primary"
+                                htmlType={'submit'}
+                                loading={isCreating || isUpdating}
+                                disabled={isLoading || !canSubmit}
+                            >
+                                {mode === 'edit' ? t('Save') : t('Create')}
+                            </Button>
+                        </Space>
+                    </Col>
+                </Row>
             </Form.Item>
         </Form>
     );

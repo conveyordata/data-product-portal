@@ -1,32 +1,25 @@
-import { Flex, Table, type TableColumnsType, TableProps } from 'antd';
-import { useCallback, useEffect, useMemo } from 'react';
+import { Flex, Skeleton, Table, type TableColumnsType, type TableProps } from 'antd';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import {
-    useGetDataOutputByIdQuery,
-    useRemoveDatasetFromDataOutputMutation,
-} from '@/store/features/data-outputs/data-outputs-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import type { DataOutputDatasetLink } from '@/types/data-output';
 
-import styles from './dataset-table.module.scss';
 import { getDataOutputDatasetsColumns } from './dataset-table-columns.tsx';
+import styles from './dataset-table.module.scss';
 
 type Props = {
-    isCurrentDataOutputOwner: boolean;
+    dataProductId: string | undefined;
     dataOutputId: string;
     datasets: DataOutputDatasetLink[];
 };
-
-export function DatasetTable({ isCurrentDataOutputOwner, dataOutputId, datasets }: Props) {
+export function DatasetTable({ dataProductId, dataOutputId, datasets }: Props) {
     const { t } = useTranslation();
     const { data: dataOutput, isLoading: isLoadingDataOutput } = useGetDataOutputByIdQuery(dataOutputId);
-    const [removeDatasetFromDataOutput, { isLoading: isRemovingDatasetFromDataOutput }] =
-        useRemoveDatasetFromDataOutputMutation();
 
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+    const { pagination, handlePaginationChange } = useTablePagination(datasets, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
@@ -34,57 +27,14 @@ export function DatasetTable({ isCurrentDataOutputOwner, dataOutputId, datasets 
         handlePaginationChange(pagination);
     };
 
-    useEffect(() => {
-        resetPagination();
-    }, [datasets, resetPagination]);
-
-    const handleRemoveDatasetFromDataOutput = useCallback(
-        async (datasetId: string, name: string) => {
-            try {
-                await removeDatasetFromDataOutput({ datasetId, dataOutputId: dataOutputId }).unwrap();
-                dispatchMessage({
-                    content: t('Dataset {{name}} has been removed from data output', { name }),
-                    type: 'success',
-                });
-            } catch (error) {
-                console.error('Failed to remove dataset from data output', error);
-            }
-        },
-        [dataOutputId, removeDatasetFromDataOutput, t],
-    );
-
-    const handleCancelDatasetLinkRequest = useCallback(
-        async (datasetId: string, name: string) => {
-            try {
-                await removeDatasetFromDataOutput({ datasetId, dataOutputId: dataOutputId }).unwrap();
-                dispatchMessage({
-                    content: t('Request to link dataset {{name}} has been cancelled', { name }),
-                    type: 'success',
-                });
-            } catch (error) {
-                console.error('Failed to cancel dataset link request', error);
-            }
-        },
-        [dataOutputId, removeDatasetFromDataOutput, t],
-    );
-
     const columns: TableColumnsType<DataOutputDatasetLink> = useMemo(() => {
         return getDataOutputDatasetsColumns({
-            onRemoveDataOutputDatasetLink: handleRemoveDatasetFromDataOutput,
-            onCancelDataOutputDatasetLinkRequest: handleCancelDatasetLinkRequest,
             t,
-            isDisabled: !isCurrentDataOutputOwner,
-            isLoading: isRemovingDatasetFromDataOutput,
+            dataProductId,
         });
-    }, [
-        handleRemoveDatasetFromDataOutput,
-        handleCancelDatasetLinkRequest,
-        t,
-        isCurrentDataOutputOwner,
-        isRemovingDatasetFromDataOutput,
-    ]);
+    }, [dataProductId, t]);
 
-    if (!dataOutput) return null;
+    if (!dataOutput) return <Skeleton />;
 
     return (
         <Flex className={styles.datasetListContainer}>

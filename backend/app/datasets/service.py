@@ -3,8 +3,9 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, raiseload
 
+from app.core.authz import Authorization
 from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
@@ -13,32 +14,45 @@ from app.core.namespace.validation import (
     NamespaceValidator,
     NamespaceValidityType,
 )
+from app.data_outputs.model import DataOutput
+from app.data_outputs_datasets.model import (
+    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+)
 from app.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
+from app.data_products_datasets.model import (
+    DataProductDatasetAssociation as DataProductDatasetAssociationModel,
+)
+from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.schema_request import (
     DatasetAboutUpdate,
-    DatasetCreateUpdate,
+    DatasetCreate,
     DatasetStatusUpdate,
+    DatasetUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.role_assignments.dataset.service import (
+    RoleAssignmentService as DatasetRoleAssignmentService,
+)
 from app.role_assignments.enums import DecisionStatus
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
-from app.users.model import User, ensure_user_exists
+from app.users.model import User
 
 
 class DatasetService:
-    def __init__(self):
+    def __init__(self, db: Session):
+        self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
 
-    def get_dataset(self, id: UUID, db: Session, user: User) -> DatasetGet:
-        dataset = db.get(
+    def get_dataset(self, id: UUID, user: User) -> DatasetGet:
+        dataset = self.db.get(
             DatasetModel,
             id,
             options=[
@@ -52,7 +66,7 @@ class DatasetService:
                 status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found"
             )
 
-        if not dataset.isVisibleToUser(user):
+        if not self.is_visible_to_user(dataset, user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private dataset",
@@ -65,7 +79,7 @@ class DatasetService:
         dataset.rolled_up_tags = rolled_up_tags
 
         if not dataset.lifecycle:
-            default_lifecycle = db.scalar(
+            default_lifecycle = self.db.scalar(
                 select(DataProductLifeCycleModel).where(
                     DataProductLifeCycleModel.is_default
                 )
@@ -74,25 +88,33 @@ class DatasetService:
 
         return dataset
 
-    def get_datasets(self, db: Session, user: User) -> Sequence[DatasetsGet]:
-        default_lifecycle = db.scalar(
+    def get_datasets(self, user: User) -> Sequence[DatasetsGet]:
+        default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
             )
         )
         datasets = [
             dataset
-            for dataset in db.scalars(
+            for dataset in self.db.scalars(
                 select(DatasetModel)
                 .options(
-                    joinedload(DatasetModel.data_output_links),
-                    joinedload(DatasetModel.data_product_links),
+                    joinedload(DatasetModel.data_product_links)
+                    .joinedload(DataProductDatasetAssociationModel.data_product)
+                    .raiseload("*"),
+                    joinedload(DatasetModel.data_output_links)
+                    .joinedload(DataOutputDatasetAssociationModel.data_output)
+                    .options(
+                        joinedload(DataOutput.configuration),
+                        joinedload(DataOutput.owner),
+                        raiseload("*"),
+                    ),
                 )
                 .order_by(asc(DatasetModel.name))
             )
             .unique()
             .all()
-            if dataset.isVisibleToUser(user)
+            if self.is_visible_to_user(dataset, user)
         ]
 
         for dataset in datasets:
@@ -100,48 +122,42 @@ class DatasetService:
                 dataset.lifecycle = default_lifecycle
         return datasets
 
-    def get_user_datasets(self, user_id: UUID, db: Session) -> Sequence[DatasetsGet]:
+    def get_user_datasets(self, user_id: UUID) -> Sequence[DatasetsGet]:
         return (
-            db.scalars(
+            self.db.scalars(
                 select(DatasetModel)
                 .options(
-                    joinedload(DatasetModel.data_product_links),
-                    joinedload(DatasetModel.data_output_links),
+                    joinedload(DatasetModel.data_product_links).raiseload("*"),
+                    joinedload(DatasetModel.data_output_links)
+                    .joinedload(DataOutputDatasetAssociationModel.data_output)
+                    .options(
+                        joinedload(DataOutput.configuration),
+                        joinedload(DataOutput.owner),
+                        raiseload("*"),
+                    ),
                 )
-                .filter(DatasetModel.owners.any(id=user_id))
+                .filter(DatasetModel.assignments.any(user_id=user_id))
                 .order_by(asc(DatasetModel.name))
             )
             .unique()
             .all()
         )
 
-    def _update_owners(
-        self, dataset: DatasetCreateUpdate, db: Session, owner_ids: Iterable[UUID] = ()
-    ) -> DatasetCreateUpdate:
-        if not owner_ids:
-            owner_ids = dataset.owners
-        dataset.owners = []
-        for owner in owner_ids:
-            user = ensure_user_exists(owner, db)
-            dataset.owners.append(user)
-        return dataset
-
-    def _fetch_tags(self, db: Session, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
+    def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
         for tag_id in tag_ids:
-            tag = ensure_tag_exists(tag_id, db)
+            tag = ensure_tag_exists(tag_id, self.db)
             tags.append(tag)
 
         return tags
 
     def create_dataset(
         self,
-        dataset: DatasetCreateUpdate,
-        db: Session,
+        dataset: DatasetCreate,
     ) -> DatasetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
-                dataset.namespace, db
+                dataset.namespace, self.db
             ).validity
         ) != NamespaceValidityType.VALID:
             raise HTTPException(
@@ -149,37 +165,35 @@ class DatasetService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        new_dataset = self._update_owners(dataset, db)
-        dataset_schema = new_dataset.parse_pydantic_schema()
-        tags = self._fetch_tags(db, dataset_schema.pop("tag_ids", []))
+        dataset_schema = dataset.parse_pydantic_schema()
+        tags = self._fetch_tags(dataset_schema.pop("tag_ids", []))
+        _ = dataset_schema.pop("owners", [])
         model = DatasetModel(**dataset_schema, tags=tags)
 
-        db.add(model)
-        db.commit()
+        self.db.add(model)
+        self.db.commit()
         RefreshInfrastructureLambda().trigger()
         return model
 
-    def remove_dataset(self, id: UUID, db: Session) -> None:
-        dataset = db.get(DatasetModel, id)
+    def remove_dataset(self, id: UUID) -> None:
+        dataset = self.db.get(DatasetModel, id)
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
             )
-        db.delete(dataset)
-        db.commit()
+        self.db.delete(dataset)
+        self.db.commit()
         RefreshInfrastructureLambda().trigger()
 
-    def update_dataset(
-        self, id: UUID, dataset: DatasetCreateUpdate, db: Session
-    ) -> dict[str, UUID]:
-        current_dataset = ensure_dataset_exists(id, db)
+    def update_dataset(self, id: UUID, dataset: DatasetUpdate) -> dict[str, UUID]:
+        current_dataset = ensure_dataset_exists(id, self.db)
         updated_dataset = dataset.model_dump(exclude_unset=True)
 
         if (
             current_dataset.namespace != dataset.namespace
             and (
                 validity := self.namespace_validator.validate_namespace(
-                    dataset.namespace, db
+                    dataset.namespace, self.db
                 ).validity
             )
             != NamespaceValidityType.VALID
@@ -190,67 +204,27 @@ class DatasetService:
             )
 
         for k, v in updated_dataset.items():
-            if k == "owners":
-                current_dataset = self._update_owners(current_dataset, db, v)
-            elif k == "tag_ids":
-                new_tags = self._fetch_tags(db, v)
+            if k == "tag_ids":
+                new_tags = self._fetch_tags(v)
                 current_dataset.tags = new_tags
             else:
                 setattr(current_dataset, k, v) if v else None
-        db.commit()
+        self.db.commit()
         RefreshInfrastructureLambda().trigger()
         return {"id": current_dataset.id}
 
-    def update_dataset_about(
-        self, id: UUID, dataset: DatasetAboutUpdate, db: Session
-    ) -> None:
-        current_dataset = ensure_dataset_exists(id, db)
+    def update_dataset_about(self, id: UUID, dataset: DatasetAboutUpdate) -> None:
+        current_dataset = ensure_dataset_exists(id, self.db)
         current_dataset.about = dataset.about
-        db.commit()
+        self.db.commit()
 
-    def update_dataset_status(
-        self, id: UUID, dataset: DatasetStatusUpdate, db: Session
-    ) -> None:
-        current_dataset = ensure_dataset_exists(id, db)
+    def update_dataset_status(self, id: UUID, dataset: DatasetStatusUpdate) -> None:
+        current_dataset = ensure_dataset_exists(id, self.db)
         current_dataset.status = dataset.status
-        db.commit()
+        self.db.commit()
 
-    def add_user_to_dataset(self, dataset_id: UUID, user_id: UUID, db: Session) -> None:
-        dataset = ensure_dataset_exists(dataset_id, db)
-        user = ensure_user_exists(user_id, db)
-        if user in dataset.owners:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"User {user_id} is already an owner of dataset {dataset_id}",
-            )
-
-        dataset.owners.append(user)
-        db.commit()
-        RefreshInfrastructureLambda().trigger()
-
-    def remove_user_from_dataset(
-        self, dataset_id: UUID, user_id: UUID, db: Session
-    ) -> None:
-        dataset = ensure_dataset_exists(dataset_id, db)
-        user = ensure_user_exists(user_id, db)
-
-        if user not in dataset.owners:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"User {user_id} is not an owner of dataset {dataset_id}",
-            )
-        elif len(dataset.owners) == 1:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Cannot remove the last owner of dataset {dataset_id}",
-            )
-
-        dataset.owners.remove(user)
-        db.commit()
-        RefreshInfrastructureLambda().trigger()
-
-    def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
-        dataset = db.get(
+    def get_graph_data(self, id: UUID, level: int) -> Graph:
+        dataset = self.db.get(
             DatasetModel,
             id,
             options=[
@@ -332,15 +306,37 @@ class DatasetService:
                 )
         return Graph(nodes=set(nodes), edges=set(edges))
 
-    def validate_dataset_namespace(
-        self, namespace: str, db: Session
-    ) -> NamespaceValidation:
-        return self.namespace_validator.validate_namespace(namespace, db)
+    def validate_dataset_namespace(self, namespace: str) -> NamespaceValidation:
+        return self.namespace_validator.validate_namespace(namespace, self.db)
 
-    def dataset_namespace_suggestion(
-        self, name: str, db: Session
-    ) -> NamespaceSuggestion:
-        return self.namespace_validator.namespace_suggestion(name)
+    @classmethod
+    def dataset_namespace_suggestion(cls, name: str) -> NamespaceSuggestion:
+        return NamespaceValidator.namespace_suggestion(name)
 
-    def dataset_namespace_length_limits(self) -> NamespaceLengthLimits:
-        return self.namespace_validator.namespace_length_limits()
+    @classmethod
+    def dataset_namespace_length_limits(cls) -> NamespaceLengthLimits:
+        return NamespaceValidator.namespace_length_limits()
+
+    def is_visible_to_user(self, dataset: DatasetModel, user: User) -> bool:
+        if (
+            dataset.access_type != DatasetAccessType.PRIVATE
+            or Authorization().has_admin_role(user_id=str(user.id))
+            or DatasetRoleAssignmentService(self.db).has_assignment(
+                dataset_id=dataset.id, user=user
+            )
+        ):
+            return True
+
+        consuming_data_products = {
+            link.data_product
+            for link in dataset.data_product_links
+            if link.status == DecisionStatus.APPROVED
+        }
+
+        user_data_products = {
+            assignment.data_product
+            for assignment in user.data_product_roles
+            if assignment.decision == DecisionStatus.APPROVED
+        }
+
+        return bool(consuming_data_products & user_data_products)

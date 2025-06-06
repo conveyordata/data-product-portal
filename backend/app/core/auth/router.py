@@ -5,8 +5,9 @@ from app.core.auth.auth import authorize_user
 from app.core.auth.credentials import AWSCredentials
 from app.core.auth.device_flows.router import router as device
 from app.core.auth.service import AuthService
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import DataProductNameResolver
 from app.database.database import get_db_session
-from app.dependencies import OnlyWithProductAccessName
 from app.users.schema import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -22,7 +23,15 @@ def authorize(
 
 @router.get(
     "/aws_credentials",
-    dependencies=[Depends(OnlyWithProductAccessName())],
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__READ_INTEGRATIONS,
+                DataProductNameResolver,
+                object_id="data_product_name",
+            )
+        )
+    ],
 )
 def get_aws_credentials(
     data_product_name: str,

@@ -1,8 +1,9 @@
-import { Flex, theme, Typography } from 'antd';
-import { ReactNode } from 'react';
+import { Flex, Typography, theme } from 'antd';
+import { type ReactNode, useMemo } from 'react';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
-import { UserContract } from '@/types/users';
+import type { UserContract } from '@/types/users';
+import { Sorter } from '@/utils/table-sorter.helper.ts';
 
 import styles from './user-access-overview.module.scss';
 
@@ -15,6 +16,16 @@ type Props = {
 
 export function UserAccessOverview({ users = [], title }: Props) {
     const { token } = useToken();
+
+    const sorted = useMemo(() => {
+        const sorter = new Sorter<UserContract>();
+        const compareFn = sorter.cascadedSorter(
+            sorter.stringSorter((user) => user.last_name),
+            sorter.stringSorter((user) => user.first_name),
+        );
+        return [...users].sort(compareFn);
+    }, [users]);
+
     return (
         <Flex vertical className={styles.container}>
             <Flex vertical className={styles.sectionWrapper}>
@@ -22,7 +33,7 @@ export function UserAccessOverview({ users = [], title }: Props) {
 
                 {/*  user avatar */}
                 <Flex vertical className={styles.userAvatarList}>
-                    {users.map((user) => (
+                    {sorted.map((user) => (
                         <UserAvatar
                             key={user.id}
                             name={`${user.first_name} ${user.last_name}`}

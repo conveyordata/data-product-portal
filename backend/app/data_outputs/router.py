@@ -1,11 +1,13 @@
+from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataOutputResolver
 from app.core.namespace.validation import NamespaceLengthLimits, NamespaceSuggestion
+from app.data_outputs import email
 from app.data_outputs.schema_request import (
     DataOutputResultStringRequest,
     DataOutputStatusUpdate,
@@ -14,38 +16,43 @@ from app.data_outputs.schema_request import (
 from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
 from app.data_outputs.service import DataOutputService
 from app.database.database import get_db_session
-from app.dependencies import only_data_output_owners
 from app.graph.graph import Graph
+from app.role_assignments.dataset.service import RoleAssignmentService
 from app.users.schema import User
 
 router = APIRouter(prefix="/data_outputs", tags=["data_outputs"])
 
 
 @router.get("")
-def get_data_outputs(db: Session = Depends(get_db_session)) -> list[DataOutputsGet]:
-    return DataOutputService().get_data_outputs(db)
+def get_data_outputs(db: Session = Depends(get_db_session)) -> Sequence[DataOutputsGet]:
+    return DataOutputService(db).get_data_outputs()
 
 
 @router.get("/namespace_suggestion")
 def get_data_output_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return DataOutputService().data_output_namespace_suggestion(name)
+    return DataOutputService.data_output_namespace_suggestion(name)
 
 
 @router.get("/namespace_length_limits")
 def get_data_output_namespace_length_limits() -> NamespaceLengthLimits:
-    return DataOutputService().data_output_namespace_length_limits()
+    return DataOutputService.data_output_namespace_length_limits()
 
 
 @router.post("/result_string")
 def get_data_output_result_string(
     request: DataOutputResultStringRequest, db: Session = Depends(get_db_session)
 ) -> str:
-    return DataOutputService().get_data_output_result_string(request, db)
+    return DataOutputService(db).get_data_output_result_string(request)
 
 
 @router.get("/{id}")
 def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutputGet:
-    return DataOutputService().get_data_output(id, db)
+    output = DataOutputService(db).get_data_output(id)
+    if output is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Data output not found"
+        )
+    return output
 
 
 @router.delete(
@@ -59,7 +66,6 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
         }
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__DELETE_DATA_OUTPUT,
@@ -71,9 +77,8 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
 def remove_data_output(
     id: UUID,
     db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-):
-    return DataOutputService().remove_data_output(id, db, authenticated_user)
+) -> None:
+    return DataOutputService(db).remove_data_output(id)
 
 
 @router.put(
@@ -87,7 +92,6 @@ def remove_data_output(
         }
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
@@ -98,8 +102,8 @@ def remove_data_output(
 )
 def update_data_output(
     id: UUID, data_output: DataOutputUpdate, db: Session = Depends(get_db_session)
-):
-    return DataOutputService().update_data_output(id, data_output, db)
+) -> dict[str, UUID]:
+    return DataOutputService(db).update_data_output(id, data_output)
 
 
 @router.put(
@@ -113,7 +117,6 @@ def update_data_output(
         }
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT,
@@ -126,8 +129,8 @@ def update_data_output_status(
     id: UUID,
     data_output: DataOutputStatusUpdate,
     db: Session = Depends(get_db_session),
-):
-    return DataOutputService().update_data_output_status(id, data_output, db)
+) -> None:
+    return DataOutputService(db).update_data_output_status(id, data_output)
 
 
 @router.post(
@@ -147,7 +150,6 @@ def update_data_output_status(
         },
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
@@ -162,10 +164,23 @@ def link_dataset_to_data_output(
     background_tasks: BackgroundTasks,
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
-):
-    return DataOutputService().link_dataset_to_data_output(
-        id, dataset_id, authenticated_user, db, background_tasks
+) -> dict[str, UUID]:
+    dataset_link = DataOutputService(db).link_dataset_to_data_output(
+        id, dataset_id, authenticated_user
     )
+
+    approvers = RoleAssignmentService(db).users_with_authz_action(
+        dataset_link.dataset_id, Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST
+    )
+    background_tasks.add_task(
+        email.send_link_dataset_email(
+            dataset_link.dataset,
+            dataset_link.data_output,
+            requester=authenticated_user,
+            approvers=approvers,
+        )
+    )
+    return {"id": dataset_link.id}
 
 
 @router.delete(
@@ -185,7 +200,6 @@ def link_dataset_to_data_output(
         },
     },
     dependencies=[
-        Depends(only_data_output_owners),
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
@@ -197,16 +211,13 @@ def link_dataset_to_data_output(
 def unlink_dataset_from_data_output(
     id: UUID,
     dataset_id: UUID,
-    authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
-):
-    return DataOutputService().unlink_dataset_from_data_output(
-        id, dataset_id, authenticated_user, db
-    )
+) -> None:
+    return DataOutputService(db).unlink_dataset_from_data_output(id, dataset_id)
 
 
 @router.get("/{id}/graph")
 def get_graph_data(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
-    return DataOutputService().get_graph_data(id, level, db)
+    return DataOutputService(db).get_graph_data(id, level)

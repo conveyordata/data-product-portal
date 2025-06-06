@@ -1,5 +1,5 @@
 import { BellOutlined, ExportOutlined } from '@ant-design/icons';
-import { Badge, Button, Dropdown, Flex, type MenuProps, Space, theme, Typography } from 'antd';
+import { Badge, Button, Dropdown, Flex, type MenuProps, Space, Typography, theme } from 'antd';
 import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,13 +7,9 @@ import { Link, type NavigateFunction, useNavigate } from 'react-router';
 
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { useGetDataOutputDatasetPendingActionsQuery } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
-import { useGetDataProductMembershipPendingActionsQuery } from '@/store/features/data-product-memberships/data-product-memberships-api-slice';
-import { useGetDataProductDatasetPendingActionsQuery } from '@/store/features/data-products-datasets/data-products-datasets-api-slice';
-import type { DataOutputDatasetContract } from '@/types/data-output-dataset';
-import type { DataProductDatasetContract } from '@/types/data-product-dataset';
-import type { DataProductMembershipContract } from '@/types/data-product-membership';
+import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
+import { PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
 
 import styles from './notifications.module.scss';
 
@@ -24,20 +20,13 @@ export function Notifications() {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    const { data: pending_actions_datasets } = useGetDataProductDatasetPendingActionsQuery();
-    const { data: pending_actions_dataoutputs } = useGetDataOutputDatasetPendingActionsQuery();
-    const { data: pending_actions_data_products } = useGetDataProductMembershipPendingActionsQuery();
-
-    type PendingAction =
-        | ({ type: 'data_product' } & DataProductDatasetContract)
-        | ({ type: 'data_output' } & DataOutputDatasetContract)
-        | ({ type: 'team' } & DataProductMembershipContract);
+    const { data: pending_actions } = useGetPendingActionsQuery();
 
     const createPendingItem = useCallback((action: PendingAction, navigate: NavigateFunction, t: TFunction) => {
         let link, description, navigatePath;
 
-        switch (action.type) {
-            case 'data_product':
+        switch (action.pending_action_type) {
+            case PendingActionTypes.DataProductDataset:
                 link = createDataProductIdPath(action.data_product_id);
                 description = (
                     <Typography.Text>
@@ -54,7 +43,7 @@ export function Notifications() {
                 navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
                 break;
 
-            case 'data_output':
+            case PendingActionTypes.DataOutputDataset:
                 link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
                 description = (
                     <Typography.Text>
@@ -71,8 +60,8 @@ export function Notifications() {
                 navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
                 break;
 
-            case 'team':
-                link = createDataProductIdPath(action.data_product_id);
+            case PendingActionTypes.DataProductRoleAssignment:
+                link = createDataProductIdPath(action.data_product.id);
                 description = (
                     <Typography.Text>
                         {t('{{name}} would like to join the data product', { name: action.user?.first_name })}{' '}
@@ -82,7 +71,7 @@ export function Notifications() {
                         {t('team')}{' '}
                     </Typography.Text>
                 );
-                navigatePath = createDataProductIdPath(action.data_product_id, DataProductTabKeys.Team);
+                navigatePath = createDataProductIdPath(action.data_product.id, DataProductTabKeys.Team);
                 break;
 
             default:
@@ -98,25 +87,10 @@ export function Notifications() {
     }, []);
 
     const pendingItems = useMemo(() => {
-        const datasets = pending_actions_datasets?.map((action) =>
-            createPendingItem({ ...action, type: 'data_product' }, navigate, t),
-        );
-        const dataOutputs = pending_actions_dataoutputs?.map((action) =>
-            createPendingItem({ ...action, type: 'data_output' }, navigate, t),
-        );
-        const dataProducts = pending_actions_data_products?.map((action) =>
-            createPendingItem({ ...action, type: 'team' }, navigate, t),
-        );
+        const items = pending_actions?.map((action) => createPendingItem(action, navigate, t));
 
-        return [...(datasets ?? []), ...(dataOutputs ?? []), ...(dataProducts ?? [])];
-    }, [
-        pending_actions_datasets,
-        pending_actions_dataoutputs,
-        pending_actions_data_products,
-        createPendingItem,
-        navigate,
-        t,
-    ]);
+        return items ?? [];
+    }, [pending_actions, createPendingItem, navigate, t]);
 
     const items: MenuProps['items'] = [
         {

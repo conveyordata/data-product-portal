@@ -3,7 +3,6 @@ import { Flex, Space, Typography } from 'antd';
 import clsx from 'clsx';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
 
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
@@ -12,13 +11,12 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { DataProductActions } from '@/pages/data-product/components/data-product-actions/data-product-actions.component.tsx';
 import { DataProductDescription } from '@/pages/data-product/components/data-product-description/data-product-description.tsx';
 import { DataProductTabs } from '@/pages/data-product/components/data-product-tabs/data-product-tabs.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
-import { getDataProductOwners, getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
+import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 
@@ -26,10 +24,10 @@ import styles from './data-product.module.scss';
 
 export function DataProduct() {
     const { t } = useTranslation();
-    const currentUser = useSelector(selectCurrentUser);
-    const { dataProductId = '' } = useParams();
-    const { data: dataProduct, isLoading } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
     const navigate = useNavigate();
+    const { dataProductId = '' } = useParams();
+
+    const { data: dataProduct, isLoading } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
     const { data: edit_access } = useCheckAccessQuery(
         {
             resource: dataProductId,
@@ -38,24 +36,21 @@ export function DataProduct() {
         { skip: !dataProductId },
     );
 
-    const canEditProduct = edit_access?.allowed || false;
+    const canEdit = edit_access?.allowed || false;
 
     const dataProductTypeIcon = useMemo(() => {
         return getDataProductTypeIcon(dataProduct?.type?.icon_key);
     }, [dataProduct?.type?.icon_key]);
 
-    const dataProductOwners = dataProduct ? getDataProductOwners(dataProduct) : [];
-
-    const isCurrentDataProductOwner = Boolean(
-        dataProduct && currentUser && (getIsDataProductOwner(dataProduct, currentUser?.id) || currentUser?.is_admin),
-    );
+    const dataProductOwners = useGetDataProductOwners(dataProduct?.id);
 
     function navigateToEditPage() {
-        if (canEditProduct || (isCurrentDataProductOwner && dataProductId)) {
-            navigate(
-                getDynamicRoutePath(ApplicationPaths.DataProductEdit, DynamicPathParams.DataProductId, dataProductId),
-            );
-        }
+        const destination = getDynamicRoutePath(
+            ApplicationPaths.DataProductEdit,
+            DynamicPathParams.DataProductId,
+            dataProductId,
+        );
+        return navigate(destination);
     }
 
     useEffect(() => {
@@ -85,7 +80,7 @@ export function DataProduct() {
                             {dataProduct?.name}
                         </Typography.Title>
                     </Space>
-                    {(canEditProduct || isCurrentDataProductOwner) && (
+                    {canEdit && (
                         <Space className={styles.editIcon}>
                             <CircleIconButton
                                 icon={<SettingOutlined />}
@@ -104,6 +99,7 @@ export function DataProduct() {
                             type={dataProduct.type.name}
                             description={dataProduct.description}
                             domain={dataProduct.domain.name}
+                            namespace={dataProduct.namespace}
                             tags={[
                                 ...dataProduct.tags,
                                 ...dataProduct.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),

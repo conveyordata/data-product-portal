@@ -4,7 +4,6 @@ from uuid import UUID
 from app.data_outputs.schema import DataOutput
 from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
 from app.data_product_lifecycles.schema import DataProductLifeCycle
-from app.data_product_memberships.schema import DataProductMembership
 from app.data_product_settings.schema import DataProductSettingValue
 from app.data_product_types.schema import DataProductType
 from app.data_products.status import DataProductStatus
@@ -13,7 +12,6 @@ from app.datasets.schema import Dataset
 from app.domains.schema import Domain
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
-from app.users.schema import User
 
 
 class BaseDataProductGet(ORMModel):
@@ -31,11 +29,6 @@ class BaseDataProductGet(ORMModel):
     data_product_settings: list[DataProductSettingValue]
 
 
-class MembershipLinks(DataProductMembership):
-    # Nested schemas
-    user: User
-
-
 class DataOutputLinks(DataOutput):
     # Nested schemas
     dataset_links: list[DataOutputDatasetAssociation]
@@ -51,7 +44,6 @@ class DataProductGet(BaseDataProductGet):
 
     # Nested schemas
     dataset_links: list[DatasetLinks]
-    memberships: list[MembershipLinks]
     data_outputs: list[DataOutputLinks]
     rolled_up_tags: set[Tag]
 

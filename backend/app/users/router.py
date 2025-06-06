@@ -1,11 +1,12 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DataProductResolver
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
-from app.dependencies import only_for_admin
 from app.users.schema_request import UserCreate
 from app.users.schema_response import UsersGet
 from app.users.service import UserService
@@ -14,8 +15,8 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("")
-def get_users(db: Session = Depends(get_db_session)) -> list[UsersGet]:
-    return UserService().get_users(db)
+def get_users(db: Session = Depends(get_db_session)) -> Sequence[UsersGet]:
+    return UserService(db).get_users()
 
 
 @router.delete(
@@ -29,12 +30,11 @@ def get_users(db: Session = Depends(get_db_session)) -> list[UsersGet]:
         }
     },
     dependencies=[
-        Depends(only_for_admin),
-        Depends(Authorization.enforce(Action.GLOBAL__DELETE_USER, DataProductResolver)),
+        Depends(Authorization.enforce(Action.GLOBAL__DELETE_USER, EmptyResolver)),
     ],
 )
 def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
-    return UserService().remove_user(id, db)
+    return UserService(db).remove_user(id)
 
 
 @router.post(
@@ -48,11 +48,10 @@ def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
         },
     },
     dependencies=[
-        Depends(only_for_admin),
-        Depends(Authorization.enforce(Action.GLOBAL__CREATE_USER, DataProductResolver)),
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_USER, EmptyResolver)),
     ],
 )
 def create_user(
     user: UserCreate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
-    return UserService().create_user(user, db)
+    return UserService(db).create_user(user)

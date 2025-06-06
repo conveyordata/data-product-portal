@@ -46,7 +46,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 method: 'GET',
             }),
             providesTags: (_, __, id) => [
-                { type: TagTypes.Dataset as const, id },
+                { type: TagTypes.Dataset as const, id: id },
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
@@ -112,43 +112,11 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
             },
             invalidatesTags: (_, __, { datasetId }) => [{ type: TagTypes.Dataset as const, id: datasetId }],
         }),
-        addUserToDataset: builder.mutation<
-            void,
-            {
-                datasetId: string;
-                userId: string;
-            }
-        >({
-            query: ({ datasetId, userId }) => ({
-                url: buildUrl(ApiUrl.DatasetUser, { datasetId, userId }),
-                method: 'POST',
-            }),
-            invalidatesTags: (_, __, { datasetId }) => [
-                { type: TagTypes.Dataset as const, id: datasetId },
-                { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-            ],
-        }),
         getDatasetGraphData: builder.query<GraphContract, string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DatasetGraph, { datasetId: id }),
                 method: 'GET',
             }),
-        }),
-        removeUserFromDataset: builder.mutation<
-            void,
-            {
-                datasetId: string;
-                userId: string;
-            }
-        >({
-            query: ({ datasetId, userId }) => ({
-                url: buildUrl(ApiUrl.DatasetUser, { datasetId, userId }),
-                method: 'DELETE',
-            }),
-            invalidatesTags: (_, __, { datasetId }) => [
-                { type: TagTypes.Dataset as const, id: datasetId },
-                { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-            ],
         }),
         validateDatasetNamespace: builder.query<NamespaceValidationResponse, string>({
             query: (namespace) => ({
@@ -182,8 +150,6 @@ export const {
     useUpdateDatasetMutation,
     useUpdateDatasetAboutMutation,
     useGetUserDatasetsQuery,
-    useAddUserToDatasetMutation,
-    useRemoveUserFromDatasetMutation,
     useGetDatasetGraphDataQuery,
     useLazyGetDatasetNamespaceSuggestionQuery,
     useLazyValidateDatasetNamespaceQuery,

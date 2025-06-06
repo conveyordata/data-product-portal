@@ -2,19 +2,23 @@ import uuid
 from copy import deepcopy
 
 import pytest
-from tests.factories import DatasetFactory, DomainFactory, UserFactory
-from tests.factories.data_product_membership import DataProductMembershipFactory
-from tests.factories.data_product_setting import DataProductSettingFactory
-from tests.factories.data_products_datasets import DataProductDatasetAssociationFactory
-from tests.factories.role import RoleFactory
-from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
-from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
+from tests.factories import (
+    DataProductDatasetAssociationFactory,
+    DataProductFactory,
+    DataProductRoleAssignmentFactory,
+    DataProductSettingFactory,
+    DatasetFactory,
+    DatasetRoleAssignmentFactory,
+    DomainFactory,
+    GlobalRoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
 from app.datasets.enums import DatasetAccessType
-from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Scope
+from app.roles.schema import Prototype, Scope
 from app.roles.service import RoleService
 
 ENDPOINT = "/api/datasets"
@@ -49,13 +53,12 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
-    def test_create_dataset_no_owner_role(self, session, dataset_payload, client):
+    def test_create_dataset_no_owner_role(self, dataset_payload, client):
         user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_DATASET]
@@ -63,7 +66,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         created_dataset = self.create_default_dataset(client, dataset_payload)
         assert created_dataset.status_code == 400
@@ -77,7 +79,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         create_payload = deepcopy(dataset_payload)
         create_payload["owners"] = []
@@ -93,7 +94,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         DatasetFactory(namespace=dataset_payload["namespace"])
 
@@ -111,7 +111,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         create_payload = deepcopy(dataset_payload)
         create_payload["namespace"] = "!"
@@ -130,7 +129,6 @@ class TestDatasetsRouter:
         GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
         create_payload = deepcopy(dataset_payload)
         create_payload["namespace"] = "a" * 256
@@ -145,22 +143,25 @@ class TestDatasetsRouter:
         data = response.json()
         assert len(data) == 1
         assert data[0]["id"] == str(ds.id)
-        assert data[0]["owners"][0]["id"] == str(ds.owners[0].id)
 
     def test_get_user_datasets(self, client):
         user_1, user_2 = UserFactory.create_batch(2)
-        DatasetFactory(owners=[user_1])
-        ds = DatasetFactory(owners=[user_1, user_2])
+        ds_1, ds_2 = DatasetFactory.create_batch(2)
+        owner = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        DatasetRoleAssignmentFactory(
+            dataset_id=ds_1.id, user_id=user_1.id, role_id=owner.id
+        )
+        DatasetRoleAssignmentFactory(
+            dataset_id=ds_2.id, user_id=user_2.id, role_id=owner.id
+        )
 
         response = client.get(f"{ENDPOINT}/user/{user_2.id}")
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
-        assert len(data[0]["owners"]) == 2
-        assert str(user_2.id) in [owner["id"] for owner in data[0]["owners"]]
-        assert data[0]["id"] == str(ds.id)
+        assert data[0]["id"] == str(ds_2.id)
 
-    def test_update_dataset_not_owner(self, client):
+    def test_update_dataset_no_role(self, client):
         ds = DatasetFactory()
         update_payload = {
             "name": "new_name",
@@ -168,7 +169,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tags": [],
             "access_type": "public",
-            "owners": [str(ds.owners[0].id)],
             "domain_id": str(ds.domain_id),
         }
 
@@ -182,7 +182,7 @@ class TestDatasetsRouter:
             scope=Scope.DATASET,
             permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
         )
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
         update_payload = {
@@ -191,7 +191,6 @@ class TestDatasetsRouter:
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
-            "owners": [str(ds.owners[0].id)],
             "domain_id": str(ds.domain_id),
         }
 
@@ -200,29 +199,7 @@ class TestDatasetsRouter:
         assert updated_dataset.status_code == 200
         assert updated_dataset.json()["id"] == str(ds.id)
 
-    def test_update_dataset_remove_all_owners(self, client):
-        user = UserFactory(external_id="sub")
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
-        )
-        ds = DatasetFactory(owners=[user])
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        update_payload = {
-            "name": "new_name",
-            "namespace": "new_namespace",
-            "description": "new_description",
-            "tags": [],
-            "access_type": "public",
-            "owners": [],
-            "domain_id": str(ds.domain_id),
-        }
-
-        updated_dataset = self.update_default_dataset(client, update_payload, ds.id)
-
-        assert updated_dataset.status_code == 422
-
-    def test_update_dataset_about_not_owners(self, client):
+    def test_update_dataset_about_no_role(self, client):
         ds = DatasetFactory()
         response = self.update_dataset_about(client, ds.id)
         assert response.status_code == 403
@@ -233,7 +210,7 @@ class TestDatasetsRouter:
             scope=Scope.DATASET,
             permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
         )
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = self.update_dataset_about(client, ds.id)
         assert response.status_code == 200
@@ -248,7 +225,7 @@ class TestDatasetsRouter:
         role = RoleFactory(
             scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
         )
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = self.delete_default_dataset(client, ds.id)
         assert response.status_code == 200
@@ -256,85 +233,27 @@ class TestDatasetsRouter:
         response = self.get_dataset_by_id(client, ds.id)
         assert response.status_code == 404
 
-    def test_add_user_to_dataset(self, client):
-        user = UserFactory(external_id="sub")
-        role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__CREATE_USER]
-        )
-        ds = DatasetFactory(owners=[user])
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        user = UserFactory()
-        response = self.add_user_to_dataset(client, user.id, ds.id)
-        assert response.status_code == 200
-
-        dataset = self.get_dataset_by_id(client, ds.id)
-        assert dataset.status_code == 200
-        assert len(dataset.json()["owners"]) == 2
-
-    @pytest.mark.usefixtures("admin")
-    def test_add_user_to_dataset_by_admin(self, client):
-        # Add dataset which is owned by another non-admin user
-        ds = DatasetFactory(owners=[UserFactory()])
-        # Create one more user that should be added to the dataset by admin user
-        new_user = UserFactory()
-        response = self.add_user_to_dataset(client, new_user.id, ds.id)
-        assert response.status_code == 200
-
-        dataset = self.get_dataset_by_id(client, ds.id)
-        data = dataset.json()
-        assert len(data["owners"]) == 2
-        assert str(new_user.id) in [owner["id"] for owner in data["owners"]]
-
-    def test_remove_user_from_dataset(self, client):
-        ds_owner = UserFactory()
-        # Create dataset with two owners
-        user = UserFactory(external_id="sub")
-        role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE_USER]
-        )
-        ds = DatasetFactory(owners=[user, ds_owner])
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-        response = self.delete_dataset_user(client, ds_owner.id, ds.id)
-        assert response.status_code == 200
-
-        dataset = self.get_dataset_by_id(client, ds.id)
-        assert dataset.status_code == 200
-        assert len(dataset.json()["owners"]) == 1
-
-    def test_remove_last_user_from_dataset(self, client):
-        user = UserFactory(external_id="sub")
-
-        role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE_USER]
-        )
-        ds = DatasetFactory(owners=[user])
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
-
-        response = self.delete_dataset_user(client, user.id, ds.id)
-        assert response.status_code == 400
-
     def test_get_dataset_by_id_with_invalid_dataset_id(self, client, session):
         dataset = self.get_dataset_by_id(client, self.invalid_id)
         assert dataset.status_code == 404
 
     def test_update_dataset_with_invalid_dataset_id(self, client):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+
         update_payload = {
             "name": "new_name",
             "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
             "access_type": "public",
-            "owners": [],
             "domain_id": str(uuid.uuid4()),
         }
-        user = UserFactory(external_id="sub")
-
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
-        )
-        ds = DatasetFactory(owners=[user])
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         dataset = self.update_default_dataset(client, update_payload, self.invalid_id)
         assert dataset.status_code == 403
 
@@ -343,35 +262,12 @@ class TestDatasetsRouter:
         role = RoleFactory(
             scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__DELETE]
         )
-        ds = DatasetFactory(owners=[user])
+        ds = DatasetFactory()
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         dataset = self.delete_default_dataset(client, self.invalid_id)
         assert dataset.status_code == 403
 
-    def test_remove_user_from_dataset_with_invalid_dataset_id(self, client):
-        user = UserFactory()
-        dataset = self.delete_dataset_user(client, user.id, self.invalid_id)
-        assert dataset.status_code == 403
-
-    def test_remove_user_from_dataset_with_invalid_user_id(self, client):
-        ds = DatasetFactory(owners=[UserFactory(external_id="sub")])
-        response = self.delete_dataset_user(client, self.invalid_id, ds.id)
-        assert response.status_code == 403
-
-    def test_add_already_existing_dataset_owner_to_dataset(self, client):
-        ds_owner = UserFactory(external_id="sub")
-        role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.DATASET__CREATE_USER]
-        )
-        ds = DatasetFactory(owners=[ds_owner])
-        DatasetRoleAssignmentFactory(
-            user_id=ds_owner.id, role_id=role.id, dataset_id=ds.id
-        )
-        response = self.add_user_to_dataset(client, ds_owner.id, ds.id)
-        assert response.status_code == 400
-        assert "is already an owner of dataset" in response.json()["detail"]
-
-    def test_update_status_not_owner(self, client):
+    def test_update_status_no_role(self, client):
         ds = DatasetFactory()
         response = self.update_dataset_status(client, {"status": "active"}, ds.id)
         assert response.status_code == 403
@@ -382,13 +278,14 @@ class TestDatasetsRouter:
             scope=Scope.DATASET,
             permissions=[AuthorizationAction.DATASET__UPDATE_STATUS],
         )
-        ds = DatasetFactory(owners=[ds_owner])
+        ds = DatasetFactory()
         DatasetRoleAssignmentFactory(
             user_id=ds_owner.id, role_id=role.id, dataset_id=ds.id
         )
         response = self.get_dataset_by_id(client, ds.id)
         assert response.json()["status"] == "active"
         response = self.update_dataset_status(client, {"status": "pending"}, ds.id)
+        assert response.status_code == 200
         response = self.get_dataset_by_id(client, ds.id)
         assert response.json()["status"] == "pending"
 
@@ -404,6 +301,10 @@ class TestDatasetsRouter:
                         "id": str(ds.id),
                         "link_to_id": None,
                         "name": ds.name,
+                        "domain": None,
+                        "domain_id": None,
+                        "assignments": None,
+                        "description": None,
                     },
                     "id": str(ds.id),
                     "isMain": True,
@@ -412,31 +313,22 @@ class TestDatasetsRouter:
             ],
         }
 
-    def test_dataset_set_custom_setting_wrong_scope(self, client):
-        ds_owner = UserFactory(external_id="sub")
-        ds = DatasetFactory(owners=[ds_owner])
-        ds = DatasetFactory()
-        setting = DataProductSettingFactory()
-        response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}")
-        assert response.status_code == 403
-
-    def test_dataset_set_custom_setting_not_owner(self, client):
+    def test_dataset_set_custom_setting_no_role(self, client):
         ds = DatasetFactory()
         setting = DataProductSettingFactory(scope="dataset")
         response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}")
         assert response.status_code == 403
 
     def test_dataset_set_custom_setting(self, client):
-        ds_owner = UserFactory(external_id="sub")
+        user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[AuthorizationAction.DATASET__UPDATE_SETTINGS],
         )
-        ds = DatasetFactory(owners=[ds_owner])
-        DatasetRoleAssignmentFactory(
-            user_id=ds_owner.id, role_id=role.id, dataset_id=ds.id
-        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         setting = DataProductSettingFactory(scope="dataset")
+
         response = client.post(f"{ENDPOINT}/{ds.id}/settings/{setting.id}?value=false")
         assert response.status_code == 200
         response = client.get(f"{ENDPOINT}/{ds.id}")
@@ -448,8 +340,10 @@ class TestDatasetsRouter:
         assert response.status_code == 403
 
     def test_get_private_dataset_by_owner(self, client):
-        ds_owner = UserFactory(external_id="sub")
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[ds_owner])
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = self.get_dataset_by_id(client, ds.id)
         assert response.status_code == 200
 
@@ -460,10 +354,14 @@ class TestDatasetsRouter:
         assert response.status_code == 200
 
     def test_get_private_dataset_by_member_of_consuming_data_product(self, client):
-        user = UserFactory(external_id="sub")
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
-        dp = DataProductMembershipFactory(user=user).data_product
+        dp = DataProductFactory()
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        DataProductRoleAssignmentFactory(
+            data_product_id=dp.id, user_id=user.id, role_id=role.id
+        )
 
         response = self.get_dataset_by_id(client, ds.id)
         assert response.status_code == 200
@@ -475,8 +373,10 @@ class TestDatasetsRouter:
         assert len(response.json()) == 0
 
     def test_get_private_datasets_by_owner(self, client):
-        ds_owner = UserFactory(external_id="sub")
-        DatasetFactory(access_type=DatasetAccessType.PRIVATE, owners=[ds_owner])
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, prototype=Prototype.OWNER)
+        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         response = client.get(ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 1
@@ -489,16 +389,20 @@ class TestDatasetsRouter:
         assert len(response.json()) == 1
 
     def test_get_private_datasets_by_member_of_consuming_data_product(self, client):
-        user = UserFactory(external_id="sub")
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
-        dp = DataProductMembershipFactory(user=user).data_product
+        dp = DataProductFactory()
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=dp.id
+        )
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
 
         response = client.get(ENDPOINT)
         assert response.status_code == 200
         assert len(response.json()) == 1
 
-    def test_get_namespace_suggestion_subsitution(self, client):
+    def test_get_namespace_suggestion_substitution(self, client):
         name = "test with spaces"
         response = self.get_namespace_suggestion(client, name)
         body = response.json()
@@ -546,22 +450,19 @@ class TestDatasetsRouter:
     def test_update_dataset_duplicate_namespace(self, client):
         namespace = "namespace"
         DatasetFactory(namespace=namespace)
-        ds_owner = UserFactory(external_id="sub")
+        user = UserFactory(external_id="sub")
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
         )
-        ds = DatasetFactory(owners=[ds_owner])
-        DatasetRoleAssignmentFactory(
-            user_id=ds_owner.id, role_id=role.id, dataset_id=ds.id
-        )
+        ds = DatasetFactory()
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
         update_payload = {
             "name": "new_name",
             "namespace": namespace,
             "description": "new_description",
             "tag_ids": [],
             "access_type": "public",
-            "owners": [str(ds.owners[0].id)],
             "domain_id": str(ds.domain_id),
         }
 
@@ -593,14 +494,6 @@ class TestDatasetsRouter:
     @staticmethod
     def get_dataset_by_id(client, dataset_id):
         return client.get(f"{ENDPOINT}/{dataset_id}")
-
-    @staticmethod
-    def delete_dataset_user(client, user_id, dataset_id):
-        return client.delete(f"{ENDPOINT}/{dataset_id}/user/{user_id}")
-
-    @staticmethod
-    def add_user_to_dataset(client, user_id, dataset_id):
-        return client.post(f"{ENDPOINT}/{dataset_id}/user/{user_id}")
 
     @staticmethod
     def get_namespace_suggestion(client, name):

@@ -1,58 +1,48 @@
-import { Flex, Table, TableColumnsType, TableProps } from 'antd';
-import { useCallback, useEffect, useMemo } from 'react';
+import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
-    useDeleteRoleAssignmentMutation,
-    useLazyGetRoleAssignmentQuery,
-    useUpdateRoleAssignmentMutation,
-} from '@/store/features/role-assignments/roles-api-slice';
+    useDeleteDataProductRoleAssignmentMutation,
+    useUpdateDataProductRoleAssignmentMutation,
+} from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { RoleContract } from '@/types/roles';
-import { RoleAssignmentContract } from '@/types/roles/role.contract';
-import { UserContract } from '@/types/users';
+import type { RoleContract } from '@/types/roles';
+import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 
 import styles from './team-table.module.scss';
 
 type Props = {
-    isCurrentUserDataProductOwner: boolean;
     dataProductId: string;
-    dataProductUsers: RoleAssignmentContract[];
+    dataProductUsers: DataProductRoleAssignmentContract[];
 };
-
-function canPerformTeamActions(isCurrentUserDataProductOwner: boolean, userId: string, currentUserId: string) {
-    return isCurrentUserDataProductOwner && userId !== currentUserId;
-}
-
-export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataProductUsers }: Props) {
+export function TeamTable({ dataProductId, dataProductUsers }: Props) {
     const { t } = useTranslation();
-    const currentUser = useSelector(selectCurrentUser) as UserContract;
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] = useDeleteRoleAssignmentMutation();
-    const [updateRoleAssignment] = useUpdateRoleAssignmentMutation();
+    const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] =
+        useDeleteDataProductRoleAssignmentMutation();
+    const [updateRoleAssignment] = useUpdateDataProductRoleAssignmentMutation();
 
     const { handleGrantAccessToDataProduct, handleDenyAccessToDataProduct } = usePendingActionHandlers();
-    const [lazyGetRolesAssignments] = useLazyGetRoleAssignmentQuery();
-    const { data: edit_access } = useCheckAccessQuery(
-        {
-            resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
-        },
-        { skip: !dataProductId },
-    );
+
     const { data: approve_access } = useCheckAccessQuery(
         {
             resource: dataProductId,
             action: AuthorizationAction.DATA_PRODUCT__APPROVE_USER_REQUEST,
+        },
+        { skip: !dataProductId },
+    );
+    const { data: edit_access } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__UPDATE_USER,
         },
         { skip: !dataProductId },
     );
@@ -64,28 +54,24 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         { skip: !dataProductId },
     );
 
-    const canApproveUserNew = approve_access?.allowed || false;
-    const canEditUserNew = edit_access?.allowed || false;
-    const canRemoveUserNew = remove_access?.allowed || false;
+    const canApproveUser = approve_access?.allowed || false;
+    const canEditUser = edit_access?.allowed || false;
+    const canRemoveUser = remove_access?.allowed || false;
 
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+    const { pagination, handlePaginationChange } = useTablePagination(dataProductUsers, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
-    const onChange: TableProps<RoleAssignmentContract>['onChange'] = (pagination) => {
+    const onChange: TableProps<DataProductRoleAssignmentContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
-
-    useEffect(() => {
-        resetPagination();
-    }, [dataProductUsers, resetPagination]);
 
     const handleRemoveUserAccess = useCallback(
         async (id: string) => {
             try {
                 if (!dataProduct) return;
 
-                await deleteRoleAssignment({ id, data_product_id: dataProduct.id }).unwrap();
+                await deleteRoleAssignment({ role_assignment_id: id, data_product_id: dataProduct.id }).unwrap();
                 dispatchMessage({ content: t('User access to data product has been removed'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
@@ -95,16 +81,11 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
     );
 
     const handleRoleChange = useCallback(
-        async (role: RoleContract, _: string, userId: string) => {
+        async (role: RoleContract, assignmentId: string) => {
             if (!dataProduct) return;
             try {
-                const roles = await lazyGetRolesAssignments({
-                    data_product_id: dataProduct.id,
-                    user_id: userId,
-                }).unwrap();
-                const currentRole = roles[0];
                 await updateRoleAssignment({
-                    role_assignment_id: currentRole.id,
+                    role_assignment_id: assignmentId,
                     role_id: role.id,
                     data_product_id: dataProduct.id,
                 }).unwrap();
@@ -114,40 +95,38 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
                 dispatchMessage({ content: t('Failed to update user role'), type: 'error' });
             }
         },
-        [dataProduct, t, updateRoleAssignment, lazyGetRolesAssignments],
+        [dataProduct, t, updateRoleAssignment],
     );
 
-    const handleRejectMembership = useCallback(
+    const handleAcceptAccessRequest = useCallback(
         async (id: string) => {
             if (!dataProduct) return;
-            handleDenyAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
-        },
-        [dataProduct, handleDenyAccessToDataProduct],
-    );
-
-    const handleAcceptMembership = useCallback(
-        async (id: string) => {
-            if (!dataProduct) return;
-            handleGrantAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
+            await handleGrantAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
         },
         [dataProduct, handleGrantAccessToDataProduct],
     );
 
-    const columns: TableColumnsType<RoleAssignmentContract> = useMemo(() => {
+    const handleRejectAccessRequest = useCallback(
+        async (id: string) => {
+            if (!dataProduct) return;
+            await handleDenyAccessToDataProduct({ assignment_id: id, data_product_id: dataProduct.id });
+        },
+        [dataProduct, handleDenyAccessToDataProduct],
+    );
+
+    const columns: TableColumnsType<DataProductRoleAssignmentContract> = useMemo(() => {
         return getDataProductUsersTableColumns({
             t,
-            onRemoveMembership: handleRemoveUserAccess,
+            dataProductUsers: dataProductUsers,
+            onRemoveUserAccess: handleRemoveUserAccess,
+            onRejectAccessRequest: handleRejectAccessRequest,
+            onAcceptAccessRequest: handleAcceptAccessRequest,
             onRoleChange: handleRoleChange,
             isRemovingUser: isRemovingUserFromDataProduct,
-            dataProductUsers: dataProductUsers,
-            canPerformTeamActions: (userId: string) =>
-                canPerformTeamActions(isCurrentUserDataProductOwner, userId, currentUser.id),
             isLoading: isLoadingDataProduct,
-            onRejectMembershipRequest: handleRejectMembership,
-            onAcceptMembershipRequest: handleAcceptMembership,
-            canEdit: canEditUserNew,
-            canRemove: canRemoveUserNew,
-            canApprove: canApproveUserNew,
+            canApprove: canApproveUser,
+            canEdit: canEditUser,
+            canRemove: canRemoveUser,
         });
     }, [
         t,
@@ -156,20 +135,18 @@ export function TeamTable({ isCurrentUserDataProductOwner, dataProductId, dataPr
         isRemovingUserFromDataProduct,
         dataProductUsers,
         isLoadingDataProduct,
-        currentUser.id,
-        isCurrentUserDataProductOwner,
-        canEditUserNew,
-        canRemoveUserNew,
-        canApproveUserNew,
-        handleAcceptMembership,
-        handleRejectMembership,
+        canEditUser,
+        canRemoveUser,
+        canApproveUser,
+        handleAcceptAccessRequest,
+        handleRejectAccessRequest,
     ]);
 
     if (!dataProduct) return null;
 
     return (
         <Flex className={styles.teamListContainer}>
-            <Table<RoleAssignmentContract>
+            <Table<DataProductRoleAssignmentContract>
                 loading={isLoadingDataProduct}
                 className={styles.teamListTable}
                 columns={columns}

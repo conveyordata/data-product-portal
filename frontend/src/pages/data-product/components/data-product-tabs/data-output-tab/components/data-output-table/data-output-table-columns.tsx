@@ -15,17 +15,15 @@ import styles from './data-output-table.module.scss';
 
 type Props = {
     t: TFunction;
-    isLoading?: boolean;
-    isDisabled?: boolean;
-    handleOpen: (id: string) => void;
+    loading?: boolean;
+    canRemove: boolean;
     onRemoveDataOutput: (id: string, name: string) => void;
-    onRemoveDatasetFromDataOutput: (datasetId: string, dataOutputId: string, name: string) => void;
 };
 
 export const getDataProductDataOutputsColumns = ({
     t,
-    isDisabled,
-    isLoading,
+    loading,
+    canRemove,
     onRemoveDataOutput,
 }: Props): TableColumnsType<DataOutputsGetContract[0]> => {
     return [
@@ -95,10 +93,10 @@ export const getDataProductDataOutputsColumns = ({
                             placement={'leftTop'}
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
-                            okButtonProps={{ loading: isLoading }}
+                            okButtonProps={{ loading: loading }}
                             autoAdjustOverflow={true}
                         >
-                            <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                            <Button loading={loading} disabled={!canRemove} type={'link'}>
                                 {t('Remove')}
                             </Button>
                         </Popconfirm>

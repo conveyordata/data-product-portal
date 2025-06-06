@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, String, and_
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, foreign, relationship
+from sqlalchemy.orm import Mapped, foreign, relationship
 
 from app.data_output_configuration.base_model import BaseDataOutputConfiguration
 from app.data_outputs.status import DataOutputStatus
@@ -15,7 +15,7 @@ from app.environment_platform_service_configurations.model import (
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
 
-from app.database.database import Base, ensure_exists
+from app.database.database import Base
 from app.platform_services.model import PlatformService
 from app.platforms.model import Platform
 from app.shared.model import BaseORM
@@ -67,9 +67,3 @@ class DataOutput(Base, BaseORM):
         lazy="raise",
         viewonly=True,
     )
-
-
-def ensure_data_output_exists(
-    data_output_id: UUID, db: Session, **kwargs
-) -> DataOutput:
-    return ensure_exists(data_output_id, db, DataOutput, **kwargs)

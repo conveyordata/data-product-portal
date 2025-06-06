@@ -8,13 +8,13 @@ import {
 import { Flex, Layout, Menu, type MenuProps, Space } from 'antd';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { Link, useMatches } from 'react-router';
 
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
 import { DataProductOutlined, DatasetOutlined, ProductLogo } from '@/components/icons';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 import styles from './sidebar.module.scss';
@@ -23,7 +23,6 @@ export const Sidebar = () => {
     const matches = useMatches();
     const { data: version } = useGetVersionQuery();
     const { t } = useTranslation();
-    const currentUser = useSelector(selectCurrentUser);
 
     let navigationMenuItems: MenuProps['items'] = [
         {
@@ -65,7 +64,12 @@ export const Sidebar = () => {
         },
     ];
 
-    if (currentUser?.is_admin) {
+    const { data: access } = useCheckAccessQuery({
+        action: AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION,
+    });
+    const canAccessSettings = access?.allowed ?? false;
+
+    if (canAccessSettings) {
         navigationMenuItems = [
             ...navigationMenuItems,
             {

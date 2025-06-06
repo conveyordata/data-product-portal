@@ -13,9 +13,8 @@ from app.users.schema import User
 
 
 class CreateRoleAssignment(BaseModel):
-    data_product_id: UUID
     user_id: UUID
-    role_id: Optional[UUID] = None
+    role_id: UUID
 
 
 class DecideRoleAssignment(BaseModel):

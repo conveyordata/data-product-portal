@@ -1,15 +1,12 @@
 import { Flex, Form } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { Searchbar } from '@/components/form';
-import { DataProductTable } from '@/pages/dataset/components/dataset-tabs/data-product-tab/components/data-product-table/data-product-table.component.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { DataProductTable } from '@/pages/dataset/components/dataset-tabs/data-product-tab/components/data-product-table/data-product-table.component';
+import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { DataProductLink } from '@/types/dataset';
-import { SearchForm } from '@/types/shared';
-import { getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
+import type { SearchForm } from '@/types/shared';
 
 import styles from './data-product-tab.module.scss';
 
@@ -29,7 +26,6 @@ function filterDataProducts(dataProductLinks: DataProductLink[], searchTerm: str
 
 export function DataProductTab({ datasetId }: Props) {
     const { t } = useTranslation();
-    const user = useSelector(selectCurrentUser);
     const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId);
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -41,12 +37,6 @@ export function DataProductTab({ datasetId }: Props) {
     const filteredDataProducts = useMemo(() => {
         return filterDataProducts(datasetDataProducts, searchTerm);
     }, [datasetDataProducts, searchTerm]);
-
-    const isDatasetOwner = useMemo(() => {
-        if (!dataset || !user) return false;
-
-        return getIsDatasetOwner(dataset, user.id) || user.is_admin;
-    }, [dataset, user]);
 
     return (
         <>
@@ -60,13 +50,7 @@ export function DataProductTab({ datasetId }: Props) {
                     form={searchForm}
                 />
 
-                <DataProductTable
-                    dataProducts={filteredDataProducts}
-                    isLoading={isLoading}
-                    datasetId={datasetId}
-                    isCurrentDatasetOwner={isDatasetOwner}
-                    currentUserId={user?.id}
-                />
+                <DataProductTable datasetId={datasetId} dataProducts={filteredDataProducts} isLoading={isLoading} />
             </Flex>
             {/* Todo - Allow to initiate data-product-dataset-link action from the dataset (for restricted datasets) */}
             {/*{isVisible && <AddDataProductPopup onClose={handleClose} isOpen={isVisible} datasetId={datasetId} />}*/}

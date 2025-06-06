@@ -32,9 +32,9 @@ class AuthService:
             .scalar_one()
             .id
         )
-        role_arn = DataProductService().get_data_product_role_arn(
-            data_product_id, environment, db
+        role_arn = DataProductService(db).get_data_product_role_arn(
+            data_product_id, environment
         )
-        return DataProductService().get_aws_temporary_credentials(
+        return DataProductService.get_aws_temporary_credentials(
             role_arn, authorized_user
         )

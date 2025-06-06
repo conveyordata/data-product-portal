@@ -4,15 +4,14 @@ from fastapi.testclient import TestClient
 from tests.factories import UserFactory
 
 from app.authorization.schema import AccessResponse
-from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization
+from app.core.authz import Action, Authorization
 
 ENDPOINT = "/api/authz"
 
 
 class TestAuthorizationRouter:
     def test_check_access(self, client: TestClient):
-        action = AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION
+        action = Action.GLOBAL__UPDATE_CONFIGURATION
         response = client.get(f"{ENDPOINT}/access/{action}")
         assert response.status_code == 200
 
@@ -25,7 +24,7 @@ class TestAuthorizationRouter:
         user = UserFactory(external_id="sub")
         role_id = uuid.uuid4()
         resource_id = uuid.uuid4()
-        action = AuthorizationAction.GLOBAL__DELETE_USER
+        action = Action.GLOBAL__DELETE_USER
 
         authorizer.sync_role_permissions(
             role_id=str(role_id),
@@ -40,3 +39,13 @@ class TestAuthorizationRouter:
 
         access = AccessResponse(**response.json())
         assert access.allowed is True
+
+    def test_is_admin(self, client: TestClient):
+        response = client.get(f"{ENDPOINT}/admin")
+        assert response.status_code == 200
+        assert response.json() is False
+
+    def test_is_admin_authorized(self, client: TestClient, admin):
+        response = client.get(f"{ENDPOINT}/admin")
+        assert response.status_code == 200
+        assert response.json() is True

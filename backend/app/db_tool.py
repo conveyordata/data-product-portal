@@ -1,4 +1,3 @@
-import asyncio
 import os
 
 import typer
@@ -27,10 +26,10 @@ def seed_cmd(path: str = typer.Argument(..., help="Path to the seed script.")):
     print("[bold green]Seeding :seedling:[/bold green]")
     print("Seeding started -> source =", path)
     try:
-        asyncio.run(seed_db(path))
+        seed_db(path)
         print("Seeding finished successfully")
     except Exception as e:
-        print("Something went wrong when seeding", e)
+        print("Something went wrong when seeding:\n", e)
 
 
 @app.command()

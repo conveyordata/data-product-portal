@@ -1,18 +1,18 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Boolean, Column, String
+from sqlalchemy import UUID, Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.data_product_memberships.model import DataProductMembership
-from app.data_products.model import DataProduct
 from app.database.database import Base, ensure_exists
-from app.datasets.model import datasets_owner_table
+from app.role_assignments.data_product.model import DataProductRoleAssignment
+from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
+    from app.data_products.model import DataProduct
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.datasets.model import Dataset
 
@@ -25,12 +25,11 @@ class User(Base, BaseORM):
     external_id = Column(String)
     first_name = Column(String)
     last_name = Column(String)
-    is_admin = Column(Boolean, server_default="false", nullable=False)
 
     # Relationships - Data Products
-    data_product_memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
-        foreign_keys="DataProductMembership.user_id",
+    data_product_roles: Mapped[list["DataProductRoleAssignment"]] = relationship(
+        "DataProductRoleAssignment",
+        foreign_keys="DataProductRoleAssignment.user_id",
         back_populates="user",
         # Deliberately lazy:
         #  - Used in limited cases, only on a single user
@@ -40,37 +39,21 @@ class User(Base, BaseORM):
         #     membership field with raise load strategy)
         lazy="select",
     )
-    approved_memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
-        foreign_keys="DataProductMembership.approved_by_id",
-        back_populates="approved_by",
-        lazy="raise",
-    )
-    denied_memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
-        foreign_keys="DataProductMembership.denied_by_id",
-        back_populates="denied_by",
-        lazy="raise",
-    )
-    requested_memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
-        foreign_keys="DataProductMembership.requested_by_id",
-        back_populates="requested_by",
-        lazy="raise",
-    )
     data_products: Mapped[list["DataProduct"]] = association_proxy(
-        "data_product_memberships", "data_product"
+        "data_product_roles", "data_product"
     )
 
     # Relationships - Datasets
-    owned_datasets: Mapped[list["Dataset"]] = relationship(
-        secondary=datasets_owner_table,
-        back_populates="owners",
+    dataset_roles: Mapped[list["DatasetRoleAssignment"]] = relationship(
+        "DatasetRoleAssignment",
+        foreign_keys="DatasetRoleAssignment.user_id",
+        back_populates="user",
         # Deliberately lazy:
         #  - Used in limited cases, only on a single user
         #  - Complicates get_authenticated_user
         lazy="select",
     )
+    datasets: Mapped[list["Dataset"]] = association_proxy("dataset_roles", "dataset")
     requested_datasets: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
         foreign_keys="DataProductDatasetAssociation.requested_by_id",

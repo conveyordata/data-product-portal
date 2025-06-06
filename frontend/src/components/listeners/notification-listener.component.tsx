@@ -11,6 +11,7 @@ const NotificationListener: React.FC = () => {
         maxCount: 5,
     });
 
+    // biome-ignore lint: I don't know what the effect of removing id is
     useEffect(() => {
         if (message && description) {
             notificationApi[type]({

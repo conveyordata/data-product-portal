@@ -12,48 +12,47 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
-    useCreateRoleAssignmentMutation,
-    useGetRoleAssignmentQuery,
-} from '@/store/features/role-assignments/roles-api-slice';
+    useCreateDataProductRoleAssignmentMutation,
+    useGetDataProductRoleAssignmentsQuery,
+} from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { RoleAssignmentContract } from '@/types/roles/role.contract';
-import { SearchForm } from '@/types/shared';
-import { UserContract } from '@/types/users';
-import { getIsDataProductOwner } from '@/utils/data-product-user-role.helper.ts';
+import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
+import type { SearchForm } from '@/types/shared';
+import type { UserContract } from '@/types/users';
 
 import styles from './team-tab.module.scss';
+
+function filterUsers(
+    users: DataProductRoleAssignmentContract[],
+    searchTerm: string,
+): DataProductRoleAssignmentContract[] {
+    if (!searchTerm) return users;
+
+    const searchString = searchTerm.toLowerCase();
+    return users.filter((assignment) => {
+        const user = assignment?.user;
+        return (
+            user?.email?.toLowerCase()?.includes(searchString) ||
+            user?.first_name?.toLowerCase()?.includes(searchString) ||
+            user?.last_name?.toLowerCase()?.includes(searchString)
+        );
+    });
+}
 
 type Props = {
     dataProductId: string;
 };
-
-function filterUsers(users: RoleAssignmentContract[], searchTerm: string) {
-    if (!searchTerm) return users;
-    if (!users) return [];
-
-    return (
-        users.filter((membership) => {
-            const searchString = searchTerm.toLowerCase();
-            return (
-                membership?.user?.email?.toLowerCase()?.includes(searchString) ||
-                membership?.user?.first_name?.toLowerCase()?.includes(searchString) ||
-                membership?.user?.last_name?.toLowerCase()?.includes(searchString)
-            );
-        }) ?? []
-    );
-}
-
 export function TeamTab({ dataProductId }: Props) {
+    const { t } = useTranslation();
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
-    const { t } = useTranslation();
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const { data: roleAssignments, isFetching } = useGetRoleAssignmentQuery({
+    const { data: roleAssignments, isFetching } = useGetDataProductRoleAssignmentsQuery({
         data_product_id: dataProductId,
-        user_id: undefined,
     });
-    const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateRoleAssignmentMutation();
+    const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateDataProductRoleAssignmentMutation();
+
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
     const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
@@ -71,13 +70,7 @@ export function TeamTab({ dataProductId }: Props) {
         { skip: !dataProductId },
     );
 
-    const canAddUserNew = access?.allowed || false;
-
-    const isDataProductOwner = useMemo(() => {
-        if (!dataProduct || !user) return false;
-
-        return getIsDataProductOwner(dataProduct, user.id) || user.is_admin;
-    }, [dataProduct, user]);
+    const canAddUser = access?.allowed || false;
 
     const handleGrantAccessToDataProduct = useCallback(
         async (user: UserContract, role_id: string) => {
@@ -106,20 +99,16 @@ export function TeamTab({ dataProductId }: Props) {
                     placeholder={t('Search users by email or name')}
                     actionButton={
                         <Button
-                            disabled={!(canAddUserNew || isDataProductOwner)}
                             type={'primary'}
                             className={styles.formButton}
                             onClick={handleOpen}
+                            disabled={!canAddUser}
                         >
                             {t('Add User')}
                         </Button>
                     }
                 />
-                <TeamTable
-                    isCurrentUserDataProductOwner={isDataProductOwner}
-                    dataProductId={dataProductId}
-                    dataProductUsers={filteredUsers}
-                />
+                <TeamTable dataProductId={dataProductId} dataProductUsers={filteredUsers} />
             </Flex>
             {isVisible && (
                 <UserPopup

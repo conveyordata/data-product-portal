@@ -1,12 +1,12 @@
 import { TeamOutlined } from '@ant-design/icons';
-import { Badge, Popover, TableColumnsType, Tag } from 'antd';
+import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { DataProductsGetContract, DataProductStatus } from '@/types/data-product';
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { DataProductTypeContract } from '@/types/data-product-type';
-import { DomainContract } from '@/types/domain';
+import type { DataProductStatus, DataProductsGetContract } from '@/types/data-product';
+import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import type { DataProductTypeContract } from '@/types/data-product-type';
+import type { DomainContract } from '@/types/domain';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';

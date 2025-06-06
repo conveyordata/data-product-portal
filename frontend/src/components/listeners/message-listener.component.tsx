@@ -8,6 +8,7 @@ const MessageListener: React.FC = () => {
     const { content, duration, onClose, type, id } = useSelector(selectMessage);
     const [messageApi, contextHolder] = message.useMessage({ maxCount: 5 });
 
+    // biome-ignore lint: I don't know what the effect of removing id is
     useEffect(() => {
         if (content) {
             messageApi[type]({

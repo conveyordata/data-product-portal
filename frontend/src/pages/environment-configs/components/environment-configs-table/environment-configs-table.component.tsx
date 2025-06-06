@@ -7,7 +7,7 @@ import { buildUrl } from '@/api/api-urls';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useGetAllEnvironmentConfigsQuery } from '@/store/features/environments/environments-api-slice';
 import { EnvironmentConfigContract } from '@/types/environment';
-import { ApplicationPaths, createEnvironmentConfigPath, DynamicPathParams } from '@/types/navigation';
+import { ApplicationPaths, DynamicPathParams, createEnvironmentConfigPath } from '@/types/navigation';
 import { SearchForm } from '@/types/shared';
 
 import { getEnvironmentConfigTableColumns } from './environment-configs-columns';
@@ -30,8 +30,6 @@ export const EnvironmentConfigsTable = () => {
     const navigate = useNavigate();
     const { environmentId = '' } = useParams<DynamicPathParams>();
 
-    const { pagination, handlePaginationChange, handleTotalChange } = useTablePagination({});
-
     const { data = [], isFetching } = useGetAllEnvironmentConfigsQuery(environmentId, {
         skip: !environmentId,
     });
@@ -49,6 +47,8 @@ export const EnvironmentConfigsTable = () => {
     const filteredEnvConfigs = useMemo(() => {
         return filterEnvConfigs(envConfigs, searchTerm);
     }, [envConfigs, searchTerm]);
+
+    const { pagination, handlePaginationChange, handleTotalChange } = useTablePagination(filteredEnvConfigs);
 
     const onChange: TableProps<EnvironmentConfigContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);

@@ -1,15 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import { EmptyList } from '@/components/empty/empty-list/empty-list.component.tsx';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
+import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { TextEditor } from '@/components/rich-text/text-editor/text-editor';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { useGetDatasetByIdQuery, useUpdateDatasetAboutMutation } from '@/store/features/datasets/datasets-api-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { useGetDatasetByIdQuery, useUpdateDatasetAboutMutation } from '@/store/features/datasets/datasets-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { getIsDatasetOwner } from '@/utils/dataset-user.helper.ts';
 
 type Props = {
     datasetId: string;
@@ -28,7 +27,7 @@ export function AboutTab({ datasetId }: Props) {
         },
         { skip: !datasetId },
     );
-    const canEditNew = edit_access?.allowed || false;
+    const canEdit = edit_access?.allowed || false;
 
     if (isFetching) {
         return <LoadingSpinner />;
@@ -37,8 +36,6 @@ export function AboutTab({ datasetId }: Props) {
     if (!dataset || !currentUser) {
         return <EmptyList />;
     }
-
-    const canEdit = getIsDatasetOwner(dataset, currentUser?.id) || Boolean(currentUser?.is_admin);
 
     async function handleSubmit(content: string) {
         if (canEdit) {
@@ -59,7 +56,7 @@ export function AboutTab({ datasetId }: Props) {
             onSubmit={handleSubmit}
             isLoading={isFetching}
             isSubmitting={isLoading}
-            isDisabled={!(canEditNew || canEdit)}
+            isDisabled={!canEdit}
         />
     );
 }

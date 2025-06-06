@@ -5,12 +5,12 @@ from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.data_product_memberships.model import DataProductMembership
 from app.data_product_settings.model import DataProductSettingValue
 from app.data_product_types.model import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
+from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
 from app.tags.model import Tag, tag_data_product_table
@@ -50,14 +50,12 @@ class DataProduct(Base, BaseORM):
     domain: Mapped["Domain"] = relationship(
         back_populates="data_products", lazy="joined"
     )
-    memberships: Mapped[list["DataProductMembership"]] = relationship(
-        "DataProductMembership",
+    assignments: Mapped[list["DataProductRoleAssignment"]] = relationship(
         back_populates="data_product",
         cascade="all, delete-orphan",
-        order_by="DataProductMembership.status, "
-        "DataProductMembership.requested_on, "
-        "DataProductMembership.role",
-        lazy="joined",
+        order_by="DataProductRoleAssignment.decision, "
+        "DataProductRoleAssignment.requested_on",
+        lazy="raise",
     )
     dataset_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
@@ -85,12 +83,12 @@ class DataProduct(Base, BaseORM):
 
     @property
     def user_count(self) -> int:
-        approved_memberships = [
-            membership
-            for membership in self.memberships
-            if membership.status == DecisionStatus.APPROVED
+        approved_assignments = [
+            assignment
+            for assignment in self.assignments
+            if assignment.decision == DecisionStatus.APPROVED
         ]
-        return len(approved_memberships)
+        return len(approved_assignments)
 
     @property
     def dataset_count(self) -> int:

@@ -16,9 +16,11 @@ import {
     DataProductGetDatabricksWorkspaceUrlResponse,
     DataProductGetSignInUrlRequest,
     DataProductGetSignInUrlResponse,
-    DataProductsGetContract,
+    DataProductGetSnowflakeUrlRequest,
+    DataProductGetSnowflakeUrlResponse,
     DataProductUpdateRequest,
     DataProductUpdateResponse,
+    DataProductsGetContract,
 } from '@/types/data-product';
 import { GraphContract } from '@/types/graph/graph-contract';
 import {
@@ -75,12 +77,6 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
         getDataProductGraphData: builder.query<GraphContract, string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductGraph, { dataProductId: id }),
-                method: 'GET',
-            }),
-        }),
-        getGraphData: builder.query<GraphContract, string>({
-            query: () => ({
-                url: ApiUrl.Graph,
                 method: 'GET',
             }),
         }),
@@ -146,6 +142,16 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
         >({
             query: ({ id, environment }) => ({
                 url: buildUrl(ApiUrl.DataProductDatabricksWorkspaceUrl, { dataProductId: id }),
+                method: 'GET',
+                params: { environment },
+            }),
+        }),
+        getDataProductSnowflakeUrl: builder.mutation<
+            DataProductGetSnowflakeUrlResponse,
+            DataProductGetSnowflakeUrlRequest
+        >({
+            query: ({ id, environment }) => ({
+                url: buildUrl(ApiUrl.DataProductSnowflakeUrl, { dataProductId: id }),
                 method: 'GET',
                 params: { environment },
             }),
@@ -255,8 +261,8 @@ export const {
     useGetUserDataProductsQuery,
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
-    useGetGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
+    useGetDataProductSnowflakeUrlMutation,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,
     useGetDataProductNamespaceLengthLimitsQuery,

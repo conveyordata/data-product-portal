@@ -1,33 +1,24 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Table
+from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.data_outputs_datasets.model import DataOutputDatasetAssociation
 from app.data_product_lifecycles.model import DataProductLifecycle
-from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
 from app.domains.model import Domain
 from app.role_assignments.enums import DecisionStatus
-from app.shared.model import BaseORM, utcnow
+from app.shared.model import BaseORM
 from app.tags.model import Tag, tag_dataset_table
 
 if TYPE_CHECKING:
+    from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_product_settings.model import DataProductSettingValue
-    from app.users.model import User
-
-datasets_owner_table = Table(
-    "datasets_owners",
-    Base.metadata,
-    Column("dataset_id", ForeignKey("datasets.id")),
-    Column("users_id", ForeignKey("users.id")),
-    Column("created_on", DateTime(timezone=False), server_default=utcnow()),
-    Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
-)
+    from app.data_products_datasets.model import DataProductDatasetAssociation
+    from app.role_assignments.dataset.model import DatasetRoleAssignment
 
 
 class Dataset(Base, BaseORM):
@@ -48,8 +39,12 @@ class Dataset(Base, BaseORM):
     domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
 
     # Relationships
-    owners: Mapped[list["User"]] = relationship(
-        secondary=datasets_owner_table, back_populates="owned_datasets", lazy="joined"
+    assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        order_by="DatasetRoleAssignment.decision, "
+        "DatasetRoleAssignment.requested_on",
+        lazy="joined",
     )
     data_product_links: Mapped[list["DataProductDatasetAssociation"]] = relationship(
         "DataProductDatasetAssociation",
@@ -88,28 +83,6 @@ class Dataset(Base, BaseORM):
             if link.status == DecisionStatus.APPROVED
         ]
         return len(accepted_product_links)
-
-    def isVisibleToUser(self, user: "User"):
-        if (
-            self.access_type != DatasetAccessType.PRIVATE
-            or user.is_admin
-            or user in self.owners
-        ):
-            return True
-
-        consuming_data_products = {
-            link.data_product
-            for link in self.data_product_links
-            if link.status == DecisionStatus.APPROVED
-        }
-
-        user_data_products = {
-            membership.data_product
-            for membership in user.data_product_memberships
-            if membership.status == DecisionStatus.APPROVED
-        }
-
-        return bool(consuming_data_products & user_data_products)
 
 
 def ensure_dataset_exists(dataset_id: UUID, db: Session, **kwargs) -> Dataset:

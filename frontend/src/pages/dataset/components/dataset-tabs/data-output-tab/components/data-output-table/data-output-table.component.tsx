@@ -1,5 +1,5 @@
 import { Flex, Table, type TableColumnsType, TableProps } from 'antd';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
@@ -11,18 +11,16 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputLink } from '@/types/dataset';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
-import styles from './data-output-table.module.scss';
 import { getDatasetDataProductsColumns } from './data-output-table-columns.tsx';
+import styles from './data-output-table.module.scss';
 
 type Props = {
-    isCurrentDatasetOwner: boolean;
     datasetId: string;
     dataOutputs: DataOutputLink[];
-    currentUserId?: string;
     isLoading?: boolean;
 };
 
-export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs, isLoading }: Props) {
+export function DataOutputTable({ datasetId, dataOutputs, isLoading }: Props) {
     const { t } = useTranslation();
     const {
         handleAcceptDataOutputDatasetLink,
@@ -47,20 +45,16 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
         },
         { skip: !datasetId },
     );
-    const canAcceptNew = accept_access?.allowed || false;
-    const canRevokeNew = revoke_access?.allowed || false;
+    const canAccept = accept_access?.allowed || false;
+    const canRevoke = revoke_access?.allowed || false;
 
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+    const { pagination, handlePaginationChange } = useTablePagination(dataOutputs, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
     const onChange: TableProps<DataOutputLink>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
-
-    useEffect(() => {
-        resetPagination();
-    }, [dataOutputs, resetPagination]);
 
     const handleRemoveDatasetFromDataOutput = useCallback(
         async (dataOutputId: string, name: string, datasetLinkId: string) => {
@@ -82,27 +76,24 @@ export function DataOutputTable({ isCurrentDatasetOwner, datasetId, dataOutputs,
 
     const columns: TableColumnsType<DataOutputLink> = useMemo(() => {
         return getDatasetDataProductsColumns({
-            onRemoveDataOutputDatasetLink: handleRemoveDatasetFromDataOutput,
             t,
-            isDisabled: !isCurrentDatasetOwner,
-            canAcceptNew: canAcceptNew,
-            canRevokeNew: canRevokeNew,
-            isLoading: isRemovingDatasetFromDataProduct || isRejectingDataOutputLink || isApprovingDataOutputLink,
-            isCurrentDatasetOwner,
-            onRejectDataOutputDatasetLink: handleRejectDataOutputDatasetLink,
             onAcceptDataOutputDatasetLink: handleAcceptDataOutputDatasetLink,
+            onRejectDataOutputDatasetLink: handleRejectDataOutputDatasetLink,
+            onRemoveDataOutputDatasetLink: handleRemoveDatasetFromDataOutput,
+            isLoading: isRemovingDatasetFromDataProduct || isRejectingDataOutputLink || isApprovingDataOutputLink,
+            canAccept: canAccept,
+            canRevoke: canRevoke,
         });
     }, [
-        handleRemoveDatasetFromDataOutput,
         t,
-        isCurrentDatasetOwner,
+        handleAcceptDataOutputDatasetLink,
+        handleRejectDataOutputDatasetLink,
+        handleRemoveDatasetFromDataOutput,
         isRemovingDatasetFromDataProduct,
         isRejectingDataOutputLink,
         isApprovingDataOutputLink,
-        handleRejectDataOutputDatasetLink,
-        handleAcceptDataOutputDatasetLink,
-        canAcceptNew,
-        canRevokeNew,
+        canAccept,
+        canRevoke,
     ]);
 
     return (

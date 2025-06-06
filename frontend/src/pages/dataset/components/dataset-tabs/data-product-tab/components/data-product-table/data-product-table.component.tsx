@@ -1,5 +1,5 @@
-import { Flex, Table, TableColumnsType, TableProps } from 'antd';
-import { useCallback, useEffect, useMemo } from 'react';
+import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
@@ -11,18 +11,16 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { DataProductLink } from '@/types/dataset';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
-import styles from './data-product-table.module.scss';
 import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';
+import styles from './data-product-table.module.scss';
 
 type Props = {
-    isCurrentDatasetOwner: boolean;
     datasetId: string;
     dataProducts: DataProductLink[];
-    currentUserId?: string;
     isLoading?: boolean;
 };
 
-export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProducts, isLoading }: Props) {
+export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) {
     const { t } = useTranslation();
     const [removeDatasetFromDataProduct, { isLoading: isRemovingDatasetFromDataProduct }] =
         useRemoveDataProductDatasetLinkMutation();
@@ -35,14 +33,13 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
         isRejectingDataProductLink,
     } = usePendingActionHandlers();
 
-    const { data: access } = useCheckAccessQuery(
+    const { data: approve_access } = useCheckAccessQuery(
         {
             resource: datasetId,
             action: AuthorizationAction.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
         },
         { skip: !datasetId },
     );
-    const canApproveNew = access?.allowed || false;
     const { data: revoke_access } = useCheckAccessQuery(
         {
             resource: datasetId,
@@ -50,19 +47,16 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
         },
         { skip: !datasetId },
     );
-    const canRevokeNew = revoke_access?.allowed || false;
+    const canApprove = approve_access?.allowed || false;
+    const canRevoke = revoke_access?.allowed || false;
 
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+    const { pagination, handlePaginationChange } = useTablePagination(dataProducts, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
     const onChange: TableProps<DataProductLink>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
-
-    useEffect(() => {
-        resetPagination();
-    }, [dataProducts, resetPagination]);
 
     const handleRemoveDatasetFromDataProduct = useCallback(
         async (dataProductId: string, name: string, datasetLinkId: string) => {
@@ -84,29 +78,26 @@ export function DataProductTable({ isCurrentDatasetOwner, datasetId, dataProduct
 
     const columns: TableColumnsType<DataProductLink> = useMemo(() => {
         return getDatasetDataProductsColumns({
-            onRemoveDataProductDatasetLink: handleRemoveDatasetFromDataProduct,
             t,
             dataProductLinks: dataProducts,
-            isDisabled: !isCurrentDatasetOwner,
-            isLoading: isRemovingDatasetFromDataProduct || isRejectingDataProductLink || isApprovingDataProductLink,
-            isCurrentDatasetOwner,
-            canApproveNew,
-            canRevokeNew,
-            onRejectDataProductDatasetLink: handleRejectDataProductDatasetLink,
             onAcceptDataProductDatasetLink: handleAcceptDataProductDatasetLink,
+            onRejectDataProductDatasetLink: handleRejectDataProductDatasetLink,
+            onRemoveDataProductDatasetLink: handleRemoveDatasetFromDataProduct,
+            isLoading: isRemovingDatasetFromDataProduct || isRejectingDataProductLink || isApprovingDataProductLink,
+            canApprove: canApprove,
+            canRevoke: canRevoke,
         });
     }, [
-        handleRemoveDatasetFromDataProduct,
         t,
         dataProducts,
-        isCurrentDatasetOwner,
-        isRemovingDatasetFromDataProduct,
-        isRejectingDataProductLink,
-        isApprovingDataProductLink,
-        canApproveNew,
-        canRevokeNew,
-        handleRejectDataProductDatasetLink,
         handleAcceptDataProductDatasetLink,
+        handleRejectDataProductDatasetLink,
+        handleRemoveDatasetFromDataProduct,
+        isApprovingDataProductLink,
+        isRejectingDataProductLink,
+        isRemovingDatasetFromDataProduct,
+        canApprove,
+        canRevoke,
     ]);
 
     return (

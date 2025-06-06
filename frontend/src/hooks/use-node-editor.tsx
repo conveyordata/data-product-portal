@@ -1,5 +1,5 @@
 import type { Connection, Edge, Node, OnConnect } from '@xyflow/react';
-import { addEdge, Position, useEdgesState, useNodesState } from '@xyflow/react';
+import { Position, addEdge, useEdgesState, useNodesState } from '@xyflow/react';
 import { useCallback } from 'react';
 
 import { generateDagreLayout } from '@/utils/node-editor.helper.ts';
