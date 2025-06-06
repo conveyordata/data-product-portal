@@ -12,8 +12,7 @@
     .search-container {
         justify-content: space-between;
         align-items: center;
-        gap: globals.$column-gap-xs;
-
+        gap: globals.$column-gap-m;
         h3 {
             margin: 0;
             text-wrap: avoid;
@@ -31,6 +30,7 @@
 
     .table-filters {
         display: flex;
+        width: 100%;
         gap: globals.$column-gap-m;
     }
 }

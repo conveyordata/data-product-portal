@@ -1,10 +1,7 @@
-import type { RadioChangeEvent } from 'antd';
-import { Flex, Form, Input, Pagination, Table, Typography } from 'antd';
+import { Flex, Form, Input, Pagination, Space, Table, Typography } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter';
-import { useQuickFilter } from '@/hooks/use-quick-filter';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
@@ -37,7 +34,6 @@ function filterUsers(users: UsersGetContract, searchTerm?: string) {
 
 export function UsersTable() {
     const { t } = useTranslation();
-    const { quickFilter, onQuickFilterChange, quickFilterOptions } = useQuickFilter({});
     const { data: users = [], isFetching } = useGetAllUsersQuery();
     const { data: roles = [] } = useGetRolesQuery('global');
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
@@ -141,10 +137,6 @@ export function UsersTable() {
         });
     };
 
-    const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
-        onQuickFilterChange(value);
-    };
-
     return (
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.searchContainer}>
@@ -156,12 +148,7 @@ export function UsersTable() {
                 </Form>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
-                <Flex align="flex-end" justify="space-between" className={styles.tableBar}>
-                    <TableQuickFilter
-                        value={quickFilter}
-                        onFilterChange={handleQuickFilterChange}
-                        quickFilterOptions={quickFilterOptions}
-                    />
+                <Flex align="flex-end" justify="flex-end" className={styles.tableBar}>
                     <Pagination
                         current={pagination.current}
                         pageSize={pagination.pageSize}
