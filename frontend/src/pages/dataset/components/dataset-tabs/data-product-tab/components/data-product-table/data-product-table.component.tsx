@@ -8,7 +8,7 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useRemoveDataProductDatasetLinkMutation } from '@/store/features/data-products-datasets/data-products-datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { DataProductLink } from '@/types/dataset';
+import type { DataProductLink } from '@/types/dataset';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
 import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';

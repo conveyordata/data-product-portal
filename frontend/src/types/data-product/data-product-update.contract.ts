@@ -1,4 +1,4 @@
-import { DataProductCreate, DataProductCreateResponse } from '@/types/data-product';
+import type { DataProductCreate, DataProductCreateResponse } from '@/types/data-product';
 
 export type DataProductUpdateRequest = Omit<DataProductCreate, 'owners'>;
 

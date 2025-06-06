@@ -1,8 +1,8 @@
-import { Button, Flex, Popconfirm, TableColumnsType } from 'antd';
+import { Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { TagContract } from '@/types/tag';
+import type { TagContract } from '@/types/tag';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
     handleEdit: (tag: TagContract) => () => void;
 };
 
-export const getTagsTableColums = ({ t, onRemoveTag, handleEdit }: Props): TableColumnsType<TagContract> => {
+export const getTagsTableColumns = ({ t, onRemoveTag, handleEdit }: Props): TableColumnsType<TagContract> => {
     const sorter = new Sorter<TagContract>();
     return [
         {

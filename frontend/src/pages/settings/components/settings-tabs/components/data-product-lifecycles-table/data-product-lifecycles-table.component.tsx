@@ -10,7 +10,7 @@ import {
     useRemoveDataProductLifecycleMutation,
 } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 
 import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
 import styles from './data-product-lifecycles-table.module.scss';

@@ -1,7 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls';
 import { baseApiSlice } from '@/store/features/api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
-import { DecisionStatus } from '@/types/roles';
+import type { DecisionStatus } from '@/types/roles';
 import type {
     DataProductRoleAssignmentContract,
     DataProductRoleAssignmentCreateContract,

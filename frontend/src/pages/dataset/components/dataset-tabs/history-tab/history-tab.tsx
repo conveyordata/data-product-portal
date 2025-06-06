@@ -30,7 +30,7 @@ export function HistoryTab({ datasetId }: Props) {
                     <Input.Search placeholder={t('Search history by description, type or name')} allowClear />
                 </Form.Item>
             </Form>
-            <EmptyList description={t(`No data available for dataset {{name}}`, { name: dataset?.name })} />
+            <EmptyList description={t('No data available for dataset {{name}}', { name: dataset?.name })} />
         </Flex>
     );
 }

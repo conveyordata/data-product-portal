@@ -1,7 +1,7 @@
 import { List, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
+import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 
 const { Text } = Typography;
 

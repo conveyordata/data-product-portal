@@ -6,7 +6,7 @@ import type { UserContract } from '@/types/users';
 export function useGetDatasetOwners(datasetId: string | undefined): UserContract[] | undefined {
     const { data: roleAssignments } = useGetDatasetRoleAssignmentsQuery(
         {
-            dataset_id: datasetId!,
+            dataset_id: datasetId,
             decision: DecisionStatus.Approved,
         },
         { skip: !datasetId },

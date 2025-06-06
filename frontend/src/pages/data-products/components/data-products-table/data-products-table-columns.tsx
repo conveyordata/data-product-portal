@@ -65,9 +65,8 @@ export const getDataProductTableColumns = ({
                             {lifecycle.name}
                         </Tag>
                     );
-                } else {
-                    return;
                 }
+                return;
             },
             ...new FilterSettings(data, (dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
             sorter: sorter.stringSorter((dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),

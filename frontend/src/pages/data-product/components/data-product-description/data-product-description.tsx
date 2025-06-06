@@ -1,8 +1,8 @@
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { TagModel } from '@/types/tag';
+import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import type { TagModel } from '@/types/tag';
 
 import styles from './data-product-description.module.scss';
 
@@ -41,7 +41,9 @@ export function DataProductDescription({ lifecycle, type, description, domain, t
                 </Space>
                 <Flex>
                     {tags.map((tag) => (
-                        <Tag color={tag.rolled_up ? 'red' : 'success'}>{tag.value}</Tag>
+                        <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.id}>
+                            {tag.value}
+                        </Tag>
                     ))}
                 </Flex>
                 <Space>

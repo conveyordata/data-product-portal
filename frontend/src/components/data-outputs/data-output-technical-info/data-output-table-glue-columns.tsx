@@ -1,8 +1,8 @@
-import { TableColumnsType } from 'antd';
-import { TFunction } from 'i18next';
+import type { TableColumnsType } from 'antd';
+import type { TFunction } from 'i18next';
 
-import { GlueDataOutputContract } from '@/types/data-output';
-import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
+import type { GlueDataOutputContract } from '@/types/data-output';
+import type { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
 
 type Props = {
     t: TFunction;

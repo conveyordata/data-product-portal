@@ -6,7 +6,7 @@ import type { UserContract } from '@/types/users';
 export function useGetDataProductOwners(dataProductId: string | undefined): UserContract[] | undefined {
     const { data: roleAssignments } = useGetDataProductRoleAssignmentsQuery(
         {
-            data_product_id: dataProductId!,
+            data_product_id: dataProductId,
             decision: DecisionStatus.Approved,
         },
         { skip: !dataProductId },

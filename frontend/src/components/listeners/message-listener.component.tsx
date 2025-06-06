@@ -1,5 +1,6 @@
 import { message } from 'antd';
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectMessage } from '@/store/features/feedback/feedback-slice.ts';

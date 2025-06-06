@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
 import type { DataProductIcon } from '@/types/data-product-type';
-import { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
+import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 
 export type DataProductNodeProps = Node<{

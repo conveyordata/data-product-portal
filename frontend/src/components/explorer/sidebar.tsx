@@ -1,9 +1,9 @@
-import { Node, useReactFlow } from '@xyflow/react';
+import { type Node, useReactFlow } from '@xyflow/react';
 import { Select, Tag } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DataProductContract } from '@/types/data-product';
+import type { DataProductContract } from '@/types/data-product';
 
 import { NodeContext } from './node-context';
 import styles from './sidebar.module.scss';

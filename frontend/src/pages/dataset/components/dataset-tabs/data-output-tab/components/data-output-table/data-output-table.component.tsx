@@ -1,4 +1,4 @@
-import { Flex, Table, type TableColumnsType, TableProps } from 'antd';
+import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 

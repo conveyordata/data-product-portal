@@ -1,8 +1,8 @@
-import { DataOutputContract } from '@/types/data-output';
-import { UserContract } from '@/types/users';
+import type { DataOutputContract } from '@/types/data-output';
+import type { UserContract } from '@/types/users';
 
-import { DatasetContract } from '../dataset';
-import { DecisionStatus } from '../roles';
+import type { DatasetContract } from '../dataset';
+import type { DecisionStatus } from '../roles';
 
 export type DataOutputDatasetContract = {
     id: string;

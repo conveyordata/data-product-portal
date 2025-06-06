@@ -1,10 +1,10 @@
 import Icon from '@ant-design/icons';
-import { Dropdown, DropdownProps, Flex, MenuProps, Radio, Space, Spin, Typography } from 'antd';
+import { Dropdown, type DropdownProps, Flex, type MenuProps, Radio, Space, Spin, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Environment } from '@/types/environment';
-import { CustomDropdownItemProps } from '@/types/shared';
+import type { Environment } from '@/types/environment';
+import type { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './data-access-tile.module.scss';
 

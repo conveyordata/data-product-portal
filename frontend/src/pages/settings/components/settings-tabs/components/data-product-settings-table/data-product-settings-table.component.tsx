@@ -10,7 +10,7 @@ import {
     useRemoveDataProductSettingMutation,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataProductSettingContract, DataProductSettingScope } from '@/types/data-product-setting';
+import type { DataProductSettingContract, DataProductSettingScope } from '@/types/data-product-setting';
 
 import { getDataProductSettingsTableColumns } from './data-product-settings-table-columns.tsx';
 import styles from './data-product-settings-table.module.scss';

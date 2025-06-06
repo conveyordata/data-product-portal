@@ -1,6 +1,6 @@
-import { DataOutputContract } from '@/types/data-output';
+import type { DataOutputContract } from '@/types/data-output';
 
-import { EnvironmentConfig } from '../environment';
+import type { EnvironmentConfig } from '../environment';
 
 export type TechnicalInfoContract = {
     environmentConfig: EnvironmentConfig;
