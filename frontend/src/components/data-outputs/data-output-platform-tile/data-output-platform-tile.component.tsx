@@ -1,20 +1,17 @@
 import Icon from '@ant-design/icons';
-import { type DropdownProps, Flex, Radio, Space, Spin, Typography } from 'antd';
+import { Flex, Radio, Space, Spin, Typography } from 'antd';
 
-import type { Environment } from '@/types/environment';
 import type { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './data-output-platform-tile.module.scss';
 
 type Props<T extends string> = {
     dataPlatform: CustomDropdownItemProps<T>;
-    environments: Environment[];
-    onMenuItemClick?: (environment: string, dataPlatform: T) => void;
-    onTileClick?: (dataPlatform: T) => void;
-    dropdownProps?: DropdownProps;
+    onTileClick?: (dataPlatform: CustomDropdownItemProps<T>) => void;
     isLoading?: boolean;
     isDisabled?: boolean;
     isSelected?: boolean;
+    value?: string;
 };
 
 export function DataOutputPlatformTile<T extends string>({
@@ -23,6 +20,7 @@ export function DataOutputPlatformTile<T extends string>({
     isDisabled,
     isSelected,
     onTileClick = (): void => undefined,
+    value,
 }: Props<T>) {
     const isDisabledDropdown = isDisabled || dataPlatform.disabled;
 
@@ -34,7 +32,8 @@ export function DataOutputPlatformTile<T extends string>({
                         rootClassName={styles.radioButton}
                         disabled={isDisabledDropdown}
                         checked={isSelected}
-                        onClick={() => onTileClick(dataPlatform.value)}
+                        onClick={() => onTileClick(dataPlatform)}
+                        value={value}
                     >
                         <Flex vertical className={styles.iconWrapper}>
                             {isLoading ? (

@@ -391,6 +391,7 @@ class DataProductService:
             self.db.scalars(
                 select(DataOutputModel)
                 .options(
+                    joinedload(DataOutputModel.environment_configurations),
                     joinedload(DataOutputModel.dataset_links)
                     .joinedload(DataOutputDatasetAssociation.dataset)
                     .raiseload("*"),

@@ -132,7 +132,9 @@ function parseFullNodes(
               })
         : [];
 
-    return [...domain_nodes, ...regular_nodes];
+    const result = [...domain_nodes, ...regular_nodes];
+
+    return result;
 }
 
 function InternalFullExplorer() {
@@ -150,6 +152,16 @@ function InternalFullExplorer() {
         domainsEnabled: false,
     });
 
+    useEffect(() => {
+        // Give React Flow time to update its internals
+        const timeout = setTimeout(() => {
+            currentInstance.fitView();
+            setNodeId(null); // Reset nodeId when the graph is updated
+        }, 50); // 50ms is usually enough
+
+        return () => clearTimeout(timeout);
+    }, [currentInstance]);
+
     const [nodeId, setNodeId] = useState<string | null>(null);
 
     const { data: graph, isFetching } = useGetGraphDataQuery(
@@ -159,20 +171,10 @@ function InternalFullExplorer() {
             includeDataOutputs: sidebarFilters.dataOutputsEnabled,
             includeDomains: sidebarFilters.domainsEnabled,
         },
-        { skip: false },
+        {
+            skip: false,
+        },
     );
-
-    useEffect(() => {
-        if (!isFetching) {
-            // Give React Flow time to update its internals
-            const timeout = setTimeout(() => {
-                currentInstance.fitView();
-                setNodeId(null); // Reset nodeId when the graph is updated
-            }, 50); // 50ms is usually enough
-
-            return () => clearTimeout(timeout);
-        }
-    }, [isFetching, currentInstance]);
 
     const generateGraph = useCallback(() => {
         if (graph) {

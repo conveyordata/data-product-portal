@@ -11,10 +11,8 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy import orm
+from sqlalchemy import insert, orm
 
-from app.platform_services.model import PlatformService
-from app.platforms.model import Platform
 from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
@@ -28,7 +26,7 @@ def upgrade() -> None:
     op.drop_table("platforms")
     op.execute("DROP TYPE platformtypes;")
 
-    op.create_table(
+    platforms_table = op.create_table(
         "platforms",
         sa.Column(
             "id", sa.UUID, primary_key=True, server_default=sa.text("gen_random_uuid()")
@@ -36,7 +34,7 @@ def upgrade() -> None:
         sa.Column("name", sa.String, unique=True, nullable=False),
     )
 
-    op.create_table(
+    platform_services_table = op.create_table(
         "platform_services",
         sa.Column(
             "id", sa.UUID, primary_key=True, server_default=sa.text("gen_random_uuid()")
@@ -76,9 +74,15 @@ def upgrade() -> None:
     bind = op.get_bind()
     session = orm.Session(bind=bind)
 
-    platform = Platform(name="AWS")
-    platform.services = [PlatformService(name="S3"), PlatformService(name="Glue")]
-    session.add(platform)
+    aws_id = session.execute(
+        insert(platforms_table).values(name="AWS").returning(platforms_table.c.id)
+    ).scalar_one()
+
+    for service in ["S3", "Glue"]:
+        session.execute(
+            insert(platform_services_table).values(name=service, platform_id=aws_id)
+        )
+
     session.commit()
 
 

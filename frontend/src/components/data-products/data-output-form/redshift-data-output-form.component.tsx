@@ -1,59 +1,46 @@
 import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { DataOutputConfiguration, DataOutputCreateFormSchema, RedshiftDataOutput } from '@/types/data-output';
+import type { DataOutputCreateFormSchema } from '@/types/data-output';
+import { DataPlatforms } from '@/types/data-platform';
+
+import { configurationFieldName } from './components/configuration-field-name';
+import { ConfigurationFormItem } from './components/output-configuration-form-item';
+import { ConfigurationSubForm } from './components/output-configuration-sub-form.component';
 
 type Props = {
     sourceAligned: boolean;
-    identifiers: string[] | undefined;
+    identifiers?: string[];
     namespace: string;
-    form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
+    form: FormInstance<DataOutputCreateFormSchema>;
 };
 
-export function RedshiftDataOutputForm({ form, identifiers, namespace, sourceAligned }: Props) {
+export function RedshiftDataOutputForm({ form, identifiers = [], namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
-    const entireSchema = Form.useWatch('entire_schema', form);
-    const databaseOptionsRef = useRef((identifiers ?? []).map((database) => ({ label: database, value: database })));
-    const databaseValue = Form.useWatch('database', form);
-    const schemaValue = Form.useWatch('schema', form);
-    const tableValue = Form.useWatch('table', form);
+    const entireSchema = Form.useWatch(configurationFieldName('entire_schema'), form);
+
+    const databaseOptions = (sourceAligned ? identifiers : [namespace]).map((database) => ({
+        label: database,
+        value: database,
+    }));
 
     useEffect(() => {
-        let databaseOptionsList = identifiers;
         if (!sourceAligned) {
-            databaseOptionsList = [namespace];
-            form.setFieldsValue({ database: namespace });
+            form.setFieldValue(configurationFieldName('database'), namespace);
         } else {
-            form.setFieldsValue({ database: undefined });
+            form.setFieldValue(configurationFieldName('database'), undefined);
         }
-        databaseOptionsRef.current = (databaseOptionsList ?? []).map((database) => ({
-            label: database,
-            value: database,
-        }));
-    }, [sourceAligned, identifiers, namespace, form]);
-
-    useEffect(() => {
-        let result = databaseValue;
-        if (databaseValue) {
-            if (schemaValue) {
-                result += `__${schemaValue}`;
-            }
-            if (entireSchema) {
-                result += '.*';
-            } else if (tableValue) {
-                result += `.${tableValue}`;
-            }
-        } else {
-            result = '';
-        }
-
-        form.setFieldsValue({ result: result });
-    }, [databaseValue, schemaValue, tableValue, entireSchema, form]);
+    }, [namespace, form, sourceAligned]);
 
     return (
-        <div>
-            <Form.Item<RedshiftDataOutput>
+        <ConfigurationSubForm
+            form={form}
+            platform={DataPlatforms.Redshift}
+            resultLabel={t('Resulting database and schema')}
+            resultTooltip={t('The schema on Redshift you can access through this data output')}
+        >
+            <ConfigurationFormItem
                 name={'database'}
                 label={t('Schema')}
                 tooltip={t('The name of the Redshift schema to link the data output to')}
@@ -63,32 +50,30 @@ export function RedshiftDataOutputForm({ form, identifiers, namespace, sourceAli
                         message: t('Please input the name of the Redshift schema for this data output'),
                     },
                 ]}
+                normalize={(value: string | string[]) => {
+                    return Array.isArray(value) ? value[0] : value;
+                }}
             >
                 <Select
                     allowClear
                     showSearch
                     mode="tags"
                     disabled={!sourceAligned}
-                    onChange={(value) => {
-                        if (value.length > 0) {
-                            form.setFieldsValue({ database: value[0] });
-                        }
-                    }}
                     maxCount={1}
-                    options={databaseOptionsRef.current}
+                    options={databaseOptions}
                 />
-            </Form.Item>
-            <Form.Item<RedshiftDataOutput & { temp_suffix: string }>
+            </ConfigurationFormItem>
+            <ConfigurationFormItem
                 name={'schema'}
                 label={t('Schema suffix')}
                 tooltip={t('The suffix of the Redshift schema to link the data output to')}
             >
                 <Input />
-            </Form.Item>
-            <Form.Item name={'entire_schema'} valuePropName="checked" initialValue={true}>
-                <Checkbox defaultChecked={true}>{t('Include entire schema')}</Checkbox>
-            </Form.Item>
-            <Form.Item<RedshiftDataOutput>
+            </ConfigurationFormItem>
+            <ConfigurationFormItem name={'entire_schema'} valuePropName="checked" initialValue={true}>
+                <Checkbox>{t('Include entire schema')}</Checkbox>
+            </ConfigurationFormItem>
+            <ConfigurationFormItem
                 required
                 name={'table'}
                 hidden={entireSchema}
@@ -102,15 +87,7 @@ export function RedshiftDataOutputForm({ form, identifiers, namespace, sourceAli
                 ]}
             >
                 <Input />
-            </Form.Item>
-            <Form.Item<RedshiftDataOutput & { result: string }>
-                required
-                name={'result'}
-                label={t('Resulting schema and table')}
-                tooltip={t('The schema on Redshift you can access through this data output')}
-            >
-                <Input disabled />
-            </Form.Item>
-        </div>
+            </ConfigurationFormItem>
+        </ConfigurationSubForm>
     );
 }
