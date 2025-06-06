@@ -1,7 +1,7 @@
 """template data output result
 
 Revision ID: 137cce3079d2
-Revises: 7727032896e7
+Revises: eb57869c9840
 Create Date: 2025-05-09 07:58:41.192102
 
 """
@@ -14,7 +14,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "137cce3079d2"
-down_revision: Union[str, None] = "7727032896e7"
+down_revision: Union[str, None] = "eb57869c9840"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
