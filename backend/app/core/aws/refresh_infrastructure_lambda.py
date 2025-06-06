@@ -3,7 +3,7 @@ from typing import Any
 from botocore.exceptions import ClientError
 
 from app.core.aws.boto3_clients import get_client
-from app.core.logging.logger import logger
+from app.core.logging import logger
 from app.settings import settings
 
 
