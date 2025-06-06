@@ -11,11 +11,11 @@ from app.role_assignments.enums import DecisionStatus
 
 
 class AuthAssignment(Protocol):
-    def add(self) -> None: ...
+    def add(self) -> bool: ...
 
-    def remove(self) -> None: ...
+    def remove(self) -> bool: ...
 
-    def swap(self) -> None: ...
+    def swap(self) -> tuple[bool, bool]: ...
 
 
 @dataclass
@@ -45,33 +45,34 @@ class ResourceAuthAssignment(AuthAssignment):
 
         return assignment.role_id
 
-    def add(self) -> None:
+    def add(self) -> bool:
         authorizer = Authorization()
-        authorizer.assign_resource_role(
+        return authorizer.assign_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
             resource_id=str(self.resource_id),
         )
 
-    def remove(self) -> None:
+    def remove(self) -> bool:
         authorizer = Authorization()
-        authorizer.revoke_resource_role(
+        return authorizer.revoke_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
             resource_id=str(self.resource_id),
         )
 
-    def swap(self) -> None:
+    def swap(self) -> tuple[bool, bool]:
         assert self.previous_role_id is not None
 
         authorizer = Authorization()
-        authorizer.revoke_resource_role(
+        revoke = authorizer.revoke_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.previous_role_id),
             resource_id=str(self.resource_id),
         )
-        authorizer.assign_resource_role(
+        assign = authorizer.assign_resource_role(
             user_id=str(self.user_id),
             role_id=str(self.role_id),
             resource_id=str(self.resource_id),
         )
+        return revoke, assign
