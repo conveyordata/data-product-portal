@@ -41,10 +41,10 @@ export const globalRoleAssignmentsApiSlice = baseApiSlice
                         user_id: request.user_id,
                     },
                 }),
-                invalidatesTags: (_, _error) => [
+                invalidatesTags: (_, _error, { user_id }) => [
                     { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.GlobalAssignments as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.User as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.User as const, id: user_id },
                 ],
             }),
             requestGlobalRoleAssignment: builder.mutation<
@@ -59,10 +59,10 @@ export const globalRoleAssignmentsApiSlice = baseApiSlice
                         user_id: request.user_id,
                     },
                 }),
-                invalidatesTags: (_, _error, { role_id }) => [
+                invalidatesTags: (_, _error, { role_id, user_id }) => [
                     { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.GlobalAssignments as const, id: role_id },
-                    { type: TagTypes.User as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.User as const, id: user_id },
                 ],
             }),
             updateGlobalRoleAssignment: builder.mutation<
@@ -70,16 +70,16 @@ export const globalRoleAssignmentsApiSlice = baseApiSlice
                 { role_assignment_id: string; role_id: string }
             >({
                 query: (request) => ({
-                    url: buildUrl(ApiUrl.RoleAssignmentsGlobal, {
+                    url: buildUrl(ApiUrl.RoleAssignmentsGlobalUpdate, {
                         assignmentId: request.role_assignment_id,
                     }),
                     method: 'PATCH',
                     data: { role_id: request.role_id },
                 }),
-                invalidatesTags: (_, _error) => [
+                invalidatesTags: (_result, _error) => [
                     { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.GlobalAssignments as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.User as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.User as const, id: _result?.user.id || STATIC_TAG_ID.LIST },
                 ],
             }),
             decideGlobalRoleAssignment: builder.mutation<
@@ -93,10 +93,10 @@ export const globalRoleAssignmentsApiSlice = baseApiSlice
                     method: 'PATCH',
                     data: { decision: request.decision_status },
                 }),
-                invalidatesTags: (_, _error) => [
+                invalidatesTags: (_result, _error) => [
                     { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.GlobalAssignments as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.User as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.User as const, id: _result?.user.id || STATIC_TAG_ID.LIST },
                 ],
             }),
             deleteGlobalRoleAssignment: builder.mutation<void, { role_assignment_id: string }>({

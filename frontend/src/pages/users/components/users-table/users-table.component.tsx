@@ -15,6 +15,7 @@ import {
     useCreateGlobalRoleAssignmentMutation,
     useDecideGlobalRoleAssignmentMutation,
     useDeleteGlobalRoleAssignmentMutation,
+    useUpdateGlobalRoleAssignmentMutation,
 } from '@/store/features/role-assignments/global-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
@@ -49,7 +50,8 @@ export function UsersTable() {
         return filterUsers(data, searchTerm);
     }, [quickFilter, users, searchTerm]);
     const { pagination, handlePaginationChange } = useTablePagination(filteredUsers);
-    const [updateGlobalRole] = useCreateGlobalRoleAssignmentMutation();
+    const [createGlobalRole] = useCreateGlobalRoleAssignmentMutation();
+    const [updateGlobalRole] = useUpdateGlobalRoleAssignmentMutation();
     const [decideGlobalRole] = useDecideGlobalRoleAssignmentMutation();
     const [deleteGlobalRole] = useDeleteGlobalRoleAssignmentMutation();
 
@@ -57,7 +59,7 @@ export function UsersTable() {
         if (original?.role.id === value) {
             return;
         }
-        if (original !== null && value !== original.role.id) {
+        if (original !== null && !value) {
             deleteGlobalRole({
                 role_assignment_id: original.id,
             })
@@ -72,8 +74,24 @@ export function UsersTable() {
                     dispatchMessage({ content: t('Could not remove global role'), type: 'error' });
                 });
         }
-        if (value) {
+        if (original !== null && value) {
             updateGlobalRole({
+                role_assignment_id: original.id,
+                role_id: value,
+            })
+                .unwrap()
+                .then(() => {
+                    dispatchMessage({
+                        content: t('Global role updated successfully'),
+                        type: 'success',
+                    });
+                })
+                .catch(() => {
+                    dispatchMessage({ content: t('Could not update global role'), type: 'error' });
+                });
+        }
+        if (original === null && value) {
+            createGlobalRole({
                 user_id,
                 role_id: value,
             })
@@ -86,16 +104,16 @@ export function UsersTable() {
                         .unwrap()
                         .then(() => {
                             dispatchMessage({
-                                content: t('Global role updated successfully'),
+                                content: t('Global role created successfully'),
                                 type: 'success',
                             });
                         })
                         .catch(() => {
-                            dispatchMessage({ content: t('Could not update global role'), type: 'error' });
+                            dispatchMessage({ content: t('Could not create global role'), type: 'error' });
                         });
                 })
                 .catch(() => {
-                    dispatchMessage({ content: t('Could not update global role'), type: 'error' });
+                    dispatchMessage({ content: t('Could not create global role'), type: 'error' });
                 });
         }
     };
@@ -109,7 +127,7 @@ export function UsersTable() {
                 allRoles: roles.filter((role) => role.name.toLowerCase() != 'everyone'),
                 onChange: onChangeGlobalRole,
             }),
-        [t, filteredUsers, roles, canAssignGlobalRole],
+        [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole],
     );
 
     const handlePageChange = (page: number, pageSize: number) => {
