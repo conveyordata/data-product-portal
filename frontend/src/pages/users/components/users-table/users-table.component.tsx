@@ -1,6 +1,6 @@
 import type { RadioChangeEvent } from 'antd';
 import { Flex, Form, Input, Pagination, Table, Typography } from 'antd';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter';
@@ -55,68 +55,71 @@ export function UsersTable() {
     const [decideGlobalRole] = useDecideGlobalRoleAssignmentMutation();
     const [deleteGlobalRole] = useDeleteGlobalRoleAssignmentMutation();
 
-    const onChangeGlobalRole = (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => {
-        if (original?.role.id === value) {
-            return;
-        }
-        if (original !== null && !value) {
-            deleteGlobalRole({
-                role_assignment_id: original.id,
-            })
-                .unwrap()
-                .then(() => {
-                    dispatchMessage({
-                        content: t('Global role removed successfully'),
-                        type: 'success',
-                    });
+    const onChangeGlobalRole = useCallback(
+        (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => {
+            if (original?.role.id === value) {
+                return;
+            }
+            if (original !== null && !value) {
+                deleteGlobalRole({
+                    role_assignment_id: original.id,
                 })
-                .catch(() => {
-                    dispatchMessage({ content: t('Could not remove global role'), type: 'error' });
-                });
-        }
-        if (original !== null && value) {
-            updateGlobalRole({
-                role_assignment_id: original.id,
-                role_id: value,
-            })
-                .unwrap()
-                .then(() => {
-                    dispatchMessage({
-                        content: t('Global role updated successfully'),
-                        type: 'success',
-                    });
-                })
-                .catch(() => {
-                    dispatchMessage({ content: t('Could not update global role'), type: 'error' });
-                });
-        }
-        if (original === null && value) {
-            createGlobalRole({
-                user_id,
-                role_id: value,
-            })
-                .unwrap()
-                .then((result: GlobalRoleAssignmentContract) => {
-                    decideGlobalRole({
-                        role_assignment_id: result.id,
-                        decision_status: 'approved',
-                    })
-                        .unwrap()
-                        .then(() => {
-                            dispatchMessage({
-                                content: t('Global role created successfully'),
-                                type: 'success',
-                            });
-                        })
-                        .catch(() => {
-                            dispatchMessage({ content: t('Could not create global role'), type: 'error' });
+                    .unwrap()
+                    .then(() => {
+                        dispatchMessage({
+                            content: t('Global role removed successfully'),
+                            type: 'success',
                         });
+                    })
+                    .catch(() => {
+                        dispatchMessage({ content: t('Could not remove global role'), type: 'error' });
+                    });
+            }
+            if (original !== null && value) {
+                updateGlobalRole({
+                    role_assignment_id: original.id,
+                    role_id: value,
                 })
-                .catch(() => {
-                    dispatchMessage({ content: t('Could not create global role'), type: 'error' });
-                });
-        }
-    };
+                    .unwrap()
+                    .then(() => {
+                        dispatchMessage({
+                            content: t('Global role updated successfully'),
+                            type: 'success',
+                        });
+                    })
+                    .catch(() => {
+                        dispatchMessage({ content: t('Could not update global role'), type: 'error' });
+                    });
+            }
+            if (original === null && value) {
+                createGlobalRole({
+                    user_id,
+                    role_id: value,
+                })
+                    .unwrap()
+                    .then((result: GlobalRoleAssignmentContract) => {
+                        decideGlobalRole({
+                            role_assignment_id: result.id,
+                            decision_status: 'approved',
+                        })
+                            .unwrap()
+                            .then(() => {
+                                dispatchMessage({
+                                    content: t('Global role created successfully'),
+                                    type: 'success',
+                                });
+                            })
+                            .catch(() => {
+                                dispatchMessage({ content: t('Could not create global role'), type: 'error' });
+                            });
+                    })
+                    .catch(() => {
+                        dispatchMessage({ content: t('Could not create global role'), type: 'error' });
+                    });
+            }
+        },
+        [t, deleteGlobalRole, updateGlobalRole, createGlobalRole, decideGlobalRole],
+    );
 
     const columns = useMemo(
         () =>
@@ -127,7 +130,7 @@ export function UsersTable() {
                 allRoles: roles.filter((role) => role.name.toLowerCase() != 'everyone'),
                 onChange: onChangeGlobalRole,
             }),
-        [t, filteredUsers, roles, canAssignGlobalRole],
+        [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole],
     );
 
     const handlePageChange = (page: number, pageSize: number) => {
