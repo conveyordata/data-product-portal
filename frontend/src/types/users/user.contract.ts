@@ -1,3 +1,5 @@
+import type { GlobalRoleAssignmentContract } from '../roles/role.contract';
+
 export interface UserContract {
     id: string;
     email: string;
@@ -6,4 +8,8 @@ export interface UserContract {
     last_name: string;
 }
 
-export interface UserModel extends UserContract {}
+export type UsersGetContract = Array<
+    UserContract & {
+        global_role: GlobalRoleAssignmentContract;
+    }
+>;

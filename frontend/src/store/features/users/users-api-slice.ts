@@ -2,12 +2,13 @@ import { ApiUrl } from '@/api/api-urls';
 import { baseApiSlice } from '@/store/features/api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
 import type { UserContract, UserCreateRequest } from '@/types/users';
+import type { UsersGetContract } from '@/types/users/user.contract';
 
 export const userTags: string[] = [TagTypes.User];
 
 export const usersApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: userTags }).injectEndpoints({
     endpoints: (builder) => ({
-        getAllUsers: builder.query<UserContract[], void>({
+        getAllUsers: builder.query<UsersGetContract, void>({
             query: () => ({
                 url: ApiUrl.Users,
                 method: 'GET',

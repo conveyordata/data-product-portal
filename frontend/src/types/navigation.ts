@@ -30,6 +30,7 @@ export enum ApplicationPaths {
     Settings = '/settings',
     DataProductLifecycles = '/data-product-lifecycles',
     RoleConfiguration = '/configuration/roles',
+    People = '/people',
 }
 
 export const authenticatedPaths: string[] = [
@@ -53,6 +54,7 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.EnvironmentConfigs,
     ApplicationPaths.EnvironmentConfigNew,
     ApplicationPaths.Explorer,
+    ApplicationPaths.People,
 ];
 
 export function createDataProductIdPath(
