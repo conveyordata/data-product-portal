@@ -48,7 +48,7 @@ export function UsersTable() {
     const filteredUsers = useMemo(() => {
         const data = users;
         return filterUsers(data, searchTerm);
-    }, [quickFilter, users, searchTerm]);
+    }, [users, searchTerm]);
     const { pagination, handlePaginationChange } = useTablePagination(filteredUsers);
     const [createGlobalRole] = useCreateGlobalRoleAssignmentMutation();
     const [updateGlobalRole] = useUpdateGlobalRoleAssignmentMutation();
@@ -127,7 +127,7 @@ export function UsersTable() {
                 allRoles: roles.filter((role) => role.name.toLowerCase() != 'everyone'),
                 onChange: onChangeGlobalRole,
             }),
-        [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole],
+        [t, filteredUsers, roles, canAssignGlobalRole],
     );
 
     const handlePageChange = (page: number, pageSize: number) => {

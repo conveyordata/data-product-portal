@@ -160,7 +160,7 @@ function InternalFullExplorer() {
         }, 50); // 50ms is usually enough
 
         return () => clearTimeout(timeout);
-    }, [sidebarFilters, currentInstance]);
+    }, [currentInstance]);
 
     const [nodeId, setNodeId] = useState<string | null>(null);
 
