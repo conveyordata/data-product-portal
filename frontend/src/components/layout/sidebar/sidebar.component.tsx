@@ -42,7 +42,7 @@ export const Sidebar = () => {
             key: ApplicationPaths.Datasets,
         },
         {
-            label: <Link to={ApplicationPaths.Users}>{t('Users')}</Link>,
+            label: <Link to={ApplicationPaths.Users}>{t('People')}</Link>,
             icon: <TeamOutlined />,
             key: ApplicationPaths.Users,
         },
