@@ -272,7 +272,7 @@ export const Breadcrumbs = () => {
                                             item: styles.breadcrumbItem,
                                         }}
                                     >
-                                        {t('Users')}
+                                        {t('People')}
                                     </Space>
                                 ),
                             });
