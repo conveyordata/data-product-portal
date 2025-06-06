@@ -138,10 +138,6 @@ export function UsersTable() {
         });
     };
 
-    // const navigateToDataProduct = (dataProductId: string) => {
-    //     navigate(createDataProductIdPath(dataProductId));
-    // };
-
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
         onQuickFilterChange(value);
     };
