@@ -30,7 +30,7 @@ export enum ApplicationPaths {
     Settings = '/settings',
     DataProductLifecycles = '/data-product-lifecycles',
     RoleConfiguration = '/configuration/roles',
-    Users = '/users',
+    People = '/people',
 }
 
 export const authenticatedPaths: string[] = [
