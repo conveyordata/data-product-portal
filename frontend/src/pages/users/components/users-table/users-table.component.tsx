@@ -19,7 +19,7 @@ import {
 } from '@/store/features/role-assignments/global-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
-import { GlobalRoleAssignmentContract } from '@/types/roles/role.contract';
+import type { GlobalRoleAssignmentContract } from '@/types/roles/role.contract';
 import { UsersGetContract } from '@/types/users/user.contract';
 import { getUserTableColumns } from './users-table-columns';
 import styles from './users-table.module.scss';
