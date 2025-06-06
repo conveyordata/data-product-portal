@@ -1,5 +1,5 @@
 import type { Edge } from '@xyflow/react';
-import { GlobalToken } from 'antd';
+import type { GlobalToken } from 'antd';
 
 import type { EdgeContract } from '@/types/graph/graph-contract.ts';
 

@@ -10,178 +10,167 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
-import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { ActionResolveRequest, PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
+import { createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
+import {
+    type ActionResolveRequest,
+    type PendingAction,
+    PendingActionTypes,
+} from '@/types/pending-actions/pending-actions';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 
 import { DEFAULT_LIST_PAGINATION } from '@/constants/list.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import styles from './pending-requests-inbox.module.scss';
-import { PendingRequestsList } from './pending-requests-list';
-import { CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
+import { type PendingActionItem, PendingRequestsList } from './pending-requests-list';
+import { type CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
 
-const createPendingItem = (action: PendingAction, t: TFunction, color: string) => {
-    let link, description, navigatePath, date, author, initials, message, tag, type, request, icon;
-
+const createPendingItem = (action: PendingAction, t: TFunction, color: string): PendingActionItem | null => {
     function getInitials(firstName: string, lastName: string) {
         return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
     }
 
     switch (action.pending_action_type) {
-        case PendingActionTypes.DataProductDataset:
-            icon = <DatasetOutlined />;
-            link = createDataProductIdPath(action.data_product_id);
-            description = (
-                <Typography.Text strong>
-                    {t('Request for')} <strong className={styles.bolder}>{t('read access')}</strong>{' '}
-                    {t('from the data product')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        <strong>{action.data_product.name}</strong>
-                    </Link>
-                </Typography.Text>
-            );
-            message = (
-                <Typography.Text>
-                    {t('Accepting will grant the data product read access on the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        {action.dataset.name}
-                    </Link>{' '}
-                    {t('dataset.')}
-                </Typography.Text>
-            );
-            tag = (
-                <Typography.Text
-                    style={{
-                        color: color,
-                    }}
-                    strong
-                >
-                    {t('{{name}} Dataset', { name: action.dataset.name })}
-                </Typography.Text>
-            );
-            navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
-            date = action.requested_on;
-            author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
-            initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
-            request = {
-                type: PendingActionTypes.DataProductDataset as PendingActionTypes.DataProductDataset,
+        case PendingActionTypes.DataProductDataset: {
+            return {
+                key: action.id,
+                icon: <DatasetOutlined />,
+                color: color,
+                description: (
+                    <Typography.Text strong>
+                        {t('Request for')} <strong className={styles.bolder}>{t('read access')}</strong>{' '}
+                        {t('from the data product')}{' '}
+                        <Link onClick={(e) => e.stopPropagation()} to={createDataProductIdPath(action.data_product_id)}>
+                            <strong>{action.data_product.name}</strong>
+                        </Link>
+                    </Typography.Text>
+                ),
+                message: (
+                    <Typography.Text>
+                        {t('Accepting will grant the data product read access on the')}{' '}
+                        <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                            {action.dataset.name}
+                        </Link>{' '}
+                        {t('dataset.')}
+                    </Typography.Text>
+                ),
+                tag: (
+                    <Typography.Text
+                        style={{
+                            color: color,
+                        }}
+                        strong
+                    >
+                        {t('{{name}} Dataset', { name: action.dataset.name })}
+                    </Typography.Text>
+                ),
+                navigatePath: createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct),
+                date: action.requested_on,
+                author: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
+                initials: getInitials(action.requested_by.first_name, action.requested_by.last_name),
                 request: {
-                    id: action.id,
-                    data_product_id: action.data_product_id,
-                    dataset_id: action.dataset_id,
+                    type: PendingActionTypes.DataProductDataset as const,
+                    request: {
+                        id: action.id,
+                        data_product_id: action.data_product_id,
+                        dataset_id: action.dataset_id,
+                    },
                 },
             };
-            break;
-
-        case PendingActionTypes.DataOutputDataset:
-            icon = <DatasetOutlined color="" />;
-            link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
-            description = (
-                <Typography.Text strong>
-                    {t('Request for')} <strong className={styles.bolder}>{t('the creation of a link')}</strong>{' '}
-                    {t('coming from the data output')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        <strong>{action.data_output.name}</strong>
-                    </Link>
-                </Typography.Text>
-            );
-            message = (
-                <Typography.Text>
-                    {t('Accepting will create a link from the data output to the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        {action.dataset.name}
-                    </Link>{' '}
-                    {t('dataset.')}
-                </Typography.Text>
-            );
-            tag = (
-                <Typography.Text
-                    style={{
-                        color: color,
-                    }}
-                    strong
-                >
-                    {t('{{name}} Dataset', { name: action.dataset.name })}
-                </Typography.Text>
-            );
-            navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
-            date = action.requested_on;
-            author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
-            initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
-            request = {
-                type: PendingActionTypes.DataOutputDataset as PendingActionTypes.DataOutputDataset,
+        }
+        case PendingActionTypes.DataOutputDataset: {
+            return {
+                key: action.id,
+                icon: <DatasetOutlined color="" />,
+                color: color,
+                description: (
+                    <Typography.Text strong>
+                        {t('Request for')} <strong className={styles.bolder}>{t('the creation of a link')}</strong>{' '}
+                        {t('coming from the data output')}{' '}
+                        <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                            <strong>{action.data_output.name}</strong>
+                        </Link>
+                    </Typography.Text>
+                ),
+                message: (
+                    <Typography.Text>
+                        {t('Accepting will create a link from the data output to the')}{' '}
+                        <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                            {action.dataset.name}
+                        </Link>{' '}
+                        {t('dataset.')}
+                    </Typography.Text>
+                ),
+                tag: (
+                    <Typography.Text
+                        style={{
+                            color: color,
+                        }}
+                        strong
+                    >
+                        {t('{{name}} Dataset', { name: action.dataset.name })}
+                    </Typography.Text>
+                ),
+                navigatePath: createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput),
+                date: action.requested_on,
+                author: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
+                initials: getInitials(action.requested_by.first_name, action.requested_by.last_name),
                 request: {
-                    id: action.id,
-                    data_output_id: action.data_output_id,
-                    dataset_id: action.dataset_id,
+                    type: PendingActionTypes.DataOutputDataset as const,
+                    request: {
+                        id: action.id,
+                        data_output_id: action.data_output_id,
+                        dataset_id: action.dataset_id,
+                    },
                 },
             };
-            break;
-
-        case PendingActionTypes.DataProductRoleAssignment:
-            icon = <DataProductOutlined />;
-            link = createDataProductIdPath(action.data_product.id);
-            description = (
-                <Typography.Text strong>
-                    {t('Request for ')} <strong className={styles.bolder}>{t('team membership')}</strong> {t('from')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={'/'}>
-                        <strong>
-                            {action.user.first_name} {action.user.last_name}
-                        </strong>
-                    </Link>
-                </Typography.Text>
-            );
-            message = (
-                <Typography.Text>
-                    {t('Accepting will grant the user the role of {{role}} in the', {
-                        role: action.role.name,
-                        firstName: action.user.first_name,
-                        lastName: action.user.last_name,
-                    })}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.data_product.id)}>
-                        {action.data_product.name}
-                    </Link>{' '}
-                    {t('data product.')}
-                </Typography.Text>
-            );
-            tag = (
-                <Typography.Text
-                    style={{
-                        color: color,
-                    }}
-                    strong
-                >
-                    {t('{{name}} Data Product', { name: action.data_product.name })}
-                </Typography.Text>
-            );
-            navigatePath = createDataProductIdPath(action.data_product.id, DataProductTabKeys.Team);
-            date = action.requested_on ?? '';
-            author = action.user.first_name + ' ' + action.user.last_name;
-            initials = getInitials(action.user.first_name, action.user.last_name);
-            request = {
-                type: PendingActionTypes.DataProductRoleAssignment as PendingActionTypes.DataProductRoleAssignment,
-                request: { assignment_id: action.id, data_product_id: action.data_product.id },
+        }
+        case PendingActionTypes.DataProductRoleAssignment: {
+            return {
+                key: action.id,
+                icon: <DataProductOutlined />,
+                color: color,
+                description: (
+                    <Typography.Text strong>
+                        {t('Request for ')} <strong className={styles.bolder}>{t('team membership')}</strong>{' '}
+                        {t('from')}{' '}
+                        <Link onClick={(e) => e.stopPropagation()} to={'/'}>
+                            <strong>
+                                {action.user.first_name} {action.user.last_name}
+                            </strong>
+                        </Link>
+                    </Typography.Text>
+                ),
+                message: (
+                    <Typography.Text>
+                        {t('Accepting will grant the user the role of {{role}} in the', {
+                            role: action.role.name,
+                            firstName: action.user.first_name,
+                            lastName: action.user.last_name,
+                        })}{' '}
+                        <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.data_product.id)}>
+                            {action.data_product.name}
+                        </Link>{' '}
+                        {t('data product.')}
+                    </Typography.Text>
+                ),
+                tag: (
+                    <Typography.Text style={{ color: color }} strong>
+                        {t('{{name}} Data Product', { name: action.data_product.name })}
+                    </Typography.Text>
+                ),
+                navigatePath: createDataProductIdPath(action.data_product.id, DataProductTabKeys.Team),
+                date: action.requested_on ?? '',
+                author: `${action.user.first_name} ${action.user.last_name}`,
+                initials: getInitials(action.user.first_name, action.user.last_name),
+                request: {
+                    type: PendingActionTypes.DataProductRoleAssignment as const,
+                    request: { assignment_id: action.id, data_product_id: action.data_product.id },
+                },
             };
-            break;
-
+        }
         default:
             return null;
     }
-
-    return {
-        key: type + action.id,
-        description: description,
-        navigatePath: navigatePath,
-        date: date,
-        author: author,
-        initials: initials,
-        message: message,
-        color: color,
-        tag: tag,
-        type: action.pending_action_type,
-        request: request,
-        icon: icon,
-    };
 };
 
 export function PendingRequestsInbox() {
@@ -208,8 +197,8 @@ export function PendingRequestsInbox() {
             createPendingItem(
                 action,
                 t,
-                action.pending_action_type == PendingActionTypes.DataOutputDataset ||
-                    action.pending_action_type == PendingActionTypes.DataProductDataset
+                action.pending_action_type === PendingActionTypes.DataOutputDataset ||
+                    action.pending_action_type === PendingActionTypes.DataProductDataset
                     ? datasetColor
                     : dataProductColor,
             ),
@@ -238,7 +227,9 @@ export function PendingRequestsInbox() {
 
     const slicedPendingActionItems = useMemo(() => {
         return (
-            selectedTypes.size === 0 ? pendingItems : pendingItems.filter((item) => selectedTypes.has(item.type))
+            selectedTypes.size === 0
+                ? pendingItems
+                : pendingItems.filter((item) => selectedTypes.has(item.request.type))
         ).sort((a, b) => {
             if (!a?.date || !b?.date) {
                 return 0;
@@ -252,7 +243,9 @@ export function PendingRequestsInbox() {
 
         const typesSet = new Set<PendingActionTypes>();
         if (key === 'all') {
-            Object.values(PendingActionTypes).forEach((type) => typesSet.add(type));
+            for (const type of Object.values(PendingActionTypes)) {
+                typesSet.add(type);
+            }
         } else if (key === 'dataProduct') {
             typesSet.add(PendingActionTypes.DataProductRoleAssignment);
         } else if (key === 'dataset') {
@@ -290,7 +283,7 @@ export function PendingRequestsInbox() {
         }
     };
 
-    if (pendingItems.length == 0 && isFetching == false) {
+    if (pendingItems.length === 0 && isFetching === false) {
         return (
             <div className={styles.requestsInbox}>
                 <Typography.Title level={1} className={styles.welcomeContent}>
@@ -300,10 +293,10 @@ export function PendingRequestsInbox() {
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
                     description={
                         <Typography.Text>
-                            <CheckCircleOutlined /> {t(`You have no requests to handle.`)}
+                            <CheckCircleOutlined /> {t('You have no requests to handle.')}
                         </Typography.Text>
                     }
-                ></Empty>
+                />
             </div>
         );
     }

@@ -1,4 +1,4 @@
-import { DatasetCreateRequest, DatasetCreateResponse } from '@/types/dataset';
+import type { DatasetCreateRequest, DatasetCreateResponse } from '@/types/dataset';
 
 export type DatasetUpdateRequest = Omit<DatasetCreateRequest, 'owners'>;
 

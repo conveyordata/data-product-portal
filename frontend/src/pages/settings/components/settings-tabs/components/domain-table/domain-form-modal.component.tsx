@@ -1,18 +1,10 @@
 import { Button, Form, Input } from 'antd';
-import { TFunction } from 'i18next';
 
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { useCreateDomainMutation, useUpdateDomainMutation } from '@/store/features/domains/domains-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { DomainContract, DomainCreateRequest } from '@/types/domain';
-
-interface CreateDomainModalProps {
-    onClose: () => void;
-    t: TFunction;
-    isOpen: boolean;
-    mode: 'create' | 'edit';
-    initial?: DomainContract;
-}
+import type { DomainContract, DomainCreateRequest } from '@/types/domain';
+import { useTranslation } from 'react-i18next';
 
 interface DomainFormText {
     title: string;
@@ -21,7 +13,14 @@ interface DomainFormText {
     submitButtonText: string;
 }
 
-export const CreateDomainModal: React.FC<CreateDomainModalProps> = ({ isOpen, t, onClose, mode, initial }) => {
+type Props = {
+    onClose: () => void;
+    isOpen: boolean;
+    mode: 'create' | 'edit';
+    initial: DomainContract;
+};
+export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
+    const { t } = useTranslation();
     const [form] = Form.useForm();
     const [createDomain] = useCreateDomainMutation();
     const [editDomain] = useUpdateDomainMutation();
@@ -47,7 +46,7 @@ export const CreateDomainModal: React.FC<CreateDomainModalProps> = ({ isOpen, t,
             if (mode === 'create') {
                 await createDomain(values);
             } else {
-                await editDomain({ domain: values, domainId: initial!.id });
+                await editDomain({ domain: values, domainId: initial.id });
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });
@@ -105,4 +104,4 @@ export const CreateDomainModal: React.FC<CreateDomainModalProps> = ({ isOpen, t,
             </Form>
         </FormModal>
     );
-};
+}

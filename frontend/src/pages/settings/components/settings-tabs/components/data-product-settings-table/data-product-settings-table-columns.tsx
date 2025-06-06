@@ -1,8 +1,8 @@
-import { Button, Checkbox, Flex, Input, Popconfirm, Select, TableColumnsType } from 'antd';
+import { Button, Checkbox, Flex, Input, Popconfirm, Select, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { DataProductSettingContract } from '@/types/data-product-setting';
+import type { DataProductSettingContract } from '@/types/data-product-setting';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {

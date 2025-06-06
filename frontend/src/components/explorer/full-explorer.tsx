@@ -14,14 +14,14 @@ import type { NodeContract } from '@/types/graph/graph-contract.ts';
 
 import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common';
 import styles from './explorer.module.scss';
-import { Sidebar, SidebarFilters } from './sidebar';
+import { Sidebar, type SidebarFilters } from './sidebar';
 import { parseEdges } from './utils';
 
 function parseFullNodes(
     nodes: NodeContract[],
     setNodeId: (id: string) => void,
     defaultNodePosition: XYPosition,
-    domainsEnabled: boolean = true,
+    domainsEnabled = true,
 ): Node[] {
     // Regular nodes and domain nodes. In domain nodes, we count how many children they have so we can estimate their size.
     const regular_nodes = nodes
@@ -34,7 +34,7 @@ function parseFullNodes(
                         nodeToolbarActions: node.isMain ? (
                             ''
                         ) : (
-                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id!} />
+                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id} />
                         ),
                         sourceHandlePosition: Position.Left,
                         isActive: true,

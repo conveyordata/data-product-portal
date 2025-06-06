@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Searchbar } from '@/components/form';
 import { DataProductTable } from '@/pages/dataset/components/dataset-tabs/data-product-tab/components/data-product-table/data-product-table.component';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
-import { DataProductLink } from '@/types/dataset';
+import type { DataProductLink } from '@/types/dataset';
 import type { SearchForm } from '@/types/shared';
 
 import styles from './data-product-tab.module.scss';

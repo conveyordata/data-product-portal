@@ -1,13 +1,13 @@
-import { Button, Flex, Form, Input, Space, Table, TableProps, Typography } from 'antd';
+import { Button, Flex, Form, Input, Space, Table, type TableProps, Typography } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useGetAllEnvironmentsQuery } from '@/store/features/environments/environments-api-slice.tsx';
-import { Environment } from '@/types/environment';
+import type { Environment } from '@/types/environment';
 import { ApplicationPaths, createEnvironmentConfigsPath } from '@/types/navigation';
-import { SearchForm } from '@/types/shared';
+import type { SearchForm } from '@/types/shared';
 
 import { getEnvironmentTableColumns } from './environments-columns';
 import styles from './environments-table.module.scss';
@@ -23,7 +23,6 @@ function filterEnvironments(environments: Environment[], searchTerm?: string) {
 export const EnvironmentsTable = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { pagination, handlePaginationChange, handleTotalChange } = useTablePagination({});
 
     const { data: environments = [], isFetching } = useGetAllEnvironmentsQuery();
 
@@ -34,6 +33,7 @@ export const EnvironmentsTable = () => {
     const filteredEnvironments = useMemo(() => {
         return filterEnvironments(environments, searchTerm);
     }, [environments, searchTerm]);
+    const { pagination, handlePaginationChange, handleTotalChange } = useTablePagination(filteredEnvironments);
 
     const onChange: TableProps<Environment>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);

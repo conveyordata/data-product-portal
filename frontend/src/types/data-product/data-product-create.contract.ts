@@ -1,4 +1,4 @@
-import { DataProductContract } from '@/types/data-product/data-product-contract.ts';
+import type { DataProductContract } from '@/types/data-product/data-product-contract.ts';
 
 export type DataProductCreate = Pick<
     DataProductContract,

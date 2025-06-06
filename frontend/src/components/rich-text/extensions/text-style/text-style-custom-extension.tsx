@@ -22,11 +22,11 @@ export const TextStyleCustomExtension = TextStyle.extend({
                 default: null,
                 parseHTML: (element) => element.style.fontSize.replace('px', ''),
                 renderHTML: (attributes) => {
-                    if (!attributes['fontSize']) {
+                    if (!attributes.fontSize) {
                         return {};
                     }
                     return {
-                        style: `font-size: ${attributes['fontSize']}px`,
+                        style: `font-size: ${attributes.fontSize}px`,
                     };
                 },
                 keepOnSplit: false,

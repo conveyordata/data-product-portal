@@ -1,5 +1,4 @@
 import { Button, Form, Input, Select } from 'antd';
-import { TFunction } from 'i18next';
 
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
@@ -8,27 +7,22 @@ import {
     useRemoveDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { DataProductTypeContract } from '@/types/data-product-type';
+import type { DataProductTypeContract } from '@/types/data-product-type';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
-
-interface CreateDataProductTypeMigrateModalProps {
-    onClose: () => void;
-    t: TFunction;
-    isOpen: boolean;
-    migrateFrom?: DataProductTypeContract;
-}
 
 interface DataProductTypeMigrateFormValues {
     toId: string;
 }
 
-export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMigrateModalProps> = ({
-    isOpen,
-    t,
-    onClose,
-    migrateFrom,
-}) => {
+type Props = {
+    onClose: () => void;
+    isOpen: boolean;
+    migrateFrom: DataProductTypeContract;
+};
+export function CreateDataProductTypeMigrateModal({ isOpen, onClose, migrateFrom }: Props) {
+    const { t } = useTranslation();
     const [form] = Form.useForm();
     const { data: dataProductTypes = [] } = useGetAllDataProductTypesQuery();
     const [migrateDataProductType] = useMigrateDataProductTypeMutation();
@@ -36,8 +30,8 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
 
     const handleFinish = async (values: DataProductTypeMigrateFormValues) => {
         try {
-            await migrateDataProductType({ fromId: migrateFrom!.id, toId: values.toId });
-            await onRemoveDataProductType(migrateFrom!.id);
+            await migrateDataProductType({ fromId: migrateFrom?.id, toId: values.toId });
+            await onRemoveDataProductType(migrateFrom?.id);
             dispatchMessage({ content: t('Type migrated and deleted successfully'), type: 'success' });
             form.resetFields();
             onClose();
@@ -87,7 +81,7 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
                 >
                     <Select>
                         {dataProductTypes
-                            .filter((dataProductType) => dataProductType.id !== migrateFrom!.id)
+                            .filter((dataProductType) => dataProductType.id !== migrateFrom?.id)
                             .map((dataProductType) => (
                                 <Option key={dataProductType.id} value={dataProductType.id}>
                                     {dataProductType.name}
@@ -98,4 +92,4 @@ export const CreateDataProductTypeMigrateModal: React.FC<CreateDataProductTypeMi
             </Form>
         </FormModal>
     );
-};
+}

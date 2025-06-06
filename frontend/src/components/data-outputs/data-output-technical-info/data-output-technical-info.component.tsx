@@ -1,9 +1,9 @@
-import { Table, TableColumnsType } from 'antd';
+import { Table, type TableColumnsType } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
+import type { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
 import { DataOutputConfigurationTypes } from '@/types/data-output/data-output.contract';
 
 import { getTechnicalInformationColumns } from './data-output-table-columns';

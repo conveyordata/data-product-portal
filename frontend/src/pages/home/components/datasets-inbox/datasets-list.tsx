@@ -7,10 +7,10 @@ import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/c
 import { UsageListItem } from '@/components/list/usage-list-item/usage-list-item.component.tsx';
 import styles from '@/pages/home/components/datasets-inbox/datasets-inbox.module.scss';
 import { getLastVisitedItemDate } from '@/pages/home/helpers/last-visited-item-helper.ts';
-import { DatasetsGetContract } from '@/types/dataset';
+import type { DatasetsGetContract } from '@/types/dataset';
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import { formatDate } from '@/utils/date.helper.ts';
-import { LastVisitedItem } from '@/utils/local-storage.helper.ts';
+import type { LastVisitedItem } from '@/utils/local-storage.helper.ts';
 
 type DatasetListProps = {
     datasets?: DatasetsGetContract;

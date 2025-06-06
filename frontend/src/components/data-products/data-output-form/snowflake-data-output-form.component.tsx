@@ -1,8 +1,8 @@
-import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
+import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
+import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
 import { DataPlatforms } from '@/types/data-platform';
 
 import { configurationFieldName } from './components/configuration-field-name';

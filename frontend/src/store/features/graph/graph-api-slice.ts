@@ -1,7 +1,7 @@
 import { ApiUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { TagTypes } from '@/store/features/api/tag-types.ts';
-import { GraphContract } from '@/types/graph/graph-contract';
+import type { GraphContract } from '@/types/graph/graph-contract';
 
 export const graphTags: string[] = [TagTypes.Graph];
 

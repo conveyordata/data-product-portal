@@ -1,12 +1,12 @@
-import { Badge, Popover, TableColumnsType, Tag } from 'antd';
+import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { DatasetAccessIcon } from '@/components/datasets/dataset-access-icon/dataset-access-icon';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
-import { DatasetStatus } from '@/types/dataset/dataset.contract';
-import { DomainContract } from '@/types/domain';
+import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import type { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
+import type { DatasetStatus } from '@/types/dataset/dataset.contract';
+import type { DomainContract } from '@/types/domain';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
@@ -70,9 +70,8 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
                             {lifecycle.name}
                         </Tag>
                     );
-                } else {
-                    return;
                 }
+                return;
             },
             ...new FilterSettings(datasets, (dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
             sorter: sorter.stringSorter((dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),

@@ -1,8 +1,9 @@
-import { Form, FormInstance, Input } from 'antd';
-import React, { useEffect } from 'react';
+import { Form, type FormInstance, Input } from 'antd';
+import type React from 'react';
+import { useEffect } from 'react';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { DataPlatform } from '@/types/data-platform';
+import type { DataPlatform } from '@/types/data-platform';
 import { DataPlatformDataOutputConfigurationMap } from '@/types/data-platform/data-platform';
 
 import { configurationFieldName } from './configuration-field-name';

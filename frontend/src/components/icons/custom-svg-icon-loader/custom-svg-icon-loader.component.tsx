@@ -1,14 +1,15 @@
 import Icon from '@ant-design/icons';
-import { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
+import type { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
 import clsx from 'clsx';
-import { ComponentType, ForwardRefExoticComponent, SVGProps } from 'react';
+import type { ComponentType, ForwardRefExoticComponent, SVGProps } from 'react';
 
 import styles from './custom-svg-icon-loader.module.scss';
 
 type Props = {
     iconComponent:
         | ComponentType<CustomIconComponentProps | SVGProps<SVGSVGElement>>
-        | ForwardRefExoticComponent<CustomIconComponentProps>;
+        | ForwardRefExoticComponent<CustomIconComponentProps>
+        | undefined;
     size?: 'x-small' | 'small' | 'default' | 'large' | 'x-large';
     hasRoundBorder?: boolean;
     hasSquareBorder?: boolean;

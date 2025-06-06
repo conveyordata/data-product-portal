@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next';
 import { DataOutputStatus } from '@/types/data-output';
 import { DataProductStatus } from '@/types/data-product';
 import { DecisionStatus } from '@/types/roles';
-import { Status } from '@/types/shared';
+import type { Status } from '@/types/shared';
 
 export function getStatusLabel(t: TFunction, status: Status): string {
     switch (status) {

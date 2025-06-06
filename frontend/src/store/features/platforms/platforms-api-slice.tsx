@@ -1,7 +1,7 @@
 import { ApiUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { IdName } from '@/types/shared';
+import type { IdName } from '@/types/shared';
 
 export const platformTags: string[] = [TagTypes.Platform];
 export const platformsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: platformTags }).injectEndpoints({

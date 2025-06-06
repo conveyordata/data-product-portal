@@ -1,10 +1,10 @@
 import { notification } from 'antd';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectNotification } from '@/store/features/feedback/feedback-slice.ts';
 
-const NotificationListener: React.FC = () => {
+export default function NotificationListener() {
     const { message, description, type, id } = useSelector(selectNotification);
     const [notificationApi, contextHolder] = notification.useNotification({
         stack: { threshold: 3 },
@@ -23,6 +23,4 @@ const NotificationListener: React.FC = () => {
     }, [message, description, type, id, notificationApi]);
 
     return <>{contextHolder}</>;
-};
-
-export default NotificationListener;
+}

@@ -1,4 +1,4 @@
-import { DataOutputConfiguration } from '.';
+import type { DataOutputConfiguration } from '.';
 
 export interface DataOutputResultStringRequest {
     platform_id: string;

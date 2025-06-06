@@ -6,11 +6,11 @@ import { useNavigate } from 'react-router';
 
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
-import { ActionResolveRequest } from '@/types/pending-actions/pending-actions';
+import type { ActionResolveRequest } from '@/types/pending-actions/pending-actions';
 import { formatDate } from '@/utils/date.helper.ts';
-import { PaginationConfig } from 'antd/es/pagination';
+import type { PaginationConfig } from 'antd/es/pagination';
 
-type PendingActionItem = {
+export type PendingActionItem = {
     key: string;
     description: ReactNode;
     navigatePath: string;
@@ -41,7 +41,7 @@ export const PendingRequestsList = ({
     const navigate = useNavigate();
 
     if (!pendingActionItems || pendingActionItems.length === 0) {
-        return <EmptyList description={t(`No requests available.`)} />;
+        return <EmptyList description={t('No requests available.')} />;
     }
 
     const handleItemClick = (navigatePath: string) => {

@@ -8,7 +8,7 @@ import {
     useGetThemeSettingsQuery,
     useUpdateThemeSettingsMutation,
 } from '@/store/features/theme-settings/theme-settings-api-slice';
-import { ThemeSettings } from '@/types/theme-settings';
+import type { ThemeSettings } from '@/types/theme-settings';
 
 import styles from './theme-form.module.scss';
 

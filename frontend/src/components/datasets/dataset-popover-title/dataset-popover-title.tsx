@@ -1,4 +1,4 @@
-import { Space, Typography, TypographyProps } from 'antd';
+import { Space, Typography, type TypographyProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { DatasetAccess } from '@/types/dataset';

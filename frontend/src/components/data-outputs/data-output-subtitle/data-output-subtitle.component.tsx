@@ -1,9 +1,9 @@
 import { Flex, Typography } from 'antd';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { DataOutputContract } from '@/types/data-output';
+import type { DataOutputContract } from '@/types/data-output';
 import { DataOutputConfigurationTypes } from '@/types/data-output/data-output.contract';
 
 type Props = {

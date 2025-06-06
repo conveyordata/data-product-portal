@@ -9,9 +9,9 @@ import {
     UndoOutlined,
     UnorderedListOutlined,
 } from '@ant-design/icons';
-import { Level } from '@tiptap/extension-heading';
-import { Editor } from '@tiptap/react';
-import { Button, Divider, Flex, Popover, Select, SelectProps } from 'antd';
+import type { Level } from '@tiptap/extension-heading';
+import type { Editor } from '@tiptap/react';
+import { Button, Divider, Flex, Popover, Select, type SelectProps } from 'antd';
 import clsx from 'clsx';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

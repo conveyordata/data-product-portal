@@ -1,9 +1,9 @@
-import { DataProductContract } from '@/types/data-product';
-import { TagContract } from '@/types/tag';
+import type { DataProductContract } from '@/types/data-product';
+import type { TagContract } from '@/types/tag';
 
-import { DataOutputConfiguration } from '.';
-import { TechnicalInfoContract } from './data-output-technical-info.contract';
-import { DataOutputDatasetLink } from './dataset-link.contract';
+import type { DataOutputConfiguration } from '.';
+import type { TechnicalInfoContract } from './data-output-technical-info.contract';
+import type { DataOutputDatasetLink } from './dataset-link.contract';
 
 export enum DataOutputConfigurationTypes {
     S3DataOutput = 'S3DataOutput',

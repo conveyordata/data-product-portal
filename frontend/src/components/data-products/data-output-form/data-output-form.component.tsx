@@ -23,7 +23,7 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
-import { DataPlatform, DataPlatforms } from '@/types/data-platform';
+import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { getDataPlatforms } from '@/utils/data-platforms';
@@ -112,7 +112,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const platformServiceConfigMap = useMemo(() => {
         const map = new Map<DataPlatform, ServiceConfig>();
 
-        platformConfig?.forEach((config) => {
+        if (!platformConfig) {
+            return map;
+        }
+        for (const config of platformConfig) {
             const platform = (
                 config.platform.name === config.service.name ? config.platform.name : config.service.name
             ).toLocaleLowerCase() as DataPlatform;
@@ -122,7 +125,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 service_id: config.service.id,
                 configuration: config.config,
             });
-        });
+        }
 
         return map;
     }, [platformConfig]);
@@ -347,6 +350,9 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 </Radio.Group>
             </Form.Item>
             {(() => {
+                if (!currentDataProduct) {
+                    return null;
+                }
                 switch (selectedConfiguration?.value) {
                     case DataPlatforms.S3:
                         return (
@@ -354,7 +360,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 form={form}
                                 identifiers={identifiers}
                                 sourceAligned={sourceAligned}
-                                namespace={currentDataProduct!.namespace}
+                                namespace={currentDataProduct.namespace}
                             />
                         );
                     case DataPlatforms.Redshift:
@@ -362,7 +368,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <RedshiftDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                namespace={currentDataProduct!.namespace}
+                                namespace={currentDataProduct.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );
@@ -371,7 +377,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <GlueDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                namespace={currentDataProduct!.namespace}
+                                namespace={currentDataProduct.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );
@@ -380,7 +386,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <DatabricksDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                namespace={currentDataProduct!.namespace}
+                                namespace={currentDataProduct.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );
@@ -389,7 +395,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <SnowflakeDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                namespace={currentDataProduct!.namespace}
+                                namespace={currentDataProduct.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );

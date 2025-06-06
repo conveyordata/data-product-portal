@@ -51,21 +51,22 @@ export function DataOutput() {
                     ApplicationPaths.DataOutputEdit,
                     DynamicPathParams.DataOutputId,
                     dataOutputId,
-                ).replace(':' + DynamicPathParams.DataProductId, dataOutput.owner.id),
+                ).replace(`:${DynamicPathParams.DataProductId}`, dataOutput.owner.id),
             );
         }
     }
 
-    if (isLoading) return <LoadingSpinner />;
+    if (isLoading || !dataOutput || dataOutputOwners === undefined || dataOutputTypeIcon === undefined)
+        return <LoadingSpinner />;
 
     return (
         <Flex className={styles.dataOutputContainer}>
             <Flex vertical className={styles.content}>
                 <Flex className={styles.headerContainer}>
                     <Space className={styles.header}>
-                        <CustomSvgIconLoader iconComponent={dataOutputTypeIcon!} size="large" />
+                        <CustomSvgIconLoader iconComponent={dataOutputTypeIcon} size="large" />
                         <Typography.Title level={3} ellipsis={{ tooltip: dataOutput?.name, rows: 2 }}>
-                            {dataOutput?.name}
+                            {dataOutput.name}
                         </Typography.Title>
                     </Space>
                     {canEdit && (
@@ -83,14 +84,14 @@ export function DataOutput() {
                     {/* Data product description */}
                     <Flex vertical className={styles.overview}>
                         <DataOutputDescription
-                            status={dataOutput!.status}
-                            namespace={dataOutput!.namespace}
-                            type={dataOutput!.configuration.configuration_type!}
-                            description={dataOutput!.description}
-                            tags={dataOutput!.tags}
+                            status={dataOutput.status}
+                            namespace={dataOutput.namespace}
+                            type={dataOutput.configuration.configuration_type}
+                            description={dataOutput.description}
+                            tags={dataOutput.tags}
                         />
                         {/*  Tabs  */}
-                        <DataOutputTabs dataOutputId={dataOutput!.id} isLoading={isLoading} />
+                        <DataOutputTabs dataOutputId={dataOutput.id} isLoading={isLoading} />
                     </Flex>
                 </Flex>
             </Flex>

@@ -16,7 +16,12 @@ import store from '@/store';
 
 import App from './App.tsx';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const root = document.getElementById('root');
+if (!root) {
+    throw new Error('Root is missing');
+}
+
+ReactDOM.createRoot(root).render(
     <React.StrictMode>
         <AuthProvider {...oidcAuthProviderProps}>
             <Provider store={store}>

@@ -1,5 +1,5 @@
 import { Button, Checkbox, Form, Input, InputNumber, Select } from 'antd';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -13,12 +13,13 @@ import {
     useUpdateDataProductSettingMutation,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import {
+import type {
     DataProductSettingContract,
     DataProductSettingScope,
     DataProductSettingType,
 } from '@/types/data-product-setting';
 
+import { useTranslation } from 'react-i18next';
 import styles from './data-product-settings-table.module.scss';
 
 const { Option } = Select;
@@ -26,15 +27,6 @@ const { Option } = Select;
 type Mode = 'create' | 'edit';
 
 const DEBOUNCE = 500;
-
-interface CreateSettingModalProps {
-    onClose: () => void;
-    t: TFunction;
-    isOpen: boolean;
-    mode: Mode;
-    scope: DataProductSettingScope;
-    initial?: DataProductSettingContract;
-}
 
 interface DataProductSettingValueForm {
     name: string;
@@ -63,31 +55,28 @@ const createText = (t: TFunction, scope: DataProductSettingScope, mode: Mode): S
                 errorMessage: t('Failed to create data product setting'),
                 submitButtonText: t('Create'),
             };
-        } else {
-            return {
-                title: t('Create New Dataset Setting'),
-                successMessage: t('Dataset setting created successfully'),
-                errorMessage: t('Failed to create dataset setting'),
-                submitButtonText: t('Create'),
-            };
         }
-    } else {
-        if (scope === 'dataproduct') {
-            return {
-                title: t('Update Data Product Setting'),
-                successMessage: t('Data product setting updated successfully'),
-                errorMessage: t('Failed to update data product setting'),
-                submitButtonText: t('Update'),
-            };
-        } else {
-            return {
-                title: t('Update Dataset Setting'),
-                successMessage: t('Dataset setting updated successfully'),
-                errorMessage: t('Failed to update dataset setting'),
-                submitButtonText: t('Update'),
-            };
-        }
+        return {
+            title: t('Create New Dataset Setting'),
+            successMessage: t('Dataset setting created successfully'),
+            errorMessage: t('Failed to create dataset setting'),
+            submitButtonText: t('Create'),
+        };
     }
+    if (scope === 'dataproduct') {
+        return {
+            title: t('Update Data Product Setting'),
+            successMessage: t('Data product setting updated successfully'),
+            errorMessage: t('Failed to update data product setting'),
+            submitButtonText: t('Update'),
+        };
+    }
+    return {
+        title: t('Update Dataset Setting'),
+        successMessage: t('Dataset setting updated successfully'),
+        errorMessage: t('Failed to update dataset setting'),
+        submitButtonText: t('Update'),
+    };
 };
 
 const typeFormItem = (type: DataProductSettingType) => {
@@ -129,7 +118,15 @@ const initialDefaultValue = (type: DataProductSettingType) => {
     }
 };
 
-export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, t, onClose, scope, mode, initial }) => {
+type Props = {
+    onClose: () => void;
+    isOpen: boolean;
+    mode: Mode;
+    scope: DataProductSettingScope;
+    initial: DataProductSettingContract;
+};
+export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Props) {
+    const { t } = useTranslation();
     const [form] = Form.useForm();
     const [createDataProductSetting] = useCreateDataProductSettingMutation();
     const [updateDataProductSetting] = useUpdateDataProductSettingMutation();
@@ -147,9 +144,8 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 ...initial,
                 default: parseInitialDefaultValue(initial),
             };
-        } else {
-            return { type: 'checkbox', default: initialDefaultValue(typeValue) };
         }
+        return { type: 'checkbox', default: initialDefaultValue(typeValue) };
     }, [initial, typeValue]);
 
     useEffect(() => {
@@ -172,7 +168,7 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
                 await createDataProductSetting(newSetting);
             } else {
                 const updateSetting: DataProductSettingContract = {
-                    ...initial!,
+                    ...initial,
                     ...values,
                     default: values.default.toString(),
                 };
@@ -315,4 +311,4 @@ export const CreateSettingModal: React.FC<CreateSettingModalProps> = ({ isOpen, 
             </Form>
         </FormModal>
     );
-};
+}

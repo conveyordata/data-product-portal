@@ -1,7 +1,7 @@
 import { ApiUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { TagTypes } from '@/store/features/api/tag-types.ts';
-import { ThemeSettings, ThemeSettingsUpdateRequest } from '@/types/theme-settings';
+import type { ThemeSettings, ThemeSettingsUpdateRequest } from '@/types/theme-settings';
 
 export const ThemeSettingsTags: string[] = [TagTypes.ThemeSettings];
 export const ThemeSettingsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: ThemeSettingsTags }).injectEndpoints({

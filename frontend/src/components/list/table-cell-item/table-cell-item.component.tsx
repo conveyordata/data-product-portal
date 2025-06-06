@@ -1,17 +1,16 @@
 import Icon from '@ant-design/icons';
-import { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
-import { Flex, Popover, Typography, TypographyProps } from 'antd';
+import type { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
+import { Flex, Popover, Typography, type TypographyProps } from 'antd';
 import type { TooltipPlacement } from 'antd/es/tooltip';
-import * as React from 'react';
-import { ComponentType, ReactNode } from 'react';
+import { type ComponentType, type ForwardRefExoticComponent, type ReactNode, type SVGProps, useState } from 'react';
 
 import styles from './table-cell-item.module.scss';
 
 type Props = {
     icon?: ReactNode;
     reactSVGComponent?:
-        | ComponentType<CustomIconComponentProps | React.SVGProps<SVGSVGElement>>
-        | React.ForwardRefExoticComponent<CustomIconComponentProps>;
+        | ComponentType<CustomIconComponentProps | SVGProps<SVGSVGElement>>
+        | ForwardRefExoticComponent<CustomIconComponentProps>;
     children?: ReactNode;
     text?: string;
     textComponent?: ReactNode;
@@ -33,7 +32,7 @@ export function TableCellItem({
     tooltip,
     ...otherProps
 }: Props) {
-    const [hasEllipsis, setHasEllipsis] = React.useState<boolean>(false);
+    const [hasEllipsis, setHasEllipsis] = useState<boolean>(false);
 
     const tableCellItem = (
         <Flex className={styles.tableCellWrapper} {...otherProps}>
