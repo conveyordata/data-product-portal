@@ -3,6 +3,7 @@ import {
     FileSearchOutlined,
     HomeOutlined,
     SettingOutlined,
+    TeamOutlined,
     UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Flex, Layout, Menu, type MenuProps, Space } from 'antd';
@@ -39,6 +40,11 @@ export const Sidebar = () => {
             label: <Link to={ApplicationPaths.Datasets}>{t('Marketplace')}</Link>,
             icon: <DatasetOutlined />,
             key: ApplicationPaths.Datasets,
+        },
+        {
+            label: <Link to={ApplicationPaths.People}>{t('People')}</Link>,
+            icon: <TeamOutlined />,
+            key: ApplicationPaths.People,
         },
         {
             label: <Link to={ApplicationPaths.AuditLogs}>{t('Audit Logs')}</Link>,

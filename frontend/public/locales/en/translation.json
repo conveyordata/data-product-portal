@@ -26,6 +26,7 @@
     "Yes": "Yes",
     "No": "No",
     "Delete": "Delete",
+    "Users": "Users",
     "Glue database": "Glue database",
     "Snowflake schema": "Snowflake schema",
     "Databricks schema": "Databricks schema",
@@ -522,5 +523,16 @@
     "The path can only contain letters, numbers, dots, underscores, dashes and slashes": "The path can only contain letters, numbers, dots, underscores, dashes and slashes",
     "The Snowflake schema to link the data output to": "The Snowflake schema to link the data output to",
     "Please input the name of the Snowflake database for this data output": "Please input the name of the Snowflake database for this data output",
-    "The name of the Snowflake database to link the data output to": "The name of the Snowflake database to link the data output to"
+    "The name of the Snowflake database to link the data output to": "The name of the Snowflake database to link the data output to",
+    "Showing {{range0}}-{{range1}} of {{total}} users": "Showing {{range0}}-{{range1}} of {{total}} users",
+    "Search users by name": "Search users by name",
+    "Global Role": "Global Role",
+    "Email": "Email",
+    "People": "People",
+    "Global role removed successfully": "Global role removed successfully",
+    "Could not remove global role": "Could not remove global role",
+    "Global role updated successfully": "Global role updated successfully",
+    "Could not update global role": "Could not update global role",
+    "Global role created successfully": "Global role created successfully",
+    "Could not create global role": "Could not create global role"
 }

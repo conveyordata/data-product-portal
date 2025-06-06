@@ -264,6 +264,19 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
+                        case ApplicationPaths.People:
+                            Object.assign(breadcrumbItem, {
+                                title: (
+                                    <Space
+                                        classNames={{
+                                            item: styles.breadcrumbItem,
+                                        }}
+                                    >
+                                        {t('People')}
+                                    </Space>
+                                ),
+                            });
+                            break;
                         default:
                             Object.assign(breadcrumbItem, {
                                 title: '',

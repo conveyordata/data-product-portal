@@ -51,7 +51,6 @@ class Settings(BaseSettings):
     EMAIL_BUTTON_COLOR: str = "#3B9672"
 
     # Authorizer
-    AUTHORIZER_ENABLED: bool = True
     AUTHORIZER_CACHE_SIZE: int = 128
     AUTHORIZER_STARTUP_SYNC: bool = True
 
