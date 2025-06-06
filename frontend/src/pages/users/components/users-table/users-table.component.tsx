@@ -151,13 +151,6 @@ export function UsersTable() {
                         <Input.Search placeholder={t('Search users by name')} allowClear />
                     </Form.Item>
                 </Form>
-                {/* <Space>
-                    <Link to={ApplicationPaths.DataProductNew}>
-                        <Button className={styles.formButton} type={'primary'} disabled={!canCreateDataProduct}>
-                            {t('Create Data Product')}
-                        </Button>
-                    </Link>
-                </Space> */}
             </Flex>
             <Flex vertical className={styles.tableFilters}>
                 <Flex align="flex-end" justify="space-between" className={styles.tableBar}>
