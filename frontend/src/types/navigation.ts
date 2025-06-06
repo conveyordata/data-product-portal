@@ -54,7 +54,7 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.EnvironmentConfigs,
     ApplicationPaths.EnvironmentConfigNew,
     ApplicationPaths.Explorer,
-    ApplicationPaths.Users,
+    ApplicationPaths.People,
 ];
 
 export function createDataProductIdPath(

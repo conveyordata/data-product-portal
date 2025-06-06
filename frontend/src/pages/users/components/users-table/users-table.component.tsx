@@ -148,7 +148,7 @@ export function UsersTable() {
     return (
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.searchContainer}>
-                <Typography.Title level={3}>{t('Users')}</Typography.Title>
+                <Typography.Title level={3}>{t('People')}</Typography.Title>
                 <Form<SearchForm> form={searchForm} className={styles.searchForm}>
                     <Form.Item<SearchForm> name={'search'} initialValue={''} className={styles.formItem}>
                         <Input.Search placeholder={t('Search users by name')} allowClear />

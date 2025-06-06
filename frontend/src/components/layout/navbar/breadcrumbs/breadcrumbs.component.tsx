@@ -264,7 +264,7 @@ export const Breadcrumbs = () => {
                                 ),
                             });
                             break;
-                        case ApplicationPaths.Users:
+                        case ApplicationPaths.People:
                             Object.assign(breadcrumbItem, {
                                 title: (
                                     <Space

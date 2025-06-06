@@ -98,7 +98,7 @@ const router = createBrowserRouter([
                         ],
                     },
                     {
-                        path: ApplicationPaths.Users,
+                        path: ApplicationPaths.People,
                         element: <Users />,
                     },
                     {
