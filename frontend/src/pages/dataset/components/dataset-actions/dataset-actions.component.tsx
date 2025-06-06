@@ -8,8 +8,8 @@ import datahubLogo from '@/assets/icons/datahub-logo.svg?react';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { DataPlatform, DataPlatforms } from '@/types/data-platform';
-import { CustomDropdownItemProps } from '@/types/shared';
+import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
+import type { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './dataset-actions.module.scss';
 

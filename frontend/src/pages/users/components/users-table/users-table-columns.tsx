@@ -5,8 +5,8 @@ import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
-import { GlobalRoleAssignmentContract, RoleContract } from '@/types/roles/role.contract';
-import { UsersGetContract } from '@/types/users/user.contract';
+import type { GlobalRoleAssignmentContract, RoleContract } from '@/types/roles/role.contract';
+import type { UsersGetContract } from '@/types/users/user.contract';
 import styles from './users-table.module.scss';
 
 export const getUserTableColumns = ({
@@ -81,75 +81,13 @@ export const getUserTableColumns = ({
                             />
                         </TableCellItem>
                     );
-                } else {
-                    return <TableCellItem text={role?.role.name || ''} />;
                 }
+                return <TableCellItem text={role?.role.name || ''} />;
             },
             // ...new FilterSettings(data, (user) => (user.email !== null ? user.email : '')),
             // sorter: sorter.stringSorter((user) => user.global_roles),
             // defaultSortOrder: 'ascend',
             width: '25%',
         },
-        // {
-        //     title: t('Status'),
-        //     dataIndex: 'lifecycle',
-        //     render: (lifecycle: DataProductLifeCycleContract) => {
-        //         if (lifecycle !== null) {
-        //             return (
-        //                 <Tag color={lifecycle.color || 'default'} className={styles.tag}>
-        //                     {lifecycle.name}
-        //                 </Tag>
-        //             );
-        //         } else {
-        //             return;
-        //         }
-        //     },
-        //     ...new FilterSettings(data, (user) => (user.lifecycle !== null ? user.lifecycle.name : '')),
-        //     sorter: sorter.stringSorter((user) => (user.lifecycle !== null ? user.lifecycle.name : '')),
-        //     width: '10%',
-        // },
-        // {
-        //     title: t('Domain'),
-        //     dataIndex: 'domain',
-        //     render: (domain: DomainContract) => {
-        //         return <TableCellItem text={domain.name} />;
-        //     },
-        //     ...new FilterSettings(data, (user) => user.domain.name),
-        //     sorter: sorter.stringSorter((user) => user.domain.name),
-        // },
-        // {
-        //     title: t('Type'),
-        //     dataIndex: 'type',
-        //     render: (type: DataProductTypeContract) => {
-        //         const icon = getDataProductTypeIcon(type.icon_key);
-        //         return <TableCellItem reactSVGComponent={icon} text={type.name} />;
-        //     },
-        //     ellipsis: true,
-        //     ...new FilterSettings(data, (user) => user.type.name),
-        //     sorter: sorter.stringSorter((user) => user.type.name),
-        // },
-        // {
-        //     title: t('Access'),
-        //     dataIndex: 'user_count',
-        //     render: (userCount: number) => {
-        //         return <TableCellItem icon={<TeamOutlined />} text={t('{{count}} users', { count: userCount })} />;
-        //     },
-        //     sorter: sorter.numberSorter((user) => user.user_count),
-        // },
-        // {
-        //     title: t('Consumes'),
-        //     dataIndex: 'dataset_count',
-        //     render: (datasetCount: number) => {
-        //         return <TableCellItem text={t('{{count}} datasets', { count: datasetCount })} />;
-        //     },
-        //     sorter: sorter.numberSorter((user) => user.dataset_count),
-        // },
-        // {
-        //     title: t('Produces'),
-        //     dataIndex: 'data_outputs_count',
-        //     render: (dataOutputCount: number) => {
-        //         return <TableCellItem text={t('{{count}} data outputs', { count: dataOutputCount })} />;
-        //     },
-        // },
     ];
 };

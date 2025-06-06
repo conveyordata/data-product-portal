@@ -1,4 +1,4 @@
-import { IdName } from '../shared';
+import type { IdName } from '../shared';
 
 interface Config {
     identifiers: string[];
@@ -27,5 +27,5 @@ export type PlatformServiceConfigCreateFormSchema = Omit<PlatformServiceConfigCr
 };
 
 export type PlatformServiceConfigMapping = {
-    [key: string]: {};
+    [key: string]: object;
 };

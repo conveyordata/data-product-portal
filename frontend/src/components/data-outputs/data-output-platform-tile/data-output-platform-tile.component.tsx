@@ -1,8 +1,8 @@
 import Icon from '@ant-design/icons';
-import { DropdownProps, Flex, Radio, Space, Spin, Typography } from 'antd';
+import { type DropdownProps, Flex, Radio, Space, Spin, Typography } from 'antd';
 
-import { Environment } from '@/types/environment';
-import { CustomDropdownItemProps } from '@/types/shared';
+import type { Environment } from '@/types/environment';
+import type { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './data-output-platform-tile.module.scss';
 

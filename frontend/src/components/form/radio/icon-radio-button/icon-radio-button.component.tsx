@@ -1,5 +1,5 @@
-import { Flex, FlexProps, Radio, RadioProps, Typography } from 'antd';
-import { ReactNode } from 'react';
+import { Flex, type FlexProps, Radio, type RadioProps, Typography } from 'antd';
+import type { ReactNode } from 'react';
 
 import styles from './icon-radio-button.module.scss';
 

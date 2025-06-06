@@ -8,7 +8,7 @@ import { useQuickFilter } from '@/hooks/use-quick-filter';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { SearchForm } from '@/types/shared';
+import type { SearchForm } from '@/types/shared';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import {
@@ -20,7 +20,7 @@ import {
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
 import type { GlobalRoleAssignmentContract } from '@/types/roles/role.contract';
-import { UsersGetContract } from '@/types/users/user.contract';
+import type { UsersGetContract } from '@/types/users/user.contract';
 import { getUserTableColumns } from './users-table-columns';
 import styles from './users-table.module.scss';
 
@@ -127,7 +127,7 @@ export function UsersTable() {
                 t,
                 users: filteredUsers,
                 canAssignRole: canAssignGlobalRole,
-                allRoles: roles.filter((role) => role.name.toLowerCase() != 'everyone'),
+                allRoles: roles.filter((role) => role.name.toLowerCase() !== 'everyone'),
                 onChange: onChangeGlobalRole,
             }),
         [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole],

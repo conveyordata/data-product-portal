@@ -1,5 +1,5 @@
 import { Layout, theme } from 'antd';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { Outlet, useNavigate } from 'react-router';
 
@@ -7,7 +7,7 @@ import { ApplicationPaths } from '@/types/navigation.ts';
 
 import styles from './public.module.scss';
 
-const PublicLayout: React.FC = () => {
+export default function PublicLayout() {
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
@@ -36,6 +36,4 @@ const PublicLayout: React.FC = () => {
             </Layout.Content>
         </Layout>
     );
-};
-
-export default PublicLayout;
+}

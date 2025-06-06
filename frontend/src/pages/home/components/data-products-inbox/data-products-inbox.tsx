@@ -1,6 +1,6 @@
 import { PartitionOutlined, TeamOutlined } from '@ant-design/icons';
 import { Button, Tabs, Typography } from 'antd';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -11,7 +11,7 @@ import {
     useGetUserDataProductsQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import { LastVisitedItem, LocalStorageKeys, getItemFromLocalStorage } from '@/utils/local-storage.helper.ts';
+import { type LastVisitedItem, LocalStorageKeys, getItemFromLocalStorage } from '@/utils/local-storage.helper.ts';
 
 import styles from './data-products-inbox.module.scss';
 import { DataProductsList } from './data-products-list.tsx';

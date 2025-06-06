@@ -1,4 +1,4 @@
-import { Button, Flex, Form, Input, Pagination, RadioChangeEvent, Space, Table, Typography } from 'antd';
+import { Button, Flex, Form, Input, Pagination, type RadioChangeEvent, Space, Table, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -12,9 +12,9 @@ import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { DatasetsGetContract } from '@/types/dataset';
+import type { DatasetsGetContract } from '@/types/dataset';
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
-import { SearchForm } from '@/types/shared';
+import type { SearchForm } from '@/types/shared';
 import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
 
 import styles from './datasets-table.module.scss';

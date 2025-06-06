@@ -1,6 +1,6 @@
-import { Radio, RadioChangeEvent, RadioGroupProps } from 'antd';
+import { Radio, type RadioChangeEvent, type RadioGroupProps } from 'antd';
 
-import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
+import type { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
 
 type QuickFiltersProps = {
     value: QuickFilterParticipation;

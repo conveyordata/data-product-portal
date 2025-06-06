@@ -1,7 +1,7 @@
-import { DataProductContract } from '../data-product';
-import { DatasetContract } from '../dataset';
-import { UserContract } from '../users';
-import { DecisionStatus } from './role-assignment-status';
+import type { DataProductContract } from '../data-product';
+import type { DatasetContract } from '../dataset';
+import type { UserContract } from '../users';
+import type { DecisionStatus } from './role-assignment-status';
 
 export const Prototype = {
     CUSTOM: 0,

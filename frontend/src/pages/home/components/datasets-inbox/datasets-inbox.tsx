@@ -1,6 +1,6 @@
 import { PartitionOutlined, TeamOutlined } from '@ant-design/icons';
 import { Button, Tabs, Typography } from 'antd';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -9,7 +9,7 @@ import { DatasetList } from '@/pages/home/components/datasets-inbox/datasets-lis
 import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
 import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import { LastVisitedItem, LocalStorageKeys, getItemFromLocalStorage } from '@/utils/local-storage.helper.ts';
+import { type LastVisitedItem, LocalStorageKeys, getItemFromLocalStorage } from '@/utils/local-storage.helper.ts';
 
 import styles from './datasets-inbox.module.scss';
 

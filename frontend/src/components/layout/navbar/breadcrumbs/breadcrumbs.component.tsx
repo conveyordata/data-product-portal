@@ -1,7 +1,7 @@
 import Icon, { CompassOutlined, HomeOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Breadcrumb, Space, Typography } from 'antd';
-import { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadcrumb/Breadcrumb';
-import { ReactNode, useMemo } from 'react';
+import type { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadcrumb/Breadcrumb';
+import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
@@ -19,7 +19,7 @@ import {
     useGetEnvironmentByIdQuery,
 } from '@/store/features/environments/environments-api-slice';
 import { useGetPlatformServiceConfigByIdQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
-import { ApplicationPaths, DynamicPathParams, createEnvironmentConfigsPath } from '@/types/navigation.ts';
+import { ApplicationPaths, type DynamicPathParams, createEnvironmentConfigsPath } from '@/types/navigation.ts';
 import {
     isDataOutputEditPage,
     isDataProductEditPage,
@@ -304,7 +304,7 @@ export const Breadcrumbs = () => {
                                         dataOutputId &&
                                         dataOutput &&
                                         !isFetchingDataOutput &&
-                                        path.split('/').length == 4
+                                        path.split('/').length === 4
                                     ) {
                                         Object.assign(breadcrumbItem, {
                                             path: `${path}#${DataOutputTabKeys.Datasets}`,
@@ -373,7 +373,8 @@ export const Breadcrumbs = () => {
                             if (environmentId && environment && !isFetchingEnvironment) {
                                 if (isEnvironmentConfigsPage(path, environmentId)) {
                                     break;
-                                } else if (isEnvironmentConfigCreatePage(path, environmentId)) {
+                                }
+                                if (isEnvironmentConfigCreatePage(path, environmentId)) {
                                     Object.assign(breadcrumbItem, {
                                         title: (
                                             <Space

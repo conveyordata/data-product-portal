@@ -1,8 +1,8 @@
-import { Form, FormInstance, Input, Select } from 'antd';
+import { Form, type FormInstance, Input, Select } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DataOutputConfiguration, DataOutputCreateFormSchema, S3DataOutput } from '@/types/data-output';
+import type { DataOutputConfiguration, DataOutputCreateFormSchema, S3DataOutput } from '@/types/data-output';
 import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
 
 type Props = {
@@ -21,18 +21,18 @@ export function S3DataOutputForm({ form, namespace, identifiers, sourceAligned }
     const dataProductNameValue: string = Form.useWatch('temp_path', form);
     const bucketValue: string = Form.useWatch('bucket', form);
     useEffect(() => {
-        let path = namespace + '/';
+        let path = `${namespace}/`;
         if (sourceAligned) {
             path = '';
         }
         if (dataProductNameValue) {
             form.setFieldsValue({ path: path + generateExternalIdFromName(dataProductNameValue) });
             form.setFieldsValue({
-                result: bucketValue + '/' + path + generateExternalIdFromName(dataProductNameValue),
+                result: `${bucketValue}/${path}${generateExternalIdFromName(dataProductNameValue)}`,
             });
         } else {
             form.setFieldsValue({ path: path });
-            form.setFieldsValue({ result: bucketValue + '/' + path });
+            form.setFieldsValue({ result: `${bucketValue}/${path}` });
         }
     }, [dataProductNameValue, sourceAligned, bucketValue, namespace, form]);
 

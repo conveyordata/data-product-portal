@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.logging.logger import logger
+from app.core.logging import logger
 from app.data_outputs.model import DataOutput
 from app.data_products.model import DataProduct
 from app.datasets.model import Dataset

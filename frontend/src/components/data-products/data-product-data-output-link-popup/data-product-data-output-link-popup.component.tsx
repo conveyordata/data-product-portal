@@ -3,7 +3,7 @@ import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
-import { type DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
+import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
 
 import styles from './data-product-data-output-link-popup.module.scss';
 

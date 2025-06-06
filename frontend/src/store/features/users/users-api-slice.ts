@@ -2,7 +2,7 @@ import { ApiUrl } from '@/api/api-urls';
 import { baseApiSlice } from '@/store/features/api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
 import type { UserContract, UserCreateRequest } from '@/types/users';
-import { UsersGetContract } from '@/types/users/user.contract';
+import type { UsersGetContract } from '@/types/users/user.contract';
 
 export const userTags: string[] = [TagTypes.User];
 

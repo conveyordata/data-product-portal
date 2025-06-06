@@ -30,7 +30,7 @@ export function HistoryTab({ dataProductId }: Props) {
                     <Input.Search placeholder={t('Search history by description, type or name')} allowClear />
                 </Form.Item>
             </Form>
-            <EmptyList description={t(`No data available for data product {{name}}`, { name: dataProduct?.name })} />
+            <EmptyList description={t('No data available for data product {{name}}', { name: dataProduct?.name })} />
         </Flex>
     );
 }

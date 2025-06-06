@@ -1,9 +1,8 @@
 import { Flex, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-// import { useTranslation } from 'react-i18next';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import {
+import type {
     DatabricksDataOutputContract,
     GlueDataOutputContract,
     RedshiftDataOutputContract,
@@ -59,7 +58,7 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
         case 'S3DataOutput': {
             const s3_configuration = data_output.configuration as S3DataOutputContract;
             const configuration: S3DataOutputContract = data_output.configuration as S3DataOutputContract;
-            let suffix = '/' + configuration.suffix + '/';
+            let suffix = `/${configuration.suffix}/`;
             if (configuration.suffix === '') {
                 suffix = '/';
             }

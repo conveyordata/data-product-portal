@@ -1,5 +1,5 @@
 import { Button, Form, List, Typography } from 'antd';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,9 +14,9 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DatasetLink } from '@/types/data-product';
-import { DatasetAccess, DatasetsGetContract } from '@/types/dataset';
-import { SearchForm } from '@/types/shared';
+import type { DatasetLink } from '@/types/data-product';
+import { DatasetAccess, type DatasetsGetContract } from '@/types/dataset';
+import type { SearchForm } from '@/types/shared';
 
 import styles from './add-dataset-popup.module.scss';
 

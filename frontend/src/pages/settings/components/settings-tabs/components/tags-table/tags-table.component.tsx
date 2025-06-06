@@ -9,7 +9,7 @@ import { useGetAllTagsQuery, useRemoveTagMutation } from '@/store/features/tags/
 import type { TagContract } from '@/types/tag/tag';
 
 import { CreateTagsModal } from './tags-form-modal.component';
-import { getTagsTableColums } from './tags-table-columns';
+import { getTagsTableColumns } from './tags-table-columns';
 import styles from './tags-table.module.scss';
 
 export function TagsTable() {
@@ -37,7 +37,7 @@ export function TagsTable() {
         handleOpen();
     };
 
-    const columns = getTagsTableColums({ t, onRemoveTag, handleEdit });
+    const columns = getTagsTableColumns({ t, onRemoveTag, handleEdit });
 
     return (
         <Flex vertical className={styles.tableContainer}>
@@ -60,8 +60,8 @@ export function TagsTable() {
                 rowClassName={() => 'editable-row'}
                 size={'small'}
             />
-            {isVisible && (
-                <CreateTagsModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />
+            {isVisible && initial && (
+                <CreateTagsModal isOpen={isVisible} onClose={handleClose} mode={mode} initial={initial} />
             )}
         </Flex>
     );

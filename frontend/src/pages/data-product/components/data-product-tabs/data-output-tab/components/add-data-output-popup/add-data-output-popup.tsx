@@ -1,4 +1,4 @@
-import { type FormInstance } from 'antd';
+import type { FormInstance } from 'antd';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 

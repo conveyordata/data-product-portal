@@ -6,7 +6,7 @@ import type { ComponentType, ForwardRefExoticComponent, ReactNode, SVGProps } fr
 
 import { DefaultHandle } from '@/components/charts/custom-handles/default-handle.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
+import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 
 import styles from './base-node.module.scss';
 
@@ -15,7 +15,8 @@ export type BaseNodeProps = Node<{
     name: string;
     icon:
         | ComponentType<CustomIconComponentProps | SVGProps<SVGSVGElement>>
-        | ForwardRefExoticComponent<CustomIconComponentProps>;
+        | ForwardRefExoticComponent<CustomIconComponentProps>
+        | undefined;
     borderType?: 'square' | 'round';
     isMainNode?: boolean;
     nodeToolbarActions?: ReactNode;

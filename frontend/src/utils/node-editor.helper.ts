@@ -29,14 +29,16 @@ export const generateDagreLayout = (
     graph.setDefaultEdgeLabel(() => ({}));
     graph.setGraph({ rankdir: getDagreDirection(direction) });
 
-    nodes.forEach((node) => {
+    for (const node of nodes) {
         graph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-    });
-    edges.forEach((edge) => graph.setEdge(edge.source, edge.target));
+    }
+    for (const edge of edges) {
+        graph.setEdge(edge.source, edge.target);
+    }
 
     Dagre.layout(graph);
 
-    nodes.forEach((node) => {
+    for (const node of nodes) {
         if (graph.node(node.id)) {
             const position = graph.node(node.id);
             node.targetPosition = isHorizontal ? Position.Left : Position.Top;
@@ -47,7 +49,7 @@ export const generateDagreLayout = (
                 y: position.y - nodeHeight / 2,
             };
         }
-    });
+    }
 
     return { nodes, edges };
 };

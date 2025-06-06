@@ -24,7 +24,7 @@ export enum ApiUrl {
     DataProductSettingNamespaceLimits = '/api/data_product_settings/namespace_length_limits',
     DataProductOutputCreate = '/api/data_products/:dataProductId/data_output',
     DataProductSettingGet = '/api/data_product_settings/:settingId',
-    DataProductSettingValue = '/api/data_products/:dataProductId/settings/:dataProductSettingId',
+    DataProductSettingValue = '/api/data_products/:dataProductId/settings/:settingId',
     DataProductSignInUrl = '/api/data_products/:dataProductId/signin_url',
     DataProductConveyorIdeUrl = '/api/data_products/:dataProductId/conveyor_ide_url',
     DataProductDatabricksWorkspaceUrl = '/api/data_products/:dataProductId/databricks_workspace_url',
@@ -68,7 +68,7 @@ export enum ApiUrl {
     Datasets = '/api/datasets',
     DatasetUser = '/api/datasets/:datasetId/user/:userId',
     DatasetGet = '/api/datasets/:datasetId',
-    DatasetSettingValue = '/api/datasets/:datasetId/settings/:dataProductSettingId',
+    DatasetSettingValue = '/api/datasets/:datasetId/settings/:settingId',
     DatasetAbout = '/api/datasets/:datasetId/about',
     DatasetGraph = '/api/datasets/:datasetId/graph',
     DatasetNamespaceValidation = '/api/datasets/validate_namespace',
@@ -97,14 +97,21 @@ export enum ApiUrl {
 
 export type DynamicPathParams =
     | 'dataProductId'
-    | 'userId'
+    | 'dataProductTypeId'
+    | 'dataOutputId'
     | 'datasetId'
     | 'datasetLinkId'
+    | 'domainId'
+    | 'fromId'
+    | 'toId'
     | 'platformId'
     | 'serviceId'
     | 'environmentId'
+    | 'settingId'
+    | 'lifecycleId'
     | 'configId'
     | 'scope'
+    | 'userId'
     | 'roleId'
     | 'assignmentId';
 

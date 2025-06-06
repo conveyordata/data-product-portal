@@ -1,8 +1,8 @@
-import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
+import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DataOutputConfiguration, DataOutputCreateFormSchema, DatabricksDataOutput } from '@/types/data-output';
+import type { DataOutputConfiguration, DataOutputCreateFormSchema, DatabricksDataOutput } from '@/types/data-output';
 
 type Props = {
     sourceAligned: boolean;

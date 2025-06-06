@@ -11,7 +11,7 @@ export function DataProductCreate() {
     return (
         <Flex vertical className={styles.container}>
             <Typography.Title level={3} className={styles.title}>
-                {t(`New Data Product`)}
+                {t('New Data Product')}
             </Typography.Title>
             <Space direction={'vertical'} size={'large'} className={styles.container}>
                 <DataProductForm mode={'create'} />

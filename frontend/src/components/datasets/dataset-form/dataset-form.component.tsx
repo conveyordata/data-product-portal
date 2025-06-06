@@ -39,7 +39,7 @@ import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import {
     DatasetAccess,
-    DatasetCreateFormSchema,
+    type DatasetCreateFormSchema,
     type DatasetCreateRequest,
     type DatasetUpdateRequest,
 } from '@/types/dataset';

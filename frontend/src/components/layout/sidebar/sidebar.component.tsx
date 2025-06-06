@@ -61,6 +61,7 @@ export const Sidebar = () => {
                 <a
                     href={`https://d33vpinjygaq6n.cloudfront.net/docs/${version?.version.split('.').slice(0, 2).join('.')}.x/intro`}
                     target="_blank"
+                    rel="noreferrer"
                 >
                     {t('Documentation')}
                 </a>

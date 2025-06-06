@@ -1,6 +1,5 @@
 import { Layout } from 'antd';
 import clsx from 'clsx';
-import React from 'react';
 import { Outlet, useLocation } from 'react-router';
 
 import { Navbar } from '@/components/layout/navbar/navbar.component.tsx';
@@ -9,7 +8,7 @@ import { ApplicationPaths } from '@/types/navigation.ts';
 
 import styles from './root.module.scss';
 
-const RootLayout: React.FC = () => {
+export default function RootLayout() {
     const { pathname } = useLocation();
 
     const isHome = pathname === ApplicationPaths.Home;
@@ -30,6 +29,4 @@ const RootLayout: React.FC = () => {
             </Layout>
         </Layout>
     );
-};
-
-export default RootLayout;
+}

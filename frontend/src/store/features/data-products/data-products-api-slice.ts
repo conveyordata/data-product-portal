@@ -1,8 +1,8 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DataOutputsGetContract } from '@/types/data-output';
-import {
+import type { DataOutputsGetContract } from '@/types/data-output';
+import type {
     DataProductContract,
     DataProductCreate,
     DataProductCreateResponse,
@@ -22,8 +22,8 @@ import {
     DataProductUpdateResponse,
     DataProductsGetContract,
 } from '@/types/data-product';
-import { GraphContract } from '@/types/graph/graph-contract';
-import {
+import type { GraphContract } from '@/types/graph/graph-contract';
+import type {
     NamespaceLengthLimitsResponse,
     NamespaceSuggestionResponse,
     NamespaceValidationResponse,

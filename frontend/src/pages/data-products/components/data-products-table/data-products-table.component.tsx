@@ -16,9 +16,9 @@ import {
     useGetUserDataProductsQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { DataProductsGetContract } from '@/types/data-product';
+import type { DataProductsGetContract } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
-import { SearchForm } from '@/types/shared';
+import type { SearchForm } from '@/types/shared';
 import { QuickFilterParticipation } from '@/types/shared/table-filters';
 
 import styles from './data-products-table.module.scss';
