@@ -57,6 +57,7 @@ test = "pytest -v tests/"
 coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
 compose = "docker compose -f test-compose.yaml up -d"
 compose-down = "docker compose -f test-compose.yaml down"
+compile-requirements = "pip-compile --generate-hashes --upgrade requirements-poetry.in"
 
 [build-system]
 requires = ["poetry-core"]
