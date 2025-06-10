@@ -54,8 +54,8 @@ class DataOutputDatasetService:
                 actor_id=actor.id,
             ),
         )
-        NotificationService().create_dataset_notifications(
-            self.db, current_link.dataset_id, event_id, [current_link.requested_by_id]
+        NotificationService(self.db).create_dataset_notifications(
+            current_link.dataset_id, event_id, [current_link.requested_by_id]
         )
         RefreshInfrastructureLambda().trigger()
         self.db.commit()
@@ -82,8 +82,8 @@ class DataOutputDatasetService:
                 actor_id=actor.id,
             ),
         )
-        NotificationService().create_dataset_notifications(
-            self.db, current_link.dataset_id, event_id, [current_link.requested_by_id]
+        NotificationService(self.db).create_dataset_notifications(
+            current_link.dataset_id, event_id, [current_link.requested_by_id]
         )
         self.db.commit()
 
@@ -107,8 +107,7 @@ class DataOutputDatasetService:
             ),
         )
         if current_link.status == DecisionStatus.APPROVED:
-            NotificationService().create_dataset_notifications(
-                self.db,
+            NotificationService(self.db).create_dataset_notifications(
                 current_link.dataset_id,
                 event_id,
                 [current_link.requested_by_id],

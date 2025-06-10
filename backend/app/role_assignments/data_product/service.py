@@ -113,8 +113,7 @@ class RoleAssignmentService:
                 actor_id=authenticated_user.id,
             ),
         )
-        NotificationService().create_data_product_notifications(
-            self.db,
+        NotificationService(self.db).create_data_product_notifications(
             assignment.data_product_id,
             event_id,
             (
@@ -156,8 +155,7 @@ class RoleAssignmentService:
                     actor_id=actor.id,
                 ),
             )
-            NotificationService().create_data_product_notifications(
-                self.db,
+            NotificationService(self.db).create_data_product_notifications(
                 assignment.data_product_id,
                 event_id,
                 (
@@ -178,8 +176,7 @@ class RoleAssignmentService:
                     actor_id=actor.id,
                 ),
             )
-            NotificationService().create_data_product_notifications(
-                self.db,
+            NotificationService(self.db).create_data_product_notifications(
                 assignment.data_product_id,
                 event_id,
                 (

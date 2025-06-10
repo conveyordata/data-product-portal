@@ -210,8 +210,8 @@ class DataProductService:
                 actor_id=authenticated_user.id,
             ),
         )
-        NotificationService().create_data_product_notifications(
-            self.db, model.id, event_id, owners
+        NotificationService(self.db).create_data_product_notifications(
+            model.id, event_id, owners
         )
         self.db.commit()
         RefreshInfrastructureLambda().trigger()
@@ -234,8 +234,8 @@ class DataProductService:
                 actor_id=authenticated_user.id,
             ),
         )
-        NotificationService().create_data_product_notifications(
-            self.db, data_product.id, event_id
+        NotificationService(self.db).create_data_product_notifications(
+            data_product.id, event_id
         )
         self.db.delete(data_product)
         self.db.commit()
@@ -378,8 +378,8 @@ class DataProductService:
             ),
         )
         if approval_status == DecisionStatus.APPROVED:
-            NotificationService().create_data_product_notifications(
-                self.db, data_product.id, event_id
+            NotificationService(self.db).create_data_product_notifications(
+                data_product.id, event_id
             )
         self.db.commit()
         self.db.refresh(data_product)
@@ -426,8 +426,8 @@ class DataProductService:
             ),
         )
         if data_product_dataset.status == DecisionStatus.APPROVED:
-            NotificationService().create_data_product_notifications(
-                self.db, data_product.id, event_id
+            NotificationService(self.db).create_data_product_notifications(
+                data_product.id, event_id
             )
         data_product.dataset_links.remove(data_product_dataset)
         self.db.commit()

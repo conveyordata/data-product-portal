@@ -107,8 +107,7 @@ class RoleAssignmentService:
                 actor_id=authenticated_user.id,
             ),
         )
-        NotificationService().create_dataset_notifications(
-            self.db,
+        NotificationService(self.db).create_dataset_notifications(
             assignment.dataset_id,
             event_id,
             (
@@ -149,8 +148,7 @@ class RoleAssignmentService:
                     actor_id=actor.id,
                 ),
             )
-            NotificationService().create_dataset_notifications(
-                self.db,
+            NotificationService(self.db).create_dataset_notifications(
                 assignment.dataset_id,
                 event_id,
                 (
@@ -171,8 +169,7 @@ class RoleAssignmentService:
                     actor_id=actor.id,
                 ),
             )
-            NotificationService().create_dataset_notifications(
-                self.db,
+            NotificationService(self.db).create_dataset_notifications(
                 assignment.dataset_id,
                 event_id,
                 (
