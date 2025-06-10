@@ -78,8 +78,10 @@ export function RolesTable({ scope }: RolesTableProps) {
 
     const handleCheckboxChange = useCallback(
         (record: PermissionInstance, id: string, checked: boolean) => {
-            console.log(record, id, checked);
-            const role = roles.find((role) => role.id === id)!;
+            const role = roles.find((role) => role.id === id);
+            if (!role) {
+                throw new Error('Role not found');
+            }
 
             const permissions = [...role.permissions];
             if (checked && !permissions.includes(record.id)) {
@@ -96,14 +98,13 @@ export function RolesTable({ scope }: RolesTableProps) {
 
     const renderPermission = (_: string, record: Permission) => {
         if (record.type === 'Instance') {
-            record = record as PermissionInstance;
             return (
                 <QuestionTooltip title={record.description}>
                     <Text className={styles.permissionInstance}>{record.name}</Text>
                 </QuestionTooltip>
             );
-        } else if (record.type === 'Group') {
-            record = record as PermissionGroup;
+        }
+        if (record.type === 'Group') {
             return (
                 <Text className={styles.permissionGroup} strong>
                     {record.name}
@@ -114,7 +115,10 @@ export function RolesTable({ scope }: RolesTableProps) {
 
     const renderCheckbox = (id: string) => (value: boolean, record: Permission) => {
         if (record.type === 'Instance') {
-            const role = roles.find((role) => role.id === id)!;
+            const role = roles.find((role) => role.id === id);
+            if (!role) {
+                throw new Error('Role not found');
+            }
 
             let checkbox: ReactElement;
             if (role.prototype === Prototype.ADMIN) {

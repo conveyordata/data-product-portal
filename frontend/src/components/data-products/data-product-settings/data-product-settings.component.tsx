@@ -1,6 +1,6 @@
 import { Flex, Form, type FormProps, Select, Switch, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
@@ -68,39 +68,37 @@ export function DataProductSettings({ id, scope }: Props) {
 
     const updatedSettings: (DataProductSettingContract & { value: string })[] = useMemo(() => {
         if (filteredSettings) {
-            if (scope == 'dataproduct') {
+            if (scope === 'dataproduct') {
                 return filteredSettings.map((setting) => {
                     const match = dataProduct?.data_product_settings?.find(
                         (dps) => dps.data_product_setting_id === setting.id,
                     );
                     return match ? { ...setting, value: match.value } : { ...setting, value: setting.default };
                 });
-            } else if (scope == 'dataset') {
+            }
+            if (scope === 'dataset') {
                 return filteredSettings.map((setting) => {
                     const match = dataset?.data_product_settings?.find(
                         (ds) => ds.data_product_setting_id === setting.id,
                     );
                     return match ? { ...setting, value: match.value } : { ...setting, value: setting.default };
                 });
-            } else {
-                return [];
             }
-        } else {
-            return [];
         }
+        return [];
     }, [filteredSettings, scope, dataProduct?.data_product_settings, dataset?.data_product_settings]);
 
     const onSubmit: FormProps<DataProductSettingValueForm>['onFinish'] = useCallback(
         async (values: DataProductSettingValueForm) => {
             try {
-                let id: string = '';
+                let id = '';
                 if (dataProduct) {
                     id = dataProduct.id;
                 }
                 if (dataset) {
                     id = dataset.id;
                 }
-                if (id != '') {
+                if (id !== '') {
                     updatedSettings?.map(async (setting) => {
                         const key = `data_product_settings_id_${setting.id}`;
                         if (values[`value_${setting.id}`].toString() !== setting.value) {
@@ -160,67 +158,64 @@ export function DataProductSettings({ id, scope }: Props) {
             {} as Record<string, typeof updatedSettings>,
         );
 
+        const renderSetting = (setting: DataProductSettingContract): ReactElement | null => {
+            switch (setting.type) {
+                case 'checkbox':
+                    return (
+                        <Form.Item<DataProductSettingValueForm>
+                            name={`value_${setting.id}`}
+                            label={setting.name}
+                            tooltip={setting.tooltip}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: t('Please input the value'),
+                                },
+                            ]}
+                        >
+                            <Switch />
+                        </Form.Item>
+                    );
+                case 'tags':
+                    return (
+                        <Form.Item<DataProductSettingValueForm>
+                            name={`value_${setting.id}`}
+                            label={setting.name}
+                            tooltip={setting.tooltip}
+                        >
+                            <Select allowClear={false} defaultActiveFirstOption mode="tags" />
+                        </Form.Item>
+                    );
+                case 'input':
+                    return (
+                        <Form.Item<DataProductSettingValueForm>
+                            name={`value_${setting.id}`}
+                            label={setting.name}
+                            tooltip={setting.tooltip}
+                        >
+                            <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                        </Form.Item>
+                    );
+                default:
+                    return null;
+            }
+        };
+
         // Render grouped settings
         return Object.entries(groupedSettings).map(([divider, settings]) => (
             <Flex key={divider} vertical>
                 <Typography.Title>{divider}</Typography.Title>
-                {settings.map((setting) => {
-                    let renderedSetting;
-                    switch (setting.type) {
-                        case 'checkbox':
-                            renderedSetting = (
-                                <Form.Item<DataProductSettingValueForm>
-                                    name={`value_${setting.id}`}
-                                    label={setting.name}
-                                    tooltip={setting.tooltip}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: t('Please input the value'),
-                                        },
-                                    ]}
-                                >
-                                    <Switch />
-                                </Form.Item>
-                            );
-                            break;
-                        case 'tags':
-                            renderedSetting = (
-                                <Form.Item<DataProductSettingValueForm>
-                                    name={`value_${setting.id}`}
-                                    label={setting.name}
-                                    tooltip={setting.tooltip}
-                                >
-                                    <Select allowClear={false} defaultActiveFirstOption mode="tags" />
-                                </Form.Item>
-                            );
-                            break;
-                        case 'input':
-                            renderedSetting = (
-                                <Form.Item<DataProductSettingValueForm>
-                                    name={`value_${setting.id}`}
-                                    label={setting.name}
-                                    tooltip={setting.tooltip}
-                                >
-                                    <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
-                                </Form.Item>
-                            );
-                            break;
-                        default:
-                            break;
-                    }
-                    return (
-                        <Flex key={setting.id} vertical>
-                            {/* Hidden Input for ID */}
-                            <Form.Item<DataProductSettingValueForm>
-                                name={`data_product_settings_id_${setting.id}`}
-                                initialValue={setting.id}
-                                hidden
-                            />
-                            {renderedSetting}
-                        </Flex>
-                    );
-                })}
+                {settings.map((setting) => (
+                    <Flex key={setting.id} vertical>
+                        {/* Hidden Input for ID */}
+                        <Form.Item<DataProductSettingValueForm>
+                            name={`data_product_settings_id_${setting.id}`}
+                            initialValue={setting.id}
+                            hidden
+                        />
+                        {renderSetting(setting)}
+                    </Flex>
+                ))}
             </Flex>
         ));
     }, [updatedSettings, t]);

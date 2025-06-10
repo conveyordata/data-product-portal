@@ -4,7 +4,7 @@ from typing import Sequence
 
 import emailgen
 
-from app.core.logging.logger import logger
+from app.core.logging import logger
 from app.settings import settings
 from app.users.schema import User
 

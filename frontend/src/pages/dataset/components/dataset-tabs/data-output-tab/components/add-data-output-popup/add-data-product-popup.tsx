@@ -12,9 +12,9 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataProductsGetContract } from '@/types/data-product';
-import { DataProductLink } from '@/types/dataset';
-import { SearchForm } from '@/types/shared';
+import type { DataProductsGetContract } from '@/types/data-product';
+import type { DataProductLink } from '@/types/dataset';
+import type { SearchForm } from '@/types/shared';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 
 type Props = {

@@ -1,4 +1,4 @@
-import { DataProductLifeCycleContract } from './data-product-lifecycle.contract';
+import type { DataProductLifeCycleContract } from './data-product-lifecycle.contract';
 
 export type DataProductLifecycleCreateRequest = Pick<
     DataProductLifeCycleContract,

@@ -6,7 +6,7 @@ from jwt.exceptions import ExpiredSignatureError, PyJWTError
 from pydantic import BaseModel
 
 from app.core.auth.oidc import OIDCConfiguration
-from app.core.logging.logger import logger
+from app.core.logging import logger
 
 oidc = OIDCConfiguration()
 

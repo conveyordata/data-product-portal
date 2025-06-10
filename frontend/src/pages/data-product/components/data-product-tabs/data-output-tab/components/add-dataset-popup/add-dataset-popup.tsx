@@ -14,9 +14,9 @@ import {
 } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
-import { DatasetsGetContract } from '@/types/dataset';
-import { SearchForm } from '@/types/shared';
+import type { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
+import type { DatasetsGetContract } from '@/types/dataset';
+import type { SearchForm } from '@/types/shared';
 
 import styles from './add-dataset-popup.module.scss';
 

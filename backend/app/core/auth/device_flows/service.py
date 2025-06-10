@@ -21,7 +21,7 @@ from app.core.auth.device_flows.model import DeviceFlow as DeviceFlowModel
 from app.core.auth.device_flows.schema import DeviceFlow, DeviceFlowStatus
 from app.core.auth.jwt import get_oidc
 from app.core.helpers.templates import render_html_template
-from app.core.logging.logger import logger
+from app.core.logging import logger
 
 basic_auth = HTTPBasic()
 

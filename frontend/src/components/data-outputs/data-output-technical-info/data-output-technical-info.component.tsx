@@ -1,11 +1,11 @@
-import { Table, TableColumnsType } from 'antd';
+import { Table, type TableColumnsType } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetEnvironmentPlatformServiceConfigQuery } from '@/store/features/environments/environments-api-slice';
-import { DataOutputContract } from '@/types/data-output';
-import { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
+import type { DataOutputContract } from '@/types/data-output';
+import type { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
 
 import { getDatabricksTechnicalInformationColumns } from './data-output-table-databricks-columns';
 import { getGlueTechnicalInformationColumns } from './data-output-table-glue-columns';
@@ -23,12 +23,10 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
     const { data: data_output, isLoading: isLoadingDataOutput } = useGetDataOutputByIdQuery(data_output_id);
     const { data: environmentConfig, isFetching: isLoadingConfig } = useGetEnvironmentPlatformServiceConfigQuery(
         {
-            platformId: data_output!.platform_id,
-            serviceId: data_output!.service_id,
+            platformId: data_output?.platform_id ?? '',
+            serviceId: data_output?.service_id ?? '',
         },
-        {
-            skip: !data_output,
-        },
+        { skip: !data_output },
     );
     const technicalInfo: TechnicalInfoContract[] = useMemo(
         () =>

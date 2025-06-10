@@ -1,5 +1,5 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls';
-import {
+import type {
     DataOutputContract,
     DataOutputCreate,
     DataOutputCreateResponse,
@@ -8,11 +8,14 @@ import {
     DataOutputDatasetRemoveRequest,
     DataOutputDatasetRemoveResponse,
 } from '@/types/data-output';
-import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
-import { DataOutputUpdateRequest, DataOutputUpdateResponse } from '@/types/data-output/data-output-update.contract';
-import { EventContract } from '@/types/events/event.contract';
-import { GraphContract } from '@/types/graph/graph-contract';
-import { NamespaceLengthLimitsResponse, NamespaceSuggestionResponse } from '@/types/namespace/namespace';
+import type { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
+import type {
+    DataOutputUpdateRequest,
+    DataOutputUpdateResponse,
+} from '@/types/data-output/data-output-update.contract';
+import type { EventContract } from '@/types/events/event.contract';
+import type { GraphContract } from '@/types/graph/graph-contract';
+import type { NamespaceLengthLimitsResponse, NamespaceSuggestionResponse } from '@/types/namespace/namespace';
 
 import { baseApiSlice } from '../api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
@@ -60,12 +63,6 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 { type: TagTypes.DataProduct as const, id: arg.id },
                 { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
             ],
-            // invalidatesTags: (_, _error, arg) => [
-            //
-            //     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-            //     { type: TagTypes.DataOutput as const, id: arg.dataOutputId },
-            //     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-            // ],
         }),
         getDataOutputHistory: builder.query<EventContract[], string>({
             query: (id) => ({

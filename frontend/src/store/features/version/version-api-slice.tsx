@@ -1,7 +1,7 @@
 import { ApiUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { TagTypes } from '@/store/features/api/tag-types.ts';
-import { VersionResponse } from '@/types/version';
+import type { VersionResponse } from '@/types/version';
 
 export const versionTags: string[] = [TagTypes.Version];
 export const versionApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: versionTags }).injectEndpoints({

@@ -173,7 +173,7 @@ def link_dataset_to_data_output(
         id, dataset_id, authenticated_user
     )
 
-    approvers = RoleAssignmentService(db, authenticated_user).users_with_authz_action(
+    approvers = RoleAssignmentService(db).users_with_authz_action(
         dataset_link.dataset_id, Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST
     )
     background_tasks.add_task(

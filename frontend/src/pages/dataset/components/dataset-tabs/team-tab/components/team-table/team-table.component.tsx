@@ -1,5 +1,5 @@
 import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
@@ -15,8 +15,8 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { DatasetRoleAssignmentContract, RoleContract } from '@/types/roles/role.contract';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
-import styles from './team-table.module.scss';
 import { getDatasetTeamColumns } from './team-table-columns';
+import styles from './team-table.module.scss';
 
 type Props = {
     datasetId: string;
@@ -47,17 +47,13 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
     const canEditUser = edit_access?.allowed || false;
     const canRemoveUser = remove_access?.allowed || false;
 
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+    const { pagination, handlePaginationChange } = useTablePagination(datasetUsers, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
     const onChange: TableProps<DatasetRoleAssignmentContract>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
-
-    useEffect(() => {
-        resetPagination();
-    }, [datasetUsers, resetPagination]);
 
     const handleRemoveUserAccess = useCallback(
         async (id: string) => {

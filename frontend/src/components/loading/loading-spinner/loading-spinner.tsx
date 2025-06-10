@@ -1,5 +1,5 @@
-import { Flex, Spin, SpinProps } from 'antd';
-import { ReactNode } from 'react';
+import { Flex, Spin, type SpinProps } from 'antd';
+import type { ReactNode } from 'react';
 
 import styles from './loading-spinner.module.scss';
 

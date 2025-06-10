@@ -33,9 +33,8 @@ def list_assignments(
     user_id: Optional[UUID] = None,
     decision: Optional[DecisionStatus] = None,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
 ) -> Sequence[RoleAssignmentResponse]:
-    return RoleAssignmentService(db=db, user=user).list_assignments(
+    return RoleAssignmentService(db).list_assignments(
         dataset_id=dataset_id, user_id=user_id, decision=decision
     )
 
@@ -54,7 +53,7 @@ def create_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
+    service = RoleAssignmentService(db)
     role_assignment = service.create_assignment(id, request, user)
 
     approvers: Sequence[User] = ()
@@ -71,7 +70,7 @@ def create_assignment(
                 role_id=role_assignment.role_id,
                 decision=DecisionStatus.APPROVED,
             ),
-            user,
+            actor=user,
         )
         return role_assignment
 
@@ -94,7 +93,7 @@ def request_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    return RoleAssignmentService(db=db, user=user).create_assignment(id, request, user)
+    return RoleAssignmentService(db).create_assignment(id, request, user)
 
 
 @router.delete(
@@ -113,7 +112,7 @@ def delete_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> None:
-    assignment = RoleAssignmentService(db=db, user=user).delete_assignment(id, user)
+    assignment = RoleAssignmentService(db).delete_assignment(id, user)
 
     if assignment.decision is DecisionStatus.APPROVED:
         DatasetAuthAssignment(assignment).remove()
@@ -137,11 +136,11 @@ def modify_assigned_role(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
+    service = RoleAssignmentService(db)
     original_role = service.get_assignment(id).role_id
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, role_id=request.role_id), user
+        UpdateRoleAssignment(id=id, role_id=request.role_id), actor=user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:
@@ -167,7 +166,7 @@ def decide_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db=db, user=user)
+    service = RoleAssignmentService(db)
     original = service.get_assignment(id)
 
     if original.decision not in (DecisionStatus.PENDING, request.decision):
@@ -183,7 +182,7 @@ def decide_assignment(
         )
 
     assignment = service.update_assignment(
-        UpdateRoleAssignment(id=id, decision=request.decision), user
+        UpdateRoleAssignment(id=id, decision=request.decision), actor=user
     )
 
     if assignment.decision is DecisionStatus.APPROVED:

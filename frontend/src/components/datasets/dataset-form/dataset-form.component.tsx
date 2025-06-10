@@ -9,6 +9,7 @@ import {
     Radio,
     Row,
     Select,
+    Skeleton,
     Space,
     Tooltip,
 } from 'antd';
@@ -38,7 +39,7 @@ import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import {
     DatasetAccess,
-    DatasetCreateFormSchema,
+    type DatasetCreateFormSchema,
     type DatasetCreateRequest,
     type DatasetUpdateRequest,
 } from '@/types/dataset';
@@ -101,8 +102,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
     const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
-    const [fetchNamespace, { data: namespaceSuggestion, isFetching: isFetchingNamespaceSuggestion }] =
-        useLazyGetDatasetNamespaceSuggestionQuery();
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDatasetNamespaceSuggestionQuery();
     const [validateNamespace] = useLazyValidateDatasetNamespaceQuery();
     const { data: namespaceLengthLimits } = useGetDatasetNamespaceLengthLimitsQuery();
 
@@ -136,7 +136,10 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
     const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
-    const userSelectOptions = users.map((user) => ({ label: user.email, value: user.id }));
+    const userSelectOptions = users.map((owner) => ({
+        label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
+        value: owner.id,
+    }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
     const onFinish: FormProps<DatasetCreateFormSchema>['onFinish'] = async (values) => {
@@ -166,7 +169,6 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     name: values.name,
                     namespace: values.namespace,
                     description: values.description,
-                    owners: values.owners,
                     tag_ids: values.tag_ids,
                     domain_id: values.domain_id,
                     lifecycle_id: values.lifecycle_id,
@@ -234,33 +236,34 @@ export function DatasetForm({ mode, datasetId }: Props) {
             form.setFieldValue('namespace', namespaceSuggestion?.namespace);
             form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditNamespace, namespaceSuggestion, isFetchingNamespaceSuggestion, t]);
-
-    const ownerIds = useGetDatasetOwnerIds(currentDataset?.id);
-
-    useEffect(() => {
-        if (currentDataset && mode === 'edit') {
-            form.setFieldsValue({
-                namespace: currentDataset.namespace,
-                name: currentDataset.name,
-                description: currentDataset.description,
-                access_type: currentDataset.access_type,
-                domain_id: currentDataset.domain.id,
-                tag_ids: currentDataset.tags.map((tag) => tag.id),
-                lifecycle_id: currentDataset.lifecycle.id,
-                owners: ownerIds,
-            });
-        }
-    }, [currentDataset, mode, form, ownerIds]);
+    }, [form, mode, canEditNamespace, namespaceSuggestion]);
 
     const validateNamespaceCallback = useCallback(
         (namespace: string) => validateNamespace(namespace).unwrap(),
         [validateNamespace],
     );
 
+    const ownerIds = useGetDatasetOwnerIds(currentDataset?.id);
+
+    if (mode === 'edit' && (!currentDataset || ownerIds === undefined)) {
+        return <Skeleton active />;
+    }
+
+    const initialValues = {
+        name: currentDataset?.name,
+        namespace: currentDataset?.namespace,
+        description: currentDataset?.description,
+        access_type: currentDataset?.access_type,
+        lifecycle_id: currentDataset?.lifecycle.id,
+        domain_id: currentDataset?.domain.id,
+        tag_ids: currentDataset?.tags.map((tag) => tag.id),
+        owners: ownerIds,
+    };
+
     return (
         <Form<DatasetCreateFormSchema>
             form={form}
+            labelWrap
             labelCol={FORM_GRID_WRAPPER_COLS}
             wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
@@ -268,8 +271,8 @@ export function DatasetForm({ mode, datasetId }: Props) {
             onFinishFailed={onFinishFailed}
             autoComplete={'off'}
             requiredMark={'optional'}
-            labelWrap
             disabled={isLoading || !canSubmit}
+            initialValues={initialValues}
         >
             <Form.Item<DatasetCreateFormSchema>
                 name={'name'}

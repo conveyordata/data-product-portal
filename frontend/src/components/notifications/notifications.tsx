@@ -1,5 +1,5 @@
 import { BellOutlined, CloseOutlined } from '@ant-design/icons';
-import { Badge, Button, Flex, Popover, Space, Tag, theme, Typography } from 'antd';
+import { Badge, Button, Flex, Popover, Space, Tag, Typography, theme } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +9,7 @@ import {
     useRemoveAllNotificationsMutation,
     useRemoveNotificationMutation,
 } from '@/store/features/notifications/notifications-api-slice';
-import { NotificationContract } from '@/types/notifications/notification.contract';
+import type { NotificationContract } from '@/types/notifications/notification.contract';
 import { formatDateToNowFromUTCString } from '@/utils/date.helper';
 
 import { NotificationDescription } from './notification-description';

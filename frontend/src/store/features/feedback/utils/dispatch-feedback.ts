@@ -1,8 +1,8 @@
 import store from '@/store';
 import {
+    type MessageState,
+    type NotificationState,
     hideModal,
-    MessageState,
-    NotificationState,
     showMessage,
     showModal,
     showNotification,

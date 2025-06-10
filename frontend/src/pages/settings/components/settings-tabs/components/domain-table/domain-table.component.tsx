@@ -1,4 +1,4 @@
-import { Button, Flex, Space, Table, TableProps, Typography } from 'antd';
+import { Button, Flex, Space, Table, type TableProps, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,17 +6,17 @@ import { useModal } from '@/hooks/use-modal';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useGetAllDomainsQuery, useRemoveDomainMutation } from '@/store/features/domains/domains-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DomainsGetContract } from '@/types/domain';
+import type { DomainsGetContract } from '@/types/domain';
 
 import { CreateDomainModal } from './domain-form-modal.component';
 import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
-import styles from './domain-table.module.scss';
 import { getDomainTableColumns } from './domain-table-columns';
+import styles from './domain-table.module.scss';
 
 export function DomainTable() {
     const { t } = useTranslation();
     const { data = [], isFetching } = useGetAllDomainsQuery();
-    const { pagination, handlePaginationChange } = useTablePagination({});
+    const { pagination, handlePaginationChange } = useTablePagination(data);
     const { isVisible, handleOpen, handleClose } = useModal();
     const {
         isVisible: migrateModalVisible,
@@ -83,13 +83,12 @@ export function DomainTable() {
                     size={'small'}
                 />
             </Flex>
-            {isVisible && (
-                <CreateDomainModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />
+            {isVisible && initial && (
+                <CreateDomainModal isOpen={isVisible} onClose={handleClose} mode={mode} initial={initial} />
             )}
-            {migrateModalVisible && (
+            {migrateModalVisible && migrateFrom && (
                 <CreateDomainMigrateModal
                     isOpen={migrateModalVisible}
-                    t={t}
                     onClose={handleCloseMigrate}
                     migrateFrom={migrateFrom}
                 />

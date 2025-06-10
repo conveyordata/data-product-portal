@@ -1,7 +1,5 @@
-import { ConfigProvider } from 'antd';
-
 import { AppRoutes } from '@/routes.tsx';
-
+import { ConfigProvider } from 'antd';
 import { AppConfig } from './config/app-config';
 
 function App() {

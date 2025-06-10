@@ -1,8 +1,8 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DataOutputsGetContract } from '@/types/data-output';
-import {
+import type { DataOutputsGetContract } from '@/types/data-output';
+import type {
     DataProductContract,
     DataProductCreate,
     DataProductCreateResponse,
@@ -16,13 +16,15 @@ import {
     DataProductGetDatabricksWorkspaceUrlResponse,
     DataProductGetSignInUrlRequest,
     DataProductGetSignInUrlResponse,
-    DataProductsGetContract,
+    DataProductGetSnowflakeUrlRequest,
+    DataProductGetSnowflakeUrlResponse,
     DataProductUpdateRequest,
     DataProductUpdateResponse,
+    DataProductsGetContract,
 } from '@/types/data-product';
-import { EventContract } from '@/types/events/event.contract';
-import { GraphContract } from '@/types/graph/graph-contract';
-import {
+import type { EventContract } from '@/types/events/event.contract';
+import type { GraphContract } from '@/types/graph/graph-contract';
+import type {
     NamespaceLengthLimitsResponse,
     NamespaceSuggestionResponse,
     NamespaceValidationResponse,
@@ -91,12 +93,6 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 method: 'GET',
             }),
         }),
-        getGraphData: builder.query<GraphContract, string>({
-            query: () => ({
-                url: ApiUrl.Graph,
-                method: 'GET',
-            }),
-        }),
         createDataProduct: builder.mutation<DataProductCreateResponse, DataProductCreate>({
             query: (dataProduct) => ({
                 url: ApiUrl.DataProducts,
@@ -160,6 +156,16 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
         >({
             query: ({ id, environment }) => ({
                 url: buildUrl(ApiUrl.DataProductDatabricksWorkspaceUrl, { dataProductId: id }),
+                method: 'GET',
+                params: { environment },
+            }),
+        }),
+        getDataProductSnowflakeUrl: builder.mutation<
+            DataProductGetSnowflakeUrlResponse,
+            DataProductGetSnowflakeUrlRequest
+        >({
+            query: ({ id, environment }) => ({
+                url: buildUrl(ApiUrl.DataProductSnowflakeUrl, { dataProductId: id }),
                 method: 'GET',
                 params: { environment },
             }),
@@ -269,9 +275,9 @@ export const {
     useGetUserDataProductsQuery,
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
-    useGetGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
     useGetDataProductHistoryQuery,
+    useGetDataProductSnowflakeUrlMutation,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,
     useGetDataProductNamespaceLengthLimitsQuery,

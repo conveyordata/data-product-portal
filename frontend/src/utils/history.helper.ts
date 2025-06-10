@@ -1,8 +1,8 @@
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
-import { EventContract } from '@/types/events/event.contract';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import { EventType } from '@/types/events/event-types';
+import type { EventContract } from '@/types/events/event.contract';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 
 export function getTypeDisplayName(t: TFunction, type: EventReferenceEntity): string {
@@ -23,7 +23,7 @@ export function getSubjectDisplayLabel(t: TFunction, record: EventContract): str
     const displayType = ` ${getTypeDisplayName(t, subject_type)}`;
 
     if (deleted_subject_identifier) {
-        return subject_type == EventReferenceEntity.User
+        return subject_type === EventReferenceEntity.User
             ? deleted_subject_identifier
             : `${deleted_subject_identifier} ${displayType}`;
     }
@@ -50,7 +50,7 @@ export function getTargetDisplayLabel(t: TFunction, record: EventContract): stri
     const displayType = ` ${getTypeDisplayName(t, target_type)}`;
 
     if (deleted_target_identifier) {
-        return target_type == EventReferenceEntity.User
+        return target_type === EventReferenceEntity.User
             ? deleted_target_identifier
             : `${deleted_target_identifier} ${displayType}`;
     }

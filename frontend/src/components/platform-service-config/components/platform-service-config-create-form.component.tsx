@@ -1,4 +1,4 @@
-import { Button, Form, FormProps, Input, Select, Space } from 'antd';
+import { Button, Form, type FormProps, Input, Select, Space } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -10,7 +10,7 @@ import { useCreatePlatformServiceConfigMutation } from '@/store/features/platfor
 import { useGetAllPlatformServicesQuery } from '@/store/features/platform-services/platform-services-api-slice';
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import {
+import type {
     PlatformServiceConfigCreateFormSchema,
     PlatformServiceConfigCreateRequest,
 } from '@/types/platform-service-config';

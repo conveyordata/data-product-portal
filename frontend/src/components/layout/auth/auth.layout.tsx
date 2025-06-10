@@ -108,9 +108,9 @@ export const AuthLayout = () => {
 
     if (isLoading || isSettingUserCredentialsInStore) {
         return <LoadingSpinner />;
-    } else if (!isOidcEnabled || isAuthenticated) {
-        return <Outlet />;
-    } else {
-        return null;
     }
+    if (!isOidcEnabled || isAuthenticated) {
+        return <Outlet />;
+    }
+    return null;
 };

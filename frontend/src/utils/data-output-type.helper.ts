@@ -1,4 +1,4 @@
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
 import databricksBorderIcon from '@/assets/icons/databricks-border-icon.svg?react';
 import glueBorderIcon from '@/assets/icons/glue-border-icon.svg?react';

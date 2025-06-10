@@ -1,14 +1,6 @@
-import { Form, type FormInstance, type FormProps, Input, Select, Space } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
-import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
-import { useDebouncedCallback } from 'use-debounce';
-
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
-import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import {
     useCreateDataOutputMutation,
     useGetDataOutputNamespaceLengthLimitsQuery,
@@ -23,11 +15,15 @@ import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-servic
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import type { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
 import { DataOutputStatus } from '@/types/data-output/data-output.contract';
-import { DataPlatform, DataPlatforms } from '@/types/data-platform';
-import { createDataProductIdPath } from '@/types/navigation';
+import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { getDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
+import { Form, type FormInstance, type FormProps, Input, Select, Skeleton, Space } from 'antd';
+import TextArea from 'antd/es/input/TextArea';
+import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDebouncedCallback } from 'use-debounce';
 
 import styles from './data-output-form.module.scss';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
@@ -47,30 +43,20 @@ type Props = {
 
 export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit }: Props) {
     const { t } = useTranslation();
-    const navigate = useNavigate();
+
     const [selectedDataPlatform, setSelectedDataPlatform] = useState<
         CustomDropdownItemProps<DataPlatforms> | undefined
     >(undefined);
     const [selectedConfiguration, setSelectedConfiguration] = useState<
         CustomDropdownItemProps<DataPlatforms> | undefined
     >(undefined);
-
     const [identifiers, setIdentifiers] = useState<string[]>([]);
+
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
-    const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
-    const [form] = Form.useForm();
-    const sourceAligned = Form.useWatch('is_source_aligned', form);
-    const dataOutputNameValue = Form.useWatch('name', form);
-    const isLoading = isCreating || isCreating || isFetchingInitialValues || isFetchingTags;
-
-    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataOutputNamespaceSuggestionQuery();
-    const [validateNamespace] = useLazyValidateDataOutputNamespaceQuery();
-    const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
-    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
-
     const dataPlatforms = useMemo(
         () =>
             getDataPlatforms(t).filter((platform) => {
@@ -81,7 +67,33 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             }),
         [t, platformConfig],
     );
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+
+    const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
+    const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataOutputNamespaceSuggestionQuery();
+    const [validateNamespace] = useLazyValidateDataOutputNamespaceQuery();
+    const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
+    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
+
+    const [form] = Form.useForm();
+    const sourceAligned = Form.useWatch('is_source_aligned', form);
+    const dataOutputNameValue = Form.useWatch('name', form);
+    const isLoading = isCreating || isCreating || isFetchingInitialValues || isFetchingTags;
+
+    const platformId = useMemo(() => {
+        return platformConfig?.find(
+            (config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase(),
+        )?.platform.id;
+    }, [platformConfig, selectedDataPlatform?.value]);
+
+    const serviceId = useMemo(() => {
+        return platformConfig?.find(
+            (config) =>
+                config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
+                config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase(),
+        )?.service.id;
+    }, [platformConfig, selectedDataPlatform?.value, selectedConfiguration?.value]);
+
+    const hideService = selectedDataPlatform === undefined || selectedDataPlatform.children?.length === 0;
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
@@ -89,23 +101,23 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
                 switch (selectedConfiguration?.value) {
                     case DataPlatforms.S3: {
-                        config['configuration_type'] = 'S3DataOutput';
+                        config.configuration_type = 'S3DataOutput';
                         break;
                     }
                     case DataPlatforms.Glue: {
-                        config['configuration_type'] = 'GlueDataOutput';
+                        config.configuration_type = 'GlueDataOutput';
                         break;
                     }
                     case DataPlatforms.Databricks: {
-                        config['configuration_type'] = 'DatabricksDataOutput';
+                        config.configuration_type = 'DatabricksDataOutput';
                         break;
                     }
                     case DataPlatforms.Snowflake: {
-                        config['configuration_type'] = 'SnowflakeDataOutput';
+                        config.configuration_type = 'SnowflakeDataOutput';
                         break;
                     }
                     case DataPlatforms.Redshift: {
-                        config['configuration_type'] = 'RedshiftDataOutput';
+                        config.configuration_type = 'RedshiftDataOutput';
                         break;
                     }
                     default: {
@@ -114,29 +126,21 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     }
                 }
 
-                // TODO: platform_id and service_id can be undefined when nothing is selected
                 const request: DataOutputCreate = {
                     name: values.name,
                     namespace: values.namespace,
                     description: values.description,
                     configuration: config,
-                    platform_id: platformConfig!.filter(
-                        (config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase(),
-                    )[0].platform.id,
-                    service_id: platformConfig!.filter(
-                        (config) =>
-                            config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
-                            config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase(),
-                    )[0].service.id,
+                    platform_id: platformId ?? '',
+                    service_id: serviceId ?? '',
                     sourceAligned: sourceAligned === undefined ? false : sourceAligned,
                     status: DataOutputStatus.Active,
                     tag_ids: values.tag_ids ?? [],
                 };
                 await createDataOutput({ id: dataProductId, dataOutput: request }).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
-                modalCallbackOnSubmit();
-                navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
 
+                modalCallbackOnSubmit();
                 form.resetFields();
             }
         } catch (_e) {
@@ -157,14 +161,14 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             setIdentifiers([]);
         } else {
             setSelectedDataPlatform(dropdown);
-            if (dropdown!.children?.length === 0) {
+            if (dropdown?.children?.length === 0) {
                 setSelectedConfiguration(dropdown);
                 setIdentifiers(
-                    platformConfig!.filter(
+                    platformConfig?.find(
                         (config) =>
                             config.platform.name.toLowerCase() === dropdown?.value.toLowerCase() &&
                             config.service.name.toLowerCase() === dropdown?.value.toLowerCase(),
-                    )[0].config,
+                    )?.config ?? [],
                 );
             } else {
                 setSelectedConfiguration(undefined);
@@ -175,9 +179,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const onConfigurationClick = (dataPlatform: DataPlatform) => {
         if (!platformsLoading) {
-            const dropdown = selectedDataPlatform?.children
-                ?.filter((platform) => platform.value === dataPlatform)
-                .at(0);
+            const dropdown = selectedDataPlatform?.children?.find((platform) => platform.value === dataPlatform);
             if (selectedConfiguration !== undefined && selectedConfiguration === dropdown) {
                 setSelectedConfiguration(undefined);
                 setIdentifiers([]);
@@ -185,11 +187,11 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 setIdentifiers([]);
                 setSelectedConfiguration(dropdown);
                 setIdentifiers(
-                    platformConfig!.filter(
+                    platformConfig?.find(
                         (config) =>
                             config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
                             config.service.name.toLowerCase() === dropdown?.value.toLowerCase(),
-                    )[0].config,
+                    )?.config ?? [],
                 );
             }
         }
@@ -226,6 +228,10 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         (namespace: string) => validateNamespace({ dataProductId, namespace }).unwrap(),
         [validateNamespace, dataProductId],
     );
+
+    if (!currentDataProduct) {
+        return <Skeleton />;
+    }
 
     return (
         <Form
@@ -299,7 +305,21 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             >
                 <Select allowClear={false} defaultActiveFirstOption defaultValue={false} options={options} />
             </Form.Item>
-            <Form.Item>
+            <Form.Item
+                name={'platform_id'}
+                label={'Type'}
+                required
+                rules={[
+                    {
+                        validator: (_) => {
+                            if (platformId === undefined) {
+                                return Promise.reject(new Error('Please select a data output type'));
+                            }
+                            return Promise.resolve();
+                        },
+                    },
+                ]}
+            >
                 <Space wrap className={styles.radioButtonContainer}>
                     {dataPlatforms
                         .filter((dataPlatform) => dataPlatform.hasConfig)
@@ -316,7 +336,23 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         ))}
                 </Space>
             </Form.Item>
-            <Form.Item hidden={selectedDataPlatform?.children?.length === 0}>
+            <Form.Item
+                name="service_id"
+                hidden={hideService}
+                rules={[
+                    {
+                        validator: (_) => {
+                            if (hideService) {
+                                return Promise.resolve();
+                            }
+                            if (serviceId === undefined) {
+                                return Promise.reject(new Error('Please select a service'));
+                            }
+                            return Promise.resolve();
+                        },
+                    },
+                ]}
+            >
                 <Space wrap className={styles.radioButtonContainer}>
                     {selectedDataPlatform?.children
                         ?.filter((platform) => {
@@ -332,9 +368,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 dataPlatform={dataPlatform}
                                 environments={[]}
                                 isDisabled={isLoading}
-                                isSelected={
-                                    selectedConfiguration !== undefined && dataPlatform === selectedConfiguration
-                                }
+                                isSelected={dataPlatform === selectedConfiguration}
                                 isLoading={isLoading}
                                 onTileClick={onConfigurationClick}
                             />
@@ -349,7 +383,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 form={form}
                                 identifiers={identifiers}
                                 sourceAligned={sourceAligned}
-                                namespace={currentDataProduct!.namespace}
+                                namespace={currentDataProduct.namespace}
                                 mode={mode}
                                 dataProductId={dataProductId}
                             />
@@ -359,7 +393,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <RedshiftDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                namespace={currentDataProduct!.namespace}
+                                namespace={currentDataProduct?.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );
@@ -368,7 +402,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <GlueDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                namespace={currentDataProduct!.namespace}
+                                namespace={currentDataProduct.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         ); //mode={mode} dataProductId={dataProductId} />;
@@ -377,7 +411,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <DatabricksDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                namespace={currentDataProduct!.namespace}
+                                namespace={currentDataProduct.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         ); //mode={mode} dataProductId={dataProductId} />;
@@ -386,7 +420,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <SnowflakeDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                namespace={currentDataProduct!.namespace}
+                                namespace={currentDataProduct.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );

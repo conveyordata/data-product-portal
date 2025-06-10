@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import type { EventContract } from '@/types/events/event.contract';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import type { EventContract } from '@/types/events/event.contract';
 import {
     getEventReferenceEntityLinkPath,
     getEventTypeDisplayName,
@@ -27,11 +27,11 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
     if (!(subject_id === resourceId && type === subject_type)) {
         const path = getEventReferenceEntityLinkPath(
             subject_id,
-            subject_type == EventReferenceEntity.DataOutput ? (record.data_output?.owner_id ?? null) : null,
+            subject_type === EventReferenceEntity.DataOutput ? (record.data_output?.owner_id ?? null) : null,
             subject_type,
         );
 
-        if (subject_type == EventReferenceEntity.User) {
+        if (subject_type === EventReferenceEntity.User) {
             return (
                 <Typography.Text>
                     {getEventTypeDisplayName(t, record.name)} {getTargetDisplayLabel(t, record)}
@@ -58,11 +58,11 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
     if (target_id && !(target_id === resourceId && type === target_type)) {
         const path = getEventReferenceEntityLinkPath(
             target_id,
-            target_type == EventReferenceEntity.DataOutput ? (record.data_output?.owner_id ?? null) : null,
+            target_type === EventReferenceEntity.DataOutput ? (record.data_output?.owner_id ?? null) : null,
             target_type,
         );
 
-        if (target_type == EventReferenceEntity.User) {
+        if (target_type === EventReferenceEntity.User) {
             return (
                 <Typography.Text>
                     {getEventTypeDisplayName(t, record.name)} {getTargetDisplayLabel(t, record)}

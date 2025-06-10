@@ -24,8 +24,11 @@ from app.users.schema import User
 
 
 class DataOutputDatasetService:
-    def approve_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
+    def __init__(self, db: Session):
+        self.db = db
+
+    def approve_data_output_link(self, id: UUID, actor: User) -> None:
+        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -38,27 +41,27 @@ class DataOutputDatasetService:
             )
 
         current_link.status = DecisionStatus.APPROVED
-        current_link.approved_by = authenticated_user
+        current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
         event_id = EventService().create_event(
-            db,
+            self.db,
             CreateEvent(
                 name=EventType.DATA_OUTPUT_DATASET_LINK_APPROVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,
                 target_type=EventReferenceEntity.DATA_OUTPUT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService().create_dataset_notifications(
-            db, current_link.dataset_id, event_id, [current_link.requested_by_id]
+            self.db, current_link.dataset_id, event_id, [current_link.requested_by_id]
         )
         RefreshInfrastructureLambda().trigger()
-        db.commit()
+        self.db.commit()
 
-    def deny_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
+    def deny_data_output_link(self, id: UUID, actor: User) -> None:
+        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -66,26 +69,26 @@ class DataOutputDatasetService:
             )
 
         current_link.status = DecisionStatus.DENIED
-        current_link.denied_by = authenticated_user
+        current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
         event_id = EventService().create_event(
-            db,
+            self.db,
             CreateEvent(
                 name=EventType.DATA_OUTPUT_DATASET_LINK_DENIED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,
                 target_type=EventReferenceEntity.DATA_OUTPUT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService().create_dataset_notifications(
-            db, current_link.dataset_id, event_id, [current_link.requested_by_id]
+            self.db, current_link.dataset_id, event_id, [current_link.requested_by_id]
         )
-        db.commit()
+        self.db.commit()
 
-    def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
+    def remove_data_output_link(self, id: UUID, actor: User) -> None:
+        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -93,29 +96,32 @@ class DataOutputDatasetService:
             )
 
         event_id = EventService().create_event(
-            db,
+            self.db,
             CreateEvent(
                 name=EventType.DATA_OUTPUT_DATASET_LINK_REMOVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_output_id,
                 target_type=EventReferenceEntity.DATA_OUTPUT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         if current_link.status == DecisionStatus.APPROVED:
             NotificationService().create_dataset_notifications(
-                db, current_link.dataset_id, event_id, [current_link.requested_by_id]
+                self.db,
+                current_link.dataset_id,
+                event_id,
+                [current_link.requested_by_id],
             )
-        db.delete(current_link)
+        self.db.delete(current_link)
+        self.db.commit()
         RefreshInfrastructureLambda().trigger()
-        db.commit()
 
     def get_user_pending_actions(
-        self, db: Session, user: User
+        self, user: User
     ) -> Sequence[DataOutputDatasetPendingAction]:
         requested_associations = (
-            db.scalars(
+            self.db.scalars(
                 select(DataOutputDatasetAssociationModel)
                 .where(
                     DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,

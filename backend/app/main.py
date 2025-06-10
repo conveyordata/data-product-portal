@@ -12,7 +12,7 @@ from app.authorization.service import AuthorizationService
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.errors.error_handling import add_exception_handlers
-from app.core.logging.logger import logger
+from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.webhook import call_webhook
 from app.database import database
@@ -59,7 +59,7 @@ async def log_middleware(request: Request, call_next):
 async def lifespan(_: FastAPI):
     db = next(database.get_db_session())
     resync = RoleService(db).initialize_prototype_roles()
-    if resync:
+    if resync or settings.AUTHORIZER_STARTUP_SYNC:
         AuthorizationService(db).reload_enforcer()
 
     backend_analytics()

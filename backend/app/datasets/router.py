@@ -46,10 +46,8 @@ def get_datasets(
 
 
 @router.get("/namespace_suggestion")
-def get_dataset_namespace_suggestion(
-    name: str, db: Session = Depends(get_db_session)
-) -> NamespaceSuggestion:
-    return DatasetService(db).dataset_namespace_suggestion(name)
+def get_dataset_namespace_suggestion(name: str) -> NamespaceSuggestion:
+    return DatasetService.dataset_namespace_suggestion(name)
 
 
 @router.get("/validate_namespace")
@@ -122,16 +120,16 @@ def create_dataset(
         )
 
     new_dataset = DatasetService(db).create_dataset(dataset, authenticated_user)
-    assignment_service = RoleAssignmentService(db=db, user=authenticated_user)
+    assignment_service = RoleAssignmentService(db=db)
     for owner_id in dataset.owners:
         response = assignment_service.create_assignment(
             new_dataset.id,
             CreateRoleAssignment(user_id=owner_id, role_id=owner_role.id),
-            authenticated_user,
+            actor=authenticated_user,
         )
         assignment_service.update_assignment(
             UpdateRoleAssignment(id=response.id, decision=DecisionStatus.APPROVED),
-            authenticated_user,
+            actor=authenticated_user,
         )
 
     return {"id": new_dataset.id}
@@ -253,9 +251,6 @@ def set_value_for_dataset(
     id: UUID,
     setting_id: UUID,
     value: str,
-    authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> None:
-    return DataProductSettingService().set_value_for_product(
-        setting_id, id, value, authenticated_user, db
-    )
+    return DataProductSettingService(db).set_value_for_product(setting_id, id, value)

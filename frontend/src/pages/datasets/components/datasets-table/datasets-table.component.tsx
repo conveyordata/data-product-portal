@@ -1,5 +1,5 @@
-import { Button, Flex, Form, Input, Pagination, RadioChangeEvent, Space, Table, Typography } from 'antd';
-import { useEffect, useMemo } from 'react';
+import { Button, Flex, Form, Input, Pagination, type RadioChangeEvent, Space, Table, Typography } from 'antd';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
@@ -12,9 +12,9 @@ import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { DatasetsGetContract } from '@/types/dataset';
+import type { DatasetsGetContract } from '@/types/dataset';
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
-import { SearchForm } from '@/types/shared';
+import type { SearchForm } from '@/types/shared';
 import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
 
 import styles from './datasets-table.module.scss';
@@ -32,23 +32,20 @@ export function DatasetsTable() {
     const { quickFilter, onQuickFilterChange, quickFilterOptions } = useQuickFilter({});
     const navigate = useNavigate();
     const { data: datasets = [], isFetching } = useGetAllDatasetsQuery();
-    const { data: userDatasets = [], isFetching: isFetchingUserDatasets } = useGetUserDatasetsQuery(
-        currentUser?.id || '',
-        { skip: !currentUser },
-    );
+    const { data: userDatasets = [] } = useGetUserDatasetsQuery(currentUser?.id || '', { skip: !currentUser });
     const { data: access } = useCheckAccessQuery(
         { action: AuthorizationAction.GLOBAL__CREATE_DATASET },
         { skip: !currentUser },
     );
     const canCreateDataset = access?.allowed || false;
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({});
+
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-
     const filteredDatasets = useMemo(() => {
         const data = quickFilter === QuickFilterParticipation.All ? datasets : userDatasets;
         return filterDatasets(data, searchTerm);
     }, [quickFilter, datasets, userDatasets, searchTerm]);
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination(filteredDatasets);
 
     const columns = useMemo(() => getDatasetTableColumns({ t, datasets: filteredDatasets }), [t, filteredDatasets]);
 
@@ -68,12 +65,6 @@ export function DatasetsTable() {
     function navigateToDataset(datasetId: string) {
         navigate(createDatasetIdPath(datasetId));
     }
-
-    useEffect(() => {
-        if (!isFetching && !isFetchingUserDatasets) {
-            resetPagination();
-        }
-    }, [filteredDatasets, isFetching, isFetchingUserDatasets, resetPagination]);
 
     return (
         <Flex vertical className={styles.tableContainer}>

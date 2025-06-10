@@ -10,10 +10,10 @@ import {
     useRemoveDataProductSettingMutation,
 } from '@/store/features/data-product-settings/data-product-settings-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataProductSettingContract, DataProductSettingScope } from '@/types/data-product-setting';
+import type { DataProductSettingContract, DataProductSettingScope } from '@/types/data-product-setting';
 
-import styles from './data-product-settings-table.module.scss';
 import { getDataProductSettingsTableColumns } from './data-product-settings-table-columns.tsx';
+import styles from './data-product-settings-table.module.scss';
 import { CreateSettingModal } from './new-data-product-setting-modal.component.tsx';
 
 type Props = {
@@ -26,7 +26,7 @@ export function DataProductSettingsTable({ scope }: Props) {
     const filteredSettings = useMemo(() => {
         return dataProductSettings.filter((setting) => setting.scope === scope);
     }, [dataProductSettings, scope]);
-    const { pagination, handlePaginationChange } = useTablePagination({});
+    const { pagination, handlePaginationChange } = useTablePagination(filteredSettings);
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductSettingContract | undefined>(undefined);

@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import type { EventContract } from '@/types/events/event.contract';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import type { EventContract } from '@/types/events/event.contract';
 import { getEventReferenceEntityLinkPath, getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
 import { getEventTypeNotificationText } from '@/utils/notification.helper';
 

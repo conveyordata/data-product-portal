@@ -34,44 +34,46 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
     def was_admin(self) -> bool:
         return self.previous_role_id == ADMIN_UUID
 
-    def add(self) -> None:
+    def add(self) -> bool:
         authorizer = Authorization()
 
         if self.is_admin():
-            authorizer.assign_admin_role(user_id=str(self.user_id))
+            return authorizer.assign_admin_role(user_id=str(self.user_id))
         else:
-            authorizer.assign_global_role(
+            return authorizer.assign_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.role_id),
             )
 
-    def remove(self) -> None:
+    def remove(self) -> bool:
         authorizer = Authorization()
         if self.is_admin():
-            authorizer.revoke_admin_role(user_id=str(self.user_id))
+            return authorizer.revoke_admin_role(user_id=str(self.user_id))
         else:
-            authorizer.revoke_global_role(
+            return authorizer.revoke_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.role_id),
             )
 
-    def swap(self) -> None:
+    def swap(self) -> tuple[bool, bool]:
         assert self.previous_role_id is not None
 
         authorizer = Authorization()
 
         if self.was_admin():
-            authorizer.revoke_admin_role(user_id=str(self.user_id))
+            revoke = authorizer.revoke_admin_role(user_id=str(self.user_id))
         else:
-            authorizer.revoke_global_role(
+            revoke = authorizer.revoke_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.previous_role_id),
             )
 
         if self.is_admin():
-            authorizer.assign_admin_role(user_id=str(self.user_id))
+            assign = authorizer.assign_admin_role(user_id=str(self.user_id))
         else:
-            authorizer.assign_global_role(
+            assign = authorizer.assign_global_role(
                 user_id=str(self.user_id),
                 role_id=str(self.role_id),
             )
+
+        return revoke, assign

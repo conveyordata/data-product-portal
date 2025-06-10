@@ -1,19 +1,24 @@
-import type { TablePaginationConfig } from 'antd';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
+import type { PaginationProps } from 'antd/es/pagination/Pagination';
+
+const defaultValues: Props = {
+    initialPagination: DEFAULT_TABLE_PAGINATION,
+};
 
 type Props = {
-    initialPagination?: TablePaginationConfig;
+    initialPagination: PaginationProps;
 };
-export const useTablePagination = ({ initialPagination = DEFAULT_TABLE_PAGINATION }: Props) => {
-    const [pagination, setPagination] = useState<TablePaginationConfig>(initialPagination);
+export const useTablePagination = (elements: object[], props: Partial<Props> = {}) => {
+    const config = { ...defaultValues, ...props };
+    const [pagination, setPagination] = useState<PaginationProps>(config.initialPagination);
 
     const resetPagination = useCallback(() => {
-        setPagination(initialPagination);
-    }, [initialPagination]);
+        setPagination(config.initialPagination);
+    }, [config.initialPagination]);
 
-    const handleTotalChange = (total: number) => {
+    const handleTotalChange = useCallback((total: number) => {
         setPagination((prev) =>
             prev.total === total
                 ? prev
@@ -22,9 +27,9 @@ export const useTablePagination = ({ initialPagination = DEFAULT_TABLE_PAGINATIO
                       total,
                   },
         );
-    };
+    }, []);
 
-    const handleCurrentPageChange = (current: number) => {
+    const handleCurrentPageChange = useCallback((current: number) => {
         setPagination((prev) =>
             prev.current === current
                 ? prev
@@ -33,9 +38,9 @@ export const useTablePagination = ({ initialPagination = DEFAULT_TABLE_PAGINATIO
                       current,
                   },
         );
-    };
+    }, []);
 
-    const handlePageSizeChange = (pageSize: number) => {
+    const handlePageSizeChange = useCallback((pageSize: number) => {
         setPagination((prev) =>
             prev.pageSize === pageSize
                 ? prev
@@ -44,11 +49,21 @@ export const useTablePagination = ({ initialPagination = DEFAULT_TABLE_PAGINATIO
                       pageSize,
                   },
         );
-    };
+    }, []);
 
-    const handlePaginationChange = (pagination: TablePaginationConfig) => {
+    const handlePaginationChange = (pagination: PaginationProps) => {
         setPagination(pagination);
     };
+
+    useEffect(() => {
+        if (elements.length !== pagination.total) {
+            handleTotalChange(elements.length);
+
+            if (pagination.current && pagination.current > elements.length) {
+                handleCurrentPageChange(elements.length);
+            }
+        }
+    }, [elements, pagination, handleTotalChange, handleCurrentPageChange]);
 
     return {
         pagination,

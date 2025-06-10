@@ -1,8 +1,8 @@
-import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
+import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DataOutputConfiguration, DataOutputCreateFormSchema, SnowflakeDataOutput } from '@/types/data-output';
+import type { DataOutputConfiguration, DataOutputCreateFormSchema, SnowflakeDataOutput } from '@/types/data-output';
 
 type Props = {
     sourceAligned: boolean;
@@ -47,7 +47,7 @@ export function SnowflakeDataOutputForm({ form, identifiers, namespace, sourceAl
         }
 
         form.setFieldsValue({ result: result });
-    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireDatabase, form]);
+    }, [databaseValue, schemaValue, tableValue, entireDatabase, form]);
 
     return (
         <div>

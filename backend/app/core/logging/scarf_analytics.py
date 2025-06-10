@@ -14,7 +14,7 @@ def backend_analytics():
     try:
         # If either environment variable is set, do not collect metrics and exit.
         if not settings.SCARF_NO_ANALYTICS and not settings.DO_NOT_TRACK:
-            result = requests.get(
+            requests.get(
                 "https://dataminded.gateway.scarf.sh/telemetry",
                 params={
                     "version": API_VERSION,
@@ -24,9 +24,5 @@ def backend_analytics():
                     "sandbox": settings.SANDBOX,
                 },
             )
-            logger.info(result.status_code)
-            logger.info(result.content)
     except Exception as e:
-        logger.warning("SOMETHING WENT WRONG WITH ANALYTICS")
-        logger.warning(e)
-        pass
+        logger.warning(f"Unable to connect to scarf: {e}")

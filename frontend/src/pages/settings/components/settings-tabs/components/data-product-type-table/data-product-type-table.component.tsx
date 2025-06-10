@@ -1,4 +1,4 @@
-import { Button, Flex, Space, Table, TableProps, Typography } from 'antd';
+import { Button, Flex, Space, Table, type TableProps, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,17 +9,17 @@ import {
     useRemoveDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataProductTypesGetContract } from '@/types/data-product-type';
+import type { DataProductTypesGetContract } from '@/types/data-product-type';
 
 import { CreateDataProductTypeModal } from './data-product-type-form-modal.component';
 import { CreateDataProductTypeMigrateModal } from './data-product-type-migrate-modal.component';
-import styles from './data-product-type-table.module.scss';
 import { getDataProductTypeTableColumns } from './data-product-type-table-columns';
+import styles from './data-product-type-table.module.scss';
 
 export function DataProductTypeTable() {
     const { t } = useTranslation();
     const { data = [], isFetching } = useGetAllDataProductTypesQuery();
-    const { pagination, handlePaginationChange } = useTablePagination({});
+    const { pagination, handlePaginationChange } = useTablePagination(data);
     const { isVisible, handleOpen, handleClose } = useModal();
     const {
         isVisible: migrateModalVisible,
@@ -84,19 +84,12 @@ export function DataProductTypeTable() {
                 rowClassName={() => 'editable-row'}
                 size={'small'}
             />
-            {isVisible && (
-                <CreateDataProductTypeModal
-                    onClose={handleClose}
-                    t={t}
-                    isOpen={isVisible}
-                    mode={mode}
-                    initial={initial}
-                />
+            {isVisible && initial && (
+                <CreateDataProductTypeModal onClose={handleClose} isOpen={isVisible} mode={mode} initial={initial} />
             )}
-            {migrateModalVisible && (
+            {migrateModalVisible && migrateFrom && (
                 <CreateDataProductTypeMigrateModal
                     isOpen={migrateModalVisible}
-                    t={t}
                     onClose={handleCloseMigrate}
                     migrateFrom={migrateFrom}
                 />

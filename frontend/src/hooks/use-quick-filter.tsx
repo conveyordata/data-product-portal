@@ -1,5 +1,5 @@
 import { GlobalOutlined, TeamOutlined } from '@ant-design/icons';
-import { RadioGroupProps, Space } from 'antd';
+import { type RadioGroupProps, Space } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 

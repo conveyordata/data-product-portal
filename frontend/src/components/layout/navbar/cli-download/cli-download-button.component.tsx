@@ -1,6 +1,6 @@
 import { AppleOutlined, CodeOutlined, LinuxOutlined, WindowsOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Popover } from 'antd';
-import { JSX } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
@@ -10,7 +10,7 @@ import styles from './cli-download-button.module.scss';
 type DownloadItem = {
     label: string;
     suffix: string;
-    icon: JSX.Element;
+    icon: ReactElement;
 };
 
 const createDownloadLink = (suffix: string, version: string) => {

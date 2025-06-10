@@ -1,8 +1,8 @@
-import { ThemeConfig } from 'antd';
-import { OidcClientSettings } from 'oidc-client-ts';
+import type { ThemeConfig } from 'antd';
+import type { OidcClientSettings } from 'oidc-client-ts';
 
 import { blueThemeConfig, datamindedThemeConfig, greenThemeConfig } from '@/theme/antd-theme';
-import { LogoutCognitoExtraParams } from '@/types/auth/oidc.ts';
+import type { LogoutCognitoExtraParams } from '@/types/auth/oidc.ts';
 
 interface Config {
     /**
@@ -52,6 +52,7 @@ declare global {
     const config: Config;
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: Fine for the config
 export class AppConfig {
     public static getThemeConfiguration(): ThemeConfig {
         const themeMapping: Record<string, ThemeConfig> = {

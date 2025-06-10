@@ -1,5 +1,4 @@
-import { Button, Form, type FormProps, Input, Popconfirm, Select, Space } from 'antd';
-import { useEffect } from 'react';
+import { Button, Form, type FormProps, Input, Popconfirm, Select, Skeleton, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
@@ -65,12 +64,12 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
     const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
 
-    const handleDeleteDataProduct = async () => {
-        if (canDelete && currentDataOutput) {
+    const handleDeleteDataOutput = async () => {
+        if (canDelete && currentDataOutput && dataProduct) {
             try {
-                await deleteDataOutput(currentDataOutput?.id).unwrap();
+                await deleteDataOutput(currentDataOutput.id).unwrap();
                 dispatchMessage({ content: t('Data output deleted successfully'), type: 'success' });
-                navigate(createDataProductIdPath(dataProduct!.id));
+                navigate(createDataProductIdPath(dataProduct.id));
             } catch (_error) {
                 dispatchMessage({
                     content: t('Failed to delete data output, please try again later'),
@@ -79,6 +78,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             }
         }
     };
+
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
             if (dataOutputId && currentDataOutput) {
@@ -120,20 +120,21 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
         }
     };
 
-    useEffect(() => {
-        if (currentDataOutput) {
-            form.setFieldsValue({
-                namespace: currentDataOutput.namespace,
-                name: currentDataOutput.name,
-                description: currentDataOutput.description,
-                tag_ids: currentDataOutput.tags.map((tag) => tag.id),
-            });
-        }
-    }, [currentDataOutput, form, mode]);
+    if (mode === 'edit' && !currentDataOutput) {
+        return <Skeleton active />;
+    }
+
+    const initialValues = {
+        namespace: currentDataOutput?.namespace,
+        name: currentDataOutput?.name,
+        description: currentDataOutput?.description,
+        tag_ids: currentDataOutput?.tags.map((tag) => tag.id),
+    };
 
     return (
         <Form
             form={form}
+            labelWrap
             labelCol={FORM_GRID_WRAPPER_COLS}
             wrapperCol={FORM_GRID_WRAPPER_COLS}
             layout="vertical"
@@ -141,8 +142,8 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
             onFinishFailed={onSubmitFailed}
             autoComplete={'off'}
             requiredMark={'optional'}
-            labelWrap
             disabled={isLoading || !canEdit}
+            initialValues={initialValues}
         >
             <Form.Item<DataOutputCreateFormSchema>
                 name={'name'}
@@ -213,7 +214,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
                     {canDelete && (
                         <Popconfirm
                             title={t('Are you sure you want to delete this data output?')}
-                            onConfirm={handleDeleteDataProduct}
+                            onConfirm={handleDeleteDataOutput}
                             okText={t('Yes')}
                             cancelText={t('No')}
                         >

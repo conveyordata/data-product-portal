@@ -28,6 +28,7 @@
     "Yes": "Yes",
     "No": "No",
     "Delete": "Delete",
+    "Users": "Users",
     "Glue database": "Glue database",
     "Snowflake schema": "Snowflake schema",
     "Databricks schema": "Databricks schema",
@@ -576,5 +577,16 @@
     "role assignment removed for user ": "role assignment removed for user ",
     "role assignment approved for user ": "role assignment approved for user ",
     "role assignment denied for user ": "role assignment denied for user ",
-    "has removed a link to the ": "has removed a link to the "
+    "has removed a link to the ": "has removed a link to the ",
+    "Showing {{range0}}-{{range1}} of {{total}} users": "Showing {{range0}}-{{range1}} of {{total}} users",
+    "Search users by name": "Search users by name",
+    "Global Role": "Global Role",
+    "Email": "Email",
+    "People": "People",
+    "Global role removed successfully": "Global role removed successfully",
+    "Could not remove global role": "Could not remove global role",
+    "Global role updated successfully": "Global role updated successfully",
+    "Could not update global role": "Could not update global role",
+    "Global role created successfully": "Global role created successfully",
+    "Could not create global role": "Could not create global role"
 }

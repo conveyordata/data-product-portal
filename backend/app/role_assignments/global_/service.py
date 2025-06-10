@@ -20,9 +20,8 @@ from app.users.schema import User
 
 
 class RoleAssignmentService:
-    def __init__(self, db: Session, user: User) -> None:
+    def __init__(self, db: Session) -> None:
         self.db = db
-        self.user = user
 
     def get_assignment(self, id_: UUID) -> RoleAssignment:
         return ensure_exists(id_, self.db, GlobalRoleAssignment)
@@ -38,12 +37,14 @@ class RoleAssignmentService:
 
         return self.db.scalars(query).all()
 
-    def create_assignment(self, request: RoleAssignmentRequest) -> RoleAssignment:
+    def create_assignment(
+        self, request: RoleAssignmentRequest, actor: User
+    ) -> RoleAssignment:
         self.ensure_is_global_scope(request.role_id)
         role_assignment = GlobalRoleAssignment(
             **request.model_dump(),
             requested_on=datetime.now(),
-            requested_by_id=self.user.id,
+            requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
         self.db.commit()
@@ -63,7 +64,9 @@ class RoleAssignmentService:
                 detail="Role not found for this scope",
             )
 
-    def update_assignment(self, request: UpdateRoleAssignment) -> RoleAssignment:
+    def update_assignment(
+        self, request: UpdateRoleAssignment, actor: User
+    ) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
 
         if (role_id := request.role_id) is not None:
@@ -72,7 +75,7 @@ class RoleAssignmentService:
         if (decision := request.decision) is not None:
             assignment.decision = decision
             assignment.decided_on = datetime.now()
-            assignment.decided_by_id = self.user.id
+            assignment.decided_by_id = actor.id
 
         self.db.commit()
         return assignment

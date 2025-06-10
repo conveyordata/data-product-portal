@@ -3,7 +3,7 @@ import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import type { DataProductsGetContract, DataProductStatus } from '@/types/data-product';
+import type { DataProductStatus, DataProductsGetContract } from '@/types/data-product';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import type { DataProductTypeContract } from '@/types/data-product-type';
 import type { DomainContract } from '@/types/domain';
@@ -65,9 +65,8 @@ export const getDataProductTableColumns = ({
                             {lifecycle.name}
                         </Tag>
                     );
-                } else {
-                    return;
                 }
+                return;
             },
             ...new FilterSettings(data, (dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
             sorter: sorter.stringSorter((dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),

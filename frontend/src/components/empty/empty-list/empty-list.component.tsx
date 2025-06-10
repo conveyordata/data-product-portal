@@ -1,4 +1,4 @@
-import { Empty, EmptyProps, Flex, FlexProps } from 'antd';
+import { Empty, type EmptyProps, Flex, type FlexProps } from 'antd';
 
 import styles from './empty-list.module.scss';
 

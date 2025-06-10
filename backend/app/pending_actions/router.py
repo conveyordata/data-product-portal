@@ -17,4 +17,4 @@ def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> Sequence[PendingAction]:
-    return PendingActionsService().get_user_pending_actions(db, authenticated_user)
+    return PendingActionsService(db).get_user_pending_actions(authenticated_user)

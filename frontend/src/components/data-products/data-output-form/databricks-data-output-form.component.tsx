@@ -1,8 +1,8 @@
-import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
+import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DatabricksDataOutput, DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
+import type { DataOutputConfiguration, DataOutputCreateFormSchema, DatabricksDataOutput } from '@/types/data-output';
 
 type Props = {
     sourceAligned: boolean;
@@ -47,7 +47,7 @@ export function DatabricksDataOutputForm({ form, identifiers, namespace, sourceA
         }
 
         form.setFieldsValue({ result: result });
-    }, [catalogValue, sourceAligned, schemaValue, tableValue, entireCatalog, form]);
+    }, [catalogValue, schemaValue, tableValue, entireCatalog, form]);
 
     return (
         <div>

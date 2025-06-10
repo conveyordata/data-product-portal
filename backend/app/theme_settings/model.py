@@ -12,5 +12,5 @@ class ThemeSettings(Base):
     portal_name = Column(String)
 
     @staticmethod
-    def getSettings(db: Session):
+    def get_settings(db: Session):
         return db.get(ThemeSettings, SETTINGS_ID)

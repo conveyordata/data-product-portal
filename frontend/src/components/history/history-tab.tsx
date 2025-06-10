@@ -1,12 +1,12 @@
-import { Flex, Form, Table, TableProps } from 'antd';
-import { TFunction } from 'i18next';
+import { Flex, Form, Table, type TableProps } from 'antd';
+import type { TFunction } from 'i18next';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { HISTORY_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import { EventContract } from '@/types/events/event.contract';
-import { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import type { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import type { EventContract } from '@/types/events/event.contract';
 import { getEventTypeDisplayName, getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
 
 import { Searchbar } from '../form';
@@ -60,7 +60,7 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
 
     useEffect(() => {
         resetPagination();
-    }, [filteredHistory, resetPagination]);
+    }, [resetPagination]);
 
     const columns = useMemo(() => getHistoryColumns({ t, resourceId: id, type }), [t, id, type]);
 

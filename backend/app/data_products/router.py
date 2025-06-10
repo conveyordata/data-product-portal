@@ -49,43 +49,43 @@ router = APIRouter(prefix="/data_products", tags=["data_products"])
 def get_data_products(
     db: Session = Depends(get_db_session),
 ) -> Sequence[DataProductsGet]:
-    return DataProductService().get_data_products(db)
+    return DataProductService(db).get_data_products()
 
 
 @router.get("/namespace_suggestion")
 def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return DataProductService().data_product_namespace_suggestion(name)
+    return DataProductService.data_product_namespace_suggestion(name)
 
 
 @router.get("/validate_namespace")
 def validate_data_product_namespace(
     namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
-    return DataProductService().validate_data_product_namespace(namespace, db)
+    return DataProductService(db).validate_data_product_namespace(namespace)
 
 
 @router.get("/namespace_length_limits")
 def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
-    return DataProductService().data_product_namespace_length_limits()
+    return DataProductService.data_product_namespace_length_limits()
 
 
 @router.get("/user/{user_id}")
 def get_user_data_products(
     user_id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[DataProductsGet]:
-    return DataProductService().get_user_data_products(user_id, db)
+    return DataProductService(db).get_user_data_products(user_id)
 
 
 @router.get("/{id}")
 def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataProductGet:
-    return DataProductService().get_data_product(id, db)
+    return DataProductService(db).get_data_product(id)
 
 
 @router.get("/{id}/history")
 def get_event_history(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> list[EventGet]:
-    return DataProductService().get_event_history(id, db)
+    return DataProductService(db).get_event_history(id)
 
 
 @router.post(
@@ -124,10 +124,10 @@ def create_data_product(
             detail="Owner role not found",
         )
 
-    created_data_product = DataProductService().create_data_product(
-        data_product, db, authenticated_user
+    created_data_product = DataProductService(db).create_data_product(
+        data_product, authenticated_user
     )
-    assignment_service = RoleAssignmentService(db=db, user=authenticated_user)
+    assignment_service = RoleAssignmentService(db)
     for owner in data_product.owners:
         response = assignment_service.create_assignment(
             created_data_product.id,
@@ -135,11 +135,11 @@ def create_data_product(
                 user_id=owner,
                 role_id=owner_role.id,
             ),
-            authenticated_user,
+            actor=authenticated_user,
         )
         assignment_service.update_assignment(
             UpdateRoleAssignment(id=response.id, decision=DecisionStatus.APPROVED),
-            authenticated_user,
+            actor=authenticated_user,
         )
     return {"id": created_data_product.id}
 
@@ -165,7 +165,7 @@ def remove_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DataProductService().remove_data_product(id, db, authenticated_user)
+    DataProductService(db).remove_data_product(id, authenticated_user)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
     return
 
@@ -194,8 +194,8 @@ def update_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DataProductService().update_data_product(
-        id, data_product, db, authenticated_user
+    return DataProductService(db).update_data_product(
+        id, data_product, authenticated_user
     )
 
 
@@ -233,7 +233,7 @@ def create_data_output(
 async def validate_data_output_namespace(
     id: UUID, namespace: str, db: Session = Depends(get_db_session)
 ) -> NamespaceValidation:
-    return DataProductService().validate_data_output_namespace(namespace, id, db)
+    return DataProductService(db).validate_data_output_namespace(namespace, id)
 
 
 @router.put(
@@ -260,8 +260,8 @@ def update_data_product_about(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataProductService().update_data_product_about(
-        id, data_product, db, authenticated_user
+    return DataProductService(db).update_data_product_about(
+        id, data_product, authenticated_user
     )
 
 
@@ -289,8 +289,8 @@ def update_data_product_status(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataProductService().update_data_product_status(
-        id, data_product, db, authenticated_user
+    return DataProductService(db).update_data_product_status(
+        id, data_product, authenticated_user
     )
 
 
@@ -326,14 +326,12 @@ def link_dataset_to_data_product(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> dict[str, UUID]:
-    dataset_link = DataProductService().link_dataset_to_data_product(
-        id, dataset_id, authenticated_user, db
+    dataset_link = DataProductService(db).link_dataset_to_data_product(
+        id, dataset_id, authenticated_user
     )
 
     if dataset_link.dataset.access_type != DatasetAccessType.PUBLIC:
-        approvers = DatasetRoleAssignmentService(
-            db, authenticated_user
-        ).users_with_authz_action(
+        approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
             dataset_link.dataset_id, Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST
         )
         background_tasks.add_task(
@@ -378,9 +376,9 @@ def unlink_dataset_from_data_product(
     dataset_id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
-    return DataProductService().unlink_dataset_from_data_product(
-        id, dataset_id, db, authenticated_user
+) -> None:
+    return DataProductService(db).unlink_dataset_from_data_product(
+        id, dataset_id, authenticated_user
     )
 
 
@@ -395,7 +393,7 @@ def unlink_dataset_from_data_product(
     ],
 )
 def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) -> str:
-    return DataProductService().get_data_product_role_arn(id, environment, db)
+    return DataProductService(db).get_data_product_role_arn(id, environment)
 
 
 @router.get(
@@ -414,8 +412,8 @@ def get_signin_url(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> str:
-    return DataProductService().generate_signin_url(
-        id, environment, authenticated_user, db
+    return DataProductService(db).generate_signin_url(
+        id, environment, authenticated_user
     )
 
 
@@ -430,7 +428,7 @@ def get_signin_url(
     ],
 )
 def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
-    return DataProductService().get_conveyor_ide_url(id, db)
+    return DataProductService(db).get_conveyor_ide_url(id)
 
 
 @router.get(
@@ -448,21 +446,39 @@ def get_databricks_workspace_url(
     environment: str,
     db: Session = Depends(get_db_session),
 ) -> str:
-    return DataProductService().get_databricks_workspace_url(id, environment, db)
+    return DataProductService(db).get_databricks_workspace_url(id, environment)
+
+
+@router.get(
+    "/{id}/snowflake_url",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
+        ),
+    ],
+)
+def get_snowflake_url(
+    id: UUID,
+    environment: str,
+    db: Session = Depends(get_db_session),
+) -> str:
+    return DataProductService(db).get_snowflake_url(id, environment)
 
 
 @router.get("/{id}/data_outputs")
 def get_data_outputs(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> Sequence[DataOutputGet]:
-    return DataProductService().get_data_outputs(id, db)
+    return DataProductService(db).get_data_outputs(id)
 
 
 @router.get("/{id}/graph")
 def get_graph_data(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
-    return DataProductService().get_graph_data(id, level, db)
+    return DataProductService(db).get_graph_data(id, level)
 
 
 @router.post(
@@ -479,9 +495,6 @@ def set_value_for_data_product(
     id: UUID,
     setting_id: UUID,
     value: str,
-    authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> None:
-    return DataProductSettingService().set_value_for_product(
-        setting_id, id, value, authenticated_user, db
-    )
+    return DataProductSettingService(db).set_value_for_product(setting_id, id, value)

@@ -1,33 +1,33 @@
 import Icon from '@ant-design/icons';
-import { Dropdown, DropdownProps, Flex, MenuProps, Radio, Space, Spin, Typography } from 'antd';
+import { Dropdown, type DropdownProps, Flex, type MenuProps, Radio, Space, Spin, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Environment } from '@/types/environment';
-import { CustomDropdownItemProps } from '@/types/shared';
+import type { Environment } from '@/types/environment';
+import type { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './data-access-tile.module.scss';
+
+const ACCESS_DATA_DROPDOWN_DELAY = 0.25;
 
 type Props<T extends string> = {
     dataPlatform: CustomDropdownItemProps<T>;
     environments: Environment[];
-    onMenuItemClick?: (environment: string, dataPlatform: T) => void;
-    onTileClick?: (dataPlatform: T) => void;
-    dropdownProps?: DropdownProps;
     isLoading?: boolean;
     isDisabled?: boolean;
+    dropdownProps?: DropdownProps;
+    onMenuItemClick?: (environment: string, dataPlatform: T) => void;
+    onTileClick?: (dataPlatform: T) => void;
 };
-
-const ACCESS_DATA_DROPDOWN_DELAY = 0.25;
 
 export function AccessDataTile<T extends string>({
     dataPlatform,
     environments,
     isLoading,
     isDisabled,
-    onMenuItemClick = () => {},
     dropdownProps,
-    onTileClick = () => {},
+    onMenuItemClick = (): void => undefined,
+    onTileClick = (): void => undefined,
 }: Props<T>) {
     const { t } = useTranslation();
     const isDisabledDropdown = isDisabled || dataPlatform.disabled;

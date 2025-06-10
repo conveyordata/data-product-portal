@@ -1,95 +1,87 @@
 {
-  "name": "data-product-portal-client",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "npm run copy-config && vite --force",
-    "build": "vite build",
-    "build:prd": "vite build --mode production",
-    "copy-config": "cp config.local.js public/config.js",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "eslint --fix . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "start": "npm run copy-config && npm run build && vite preview",
-    "format": "prettier --write ./src",
-    "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js"
-  },
-  "dependencies": {
-    "@ant-design/colors": "^8.0.0",
-    "@ant-design/v5-patch-for-react-19": "^1.0.3",
-    "@dagrejs/dagre": "^1.1.4",
-    "@fontsource/inter": "^5.2.5",
-    "@reduxjs/toolkit": "^2.8.2",
-    "@tiptap/extension-bubble-menu": "^2.12.0",
-    "@tiptap/extension-document": "^2.12.0",
-    "@tiptap/extension-hard-break": "^2.12.0",
-    "@tiptap/extension-link": "^2.12.0",
-    "@tiptap/extension-placeholder": "^2.12.0",
-    "@tiptap/extension-table": "^2.12.0",
-    "@tiptap/extension-table-cell": "^2.12.0",
-    "@tiptap/extension-table-header": "^2.12.0",
-    "@tiptap/extension-table-row": "^2.12.0",
-    "@tiptap/extension-text-style": "^2.12.0",
-    "@tiptap/extension-typography": "^2.12.0",
-    "@tiptap/extension-underline": "^2.12.0",
-    "@tiptap/pm": "^2.12.0",
-    "@tiptap/react": "^2.12.0",
-    "@tiptap/starter-kit": "^2.12.0",
-    "@xyflow/react": "^12.6.4",
-    "antd": "^5.25.3",
-    "axios": "^1.9.0",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
-    "i18next": "^25.2.1",
-    "i18next-http-backend": "^3.0.2",
-    "oidc-client-ts": "^3.2.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-i18next": "^15.5.2",
-    "react-oidc-context": "^3.3.0",
-    "react-redux": "^9.2.0",
-    "use-debounce": "^10.0.4",
-    "react-router": "^7.6.1"
-  },
-  "devDependencies": {
-    "@types/node": "^22.15.23",
-    "@types/react": "^19.1.6",
-    "@types/react-dom": "^19.1.5",
-    "@typescript-eslint/eslint-plugin": "^8.33.0",
-    "@typescript-eslint/parser": "^8.32.1",
-    "@vitejs/plugin-react": "^4.5.0",
-    "axios-mock-adapter": "^2.1.0",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.4.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
-    "i18next-parser": "^9.3.0",
-    "msw": "^2.8.5",
-    "prettier": "3.5.3",
-    "sass": "^1.89.0",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.5",
-    "vite-plugin-svgr": "^4.3.0"
-  },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-musl": "^4.41.1"
-  },
-  "volta": {
-    "node": "20.12.2"
-  },
-  "engines": {
-    "node": ">= 20.9",
-    "npm": ">= 10.1"
-  },
-  "overrides": {
-    "i18next-parser": {
-      "rimraf": "^4.0.0"
+    "name": "data-product-portal-client",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "npm run copy-config && vite --force",
+        "build": "vite build",
+        "build:prd": "vite build --mode production",
+        "copy-config": "cp config.local.js public/config.js",
+        "check": "biome check",
+        "check:fix": "biome check --fix",
+        "start": "npm run copy-config && npm run build && vite preview",
+        "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js"
     },
-    "zustand": {
-      "use-sync-external-store": "^1.4.0"
+    "dependencies": {
+        "@ant-design/colors": "^8.0.0",
+        "@ant-design/v5-patch-for-react-19": "^1.0.3",
+        "@dagrejs/dagre": "^1.1.4",
+        "@fontsource/inter": "^5.2.5",
+        "@reduxjs/toolkit": "^2.8.2",
+        "@tiptap/extension-bubble-menu": "^2.13.0",
+        "@tiptap/extension-document": "^2.13.0",
+        "@tiptap/extension-hard-break": "^2.13.0",
+        "@tiptap/extension-link": "^2.13.0",
+        "@tiptap/extension-placeholder": "^2.13.0",
+        "@tiptap/extension-table": "^2.13.0",
+        "@tiptap/extension-table-cell": "^2.13.0",
+        "@tiptap/extension-table-header": "^2.13.0",
+        "@tiptap/extension-table-row": "^2.13.0",
+        "@tiptap/extension-text-style": "^2.13.0",
+        "@tiptap/extension-typography": "^2.13.0",
+        "@tiptap/extension-underline": "^2.13.0",
+        "@tiptap/pm": "^2.13.0",
+        "@tiptap/react": "^2.13.0",
+        "@tiptap/starter-kit": "^2.13.0",
+        "@xyflow/react": "^12.6.4",
+        "antd": "^5.25.4",
+        "axios": "^1.9.0",
+        "clsx": "^2.1.1",
+        "date-fns": "^4.1.0",
+        "i18next": "^25.2.1",
+        "i18next-http-backend": "^3.0.2",
+        "oidc-client-ts": "^3.2.1",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
+        "react-i18next": "^15.5.2",
+        "react-oidc-context": "^3.3.0",
+        "react-redux": "^9.2.0",
+        "react-router": "^7.6.2",
+        "use-debounce": "^10.0.4"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "1.9.4",
+        "@types/node": "^22.15.30",
+        "@types/react": "^19.1.6",
+        "@types/react-dom": "^19.1.6",
+        "@typescript-eslint/eslint-plugin": "^8.33.1",
+        "@typescript-eslint/parser": "^8.32.1",
+        "@vitejs/plugin-react": "^4.5.1",
+        "axios-mock-adapter": "^2.1.0",
+        "i18next-parser": "^9.3.0",
+        "msw": "^2.9.0",
+        "sass": "^1.89.1",
+        "typescript": "^5.8.3",
+        "vite": "^6.3.5",
+        "vite-plugin-svgr": "^4.3.0"
+    },
+    "optionalDependencies": {
+        "@rollup/rollup-linux-x64-musl": "^4.41.1"
+    },
+    "volta": {
+        "node": "20.12.2"
+    },
+    "engines": {
+        "node": ">= 20.9",
+        "npm": ">= 10.1"
+    },
+    "overrides": {
+        "i18next-parser": {
+            "rimraf": "^4.0.0"
+        },
+        "zustand": {
+            "use-sync-external-store": "^1.4.0"
+        }
     }
-  }
 }

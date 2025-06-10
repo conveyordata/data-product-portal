@@ -1,8 +1,8 @@
-import { Checkbox, Form, FormInstance, Input, Select } from 'antd';
+import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DataOutputConfiguration, DataOutputCreateFormSchema, RedshiftDataOutput } from '@/types/data-output';
+import type { DataOutputConfiguration, DataOutputCreateFormSchema, RedshiftDataOutput } from '@/types/data-output';
 
 type Props = {
     sourceAligned: boolean;
@@ -49,7 +49,7 @@ export function RedshiftDataOutputForm({ form, identifiers, namespace, sourceAli
         }
 
         form.setFieldsValue({ result: result });
-    }, [databaseValue, sourceAligned, schemaValue, tableValue, entireSchema, form]);
+    }, [databaseValue, schemaValue, tableValue, entireSchema, form]);
 
     return (
         <div>

@@ -1,9 +1,9 @@
-import { DataOutputContract } from '../data-output';
-import { DataProductContract } from '../data-product';
-import { DatasetContract } from '../dataset';
-import { UserContract } from '../users';
-import { EventReferenceEntity } from './event-reference-entity';
-import { EventType } from './event-types';
+import type { DataOutputContract } from '../data-output';
+import type { DataProductContract } from '../data-product';
+import type { DatasetContract } from '../dataset';
+import type { UserContract } from '../users';
+import type { EventReferenceEntity } from './event-reference-entity';
+import type { EventType } from './event-types';
 
 export interface EventContract {
     name: EventType;

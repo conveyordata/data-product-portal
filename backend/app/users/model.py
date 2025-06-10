@@ -1,13 +1,14 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Boolean, Column, String
+from sqlalchemy import UUID, Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.database.database import Base, ensure_exists
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.dataset.model import DatasetRoleAssignment
+from app.role_assignments.global_.model import GlobalRoleAssignment
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -27,7 +28,6 @@ class User(Base, BaseORM):
     external_id = Column(String)
     first_name = Column(String)
     last_name = Column(String)
-    is_admin = Column(Boolean, server_default="false", nullable=False)
     events: Mapped[list["Event"]] = relationship(
         "Event", back_populates="actor", foreign_keys="Event.actor_id", lazy="raise"
     )
@@ -54,6 +54,18 @@ class User(Base, BaseORM):
     )
     data_products: Mapped[list["DataProduct"]] = association_proxy(
         "data_product_roles", "data_product"
+    )
+    global_role: Mapped["GlobalRoleAssignment"] = relationship(
+        "GlobalRoleAssignment",
+        foreign_keys="GlobalRoleAssignment.user_id",
+        back_populates="user",
+        # Deliberately lazy:
+        #  - Used in limited cases, only on a single user
+        #  - Complicates get_authenticated_user
+        #  - Private dataset test cases become more complex
+        #    (need to manipulate the session to avoid a user being cached with a
+        #     membership field with raise load strategy)
+        lazy="select",
     )
 
     # Relationships - Datasets

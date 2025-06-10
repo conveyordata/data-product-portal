@@ -1,5 +1,5 @@
-import { EventContract } from '../events/event.contract';
-import { UserContract } from '../users';
+import type { EventContract } from '../events/event.contract';
+import type { UserContract } from '../users';
 
 export enum NotificationTypes {
     DataProductDatasetNotification = 'DataProductDatasetNotification',

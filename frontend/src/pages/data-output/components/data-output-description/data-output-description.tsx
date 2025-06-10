@@ -1,8 +1,8 @@
 import { Badge, Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { DataOutputStatus } from '@/types/data-output';
-import { TagModel } from '@/types/tag';
+import type { DataOutputStatus } from '@/types/data-output';
+import type { TagModel } from '@/types/tag';
 import { getDataOutputType } from '@/utils/data-output-type.helper';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 
@@ -13,9 +13,10 @@ type Props = {
     type: string;
     description: string;
     tags: TagModel[];
+    namespace: string;
 };
 
-export function DataOutputDescription({ status, type, description, tags }: Props) {
+export function DataOutputDescription({ status, type, description, tags, namespace }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -31,13 +32,19 @@ export function DataOutputDescription({ status, type, description, tags }: Props
                         />
                     </Flex>
                     <Flex className={styles.statusBadge}>
+                        <Typography.Text strong>{t('Namespace')}</Typography.Text>
+                        <Typography.Text>{namespace}</Typography.Text>
+                    </Flex>
+                    <Flex className={styles.statusBadge}>
                         <Typography.Text strong>{t('Type')}</Typography.Text>
                         <Typography.Text>{getDataOutputType(type, t)}</Typography.Text>
                     </Flex>
                 </Space>
                 <Flex>
                     {tags.map((tag) => (
-                        <Tag color="success">{tag.value}</Tag>
+                        <Tag color="success" key={tag.id}>
+                            {tag.value}
+                        </Tag>
                     ))}
                 </Flex>
                 <Space>
