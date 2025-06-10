@@ -15,11 +15,11 @@ from app.users.schema import User
 
 
 class NotificationService:
+    def __init__(self, db: Session):
+        self.db = db
 
-    def get_user_notifications(
-        self, db: Session, authenticated_user: User
-    ) -> list[NotificationGet]:
-        return db.scalars(
+    def get_user_notifications(self, authenticated_user: User) -> list[NotificationGet]:
+        return self.db.scalars(
             select(NotificationModel)
             .options(
                 joinedload(NotificationModel.user),
@@ -29,10 +29,8 @@ class NotificationService:
             .order_by(desc(NotificationModel.created_on))
         ).all()
 
-    def remove_notification(
-        self, id: UUID, db: Session, authenticated_user: User
-    ) -> None:
-        notification = db.get(
+    def remove_notification(self, id: UUID, authenticated_user: User) -> None:
+        notification = self.db.get(
             NotificationModel,
             id,
         )
@@ -50,25 +48,24 @@ class NotificationService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Notification does not belong to authenticated user",
             )
-        db.delete(notification)
-        db.commit()
+        self.db.delete(notification)
+        self.db.commit()
 
-    def remove_all_notifications(self, db: Session, authenticated_user: User) -> None:
-        db.execute(
+    def remove_all_notifications(self, authenticated_user: User) -> None:
+        self.db.execute(
             delete(NotificationModel).where(
                 NotificationModel.user_id == authenticated_user.id
             )
         )
-        db.commit()
+        self.db.commit()
 
     def create_dataset_notifications(
         self,
-        db: Session,
         dataset_id: UUID,
         event_id: UUID,
         bonus_receiver_ids: list[UUID] = [],
     ) -> None:
-        assignments = db.scalars(
+        assignments = self.db.scalars(
             select(DatasetRoleAssignment).where(
                 DatasetRoleAssignment.dataset_id == dataset_id,
                 DatasetRoleAssignment.decision == DecisionStatus.APPROVED,
@@ -83,16 +80,15 @@ class NotificationService:
         )
         for receiver in receivers:
             notification = NotificationModel(user_id=receiver, event_id=event_id)
-            db.add(notification)
+            self.db.add(notification)
 
     def create_data_product_notifications(
         self,
-        db: Session,
         data_product_id: UUID,
         event_id: UUID,
         bonus_receiver_ids: list[UUID] = [],
     ) -> None:
-        assignments = db.scalars(
+        assignments = self.db.scalars(
             select(DataProductRoleAssignment).where(
                 DataProductRoleAssignment.data_product_id == data_product_id,
                 DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
@@ -107,4 +103,4 @@ class NotificationService:
         )
         for receiver in receivers:
             notification = NotificationModel(user_id=receiver, event_id=event_id)
-            db.add(notification)
+            self.db.add(notification)

@@ -17,7 +17,7 @@ def get_user_notifications(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> list[NotificationGet]:
-    return NotificationService().get_user_notifications(db, authenticated_user)
+    return NotificationService(db).get_user_notifications(authenticated_user)
 
 
 @router.delete("/all")
@@ -25,7 +25,7 @@ def remove_all_user_notifications(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return NotificationService().remove_all_notifications(db, authenticated_user)
+    return NotificationService(db).remove_all_notifications(authenticated_user)
 
 
 @router.delete("/{id}")
@@ -34,4 +34,4 @@ def remove_user_notification(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ):
-    return NotificationService().remove_notification(id, db, authenticated_user)
+    return NotificationService(db).remove_notification(id, authenticated_user)
