@@ -18,6 +18,7 @@ from app.core.namespace.validation import (
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_request import (
     DataOutputCreate,
+    DataOutputResultStringRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
@@ -38,6 +39,7 @@ from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
+from app.platform_services.model import PlatformService
 from app.role_assignments.enums import DecisionStatus
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
@@ -65,6 +67,7 @@ class DataOutputService:
         return (
             self.db.scalars(
                 select(DataOutputModel).options(
+                    joinedload(DataOutputModel.environment_configurations),
                     joinedload(DataOutputModel.dataset_links)
                     .joinedload(DataOutputDatasetAssociationModel.dataset)
                     .raiseload("*"),
@@ -76,7 +79,12 @@ class DataOutputService:
 
     def get_data_output(self, id: UUID) -> Optional[DataOutputGet]:
         return self.db.get(
-            DataOutputModel, id, options=[joinedload(DataOutputModel.dataset_links)]
+            DataOutputModel,
+            id,
+            options=[
+                joinedload(DataOutputModel.dataset_links),
+                joinedload(DataOutputModel.environment_configurations),
+            ],
         )
 
     def get_event_history(self, id: UUID) -> list[EventGet]:
@@ -304,3 +312,22 @@ class DataOutputService:
     @classmethod
     def data_output_namespace_length_limits(cls) -> NamespaceLengthLimits:
         return NamespaceValidator.namespace_length_limits()
+
+    def get_data_output_result_string(
+        self,
+        request: DataOutputResultStringRequest,
+    ) -> str:
+        template = self.db.scalar(
+            select(PlatformService.result_string_template).where(
+                PlatformService.id == request.service_id,
+                PlatformService.platform_id == request.platform_id,
+            )
+        )
+
+        if not template:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Template not found for the given platform and service",
+            )
+
+        return request.configuration.render_template(template)

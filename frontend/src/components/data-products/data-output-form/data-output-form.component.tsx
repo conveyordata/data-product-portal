@@ -1,10 +1,19 @@
+import { Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
+import TextArea from 'antd/es/input/TextArea';
+import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+import { useDebouncedCallback } from 'use-debounce';
+
 import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
+import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import {
     useCreateDataOutputMutation,
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
+    useLazyGetDataOutputResultStringQuery,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
 import {
     useGetDataProductByIdQuery,
@@ -13,17 +22,12 @@ import {
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
-import type { DataOutputConfiguration, DataOutputCreate, DataOutputCreateFormSchema } from '@/types/data-output';
-import { DataOutputStatus } from '@/types/data-output/data-output.contract';
+import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
 import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
+import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { getDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
-import { Form, type FormInstance, type FormProps, Input, Select, Skeleton, Space } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
-import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useDebouncedCallback } from 'use-debounce';
 
 import styles from './data-output-form.module.scss';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
@@ -32,8 +36,6 @@ import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
 import { S3DataOutputForm } from './s3-data-output-form.component';
 import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 
-const DEBOUNCE = 500;
-
 type Props = {
     mode: 'create';
     formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration> | null>;
@@ -41,106 +43,101 @@ type Props = {
     modalCallbackOnSubmit: () => void;
 };
 
+type ServiceConfig = {
+    platform_id: string;
+    service_id: string;
+    configuration: string[];
+};
+
+const DEBOUNCE = 500;
+
 export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSubmit }: Props) {
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
+    // Data
+    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
+    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
+    const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
+
+    // Mutations
+    const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
+
+    // State
     const [selectedDataPlatform, setSelectedDataPlatform] = useState<
         CustomDropdownItemProps<DataPlatforms> | undefined
     >(undefined);
     const [selectedConfiguration, setSelectedConfiguration] = useState<
         CustomDropdownItemProps<DataPlatforms> | undefined
     >(undefined);
-    const [identifiers, setIdentifiers] = useState<string[]>([]);
+    const [identifiers, setIdentifiers] = useState<string[] | undefined>(undefined);
 
-    const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
-    const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
-    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
+    // Form
+    const [form] = Form.useForm();
+    const sourceAligned = Form.useWatch('sourceAligned', form);
+    const dataOutputNameValue = Form.useWatch('name', form);
 
-    const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
-    const dataPlatforms = useMemo(
-        () =>
-            getDataPlatforms(t).filter((platform) => {
-                return (
-                    platformConfig?.map((config) => config.service.name).includes(platform.label) ||
-                    platformConfig?.map((config) => config.platform.name).includes(platform.label)
-                );
-            }),
-        [t, platformConfig],
-    );
-
-    const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
+    // Namespace validation
     const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDataOutputNamespaceSuggestionQuery();
     const [validateNamespace] = useLazyValidateDataOutputNamespaceQuery();
     const { data: namespaceLengthLimits } = useGetDataOutputNamespaceLengthLimitsQuery();
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
 
-    const [form] = Form.useForm();
-    const sourceAligned = Form.useWatch('is_source_aligned', form);
-    const dataOutputNameValue = Form.useWatch('name', form);
-    const isLoading = isCreating || isCreating || isFetchingInitialValues || isFetchingTags;
+    // Result string
+    const [fetchResultString] = useLazyGetDataOutputResultStringQuery();
 
-    const platformId = useMemo(() => {
-        return platformConfig?.find(
-            (config) => config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase(),
-        )?.platform.id;
-    }, [platformConfig, selectedDataPlatform?.value]);
+    const isLoading = platformsLoading || isCreating || isFetchingInitialValues || isFetchingTags;
 
-    const serviceId = useMemo(() => {
-        return platformConfig?.find(
-            (config) =>
-                config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
-                config.service.name.toLowerCase() === selectedConfiguration?.value.toLowerCase(),
-        )?.service.id;
-    }, [platformConfig, selectedDataPlatform?.value, selectedConfiguration?.value]);
+    const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
 
-    const hideService = selectedDataPlatform === undefined || selectedDataPlatform.children?.length === 0;
+    const dataPlatforms = useMemo(
+        () =>
+            getDataPlatforms(t)
+                // Configured platforms
+                .filter(
+                    (platform) =>
+                        platform.hasConfig && platformConfig?.some((config) => config.platform.name === platform.label),
+                )
+                // Configured services
+                .map((platform) => {
+                    const platformConfigs = platformConfig?.filter((config) => config.platform.name === platform.label);
+                    platform.children = platform.children?.filter((child) =>
+                        platformConfigs?.some((config) => config.service.name === child.label),
+                    );
+                    return platform;
+                }),
+        [platformConfig, t],
+    );
+
+    const platformServiceConfigMap = useMemo(() => {
+        const map = new Map<DataPlatform, ServiceConfig>();
+
+        if (!platformConfig) {
+            return map;
+        }
+        for (const config of platformConfig) {
+            const platform = (
+                config.platform.name === config.service.name ? config.platform.name : config.service.name
+            ).toLocaleLowerCase() as DataPlatform;
+
+            map.set(platform, {
+                platform_id: config.platform.id,
+                service_id: config.service.id,
+                configuration: config.config,
+            });
+        }
+
+        return map;
+    }, [platformConfig]);
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
             if (!platformsLoading) {
-                const config: DataOutputConfiguration = values as unknown as DataOutputConfiguration;
-                switch (selectedConfiguration?.value) {
-                    case DataPlatforms.S3: {
-                        config.configuration_type = 'S3DataOutput';
-                        break;
-                    }
-                    case DataPlatforms.Glue: {
-                        config.configuration_type = 'GlueDataOutput';
-                        break;
-                    }
-                    case DataPlatforms.Databricks: {
-                        config.configuration_type = 'DatabricksDataOutput';
-                        break;
-                    }
-                    case DataPlatforms.Snowflake: {
-                        config.configuration_type = 'SnowflakeDataOutput';
-                        break;
-                    }
-                    case DataPlatforms.Redshift: {
-                        config.configuration_type = 'RedshiftDataOutput';
-                        break;
-                    }
-                    default: {
-                        const errorMessage = 'Data output not configured correctly';
-                        dispatchMessage({ content: errorMessage, type: 'error' });
-                    }
-                }
-
-                const request: DataOutputCreate = {
-                    name: values.name,
-                    namespace: values.namespace,
-                    description: values.description,
-                    configuration: config,
-                    platform_id: platformId ?? '',
-                    service_id: serviceId ?? '',
-                    sourceAligned: sourceAligned === undefined ? false : sourceAligned,
-                    status: DataOutputStatus.Active,
-                    tag_ids: values.tag_ids ?? [],
-                };
-                await createDataOutput({ id: dataProductId, dataOutput: request }).unwrap();
+                await createDataOutput({ id: dataProductId, dataOutput: values }).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
-
                 modalCallbackOnSubmit();
+                navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
+
                 form.resetFields();
             }
         } catch (_e) {
@@ -153,50 +150,33 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
     };
 
-    const onDataPlatformClick = (dataPlatform: DataPlatform) => {
-        const dropdown = dataPlatforms.filter((platform) => platform.value === dataPlatform).at(0);
-        if (selectedDataPlatform !== undefined && selectedDataPlatform === dropdown) {
-            setSelectedDataPlatform(undefined);
-            setSelectedConfiguration(undefined);
-            setIdentifiers([]);
-        } else {
+    const onDataPlatformClick = (dropdown: CustomDropdownItemProps<DataPlatforms>) => {
+        if (selectedDataPlatform !== dropdown) {
+            form.setFieldsValue({ configuration: undefined, result: undefined });
             setSelectedDataPlatform(dropdown);
-            if (dropdown?.children?.length === 0) {
+
+            if (dropdown.children?.length === 0) {
                 setSelectedConfiguration(dropdown);
-                setIdentifiers(
-                    platformConfig?.find(
-                        (config) =>
-                            config.platform.name.toLowerCase() === dropdown?.value.toLowerCase() &&
-                            config.service.name.toLowerCase() === dropdown?.value.toLowerCase(),
-                    )?.config ?? [],
-                );
+                form.setFieldValue('service_id', platformServiceConfigMap.get(dropdown.value)?.service_id);
+                setIdentifiers(platformServiceConfigMap.get(dropdown.value)?.configuration);
             } else {
                 setSelectedConfiguration(undefined);
-                setIdentifiers([]);
+                setIdentifiers(undefined);
             }
         }
     };
 
-    const onConfigurationClick = (dataPlatform: DataPlatform) => {
+    const onConfigurationClick = (dropdown: CustomDropdownItemProps<DataPlatforms>) => {
         if (!platformsLoading) {
-            const dropdown = selectedDataPlatform?.children?.find((platform) => platform.value === dataPlatform);
-            if (selectedConfiguration !== undefined && selectedConfiguration === dropdown) {
-                setSelectedConfiguration(undefined);
-                setIdentifiers([]);
-            } else {
-                setIdentifiers([]);
+            if (selectedConfiguration !== dropdown) {
+                form.setFieldsValue({ configuration: undefined, result: undefined });
                 setSelectedConfiguration(dropdown);
-                setIdentifiers(
-                    platformConfig?.find(
-                        (config) =>
-                            config.platform.name.toLowerCase() === selectedDataPlatform?.value.toLowerCase() &&
-                            config.service.name.toLowerCase() === dropdown?.value.toLowerCase(),
-                    )?.config ?? [],
-                );
+                setIdentifiers(platformServiceConfigMap.get(dropdown.value)?.configuration);
             }
         }
     };
 
+    // Namespace validation
     const fetchNamespaceDebounced = useDebouncedCallback((name: string) => fetchNamespace(name), DEBOUNCE);
 
     useEffect(() => {
@@ -229,9 +209,29 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         [validateNamespace, dataProductId],
     );
 
-    if (!currentDataProduct) {
-        return <Skeleton />;
-    }
+    // Result string
+    const setResultString = useDebouncedCallback((values: DataOutputCreateFormSchema) => {
+        form.validateFields(['configuration'], { validateOnly: true, recursive: true })
+            .then(() => {
+                const request = {
+                    platform_id: values.platform_id,
+                    service_id: values.service_id,
+                    configuration: values.configuration,
+                };
+                return fetchResultString(request).unwrap();
+            })
+            .then((result) => form.setFieldValue('result', result))
+            .catch(() => form.setFieldValue('result', undefined));
+    }, DEBOUNCE);
+
+    const onValuesChange: FormProps<DataOutputCreateFormSchema>['onValuesChange'] = (
+        changed,
+        values: DataOutputCreateFormSchema,
+    ) => {
+        if (changed.configuration || (values.configuration && changed.sourceAligned)) {
+            setResultString(values);
+        }
+    };
 
     return (
         <Form
@@ -240,6 +240,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             layout="vertical"
             onFinish={onSubmit}
             onFinishFailed={onSubmitFailed}
+            onValuesChange={onValuesChange}
             autoComplete={'off'}
             requiredMark={'optional'}
             labelWrap
@@ -285,7 +286,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             >
                 <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
+            <Form.Item<DataOutputCreateFormSchema> name={'tag_ids'} label={t('Tags')} initialValue={[]}>
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select data output tags')}
@@ -295,87 +296,63 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 />
             </Form.Item>
             <Form.Item<DataOutputCreateFormSchema>
-                name={'is_source_aligned'}
-                valuePropName="checked"
+                name={'status'}
+                required
+                hidden
+                initialValue={DataOutputStatus.Active}
+            />
+            <Form.Item<DataOutputCreateFormSchema>
+                name={'sourceAligned'}
                 label={t('Alignment')}
                 required
                 tooltip={t(
                     'If you follow product thinking approach, select Product aligned. If you want more freedom, you can select Source aligned, however this request will need to be approved by administrators. By default, or when in doubt, leave product aligned selected.',
                 )}
+                initialValue={false}
             >
-                <Select allowClear={false} defaultActiveFirstOption defaultValue={false} options={options} />
+                <Select allowClear={false} options={options} />
             </Form.Item>
-            <Form.Item
-                name={'platform_id'}
-                label={'Type'}
-                required
-                rules={[
-                    {
-                        validator: (_) => {
-                            if (platformId === undefined) {
-                                return Promise.reject(new Error('Please select a data output type'));
-                            }
-                            return Promise.resolve();
-                        },
-                    },
-                ]}
-            >
-                <Space wrap className={styles.radioButtonContainer}>
-                    {dataPlatforms
-                        .filter((dataPlatform) => dataPlatform.hasConfig)
-                        .map((dataPlatform) => (
+            <Form.Item name={'platform_id'}>
+                <Radio.Group>
+                    <Space wrap className={styles.radioButtonContainer}>
+                        {dataPlatforms.map((dataPlatform) => (
                             <DataOutputPlatformTile<DataPlatform>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
-                                environments={[]}
                                 isDisabled={isLoading}
                                 isLoading={isLoading}
-                                isSelected={selectedDataPlatform !== undefined && dataPlatform === selectedDataPlatform}
+                                isSelected={dataPlatform === selectedDataPlatform}
                                 onTileClick={onDataPlatformClick}
+                                value={
+                                    platformConfig?.find((config) => config.platform.name === dataPlatform.label)
+                                        ?.platform.id
+                                }
                             />
                         ))}
-                </Space>
+                    </Space>
+                </Radio.Group>
             </Form.Item>
-            <Form.Item
-                name="service_id"
-                hidden={hideService}
-                rules={[
-                    {
-                        validator: (_) => {
-                            if (hideService) {
-                                return Promise.resolve();
-                            }
-                            if (serviceId === undefined) {
-                                return Promise.reject(new Error('Please select a service'));
-                            }
-                            return Promise.resolve();
-                        },
-                    },
-                ]}
-            >
-                <Space wrap className={styles.radioButtonContainer}>
-                    {selectedDataPlatform?.children
-                        ?.filter((platform) => {
-                            return platformConfig?.some(
-                                (configObj) =>
-                                    configObj.platform.name === platform.label ||
-                                    configObj.service.name === platform.label,
-                            );
-                        })
-                        .map((dataPlatform) => (
+            <Form.Item name={'service_id'} hidden={selectedDataPlatform?.children?.length === 0}>
+                <Radio.Group>
+                    <Space wrap className={styles.radioButtonContainer}>
+                        {selectedDataPlatform?.children?.map((dataPlatform) => (
                             <DataOutputPlatformTile<DataPlatform>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
-                                environments={[]}
                                 isDisabled={isLoading}
                                 isSelected={dataPlatform === selectedConfiguration}
                                 isLoading={isLoading}
                                 onTileClick={onConfigurationClick}
+                                value={platformServiceConfigMap.get(dataPlatform.value)?.service_id}
                             />
                         ))}
-                </Space>
+                    </Space>
+                </Radio.Group>
             </Form.Item>
             {(() => {
+                if (!currentDataProduct) {
+                    return null;
+                }
                 switch (selectedConfiguration?.value) {
                     case DataPlatforms.S3:
                         return (
@@ -384,8 +361,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 identifiers={identifiers}
                                 sourceAligned={sourceAligned}
                                 namespace={currentDataProduct.namespace}
-                                mode={mode}
-                                dataProductId={dataProductId}
                             />
                         );
                     case DataPlatforms.Redshift:
@@ -393,7 +368,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                             <RedshiftDataOutputForm
                                 identifiers={identifiers}
                                 form={form}
-                                namespace={currentDataProduct?.namespace}
+                                namespace={currentDataProduct.namespace}
                                 sourceAligned={sourceAligned}
                             />
                         );
@@ -405,7 +380,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 namespace={currentDataProduct.namespace}
                                 sourceAligned={sourceAligned}
                             />
-                        ); //mode={mode} dataProductId={dataProductId} />;
+                        );
                     case DataPlatforms.Databricks:
                         return (
                             <DatabricksDataOutputForm
@@ -414,7 +389,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                                 namespace={currentDataProduct.namespace}
                                 sourceAligned={sourceAligned}
                             />
-                        ); //mode={mode} dataProductId={dataProductId} />;
+                        );
                     case DataPlatforms.Snowflake:
                         return (
                             <SnowflakeDataOutputForm

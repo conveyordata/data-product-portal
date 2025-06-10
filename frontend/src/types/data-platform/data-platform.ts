@@ -1,3 +1,5 @@
+import { DataOutputConfigurationTypes } from '../data-output/data-output.contract';
+
 export enum DataPlatforms {
     AWS = 'aws',
     Conveyor = 'conveyor',
@@ -22,3 +24,11 @@ export type DataPlatform =
     | DataPlatforms.S3
     | DataPlatforms.Glue
     | DataPlatforms.Redshift;
+
+export const DataPlatformDataOutputConfigurationMap: Map<DataPlatform, DataOutputConfigurationTypes> = new Map([
+    [DataPlatforms.S3, DataOutputConfigurationTypes.S3DataOutput],
+    [DataPlatforms.Glue, DataOutputConfigurationTypes.GlueDataOutput],
+    [DataPlatforms.Redshift, DataOutputConfigurationTypes.RedshiftDataOutput],
+    [DataPlatforms.Databricks, DataOutputConfigurationTypes.DatabricksDataOutput],
+    [DataPlatforms.Snowflake, DataOutputConfigurationTypes.SnowflakeDataOutput],
+]);

@@ -1,44 +1,38 @@
-import { Form, type FormInstance, Input, Select } from 'antd';
+import { type FormInstance, Input, Select } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { DataOutputConfiguration, DataOutputCreateFormSchema, S3DataOutput } from '@/types/data-output';
-import { generateExternalIdFromName } from '@/utils/external-id.helper.ts';
+import type { DataOutputCreateFormSchema } from '@/types/data-output';
+import { DataPlatforms } from '@/types/data-platform';
+
+import { configurationFieldName } from './components/configuration-field-name';
+import { ConfigurationFormItem } from './components/output-configuration-form-item';
+import { ConfigurationSubForm } from './components/output-configuration-sub-form.component';
 
 type Props = {
-    mode: 'create';
-    dataProductId: string;
-    sourceAligned: boolean;
-    identifiers: string[] | undefined;
+    form: FormInstance<DataOutputCreateFormSchema>;
     namespace: string;
-    form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
+    identifiers?: string[];
+    sourceAligned: boolean;
 };
 
-export function S3DataOutputForm({ form, namespace, identifiers, sourceAligned }: Props) {
+export function S3DataOutputForm({ form, namespace, identifiers = [], sourceAligned }: Props) {
     const { t } = useTranslation();
 
-    const bucketOptions = identifiers?.map((bucket) => ({ label: bucket, value: bucket }));
-    const dataProductNameValue: string = Form.useWatch('temp_path', form);
-    const bucketValue: string = Form.useWatch('bucket', form);
+    const bucketOptions = identifiers.map((bucket) => ({ label: bucket, value: bucket }));
+
     useEffect(() => {
-        let path = `${namespace}/`;
-        if (sourceAligned) {
-            path = '';
-        }
-        if (dataProductNameValue) {
-            form.setFieldsValue({ path: path + generateExternalIdFromName(dataProductNameValue) });
-            form.setFieldsValue({
-                result: `${bucketValue}/${path}${generateExternalIdFromName(dataProductNameValue)}`,
-            });
-        } else {
-            form.setFieldsValue({ path: path });
-            form.setFieldsValue({ result: `${bucketValue}/${path}` });
-        }
-    }, [dataProductNameValue, sourceAligned, bucketValue, namespace, form]);
+        form.setFieldValue(configurationFieldName('suffix'), sourceAligned ? '' : namespace);
+    }, [form, sourceAligned, namespace]);
 
     return (
-        <div>
-            <Form.Item<S3DataOutput>
+        <ConfigurationSubForm
+            form={form}
+            platform={DataPlatforms.S3}
+            resultLabel={t('Resulting path')}
+            resultTooltip={t('The path on S3 you can access through this data output')}
+        >
+            <ConfigurationFormItem
                 name={'bucket'}
                 label={t('Bucket')}
                 rules={[
@@ -49,9 +43,12 @@ export function S3DataOutputForm({ form, namespace, identifiers, sourceAligned }
                 ]}
             >
                 <Select allowClear showSearch options={bucketOptions} />
-            </Form.Item>
-            <Form.Item<S3DataOutput & { temp_path: string }>
-                name={'temp_path'}
+            </ConfigurationFormItem>
+            <ConfigurationFormItem name={'suffix'} hidden>
+                <Input />
+            </ConfigurationFormItem>
+            <ConfigurationFormItem
+                name={'path'}
                 label={t('Path')}
                 tooltip={t('The name of the path to give write access to')}
                 rules={[
@@ -59,21 +56,14 @@ export function S3DataOutputForm({ form, namespace, identifiers, sourceAligned }
                         required: true,
                         message: t('Please input the path of this data output'),
                     },
+                    {
+                        pattern: /^[a-zA-Z0-9._/-]+$/,
+                        message: t('The path can only contain letters, numbers, dots, underscores, dashes and slashes'),
+                    },
                 ]}
             >
                 <Input />
-            </Form.Item>
-            <Form.Item<S3DataOutput> required hidden={true} name={'path'}>
-                <Input disabled />
-            </Form.Item>
-            <Form.Item<S3DataOutput & { result: string }>
-                required
-                name={'result'}
-                label={t('Resulting path')}
-                tooltip={t('The path on s3 you can access through this data output')}
-            >
-                <Input disabled />
-            </Form.Item>
-        </div>
+            </ConfigurationFormItem>
+        </ConfigurationSubForm>
     );
 }

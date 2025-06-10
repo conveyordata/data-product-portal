@@ -1,114 +1,93 @@
 import { Checkbox, Form, type FormInstance, Input, Select } from 'antd';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { DataOutputConfiguration, DataOutputCreateFormSchema, SnowflakeDataOutput } from '@/types/data-output';
+import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
+import { DataPlatforms } from '@/types/data-platform';
+
+import { configurationFieldName } from './components/configuration-field-name';
+import { ConfigurationFormItem } from './components/output-configuration-form-item';
+import { ConfigurationSubForm } from './components/output-configuration-sub-form.component';
 
 type Props = {
     sourceAligned: boolean;
-    identifiers: string[] | undefined;
+    identifiers?: string[];
     namespace: string;
     form: FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>;
 };
 
-export function SnowflakeDataOutputForm({ form, identifiers, namespace, sourceAligned }: Props) {
+export function SnowflakeDataOutputForm({ form, identifiers = [], namespace, sourceAligned }: Props) {
     const { t } = useTranslation();
-    const entireDatabase = Form.useWatch('entire_database', form);
-    const databaseValue = Form.useWatch('database', form);
-    const schemaValue = Form.useWatch('schema', form);
-    const tableValue = Form.useWatch('table', form);
+    const entireSchema = Form.useWatch(configurationFieldName('entire_schema'), form);
 
-    const databaseOptions = useRef((identifiers ?? []).map((database) => ({ label: database, value: database })));
+    const databaseOptions = (sourceAligned ? identifiers : [namespace]).map((database) => ({
+        label: database,
+        value: database,
+    }));
 
     useEffect(() => {
-        let databaseOptionsList = identifiers; //TODO
         if (!sourceAligned) {
-            databaseOptionsList = [namespace];
-            form.setFieldsValue({ database: namespace });
+            form.setFieldValue(configurationFieldName('database'), namespace);
         } else {
-            form.setFieldsValue({ database: undefined });
+            form.setFieldValue(configurationFieldName('database'), undefined);
         }
-        databaseOptions.current = (databaseOptionsList ?? []).map((database) => ({ label: database, value: database }));
-    }, [namespace, form, identifiers, sourceAligned]);
-
-    useEffect(() => {
-        let result = databaseValue;
-        if (databaseValue) {
-            if (schemaValue) {
-                result += `__${schemaValue}`;
-            }
-            if (entireDatabase) {
-                result += '.*';
-            } else if (tableValue) {
-                result += `.${tableValue}`;
-            }
-        } else {
-            result = '';
-        }
-
-        form.setFieldsValue({ result: result });
-    }, [databaseValue, schemaValue, tableValue, entireDatabase, form]);
+    }, [namespace, form, sourceAligned]);
 
     return (
-        <div>
-            <Form.Item<SnowflakeDataOutput>
+        <ConfigurationSubForm
+            form={form}
+            platform={DataPlatforms.Snowflake}
+            resultLabel={t('Resulting database and schema')}
+            resultTooltip={t('The schema on Snowflake you can access through this data output')}
+        >
+            <ConfigurationFormItem
                 name={'database'}
-                label={t('Schema')}
-                tooltip={t('The name of the Snowflake schema to link the data output to')}
+                label={t('Database')}
+                tooltip={t('The name of the Snowflake database to link the data output to')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the Snowflake schema for this data output'),
+                        message: t('Please input the name of the Snowflake database for this data output'),
                     },
                 ]}
+                normalize={(value: string | string[]) => {
+                    return Array.isArray(value) ? value[0] : value;
+                }}
             >
                 <Select
                     allowClear
                     showSearch
                     mode="tags"
                     disabled={!sourceAligned}
-                    onChange={(value) => {
-                        if (value.length > 0) {
-                            form.setFieldsValue({ database: value[0] });
-                        }
-                    }}
                     maxCount={1}
-                    options={databaseOptions.current}
+                    options={databaseOptions}
                 />
-            </Form.Item>
-            <Form.Item<SnowflakeDataOutput & { temp_suffix: string }>
+            </ConfigurationFormItem>
+            <ConfigurationFormItem
                 name={'schema'}
-                label={t('Schema suffix')}
-                tooltip={t('The suffix of the Snowflake schema to link the data output to')}
+                label={t('Schema')}
+                tooltip={t('The Snowflake schema to link the data output to')}
             >
                 <Input />
-            </Form.Item>
-            <Form.Item name={'entire_database'} valuePropName="checked" initialValue={true}>
-                <Checkbox defaultChecked={true}>{t('Include entire database')}</Checkbox>
-            </Form.Item>
-            <Form.Item<SnowflakeDataOutput>
+            </ConfigurationFormItem>
+            <ConfigurationFormItem name={'entire_schema'} valuePropName="checked" initialValue={true}>
+                <Checkbox>{t('Include entire schema')}</Checkbox>
+            </ConfigurationFormItem>
+            <ConfigurationFormItem
                 required
                 name={'table'}
-                hidden={entireDatabase}
+                hidden={entireSchema}
                 label={t('Table')}
                 tooltip={t('The table that your data output can access')}
                 rules={[
                     {
-                        required: !entireDatabase,
+                        required: !entireSchema,
                         message: t('Please input the table this data output can access'),
                     },
                 ]}
             >
                 <Input />
-            </Form.Item>
-            <Form.Item<SnowflakeDataOutput & { result: string }>
-                required
-                name={'result'}
-                label={t('Resulting schema and table')}
-                tooltip={t('The schema on Snowflake you can access through this data output')}
-            >
-                <Input disabled />
-            </Form.Item>
-        </div>
+            </ConfigurationFormItem>
+        </ConfigurationSubForm>
     );
 }
