@@ -14,7 +14,7 @@ uvicorn = "^0.34.0"
 pydantic = { version = "^2.11.3", extras = ['email'] }
 pydantic-settings = "^2.8.1"
 typer = "^0.15.2"
-requests = "^2.31.0"
+requests = "^2.32.4"
 httpx = "^0.28.1"
 alembic = "^1.15.2"
 sqlalchemy = { version = "^2.0.40", extras = ['asyncio'] }
