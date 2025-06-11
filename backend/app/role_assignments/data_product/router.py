@@ -57,8 +57,8 @@ def create_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db)
-    role_assignment = service.create_assignment(id, request, user)
+    service = RoleAssignmentService(db=db)
+    role_assignment = service.create_assignment(id, request, actor=user)
 
     approvers: Sequence[User] = ()
     if not (is_admin := Authorization().has_admin_role(user_id=str(user.id))):
@@ -103,8 +103,8 @@ def request_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
-    service = RoleAssignmentService(db)
-    role_assignment = service.create_assignment(id, request, user)
+    service = RoleAssignmentService(db=db)
+    role_assignment = service.create_assignment(id, request, actor=user)
 
     approvers = service.users_with_authz_action(
         data_product_id=role_assignment.data_product_id,
@@ -133,8 +133,9 @@ def request_assignment(
 def delete_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
 ) -> None:
-    assignment = RoleAssignmentService(db).delete_assignment(id)
+    assignment = RoleAssignmentService(db=db).delete_assignment(id, actor=user)
 
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).remove()

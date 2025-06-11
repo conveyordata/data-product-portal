@@ -22,6 +22,7 @@ from app.datasets.schema_request import (
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
+from app.events.schema_response import EventGet
 from app.graph.graph import Graph
 from app.role_assignments.dataset.schema import (
     CreateRoleAssignment,
@@ -77,6 +78,13 @@ def get_user_datasets(
     return DatasetService(db).get_user_datasets(user_id)
 
 
+@router.get("/{id}/history")
+def get_event_history(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> Sequence[EventGet]:
+    return DatasetService(db).get_event_history(id)
+
+
 @router.post(
     "",
     responses={
@@ -111,8 +119,8 @@ def create_dataset(
             detail="Owner role not found",
         )
 
-    new_dataset = DatasetService(db).create_dataset(dataset)
-    assignment_service = RoleAssignmentService(db)
+    new_dataset = DatasetService(db).create_dataset(dataset, actor=authenticated_user)
+    assignment_service = RoleAssignmentService(db=db)
     for owner_id in dataset.owners:
         response = assignment_service.create_assignment(
             new_dataset.id,
@@ -141,8 +149,12 @@ def create_dataset(
         Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
     ],
 )
-def remove_dataset(id: UUID, db: Session = Depends(get_db_session)) -> None:
-    DatasetService(db).remove_dataset(id)
+def remove_dataset(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    DatasetService(db).remove_dataset(id, actor=authenticated_user)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
     return
 
@@ -164,9 +176,12 @@ def remove_dataset(id: UUID, db: Session = Depends(get_db_session)) -> None:
     ],
 )
 def update_dataset(
-    id: UUID, dataset: DatasetUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    dataset: DatasetUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DatasetService(db).update_dataset(id, dataset)
+    return DatasetService(db).update_dataset(id, dataset, actor=authenticated_user)
 
 
 @router.put(
@@ -186,9 +201,14 @@ def update_dataset(
     ],
 )
 def update_dataset_about(
-    id: UUID, dataset: DatasetAboutUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    dataset: DatasetAboutUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DatasetService(db).update_dataset_about(id, dataset)
+    return DatasetService(db).update_dataset_about(
+        id, dataset, actor=authenticated_user
+    )
 
 
 @router.put(
@@ -206,9 +226,14 @@ def update_dataset_about(
     ],
 )
 def update_dataset_status(
-    id: UUID, dataset: DatasetStatusUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    dataset: DatasetStatusUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DatasetService(db).update_dataset_status(id, dataset)
+    return DatasetService(db).update_dataset_status(
+        id, dataset, actor=authenticated_user
+    )
 
 
 @router.get("/{id}/graph")

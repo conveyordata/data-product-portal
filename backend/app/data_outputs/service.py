@@ -32,7 +32,13 @@ from app.data_products.service import DataProductService
 from app.database.database import ensure_exists
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
+from app.events.enum import EventReferenceEntity, EventType
+from app.events.model import Event as EventModel
+from app.events.schema import CreateEvent
+from app.events.schema_response import EventGet
+from app.events.service import EventService
 from app.graph.graph import Graph
+from app.notifications.service import NotificationService
 from app.platform_services.model import PlatformService
 from app.role_assignments.enums import DecisionStatus
 from app.tags.model import Tag as TagModel
@@ -81,10 +87,14 @@ class DataOutputService:
             ],
         )
 
+    def get_event_history(self, id: UUID) -> Sequence[EventGet]:
+        return EventService(self.db).get_history(id, EventReferenceEntity.DATA_OUTPUT)
+
     def create_data_output(
         self,
         id: UUID,
         data_output: DataOutputCreate,
+        actor: User,
     ) -> dict[str, UUID]:
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -110,11 +120,26 @@ class DataOutputService:
         model = DataOutputModel(**data_output_schema, tags=tags, owner_id=id)
 
         self.db.add(model)
+        self.db.flush()
+        event_id = EventService(self.db).create_event(
+            CreateEvent(
+                name=EventType.DATA_OUTPUT_CREATED,
+                subject_id=model.id,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
+                target_id=model.owner_id,
+                target_type=EventReferenceEntity.DATA_PRODUCT,
+                actor_id=actor.id,
+            ),
+        )
+        NotificationService(self.db).create_data_product_notifications(
+            data_product_id=model.owner_id, event_id=event_id
+        )
         self.db.commit()
         RefreshInfrastructureLambda().trigger()
+
         return {"id": model.id}
 
-    def remove_data_output(self, id: UUID) -> None:
+    def remove_data_output(self, id: UUID, *, actor: User) -> None:
         data_output = self.db.get(
             DataOutputModel,
             id,
@@ -125,15 +150,36 @@ class DataOutputService:
                 detail=f"Data Output {id} not found",
             )
 
+        event_id = EventService(self.db).create_event(
+            CreateEvent(
+                name=EventType.DATA_OUTPUT_REMOVED,
+                subject_id=id,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
+                target_id=data_output.owner_id,
+                target_type=EventReferenceEntity.DATA_PRODUCT,
+                actor_id=actor.id,
+            ),
+        )
+        NotificationService(self.db).create_data_product_notifications(
+            data_product_id=data_output.owner_id, event_id=event_id
+        )
         self.db.delete(data_output)
         self.db.commit()
         RefreshInfrastructureLambda().trigger()
 
     def update_data_output_status(
-        self, id: UUID, data_output: DataOutputStatusUpdate
+        self, id: UUID, data_output: DataOutputStatusUpdate, *, actor: User
     ) -> None:
         current_data_output = self.ensure_data_output_exists(id)
         current_data_output.status = data_output.status
+        self.db.add(
+            EventModel(
+                name=EventType.DATA_OUTPUT_UPDATED,
+                subject_id=id,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
+                actor_id=actor.id,
+            ),
+        )
         self.db.commit()
 
     def link_dataset_to_data_output(
@@ -167,13 +213,24 @@ class DataOutputService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_output.dataset_links.append(dataset_link)
-
+        self.db.add(
+            EventModel(
+                name=EventType.DATA_OUTPUT_DATASET_LINK_REQUESTED,
+                subject_id=id,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
+                target_id=dataset_id,
+                target_type=EventReferenceEntity.DATASET,
+                actor_id=actor.id,
+            ),
+        )
         self.db.commit()
         self.db.refresh(data_output)
         RefreshInfrastructureLambda().trigger()
         return dataset_link
 
-    def unlink_dataset_from_data_output(self, id: UUID, dataset_id: UUID) -> None:
+    def unlink_dataset_from_data_output(
+        self, id: UUID, dataset_id: UUID, *, actor: User
+    ) -> None:
         ensure_dataset_exists(dataset_id, self.db)
         data_output = self.ensure_data_output_exists(
             id, options=[joinedload(DataOutputModel.dataset_links)]
@@ -192,13 +249,25 @@ class DataOutputService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data output {id} not found",
             )
+        event_id = EventService(self.db).create_event(
+            CreateEvent(
+                name=EventType.DATA_OUTPUT_DATASET_LINK_REMOVED,
+                subject_id=id,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
+                target_id=dataset_id,
+                target_type=EventReferenceEntity.DATASET,
+                actor_id=actor.id,
+            ),
+        )
+        NotificationService(self.db).create_data_product_notifications(
+            data_product_id=data_output.owner_id, event_id=event_id
+        )
         data_output.dataset_links.remove(data_output_dataset)
-
         self.db.commit()
         RefreshInfrastructureLambda().trigger()
 
     def update_data_output(
-        self, id: UUID, data_output: DataOutputUpdate
+        self, id: UUID, data_output: DataOutputUpdate, *, actor: User
     ) -> dict[str, UUID]:
         current_data_output = self.ensure_data_output_exists(id)
         update_data_output = data_output.model_dump(exclude_unset=True)
@@ -209,7 +278,14 @@ class DataOutputService:
                 current_data_output.tags = new_tags
             else:
                 setattr(current_data_output, k, v) if v else None
-
+        self.db.add(
+            EventModel(
+                name=EventType.DATA_OUTPUT_UPDATED,
+                subject_id=id,
+                subject_type=EventReferenceEntity.DATA_OUTPUT,
+                actor_id=actor.id,
+            ),
+        )
         self.db.commit()
         RefreshInfrastructureLambda().trigger()
         return {"id": current_data_output.id}

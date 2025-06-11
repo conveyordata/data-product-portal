@@ -14,6 +14,7 @@ import type {
     DataOutputUpdateRequest,
     DataOutputUpdateResponse,
 } from '@/types/data-output/data-output-update.contract';
+import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import type { NamespaceLengthLimitsResponse, NamespaceSuggestionResponse } from '@/types/namespace/namespace';
 
@@ -27,6 +28,7 @@ export const dataOutputTags: string[] = [
     TagTypes.DataProduct,
     TagTypes.UserDatasets,
     TagTypes.UserDataOutputs,
+    TagTypes.History,
 ];
 
 export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dataOutputTags }).injectEndpoints({
@@ -61,6 +63,17 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProduct as const, id: arg.id },
                 { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
+            ],
+        }),
+        getDataOutputHistory: builder.query<EventContract[], string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataOutputHistory, { dataOutputId: id }),
+                method: 'GET',
+            }),
+            providesTags: (_, __, id) => [
+                { type: TagTypes.DataOutput as const, id: id },
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
         getDataOutputGraphData: builder.query<GraphContract, string>({
@@ -114,7 +127,10 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 url: buildUrl(ApiUrl.DataOutputGet, { dataOutputId: id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: [{ type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST }],
+            invalidatesTags: [
+                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
+            ],
         }),
         removeDatasetFromDataOutput: builder.mutation<DataOutputDatasetRemoveResponse, DataOutputDatasetRemoveRequest>({
             query: ({ dataOutputId, datasetId }) => ({
@@ -180,6 +196,7 @@ export const {
     useRemoveDataOutputMutation,
     useRequestDatasetAccessForDataOutputMutation,
     useGetDataOutputGraphDataQuery,
+    useGetDataOutputHistoryQuery,
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
     useLazyGetDataOutputResultStringQuery,

@@ -8,6 +8,11 @@ from sqlalchemy.orm import Session
 
 from app.core.authz import Action
 from app.database.database import ensure_exists
+from app.events.enum import EventReferenceEntity, EventType
+from app.events.model import Event as EventModel
+from app.events.schema import CreateEvent
+from app.events.service import EventService
+from app.notifications.service import NotificationService
 from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.dataset.schema import (
     CreateRoleAssignment,
@@ -46,7 +51,7 @@ class RoleAssignmentService:
         return self.db.scalars(query).all()
 
     def create_assignment(
-        self, dataset_id: UUID, request: CreateRoleAssignment, actor: User
+        self, dataset_id: UUID, request: CreateRoleAssignment, *, actor: User
     ) -> RoleAssignment:
         self.ensure_is_dataset_scope(request.role_id)
         existing_assignment = self.db.scalar(
@@ -73,19 +78,49 @@ class RoleAssignmentService:
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
+        self.db.flush()
+        self.db.add(
+            EventModel(
+                name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
+                subject_id=role_assignment.dataset_id,
+                subject_type=EventReferenceEntity.DATASET,
+                target_id=role_assignment.user_id,
+                target_type=EventReferenceEntity.USER,
+                actor_id=actor.id,
+            )
+        )
         self.db.commit()
         return role_assignment
 
-    def delete_assignment(self, id_: UUID) -> RoleAssignment:
+    def delete_assignment(self, id_: UUID, *, actor: User) -> RoleAssignment:
         assignment = self.get_assignment(id_)
         self._guard_against_illegal_owner_removal(assignment)
 
+        event_id = EventService(self.db).create_event(
+            CreateEvent(
+                name=EventType.DATASET_ROLE_ASSIGNMENT_REMOVED,
+                subject_id=assignment.dataset_id,
+                subject_type=EventReferenceEntity.DATASET,
+                target_id=assignment.user_id,
+                target_type=EventReferenceEntity.USER,
+                actor_id=actor.id,
+            ),
+        )
+        NotificationService(self.db).create_dataset_notifications(
+            dataset_id=assignment.dataset_id,
+            event_id=event_id,
+            extra_receiver_ids=(
+                [assignment.requested_by_id]
+                if assignment.requested_by_id is not None
+                else []
+            ),
+        )
         self.db.delete(assignment)
         self.db.commit()
         return assignment
 
     def update_assignment(
-        self, request: UpdateRoleAssignment, actor: User
+        self, request: UpdateRoleAssignment, *, actor: User
     ) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)
@@ -97,6 +132,49 @@ class RoleAssignmentService:
             assignment.decision = decision
             assignment.decided_on = datetime.now()
             assignment.decided_by_id = actor.id
+            event_id = EventService(self.db).create_event(
+                CreateEvent(
+                    name=(
+                        EventType.DATASET_ROLE_ASSIGNMENT_APPROVED
+                        if assignment.decision == DecisionStatus.APPROVED
+                        else EventType.DATASET_ROLE_ASSIGNMENT_DENIED
+                    ),
+                    subject_id=assignment.dataset_id,
+                    subject_type=EventReferenceEntity.DATASET,
+                    target_id=assignment.user_id,
+                    target_type=EventReferenceEntity.USER,
+                    actor_id=actor.id,
+                ),
+            )
+            NotificationService(self.db).create_dataset_notifications(
+                dataset_id=assignment.dataset_id,
+                event_id=event_id,
+                extra_receiver_ids=(
+                    [assignment.requested_by_id]
+                    if assignment.requested_by_id is not None
+                    else []
+                ),
+            )
+        else:
+            event_id = EventService(self.db).create_event(
+                CreateEvent(
+                    name=EventType.DATASET_ROLE_ASSIGNMENT_UPDATED,
+                    subject_id=assignment.dataset_id,
+                    subject_type=EventReferenceEntity.DATASET,
+                    target_id=assignment.user_id,
+                    target_type=EventReferenceEntity.USER,
+                    actor_id=actor.id,
+                ),
+            )
+            NotificationService(self.db).create_dataset_notifications(
+                dataset_id=assignment.dataset_id,
+                event_id=event_id,
+                extra_receiver_ids=(
+                    [assignment.requested_by_id]
+                    if assignment.requested_by_id is not None
+                    else []
+                ),
+            )
 
         self.db.commit()
         return assignment

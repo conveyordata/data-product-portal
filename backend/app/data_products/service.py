@@ -49,9 +49,15 @@ from app.environment_platform_configurations.model import (
     EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
 )
 from app.environments.model import Environment as EnvironmentModel
+from app.events.enum import EventReferenceEntity, EventType
+from app.events.model import Event as EventModel
+from app.events.schema import CreateEvent
+from app.events.schema_response import EventGet
+from app.events.service import EventService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.notifications.service import NotificationService
 from app.platforms.model import Platform as PlatformModel
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype
@@ -104,6 +110,9 @@ class DataProductService:
         if not data_product.lifecycle:
             data_product.lifecycle = default_lifecycle
         return data_product
+
+    def get_event_history(self, id: UUID) -> Sequence[EventGet]:
+        return EventService(self.db).get_history(id, EventReferenceEntity.DATA_PRODUCT)
 
     def get_data_products(self) -> Sequence[DataProductsGet]:
         default_lifecycle = self.db.scalar(
@@ -172,6 +181,7 @@ class DataProductService:
     def create_data_product(
         self,
         data_product: DataProductCreate,
+        actor: User,
     ) -> DataProductModel:
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -185,15 +195,26 @@ class DataProductService:
 
         data_product_schema = data_product.parse_pydantic_schema()
         tags = self._get_tags(data_product_schema.pop("tag_ids", []))
-        _ = data_product_schema.pop("owners", [])
+        owners = data_product_schema.pop("owners", [])
         model = DataProductModel(**data_product_schema, tags=tags)
         self.db.add(model)
+        self.db.flush()
+        event_id = EventService(self.db).create_event(
+            CreateEvent(
+                name=EventType.DATA_PRODUCT_CREATED,
+                subject_id=model.id,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                actor_id=actor.id,
+            ),
+        )
+        NotificationService(self.db).create_data_product_notifications(
+            data_product_id=model.id, event_id=event_id, extra_receiver_ids=owners
+        )
         self.db.commit()
-
         RefreshInfrastructureLambda().trigger()
         return model
 
-    def remove_data_product(self, id: UUID) -> None:
+    def remove_data_product(self, id: UUID, *, actor: User) -> None:
         data_product = self.db.get(DataProductModel, id)
         if not data_product:
             raise HTTPException(
@@ -201,11 +222,25 @@ class DataProductService:
                 detail=f"Data Product {id} not found",
             )
 
+        event_id = EventService(self.db).create_event(
+            CreateEvent(
+                name=EventType.DATA_PRODUCT_REMOVED,
+                subject_id=data_product.id,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                actor_id=actor.id,
+            ),
+        )
+        NotificationService(self.db).create_data_product_notifications(
+            data_product_id=data_product.id, event_id=event_id
+        )
         self.db.delete(data_product)
         self.db.commit()
 
     def update_data_product(
-        self, id: UUID, data_product: DataProductUpdate
+        self,
+        id: UUID,
+        data_product: DataProductUpdate,
+        actor: User,
     ) -> dict[str, UUID]:
         current_data_product = ensure_data_product_exists(id, self.db)
         update_data_product = data_product.model_dump(exclude_unset=True)
@@ -231,22 +266,52 @@ class DataProductService:
             else:
                 setattr(current_data_product, k, v) if v else None
 
+        self.db.add(
+            EventModel(
+                name=EventType.DATA_PRODUCT_UPDATED,
+                subject_id=id,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                actor_id=actor.id,
+            ),
+        )
         self.db.commit()
         RefreshInfrastructureLambda().trigger()
         return {"id": current_data_product.id}
 
     def update_data_product_about(
-        self, id: UUID, data_product: DataProductAboutUpdate
+        self,
+        id: UUID,
+        data_product: DataProductAboutUpdate,
+        actor: User,
     ) -> None:
         current_data_product = ensure_data_product_exists(id, self.db)
         current_data_product.about = data_product.about
+        self.db.add(
+            EventModel(
+                name=EventType.DATA_PRODUCT_UPDATED,
+                subject_id=current_data_product.id,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                actor_id=actor.id,
+            ),
+        )
         self.db.commit()
 
     def update_data_product_status(
-        self, id: UUID, data_product: DataProductStatusUpdate
+        self,
+        id: UUID,
+        data_product: DataProductStatusUpdate,
+        actor: User,
     ) -> None:
         current_data_product = ensure_data_product_exists(id, self.db)
         current_data_product.status = data_product.status
+        self.db.add(
+            EventModel(
+                name=EventType.DATA_PRODUCT_UPDATED,
+                subject_id=current_data_product.id,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                actor_id=actor.id,
+            ),
+        )
         self.db.commit()
 
     def link_dataset_to_data_product(
@@ -293,12 +358,35 @@ class DataProductService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.dataset_links.append(dataset_link)
+        event_id = EventService(self.db).create_event(
+            CreateEvent(
+                name=(
+                    EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
+                    if approval_status == DecisionStatus.PENDING
+                    else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
+                ),
+                subject_id=data_product.id,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                target_id=dataset.id,
+                target_type=EventReferenceEntity.DATASET,
+                actor_id=actor.id,
+            ),
+        )
+        if approval_status == DecisionStatus.APPROVED:
+            NotificationService(self.db).create_data_product_notifications(
+                data_product_id=data_product.id, event_id=event_id
+            )
         self.db.commit()
         self.db.refresh(data_product)
         RefreshInfrastructureLambda().trigger()
         return dataset_link
 
-    def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID) -> None:
+    def unlink_dataset_from_data_product(
+        self,
+        id: UUID,
+        dataset_id: UUID,
+        actor: User,
+    ) -> None:
         ensure_dataset_exists(dataset_id, self.db)
         data_product = ensure_data_product_exists(
             id, self.db, options=[joinedload(DataProductModel.dataset_links)]
@@ -315,6 +403,25 @@ class DataProductService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data product {id} not found",
+            )
+
+        event_id = EventService(self.db).create_event(
+            CreateEvent(
+                name=(
+                    EventType.DATA_PRODUCT_DATASET_LINK_REMOVED
+                    if data_product_dataset.status != DecisionStatus.APPROVED
+                    else EventType.DATA_PRODUCT_DATASET_LINK_DENIED
+                ),
+                subject_id=data_product.id,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                target_id=data_product_dataset.dataset_id,
+                target_type=EventReferenceEntity.DATASET,
+                actor_id=actor.id,
+            ),
+        )
+        if data_product_dataset.status == DecisionStatus.APPROVED:
+            NotificationService(self.db).create_data_product_notifications(
+                data_product_id=data_product.id, event_id=event_id
             )
         data_product.dataset_links.remove(data_product_dataset)
         self.db.commit()
@@ -334,7 +441,7 @@ class DataProductService:
 
     @classmethod
     def get_aws_temporary_credentials(
-        cls, role_arn: str, actor: User
+        cls, role_arn: str, *, actor: User
     ) -> AWSCredentials:
         email = actor.email
         try:
@@ -350,11 +457,9 @@ class DataProductService:
 
         return AWSCredentials(**response.get("Credentials"))
 
-    def generate_signin_url(
-        self, id: UUID, environment: str, authenticated_user: User
-    ) -> str:
+    def generate_signin_url(self, id: UUID, environment: str, *, actor: User) -> str:
         role = self.get_data_product_role_arn(id, environment)
-        json_credentials = self.get_aws_temporary_credentials(role, authenticated_user)
+        json_credentials = self.get_aws_temporary_credentials(role, actor=actor)
 
         url_credentials = {
             "sessionId": json_credentials.AccessKeyId,

@@ -36,5 +36,5 @@ class AuthService:
             data_product_id, environment
         )
         return DataProductService.get_aws_temporary_credentials(
-            role_arn, authorized_user
+            role_arn, actor=authorized_user
         )
