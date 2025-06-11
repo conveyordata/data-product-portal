@@ -25,7 +25,7 @@ def get_user_notifications(
 def remove_all_user_notifications(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
+) -> None:
     return NotificationService(db).remove_all_notifications(authenticated_user)
 
 
@@ -34,5 +34,5 @@ def remove_user_notification(
     id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-):
+) -> None:
     return NotificationService(db).remove_notification(id, authenticated_user)
