@@ -113,9 +113,9 @@ class RoleAssignmentService:
             ),
         )
         NotificationService(self.db).create_data_product_notifications(
-            assignment.data_product_id,
-            event_id,
-            (
+            data_product_id=assignment.data_product_id,
+            event_id=event_id,
+            extra_receiver_ids=(
                 [assignment.requested_by_id]
                 if assignment.requested_by_id is not None
                 else []
@@ -154,9 +154,9 @@ class RoleAssignmentService:
                 ),
             )
             NotificationService(self.db).create_data_product_notifications(
-                assignment.data_product_id,
-                event_id,
-                (
+                data_product_id=assignment.data_product_id,
+                event_id=event_id,
+                extra_receiver_ids=(
                     [assignment.requested_by_id]
                     if assignment.requested_by_id is not None
                     else []
@@ -174,9 +174,9 @@ class RoleAssignmentService:
                 ),
             )
             NotificationService(self.db).create_data_product_notifications(
-                assignment.data_product_id,
-                event_id,
-                (
+                data_product_id=assignment.data_product_id,
+                event_id=event_id,
+                extra_receiver_ids=(
                     [assignment.requested_by_id]
                     if assignment.requested_by_id is not None
                     else []

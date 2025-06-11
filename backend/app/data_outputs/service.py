@@ -132,7 +132,7 @@ class DataOutputService:
             ),
         )
         NotificationService(self.db).create_data_product_notifications(
-            model.owner_id, event_id
+            data_product_id=model.owner_id, event_id=event_id
         )
         self.db.commit()
         RefreshInfrastructureLambda().trigger()
@@ -161,7 +161,7 @@ class DataOutputService:
             ),
         )
         NotificationService(self.db).create_data_product_notifications(
-            data_output.owner_id, event_id
+            data_product_id=data_output.owner_id, event_id=event_id
         )
         self.db.delete(data_output)
         self.db.commit()
@@ -260,7 +260,7 @@ class DataOutputService:
             ),
         )
         NotificationService(self.db).create_data_product_notifications(
-            data_output.owner_id, event_id
+            data_product_id=data_output.owner_id, event_id=event_id
         )
         data_output.dataset_links.remove(data_output_dataset)
         self.db.commit()

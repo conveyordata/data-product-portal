@@ -54,7 +54,9 @@ class DataOutputDatasetService:
             ),
         )
         NotificationService(self.db).create_dataset_notifications(
-            current_link.dataset_id, event_id, [current_link.requested_by_id]
+            dataset_id=current_link.dataset_id,
+            event_id=event_id,
+            extra_receiver_ids=[current_link.requested_by_id],
         )
         RefreshInfrastructureLambda().trigger()
         self.db.commit()
@@ -81,7 +83,9 @@ class DataOutputDatasetService:
             ),
         )
         NotificationService(self.db).create_dataset_notifications(
-            current_link.dataset_id, event_id, [current_link.requested_by_id]
+            dataset_id=current_link.dataset_id,
+            event_id=event_id,
+            extra_receiver_ids=[current_link.requested_by_id],
         )
         self.db.commit()
 
@@ -105,9 +109,9 @@ class DataOutputDatasetService:
         )
         if current_link.status == DecisionStatus.APPROVED:
             NotificationService(self.db).create_dataset_notifications(
-                current_link.dataset_id,
-                event_id,
-                [current_link.requested_by_id],
+                dataset_id=current_link.dataset_id,
+                event_id=event_id,
+                extra_receiver_ids=[current_link.requested_by_id],
             )
         self.db.delete(current_link)
         self.db.commit()

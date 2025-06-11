@@ -107,9 +107,9 @@ class RoleAssignmentService:
             ),
         )
         NotificationService(self.db).create_dataset_notifications(
-            assignment.dataset_id,
-            event_id,
-            (
+            dataset_id=assignment.dataset_id,
+            event_id=event_id,
+            extra_receiver_ids=(
                 [assignment.requested_by_id]
                 if assignment.requested_by_id is not None
                 else []
@@ -147,9 +147,9 @@ class RoleAssignmentService:
                 ),
             )
             NotificationService(self.db).create_dataset_notifications(
-                assignment.dataset_id,
-                event_id,
-                (
+                dataset_id=assignment.dataset_id,
+                event_id=event_id,
+                extra_receiver_ids=(
                     [assignment.requested_by_id]
                     if assignment.requested_by_id is not None
                     else []
@@ -167,9 +167,9 @@ class RoleAssignmentService:
                 ),
             )
             NotificationService(self.db).create_dataset_notifications(
-                assignment.dataset_id,
-                event_id,
-                (
+                dataset_id=assignment.dataset_id,
+                event_id=event_id,
+                extra_receiver_ids=(
                     [assignment.requested_by_id]
                     if assignment.requested_by_id is not None
                     else []

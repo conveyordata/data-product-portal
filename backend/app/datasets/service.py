@@ -187,7 +187,9 @@ class DatasetService:
                 actor_id=actor.id,
             ),
         )
-        NotificationService(self.db).create_dataset_notifications(model.id, event_id)
+        NotificationService(self.db).create_dataset_notifications(
+            dataset_id=model.id, event_id=event_id
+        )
         self.db.commit()
         RefreshInfrastructureLambda().trigger()
         return model
@@ -206,7 +208,9 @@ class DatasetService:
                 actor_id=actor.id,
             ),
         )
-        NotificationService(self.db).create_dataset_notifications(dataset.id, event_id)
+        NotificationService(self.db).create_dataset_notifications(
+            dataset_id=dataset.id, event_id=event_id
+        )
         self.db.delete(dataset)
         self.db.commit()
         RefreshInfrastructureLambda().trigger()

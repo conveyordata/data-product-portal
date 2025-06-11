@@ -60,9 +60,10 @@ class NotificationService:
 
     def create_dataset_notifications(
         self,
+        *,
         dataset_id: UUID,
         event_id: UUID,
-        bonus_receiver_ids: list[UUID] = [],
+        extra_receiver_ids: Sequence[UUID] = (),
     ) -> None:
         assignments = self.db.scalars(
             select(DatasetRoleAssignment).where(
@@ -74,7 +75,7 @@ class NotificationService:
         receivers = set(
             chain(
                 (assignment.user_id for assignment in assignments),
-                bonus_receiver_ids,
+                extra_receiver_ids,
             )
         )
         for receiver in receivers:
@@ -83,9 +84,10 @@ class NotificationService:
 
     def create_data_product_notifications(
         self,
+        *,
         data_product_id: UUID,
         event_id: UUID,
-        bonus_receiver_ids: list[UUID] = [],
+        extra_receiver_ids: Sequence[UUID] = (),
     ) -> None:
         assignments = self.db.scalars(
             select(DataProductRoleAssignment).where(
@@ -97,7 +99,7 @@ class NotificationService:
         receivers = set(
             chain(
                 (assignment.user_id for assignment in assignments),
-                bonus_receiver_ids,
+                extra_receiver_ids,
             )
         )
         for receiver in receivers:
