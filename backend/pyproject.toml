@@ -42,7 +42,7 @@ optional = true
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.4.0"
-pytest-cov = "^6.1.1"
+pytest-cov = "^6.2.0"
 pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
 
