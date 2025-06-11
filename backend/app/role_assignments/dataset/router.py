@@ -110,7 +110,7 @@ def request_assignment(
 def delete_assignment(
     id: UUID,
     db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     assignment = RoleAssignmentService(db).delete_assignment(id, actor=user)
 
