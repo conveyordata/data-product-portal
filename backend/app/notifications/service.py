@@ -1,4 +1,5 @@
 from itertools import chain
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -18,18 +19,18 @@ class NotificationService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_user_notifications(self, authenticated_user: User) -> list[NotificationGet]:
+    def get_user_notifications(self, user: User) -> Sequence[NotificationGet]:
         return self.db.scalars(
             select(NotificationModel)
             .options(
                 joinedload(NotificationModel.user),
                 joinedload(NotificationModel.event),
             )
-            .where(NotificationModel.user_id == authenticated_user.id)
+            .where(NotificationModel.user_id == user.id)
             .order_by(desc(NotificationModel.created_on))
         ).all()
 
-    def remove_notification(self, id: UUID, authenticated_user: User) -> None:
+    def remove_notification(self, id: UUID, user: User) -> None:
         notification = self.db.get(
             NotificationModel,
             id,
@@ -41,8 +42,8 @@ class NotificationService:
             )
 
         auth = Authorization()
-        is_admin = auth.has_admin_role(user_id=str(authenticated_user.id))
-        is_owner = notification.user_id == authenticated_user.id
+        is_admin = auth.has_admin_role(user_id=str(user.id))
+        is_owner = notification.user_id == user.id
         if not is_admin and not is_owner:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -51,11 +52,9 @@ class NotificationService:
         self.db.delete(notification)
         self.db.commit()
 
-    def remove_all_notifications(self, authenticated_user: User) -> None:
+    def remove_all_notifications(self, user: User) -> None:
         self.db.execute(
-            delete(NotificationModel).where(
-                NotificationModel.user_id == authenticated_user.id
-            )
+            delete(NotificationModel).where(NotificationModel.user_id == user.id)
         )
         self.db.commit()
 

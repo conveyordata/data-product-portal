@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/notifications", tags=["notifications"])
 def get_user_notifications(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
-) -> list[NotificationGet]:
+) -> Sequence[NotificationGet]:
     return NotificationService(db).get_user_notifications(authenticated_user)
 
 

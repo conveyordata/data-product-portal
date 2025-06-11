@@ -59,7 +59,7 @@ def get_data_output(id: UUID, db: Session = Depends(get_db_session)) -> DataOutp
 @router.get("/{id}/history")
 def get_event_history(
     id: UUID, db: Session = Depends(get_db_session)
-) -> list[EventGet]:
+) -> Sequence[EventGet]:
     return DataOutputService(db).get_event_history(id)
 
 
@@ -87,7 +87,7 @@ def remove_data_output(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataOutputService(db).remove_data_output(id, authenticated_user)
+    return DataOutputService(db).remove_data_output(id, actor=authenticated_user)
 
 
 @router.put(
@@ -115,7 +115,9 @@ def update_data_output(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DataOutputService(db).update_data_output(id, data_output, authenticated_user)
+    return DataOutputService(db).update_data_output(
+        id, data_output, actor=authenticated_user
+    )
 
 
 @router.put(
@@ -144,7 +146,7 @@ def update_data_output_status(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     return DataOutputService(db).update_data_output_status(
-        id, data_output, authenticated_user
+        id, data_output, actor=authenticated_user
     )
 
 
@@ -181,7 +183,7 @@ def link_dataset_to_data_output(
     db: Session = Depends(get_db_session),
 ) -> dict[str, UUID]:
     dataset_link = DataOutputService(db).link_dataset_to_data_output(
-        id, dataset_id, authenticated_user
+        id, dataset_id, actor=authenticated_user
     )
 
     approvers = RoleAssignmentService(db).users_with_authz_action(
@@ -230,7 +232,7 @@ def unlink_dataset_from_data_output(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     return DataOutputService(db).unlink_dataset_from_data_output(
-        id, dataset_id, authenticated_user
+        id, dataset_id, actor=authenticated_user
     )
 
 

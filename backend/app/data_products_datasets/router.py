@@ -33,7 +33,7 @@ def approve_data_product_link(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     return DataProductDatasetService(db).approve_data_product_link(
-        id, authenticated_user
+        id, actor=authenticated_user
     )
 
 
@@ -53,7 +53,9 @@ def deny_data_product_link(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataProductDatasetService(db).deny_data_product_link(id, authenticated_user)
+    return DataProductDatasetService(db).deny_data_product_link(
+        id, actor=authenticated_user
+    )
 
 
 @router.post(
@@ -73,7 +75,7 @@ def remove_data_product_link(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     return DataProductDatasetService(db).remove_data_product_link(
-        id, authenticated_user
+        id, actor=authenticated_user
     )
 
 

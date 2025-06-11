@@ -54,7 +54,7 @@ class RoleAssignmentService:
         return self.db.scalars(query).all()
 
     def create_assignment(
-        self, data_product_id: UUID, request: CreateRoleAssignment, actor: User
+        self, data_product_id: UUID, request: CreateRoleAssignment, *, actor: User
     ) -> RoleAssignment:
         self.ensure_is_data_product_scope(request.role_id)
         existing_assignment = self.db.scalar(
@@ -98,19 +98,18 @@ class RoleAssignmentService:
         self.db.commit()
         return role_assignment
 
-    def delete_assignment(self, id_: UUID, authenticated_user: User) -> RoleAssignment:
+    def delete_assignment(self, id_: UUID, *, actor: User) -> RoleAssignment:
         assignment = self.get_assignment(id_)
         self._guard_against_illegal_owner_removal(assignment)
 
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED,
                 subject_id=assignment.data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=assignment.user_id,
                 target_type=EventReferenceEntity.USER,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService(self.db).create_data_product_notifications(
@@ -127,7 +126,7 @@ class RoleAssignmentService:
         return assignment
 
     def update_assignment(
-        self, request: UpdateRoleAssignment, actor: User
+        self, request: UpdateRoleAssignment, *, actor: User
     ) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)
@@ -140,8 +139,7 @@ class RoleAssignmentService:
             assignment.decided_on = datetime.now()
             assignment.decided_by_id = actor.id
 
-            event_id = EventService().create_event(
-                self.db,
+            event_id = EventService(self.db).create_event(
                 CreateEvent(
                     name=(
                         EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_APPROVED
@@ -165,8 +163,7 @@ class RoleAssignmentService:
                 ),
             )
         else:
-            event_id = EventService().create_event(
-                self.db,
+            event_id = EventService(self.db).create_event(
                 CreateEvent(
                     name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED,
                     subject_id=assignment.data_product_id,

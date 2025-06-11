@@ -38,7 +38,7 @@ class RoleAssignmentService:
         return self.db.scalars(query).all()
 
     def create_assignment(
-        self, request: RoleAssignmentRequest, actor: User
+        self, request: RoleAssignmentRequest, *, actor: User
     ) -> RoleAssignment:
         self.ensure_is_global_scope(request.role_id)
         role_assignment = GlobalRoleAssignment(
@@ -65,7 +65,7 @@ class RoleAssignmentService:
             )
 
     def update_assignment(
-        self, request: UpdateRoleAssignment, actor: User
+        self, request: UpdateRoleAssignment, *, actor: User
     ) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
 

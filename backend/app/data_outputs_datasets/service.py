@@ -27,7 +27,7 @@ class DataOutputDatasetService:
     def __init__(self, db: Session):
         self.db = db
 
-    def approve_data_output_link(self, id: UUID, actor: User) -> None:
+    def approve_data_output_link(self, id: UUID, *, actor: User) -> None:
         current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
@@ -43,8 +43,7 @@ class DataOutputDatasetService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_OUTPUT_DATASET_LINK_APPROVED,
                 subject_id=current_link.dataset_id,
@@ -60,7 +59,7 @@ class DataOutputDatasetService:
         RefreshInfrastructureLambda().trigger()
         self.db.commit()
 
-    def deny_data_output_link(self, id: UUID, actor: User) -> None:
+    def deny_data_output_link(self, id: UUID, *, actor: User) -> None:
         current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
@@ -71,8 +70,7 @@ class DataOutputDatasetService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_OUTPUT_DATASET_LINK_DENIED,
                 subject_id=current_link.dataset_id,
@@ -87,7 +85,7 @@ class DataOutputDatasetService:
         )
         self.db.commit()
 
-    def remove_data_output_link(self, id: UUID, actor: User) -> None:
+    def remove_data_output_link(self, id: UUID, *, actor: User) -> None:
         current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
@@ -95,8 +93,7 @@ class DataOutputDatasetService:
                 detail=f"Dataset data output link {id} not found",
             )
 
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_OUTPUT_DATASET_LINK_REMOVED,
                 subject_id=current_link.dataset_id,

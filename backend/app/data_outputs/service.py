@@ -87,14 +87,14 @@ class DataOutputService:
             ],
         )
 
-    def get_event_history(self, id: UUID) -> list[EventGet]:
-        return EventService().get_history(self.db, id, EventReferenceEntity.DATA_OUTPUT)
+    def get_event_history(self, id: UUID) -> Sequence[EventGet]:
+        return EventService(self.db).get_history(id, EventReferenceEntity.DATA_OUTPUT)
 
     def create_data_output(
         self,
         id: UUID,
         data_output: DataOutputCreate,
-        authenticated_user: User,
+        actor: User,
     ) -> dict[str, UUID]:
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -121,15 +121,14 @@ class DataOutputService:
 
         self.db.add(model)
         self.db.flush()
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_OUTPUT_CREATED,
                 subject_id=model.id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=model.owner_id,
                 target_type=EventReferenceEntity.DATA_PRODUCT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService(self.db).create_data_product_notifications(
@@ -140,7 +139,7 @@ class DataOutputService:
 
         return {"id": model.id}
 
-    def remove_data_output(self, id: UUID, authenticated_user: User) -> None:
+    def remove_data_output(self, id: UUID, *, actor: User) -> None:
         data_output = self.db.get(
             DataOutputModel,
             id,
@@ -151,15 +150,14 @@ class DataOutputService:
                 detail=f"Data Output {id} not found",
             )
 
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_OUTPUT_REMOVED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=data_output.owner_id,
                 target_type=EventReferenceEntity.DATA_PRODUCT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService(self.db).create_data_product_notifications(
@@ -170,7 +168,7 @@ class DataOutputService:
         RefreshInfrastructureLambda().trigger()
 
     def update_data_output_status(
-        self, id: UUID, data_output: DataOutputStatusUpdate, authenticated_user: User
+        self, id: UUID, data_output: DataOutputStatusUpdate, *, actor: User
     ) -> None:
         current_data_output = self.ensure_data_output_exists(id)
         current_data_output.status = data_output.status
@@ -179,7 +177,7 @@ class DataOutputService:
                 name=EventType.DATA_OUTPUT_UPDATED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         self.db.commit()
@@ -231,7 +229,7 @@ class DataOutputService:
         return dataset_link
 
     def unlink_dataset_from_data_output(
-        self, id: UUID, dataset_id: UUID, authenticated_user: User
+        self, id: UUID, dataset_id: UUID, *, actor: User
     ) -> None:
         ensure_dataset_exists(dataset_id, self.db)
         data_output = self.ensure_data_output_exists(
@@ -251,15 +249,14 @@ class DataOutputService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data output {id} not found",
             )
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_OUTPUT_DATASET_LINK_REMOVED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
                 target_id=dataset_id,
                 target_type=EventReferenceEntity.DATASET,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService(self.db).create_data_product_notifications(
@@ -270,7 +267,7 @@ class DataOutputService:
         RefreshInfrastructureLambda().trigger()
 
     def update_data_output(
-        self, id: UUID, data_output: DataOutputUpdate, authenticated_user: User
+        self, id: UUID, data_output: DataOutputUpdate, *, actor: User
     ) -> dict[str, UUID]:
         current_data_output = self.ensure_data_output_exists(id)
         update_data_output = data_output.model_dump(exclude_unset=True)
@@ -286,7 +283,7 @@ class DataOutputService:
                 name=EventType.DATA_OUTPUT_UPDATED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_OUTPUT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         self.db.commit()

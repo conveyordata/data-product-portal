@@ -129,8 +129,8 @@ class DatasetService:
                 dataset.lifecycle = default_lifecycle
         return datasets
 
-    def get_event_history(self, id: UUID) -> list[EventGet]:
-        return EventService().get_history(self.db, id, EventReferenceEntity.DATASET)
+    def get_event_history(self, id: UUID) -> Sequence[EventGet]:
+        return EventService(self.db).get_history(id, EventReferenceEntity.DATASET)
 
     def get_user_datasets(self, user_id: UUID) -> Sequence[DatasetsGet]:
         return (
@@ -161,9 +161,7 @@ class DatasetService:
 
         return tags
 
-    def create_dataset(
-        self, dataset: DatasetCreate, authenticated_user: User
-    ) -> DatasetModel:
+    def create_dataset(self, dataset: DatasetCreate, *, actor: User) -> DatasetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, self.db
@@ -181,13 +179,12 @@ class DatasetService:
 
         self.db.add(model)
         self.db.flush()
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATASET_CREATED,
                 subject_id=model.id,
                 subject_type=EventReferenceEntity.DATASET,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService(self.db).create_dataset_notifications(model.id, event_id)
@@ -195,19 +192,18 @@ class DatasetService:
         RefreshInfrastructureLambda().trigger()
         return model
 
-    def remove_dataset(self, id: UUID, authenticated_user: User) -> None:
+    def remove_dataset(self, id: UUID, *, actor: User) -> None:
         dataset = self.db.get(DatasetModel, id)
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
             )
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATASET_REMOVED,
                 subject_id=dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService(self.db).create_dataset_notifications(dataset.id, event_id)
@@ -216,7 +212,7 @@ class DatasetService:
         RefreshInfrastructureLambda().trigger()
 
     def update_dataset(
-        self, id: UUID, dataset: DatasetUpdate, authenticated_user: User
+        self, id: UUID, dataset: DatasetUpdate, *, actor: User
     ) -> dict[str, UUID]:
         current_dataset = ensure_dataset_exists(id, self.db)
         updated_dataset = dataset.model_dump(exclude_unset=True)
@@ -247,7 +243,7 @@ class DatasetService:
                 name=EventType.DATASET_UPDATED,
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         self.db.commit()
@@ -255,7 +251,7 @@ class DatasetService:
         return {"id": current_dataset.id}
 
     def update_dataset_about(
-        self, id: UUID, dataset: DatasetAboutUpdate, authenticated_user: User
+        self, id: UUID, dataset: DatasetAboutUpdate, *, actor: User
     ) -> None:
         current_dataset = ensure_dataset_exists(id, self.db)
         current_dataset.about = dataset.about
@@ -264,13 +260,13 @@ class DatasetService:
                 name=EventType.DATASET_UPDATED,
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         self.db.commit()
 
     def update_dataset_status(
-        self, id: UUID, dataset: DatasetStatusUpdate, authenticated_user: User
+        self, id: UUID, dataset: DatasetStatusUpdate, *, actor: User
     ) -> None:
         current_dataset = ensure_dataset_exists(id, self.db)
         current_dataset.status = dataset.status
@@ -279,7 +275,7 @@ class DatasetService:
                 name=EventType.DATASET_UPDATED,
                 subject_id=current_dataset.id,
                 subject_type=EventReferenceEntity.DATASET,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         self.db.commit()

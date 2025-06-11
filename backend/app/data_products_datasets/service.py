@@ -27,7 +27,7 @@ class DataProductDatasetService:
     def __init__(self, db: Session):
         self.db = db
 
-    def approve_data_product_link(self, id: UUID, authenticated_user: User) -> None:
+    def approve_data_product_link(self, id: UUID, *, actor: User) -> None:
         current_link = self.db.get(DataProductDatasetAssociationModel, id)
         if current_link.status != DecisionStatus.PENDING:
             raise HTTPException(
@@ -36,18 +36,17 @@ class DataProductDatasetService:
             )
 
         current_link.status = DecisionStatus.APPROVED
-        current_link.approved_by = authenticated_user
+        current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
 
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_DATASET_LINK_APPROVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,
                 target_type=EventReferenceEntity.DATA_PRODUCT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService(self.db).create_dataset_notifications(
@@ -56,7 +55,7 @@ class DataProductDatasetService:
         RefreshInfrastructureLambda().trigger()
         self.db.commit()
 
-    def deny_data_product_link(self, id: UUID, actor: User) -> None:
+    def deny_data_product_link(self, id: UUID, *, actor: User) -> None:
         current_link = self.db.get(DataProductDatasetAssociationModel, id)
         if (
             current_link.status != DecisionStatus.PENDING
@@ -69,8 +68,7 @@ class DataProductDatasetService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_DATASET_LINK_DENIED,
                 subject_id=current_link.dataset_id,
@@ -85,22 +83,21 @@ class DataProductDatasetService:
         )
         self.db.commit()
 
-    def remove_data_product_link(self, id: UUID, authenticated_user: User) -> None:
+    def remove_data_product_link(self, id: UUID, *, actor: User) -> None:
         current_link = self.db.get(DataProductDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Dataset data product link {id} not found",
             )
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_DATASET_LINK_REMOVED,
                 subject_id=current_link.dataset_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=current_link.data_product_id,
                 target_type=EventReferenceEntity.DATA_PRODUCT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         if current_link.status == DecisionStatus.APPROVED:
@@ -110,7 +107,7 @@ class DataProductDatasetService:
                 [current_link.requested_by_id],
             )
         self.db.delete(current_link)
-        self.db.commit
+        self.db.commit()
         RefreshInfrastructureLambda().trigger()
 
     def get_user_pending_actions(

@@ -32,7 +32,9 @@ def approve_data_output_link(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataOutputDatasetService(db).approve_data_output_link(id, authenticated_user)
+    return DataOutputDatasetService(db).approve_data_output_link(
+        id, actor=authenticated_user
+    )
 
 
 @router.post(
@@ -51,7 +53,9 @@ def deny_data_output_link(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataOutputDatasetService(db).deny_data_output_link(id, authenticated_user)
+    return DataOutputDatasetService(db).deny_data_output_link(
+        id, actor=authenticated_user
+    )
 
 
 @router.post(
@@ -70,7 +74,9 @@ def remove_data_output_link(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataOutputDatasetService(db).remove_data_output_link(id, authenticated_user)
+    return DataOutputDatasetService(db).remove_data_output_link(
+        id, actor=authenticated_user
+    )
 
 
 @router.get("/actions")

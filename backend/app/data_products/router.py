@@ -84,7 +84,7 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
 @router.get("/{id}/history")
 def get_event_history(
     id: UUID, db: Session = Depends(get_db_session)
-) -> list[EventGet]:
+) -> Sequence[EventGet]:
     return DataProductService(db).get_event_history(id)
 
 
@@ -125,7 +125,7 @@ def create_data_product(
         )
 
     created_data_product = DataProductService(db).create_data_product(
-        data_product, authenticated_user
+        data_product, actor=authenticated_user
     )
     assignment_service = RoleAssignmentService(db)
     for owner in data_product.owners:
@@ -165,7 +165,7 @@ def remove_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DataProductService(db).remove_data_product(id, authenticated_user)
+    DataProductService(db).remove_data_product(id, actor=authenticated_user)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
     return
 
@@ -195,7 +195,7 @@ def update_data_product(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
     return DataProductService(db).update_data_product(
-        id, data_product, authenticated_user
+        id, data_product, actor=authenticated_user
     )
 
 
@@ -226,7 +226,9 @@ def create_data_output(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DataOutputService(db).create_data_output(id, data_output, authenticated_user)
+    return DataOutputService(db).create_data_output(
+        id, data_output, actor=authenticated_user
+    )
 
 
 @router.get("/{id}/data_output/validate_namespace")
@@ -261,7 +263,7 @@ def update_data_product_about(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     return DataProductService(db).update_data_product_about(
-        id, data_product, authenticated_user
+        id, data_product, actor=authenticated_user
     )
 
 
@@ -290,7 +292,7 @@ def update_data_product_status(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     return DataProductService(db).update_data_product_status(
-        id, data_product, authenticated_user
+        id, data_product, actor=authenticated_user
     )
 
 
@@ -327,7 +329,7 @@ def link_dataset_to_data_product(
     db: Session = Depends(get_db_session),
 ) -> dict[str, UUID]:
     dataset_link = DataProductService(db).link_dataset_to_data_product(
-        id, dataset_id, authenticated_user
+        id, dataset_id, actor=authenticated_user
     )
 
     if dataset_link.dataset.access_type != DatasetAccessType.PUBLIC:
@@ -378,7 +380,7 @@ def unlink_dataset_from_data_product(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     return DataProductService(db).unlink_dataset_from_data_product(
-        id, dataset_id, authenticated_user
+        id, dataset_id, actor=authenticated_user
     )
 
 
@@ -413,7 +415,7 @@ def get_signin_url(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> str:
     return DataProductService(db).generate_signin_url(
-        id, environment, authenticated_user
+        id, environment, actor=authenticated_user
     )
 
 

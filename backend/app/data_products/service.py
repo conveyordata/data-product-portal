@@ -111,10 +111,8 @@ class DataProductService:
             data_product.lifecycle = default_lifecycle
         return data_product
 
-    def get_event_history(self, id: UUID) -> list[EventGet]:
-        return EventService().get_history(
-            self.db, id, EventReferenceEntity.DATA_PRODUCT
-        )
+    def get_event_history(self, id: UUID) -> Sequence[EventGet]:
+        return EventService(self.db).get_history(id, EventReferenceEntity.DATA_PRODUCT)
 
     def get_data_products(self) -> Sequence[DataProductsGet]:
         default_lifecycle = self.db.scalar(
@@ -183,7 +181,7 @@ class DataProductService:
     def create_data_product(
         self,
         data_product: DataProductCreate,
-        authenticated_user: User,
+        actor: User,
     ) -> DataProductModel:
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -201,13 +199,12 @@ class DataProductService:
         model = DataProductModel(**data_product_schema, tags=tags)
         self.db.add(model)
         self.db.flush()
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_CREATED,
                 subject_id=model.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService(self.db).create_data_product_notifications(
@@ -217,7 +214,7 @@ class DataProductService:
         RefreshInfrastructureLambda().trigger()
         return model
 
-    def remove_data_product(self, id: UUID, authenticated_user: User) -> None:
+    def remove_data_product(self, id: UUID, *, actor: User) -> None:
         data_product = self.db.get(DataProductModel, id)
         if not data_product:
             raise HTTPException(
@@ -225,13 +222,12 @@ class DataProductService:
                 detail=f"Data Product {id} not found",
             )
 
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_REMOVED,
                 subject_id=data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         NotificationService(self.db).create_data_product_notifications(
@@ -244,7 +240,7 @@ class DataProductService:
         self,
         id: UUID,
         data_product: DataProductUpdate,
-        authenticated_user: User,
+        actor: User,
     ) -> dict[str, UUID]:
         current_data_product = ensure_data_product_exists(id, self.db)
         update_data_product = data_product.model_dump(exclude_unset=True)
@@ -275,7 +271,7 @@ class DataProductService:
                 name=EventType.DATA_PRODUCT_UPDATED,
                 subject_id=id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         self.db.commit()
@@ -286,7 +282,7 @@ class DataProductService:
         self,
         id: UUID,
         data_product: DataProductAboutUpdate,
-        authenticated_user: User,
+        actor: User,
     ) -> None:
         current_data_product = ensure_data_product_exists(id, self.db)
         current_data_product.about = data_product.about
@@ -295,7 +291,7 @@ class DataProductService:
                 name=EventType.DATA_PRODUCT_UPDATED,
                 subject_id=current_data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         self.db.commit()
@@ -304,7 +300,7 @@ class DataProductService:
         self,
         id: UUID,
         data_product: DataProductStatusUpdate,
-        authenticated_user: User,
+        actor: User,
     ) -> None:
         current_data_product = ensure_data_product_exists(id, self.db)
         current_data_product.status = data_product.status
@@ -313,7 +309,7 @@ class DataProductService:
                 name=EventType.DATA_PRODUCT_UPDATED,
                 subject_id=current_data_product.id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         self.db.commit()
@@ -362,8 +358,7 @@ class DataProductService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.dataset_links.append(dataset_link)
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=(
                     EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
@@ -390,7 +385,7 @@ class DataProductService:
         self,
         id: UUID,
         dataset_id: UUID,
-        authenticated_user: User,
+        actor: User,
     ) -> None:
         ensure_dataset_exists(dataset_id, self.db)
         data_product = ensure_data_product_exists(
@@ -410,8 +405,7 @@ class DataProductService:
                 detail=f"Data product dataset for data product {id} not found",
             )
 
-        event_id = EventService().create_event(
-            self.db,
+        event_id = EventService(self.db).create_event(
             CreateEvent(
                 name=(
                     EventType.DATA_PRODUCT_DATASET_LINK_REMOVED
@@ -422,7 +416,7 @@ class DataProductService:
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
                 target_id=data_product_dataset.dataset_id,
                 target_type=EventReferenceEntity.DATASET,
-                actor_id=authenticated_user.id,
+                actor_id=actor.id,
             ),
         )
         if data_product_dataset.status == DecisionStatus.APPROVED:
@@ -447,7 +441,7 @@ class DataProductService:
 
     @classmethod
     def get_aws_temporary_credentials(
-        cls, role_arn: str, actor: User
+        cls, role_arn: str, *, actor: User
     ) -> AWSCredentials:
         email = actor.email
         try:
@@ -463,11 +457,9 @@ class DataProductService:
 
         return AWSCredentials(**response.get("Credentials"))
 
-    def generate_signin_url(
-        self, id: UUID, environment: str, authenticated_user: User
-    ) -> str:
+    def generate_signin_url(self, id: UUID, environment: str, *, actor: User) -> str:
         role = self.get_data_product_role_arn(id, environment)
-        json_credentials = self.get_aws_temporary_credentials(role, authenticated_user)
+        json_credentials = self.get_aws_temporary_credentials(role, actor=actor)
 
         url_credentials = {
             "sessionId": json_credentials.AccessKeyId,

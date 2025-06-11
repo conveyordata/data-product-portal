@@ -109,15 +109,17 @@ def _backup_data_output_name_on_delete(mapper, connection, target):
 
 
 class EventService:
+    def __init__(self, db: Session):
+        self.db = db
 
-    def create_event(self, db: Session, event: CreateEvent) -> UUID:
+    def create_event(self, event: CreateEvent) -> UUID:
         event = EventModel(**event.parse_pydantic_schema())
-        db.add(event)
-        db.flush()
+        self.db.add(event)
+        self.db.flush()
         return event.id
 
-    def get_history(self, db: Session, id: UUID, type: EventReferenceEntity):
-        return db.scalars(
+    def get_history(self, id: UUID, type: EventReferenceEntity):
+        return self.db.scalars(
             select(EventModel)
             .where(
                 or_(

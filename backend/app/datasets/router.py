@@ -81,7 +81,7 @@ def get_user_datasets(
 @router.get("/{id}/history")
 def get_event_history(
     id: UUID, db: Session = Depends(get_db_session)
-) -> list[EventGet]:
+) -> Sequence[EventGet]:
     return DatasetService(db).get_event_history(id)
 
 
@@ -119,7 +119,7 @@ def create_dataset(
             detail="Owner role not found",
         )
 
-    new_dataset = DatasetService(db).create_dataset(dataset, authenticated_user)
+    new_dataset = DatasetService(db).create_dataset(dataset, actor=authenticated_user)
     assignment_service = RoleAssignmentService(db=db)
     for owner_id in dataset.owners:
         response = assignment_service.create_assignment(
@@ -154,7 +154,7 @@ def remove_dataset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DatasetService(db).remove_dataset(id, authenticated_user)
+    DatasetService(db).remove_dataset(id, actor=authenticated_user)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
     return
 
@@ -181,7 +181,7 @@ def update_dataset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DatasetService(db).update_dataset(id, dataset, authenticated_user)
+    return DatasetService(db).update_dataset(id, dataset, actor=authenticated_user)
 
 
 @router.put(
@@ -206,7 +206,9 @@ def update_dataset_about(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DatasetService(db).update_dataset_about(id, dataset, authenticated_user)
+    return DatasetService(db).update_dataset_about(
+        id, dataset, actor=authenticated_user
+    )
 
 
 @router.put(
@@ -229,7 +231,9 @@ def update_dataset_status(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DatasetService(db).update_dataset_status(id, dataset, authenticated_user)
+    return DatasetService(db).update_dataset_status(
+        id, dataset, actor=authenticated_user
+    )
 
 
 @router.get("/{id}/graph")
