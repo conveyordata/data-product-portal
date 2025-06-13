@@ -41,9 +41,12 @@ class OIDCConfiguration:
             self.authorization_endpoint = json_config.get("authorization_endpoint")
             self.userinfo_endpoint = json_config.get("userinfo_endpoint")
             self.token_endpoint = json_config.get("token_endpoint")
-            self.jwks_keys = httpx.get(
-                url=f"{self.authority}/.well-known/jwks.json"
-            ).json()
+            if json_config.get("jwks_uri"):
+                self.jwks_keys = httpx.get(url=json_config.get("jwks_uri")).json()
+            else:
+                self.jwks_keys = httpx.get(
+                    url=f"{self.authority}/.well-known/jwks.json"
+                ).json()
             self.oidc_dependency = OpenIdConnect(
                 openIdConnectUrl=self.configuration_url, auto_error=False
             )
