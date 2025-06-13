@@ -62,7 +62,7 @@ class OIDCIdentity(BaseModel):
     username: Optional[str] = None
     preferred_username: Optional[str] = None
 
-    @model_validator(pre=True)
+    @model_validator(mode="before")
     def populate_username(cls, values):
         values["username"] = values.get("username") or values.get("preferred_username")
         return values
