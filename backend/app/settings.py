@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     OIDC_CLIENT_SECRET: Optional[str] = None
     OIDC_AUTHORITY: Optional[str] = None
     OIDC_REDIRECT_URI: Optional[str] = None
+    OIDC_AUDIENCE: Optional[str] = None
 
     # Conveyor
     CONVEYOR_API_KEY: Optional[str] = None

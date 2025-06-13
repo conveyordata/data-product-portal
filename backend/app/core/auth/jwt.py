@@ -42,6 +42,7 @@ class JWTTokenValid:
                 key=public_keys[kid],
                 algorithms=["RS256"],
                 issuer=self.oidc.authority,
+                audience=self.oidc.audience,
             )
         except ExpiredSignatureError as e:
             self.logger.debug("jwt token is expired", e)

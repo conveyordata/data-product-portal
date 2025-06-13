@@ -21,6 +21,7 @@ class OIDCConfiguration:
         client_id: Optional[str] = None,
         client_secret: Optional[str] = None,
         authority: Optional[str] = None,
+        audience: Optional[str] = None,
         redirect_uri: Optional[str] = None,
     ):
         if oidc_enabled or get_boolean_variable("OIDC_ENABLED", False):
@@ -29,6 +30,7 @@ class OIDCConfiguration:
                 client_secret if client_secret else os.getenv("OIDC_CLIENT_SECRET")
             )
             self.authority = authority if authority else os.getenv("OIDC_AUTHORITY")
+            self.audience = audience if audience else os.getenv("OIDC_AUDIENCE")
             self.redirect_uri = (
                 redirect_uri if redirect_uri else os.getenv("OIDC_REDIRECT_URI")
             )
