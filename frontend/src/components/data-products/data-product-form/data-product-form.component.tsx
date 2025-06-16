@@ -192,7 +192,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
             ]);
             fetchNamespaceDebounced(dataProductNameValue ?? '');
         }
-    }, [mode, form, canEditNamespace, dataProductNameValue, fetchNamespaceDebounced]);
+    }, [form, mode, canEditNamespace, dataProductNameValue, fetchNamespaceDebounced]);
 
     useEffect(() => {
         if (mode === 'create' && !canEditNamespace) {

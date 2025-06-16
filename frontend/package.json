@@ -11,7 +11,8 @@
         "check": "biome check",
         "check:fix": "biome check --fix",
         "start": "npm run copy-config && npm run build && vite preview",
-        "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js"
+        "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js",
+        "typecheck": "tsc --strict"
     },
     "dependencies": {
         "@ant-design/colors": "^8.0.0",

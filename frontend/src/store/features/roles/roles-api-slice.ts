@@ -14,7 +14,7 @@ export const rolesApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: roleTa
             }),
             providesTags: [{ type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST }],
         }),
-        createRole: builder.mutation<RoleContract, Omit<RoleContract, 'id'>>({
+        createRole: builder.mutation<RoleContract, Omit<RoleContract, 'id' | 'prototype'>>({
             query: (request) => ({
                 url: ApiUrl.Roles,
                 method: 'POST',
