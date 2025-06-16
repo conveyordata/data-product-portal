@@ -4,7 +4,7 @@ from typing import Optional
 
 import httpx
 from fastapi.security import OpenIdConnect
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 from app.core.config.env_var_parser import get_boolean_variable
 
@@ -59,4 +59,10 @@ class OIDCIdentity(BaseModel):
     name: str
     family_name: str
     email: str
-    username: str
+    username: Optional[str] = None
+    preferred_username: Optional[str] = None
+
+    @model_validator(mode="before")
+    def populate_username(cls, values):
+        values["username"] = values.get("username") or values.get("preferred_username")
+        return values
