@@ -34,9 +34,7 @@ export function EnvironmentConfigCreateForm() {
 
     const { data: services = [], isFetching: isFetchingServices } = useGetAllPlatformServicesQuery(
         platformIdFormValue,
-        {
-            skip: !platformIdFormValue,
-        },
+        { skip: !platformIdFormValue },
     );
 
     const { data: platformServiceConfig } = useGetPlatformServiceConfigQuery(
@@ -82,7 +80,7 @@ export function EnvironmentConfigCreateForm() {
     useEffect(() => {
         if (platformServiceConfig) {
             const configTemplateName = `${platformServiceConfig.platform.name.toLowerCase()}-${platformServiceConfig.service.name.toLocaleLowerCase()}`;
-            const identifiers = platformServiceConfig.config.identifiers;
+            const identifiers = platformServiceConfig.config;
             const configTemplate = identifiers.reduce(
                 (acc, identifier) => {
                     acc[identifier] = ENV_PLATFORM_SERVICE_CONFIG_MAPPING[configTemplateName];

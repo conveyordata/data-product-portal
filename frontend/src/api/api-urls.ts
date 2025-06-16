@@ -113,7 +113,8 @@ export type DynamicPathParams =
     | 'scope'
     | 'userId'
     | 'roleId'
-    | 'assignmentId';
+    | 'assignmentId'
+    | 'tagId';
 
 export function buildUrl(url: string, pathParams: Partial<Record<DynamicPathParams, string>>): string {
     return Object.keys(pathParams).reduce((acc, key) => {

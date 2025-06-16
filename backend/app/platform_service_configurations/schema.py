@@ -14,8 +14,8 @@ class PlatformServiceConfiguration(ORMModel):
     service: PlatformService
     config: list[str]
 
-    @field_validator("config", mode="before")
     @classmethod
+    @field_validator("config", mode="before")
     def parse_settings(cls, v: str | list) -> list:
         if isinstance(v, str):
             return json.loads(v)

@@ -96,11 +96,10 @@ export function DataProductSettingsTable({ scope }: Props) {
                     size={'small'}
                 />
             </Flex>
-            {isVisible && (
+            {isVisible && initial && (
                 <CreateSettingModal
                     scope={scope}
                     onClose={onClose}
-                    t={t}
                     isOpen={isVisible}
                     mode={mode}
                     initial={initial}

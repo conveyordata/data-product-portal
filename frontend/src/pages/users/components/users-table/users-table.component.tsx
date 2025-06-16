@@ -1,4 +1,4 @@
-import { Flex, Form, Input, Pagination, Space, Table, Typography } from 'antd';
+import { Flex, Form, Input, Pagination, Table, Typography } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -41,10 +41,7 @@ export function UsersTable() {
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
-    const filteredUsers = useMemo(() => {
-        const data = users;
-        return filterUsers(data, searchTerm);
-    }, [users, searchTerm]);
+    const filteredUsers = useMemo(() => filterUsers(users, searchTerm), [users, searchTerm]);
     const { pagination, handlePaginationChange } = useTablePagination(filteredUsers);
     const [createGlobalRole] = useCreateGlobalRoleAssignmentMutation();
     const [updateGlobalRole] = useUpdateGlobalRoleAssignmentMutation();
