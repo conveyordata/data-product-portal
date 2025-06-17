@@ -7,6 +7,7 @@ from sqlalchemy import delete, desc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.authz.authorization import Authorization
+from app.events.model import Event as EventModel
 from app.notifications.model import Notification as NotificationModel
 from app.notifications.schema_response import NotificationGet
 from app.role_assignments.data_product.model import DataProductRoleAssignment
@@ -72,6 +73,8 @@ class NotificationService:
             )
         ).all()
 
+        event = self.db.get(EventModel, event_id)
+
         receivers = set(
             chain(
                 (assignment.user_id for assignment in assignments),
@@ -79,8 +82,9 @@ class NotificationService:
             )
         )
         for receiver in receivers:
-            notification = NotificationModel(user_id=receiver, event_id=event_id)
-            self.db.add(notification)
+            if receiver != event.actor_id:
+                notification = NotificationModel(user_id=receiver, event_id=event_id)
+                self.db.add(notification)
 
     def create_data_product_notifications(
         self,
@@ -102,6 +106,10 @@ class NotificationService:
                 extra_receiver_ids,
             )
         )
+
+        event = self.db.get(EventModel, event_id)
+
         for receiver in receivers:
-            notification = NotificationModel(user_id=receiver, event_id=event_id)
-            self.db.add(notification)
+            if receiver != event.actor_id:
+                notification = NotificationModel(user_id=receiver, event_id=event_id)
+                self.db.add(notification)
