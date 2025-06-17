@@ -253,7 +253,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
         name: currentDataset?.name,
         namespace: currentDataset?.namespace,
         description: currentDataset?.description,
-        access_type: currentDataset?.access_type,
+        access_type: mode === 'create' ? DatasetAccess.Public : currentDataset?.access_type,
         lifecycle_id: currentDataset?.lifecycle.id,
         domain_id: currentDataset?.domain.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
@@ -358,7 +358,6 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 name={'access_type'}
                 label={t('Access Type')}
                 tooltip={t('The access type of the dataset')}
-                initialValue={mode === 'create' ? DatasetAccess.Public : currentDataset?.access_type}
                 rules={[
                     {
                         required: true,

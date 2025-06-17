@@ -4,7 +4,7 @@ from typing import Optional
 
 import httpx
 from fastapi.security import OpenIdConnect
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 from app.core.config.env_var_parser import get_boolean_variable
 
@@ -21,6 +21,7 @@ class OIDCConfiguration:
         client_id: Optional[str] = None,
         client_secret: Optional[str] = None,
         authority: Optional[str] = None,
+        audience: Optional[str] = None,
         redirect_uri: Optional[str] = None,
     ):
         if oidc_enabled or get_boolean_variable("OIDC_ENABLED", False):
@@ -29,6 +30,7 @@ class OIDCConfiguration:
                 client_secret if client_secret else os.getenv("OIDC_CLIENT_SECRET")
             )
             self.authority = authority if authority else os.getenv("OIDC_AUTHORITY")
+            self.audience = audience if audience else os.getenv("OIDC_AUDIENCE")
             self.redirect_uri = (
                 redirect_uri if redirect_uri else os.getenv("OIDC_REDIRECT_URI")
             )
@@ -41,9 +43,12 @@ class OIDCConfiguration:
             self.authorization_endpoint = json_config.get("authorization_endpoint")
             self.userinfo_endpoint = json_config.get("userinfo_endpoint")
             self.token_endpoint = json_config.get("token_endpoint")
-            self.jwks_keys = httpx.get(
-                url=f"{self.authority}/.well-known/jwks.json"
-            ).json()
+            if json_config.get("jwks_uri"):
+                self.jwks_keys = httpx.get(url=json_config.get("jwks_uri")).json()
+            else:
+                self.jwks_keys = httpx.get(
+                    url=f"{self.authority}/.well-known/jwks.json"
+                ).json()
             self.oidc_dependency = OpenIdConnect(
                 openIdConnectUrl=self.configuration_url, auto_error=False
             )
@@ -54,4 +59,10 @@ class OIDCIdentity(BaseModel):
     name: str
     family_name: str
     email: str
-    username: str
+    username: Optional[str] = None
+    preferred_username: Optional[str] = None
+
+    @model_validator(mode="before")
+    def populate_username(cls, values):
+        values["username"] = values.get("username") or values.get("preferred_username")
+        return values

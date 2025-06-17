@@ -11,7 +11,8 @@
         "check": "biome check",
         "check:fix": "biome check --fix",
         "start": "npm run copy-config && npm run build && vite preview",
-        "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js"
+        "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js",
+        "typecheck": "tsc --strict"
     },
     "dependencies": {
         "@ant-design/colors": "^8.0.0",
@@ -34,17 +35,17 @@
         "@tiptap/pm": "^2.14.0",
         "@tiptap/react": "^2.14.0",
         "@tiptap/starter-kit": "^2.14.0",
-        "@xyflow/react": "^12.6.4",
-        "antd": "^5.26.0",
-        "axios": "^1.9.0",
+        "@xyflow/react": "^12.7.0",
+        "antd": "^5.26.1",
+        "axios": "^1.10.0",
         "clsx": "^2.1.1",
         "date-fns": "^4.1.0",
         "i18next": "^25.2.1",
         "i18next-http-backend": "^3.0.2",
-        "oidc-client-ts": "^3.2.1",
+        "oidc-client-ts": "^3.3.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
-        "react-i18next": "^15.5.2",
+        "react-i18next": "^15.5.3",
         "react-oidc-context": "^3.3.0",
         "react-redux": "^9.2.0",
         "react-router": "^7.6.2",
@@ -52,10 +53,10 @@
     },
     "devDependencies": {
         "@biomejs/biome": "1.9.4",
-        "@types/node": "^24.0.0",
-        "@types/react": "^19.1.7",
+        "@types/node": "^24.0.3",
+        "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
-        "@typescript-eslint/eslint-plugin": "^8.34.0",
+        "@typescript-eslint/eslint-plugin": "^8.34.1",
         "@typescript-eslint/parser": "^8.32.1",
         "@vitejs/plugin-react": "^4.5.2",
         "axios-mock-adapter": "^2.1.0",
@@ -67,7 +68,7 @@
         "vite-plugin-svgr": "^4.3.0"
     },
     "optionalDependencies": {
-        "@rollup/rollup-linux-x64-musl": "^4.42.0"
+        "@rollup/rollup-linux-x64-musl": "^4.43.0"
     },
     "volta": {
         "node": "20.12.2"

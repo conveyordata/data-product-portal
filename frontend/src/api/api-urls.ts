@@ -54,10 +54,9 @@ export enum ApiUrl {
     RoleAssignmentsDataset = '/api/role_assignments/dataset/:assignmentId',
     RoleAssignmentsDatasetRequest = '/api/role_assignments/dataset/request/:datasetId',
     RoleAssignmentsDatasetDecide = '/api/role_assignments/dataset/:assignmentId/decide',
-    RoleAssignmentsGlobalGet = '/api/role_assignments/global',
-    RoleAssignmentsGlobal = '/api/role_assignments/global/',
+    RoleAssignmentsGlobal = '/api/role_assignments/global',
     RoleAssignmentsGlobalDelete = '/api/role_assignments/global/:assignmentId',
-    RoleAssignmentsGlobalRequest = '/api/role_assignments/global/request/',
+    RoleAssignmentsGlobalRequest = '/api/role_assignments/global/request',
     RoleAssignmentsGlobalDecide = '/api/role_assignments/global/:assignmentId/decide',
     RoleAssignmentsGlobalUpdate = '/api/role_assignments/global/:assignmentId/role',
     Tags = '/api/tags',
@@ -120,7 +119,8 @@ export type DynamicPathParams =
     | 'scope'
     | 'userId'
     | 'roleId'
-    | 'assignmentId';
+    | 'assignmentId'
+    | 'tagId';
 
 export function buildUrl(url: string, pathParams: Partial<Record<DynamicPathParams, string>>): string {
     return Object.keys(pathParams).reduce((acc, key) => {

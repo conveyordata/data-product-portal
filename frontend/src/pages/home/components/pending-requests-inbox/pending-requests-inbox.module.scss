@@ -31,8 +31,7 @@ $item-card-width: 360px;
 .item-card {
     width: 100%;
     height: 100%;
-    padding: globals.$spacing-m globals.$spacing-l;
-    padding-right: 0;
+    padding: globals.$spacing-m 0 globals.$spacing-m globals.$spacing-l;
     min-width: $item-card-width;
 }
 

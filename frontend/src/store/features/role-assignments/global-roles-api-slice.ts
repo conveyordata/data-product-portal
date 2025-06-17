@@ -15,7 +15,7 @@ export const globalRoleAssignmentsApiSlice = baseApiSlice
                 { role_id?: string; user_id?: string; decision?: DecisionStatus }
             >({
                 query: (request) => ({
-                    url: ApiUrl.RoleAssignmentsGlobalGet,
+                    url: ApiUrl.RoleAssignmentsGlobal,
                     method: 'GET',
                     params: {
                         ...(request.role_id ? { global_id: request.role_id } : {}),
