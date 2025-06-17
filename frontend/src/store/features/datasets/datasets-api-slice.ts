@@ -98,6 +98,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 { type: TagTypes.Dataset as const, id },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProduct as const },
+                { type: TagTypes.History as const, id },
             ],
         }),
         updateDatasetAbout: builder.mutation<
@@ -121,7 +122,10 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
 
                 queryFulfilled.catch(patchResult.undo);
             },
-            invalidatesTags: (_, __, { datasetId }) => [{ type: TagTypes.Dataset as const, id: datasetId }],
+            invalidatesTags: (_, __, { datasetId }) => [
+                { type: TagTypes.Dataset as const, id: datasetId },
+                { type: TagTypes.History as const, datasetId },
+            ],
         }),
         getDatasetGraphData: builder.query<GraphContract, string>({
             query: (id) => ({

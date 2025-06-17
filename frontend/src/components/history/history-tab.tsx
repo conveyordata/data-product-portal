@@ -50,7 +50,7 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
         return filterHistory(history ?? [], searchTerm, t);
     }, [history, searchTerm, t]);
 
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination(filteredHistory, {
         initialPagination: HISTORY_PAGINATION,
     });
 

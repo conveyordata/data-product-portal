@@ -49,6 +49,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.DataProductAssignments as const, id: data_product_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.DataProduct as const, id: data_product_id },
+                    { type: TagTypes.History as const, id: data_product_id },
                 ],
             }),
             requestDataProductRoleAssignment: builder.mutation<
@@ -68,6 +69,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.DataProductAssignments as const, id: data_product_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.DataProduct as const, id: data_product_id },
+                    { type: TagTypes.History as const, id: data_product_id },
                 ],
             }),
             updateDataProductRoleAssignment: builder.mutation<
@@ -86,6 +88,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.DataProductAssignments as const, id: data_product_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.DataProduct as const, id: data_product_id },
+                    { type: TagTypes.History as const, id: data_product_id },
                 ],
             }),
             decideDataProductRoleAssignment: builder.mutation<
@@ -104,6 +107,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.DataProductAssignments as const, id: data_product_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.DataProduct as const, id: data_product_id },
+                    { type: TagTypes.History as const, id: data_product_id },
                 ],
             }),
             deleteDataProductRoleAssignment: builder.mutation<
@@ -121,6 +125,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.DataProductAssignments as const, id: data_product_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.DataProduct as const, id: data_product_id },
+                    { type: TagTypes.History as const, id: data_product_id },
                 ],
             }),
         }),

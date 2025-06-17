@@ -46,6 +46,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.DatasetAssignments as const, id: dataset_id },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.Dataset as const, id: dataset_id },
+                    { type: TagTypes.History as const, id: dataset_id },
                 ],
             }),
             requestDatasetRoleAssignment: builder.mutation<
@@ -65,6 +66,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.DatasetAssignments as const, id: dataset_id },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.Dataset as const, id: dataset_id },
+                    { type: TagTypes.History as const, id: dataset_id },
                 ],
             }),
             updateDatasetRoleAssignment: builder.mutation<
@@ -83,6 +85,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.DatasetAssignments as const, id: dataset_id },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.Dataset as const, id: dataset_id },
+                    { type: TagTypes.History as const, id: dataset_id },
                 ],
             }),
             decideDatasetRoleAssignment: builder.mutation<
@@ -101,6 +104,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.DatasetAssignments as const, id: dataset_id },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.Dataset as const, id: dataset_id },
+                    { type: TagTypes.History as const, id: dataset_id },
                 ],
             }),
             deleteDatasetRoleAssignment: builder.mutation<void, { role_assignment_id: string; dataset_id: string }>({
@@ -115,6 +119,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.DatasetAssignments as const, id: dataset_id },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.Dataset as const, id: dataset_id },
+                    { type: TagTypes.History as const, id: dataset_id },
                 ],
             }),
         }),

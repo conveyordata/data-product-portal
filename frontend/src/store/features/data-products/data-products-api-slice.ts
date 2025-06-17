@@ -117,6 +117,7 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: data_product_id },
             ],
         }),
         removeDataProduct: builder.mutation<void, string>({
@@ -181,6 +182,8 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const, id: arg.datasetId },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: arg.datasetId },
+                { type: TagTypes.History as const, id: arg.dataProductId },
             ],
         }),
         removeDatasetFromDataProduct: builder.mutation<
@@ -196,6 +199,8 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const, id: arg.datasetId },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: arg.datasetId },
+                { type: TagTypes.History as const, id: arg.dataProductId },
             ],
         }),
         updateDataProductAbout: builder.mutation<
@@ -223,7 +228,10 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
 
                 queryFulfilled.catch(patchResult.undo);
             },
-            invalidatesTags: (_, __, { dataProductId }) => [{ type: TagTypes.DataProduct as const, id: dataProductId }],
+            invalidatesTags: (_, __, { dataProductId }) => [
+                { type: TagTypes.DataProduct as const, id: dataProductId },
+                { type: TagTypes.History as const, id: dataProductId },
+            ],
         }),
         validateDataProductNamespace: builder.query<NamespaceValidationResponse, string>({
             query: (namespace) => ({
