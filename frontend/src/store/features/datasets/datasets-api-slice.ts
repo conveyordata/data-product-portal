@@ -56,10 +56,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 url: buildUrl(ApiUrl.DatasetHistory, { datasetId: id }),
                 method: 'GET',
             }),
-            providesTags: (_, __, id) => [
-                { type: TagTypes.Dataset as const, id },
-                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
-            ],
+            providesTags: (_, __, id) => [{ type: TagTypes.History as const, id: id }],
         }),
         createDataset: builder.mutation<DatasetCreateResponse, DatasetCreateRequest>({
             query: (dataset) => ({
@@ -77,10 +74,12 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 url: buildUrl(ApiUrl.DatasetGet, { datasetId: id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: [
+            invalidatesTags: (_, _error, arg) => [
                 { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.Dataset as const, id: arg },
+                { type: TagTypes.UserDatasets as const, id: arg },
+                { type: TagTypes.History as const, id: arg },
             ],
         }),
         updateDataset: builder.mutation<

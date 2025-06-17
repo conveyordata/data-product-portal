@@ -81,11 +81,7 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 url: buildUrl(ApiUrl.DataProductHistory, { dataProductId: id }),
                 method: 'GET',
             }),
-            providesTags: (_, __, id) => [
-                { type: TagTypes.DataProduct as const, id },
-                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
-            ],
+            providesTags: (_, __, id) => [{ type: TagTypes.History as const, id: id }],
         }),
         getDataProductGraphData: builder.query<GraphContract, string>({
             query: (id) => ({
@@ -128,10 +124,12 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 url: buildUrl(ApiUrl.DataProductGet, { dataProductId: id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: [
+            invalidatesTags: (_, _error, arg) => [
                 { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const, id: arg },
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.History as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.UserDataProducts as const, id: arg },
+                { type: TagTypes.History as const, id: arg },
             ],
         }),
         getDataProductSignInUrl: builder.mutation<DataProductGetSignInUrlResponse, DataProductGetSignInUrlRequest>({

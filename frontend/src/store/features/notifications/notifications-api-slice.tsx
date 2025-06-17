@@ -21,15 +21,7 @@ export const notificationsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes
                 url: buildUrl(ApiUrl.Notifications, {}),
                 method: 'GET',
             }),
-            providesTags: () => [
-                { type: TagTypes.UserDataOutputs as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.Notifications as const, id: STATIC_TAG_ID.LIST },
-            ],
+            providesTags: () => [{ type: TagTypes.Notifications as const, id: STATIC_TAG_ID.LIST }],
         }),
         removeNotification: builder.mutation<void, string>({
             query: (id) => ({

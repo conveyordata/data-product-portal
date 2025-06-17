@@ -120,6 +120,7 @@ export type DynamicPathParams =
     | 'userId'
     | 'roleId'
     | 'assignmentId'
+    | 'notificationId'
     | 'tagId';
 
 export function buildUrl(url: string, pathParams: Partial<Record<DynamicPathParams, string>>): string {
