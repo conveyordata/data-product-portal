@@ -94,13 +94,13 @@ export function getEventTypeDisplayName(t: TFunction, type: EventType): string {
             return t('Data output removed: link removed with the');
 
         case EventType.DATA_OUTPUT_DATASET_LINK_REQUESTED:
-            return t('Requested data output dataset link to the');
+            return t('Requested producing link with the');
         case EventType.DATA_OUTPUT_DATASET_LINK_APPROVED:
-            return t('Approved data output dataset link to the');
+            return t('Approved producing link with the');
         case EventType.DATA_OUTPUT_DATASET_LINK_DENIED:
-            return t('Denied data output dataset link to the');
+            return t('Denied producing link with the');
         case EventType.DATA_OUTPUT_DATASET_LINK_REMOVED:
-            return t('Removed data output dataset link to the');
+            return t('Removed producing link with the');
 
         case EventType.DATA_PRODUCT_CREATED:
             return t('Data product created');
@@ -110,39 +110,39 @@ export function getEventTypeDisplayName(t: TFunction, type: EventType): string {
             return t('Data product removed');
 
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED:
-            return t('Created data product role assignment for');
+            return t('Added');
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED:
-            return t('Updated data product role assignment for');
+            return t('Updated role for');
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED:
-            return t('Removed data product role assignment for');
+            return t('Removed');
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REQUESTED:
-            return t('Requested data product role assignment for');
+            return t('Requested role for');
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_APPROVED:
-            return t('Approved data product role assignment for');
+            return t('Approved role for');
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_DENIED:
-            return t('Denied data product role assignment for');
+            return t('Denied role for');
 
         case EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED:
-            return t('Requested data product dataset link to the');
+            return t('Requested consuming link with the');
         case EventType.DATA_PRODUCT_DATASET_LINK_APPROVED:
-            return t('Approved data product dataset link to the');
+            return t('Approved consuming link with the');
         case EventType.DATA_PRODUCT_DATASET_LINK_DENIED:
-            return t('Denied data product dataset link to the');
+            return t('Denied consuming link with the');
         case EventType.DATA_PRODUCT_DATASET_LINK_REMOVED:
-            return t('Removed product dataset link to the');
+            return t('Removed consuming link with the');
 
         case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
-            return t('Created dataset role assignment for');
+            return t('Added');
         case EventType.DATASET_ROLE_ASSIGNMENT_UPDATED:
-            return t('Updated dataset role assignment for');
+            return t('Updated role for');
         case EventType.DATASET_ROLE_ASSIGNMENT_REMOVED:
-            return t('Removed dataset role assignment for');
+            return t('Removed');
         case EventType.DATASET_ROLE_ASSIGNMENT_REQUESTED:
-            return t('Requested dataset role assignment for');
+            return t('Requested role for');
         case EventType.DATASET_ROLE_ASSIGNMENT_APPROVED:
-            return t('Approved dataset role assignment for');
+            return t('Approved role for');
         case EventType.DATASET_ROLE_ASSIGNMENT_DENIED:
-            return t('Denied dataset role assignment for');
+            return t('Denied role for');
 
         case EventType.DATASET_CREATED:
             return t('Dataset created');

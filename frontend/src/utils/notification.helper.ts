@@ -30,15 +30,15 @@ export function getEventTypeNotificationText(t: TFunction, type: EventType): str
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED:
             return '';
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED:
-            return t('role assignment updated for user ');
+            return t('role updated for ');
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED:
-            return t('role assignment removed for user ');
+            return t('role removed for ');
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REQUESTED:
             return '';
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_APPROVED:
-            return t('role assignment approved for user ');
+            return t('role approved for ');
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_DENIED:
-            return t('role assignment denied for user ');
+            return t('role denied for ');
 
         case EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED:
             return '';
@@ -59,15 +59,15 @@ export function getEventTypeNotificationText(t: TFunction, type: EventType): str
         case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
             return '';
         case EventType.DATASET_ROLE_ASSIGNMENT_UPDATED:
-            return t('role assignment updated for user ');
+            return t('role updated for ');
         case EventType.DATASET_ROLE_ASSIGNMENT_REMOVED:
-            return t('role assignment removed for user ');
+            return t('role removed for ');
         case EventType.DATASET_ROLE_ASSIGNMENT_REQUESTED:
             return '';
         case EventType.DATASET_ROLE_ASSIGNMENT_APPROVED:
-            return t('role assignment approved for user ');
+            return t('role approved for');
         case EventType.DATASET_ROLE_ASSIGNMENT_DENIED:
-            return t('role assignment denied for user ');
+            return t('role denied for ');
 
         default:
             return '';
