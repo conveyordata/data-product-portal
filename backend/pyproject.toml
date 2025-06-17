@@ -33,7 +33,7 @@ emailgen = "^0.1.1"
 casbin = "^1.43.0"
 casbin_sqlalchemy_adapter = "^1.4.0"
 asyncpg = "^0.30.0"
-cachetools = "^6.0.0"
+cachetools = "^6.1.0"
 greenlet = "^3.2.3"
 h11 = "^0.16.0"
 
