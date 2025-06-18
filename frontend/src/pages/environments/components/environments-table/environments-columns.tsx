@@ -1,4 +1,4 @@
-import type { TableColumnsType } from 'antd';
+import { Flex, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import deleteIcon from '@/assets/icons/delete-button.svg?react';
@@ -49,14 +49,14 @@ export const getEnvironmentTableColumns = ({ t }: { t: TFunction }): TableColumn
                 dispatchMessage({ content: t('Environment deleted successfully'), type: 'success' });
             };
             return (
-                <div
+                <Flex
                     onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(record.id);
                     }}
                 >
                     <CustomSvgIconLoader iconComponent={deleteIcon} size="x-small" color={'dark'} />
-                </div>
+                </Flex>
             );
         },
     },

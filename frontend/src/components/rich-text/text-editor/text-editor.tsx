@@ -95,32 +95,28 @@ export const TextEditor = ({
                 <EditorContent editor={editor} content={content} className={styles.content} />
             </div>
             {isEditMode ? (
-                <>
-                    <Popover content={t('Save changes')}>
+                <Popover content={t('Save changes')}>
+                    <Button
+                        type="primary"
+                        className={styles.submitButton}
+                        onClick={handleSubmit}
+                        icon={<CheckOutlined />}
+                        disabled={isDisabled || isLoading || isSubmitting}
+                        loading={isSubmitting}
+                    />
+                </Popover>
+            ) : (
+                !isDisabled && (
+                    <Popover content={t('Edit content')}>
                         <Button
                             type="primary"
                             className={styles.submitButton}
-                            onClick={handleSubmit}
-                            icon={<CheckOutlined />}
+                            onClick={toggleEditMode}
                             disabled={isDisabled || isLoading || isSubmitting}
-                            loading={isSubmitting}
+                            icon={<EditOutlined />}
                         />
                     </Popover>
-                </>
-            ) : (
-                <>
-                    {!isDisabled && (
-                        <Popover content={t('Edit content')}>
-                            <Button
-                                type="primary"
-                                className={styles.submitButton}
-                                onClick={toggleEditMode}
-                                disabled={isDisabled || isLoading || isSubmitting}
-                                icon={<EditOutlined />}
-                            />
-                        </Popover>
-                    )}
-                </>
+                )
             )}
         </div>
     );

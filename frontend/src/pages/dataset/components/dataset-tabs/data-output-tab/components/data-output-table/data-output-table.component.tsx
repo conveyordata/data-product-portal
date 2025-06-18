@@ -10,9 +10,8 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputLink } from '@/types/dataset';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
-
-import { getDatasetDataProductsColumns } from './data-output-table-columns.tsx';
 import styles from './data-output-table.module.scss';
+import { getDatasetDataProductsColumns } from './data-output-table-columns.tsx';
 
 type Props = {
     datasetId: string;

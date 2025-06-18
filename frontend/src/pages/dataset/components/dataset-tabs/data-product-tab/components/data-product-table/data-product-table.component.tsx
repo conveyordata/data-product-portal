@@ -10,9 +10,8 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataProductLink } from '@/types/dataset';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
-
-import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';
 import styles from './data-product-table.module.scss';
+import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';
 
 type Props = {
     datasetId: string;

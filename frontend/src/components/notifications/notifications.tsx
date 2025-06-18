@@ -1,17 +1,15 @@
 import { BellOutlined, ExportOutlined } from '@ant-design/icons';
 import { Badge, Button, Dropdown, Flex, type MenuProps, Space, Typography, theme } from 'antd';
+import type { ItemType } from 'antd/es/menu/interface';
 import type { TFunction } from 'i18next';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, type NavigateFunction, useNavigate } from 'react-router';
-
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 import { type PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
-
-import type { ItemType } from 'antd/es/menu/interface';
 import styles from './notifications.module.scss';
 
 export function Notifications() {

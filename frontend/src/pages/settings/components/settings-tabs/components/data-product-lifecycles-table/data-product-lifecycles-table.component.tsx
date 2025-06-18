@@ -11,9 +11,8 @@ import {
 } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-
-import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
 import styles from './data-product-lifecycles-table.module.scss';
+import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
 import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.component.tsx';
 
 export function DataProductLifecyclesTable() {

@@ -13,8 +13,8 @@ import type { DataProductTypesGetContract } from '@/types/data-product-type';
 
 import { CreateDataProductTypeModal } from './data-product-type-form-modal.component';
 import { CreateDataProductTypeMigrateModal } from './data-product-type-migrate-modal.component';
-import { getDataProductTypeTableColumns } from './data-product-type-table-columns';
 import styles from './data-product-type-table.module.scss';
+import { getDataProductTypeTableColumns } from './data-product-type-table-columns';
 
 export function DataProductTypeTable() {
     const { t } = useTranslation();

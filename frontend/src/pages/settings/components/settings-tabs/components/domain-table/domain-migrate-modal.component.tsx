@@ -1,5 +1,5 @@
 import { Button, Form, Input, Select } from 'antd';
-
+import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useGetAllDomainsQuery,
@@ -8,7 +8,6 @@ import {
 } from '@/store/features/domains/domains-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type { DomainContract } from '@/types/domain';
-import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 

@@ -28,11 +28,7 @@ function getUser() {
 
 export const axiosBaseQuery =
     (
-        {
-            baseUrl,
-        }: {
-            baseUrl: string;
-        } = { baseUrl: AppConfig.getApiBaseURL() },
+        { baseUrl }: { baseUrl: string } = { baseUrl: AppConfig.getApiBaseURL() },
     ): BaseQueryFn<
         {
             url: string;
