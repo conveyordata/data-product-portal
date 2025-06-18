@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.13"
 python-dotenv = "^1.1.0"
-fastapi = "0.115.12"
+fastapi = "0.115.13"
 gunicorn = "^23.0.0"
 uvicorn = "^0.34.3"
 pydantic = { version = "^2.11.7", extras = ['email'] }
