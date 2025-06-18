@@ -10,6 +10,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects.postgresql import UUID
 
 from app.shared.model import utcnow
 
@@ -58,9 +59,25 @@ def upgrade() -> None:
     )
     op.create_index("index_events_subject", "events", ["subject_type", "subject_id"])
     op.create_index("index_events_target", "events", ["target_type", "target_id"])
+    op.create_table(
+        "notifications",
+        sa.Column("id", UUID(as_uuid=True), primary_key=True),
+        sa.Column(
+            "event_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("events.id", ondelete="CASCADE"),
+        ),
+        sa.Column(
+            "user_id", UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")
+        ),
+        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
+        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
+        sa.Column("deleted_at", sa.DateTime),
+    )
 
 
 def downgrade() -> None:
+    op.drop_table("notifications")
     op.drop_index("index_events_subject", table_name="events")
     op.drop_index("index_events_target", table_name="events")
     op.drop_table("events")
