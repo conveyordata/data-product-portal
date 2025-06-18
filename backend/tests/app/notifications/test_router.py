@@ -1,9 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from tests.factories import (
-    UserFactory,
-)
-from tests.factories.notification import NotificationFactory
+from tests.factories import NotificationFactory, UserFactory
 
 from app.notifications.schema import Notification
 from app.users.schema import User
