@@ -181,6 +181,7 @@ class DataProductService:
     def create_data_product(
         self,
         data_product: DataProductCreate,
+        *,
         actor: User,
     ) -> DataProductModel:
         if (
@@ -240,6 +241,7 @@ class DataProductService:
         self,
         id: UUID,
         data_product: DataProductUpdate,
+        *,
         actor: User,
     ) -> dict[str, UUID]:
         current_data_product = ensure_data_product_exists(id, self.db)
@@ -282,6 +284,7 @@ class DataProductService:
         self,
         id: UUID,
         data_product: DataProductAboutUpdate,
+        *,
         actor: User,
     ) -> None:
         current_data_product = ensure_data_product_exists(id, self.db)
@@ -300,6 +303,7 @@ class DataProductService:
         self,
         id: UUID,
         data_product: DataProductStatusUpdate,
+        *,
         actor: User,
     ) -> None:
         current_data_product = ensure_data_product_exists(id, self.db)
@@ -318,6 +322,7 @@ class DataProductService:
         self,
         id: UUID,
         dataset_id: UUID,
+        *,
         actor: User,
     ) -> DataProductDatasetModel:
         dataset = ensure_dataset_exists(
@@ -385,6 +390,7 @@ class DataProductService:
         self,
         id: UUID,
         dataset_id: UUID,
+        *,
         actor: User,
     ) -> None:
         ensure_dataset_exists(dataset_id, self.db)
