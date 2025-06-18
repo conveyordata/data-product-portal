@@ -1,0 +1,15 @@
+@use '@/styles/globals';
+
+.team-list-container {
+    @extend .no-select;
+    width: 100%;
+
+    .team-list-table {
+        width: 100%;
+    }
+}
+
+.pagination {
+    margin-top: 0 !important;
+    margin-bottom: globals.$spacing-regular !important;
+}

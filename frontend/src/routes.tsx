@@ -30,6 +30,7 @@ import { PlatformServiceConfig } from './pages/platform-service-config/platform-
 import { PlatformServiceConfigCreate } from './pages/platform-service-config-create/platform-service-config-create.page.tsx';
 import { PlatformsConfigs } from './pages/platforms-configs/platforms-configs.page.tsx';
 import { Settings } from './pages/settings/settings.page.tsx';
+import { User } from './pages/user/user.page.tsx';
 import { Users } from './pages/users/users.page.tsx';
 
 const router = createBrowserRouter([
@@ -99,7 +100,16 @@ const router = createBrowserRouter([
                     },
                     {
                         path: ApplicationPaths.People,
-                        element: <Users />,
+                        children: [
+                            {
+                                element: <Users />,
+                                index: true,
+                            },
+                            {
+                                path: ApplicationPaths.User,
+                                element: <User />,
+                            },
+                        ],
                     },
                     {
                         path: ApplicationPaths.AuditLogs,

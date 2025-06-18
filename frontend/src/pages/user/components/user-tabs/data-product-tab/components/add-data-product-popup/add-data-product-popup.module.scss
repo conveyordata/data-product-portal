@@ -1,0 +1,21 @@
+@use '@/styles/globals';
+
+.search-field-wrapper {
+    margin-bottom: 0 !important;
+}
+
+.dataset-list {
+    max-height: globals.$modal-content-max-height;
+    overflow: auto;
+}
+
+.dataset-name {
+    font-weight: globals.$font-weight-normal;
+}
+
+.dataset-item {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

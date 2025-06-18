@@ -31,6 +31,7 @@ export enum ApplicationPaths {
     DataProductLifecycles = '/data-product-lifecycles',
     RoleConfiguration = '/configuration/roles',
     People = '/people',
+    User = '/people/:userId',
 }
 
 export const authenticatedPaths: string[] = [
@@ -55,7 +56,12 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.EnvironmentConfigNew,
     ApplicationPaths.Explorer,
     ApplicationPaths.People,
+    ApplicationPaths.User,
 ];
+
+export function createUserIdPath(userId: string): string {
+    return ApplicationPaths.User.replace(':userId', encodeURIComponent(userId));
+}
 
 export function createDataProductIdPath(
     dataProductId: string,
@@ -101,6 +107,7 @@ export enum DynamicPathParams {
     PlatformServiceConfigId = 'platformServiceConfigId',
     EnvironmentId = 'environmentId',
     EnvConfigId = 'envConfigId',
+    UserId = 'userId',
 }
 
 export enum ApplicationPageTitles {

@@ -38,6 +38,7 @@ export enum ApiUrl {
     DataProductNamespaceLimits = '/api/data_products/namespace_length_limits',
     DataProductDataOutputNamespaceValidation = '/api/data_products/:dataProductId/data_output/validate_namespace',
     Users = '/api/users',
+    User = '/api/users/:userId',
     UserDataProducts = '/api/data_products/user/:userId',
     UserDatasets = '/api/datasets/user/:userId',
     Authorize = '/api/auth/user',

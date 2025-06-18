@@ -1,0 +1,61 @@
+@use '@/styles/globals';
+
+.dataset-container {
+    @extend .container;
+    gap: globals.$column-gap-xl;
+}
+
+.dataset-header-container {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.dataset-header {
+    margin-bottom: globals.$spacing-l;
+    gap: globals.$column-gap-regular;
+    align-items: center;
+
+    .dataset-icon {
+        width: globals.$icon-size-ml;
+        height: globals.$icon-size-ml;
+    }
+
+    h3 {
+        margin: 0;
+        text-wrap: avoid;
+        white-space: nowrap;
+    }
+}
+
+.dataset-content {
+    @extend .container;
+
+    .dataset-overview {
+        flex: 1;
+        gap: globals.$column-gap-regular;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+}
+
+.sidebar {
+    flex: 0.3;
+    min-width: globals.$min-sidebar-width;
+    gap: globals.$column-gap-xl;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.main-content {
+    flex: 1;
+    gap: globals.$column-gap-xl;
+}
+
+.actions-container {
+    width: 100%;
+    gap: globals.$column-gap-sm;
+}
+
+.sectionWrapper {
+    gap: globals.$column-gap-regular;
+}

@@ -1,7 +1,7 @@
 import { Flex, Form, Input, Pagination, Table, Typography } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { useNavigate } from 'react-router';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
@@ -14,6 +14,7 @@ import {
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { createUserIdPath } from '@/types/navigation';
 import type { GlobalRoleAssignmentContract } from '@/types/roles/role.contract';
 import type { SearchForm } from '@/types/shared';
 import type { UsersGetContract } from '@/types/users/user.contract';
@@ -33,6 +34,7 @@ function filterUsers(users: UsersGetContract, searchTerm?: string) {
 
 export function UsersTable() {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const { data: users = [], isFetching } = useGetAllUsersQuery();
     const { data: roles = [] } = useGetRolesQuery('global');
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
@@ -46,6 +48,10 @@ export function UsersTable() {
     const [updateGlobalRole] = useUpdateGlobalRoleAssignmentMutation();
     const [decideGlobalRole] = useDecideGlobalRoleAssignmentMutation();
     const [deleteGlobalRole] = useDeleteGlobalRoleAssignmentMutation();
+
+    function navigateToUser(userId: string) {
+        navigate(createUserIdPath(userId));
+    }
 
     const onChangeGlobalRole = useCallback(
         (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => {
@@ -162,6 +168,11 @@ export function UsersTable() {
                 </Flex>
 
                 <Table<UsersGetContract[0]>
+                    onRow={(record) => {
+                        return {
+                            onClick: () => navigateToUser(record.id),
+                        };
+                    }}
                     className={styles.table}
                     columns={columns}
                     dataSource={filteredUsers}

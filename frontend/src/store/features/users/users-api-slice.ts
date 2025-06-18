@@ -1,8 +1,8 @@
-import { ApiUrl } from '@/api/api-urls';
+import { ApiUrl, buildUrl } from '@/api/api-urls';
 import { baseApiSlice } from '@/store/features/api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types';
 import type { UserContract, UserCreateRequest } from '@/types/users';
-import type { UsersGetContract } from '@/types/users/user.contract';
+import type { UserResponseContract, UsersGetContract } from '@/types/users/user.contract';
 
 export const userTags: string[] = [TagTypes.User];
 
@@ -21,6 +21,16 @@ export const usersApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: userTa
                       ]
                     : [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
         }),
+        getUser: builder.query<UserResponseContract, string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.User, { userId: id }),
+                method: 'GET',
+                params: {
+                    id,
+                },
+            }),
+            providesTags: (result) => [{ type: TagTypes.User as const, id: result ? result.id : STATIC_TAG_ID.LIST }],
+        }),
         createUser: builder.mutation<UserContract, UserCreateRequest>({
             query: (user) => ({
                 url: ApiUrl.Users,
@@ -35,4 +45,4 @@ export const usersApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: userTa
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetAllUsersQuery, useCreateUserMutation } = usersApiSlice;
+export const { useGetAllUsersQuery, useCreateUserMutation, useGetUserQuery } = usersApiSlice;

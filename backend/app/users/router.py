@@ -19,6 +19,11 @@ def get_users(db: Session = Depends(get_db_session)) -> Sequence[UsersGet]:
     return UserService(db).get_users()
 
 
+@router.get("/{id}")
+def get_user(id: UUID, db: Session = Depends(get_db_session)) -> UsersGet:
+    return UserService(db).get_user(id)
+
+
 @router.delete(
     "/{id}",
     responses={

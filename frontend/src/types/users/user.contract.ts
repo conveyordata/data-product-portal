@@ -13,3 +13,19 @@ export type UsersGetContract = Array<
         global_role: GlobalRoleAssignmentContract;
     }
 >;
+
+export interface UserResponseContract extends UserContract {
+    phone?: string;
+    location?: string;
+    joinDate: string;
+    global_role: GlobalRoleAssignmentContract | null;
+    dataProducts?: number;
+    tags?: string[];
+    description?: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+    last_login?: string;
+    is_deleted?: boolean;
+    is_pending?: boolean;
+}

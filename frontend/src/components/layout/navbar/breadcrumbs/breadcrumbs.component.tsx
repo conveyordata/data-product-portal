@@ -25,6 +25,7 @@ import {
     useGetEnvironmentByIdQuery,
 } from '@/store/features/environments/environments-api-slice';
 import { useGetPlatformServiceConfigByIdQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
+import { useGetUserQuery } from '@/store/features/users/users-api-slice';
 import { ApplicationPaths, createEnvironmentConfigsPath, type DynamicPathParams } from '@/types/navigation.ts';
 import {
     isDataOutputEditPage,
@@ -34,7 +35,6 @@ import {
     isEnvironmentConfigCreatePage,
     isEnvironmentConfigsPage,
 } from '@/utils/routes.helper.ts';
-
 import styles from './breadcrumbs.module.scss';
 
 type BreadcrumbType = Partial<BreadcrumbItemType & BreadcrumbSeparatorType> & { icon?: ReactNode };
@@ -54,7 +54,11 @@ export const Breadcrumbs = () => {
         environmentId = '',
         envConfigId = '',
         dataOutputId = '',
+        userId = '',
     } = params;
+    const { data: user, isFetching: isFetchingUser } = useGetUserQuery(userId, {
+        skip: !userId,
+    });
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductByIdQuery(dataProductId, {
         skip: !dataProductId,
     });
@@ -203,6 +207,16 @@ export const Breadcrumbs = () => {
                     });
 
                     // Case for data product and dataset
+                    if (user && !isFetchingUser) {
+                        Object.assign(breadcrumbItem, {
+                            path: path,
+                            title: (
+                                <Typography.Text rootClassName={styles.title}>
+                                    {user.first_name} {user.last_name}
+                                </Typography.Text>
+                            ),
+                        });
+                    }
                     if (dataProduct && !isFetchingDataProduct) {
                         if (
                             isDataProductEditPage(path, dataProduct.id) ||
@@ -331,6 +345,8 @@ export const Breadcrumbs = () => {
             isFetchingEnvConfig,
             isFetchingEnvironment,
             isFetchingPlatformServiceConfig,
+            user,
+            isFetchingUser,
         ],
     );
 

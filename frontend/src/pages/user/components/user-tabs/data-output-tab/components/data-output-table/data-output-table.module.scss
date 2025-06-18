@@ -1,0 +1,19 @@
+@use '@/styles/globals';
+
+.dataset-list-container {
+    @extend .no-select;
+    width: 100%;
+
+    .dataset-list-table {
+        width: 100%;
+    }
+}
+
+.dataset-cell-wrapper {
+    width: 100%;
+}
+
+.pagination {
+    margin-top: 0 !important;
+    margin-bottom: globals.$spacing-regular !important;
+}

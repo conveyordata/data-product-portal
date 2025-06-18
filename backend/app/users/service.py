@@ -22,6 +22,9 @@ class UserService:
             .order_by(asc(UserModel.last_name), asc(UserModel.first_name))
         ).all()
 
+    def get_user(self, id: UUID) -> UsersGet:
+        return ensure_user_exists(id, self.db)
+
     def remove_user(self, id: UUID) -> None:
         user = ensure_user_exists(id, self.db)
         user.data_products = []
