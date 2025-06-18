@@ -1,10 +1,9 @@
 import { Button, Form, Input } from 'antd';
-
+import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useCreateTagMutation, useUpdateTagMutation } from '@/store/features/tags/tags-api-slice';
 import type { TagContract } from '@/types/tag';
-import { useTranslation } from 'react-i18next';
 
 interface TagsFormText {
     title: string;

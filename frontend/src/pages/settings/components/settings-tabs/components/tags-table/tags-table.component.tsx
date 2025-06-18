@@ -9,8 +9,8 @@ import { useGetAllTagsQuery, useRemoveTagMutation } from '@/store/features/tags/
 import type { TagContract } from '@/types/tag/tag';
 
 import { CreateTagsModal } from './tags-form-modal.component';
-import { getTagsTableColumns } from './tags-table-columns';
 import styles from './tags-table.module.scss';
+import { getTagsTableColumns } from './tags-table-columns';
 
 export function TagsTable() {
     const { t } = useTranslation();

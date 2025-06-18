@@ -4,9 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { SearchForm } from '@/types/shared';
-
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import {
     useCreateGlobalRoleAssignmentMutation,
@@ -16,10 +13,12 @@ import {
 } from '@/store/features/role-assignments/global-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { GlobalRoleAssignmentContract } from '@/types/roles/role.contract';
+import type { SearchForm } from '@/types/shared';
 import type { UsersGetContract } from '@/types/users/user.contract';
-import { getUserTableColumns } from './users-table-columns';
 import styles from './users-table.module.scss';
+import { getUserTableColumns } from './users-table-columns';
 
 function filterUsers(users: UsersGetContract, searchTerm?: string) {
     if (!searchTerm) {

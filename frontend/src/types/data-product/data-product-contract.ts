@@ -1,7 +1,7 @@
 import type { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
+import type { DatasetLink } from '@/types/data-product/dataset-link.contract.ts';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import type { DataProductTypeContract } from '@/types/data-product-type';
-import type { DatasetLink } from '@/types/data-product/dataset-link.contract.ts';
 import type { DomainContract } from '@/types/domain';
 import type { TagContract } from '@/types/tag';
 

@@ -6,9 +6,8 @@ import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import type { DataOutputDatasetLink } from '@/types/data-output';
-
-import { getDataOutputDatasetsColumns } from './dataset-table-columns.tsx';
 import styles from './dataset-table.module.scss';
+import { getDataOutputDatasetsColumns } from './dataset-table-columns.tsx';
 
 type Props = {
     dataProductId: string | undefined;

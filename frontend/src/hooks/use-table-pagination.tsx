@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-
-import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
 import type { PaginationProps } from 'antd/es/pagination/Pagination';
+import { useCallback, useEffect, useState } from 'react';
+import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
 
 const defaultValues: Props = {
     initialPagination: DEFAULT_TABLE_PAGINATION,

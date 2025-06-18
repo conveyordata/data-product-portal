@@ -10,8 +10,8 @@ import type { DomainsGetContract } from '@/types/domain';
 
 import { CreateDomainModal } from './domain-form-modal.component';
 import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
-import { getDomainTableColumns } from './domain-table-columns';
 import styles from './domain-table.module.scss';
+import { getDomainTableColumns } from './domain-table-columns';
 
 export function DomainTable() {
     const { t } = useTranslation();

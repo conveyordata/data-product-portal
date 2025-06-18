@@ -1,14 +1,13 @@
 import { UserOutlined } from '@ant-design/icons';
 import { Avatar, Button, Flex, List, Typography } from 'antd';
+import type { PaginationConfig } from 'antd/es/pagination';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
 import type { ActionResolveRequest } from '@/types/pending-actions/pending-actions';
 import { formatDate } from '@/utils/date.helper.ts';
-import type { PaginationConfig } from 'antd/es/pagination';
 
 export type PendingActionItem = {
     key: string;

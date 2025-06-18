@@ -1,14 +1,12 @@
 import { EyeInvisibleOutlined } from '@ant-design/icons';
 import { Popover } from 'antd';
 import clsx from 'clsx';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { DatasetAccess } from '@/types/dataset';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
-
-import { useMemo } from 'react';
 import styles from './dataset-access-icon.module.scss';
 
 type Props = {

@@ -1,8 +1,8 @@
 import { Button, Checkbox, Form, Input, InputNumber, Select } from 'antd';
 import type { TFunction } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
-
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import {
@@ -18,8 +18,6 @@ import type {
     DataProductSettingScope,
     DataProductSettingType,
 } from '@/types/data-product-setting';
-
-import { useTranslation } from 'react-i18next';
 import styles from './data-product-settings-table.module.scss';
 
 const { Option } = Select;
