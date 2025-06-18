@@ -10,9 +10,8 @@ import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputsGetContract } from '@/types/data-output';
-
-import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
 import styles from './data-output-table.module.scss';
+import { getDataProductDataOutputsColumns } from './data-output-table-columns.tsx';
 
 type Props = {
     dataProductId: string;

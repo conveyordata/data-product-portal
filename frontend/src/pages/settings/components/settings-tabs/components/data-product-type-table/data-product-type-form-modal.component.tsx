@@ -1,6 +1,6 @@
 import Icon from '@ant-design/icons';
 import { Button, Form, Input, Select } from 'antd';
-
+import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useCreateDataProductTypeMutation,
@@ -10,8 +10,6 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import type { DataProductTypeContract, DataProductTypeCreateRequest } from '@/types/data-product-type';
 import { DataProductIcon, dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
-
-import { useTranslation } from 'react-i18next';
 import styles from './data-product-type-table.module.scss';
 
 const { Option } = Select;

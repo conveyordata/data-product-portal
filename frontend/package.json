@@ -17,7 +17,7 @@
     "dependencies": {
         "@ant-design/colors": "^8.0.0",
         "@ant-design/v5-patch-for-react-19": "^1.0.3",
-        "@dagrejs/dagre": "^1.1.4",
+        "@dagrejs/dagre": "^1.1.5",
         "@fontsource/inter": "^5.2.6",
         "@reduxjs/toolkit": "^2.8.2",
         "@tiptap/extension-bubble-menu": "^2.14.0",
@@ -52,7 +52,7 @@
         "use-debounce": "^10.0.5"
     },
     "devDependencies": {
-        "@biomejs/biome": "1.9.4",
+        "@biomejs/biome": "2.0.0",
         "@types/node": "^24.0.3",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",

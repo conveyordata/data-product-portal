@@ -7,6 +7,7 @@ import { Link } from 'react-router';
 
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { useTablePagination } from '@/hooks/use-table-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
@@ -17,8 +18,6 @@ import {
     PendingActionTypes,
 } from '@/types/pending-actions/pending-actions';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
-
-import { useTablePagination } from '@/hooks/use-table-pagination';
 import styles from './pending-requests-inbox.module.scss';
 import { type PendingActionItem, PendingRequestsList } from './pending-requests-list';
 import { type CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';

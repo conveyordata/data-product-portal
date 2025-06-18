@@ -1,9 +1,8 @@
 import type { TableColumnsType } from 'antd';
 import dayjs from 'dayjs';
 import type { TFunction } from 'i18next';
-
-import type { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import type { EventContract } from '@/types/events/event.contract';
+import type { EventReferenceEntity } from '@/types/events/event-reference-entity';
 
 import { HistoryTableEventName } from './history-table-event-name';
 

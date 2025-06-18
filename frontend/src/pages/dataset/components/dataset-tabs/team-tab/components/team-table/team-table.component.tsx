@@ -14,9 +14,8 @@ import {
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { DatasetRoleAssignmentContract, RoleContract } from '@/types/roles/role.contract';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
-
-import { getDatasetTeamColumns } from './team-table-columns';
 import styles from './team-table.module.scss';
+import { getDatasetTeamColumns } from './team-table-columns';
 
 type Props = {
     datasetId: string;

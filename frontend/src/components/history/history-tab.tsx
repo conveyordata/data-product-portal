@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import { HISTORY_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import type { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import type { EventContract } from '@/types/events/event.contract';
+import type { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import { getEventTypeDisplayName, getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
 
 import { Searchbar } from '../form';

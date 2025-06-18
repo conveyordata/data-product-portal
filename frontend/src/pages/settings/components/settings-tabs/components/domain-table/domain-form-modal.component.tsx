@@ -1,10 +1,9 @@
 import { Button, Form, Input } from 'antd';
-
+import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { useCreateDomainMutation, useUpdateDomainMutation } from '@/store/features/domains/domains-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type { DomainContract, DomainCreateRequest } from '@/types/domain';
-import { useTranslation } from 'react-i18next';
 
 interface DomainFormText {
     title: string;

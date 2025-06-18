@@ -2,11 +2,10 @@ import { Select, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { FilterSettings } from '@/utils/table-filter.helper';
-import { Sorter } from '@/utils/table-sorter.helper';
-
 import type { GlobalRoleAssignmentContract, RoleContract } from '@/types/roles/role.contract';
 import type { UsersGetContract } from '@/types/users/user.contract';
+import { FilterSettings } from '@/utils/table-filter.helper';
+import { Sorter } from '@/utils/table-sorter.helper';
 import styles from './users-table.module.scss';
 
 export const getUserTableColumns = ({
