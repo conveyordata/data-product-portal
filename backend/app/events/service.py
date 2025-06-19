@@ -1,18 +1,21 @@
+from typing import Sequence
 from uuid import UUID
 
-from sqlalchemy import and_, event, or_, select, update
+from sqlalchemy import and_
+from sqlalchemy import event as sql_event
+from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session
 
 from app.data_outputs.model import DataOutput
 from app.data_products.model import DataProduct
 from app.datasets.model import Dataset
-from app.events.enum import EventReferenceEntity
+from app.events.enums import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.users.model import User
 
 
-@event.listens_for(User, "before_delete")
+@sql_event.listens_for(User, "before_delete")
 def _backup_user_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
@@ -36,7 +39,7 @@ def _backup_user_name_on_delete(mapper, connection, target):
     )
 
 
-@event.listens_for(Dataset, "before_delete")
+@sql_event.listens_for(Dataset, "before_delete")
 def _backup_dataset_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
@@ -60,7 +63,7 @@ def _backup_dataset_name_on_delete(mapper, connection, target):
     )
 
 
-@event.listens_for(DataProduct, "before_delete")
+@sql_event.listens_for(DataProduct, "before_delete")
 def _backup_data_product_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
@@ -84,7 +87,7 @@ def _backup_data_product_name_on_delete(mapper, connection, target):
     )
 
 
-@event.listens_for(DataOutput, "before_delete")
+@sql_event.listens_for(DataOutput, "before_delete")
 def _backup_data_output_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
@@ -118,7 +121,7 @@ class EventService:
         self.db.flush()
         return event.id
 
-    def get_history(self, id: UUID, type: EventReferenceEntity):
+    def get_history(self, id: UUID, type: EventReferenceEntity) -> Sequence[EventModel]:
         return self.db.scalars(
             select(EventModel)
             .where(

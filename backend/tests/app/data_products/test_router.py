@@ -1,6 +1,6 @@
 import json
 from copy import deepcopy
-
+from fastapi.testclient import TestClient
 import pytest
 from sqlalchemy.exc import IntegrityError
 from tests.factories import (
@@ -554,7 +554,7 @@ class TestDataProductsRouter:
         assert response.json()["validity"] == NamespaceValidityType.DUPLICATE_NAMESPACE
 
     def test_validate_data_output_namespace_duplicate_scoped_to_data_product(
-        self, client
+        self, client: TestClient
     ):
         namespace = "test"
         data_product = DataProductFactory()
@@ -567,7 +567,7 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["validity"] == NamespaceValidityType.VALID
 
-    def test_update_data_product_duplicate_namespace(self, payload, client):
+    def test_update_data_product_duplicate_namespace(self, payload, client: TestClient):
         namespace = "namespace"
         DataProductFactory(namespace=namespace)
         user = UserFactory(external_id="sub")
@@ -588,7 +588,7 @@ class TestDataProductsRouter:
         assert response.status_code == 400
 
     def test_history_event_created_on_data_product_creation(
-        self, payload, client, session
+        self, payload, client: TestClient, session
     ):
         RoleService(db=session).initialize_prototype_roles()
         user = UserFactory(external_id="sub")
@@ -609,7 +609,7 @@ class TestDataProductsRouter:
         ).json()
         assert len(history) == 3
 
-    def test_history_event_created_on_data_product_update(self, payload, client):
+    def test_history_event_created_on_data_product_update(self, payload, client: TestClient):
         user = UserFactory(external_id="sub")
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -687,7 +687,7 @@ class TestDataProductsRouter:
         history = self.get_data_product_history(client, data_product.id).json()
         assert len(history) == 1
 
-    def test_retain_deleted_data_product_name_in_history(self, client):
+    def test_retain_deleted_data_product_name_in_history(self, client: TestClient):
         user = UserFactory(external_id="sub")
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -711,60 +711,60 @@ class TestDataProductsRouter:
         assert response.json()[0]["deleted_subject_identifier"] == data_product_name
 
     @staticmethod
-    def create_data_product(client, default_data_product_payload):
+    def create_data_product(client: TestClient, default_data_product_payload):
         return client.post(ENDPOINT, json=default_data_product_payload)
 
     @staticmethod
-    def update_data_product(client, payload, data_product_id):
+    def update_data_product(client: TestClient, payload, data_product_id):
         return client.put(f"{ENDPOINT}/{data_product_id}", json=payload)
 
     @staticmethod
-    def update_data_product_about(client, data_product_id):
+    def update_data_product_about(client: TestClient, data_product_id):
         data = {"about": "Updated Data Product Description"}
         return client.put(f"{ENDPOINT}/{data_product_id}/about", json=data)
 
     @staticmethod
-    def update_data_product_status(client, status, data_product_id):
+    def update_data_product_status(client: TestClient, status, data_product_id):
         return client.put(f"{ENDPOINT}/{data_product_id}/status", json=status)
 
     @staticmethod
-    def delete_data_product(client, data_product_id):
+    def delete_data_product(client: TestClient, data_product_id):
         return client.delete(f"{ENDPOINT}/{data_product_id}")
 
     @staticmethod
-    def get_data_product_by_id(client, data_product_id):
+    def get_data_product_by_id(client: TestClient, data_product_id):
         return client.get(f"{ENDPOINT}/{data_product_id}")
 
     @staticmethod
-    def get_data_outputs(client, data_product_id):
+    def get_data_outputs(client: TestClient, data_product_id):
         return client.get(f"{ENDPOINT}/{data_product_id}/data_outputs")
 
     @staticmethod
-    def get_data_product_by_user_id(client, user_id):
+    def get_data_product_by_user_id(client: TestClient, user_id):
         return client.get(f"{ENDPOINT}/user/{user_id}")
 
     @staticmethod
-    def get_data_product_history(client, data_product_id):
+    def get_data_product_history(client: TestClient, data_product_id):
         return client.get(f"{ENDPOINT}/{data_product_id}/history")
 
     @staticmethod
-    def get_conveyor_ide_url(client, data_product_id):
+    def get_conveyor_ide_url(client: TestClient, data_product_id):
         return client.get(f"{ENDPOINT}/{data_product_id}/conveyor_ide_url")
 
     @staticmethod
-    def get_namespace_suggestion(client, name):
+    def get_namespace_suggestion(client: TestClient, name):
         return client.get(f"{ENDPOINT}/namespace_suggestion?name={name}")
 
     @staticmethod
-    def validate_namespace(client, namespace):
+    def validate_namespace(client: TestClient, namespace):
         return client.get(f"{ENDPOINT}/validate_namespace?namespace={namespace}")
 
     @staticmethod
-    def get_namespace_length_limits(client):
+    def get_namespace_length_limits(client: TestClient):
         return client.get(f"{ENDPOINT}/namespace_length_limits")
 
     @staticmethod
-    def validate_data_output_namespace(client, namespace, data_product_id):
+    def validate_data_output_namespace(client: TestClient, namespace, data_product_id):
         return client.get(
             f"{ENDPOINT}/{data_product_id}/data_output"
             f"/validate_namespace?namespace={namespace}"

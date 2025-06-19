@@ -6,9 +6,10 @@ from pydantic import NaiveDatetime
 from app.data_outputs.schema import DataOutput
 from app.data_products.schema import DataProduct
 from app.datasets.schema import Dataset
-from app.events.enum import EventReferenceEntity
 from app.shared.schema import ORMModel
 from app.users.schema import User
+
+from .enums import EventReferenceEntity
 
 
 class BaseEventGet(ORMModel):

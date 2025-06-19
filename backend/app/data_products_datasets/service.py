@@ -13,7 +13,7 @@ from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
 from app.datasets.model import Dataset as DatasetModel
-from app.events.enum import EventReferenceEntity, EventType
+from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.notifications.service import NotificationService

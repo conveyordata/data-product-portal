@@ -34,7 +34,7 @@ from app.datasets.schema_request import (
     DatasetUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
-from app.events.enum import EventReferenceEntity, EventType
+from app.events.enums import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.events.schema_response import EventGet

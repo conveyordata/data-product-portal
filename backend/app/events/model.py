@@ -6,16 +6,16 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
-from app.events.enum import EventReferenceEntity
-
-if TYPE_CHECKING:
-    from app.datasets.model import Dataset
-    from app.users.model import User
-    from app.data_outputs.model import DataOutput
-    from app.data_products.model import DataProduct
-
 from app.notifications.model import Notification
 from app.shared.model import BaseORM
+
+from .enums import EventReferenceEntity
+
+if TYPE_CHECKING:
+    from app.data_outputs.model import DataOutput
+    from app.data_products.model import DataProduct
+    from app.datasets.model import Dataset
+    from app.users.model import User
 
 
 class Event(Base, BaseORM):

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.authz import Action
 from app.database.database import ensure_exists
-from app.events.enum import EventReferenceEntity, EventType
+from app.events.enums import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.events.service import EventService

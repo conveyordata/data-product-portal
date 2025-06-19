@@ -1,7 +1,7 @@
 import factory
 from tests.factories.user import UserFactory
 
-from app.events.enum import EventReferenceEntity, EventType
+from app.events.enums import EventReferenceEntity, EventType
 from app.events.model import Event
 
 
