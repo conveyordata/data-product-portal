@@ -42,14 +42,14 @@ class NotificationService:
                 detail=f"Notification {id} not found",
             )
 
-        auth = Authorization()
-        is_admin = auth.has_admin_role(user_id=str(user.id))
+        is_admin = Authorization().has_admin_role(user_id=str(user.id))
         is_owner = notification.user_id == user.id
-        if not is_admin and not is_owner:
+        if not (is_admin or is_owner):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Notification does not belong to authenticated user",
             )
+
         self.db.delete(notification)
         self.db.commit()
 
@@ -73,14 +73,14 @@ class NotificationService:
             )
         ).all()
 
-        event = self.db.get(EventModel, event_id)
-
         receivers = set(
             chain(
                 (assignment.user_id for assignment in assignments),
                 extra_receiver_ids,
             )
         )
+
+        event = self.db.get(EventModel, event_id)
         for receiver in receivers:
             if receiver != event.actor_id:
                 notification = NotificationModel(user_id=receiver, event_id=event_id)
@@ -108,7 +108,6 @@ class NotificationService:
         )
 
         event = self.db.get(EventModel, event_id)
-
         for receiver in receivers:
             if receiver != event.actor_id:
                 notification = NotificationModel(user_id=receiver, event_id=event_id)

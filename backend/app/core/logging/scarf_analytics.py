@@ -19,7 +19,7 @@ def backend_analytics(api_version: str):
                     "platform": platform.system(),
                     "python": platform.python_version(),
                     "arch": platform.machine(),
-                    "sandbox": settings.SANDBOX,
+                    "sandbox": str(settings.SANDBOX),
                 },
             )
     except Exception as e:

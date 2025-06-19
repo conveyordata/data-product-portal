@@ -102,7 +102,7 @@ def remove_data_output(
             deleted_subject_identifier=data_output.name,
             target_id=data_output.owner_id,
             target_type=EventReferenceEntity.DATA_PRODUCT,
-            deleted_target_identifier=data_output.owner.name
+            deleted_target_identifier=data_output.owner.name,
         ),
     )
     NotificationService(db).create_data_product_notifications(

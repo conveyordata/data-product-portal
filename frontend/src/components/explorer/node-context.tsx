@@ -40,7 +40,11 @@ export function NodeContext({
                         dataSource={nodeData.assignments}
                         renderItem={(member: DataProductRoleAssignmentContract) => (
                             <List.Item key={member.id}>
-                                {member.user.first_name} {member.user.last_name} {t(' as ')} {member.role.name}
+                                {t('{{first_name}} {{last_name}} as {{role_name}}', {
+                                    first_name: member.user.first_name,
+                                    last_name: member.user.last_name,
+                                    role_name: member.role.name,
+                                })}
                             </List.Item>
                         )}
                     />

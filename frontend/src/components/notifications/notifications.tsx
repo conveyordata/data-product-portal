@@ -1,6 +1,6 @@
-import { BellOutlined, CloseOutlined } from '@ant-design/icons';
-import { Badge, Button, Flex, Popover, Space, Tag, Typography, theme } from 'antd';
-import { useCallback, useMemo, useState } from 'react';
+import { BellOutlined, CheckOutlined } from '@ant-design/icons';
+import { Badge, Button, Flex, Popover, Tag, Typography, theme } from 'antd';
+import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
@@ -33,9 +33,9 @@ export function Notifications() {
         async (notificationId: string) => {
             try {
                 await removeNotification(notificationId).unwrap();
-                dispatchMessage({ content: t('Notification has been removed'), type: 'success' });
+                dispatchMessage({ content: t('Notification has been acknowledged'), type: 'success' });
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to remove notification'), type: 'error' });
+                dispatchMessage({ content: t('Failed to acknowledge notification'), type: 'error' });
             }
         },
         [removeNotification, t],
@@ -44,9 +44,9 @@ export function Notifications() {
     const handleRemoveAllNotifications = useCallback(async () => {
         try {
             await removeAllNotifications().unwrap();
-            dispatchMessage({ content: t('Notifications removed'), type: 'success' });
+            dispatchMessage({ content: t('Notifications acknowledged'), type: 'success' });
         } catch (_error) {
-            dispatchMessage({ content: t('Failed to remove notifications'), type: 'error' });
+            dispatchMessage({ content: t('Failed to acknowledge notifications'), type: 'error' });
         }
     }, [removeAllNotifications, t]);
 
@@ -56,7 +56,7 @@ export function Notifications() {
             showActor: boolean,
             handleRemoveNotification: (id: string) => void,
             idx: number,
-        ): React.ReactNode => {
+        ): ReactNode => {
             return (
                 <Flex key={notification.id} justify="space-between" className={styles.width}>
                     <Flex vertical className={styles.width}>
@@ -73,7 +73,7 @@ export function Notifications() {
                             <Button
                                 className={styles.closeButton}
                                 type="text"
-                                icon={<CloseOutlined />}
+                                icon={<CheckOutlined />}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleRemoveNotification(notification.id);
@@ -115,9 +115,7 @@ export function Notifications() {
                         }}
                     >
                         <Typography.Text type="secondary">
-                            {excessLength === 1
-                                ? t('... {{count}} more item', { count: excessLength })
-                                : t('... {{count}} more items', { count: excessLength })}
+                            {t('... {{count}} more items', { count: excessLength })}
                         </Typography.Text>
                     </Button>
                 </Flex>,
@@ -132,7 +130,7 @@ export function Notifications() {
             return (
                 <Flex justify="space-between" align="center" className={styles.notificationLabel}>
                     <Typography.Title level={4}>{t('Notifications')}</Typography.Title>{' '}
-                    <Button onClick={handleRemoveAllNotifications}>{t('Delete all')}</Button>
+                    <Button onClick={handleRemoveAllNotifications}>{t('Acknowledge all')}</Button>
                 </Flex>
             );
         }
@@ -161,12 +159,10 @@ export function Notifications() {
                         </div>
                     }
                     classNames={{ body: styles.notificationBody }}
-                    trigger="click"
+                    trigger="hover"
                     placement="bottomRight"
                 >
-                    <Space>
-                        <Button shape={'circle'} className={styles.iconButton} icon={<BellOutlined />} />
-                    </Space>
+                    <Button shape={'circle'} className={styles.iconButton} icon={<BellOutlined />} />
                 </Popover>
             </Badge>
         </Flex>
