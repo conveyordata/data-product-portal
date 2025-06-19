@@ -263,10 +263,8 @@ class DataProductService:
                 .joinedload(DataProductModel.dataset_links)
             ],
         )
-        data_product = self.db.get(
-            DataProductModel,
-            id,
-            options=[joinedload(DataProductModel.dataset_links)],
+        data_product = ensure_data_product_exists(
+            id, self.db, options=[joinedload(DataProductModel.dataset_links)]
         )
 
         if dataset.id in [
