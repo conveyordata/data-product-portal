@@ -148,8 +148,9 @@ def _assign_owner_role_assignments(
         )
 
     assignment_service = RoleAssignmentService(db)
+    event_service = EventService(db)
     for owner_id in owners:
-        response = assignment_service.create_assignment(
+        assignment = assignment_service.create_assignment(
             dataset_id,
             CreateRoleAssignment(
                 user_id=owner_id,
@@ -158,8 +159,18 @@ def _assign_owner_role_assignments(
             actor=actor,
         )
         assignment_service.update_assignment(
-            UpdateRoleAssignment(id=response.id, decision=DecisionStatus.APPROVED),
+            UpdateRoleAssignment(id=assignment.id, decision=DecisionStatus.APPROVED),
             actor=actor,
+        )
+        event_service.create_event(
+            CreateEvent(
+                name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
+                subject_id=assignment.dataset_id,
+                subject_type=EventReferenceEntity.DATASET,
+                target_id=assignment.user_id,
+                target_type=EventReferenceEntity.USER,
+                actor_id=actor.id,
+            )
         )
 
 

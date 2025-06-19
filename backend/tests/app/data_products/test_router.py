@@ -1,7 +1,8 @@
 import json
 from copy import deepcopy
-from fastapi.testclient import TestClient
+
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 from tests.factories import (
     DataOutputFactory,
@@ -607,9 +608,11 @@ class TestDataProductsRouter:
         history = self.get_data_product_history(
             client, created_data_product.json().get("id")
         ).json()
-        assert len(history) == 3
+        assert len(history) == 2
 
-    def test_history_event_created_on_data_product_update(self, payload, client: TestClient):
+    def test_history_event_created_on_data_product_update(
+        self, payload, client: TestClient
+    ):
         user = UserFactory(external_id="sub")
         data_product = DataProductFactory()
         role = RoleFactory(

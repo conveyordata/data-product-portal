@@ -207,9 +207,26 @@ def modify_assigned_role(
     assignment = service.update_assignment(
         UpdateRoleAssignment(id=id, role_id=request.role_id), actor=user
     )
-
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment, previous_role_id=original_role).swap()
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED,
+            subject_id=assignment.data_product_id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            target_id=assignment.user_id,
+            target_type=EventReferenceEntity.USER,
+            actor_id=user.id,
+        ),
+    )
+    NotificationService(db).create_data_product_notifications(
+        data_product_id=assignment.data_product_id,
+        event_id=event_id,
+        extra_receiver_ids=(
+            [requester] if (requester := assignment.requested_by_id) is not None else []
+        ),
+    )
 
     return assignment
 
@@ -239,7 +256,6 @@ def decide_assignment(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="This assignment was already decided",
         )
-
     if request.decision is DecisionStatus.APPROVED and original.role_id is None:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -249,8 +265,29 @@ def decide_assignment(
     assignment = service.update_assignment(
         UpdateRoleAssignment(id=id, decision=request.decision), actor=user
     )
-
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).add()
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=(
+                EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_APPROVED
+                if assignment.decision == DecisionStatus.APPROVED
+                else EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_DENIED
+            ),
+            subject_id=assignment.data_product_id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            target_id=assignment.user_id,
+            target_type=EventReferenceEntity.USER,
+            actor_id=user.id,
+        ),
+    )
+    NotificationService(db).create_data_product_notifications(
+        data_product_id=assignment.data_product_id,
+        event_id=event_id,
+        extra_receiver_ids=(
+            [requester] if (requester := assignment.requested_by_id) is not None else []
+        ),
+    )
 
     return assignment

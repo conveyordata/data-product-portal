@@ -9,10 +9,6 @@ from sqlalchemy.orm import Session
 
 from app.core.authz import Action
 from app.database.database import ensure_exists
-from app.events.enums import EventReferenceEntity, EventType
-from app.events.schema import CreateEvent
-from app.events.service import EventService
-from app.notifications.service import NotificationService
 from app.pending_actions.schema import DataProductRoleAssignmentPendingAction
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.data_product.schema import (
@@ -110,49 +106,6 @@ class RoleAssignmentService:
             assignment.decided_on = datetime.now()
             assignment.decided_by_id = actor.id
 
-            event_id = EventService(self.db).create_event(
-                CreateEvent(
-                    name=(
-                        EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_APPROVED
-                        if assignment.decision == DecisionStatus.APPROVED
-                        else EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_DENIED
-                    ),
-                    subject_id=assignment.data_product_id,
-                    subject_type=EventReferenceEntity.DATA_PRODUCT,
-                    target_id=assignment.user_id,
-                    target_type=EventReferenceEntity.USER,
-                    actor_id=actor.id,
-                ),
-            )
-            NotificationService(self.db).create_data_product_notifications(
-                data_product_id=assignment.data_product_id,
-                event_id=event_id,
-                extra_receiver_ids=(
-                    [assignment.requested_by_id]
-                    if assignment.requested_by_id is not None
-                    else []
-                ),
-            )
-        else:
-            event_id = EventService(self.db).create_event(
-                CreateEvent(
-                    name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED,
-                    subject_id=assignment.data_product_id,
-                    subject_type=EventReferenceEntity.DATA_PRODUCT,
-                    target_id=assignment.user_id,
-                    target_type=EventReferenceEntity.USER,
-                    actor_id=actor.id,
-                ),
-            )
-            NotificationService(self.db).create_data_product_notifications(
-                data_product_id=assignment.data_product_id,
-                event_id=event_id,
-                extra_receiver_ids=(
-                    [assignment.requested_by_id]
-                    if assignment.requested_by_id is not None
-                    else []
-                ),
-            )
         self.db.commit()
         return assignment
 
