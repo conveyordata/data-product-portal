@@ -13,7 +13,7 @@ type Props = {
 function outputDescription(t: TFunction, data_output: DataOutputContract) {
     switch (data_output.configuration.configuration_type) {
         case DataOutputConfigurationTypes.S3DataOutput:
-            return t('Glue database');
+            return t('S3 path');
         case DataOutputConfigurationTypes.GlueDataOutput:
             return t('Glue database');
         case DataOutputConfigurationTypes.DatabricksDataOutput:
