@@ -8,7 +8,7 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 from app.users.schema_request import UserCreate
-from app.users.schema_response import UsersGet
+from app.users.schema_response import UserGet, UsersGet
 from app.users.service import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -20,7 +20,7 @@ def get_users(db: Session = Depends(get_db_session)) -> Sequence[UsersGet]:
 
 
 @router.get("/{id}")
-def get_user(id: UUID, db: Session = Depends(get_db_session)) -> UsersGet:
+def get_user(id: UUID, db: Session = Depends(get_db_session)) -> UserGet:
     return UserService(db).get_user(id)
 
 

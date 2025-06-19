@@ -1,8 +1,14 @@
 from typing import Optional
 from uuid import UUID
 
-from pydantic import EmailStr
+from pydantic import EmailStr, NaiveDatetime
 
+from app.role_assignments.data_product.schema import (
+    RoleAssignmentResponse as DataProductRoleAssignmentResponse,
+)
+from app.role_assignments.dataset.schema import (
+    RoleAssignmentResponse as DatasetRoleAssignmentResponse,
+)
 from app.role_assignments.global_.schema import RoleAssignmentResponse
 from app.shared.schema import ORMModel
 
@@ -16,7 +22,14 @@ class BaseUserGet(ORMModel):
 
 
 class UserGet(BaseUserGet):
-    pass
+    phone: Optional[str]
+    bio: Optional[str]
+    profile_picture: Optional[str]
+    location: Optional[str]
+    last_login: Optional[NaiveDatetime]
+    created_on: NaiveDatetime
+    dataset_roles: list[DatasetRoleAssignmentResponse]
+    data_product_roles: list[DataProductRoleAssignmentResponse]
 
 
 class UsersGet(BaseUserGet):

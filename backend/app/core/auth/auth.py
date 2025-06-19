@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Optional
 
 import httpx
@@ -83,7 +84,9 @@ if settings.OIDC_ENABLED:
             select(UserModel).where(UserModel.external_id == token.sub)
         ).one_or_none()
         if not result:
-            return authorize_user(token, db)
+            result = authorize_user(token, db)
+        result.last_login = datetime.now(timezone.utc)
+        db.commit()
         return result
 
 else:
@@ -115,7 +118,9 @@ else:
             select(UserModel).where(UserModel.external_id == token.sub)
         ).one_or_none()
         if not user:
-            return authorize_user(token, db)
+            user = authorize_user(token, db)
+        user.last_login = datetime.now(timezone.utc)
+        db.commit()
         return user
 
     def api_key_authenticated(

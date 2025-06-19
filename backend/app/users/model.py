@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Column, String
+from sqlalchemy import UUID, Column, DateTime, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
@@ -26,6 +26,11 @@ class User(Base, BaseORM):
     external_id = Column(String)
     first_name = Column(String)
     last_name = Column(String)
+    bio = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
+    profile_picture = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    last_login = Column(DateTime, nullable=True)
 
     # Relationships - Data Products
     data_product_roles: Mapped[list["DataProductRoleAssignment"]] = relationship(
@@ -107,5 +112,5 @@ class User(Base, BaseORM):
     )
 
 
-def ensure_user_exists(user_id: UUID, db: Session) -> User:
-    return ensure_exists(user_id, db, User)
+def ensure_user_exists(user_id: UUID, db: Session, **kwargs) -> User:
+    return ensure_exists(user_id, db, User, **kwargs)

@@ -2,12 +2,12 @@ from typing import Sequence
 from uuid import UUID
 
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.users.model import User as UserModel
 from app.users.model import ensure_user_exists
 from app.users.schema_request import UserCreate
-from app.users.schema_response import UsersGet
+from app.users.schema_response import UserGet, UsersGet
 
 
 class UserService:
@@ -22,8 +22,16 @@ class UserService:
             .order_by(asc(UserModel.last_name), asc(UserModel.first_name))
         ).all()
 
-    def get_user(self, id: UUID) -> UsersGet:
-        return ensure_user_exists(id, self.db)
+    def get_user(self, id: UUID) -> UserGet:
+        return ensure_user_exists(
+            id,
+            self.db,
+            options=[
+                joinedload(UserModel.global_role),
+                joinedload(UserModel.dataset_roles),
+                joinedload(UserModel.data_product_roles),
+            ],
+        )
 
     def remove_user(self, id: UUID) -> None:
         user = ensure_user_exists(id, self.db)
