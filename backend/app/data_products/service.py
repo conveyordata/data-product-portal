@@ -80,6 +80,7 @@ class DataProductService:
                 ),
             ],
         )
+        print(data_product.dataset_links)
 
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
@@ -93,6 +94,8 @@ class DataProductService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
             )
+
+        print(data_product.dataset_links)
 
         for link in data_product.dataset_links:
             rolled_up_tags.update(link.dataset.tags)
@@ -258,10 +261,16 @@ class DataProductService:
         dataset = ensure_dataset_exists(
             dataset_id,
             self.db,
-            options=[joinedload(DatasetModel.data_product_links)],
+            options=[
+                joinedload(DatasetModel.data_product_links)
+                .joinedload(DataProductDatasetModel.data_product)
+                .joinedload(DataProductModel.dataset_links)
+            ],
         )
-        data_product = ensure_data_product_exists(
-            id, self.db, options=[joinedload(DataProductModel.dataset_links)]
+        data_product = self.db.get(
+            DataProductModel,
+            id,
+            options=[joinedload(DataProductModel.dataset_links)],
         )
 
         if dataset.id in [

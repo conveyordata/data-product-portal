@@ -15,10 +15,8 @@ OM = TypeVar("OM", bound=ORMModel)
 def ensure_exists(
     id_: UUID, db: Session, type_: Type[OM] | Mapper[Type[OM]], **kwargs
 ) -> OM:
-    query = db.query(type_)
-    if "options" in kwargs:
-        query = query.options(*kwargs["options"])
-    item = query.filter(type_.id == id_).one()
+    item = db.get(type_, id_, **kwargs)
+
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
