@@ -12,6 +12,10 @@ from app.core.authz.resolvers import (
     EmptyResolver,
 )
 from app.database.database import get_db_session
+from app.events.enums import EventReferenceEntity, EventType
+from app.events.schema import CreateEvent
+from app.events.service import EventService
+from app.notifications.service import NotificationService
 from app.role_assignments.data_product import email
 from app.role_assignments.data_product.auth import DataProductAuthAssignment
 from app.role_assignments.data_product.schema import (
@@ -60,6 +64,17 @@ def create_assignment(
     service = RoleAssignmentService(db=db)
     role_assignment = service.create_assignment(id, request, actor=user)
 
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,
+            subject_id=role_assignment.data_product_id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            target_id=role_assignment.user_id,
+            target_type=EventReferenceEntity.USER,
+            actor_id=user.id,
+        )
+    )
+
     approvers: Sequence[User] = ()
     if not (is_admin := Authorization().has_admin_role(user_id=str(user.id))):
         approvers = service.users_with_authz_action(
@@ -76,13 +91,13 @@ def create_assignment(
             ),
             actor=user,
         )
-        return role_assignment
+    else:
+        background_tasks.add_task(
+            email.send_role_assignment_request_email,
+            role_assignment,
+            approvers,
+        )
 
-    background_tasks.add_task(
-        email.send_role_assignment_request_email,
-        role_assignment,
-        approvers,
-    )
     return role_assignment
 
 
@@ -106,11 +121,21 @@ def request_assignment(
     service = RoleAssignmentService(db=db)
     role_assignment = service.create_assignment(id, request, actor=user)
 
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REQUESTED,
+            subject_id=role_assignment.data_product_id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            target_id=role_assignment.user_id,
+            target_type=EventReferenceEntity.USER,
+            actor_id=user.id,
+        )
+    )
+
     approvers = service.users_with_authz_action(
         data_product_id=role_assignment.data_product_id,
         action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
     )
-
     background_tasks.add_task(
         email.send_role_assignment_request_email,
         role_assignment,
@@ -135,11 +160,28 @@ def delete_assignment(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> None:
-    assignment = RoleAssignmentService(db=db).delete_assignment(id, actor=user)
+    assignment = RoleAssignmentService(db=db).delete_assignment(id)
 
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).remove()
-    return None
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED,
+            subject_id=assignment.data_product_id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            target_id=assignment.user_id,
+            target_type=EventReferenceEntity.USER,
+            actor_id=user.id,
+        ),
+    )
+    NotificationService(db).create_data_product_notifications(
+        data_product_id=assignment.data_product_id,
+        event_id=event_id,
+        extra_receiver_ids=(
+            [receiver] if (receiver := assignment.requested_by_id) is not None else []
+        ),
+    )
 
 
 @router.patch(

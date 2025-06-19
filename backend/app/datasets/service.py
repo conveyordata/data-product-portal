@@ -1,3 +1,4 @@
+import copy
 from typing import Iterable, Sequence
 from uuid import UUID
 
@@ -6,7 +7,6 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, raiseload
 
 from app.core.authz import Authorization
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -34,15 +34,9 @@ from app.datasets.schema_request import (
     DatasetUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
-from app.events.enums import EventReferenceEntity, EventType
-from app.events.model import Event as EventModel
-from app.events.schema import CreateEvent
-from app.events.schema_response import EventGet
-from app.events.service import EventService
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.notifications.service import NotificationService
 from app.role_assignments.dataset.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
@@ -129,9 +123,6 @@ class DatasetService:
                 dataset.lifecycle = default_lifecycle
         return datasets
 
-    def get_event_history(self, id: UUID) -> Sequence[EventGet]:
-        return EventService(self.db).get_history(id, EventReferenceEntity.DATASET)
-
     def get_user_datasets(self, user_id: UUID) -> Sequence[DatasetsGet]:
         return (
             self.db.scalars(
@@ -161,7 +152,7 @@ class DatasetService:
 
         return tags
 
-    def create_dataset(self, dataset: DatasetCreate, *, actor: User) -> DatasetModel:
+    def create_dataset(self, dataset: DatasetCreate) -> DatasetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, self.db
@@ -178,46 +169,22 @@ class DatasetService:
         model = DatasetModel(**dataset_schema, tags=tags)
 
         self.db.add(model)
-        self.db.flush()
-        event_id = EventService(self.db).create_event(
-            CreateEvent(
-                name=EventType.DATASET_CREATED,
-                subject_id=model.id,
-                subject_type=EventReferenceEntity.DATASET,
-                actor_id=actor.id,
-            ),
-        )
-        NotificationService(self.db).create_dataset_notifications(
-            dataset_id=model.id, event_id=event_id
-        )
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
         return model
 
-    def remove_dataset(self, id: UUID, *, actor: User) -> None:
+    def remove_dataset(self, id: UUID) -> DatasetModel:
         dataset = self.db.get(DatasetModel, id)
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
             )
-        event_id = EventService(self.db).create_event(
-            CreateEvent(
-                name=EventType.DATASET_REMOVED,
-                subject_id=dataset.id,
-                subject_type=EventReferenceEntity.DATASET,
-                actor_id=actor.id,
-            ),
-        )
-        NotificationService(self.db).create_dataset_notifications(
-            dataset_id=dataset.id, event_id=event_id
-        )
+
+        result = copy.deepcopy(dataset)
         self.db.delete(dataset)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
+        return result
 
-    def update_dataset(
-        self, id: UUID, dataset: DatasetUpdate, *, actor: User
-    ) -> dict[str, UUID]:
+    def update_dataset(self, id: UUID, dataset: DatasetUpdate) -> dict[str, UUID]:
         current_dataset = ensure_dataset_exists(id, self.db)
         updated_dataset = dataset.model_dump(exclude_unset=True)
 
@@ -242,46 +209,25 @@ class DatasetService:
             else:
                 setattr(current_dataset, k, v) if v else None
 
-        self.db.add(
-            EventModel(
-                name=EventType.DATASET_UPDATED,
-                subject_id=current_dataset.id,
-                subject_type=EventReferenceEntity.DATASET,
-                actor_id=actor.id,
-            ),
-        )
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
         return {"id": current_dataset.id}
 
     def update_dataset_about(
-        self, id: UUID, dataset: DatasetAboutUpdate, *, actor: User
+        self,
+        id: UUID,
+        dataset: DatasetAboutUpdate,
     ) -> None:
         current_dataset = ensure_dataset_exists(id, self.db)
         current_dataset.about = dataset.about
-        self.db.add(
-            EventModel(
-                name=EventType.DATASET_UPDATED,
-                subject_id=current_dataset.id,
-                subject_type=EventReferenceEntity.DATASET,
-                actor_id=actor.id,
-            ),
-        )
         self.db.commit()
 
     def update_dataset_status(
-        self, id: UUID, dataset: DatasetStatusUpdate, *, actor: User
+        self,
+        id: UUID,
+        dataset: DatasetStatusUpdate,
     ) -> None:
         current_dataset = ensure_dataset_exists(id, self.db)
         current_dataset.status = dataset.status
-        self.db.add(
-            EventModel(
-                name=EventType.DATASET_UPDATED,
-                subject_id=current_dataset.id,
-                subject_type=EventReferenceEntity.DATASET,
-                actor_id=actor.id,
-            ),
-        )
         self.db.commit()
 
     def get_graph_data(self, id: UUID, level: int) -> Graph:

@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
@@ -9,7 +10,6 @@ from sqlalchemy.orm import Session
 from app.core.authz import Action
 from app.database.database import ensure_exists
 from app.events.enums import EventReferenceEntity, EventType
-from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.notifications.service import NotificationService
@@ -84,46 +84,17 @@ class RoleAssignmentService:
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
-        self.db.flush()
-        self.db.add(
-            EventModel(
-                name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,
-                subject_id=role_assignment.data_product_id,
-                subject_type=EventReferenceEntity.DATA_PRODUCT,
-                target_id=role_assignment.user_id,
-                target_type=EventReferenceEntity.USER,
-                actor_id=actor.id,
-            )
-        )
         self.db.commit()
         return role_assignment
 
-    def delete_assignment(self, id_: UUID, *, actor: User) -> RoleAssignment:
+    def delete_assignment(self, id_: UUID) -> RoleAssignment:
         assignment = self.get_assignment(id_)
         self._guard_against_illegal_owner_removal(assignment)
 
-        event_id = EventService(self.db).create_event(
-            CreateEvent(
-                name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED,
-                subject_id=assignment.data_product_id,
-                subject_type=EventReferenceEntity.DATA_PRODUCT,
-                target_id=assignment.user_id,
-                target_type=EventReferenceEntity.USER,
-                actor_id=actor.id,
-            ),
-        )
-        NotificationService(self.db).create_data_product_notifications(
-            data_product_id=assignment.data_product_id,
-            event_id=event_id,
-            extra_receiver_ids=(
-                [assignment.requested_by_id]
-                if assignment.requested_by_id is not None
-                else []
-            ),
-        )
+        result = copy.deepcopy(assignment)
         self.db.delete(assignment)
         self.db.commit()
-        return assignment
+        return result
 
     def update_assignment(
         self, request: UpdateRoleAssignment, *, actor: User
