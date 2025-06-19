@@ -16,7 +16,6 @@ def ensure_exists(
     id_: UUID, db: Session, type_: Type[OM] | Mapper[Type[OM]], **kwargs
 ) -> OM:
     item = db.get(type_, id_, **kwargs)
-
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
