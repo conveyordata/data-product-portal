@@ -454,9 +454,9 @@ class TestDatasetRoleAssignmentsRouter:
         assert len(history) == 1
 
     @staticmethod
-    def delete_dataset(client, dataset_id):
+    def delete_dataset(client: TestClient, dataset_id):
         return client.delete(f"{ENDPOINT_DATASET}/{dataset_id}")
 
     @staticmethod
-    def get_dataset_history(client, dataset_id):
+    def get_dataset_history(client: TestClient, dataset_id):
         return client.get(f"{ENDPOINT_DATASET}/{dataset_id}/history")

@@ -67,5 +67,5 @@ class TestNotificationsRouter:
         assert len(response.json()) == 0
 
     @staticmethod
-    def delete_notification(client, notification_id):
+    def delete_notification(client: TestClient, notification_id):
         return client.delete(f"{ENDPOINT}/{notification_id}")

@@ -550,34 +550,34 @@ class TestDataProductRoleAssignmentsRouter:
         return client.delete(f"{ENDPOINT_DATA_PRODUCT}/{data_product_id}")
 
     @staticmethod
-    def create_data_product_role_assignment(client, json):
+    def create_data_product_role_assignment(client: TestClient, json):
         return client.post(
             f"{ENDPOINT}",
             json=json,
         )
 
     @staticmethod
-    def delete_data_product_role_assignment(client, assignment_id):
+    def delete_data_product_role_assignment(client: TestClient, assignment_id):
         return client.delete(f"{ENDPOINT}/{assignment_id}")
 
     @staticmethod
-    def approve_data_product_role_assignment(client, assignment_id):
+    def approve_data_product_role_assignment(client: TestClient, assignment_id):
         return client.patch(
             f"{ENDPOINT}/{assignment_id}/decide",
             json={"decision": DecisionStatus.APPROVED},
         )
 
     @staticmethod
-    def deny_data_product_role_assignment(client, assignment_id):
+    def deny_data_product_role_assignment(client: TestClient, assignment_id):
         return client.patch(
             f"{ENDPOINT}/{assignment_id}/decide",
             json={"decision": DecisionStatus.DENIED},
         )
 
     @staticmethod
-    def modify_data_product_role_assignment(client, assignment_id, json):
+    def modify_data_product_role_assignment(client: TestClient, assignment_id, json):
         return client.patch(f"{ENDPOINT}/{assignment_id}/role", json=json)
 
     @staticmethod
-    def get_data_product_history(client, data_product_id):
+    def get_data_product_history(client: TestClient, data_product_id):
         return client.get(f"{ENDPOINT_DATA_PRODUCT}/{data_product_id}/history")
