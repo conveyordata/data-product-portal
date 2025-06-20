@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
@@ -49,7 +50,7 @@ class RoleAssignmentService:
         return self.db.scalars(query).all()
 
     def create_assignment(
-        self, data_product_id: UUID, request: CreateRoleAssignment, actor: User
+        self, data_product_id: UUID, request: CreateRoleAssignment, *, actor: User
     ) -> RoleAssignment:
         self.ensure_is_data_product_scope(request.role_id)
         existing_assignment = self.db.scalar(
@@ -86,12 +87,13 @@ class RoleAssignmentService:
         assignment = self.get_assignment(id_)
         self._guard_against_illegal_owner_removal(assignment)
 
+        result = copy.deepcopy(assignment)
         self.db.delete(assignment)
         self.db.commit()
-        return assignment
+        return result
 
     def update_assignment(
-        self, request: UpdateRoleAssignment, actor: User
+        self, request: UpdateRoleAssignment, *, actor: User
     ) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
         self._guard_against_illegal_owner_removal(assignment)

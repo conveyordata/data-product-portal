@@ -1,139 +1,169 @@
-import { BellOutlined, ExportOutlined } from '@ant-design/icons';
-import { Badge, Button, Dropdown, Flex, type MenuProps, Space, Typography, theme } from 'antd';
-import type { ItemType } from 'antd/es/menu/interface';
-import type { TFunction } from 'i18next';
-import { useCallback, useMemo } from 'react';
+import { BellOutlined, CheckOutlined } from '@ant-design/icons';
+import { Badge, Button, Flex, Popover, Tag, Typography, theme } from 'antd';
+import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, type NavigateFunction, useNavigate } from 'react-router';
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
-import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { type PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
+
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import {
+    useGetNotificationsQuery,
+    useRemoveAllNotificationsMutation,
+    useRemoveNotificationMutation,
+} from '@/store/features/notifications/notifications-api-slice';
+import type { NotificationContract } from '@/types/notifications/notification.contract';
+import { formatDateToNowFromUTCString } from '@/utils/date.helper';
+
+import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
+
+const MAX_ITEMS_DEFAULT = 10;
 
 export function Notifications() {
     const {
-        token: { colorPrimary },
+        token: { colorError },
     } = theme.useToken();
     const { t } = useTranslation();
-    const navigate = useNavigate();
 
-    const { data: pending_actions } = useGetPendingActionsQuery();
+    const { data: notifications } = useGetNotificationsQuery();
 
-    const createPendingItem = useCallback(
-        (action: PendingAction, navigate: NavigateFunction, t: TFunction): ItemType => {
-            switch (action.pending_action_type) {
-                case PendingActionTypes.DataProductDataset: {
-                    const navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
-                    const description = (
-                        <Typography.Text>
-                            {t('{{name}}, on behalf of data product', { name: action.requested_by?.first_name })}{' '}
-                            <Link
-                                onClick={(e) => e.stopPropagation()}
-                                to={createDataProductIdPath(action.data_product_id)}
-                            >
-                                {action.data_product.name}
-                            </Link>{' '}
-                            {t('requests read access to dataset')}{' '}
-                            <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                                {action.dataset.name}
-                            </Link>
-                        </Typography.Text>
-                    );
+    const [removeNotification] = useRemoveNotificationMutation();
+    const [removeAllNotifications] = useRemoveAllNotificationsMutation();
+    const [maxItems, setMaxItems] = useState(MAX_ITEMS_DEFAULT);
 
-                    return {
-                        key: action.id,
-                        label: <Flex>{description}</Flex>,
-                        extra: <ExportOutlined />,
-                        onClick: () => navigate(navigatePath),
-                    };
-                }
-
-                case PendingActionTypes.DataOutputDataset: {
-                    const navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
-                    const description = (
-                        <Typography.Text>
-                            {t('{{name}}, on behalf of data output', { name: action.requested_by?.first_name })}{' '}
-                            <Link
-                                onClick={(e) => e.stopPropagation()}
-                                to={createDataOutputIdPath(action.data_output_id, action.data_output.owner_id)}
-                            >
-                                {action.data_output.name}
-                            </Link>{' '}
-                            {t('requests a link to dataset')}{' '}
-                            <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                                {action.dataset.name}
-                            </Link>
-                        </Typography.Text>
-                    );
-
-                    return {
-                        key: action.id,
-                        label: <Flex>{description}</Flex>,
-                        extra: <ExportOutlined />,
-                        onClick: () => navigate(navigatePath),
-                    };
-                }
-
-                case PendingActionTypes.DataProductRoleAssignment: {
-                    const navigatePath = createDataProductIdPath(action.data_product.id, DataProductTabKeys.Team);
-                    const description = (
-                        <Typography.Text>
-                            {t('{{name}} would like to join the data product', { name: action.user?.first_name })}{' '}
-                            <Link
-                                onClick={(e) => e.stopPropagation()}
-                                to={createDataProductIdPath(action.data_product.id)}
-                            >
-                                {action.data_product.name}
-                            </Link>{' '}
-                            {t('team')}{' '}
-                        </Typography.Text>
-                    );
-
-                    return {
-                        key: action.id,
-                        label: <Flex>{description}</Flex>,
-                        extra: <ExportOutlined />,
-                        onClick: () => navigate(navigatePath),
-                    };
-                }
-
-                default:
-                    return null;
+    const handleRemoveNotification = useCallback(
+        async (notificationId: string) => {
+            try {
+                await removeNotification(notificationId).unwrap();
+                dispatchMessage({ content: t('Notification has been acknowledged'), type: 'success' });
+            } catch (_error) {
+                dispatchMessage({ content: t('Failed to acknowledge notification'), type: 'error' });
             }
+        },
+        [removeNotification, t],
+    );
+
+    const handleRemoveAllNotifications = useCallback(async () => {
+        try {
+            await removeAllNotifications().unwrap();
+            dispatchMessage({ content: t('Notifications acknowledged'), type: 'success' });
+        } catch (_error) {
+            dispatchMessage({ content: t('Failed to acknowledge notifications'), type: 'error' });
+        }
+    }, [removeAllNotifications, t]);
+
+    const createNotificationItem = useCallback(
+        (
+            notification: NotificationContract,
+            showActor: boolean,
+            handleRemoveNotification: (id: string) => void,
+            idx: number,
+        ): ReactNode => {
+            return (
+                <Flex key={notification.id} justify="space-between" className={styles.width}>
+                    <Flex vertical className={styles.width}>
+                        {showActor && (
+                            <Flex className={idx === 0 ? '' : styles.marginTop}>
+                                <Tag color="default">
+                                    {notification.event.actor.first_name} {notification.event.actor.last_name},{' '}
+                                    {formatDateToNowFromUTCString(notification.event.created_on)}:
+                                </Tag>
+                            </Flex>
+                        )}
+                        <Flex justify="space-between" className={styles.width}>
+                            <NotificationDescription record={notification.event} />
+                            <Button
+                                className={styles.closeButton}
+                                type="text"
+                                icon={<CheckOutlined />}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveNotification(notification.id);
+                                }}
+                            />
+                        </Flex>
+                    </Flex>
+                </Flex>
+            );
         },
         [],
     );
 
-    const pendingItems = useMemo(() => {
-        const items = pending_actions?.map((action) => createPendingItem(action, navigate, t));
+    const handleLoadMore = useCallback(() => {
+        setMaxItems((prev) => prev + MAX_ITEMS_DEFAULT);
+    }, []);
 
-        return items ?? [];
-    }, [pending_actions, createPendingItem, navigate, t]);
+    const notificationItems = useMemo(() => {
+        if (!notifications || notifications.length === 0) return [];
 
-    const items: MenuProps['items'] = [
-        {
-            type: 'group',
-            label: pendingItems?.length > 0 ? t('Pending actions') : t('No pending actions'),
-            children: pendingItems,
-        },
-    ];
+        const slicedItems = notifications.slice(0, maxItems).map((notification, idx) => {
+            const prev = notifications[idx - 1];
+            const sameActorAsPrevious = idx > 0 && prev.event.actor.id === notification.event.actor.id;
+
+            return createNotificationItem(notification, !sameActorAsPrevious, handleRemoveNotification, idx);
+        });
+
+        const excessLength = notifications.length - maxItems;
+
+        if (excessLength > 0) {
+            slicedItems.push(
+                <Flex key={'show-more-indicator'} className={styles.notificationItem}>
+                    <Button
+                        className={styles.closeButton}
+                        type="link"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            handleLoadMore();
+                        }}
+                    >
+                        <Typography.Text type="secondary">
+                            {t('... {{count}} more items', { count: excessLength })}
+                        </Typography.Text>
+                    </Button>
+                </Flex>,
+            );
+        }
+
+        return slicedItems;
+    }, [notifications, createNotificationItem, handleRemoveNotification, t, maxItems, handleLoadMore]);
+
+    const header = useMemo(() => {
+        if (notificationItems?.length > 0) {
+            return (
+                <Flex justify="space-between" align="center" className={styles.notificationLabel}>
+                    <Typography.Title level={4}>{t('Notifications')}</Typography.Title>{' '}
+                    <Button onClick={handleRemoveAllNotifications}>{t('Acknowledge all')}</Button>
+                </Flex>
+            );
+        }
+
+        return (
+            <Typography.Text className={styles.emptyLabel}>{t('You currently have no notifications')}</Typography.Text>
+        );
+    }, [notificationItems?.length, t, handleRemoveAllNotifications]);
 
     return (
         <Flex>
             <Badge
-                count={pendingItems?.length}
+                count={(notifications ?? []).length}
                 showZero={false}
-                color={colorPrimary}
+                color={colorError}
                 style={{ fontSize: 10 }}
                 size="small"
             >
-                <Dropdown placement={'bottomRight'} menu={{ items }} trigger={['click']}>
-                    <Space>
-                        <Button shape={'circle'} className={styles.iconButton} icon={<BellOutlined />} />
-                    </Space>
-                </Dropdown>
+                <Popover
+                    content={
+                        <div>
+                            {header}
+                            <Flex vertical className={styles.notificationItems}>
+                                {notificationItems}
+                            </Flex>
+                        </div>
+                    }
+                    classNames={{ body: styles.notificationBody }}
+                    trigger="hover"
+                    placement="bottomRight"
+                >
+                    <Button shape={'circle'} className={styles.iconButton} icon={<BellOutlined />} />
+                </Popover>
             </Badge>
         </Flex>
     );

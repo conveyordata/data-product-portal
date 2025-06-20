@@ -1,6 +1,7 @@
 import asyncio
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
@@ -20,7 +21,7 @@ from app.roles.service import RoleService
 from app.settings import settings
 from app.shared.router import router
 
-with open("./VERSION", "r") as f:
+with open(Path(__file__).parent.parent / "VERSION", "r") as f:
     API_VERSION = f.read().strip()
 
 TITLE = "Data product portal"
@@ -62,7 +63,7 @@ async def lifespan(_: FastAPI):
     if resync or settings.AUTHORIZER_STARTUP_SYNC:
         AuthorizationService(db).reload_enforcer()
 
-    backend_analytics()
+    backend_analytics(API_VERSION)
     yield
 
 

@@ -8,7 +8,6 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
@@ -23,7 +22,9 @@ class DataOutputDatasetService:
     def __init__(self, db: Session):
         self.db = db
 
-    def approve_data_output_link(self, id: UUID, actor: User) -> None:
+    def approve_data_output_link(
+        self, id: UUID, *, actor: User
+    ) -> DataOutputDatasetAssociationModel:
         current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
@@ -39,10 +40,12 @@ class DataOutputDatasetService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        RefreshInfrastructureLambda().trigger()
         self.db.commit()
+        return current_link
 
-    def deny_data_output_link(self, id: UUID, actor: User) -> None:
+    def deny_data_output_link(
+        self, id: UUID, *, actor: User
+    ) -> DataOutputDatasetAssociationModel:
         current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
@@ -54,8 +57,11 @@ class DataOutputDatasetService:
         current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
         self.db.commit()
+        return current_link
 
-    def remove_data_output_link(self, id: UUID) -> None:
+    def remove_data_output_link(
+        self, id: UUID, *, actor: User
+    ) -> DataOutputDatasetAssociationModel:
         current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
@@ -65,7 +71,7 @@ class DataOutputDatasetService:
 
         self.db.delete(current_link)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
+        return current_link
 
     def get_user_pending_actions(
         self, user: User

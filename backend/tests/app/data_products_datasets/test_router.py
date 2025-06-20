@@ -317,6 +317,108 @@ class TestDataProductsDatasetsRouter:
         response = client.get(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
         assert response.json() == []
 
+    def test_history_event_created_on_link_request(self, client):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = DatasetFactory()
+
+        response = self.request_data_product_dataset_link(
+            client, data_product.id, ds.id
+        )
+        assert response.status_code == 200
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_remove_link(self, client):
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__REVOKE_DATAPRODUCT_ACCESS],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        link = DataProductDatasetAssociationFactory(dataset=ds)
+
+        response = self.remove_data_product_dataset_link(client, link.id)
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, link.data_product_id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_approval(self, client):
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+
+        link = DataProductDatasetAssociationFactory(
+            dataset=ds, status=DecisionStatus.PENDING
+        )
+        response = self.approve_default_data_product_dataset_link(client, link.id)
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, link.data_product_id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_denial(self, client):
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        link = DataProductDatasetAssociationFactory(
+            dataset=ds, status=DecisionStatus.PENDING
+        )
+        response = self.deny_default_data_product_dataset_link(client, link.id)
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, link.data_product_id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_unlink_request(self, client):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+            ],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = DatasetFactory()
+        response = self.request_data_product_dataset_link(
+            client, data_product.id, ds.id
+        )
+
+        assert response.status_code == 200
+
+        response = self.request_data_product_dataset_unlink(
+            client, data_product.id, ds.id
+        )
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 2
+
     @staticmethod
     def request_data_product_dataset_link(
         client: TestClient, data_product_id, dataset_id
@@ -346,3 +448,7 @@ class TestDataProductsDatasetsRouter:
         return client.delete(
             f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/dataset/{dataset_id}"
         )
+
+    @staticmethod
+    def get_data_product_history(client, data_product_id):
+        return client.get(f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/history")

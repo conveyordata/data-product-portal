@@ -336,6 +336,127 @@ class TestDatasetRoleAssignmentsRouter:
         response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_history_event_created_on_dataset_role_assignment_requested(
+        self, client: TestClient
+    ):
+        dataset: Dataset = DatasetFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__REQUEST_DATASET_ACCESS],
+        )
+        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
+
+        response = client.post(
+            f"{ENDPOINT}/request/{str(dataset.id)}",
+            json={
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 200
+
+        history = self.get_dataset_history(client, dataset.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_dataset_role_assignment_approved(
+        self, client: TestClient
+    ):
+        dataset: Dataset = DatasetFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_USER_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
+        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+            dataset_id=dataset.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+
+        response = client.patch(
+            f"{ENDPOINT}/{assignment.id}/decide",
+            json={"decision": DecisionStatus.APPROVED},
+        )
+        assert response.status_code == 200
+
+        history = self.get_dataset_history(client, dataset.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_dataset_role_assignment_modified(
+        self, client: TestClient
+    ):
+        dataset: Dataset = DatasetFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__UPDATE_USER],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
+        new_role: Role = RoleFactory(scope=Scope.DATASET)
+
+        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+            dataset_id=dataset.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        response = client.patch(
+            f"{ENDPOINT}/{assignment.id}", json={"role_id": str(new_role.id)}
+        )
+        assert response.status_code == 200
+
+        history = self.get_dataset_history(client, dataset.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_dataset_role_assignment_removed(
+        self, client: TestClient
+    ):
+        dataset: Dataset = DatasetFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__DELETE_USER],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
+        assignment: RoleAssignment = DatasetRoleAssignmentFactory(
+            dataset_id=dataset.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        assert len(response.json()) == 2
+
+        response = client.delete(f"{ENDPOINT}/{assignment.id}")
+        assert response.status_code == 200
+
+        history = self.get_dataset_history(client, dataset.id).json()
+        assert len(history) == 1
+
     @staticmethod
-    def delete_dataset(client, dataset_id):
+    def delete_dataset(client: TestClient, dataset_id):
         return client.delete(f"{ENDPOINT_DATASET}/{dataset_id}")
+
+    @staticmethod
+    def get_dataset_history(client: TestClient, dataset_id):
+        return client.get(f"{ENDPOINT_DATASET}/{dataset_id}/history")

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
 from app.core.authz.resolvers import EmptyResolver
+from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -22,7 +23,12 @@ from app.datasets.schema_request import (
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
+from app.events.enums import EventReferenceEntity, EventType
+from app.events.schema import CreateEvent
+from app.events.schema_response import EventGet
+from app.events.service import EventService
 from app.graph.graph import Graph
+from app.notifications.service import NotificationService
 from app.role_assignments.dataset.schema import (
     CreateRoleAssignment,
     UpdateRoleAssignment,
@@ -77,6 +83,13 @@ def get_user_datasets(
     return DatasetService(db).get_user_datasets(user_id)
 
 
+@router.get("/{id}/history")
+def get_event_history(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> Sequence[EventGet]:
+    return EventService(db).get_history(id, EventReferenceEntity.DATASET)
+
+
 @router.post(
     "",
     responses={
@@ -104,6 +117,29 @@ def create_dataset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
+    new_dataset = DatasetService(db).create_dataset(dataset)
+    _assign_owner_role_assignments(
+        new_dataset.id, dataset.owners, db=db, actor=authenticated_user
+    )
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATASET_CREATED,
+            subject_id=new_dataset.id,
+            subject_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        ),
+    )
+    NotificationService(db).create_dataset_notifications(
+        dataset_id=new_dataset.id, event_id=event_id
+    )
+    RefreshInfrastructureLambda().trigger()
+    return {"id": new_dataset.id}
+
+
+def _assign_owner_role_assignments(
+    dataset_id: UUID, owners: Sequence[UUID], db: Session, actor: User
+) -> None:
     owner_role = RoleService(db).find_prototype(Scope.DATASET, Prototype.OWNER)
     if owner_role is None:
         raise HTTPException(
@@ -111,20 +147,31 @@ def create_dataset(
             detail="Owner role not found",
         )
 
-    new_dataset = DatasetService(db).create_dataset(dataset)
     assignment_service = RoleAssignmentService(db)
-    for owner_id in dataset.owners:
-        response = assignment_service.create_assignment(
-            new_dataset.id,
-            CreateRoleAssignment(user_id=owner_id, role_id=owner_role.id),
-            actor=authenticated_user,
+    event_service = EventService(db)
+    for owner_id in owners:
+        assignment = assignment_service.create_assignment(
+            dataset_id,
+            CreateRoleAssignment(
+                user_id=owner_id,
+                role_id=owner_role.id,
+            ),
+            actor=actor,
         )
         assignment_service.update_assignment(
-            UpdateRoleAssignment(id=response.id, decision=DecisionStatus.APPROVED),
-            actor=authenticated_user,
+            UpdateRoleAssignment(id=assignment.id, decision=DecisionStatus.APPROVED),
+            actor=actor,
         )
-
-    return {"id": new_dataset.id}
+        event_service.create_event(
+            CreateEvent(
+                name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
+                subject_id=assignment.dataset_id,
+                subject_type=EventReferenceEntity.DATASET,
+                target_id=assignment.user_id,
+                target_type=EventReferenceEntity.USER,
+                actor_id=actor.id,
+            )
+        )
 
 
 @router.delete(
@@ -141,10 +188,27 @@ def create_dataset(
         Depends(Authorization.enforce(Action.DATASET__DELETE, DatasetResolver)),
     ],
 )
-def remove_dataset(id: UUID, db: Session = Depends(get_db_session)) -> None:
-    DatasetService(db).remove_dataset(id)
+def remove_dataset(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    dataset = DatasetService(db).remove_dataset(id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
-    return
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATASET_REMOVED,
+            actor_id=authenticated_user.id,
+            subject_id=dataset.id,
+            subject_type=EventReferenceEntity.DATASET,
+            deleted_subject_identifier=dataset.name,
+        ),
+    )
+    NotificationService(db).create_dataset_notifications(
+        dataset_id=dataset.id, event_id=event_id
+    )
+    RefreshInfrastructureLambda().trigger()
 
 
 @router.put(
@@ -164,9 +228,23 @@ def remove_dataset(id: UUID, db: Session = Depends(get_db_session)) -> None:
     ],
 )
 def update_dataset(
-    id: UUID, dataset: DatasetUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    dataset: DatasetUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DatasetService(db).update_dataset(id, dataset)
+    response = DatasetService(db).update_dataset(id, dataset)
+
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATASET_UPDATED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        )
+    )
+    RefreshInfrastructureLambda().trigger()
+    return response
 
 
 @router.put(
@@ -186,9 +264,21 @@ def update_dataset(
     ],
 )
 def update_dataset_about(
-    id: UUID, dataset: DatasetAboutUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    dataset: DatasetAboutUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DatasetService(db).update_dataset_about(id, dataset)
+    DatasetService(db).update_dataset_about(id, dataset)
+
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATASET_UPDATED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        )
+    )
 
 
 @router.put(
@@ -206,9 +296,21 @@ def update_dataset_about(
     ],
 )
 def update_dataset_status(
-    id: UUID, dataset: DatasetStatusUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    dataset: DatasetStatusUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DatasetService(db).update_dataset_status(id, dataset)
+    DatasetService(db).update_dataset_status(id, dataset)
+
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATASET_UPDATED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        )
+    )
 
 
 @router.get("/{id}/graph")

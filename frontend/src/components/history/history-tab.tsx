@@ -1,0 +1,95 @@
+import { Flex, Form, Table, type TableProps } from 'antd';
+import type { TFunction } from 'i18next';
+import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { HISTORY_PAGINATION } from '@/constants/table.constants';
+import { useTablePagination } from '@/hooks/use-table-pagination';
+import type { EventContract } from '@/types/events/event.contract';
+import type { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import { getEventTypeDisplayName, getSubjectDisplayLabel, getTargetDisplayLabel } from '@/utils/history.helper';
+
+import { Searchbar } from '../form';
+import styles from './history-tab.module.scss';
+import { getHistoryColumns } from './history-table-columns';
+
+type Props = {
+    id: string;
+    type: EventReferenceEntity;
+    history?: EventContract[];
+    isFetching: boolean;
+};
+
+type SearchForm = {
+    search: string;
+};
+
+function filterHistory(events: EventContract[], searchTerm: string, t: TFunction) {
+    if (!searchTerm) return events;
+    if (!events) return [];
+
+    return events.filter((event) => {
+        const subjectLabel = getSubjectDisplayLabel(t, event);
+        const targetLabel = getTargetDisplayLabel(t, event);
+
+        return (
+            subjectLabel?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            targetLabel?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            getEventTypeDisplayName(t, event.name).toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            event.actor.email.toLowerCase().includes(searchTerm?.toLowerCase())
+        );
+    });
+}
+
+export function HistoryTab({ id, type, history = [], isFetching }: Props) {
+    const { t } = useTranslation();
+    const [searchForm] = Form.useForm<SearchForm>();
+    const searchTerm = Form.useWatch('search', searchForm);
+
+    const filteredHistory = useMemo(() => {
+        return filterHistory(history ?? [], searchTerm, t);
+    }, [history, searchTerm, t]);
+
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination(filteredHistory, {
+        initialPagination: HISTORY_PAGINATION,
+    });
+
+    const onChange: TableProps<EventContract>['onChange'] = (pagination) => {
+        handlePaginationChange(pagination);
+    };
+
+    useEffect(() => {
+        resetPagination();
+    }, [resetPagination]);
+
+    const columns = useMemo(() => getHistoryColumns({ t, resourceId: id, type }), [t, id, type]);
+
+    return (
+        <Flex vertical className={`${styles.container} ${filteredHistory?.length === 0 && styles.paginationGap}`}>
+            <Searchbar
+                form={searchForm}
+                formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
+                placeholder={t('Search event history')}
+            />
+            <Table<EventContract>
+                loading={isFetching}
+                dataSource={filteredHistory.map((item, index) => ({ ...item, key: index }))}
+                columns={columns}
+                onChange={onChange}
+                pagination={{
+                    ...pagination,
+                    position: ['topRight'],
+                    size: 'small',
+                    showTotal: (total, range) =>
+                        t('Showing {{range0}}-{{range1}} of {{total}} history items', {
+                            range0: range[0],
+                            range1: range[1],
+                            total: total,
+                        }),
+                    className: styles.pagination,
+                }}
+                size={'small'}
+            />
+        </Flex>
+    );
+}
