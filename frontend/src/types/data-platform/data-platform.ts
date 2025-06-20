@@ -11,6 +11,7 @@ export enum DataPlatforms {
     S3 = 's3',
     Glue = 'glue',
     Redshift = 'redshift',
+    Soda = 'soda',
 }
 
 export type DataPlatform =
@@ -23,7 +24,8 @@ export type DataPlatform =
     | DataPlatforms.Snowflake
     | DataPlatforms.S3
     | DataPlatforms.Glue
-    | DataPlatforms.Redshift;
+    | DataPlatforms.Redshift
+    | DataPlatforms.Soda;
 
 export const DataPlatformDataOutputConfigurationMap: Map<DataPlatform, DataOutputConfigurationTypes> = new Map([
     [DataPlatforms.S3, DataOutputConfigurationTypes.S3DataOutput],
