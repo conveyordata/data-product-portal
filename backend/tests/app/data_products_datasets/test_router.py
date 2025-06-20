@@ -43,6 +43,29 @@ class TestDataProductsDatasetsRouter:
         )
         assert response.status_code == 200
 
+    def test_request_already_exists(self, client):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = DatasetFactory()
+
+        response = self.request_data_product_dataset_link(
+            client, data_product.id, ds.id
+        )
+        assert response.status_code == 200
+        response = self.request_data_product_dataset_link(
+            client, data_product.id, ds.id
+        )
+        assert response.status_code == 400
+
     def test_request_data_product_link_private_dataset_no_access(self, client):
         data_product = DataProductFactory()
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)

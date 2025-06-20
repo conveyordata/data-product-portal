@@ -80,7 +80,6 @@ class DataProductService:
                 ),
             ],
         )
-
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
@@ -258,7 +257,11 @@ class DataProductService:
         dataset = ensure_dataset_exists(
             dataset_id,
             self.db,
-            options=[joinedload(DatasetModel.data_product_links)],
+            options=[
+                joinedload(DatasetModel.data_product_links)
+                .joinedload(DataProductDatasetModel.data_product)
+                .joinedload(DataProductModel.dataset_links)
+            ],
         )
         data_product = ensure_data_product_exists(
             id, self.db, options=[joinedload(DataProductModel.dataset_links)]
