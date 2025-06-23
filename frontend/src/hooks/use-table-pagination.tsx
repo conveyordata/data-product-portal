@@ -18,40 +18,21 @@ export const useTablePagination = (elements: object[], props: Partial<Props> = {
     }, [config.initialPagination]);
 
     const handleTotalChange = useCallback((total: number) => {
-        setPagination((prev) =>
-            prev.total === total
-                ? prev
-                : {
-                      ...prev,
-                      total,
-                  },
-        );
+        setPagination((prev) => (prev.total === total ? prev : { ...prev, total }));
     }, []);
 
     const handleCurrentPageChange = useCallback((current: number) => {
-        setPagination((prev) =>
-            prev.current === current
-                ? prev
-                : {
-                      ...prev,
-                      current,
-                  },
-        );
+        if (current > 0) {
+            setPagination((prev) => (prev.current === current ? prev : { ...prev, current }));
+        }
     }, []);
 
     const handlePageSizeChange = useCallback((pageSize: number) => {
-        setPagination((prev) =>
-            prev.pageSize === pageSize
-                ? prev
-                : {
-                      ...prev,
-                      pageSize,
-                  },
-        );
+        setPagination((prev) => (prev.pageSize === pageSize ? prev : { ...prev, pageSize }));
     }, []);
 
     const handlePaginationChange = (pagination: PaginationProps) => {
-        setPagination(pagination);
+        setPagination((prev) => ({ ...prev, ...pagination }));
     };
 
     useEffect(() => {

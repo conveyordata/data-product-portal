@@ -18,10 +18,11 @@ interface HistoryTableLinkProps {
 }
 
 export function HistoryTableEventName({ record, resourceId, type }: HistoryTableLinkProps): ReactNode {
-    const { target_id, subject_id, subject_type, target_type, deleted_subject_identifier, deleted_target_identifier } =
-        record;
     const { t } = useTranslation();
     const navigate = useNavigate();
+
+    const { target_id, subject_id, subject_type, target_type, deleted_subject_identifier, deleted_target_identifier } =
+        record;
 
     if (!(subject_id === resourceId && type === subject_type)) {
         const path = getEventReferenceEntityLinkPath(
@@ -33,23 +34,33 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
         if (subject_type === EventReferenceEntity.User) {
             return (
                 <Typography.Text>
-                    {getEventTypeDisplayName(t, record.name)} {getTargetDisplayLabel(t, record)}
+                    {getEventTypeDisplayName(
+                        t,
+                        record.name,
+                        record.subject_type,
+                        getSubjectDisplayLabel(record),
+                        <div />,
+                    )}
                 </Typography.Text>
             );
         }
+
         return (
             <Typography.Text>
-                {getEventTypeDisplayName(t, record.name)}{' '}
-                <Button
-                    type="link"
-                    disabled={!!deleted_subject_identifier}
-                    style={{ paddingLeft: 0 }}
-                    onClick={() => {
-                        if (path) navigate(path);
-                    }}
-                >
-                    {getSubjectDisplayLabel(t, record)}
-                </Button>
+                {getEventTypeDisplayName(
+                    t,
+                    record.name,
+                    record.subject_type,
+                    getSubjectDisplayLabel(record),
+                    <Button
+                        type="link"
+                        disabled={!!deleted_subject_identifier}
+                        style={{ padding: 0 }}
+                        onClick={() => {
+                            if (path) navigate(path);
+                        }}
+                    />,
+                )}
             </Typography.Text>
         );
     }
@@ -64,26 +75,36 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
         if (target_type === EventReferenceEntity.User) {
             return (
                 <Typography.Text>
-                    {getEventTypeDisplayName(t, record.name)} {getTargetDisplayLabel(t, record)}
+                    {getEventTypeDisplayName(
+                        t,
+                        record.name,
+                        record.target_type,
+                        getTargetDisplayLabel(record),
+                        <div />,
+                    )}
                 </Typography.Text>
             );
         }
+
         return (
             <Typography.Text>
-                {getEventTypeDisplayName(t, record.name)}{' '}
-                <Button
-                    type="link"
-                    disabled={!!deleted_target_identifier}
-                    style={{ paddingLeft: 0 }}
-                    onClick={() => {
-                        if (path) navigate(path);
-                    }}
-                >
-                    {getTargetDisplayLabel(t, record)}
-                </Button>
+                {getEventTypeDisplayName(
+                    t,
+                    record.name,
+                    record.target_type,
+                    getTargetDisplayLabel(record),
+                    <Button
+                        type="link"
+                        disabled={!!deleted_target_identifier}
+                        style={{ padding: 0 }}
+                        onClick={() => {
+                            if (path) navigate(path);
+                        }}
+                    />,
+                )}
             </Typography.Text>
         );
     }
 
-    return <Typography.Text>{getEventTypeDisplayName(t, record.name)}</Typography.Text>;
+    throw new Error(`Unable to render event ${record}`);
 }

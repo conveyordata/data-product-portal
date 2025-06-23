@@ -29,6 +29,7 @@ export const Searchbar = ({
     const handleSearch = (values: SearchForm) => {
         onSearch?.(values);
     };
+
     return (
         <Flex className={styles.searchContainer}>
             <Form form={form} onFinish={handleSearch} disabled={isDisabled} {...formProps}>
