@@ -31,36 +31,22 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
             subject_type,
         );
 
-        if (subject_type === EventReferenceEntity.User) {
-            return (
-                <Typography.Text>
-                    {getEventTypeDisplayName(
-                        t,
-                        record.name,
-                        record.subject_type,
-                        getSubjectDisplayLabel(record),
-                        <div />,
-                    )}
-                </Typography.Text>
+        let element = <></>;
+        if (subject_type !== EventReferenceEntity.User) {
+            element = (
+                <Button
+                    type="link"
+                    disabled={!!deleted_subject_identifier}
+                    style={{ padding: 0 }}
+                    onClick={() => {
+                        if (path) navigate(path);
+                    }}
+                />
             );
         }
-
         return (
             <Typography.Text>
-                {getEventTypeDisplayName(
-                    t,
-                    record.name,
-                    record.subject_type,
-                    getSubjectDisplayLabel(record),
-                    <Button
-                        type="link"
-                        disabled={!!deleted_subject_identifier}
-                        style={{ padding: 0 }}
-                        onClick={() => {
-                            if (path) navigate(path);
-                        }}
-                    />,
-                )}
+                {getEventTypeDisplayName(t, record.name, record.subject_type, getSubjectDisplayLabel(record), element)}
             </Typography.Text>
         );
     }
@@ -72,36 +58,22 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
             target_type,
         );
 
-        if (target_type === EventReferenceEntity.User) {
-            return (
-                <Typography.Text>
-                    {getEventTypeDisplayName(
-                        t,
-                        record.name,
-                        record.target_type,
-                        getTargetDisplayLabel(record),
-                        <div />,
-                    )}
-                </Typography.Text>
+        let element = <></>;
+        if (target_type !== EventReferenceEntity.User) {
+            element = (
+                <Button
+                    type="link"
+                    disabled={!!deleted_target_identifier}
+                    style={{ padding: 0 }}
+                    onClick={() => {
+                        if (path) navigate(path);
+                    }}
+                />
             );
         }
-
         return (
             <Typography.Text>
-                {getEventTypeDisplayName(
-                    t,
-                    record.name,
-                    record.target_type,
-                    getTargetDisplayLabel(record),
-                    <Button
-                        type="link"
-                        disabled={!!deleted_target_identifier}
-                        style={{ padding: 0 }}
-                        onClick={() => {
-                            if (path) navigate(path);
-                        }}
-                    />,
-                )}
+                {getEventTypeDisplayName(t, record.name, record.target_type, getTargetDisplayLabel(record), element)}
             </Typography.Text>
         );
     }
