@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 from typing import Sequence
 from uuid import UUID
@@ -8,7 +9,6 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
 )
@@ -23,7 +23,9 @@ class DataProductDatasetService:
     def __init__(self, db: Session):
         self.db = db
 
-    def approve_data_product_link(self, id: UUID, authenticated_user: User) -> None:
+    def approve_data_product_link(
+        self, id: UUID, *, actor: User
+    ) -> DataProductDatasetAssociationModel:
         current_link = self.db.get(DataProductDatasetAssociationModel, id)
         if current_link.status != DecisionStatus.PENDING:
             raise HTTPException(
@@ -32,38 +34,39 @@ class DataProductDatasetService:
             )
 
         current_link.status = DecisionStatus.APPROVED
-        current_link.approved_by = authenticated_user
+        current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        RefreshInfrastructureLambda().trigger()
         self.db.commit()
+        return current_link
 
-    def deny_data_product_link(self, id: UUID, actor: User) -> None:
+    def deny_data_product_link(
+        self, id: UUID, *, actor: User
+    ) -> DataProductDatasetAssociationModel:
         current_link = self.db.get(DataProductDatasetAssociationModel, id)
-        if (
-            current_link.status != DecisionStatus.PENDING
-            and current_link.status != DecisionStatus.APPROVED
-        ):
+        if current_link.status not in (DecisionStatus.PENDING, DecisionStatus.APPROVED):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Approval request already decided",
             )
+
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
         self.db.commit()
+        return current_link
 
-    def remove_data_product_link(self, id: UUID) -> None:
+    def remove_data_product_link(self, id: UUID) -> DataProductDatasetAssociationModel:
         current_link = self.db.get(DataProductDatasetAssociationModel, id)
-
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Dataset data product link {id} not found",
             )
 
+        result = copy.deepcopy(current_link)
         self.db.delete(current_link)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
+        return result
 
     def get_user_pending_actions(
         self, user: User

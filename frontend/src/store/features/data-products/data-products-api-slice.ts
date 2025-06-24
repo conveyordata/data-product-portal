@@ -22,6 +22,7 @@ import type {
     DataProductUpdateRequest,
     DataProductUpdateResponse,
 } from '@/types/data-product';
+import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import type {
     NamespaceLengthLimitsResponse,
@@ -34,6 +35,7 @@ export const dataProductTags: string[] = [
     TagTypes.UserDataProducts,
     TagTypes.Dataset,
     TagTypes.UserDatasets,
+    TagTypes.History,
 ];
 
 export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dataProductTags }).injectEndpoints({
@@ -74,6 +76,13 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
+        getDataProductHistory: builder.query<EventContract[], string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataProductHistory, { dataProductId: id }),
+                method: 'GET',
+            }),
+            providesTags: (_, __, id) => [{ type: TagTypes.History as const, id: id }],
+        }),
         getDataProductGraphData: builder.query<GraphContract, string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductGraph, { dataProductId: id }),
@@ -108,6 +117,7 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: data_product_id },
             ],
         }),
         removeDataProduct: builder.mutation<void, string>({
@@ -115,9 +125,12 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 url: buildUrl(ApiUrl.DataProductGet, { dataProductId: id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: [
+            invalidatesTags: (_, _error, arg) => [
                 { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const, id: arg },
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.UserDataProducts as const, id: arg },
+                { type: TagTypes.History as const, id: arg },
             ],
         }),
         getDataProductSignInUrl: builder.mutation<DataProductGetSignInUrlResponse, DataProductGetSignInUrlRequest>({
@@ -169,6 +182,8 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const, id: arg.datasetId },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: arg.datasetId },
+                { type: TagTypes.History as const, id: arg.dataProductId },
             ],
         }),
         removeDatasetFromDataProduct: builder.mutation<
@@ -184,6 +199,8 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const, id: arg.datasetId },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: arg.datasetId },
+                { type: TagTypes.History as const, id: arg.dataProductId },
             ],
         }),
         updateDataProductAbout: builder.mutation<
@@ -211,7 +228,10 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
 
                 queryFulfilled.catch(patchResult.undo);
             },
-            invalidatesTags: (_, __, { dataProductId }) => [{ type: TagTypes.DataProduct as const, id: dataProductId }],
+            invalidatesTags: (_, __, { dataProductId }) => [
+                { type: TagTypes.DataProduct as const, id: dataProductId },
+                { type: TagTypes.History as const, id: dataProductId },
+            ],
         }),
         validateDataProductNamespace: builder.query<NamespaceValidationResponse, string>({
             query: (namespace) => ({
@@ -262,6 +282,7 @@ export const {
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
+    useGetDataProductHistoryQuery,
     useGetDataProductSnowflakeUrlMutation,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,

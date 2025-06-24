@@ -1,3 +1,4 @@
+import copy
 from typing import Iterable, Sequence
 from uuid import UUID
 
@@ -6,7 +7,6 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, raiseload
 
 from app.core.authz import Authorization
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -43,7 +43,8 @@ from app.role_assignments.dataset.service import (
 from app.role_assignments.enums import DecisionStatus
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
-from app.users.model import User
+from app.users.model import User as UserModel
+from app.users.schema import User
 
 
 class DatasetService:
@@ -51,7 +52,7 @@ class DatasetService:
         self.db = db
         self.namespace_validator = NamespaceValidator(DatasetModel)
 
-    def get_dataset(self, id: UUID, user: User) -> DatasetGet:
+    def get_dataset(self, id: UUID, user: UserModel) -> DatasetGet:
         dataset = self.db.get(
             DatasetModel,
             id,
@@ -88,7 +89,7 @@ class DatasetService:
 
         return dataset
 
-    def get_datasets(self, user: User) -> Sequence[DatasetsGet]:
+    def get_datasets(self, user: UserModel) -> Sequence[DatasetsGet]:
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
@@ -151,10 +152,7 @@ class DatasetService:
 
         return tags
 
-    def create_dataset(
-        self,
-        dataset: DatasetCreate,
-    ) -> DatasetModel:
+    def create_dataset(self, dataset: DatasetCreate) -> DatasetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 dataset.namespace, self.db
@@ -172,18 +170,19 @@ class DatasetService:
 
         self.db.add(model)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
         return model
 
-    def remove_dataset(self, id: UUID) -> None:
+    def remove_dataset(self, id: UUID) -> DatasetModel:
         dataset = self.db.get(DatasetModel, id)
         if not dataset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset {id} not found"
             )
+
+        result = copy.deepcopy(dataset)
         self.db.delete(dataset)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
+        return result
 
     def update_dataset(self, id: UUID, dataset: DatasetUpdate) -> dict[str, UUID]:
         current_dataset = ensure_dataset_exists(id, self.db)
@@ -209,16 +208,24 @@ class DatasetService:
                 current_dataset.tags = new_tags
             else:
                 setattr(current_dataset, k, v) if v else None
+
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
         return {"id": current_dataset.id}
 
-    def update_dataset_about(self, id: UUID, dataset: DatasetAboutUpdate) -> None:
+    def update_dataset_about(
+        self,
+        id: UUID,
+        dataset: DatasetAboutUpdate,
+    ) -> None:
         current_dataset = ensure_dataset_exists(id, self.db)
         current_dataset.about = dataset.about
         self.db.commit()
 
-    def update_dataset_status(self, id: UUID, dataset: DatasetStatusUpdate) -> None:
+    def update_dataset_status(
+        self,
+        id: UUID,
+        dataset: DatasetStatusUpdate,
+    ) -> None:
         current_dataset = ensure_dataset_exists(id, self.db)
         current_dataset.status = dataset.status
         self.db.commit()

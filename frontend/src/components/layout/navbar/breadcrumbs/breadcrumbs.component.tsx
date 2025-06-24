@@ -203,7 +203,7 @@ export const Breadcrumbs = () => {
                     });
 
                     // Case for data product and dataset
-                    if (dataProduct && !isFetchingDataProduct) {
+                    if (dataProduct && !isFetchingDataProduct && pathnames.includes('data-products')) {
                         if (
                             isDataProductEditPage(path, dataProduct.id) ||
                             (dataOutput && isDataOutputEditPage(path, dataOutput.id, dataProduct.id))
@@ -239,7 +239,7 @@ export const Breadcrumbs = () => {
                             }
                         }
                     }
-                    if (dataset && !isFetchingDataset) {
+                    if (dataset && !isFetchingDataset && pathnames.includes('datasets')) {
                         if (isDatasetEditPage(path, dataset.id)) {
                             Object.assign(breadcrumbItem, {
                                 title: <Space classNames={{ item: styles.breadcrumbItem }}>{t('Edit')}</Space>,

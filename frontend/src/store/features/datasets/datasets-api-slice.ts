@@ -9,6 +9,7 @@ import type {
     DatasetUpdateResponse,
 } from '@/types/dataset';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
+import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import type {
     NamespaceLengthLimitsResponse,
@@ -16,7 +17,7 @@ import type {
     NamespaceValidationResponse,
 } from '@/types/namespace/namespace';
 
-export const datasetTags: string[] = [TagTypes.Dataset, TagTypes.UserDatasets, TagTypes.DataProduct];
+export const datasetTags: string[] = [TagTypes.Dataset, TagTypes.UserDatasets, TagTypes.DataProduct, TagTypes.History];
 
 export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: datasetTags }).injectEndpoints({
     endpoints: (builder) => ({
@@ -50,6 +51,13 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
+        getDatasetHistory: builder.query<EventContract[], string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DatasetHistory, { datasetId: id }),
+                method: 'GET',
+            }),
+            providesTags: (_, __, id) => [{ type: TagTypes.History as const, id: id }],
+        }),
         createDataset: builder.mutation<DatasetCreateResponse, DatasetCreateRequest>({
             query: (dataset) => ({
                 url: ApiUrl.Datasets,
@@ -66,9 +74,12 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 url: buildUrl(ApiUrl.DatasetGet, { datasetId: id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: [
+            invalidatesTags: (_, _error, arg) => [
                 { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.Dataset as const, id: arg },
+                { type: TagTypes.UserDatasets as const, id: arg },
+                { type: TagTypes.History as const, id: arg },
             ],
         }),
         updateDataset: builder.mutation<
@@ -87,6 +98,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 { type: TagTypes.Dataset as const, id },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.DataProduct as const },
+                { type: TagTypes.History as const, id },
             ],
         }),
         updateDatasetAbout: builder.mutation<
@@ -110,7 +122,10 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
 
                 queryFulfilled.catch(patchResult.undo);
             },
-            invalidatesTags: (_, __, { datasetId }) => [{ type: TagTypes.Dataset as const, id: datasetId }],
+            invalidatesTags: (_, __, { datasetId }) => [
+                { type: TagTypes.Dataset as const, id: datasetId },
+                { type: TagTypes.History as const, datasetId },
+            ],
         }),
         getDatasetGraphData: builder.query<GraphContract, string>({
             query: (id) => ({
@@ -151,6 +166,7 @@ export const {
     useUpdateDatasetAboutMutation,
     useGetUserDatasetsQuery,
     useGetDatasetGraphDataQuery,
+    useGetDatasetHistoryQuery,
     useLazyGetDatasetNamespaceSuggestionQuery,
     useLazyValidateDatasetNamespaceQuery,
     useGetDatasetNamespaceLengthLimitsQuery,

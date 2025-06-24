@@ -263,6 +263,104 @@ class TestDataOutputsDatasetsRouter:
         assert response.json()[0]["data_output_id"] == str(data_output.id)
         assert response.json()[0]["status"] == "pending"
 
+    def test_history_event_created_on_request_data_output_link(self, client):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+
+        data_output = DataOutputFactory(owner=data_product)
+        ds = DatasetFactory()
+
+        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        assert response.status_code == 200
+
+        history = self.get_data_output_history(client, data_output.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_remove_data_output_link(self, client):
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__REVOKE_DATA_OUTPUT_LINK],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        link = DataOutputDatasetAssociationFactory(dataset=ds)
+
+        response = self.remove_data_output_dataset_link(client, link.id)
+        assert response.status_code == 200
+
+        history = self.get_data_output_history(client, link.data_output_id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_approve_data_output_link(self, client):
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+
+        link = DataOutputDatasetAssociationFactory(
+            dataset=ds, status=DecisionStatus.PENDING
+        )
+        response = self.approve_default_data_output_dataset_link(client, link.id)
+        assert response.status_code == 200
+
+        history = self.get_data_output_history(client, link.data_output_id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_deny_data_output_link(self, client):
+        user = UserFactory(external_id="sub")
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        link = DataOutputDatasetAssociationFactory(
+            dataset=ds, status=DecisionStatus.PENDING
+        )
+        response = self.deny_default_data_output_dataset_link(client, link.id)
+        assert response.status_code == 200
+
+        history = self.get_data_output_history(client, link.data_output_id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_unlink_data_output_link(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        data_output = DataOutputFactory(owner=data_product)
+        ds = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+            ],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+
+        assert response.status_code == 200
+
+        response = self.request_data_output_dataset_unlink(
+            client, data_output.id, ds.id
+        )
+        assert response.status_code == 200
+
+        history = self.get_data_output_history(client, data_output.id).json()
+        assert len(history) == 2
+
     @staticmethod
     def request_data_output_dataset_link(client, data_output_id, dataset_id):
         return client.post(
@@ -286,3 +384,7 @@ class TestDataOutputsDatasetsRouter:
         return client.delete(
             f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}/dataset/{dataset_id}"
         )
+
+    @staticmethod
+    def get_data_output_history(client, data_output_id):
+        return client.get(f"{DATA_OUTPUTS_ENDPOINT}/{data_output_id}/history")

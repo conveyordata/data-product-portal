@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
@@ -7,7 +8,6 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
     NamespaceLengthLimits,
@@ -82,10 +82,8 @@ class DataOutputService:
         )
 
     def create_data_output(
-        self,
-        id: UUID,
-        data_output: DataOutputCreate,
-    ) -> dict[str, UUID]:
+        self, id: UUID, data_output: DataOutputCreate
+    ) -> DataOutputModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 data_output.namespace, self.db, id
@@ -108,29 +106,25 @@ class DataOutputService:
         data_output_schema = data_output.parse_pydantic_schema()
         tags = self._get_tags(data_output_schema.pop("tag_ids", []))
         model = DataOutputModel(**data_output_schema, tags=tags, owner_id=id)
-
         self.db.add(model)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
-        return {"id": model.id}
+        return model
 
-    def remove_data_output(self, id: UUID) -> None:
-        data_output = self.db.get(
-            DataOutputModel,
-            id,
-        )
+    def remove_data_output(self, id: UUID) -> DataOutputModel:
+        data_output = self.db.get(DataOutputModel, id)
         if not data_output:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data Output {id} not found",
             )
 
+        result = copy.deepcopy(data_output)
         self.db.delete(data_output)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
+        return result
 
     def update_data_output_status(
-        self, id: UUID, data_output: DataOutputStatusUpdate
+        self, id: UUID, data_output: DataOutputStatusUpdate, *, actor: User
     ) -> None:
         current_data_output = self.ensure_data_output_exists(id)
         current_data_output.status = data_output.status
@@ -140,6 +134,7 @@ class DataOutputService:
         self,
         id: UUID,
         dataset_id: UUID,
+        *,
         actor: User,
     ) -> DataOutputDatasetAssociationModel:
         dataset = ensure_dataset_exists(
@@ -167,13 +162,12 @@ class DataOutputService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_output.dataset_links.append(dataset_link)
-
         self.db.commit()
-        self.db.refresh(data_output)
-        RefreshInfrastructureLambda().trigger()
         return dataset_link
 
-    def unlink_dataset_from_data_output(self, id: UUID, dataset_id: UUID) -> None:
+    def unlink_dataset_from_data_output(
+        self, id: UUID, dataset_id: UUID
+    ) -> DataOutputModel:
         ensure_dataset_exists(dataset_id, self.db)
         data_output = self.ensure_data_output_exists(
             id, options=[joinedload(DataOutputModel.dataset_links)]
@@ -192,10 +186,10 @@ class DataOutputService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data output {id} not found",
             )
-        data_output.dataset_links.remove(data_output_dataset)
 
+        data_output.dataset_links.remove(data_output_dataset)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
+        return data_output
 
     def update_data_output(
         self, id: UUID, data_output: DataOutputUpdate
@@ -211,7 +205,6 @@ class DataOutputService:
                 setattr(current_data_output, k, v) if v else None
 
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
         return {"id": current_data_output.id}
 
     def get_graph_data(self, id: UUID, level: int) -> Graph:

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
+from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -25,9 +26,15 @@ from app.data_products.schema_request import (
 )
 from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
+from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
 from app.datasets.enums import DatasetAccessType
+from app.events.enums import EventReferenceEntity, EventType
+from app.events.schema import CreateEvent
+from app.events.schema_response import EventGet
+from app.events.service import EventService
 from app.graph.graph import Graph
+from app.notifications.service import NotificationService
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     UpdateRoleAssignment,
@@ -80,6 +87,13 @@ def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataPro
     return DataProductService(db).get_data_product(id)
 
 
+@router.get("/{id}/history")
+def get_event_history(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> Sequence[EventGet]:
+    return EventService(db).get_history(id, EventReferenceEntity.DATA_PRODUCT)
+
+
 @router.post(
     "",
     responses={
@@ -109,6 +123,35 @@ def create_data_product(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
+    created_data_product = DataProductService(db).create_data_product(data_product)
+    owners = data_product.owners
+    _assign_owner_role_assignments(
+        created_data_product.id,
+        owners=owners,
+        db=db,
+        actor=authenticated_user,
+    )
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_CREATED,
+            subject_id=created_data_product.id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        ),
+    )
+    NotificationService(db).create_data_product_notifications(
+        data_product_id=created_data_product.id,
+        event_id=event_id,
+        extra_receiver_ids=owners,
+    )
+    RefreshInfrastructureLambda().trigger()
+    return {"id": created_data_product.id}
+
+
+def _assign_owner_role_assignments(
+    data_product_id: UUID, owners: Sequence[UUID], db: Session, actor: User
+) -> None:
     owner_role = RoleService(db).find_prototype(Scope.DATA_PRODUCT, Prototype.OWNER)
     if not owner_role:
         raise HTTPException(
@@ -116,22 +159,30 @@ def create_data_product(
             detail="Owner role not found",
         )
 
-    created_data_product = DataProductService(db).create_data_product(data_product)
     assignment_service = RoleAssignmentService(db)
-    for owner in data_product.owners:
+    for owner_id in owners:
         response = assignment_service.create_assignment(
-            created_data_product.id,
+            data_product_id,
             CreateRoleAssignment(
-                user_id=owner,
+                user_id=owner_id,
                 role_id=owner_role.id,
             ),
-            actor=authenticated_user,
+            actor=actor,
         )
         assignment_service.update_assignment(
             UpdateRoleAssignment(id=response.id, decision=DecisionStatus.APPROVED),
-            actor=authenticated_user,
+            actor=actor,
         )
-    return {"id": created_data_product.id}
+        EventService(db).create_event(
+            CreateEvent(
+                name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,
+                subject_id=response.data_product_id,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                target_id=response.user_id,
+                target_type=EventReferenceEntity.USER,
+                actor_id=actor.id,
+            )
+        )
 
 
 @router.delete(
@@ -153,10 +204,23 @@ def create_data_product(
 def remove_data_product(
     id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DataProductService(db).remove_data_product(id)
+    data_product = DataProductService(db).remove_data_product(id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
-    return
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_REMOVED,
+            actor_id=authenticated_user.id,
+            subject_id=data_product.id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            deleted_subject_identifier=data_product.name,
+        ),
+    )
+    NotificationService(db).create_data_product_notifications(
+        data_product_id=data_product.id, event_id=event_id
+    )
 
 
 @router.put(
@@ -178,9 +242,22 @@ def remove_data_product(
     ],
 )
 def update_data_product(
-    id: UUID, data_product: DataProductUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    data_product: DataProductUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DataProductService(db).update_data_product(id, data_product)
+    result = DataProductService(db).update_data_product(id, data_product)
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_UPDATED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        )
+    )
+    RefreshInfrastructureLambda().trigger()
+    return result
 
 
 @router.post(
@@ -208,8 +285,24 @@ def create_data_output(
     id: UUID,
     data_output: DataOutputCreate,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> dict[str, UUID]:
-    return DataOutputService(db).create_data_output(id, data_output)
+    data_output = DataOutputService(db).create_data_output(id, data_output)
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_OUTPUT_CREATED,
+            subject_id=data_output.id,
+            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            target_id=data_output.owner_id,
+            target_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        ),
+    )
+    NotificationService(db).create_data_product_notifications(
+        data_product_id=data_output.owner_id, event_id=event_id
+    )
+    RefreshInfrastructureLambda().trigger()
+    return {"id": data_output.id}
 
 
 @router.get("/{id}/data_output/validate_namespace")
@@ -241,8 +334,17 @@ def update_data_product_about(
     id: UUID,
     data_product: DataProductAboutUpdate,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataProductService(db).update_data_product_about(id, data_product)
+    data_product = DataProductService(db).update_data_product_about(id, data_product)
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_UPDATED,
+            subject_id=data_product.id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        )
+    )
 
 
 @router.put(
@@ -267,8 +369,17 @@ def update_data_product_status(
     id: UUID,
     data_product: DataProductStatusUpdate,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataProductService(db).update_data_product_status(id, data_product)
+    data_product = DataProductService(db).update_data_product_status(id, data_product)
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_UPDATED,
+            subject_id=data_product.id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        )
+    )
 
 
 @router.post(
@@ -304,9 +415,39 @@ def link_dataset_to_data_product(
     db: Session = Depends(get_db_session),
 ) -> dict[str, UUID]:
     dataset_link = DataProductService(db).link_dataset_to_data_product(
-        id, dataset_id, authenticated_user
+        id, dataset_id, actor=authenticated_user
     )
 
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=(
+                EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
+                if dataset_link.status == DecisionStatus.PENDING
+                else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
+            ),
+            subject_id=dataset_link.data_product_id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            target_id=dataset_link.dataset_id,
+            target_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        ),
+    )
+    if dataset_link.status == DecisionStatus.APPROVED:
+        NotificationService(db).create_data_product_notifications(
+            data_product_id=dataset_link.data_product_id, event_id=event_id
+        )
+
+    _send_dataset_link_emails(dataset_link, background_tasks, authenticated_user, db)
+    RefreshInfrastructureLambda().trigger()
+    return {"id": dataset_link.id}
+
+
+def _send_dataset_link_emails(
+    dataset_link: DataProductDatasetAssociation,
+    background_tasks: BackgroundTasks,
+    actor: User,
+    db: Session,
+) -> None:
     if dataset_link.dataset.access_type != DatasetAccessType.PUBLIC:
         approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
             dataset_link.dataset_id, Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST
@@ -315,12 +456,10 @@ def link_dataset_to_data_product(
             email.send_dataset_link_email(
                 dataset_link.data_product,
                 dataset_link.dataset,
-                requester=authenticated_user,
+                requester=actor,
                 approvers=approvers,
             )
         )
-
-    return {"id": dataset_link.id}
 
 
 @router.delete(
@@ -352,8 +491,31 @@ def unlink_dataset_from_data_product(
     id: UUID,
     dataset_id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataProductService(db).unlink_dataset_from_data_product(id, dataset_id)
+    data_product_dataset = DataProductService(db).unlink_dataset_from_data_product(
+        id, dataset_id
+    )
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=(
+                EventType.DATA_PRODUCT_DATASET_LINK_REMOVED
+                if data_product_dataset.status != DecisionStatus.APPROVED
+                else EventType.DATA_PRODUCT_DATASET_LINK_DENIED
+            ),
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            target_id=data_product_dataset.dataset_id,
+            target_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        ),
+    )
+    if data_product_dataset.status == DecisionStatus.APPROVED:
+        NotificationService(db).create_data_product_notifications(
+            data_product_id=id, event_id=event_id
+        )
+    RefreshInfrastructureLambda().trigger()
 
 
 @router.get(
@@ -387,7 +549,7 @@ def get_signin_url(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> str:
     return DataProductService(db).generate_signin_url(
-        id, environment, authenticated_user
+        id, environment, actor=authenticated_user
     )
 
 

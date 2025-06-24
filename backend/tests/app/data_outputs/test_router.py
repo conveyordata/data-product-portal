@@ -330,6 +330,108 @@ class TestDataOutputsRouter:
         response = self.create_data_output(client, create_payload)
         assert response.status_code == 400
 
+    def test_history_event_created_on_data_output_creation(
+        self, data_output_payload, client
+    ):
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=data_output_payload["owner_id"],
+        )
+        created_data_output = self.create_data_output(client, data_output_payload)
+        assert created_data_output.status_code == 200
+        assert "id" in created_data_output.json()
+
+        history = self.get_data_output_history(
+            client, created_data_output.json().get("id")
+        ).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_output_status_update(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        data_output = DataOutputFactory(owner=data_product)
+        response = self.update_data_output_status(
+            client, {"status": "pending"}, data_output.id
+        )
+        response = self.get_data_output_by_id(client, data_output.id)
+        assert response.status_code == 200
+
+        history = self.get_data_output_history(client, data_output.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_output_update(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        tag = TagFactory()
+        data_output = DataOutputFactory(owner=data_product)
+        update_payload = {
+            "name": "update",
+            "description": "update",
+            "tag_ids": [str(tag.id)],
+        }
+        response = self.update_data_output(client, update_payload, data_output.id)
+        assert response.status_code == 200
+
+        history = self.get_data_output_history(client, data_output.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_output_deletion(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        data_output = DataOutputFactory(owner=data_product)
+        response = self.delete_data_output(client, data_output.id)
+        assert response.status_code == 200
+
+        history = self.get_data_output_history(client, data_output.id).json()
+        assert len(history) == 1
+
+    def test_retain_deleted_data_output_name_in_history(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE_DATA_OUTPUT],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        data_output = DataOutputFactory(owner=data_product)
+        data_output_id = data_output.id
+        data_output_name = data_output.name
+
+        response = self.delete_data_output(client, data_output.id)
+        assert response.status_code == 200
+
+        response = self.get_data_output_history(client, data_output_id)
+        assert len(response.json()) == 1
+        assert response.json()[0]["deleted_subject_identifier"] == data_output_name
+
     def test_get_result_string(self, client):
         service = PlatformServiceFactory(
             result_string_template="{bucket}/{suffix}/{path}"
@@ -383,6 +485,10 @@ class TestDataOutputsRouter:
     @staticmethod
     def get_namespace_length_limits(client: TestClient) -> Response:
         return client.get(f"{ENDPOINT}/namespace_length_limits")
+
+    @staticmethod
+    def get_data_output_history(client, data_output_id):
+        return client.get(f"{ENDPOINT}/{data_output_id}/history")
 
     @staticmethod
     def get_data_output_result_string(client, payload):

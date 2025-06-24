@@ -1,3 +1,4 @@
+import copy
 import json
 from datetime import datetime
 from typing import Sequence
@@ -13,7 +14,6 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
@@ -188,11 +188,9 @@ class DataProductService:
         model = DataProductModel(**data_product_schema, tags=tags)
         self.db.add(model)
         self.db.commit()
-
-        RefreshInfrastructureLambda().trigger()
         return model
 
-    def remove_data_product(self, id: UUID) -> None:
+    def remove_data_product(self, id: UUID) -> DataProductModel:
         data_product = self.db.get(DataProductModel, id)
         if not data_product:
             raise HTTPException(
@@ -200,11 +198,15 @@ class DataProductService:
                 detail=f"Data Product {id} not found",
             )
 
+        result = copy.deepcopy(data_product)
         self.db.delete(data_product)
         self.db.commit()
+        return result
 
     def update_data_product(
-        self, id: UUID, data_product: DataProductUpdate
+        self,
+        id: UUID,
+        data_product: DataProductUpdate,
     ) -> dict[str, UUID]:
         current_data_product = ensure_data_product_exists(id, self.db)
         update_data_product = data_product.model_dump(exclude_unset=True)
@@ -231,27 +233,33 @@ class DataProductService:
                 setattr(current_data_product, k, v) if v else None
 
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
         return {"id": current_data_product.id}
 
     def update_data_product_about(
-        self, id: UUID, data_product: DataProductAboutUpdate
-    ) -> None:
+        self,
+        id: UUID,
+        data_product: DataProductAboutUpdate,
+    ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
         current_data_product.about = data_product.about
         self.db.commit()
+        return current_data_product
 
     def update_data_product_status(
-        self, id: UUID, data_product: DataProductStatusUpdate
-    ) -> None:
+        self,
+        id: UUID,
+        data_product: DataProductStatusUpdate,
+    ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
         current_data_product.status = data_product.status
         self.db.commit()
+        return current_data_product
 
     def link_dataset_to_data_product(
         self,
         id: UUID,
         dataset_id: UUID,
+        *,
         actor: User,
     ) -> DataProductDatasetModel:
         dataset = ensure_dataset_exists(
@@ -297,11 +305,13 @@ class DataProductService:
         )
         data_product.dataset_links.append(dataset_link)
         self.db.commit()
-        self.db.refresh(data_product)
-        RefreshInfrastructureLambda().trigger()
         return dataset_link
 
-    def unlink_dataset_from_data_product(self, id: UUID, dataset_id: UUID) -> None:
+    def unlink_dataset_from_data_product(
+        self,
+        id: UUID,
+        dataset_id: UUID,
+    ) -> DataProductDatasetModel:
         ensure_dataset_exists(dataset_id, self.db)
         data_product = ensure_data_product_exists(
             id, self.db, options=[joinedload(DataProductModel.dataset_links)]
@@ -319,9 +329,10 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data product {id} not found",
             )
+
         data_product.dataset_links.remove(data_product_dataset)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
+        return data_product_dataset
 
     def get_data_product_role_arn(self, id: UUID, environment: str) -> str:
         environment_context = (
@@ -337,7 +348,7 @@ class DataProductService:
 
     @classmethod
     def get_aws_temporary_credentials(
-        cls, role_arn: str, actor: User
+        cls, role_arn: str, *, actor: User
     ) -> AWSCredentials:
         email = actor.email
         try:
@@ -353,11 +364,9 @@ class DataProductService:
 
         return AWSCredentials(**response.get("Credentials"))
 
-    def generate_signin_url(
-        self, id: UUID, environment: str, authenticated_user: User
-    ) -> str:
+    def generate_signin_url(self, id: UUID, environment: str, *, actor: User) -> str:
         role = self.get_data_product_role_arn(id, environment)
-        json_credentials = self.get_aws_temporary_credentials(role, authenticated_user)
+        json_credentials = self.get_aws_temporary_credentials(role, actor=actor)
 
         url_credentials = {
             "sessionId": json_credentials.AccessKeyId,
@@ -448,7 +457,7 @@ class DataProductService:
         if "login_url" not in config.keys():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=("login_url missing from Snowflake configuration"),
+                detail="login_url missing from Snowflake configuration",
             )
         return config["login_url"]
 
