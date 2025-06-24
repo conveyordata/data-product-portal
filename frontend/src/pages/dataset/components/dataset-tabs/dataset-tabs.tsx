@@ -1,10 +1,4 @@
-import {
-    HistoryOutlined,
-    InfoCircleOutlined,
-    PartitionOutlined,
-    SettingOutlined,
-    TeamOutlined,
-} from '@ant-design/icons';
+import { CompassOutlined, HistoryOutlined, InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -70,12 +64,6 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 children: <DataOutputTab datasetId={datasetId} />,
             },
             {
-                label: t('Team'),
-                key: TabKeys.Team,
-                icon: <TeamOutlined />,
-                children: <TeamTab datasetId={datasetId} />,
-            },
-            {
                 label: t('Consuming Data Products'),
                 key: TabKeys.DataProduct,
                 icon: <DataProductOutlined />,
@@ -84,8 +72,14 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
             {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
-                icon: <PartitionOutlined />,
+                icon: <CompassOutlined />,
                 children: <Explorer id={datasetId} type={'dataset'} />,
+            },
+            {
+                label: t('Team'),
+                key: TabKeys.Team,
+                icon: <TeamOutlined />,
+                children: <TeamTab datasetId={datasetId} />,
             },
             {
                 label: t('Settings'),
