@@ -1,4 +1,3 @@
-import { sub } from 'date-fns';
 import type { TFunction } from 'i18next';
 import type { ReactElement, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
@@ -89,19 +88,19 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataOutputCreated"
+                    i18nKey="EventDataOutputCreated"
                     defaults="Data output created: now linked with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
                 />
             );
         case EventType.DATA_OUTPUT_UPDATED:
-            return <Trans t={t} key="EventDataOutputUpdated" defaults="Data output updated" />;
+            return <Trans t={t} i18nKey="EventDataOutputUpdated" defaults="Data output updated" />;
         case EventType.DATA_OUTPUT_REMOVED:
             return (
                 <Trans
                     t={t}
-                    key="EventDataOutputRemoved"
+                    i18nKey="EventDataOutputRemoved"
                     defaults="Data output removed: link removed with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
@@ -112,7 +111,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataOutputDatasetLinkRequested"
+                    i18nKey="EventDataOutputDatasetLinkRequested"
                     defaults="Requested producing link with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
@@ -122,7 +121,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataOutputDatasetLinkApproved"
+                    i18nKey="EventDataOutputDatasetLinkApproved"
                     defaults="Approved producing link with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
@@ -132,7 +131,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataOutputDatasetLinkDenied"
+                    i18nKey="EventDataOutputDatasetLinkDenied"
                     defaults="Denied producing link with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
@@ -142,7 +141,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataOutputDatasetLinkRemoved"
+                    i18nKey="EventDataOutputDatasetLinkRemoved"
                     defaults="Removed producing link with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
@@ -150,17 +149,17 @@ export function getEventTypeDisplayName(
             );
 
         case EventType.DATA_PRODUCT_CREATED:
-            return <Trans t={t} key="EventDataProductCreated" defaults="Data product created" />;
+            return <Trans t={t} i18nKey="EventDataProductCreated" defaults="Data product created" />;
         case EventType.DATA_PRODUCT_UPDATED:
-            return <Trans t={t} key="EventDataProductUpdated" defaults="Data product updated" />;
+            return <Trans t={t} i18nKey="EventDataProductUpdated" defaults="Data product updated" />;
         case EventType.DATA_PRODUCT_REMOVED:
-            return <Trans t={t} key="EventDataProductRemoved" defaults="Data product removed" />;
+            return <Trans t={t} i18nKey="EventDataProductRemoved" defaults="Data product removed" />;
 
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED:
             return (
                 <Trans
                     t={t}
-                    key="EventDataProductRoleAssignmentCreated"
+                    i18nKey="EventDataProductRoleAssignmentCreated"
                     defaults="Added <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -170,7 +169,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataProductRoleAssignmentUpdated"
+                    i18nKey="EventDataProductRoleAssignmentUpdated"
                     defaults="Updated role for <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -180,7 +179,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataProductRoleAssignmentRemoved"
+                    i18nKey="EventDataProductRoleAssignmentRemoved"
                     defaults="Removed <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -190,7 +189,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataProductRoleAssignmentRequested"
+                    i18nKey="EventDataProductRoleAssignmentRequested"
                     defaults="Requested role for <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -200,7 +199,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataProductRoleAssignmentApproved"
+                    i18nKey="EventDataProductRoleAssignmentApproved"
                     defaults="Approved role for <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -210,7 +209,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataProductRoleAssignmentDenied"
+                    i18nKey="EventDataProductRoleAssignmentDenied"
                     defaults="Denied role for <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -221,7 +220,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataProductDatasetLinkRequested"
+                    i18nKey="EventDataProductDatasetLinkRequested"
                     defaults="Requested consuming link with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
@@ -231,7 +230,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataProductDatasetLinkApproved"
+                    i18nKey="EventDataProductDatasetLinkApproved"
                     defaults="Approved consuming link with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
@@ -241,7 +240,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataProductDatasetLinkDenied"
+                    i18nKey="EventDataProductDatasetLinkDenied"
                     defaults="Denied consuming link with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
@@ -251,7 +250,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDataProductDatasetLinkRemoved"
+                    i18nKey="EventDataProductDatasetLinkRemoved"
                     defaults="Removed consuming link with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
@@ -262,7 +261,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDatasetRoleAssignmentCreated"
+                    i18nKey="EventDatasetRoleAssignmentCreated"
                     defaults="Added <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -272,7 +271,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDatasetRoleAssignmentUpdated"
+                    i18nKey="EventDatasetRoleAssignmentUpdated"
                     defaults="Updated role for <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -282,7 +281,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDatasetRoleAssignmentRemoved"
+                    i18nKey="EventDatasetRoleAssignmentRemoved"
                     defaults="Removed <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -292,7 +291,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDatasetRoleAssignmentRequested"
+                    i18nKey="EventDatasetRoleAssignmentRequested"
                     defaults="Requested role for <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -302,7 +301,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDatasetRoleAssignmentApproved"
+                    i18nKey="EventDatasetRoleAssignmentApproved"
                     defaults="Approved role for <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -312,7 +311,7 @@ export function getEventTypeDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="EventDatasetRoleAssignmentDenied"
+                    i18nKey="EventDatasetRoleAssignmentDenied"
                     defaults="Denied role for <element>{{entity}}</element>"
                     values={{ entity }}
                     components={{ element }}
@@ -320,11 +319,11 @@ export function getEventTypeDisplayName(
             );
 
         case EventType.DATASET_CREATED:
-            return <Trans t={t} key="EventDatasetCreated" defaults="Dataset created" />;
+            return <Trans t={t} i18nKey="EventDatasetCreated" defaults="Dataset created" />;
         case EventType.DATASET_UPDATED:
-            return <Trans t={t} key="EventDatasetUpdated" defaults="Dataset updated" />;
+            return <Trans t={t} i18nKey="EventDatasetUpdated" defaults="Dataset updated" />;
         case EventType.DATASET_REMOVED:
-            return <Trans t={t} key="EventDatasetRemoved" defaults="Dataset removed" />;
+            return <Trans t={t} i18nKey="EventDatasetRemoved" defaults="Dataset removed" />;
 
         default:
             throw new Error(`Unsupported event type ${event_type}`);
@@ -349,7 +348,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataOutputCreated"
+                    i18nKey="NotificationDataOutputCreated"
                     defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} has been created for the <target>{{target_entity}}</target> {{target_entity_type}}"
                     values={{ subject_entity, subject_entity_type, target_entity, target_entity_type }}
                     components={{ subject, target }}
@@ -361,7 +360,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataOutputRemoved"
+                    i18nKey="NotificationDataOutputRemoved"
                     defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} has been removed from the <target>{{target_entity}}</target> {{target_entity_type}}"
                     values={{ subject_entity, subject_entity_type, target_entity, target_entity_type }}
                     components={{ subject, target }}
@@ -376,7 +375,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataOutputLinkApproved"
+                    i18nKey="NotificationDataOutputLinkApproved"
                     defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} is now linked to the <target>{{target_entity}}</target> {{target_entity_type}}"
                     values={{ subject_entity, subject_entity_type, target_entity, target_entity_type }}
                     components={{ subject, target }}
@@ -387,7 +386,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataOutputLinkDenied"
+                    i18nKey="NotificationDataOutputLinkDenied"
                     defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} link denied for the <target>{{target_entity}}</target> {{target_entity_type}}"
                     values={{ subject_entity, subject_entity_type, target_entity, target_entity_type }}
                     components={{ subject, target }}
@@ -398,7 +397,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataOutputLinkRemoved"
+                    i18nKey="NotificationDataOutputLinkRemoved"
                     defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} has been unlinked from the <target>{{target_entity}}</target> {{target_entity_type}}"
                     values={{ subject_entity, subject_entity_type, target_entity, target_entity_type }}
                     components={{ subject, target }}
@@ -410,7 +409,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataProductCreated"
+                    i18nKey="NotificationDataProductCreated"
                     defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} has been created"
                     values={{ subject_entity, subject_entity_type }}
                     components={{ subject }}
@@ -423,7 +422,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataProductRemoved"
+                    i18nKey="NotificationDataProductRemoved"
                     defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} has been removed"
                     values={{ subject_entity, subject_entity_type }}
                     components={{ subject }}
@@ -438,7 +437,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataProductRoleAssignmentUpdated"
+                    i18nKey="NotificationDataProductRoleAssignmentUpdated"
                     defaults="role updated for <target>{{target_entity}}</target> in <subject>{{subject_entity}}</subject> {{subject_entity_type}}"
                     values={{ target_entity, subject_entity, subject_entity_type }}
                     components={{ target, subject }}
@@ -449,7 +448,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataProductRoleAssignmentRemoved"
+                    i18nKey="NotificationDataProductRoleAssignmentRemoved"
                     defaults="role removed for <target>{{target_entity}}</target> in <subject>{{subject_entity}}</subject> {{subject_entity_type}}"
                     values={{ target_entity, subject_entity, subject_entity_type }}
                     components={{ target, subject }}
@@ -463,7 +462,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataProductRoleAssignmentApproved"
+                    i18nKey="NotificationDataProductRoleAssignmentApproved"
                     defaults="role approved for <target>{{target_entity}}</target> in <subject>{{subject_entity}}</subject> {{subject_entity_type}}"
                     values={{ target_entity, subject_entity, subject_entity_type }}
                     components={{ target, subject }}
@@ -474,7 +473,7 @@ export function getNotificationDisplayName(
             return (
                 <Trans
                     t={t}
-                    key="NotificationDataProductRoleAssignmentDenied"
+                    i18nKey="NotificationDataProductRoleAssignmentDenied"
                     defaults="role denied for <target>{{target_entity}}</target> in <subject>{{subject_entity}}</subject> {{subject_entity_type}}"
                     values={{ target_entity, subject_entity, subject_entity_type }}
                     components={{ target, subject }}

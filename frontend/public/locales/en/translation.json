@@ -150,7 +150,7 @@
     "Data Outputs": "Data Outputs",
     "Search event history": "Search event history",
     "Showing {{range0}}-{{range1}} of {{total}} history items": "Showing {{range0}}-{{range1}} of {{total}} history items",
-    "Event description": "",
+    "Event description": "Event description",
     "Executed by": "Executed by",
     "Timestamp": "Timestamp",
     "UTC": "UTC",
