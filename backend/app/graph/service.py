@@ -27,6 +27,12 @@ class GraphService:
         dataset_nodes_enabled: bool = True,
         data_output_nodes_enabled: bool = True,
     ) -> Graph:
+        if not (
+            data_product_nodes_enabled
+            or dataset_nodes_enabled
+            or data_output_nodes_enabled
+        ):
+            return Graph(nodes=[], edges=[])
         # get all data products
         data_products = (
             self.db.scalars(
