@@ -53,6 +53,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "2.0.5",
+        "@types/js-yaml": "^4.0.9",
         "@types/node": "^24.0.4",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
