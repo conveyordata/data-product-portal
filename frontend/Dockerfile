@@ -1,5 +1,5 @@
 ARG PLATFORM=linux/amd64
-FROM --platform=${PLATFORM} node:24-alpine@sha256:5d50eb77995c83edd48d685ba5dd3073b3102c1f542ffe86b4d55c470c6cdb19 AS build-stage
+FROM --platform=${PLATFORM} node:24-alpine@sha256:49e45bf002728e35c3a466737d8bcfe12c29731c7c2f3e223f9a7c794fff19a4 AS build-stage
 
 WORKDIR /app
 COPY . .
