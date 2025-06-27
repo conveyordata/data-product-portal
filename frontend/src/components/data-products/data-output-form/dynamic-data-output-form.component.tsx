@@ -4,7 +4,7 @@ import yaml from 'js-yaml';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetDataOutputConfigQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import type { DataOutputConfig, DataOutputCreateFormSchema } from '@/types/data-output';
+import type { DataOutputCreateFormSchema, OutputConfig } from '@/types/data-output';
 import type { DataPlatform } from '@/types/data-platform';
 import { configurationFieldName } from './components/configuration-field-name';
 import { ConfigurationFormItem } from './components/output-configuration-form-item';
@@ -23,10 +23,10 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
     const { data: config_yaml } = useGetDataOutputConfigQuery(platform);
     const options = identifiers.map((id) => ({ label: id, value: id }));
 
-    let config: DataOutputConfig | undefined;
+    let config: OutputConfig | undefined;
     if (config_yaml) {
         try {
-            const parsed = yaml.load(config_yaml) as Record<string, DataOutputConfig>;
+            const parsed = yaml.load(config_yaml) as Record<string, OutputConfig>;
             config = parsed[Object.keys(parsed)[0]];
         } catch (_error) {
             config = undefined;
