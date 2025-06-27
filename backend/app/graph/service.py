@@ -28,8 +28,7 @@ class GraphService:
         data_output_nodes_enabled: bool = True,
     ) -> Graph:
         if not (
-            domain_nodes_enabled
-            or data_product_nodes_enabled
+            data_product_nodes_enabled
             or dataset_nodes_enabled
             or data_output_nodes_enabled
         ):
