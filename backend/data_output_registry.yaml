@@ -1,0 +1,85 @@
+Snowflake:
+  fields:
+    - name: database
+      type: string
+      required: true
+    - name: schema
+      type: string
+    - name: table
+      type: string
+      default: '*'
+    - name: bucket_identifier
+      type: string
+    - name: database_path
+      type: string
+    - name: table_path
+      type: string
+  # technical_label: "Schema"
+  # subtitle_label: "Snowflake schema"
+  # config_class: app.data_output_configuration.snowflake.schema.SnowflakeDataOutput
+  # model_class: app.data_output_configuration.snowflake.model.SnowflakeDataOutput
+
+S3:
+  fields:
+    - name: bucket
+      type: string
+      required: true
+    - name: suffix
+      type: string
+    - name: path
+      type: string
+      required: true
+  # technical_label: "Path"
+  # subtitle_label: "S3 path"
+  # config_class: app.data_output_configuration.s3.schema.S3DataOutput
+  # model_class: app.data_output_configuration.s3.model.S3DataOutput
+
+Redshift:
+  fields:
+    - name: database
+      type: string
+      required: true
+    - name: schema
+      type: string
+    - name: table
+      type: string
+      default: '*'
+    - name: bucket_identifier
+      type: string
+    - name: database_path
+      type: string
+    - name: table_path
+      type: string
+
+Glue:
+  fields:
+    - name: database
+      type: string
+      required: true
+    - name: database_suffix
+      type: string
+    - name: table
+      type: string
+      default: '*'
+    - name: bucket_identifier
+      type: string
+    - name: database_path
+      type: string
+    - name: table_path
+      type: string
+Databricks:
+  fields:
+    - name: catalog
+      type: string
+      required: true
+    - name: schema
+      type: string
+    - name: table
+      type: string
+      default: '*'
+    - name: bucket_identifier
+      type: string
+    - name: catalog_path
+      type: string
+    - name: table_path
+      type: string

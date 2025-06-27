@@ -34,6 +34,14 @@ def get_data_outputs(db: Session = Depends(get_db_session)) -> Sequence[DataOutp
     return DataOutputService(db).get_data_outputs()
 
 
+@router.get("/config")
+def get_data_output_configs(
+    type: str,
+    db: Session = Depends(get_db_session),
+) -> str:
+    return DataOutputService(db).get_data_output_configs(type)
+
+
 @router.get("/namespace_suggestion")
 def get_data_output_namespace_suggestion(name: str) -> NamespaceSuggestion:
     return DataOutputService.data_output_namespace_suggestion(name)

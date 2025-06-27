@@ -31,6 +31,7 @@ import { selectFilterOptionByLabel } from '@/utils/form.helper';
 
 import styles from './data-output-form.module.scss';
 import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
+import { DynamicDataOutputForm } from './dynamic-data-output-form.component';
 import { GlueDataOutputForm } from './glue-data-output-form.component';
 import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
 import { S3DataOutputForm } from './s3-data-output-form.component';
@@ -403,6 +404,14 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                         return null;
                 }
             })()}
+            {currentDataProduct && selectedConfiguration && (
+                <DynamicDataOutputForm
+                    form={form}
+                    namespace={currentDataProduct.namespace}
+                    sourceAligned={sourceAligned}
+                    platform={selectedConfiguration.value}
+                />
+            )}
         </Form>
     );
 }
