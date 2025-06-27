@@ -1,7 +1,7 @@
 import Icon, {
+    CompassOutlined,
     HistoryOutlined,
     InfoCircleOutlined,
-    PartitionOutlined,
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
@@ -70,12 +70,6 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 children: <DatasetTab dataProductId={dataProductId} />,
             },
             {
-                label: t('Team'),
-                key: TabKeys.Team,
-                icon: <TeamOutlined />,
-                children: <TeamTab dataProductId={dataProductId} />,
-            },
-            {
                 label: t('Data Outputs'),
                 key: TabKeys.DataOutputs,
                 icon: <Icon component={dataOutputOutlineIcon} />,
@@ -84,8 +78,14 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
             {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
-                icon: <PartitionOutlined />,
+                icon: <CompassOutlined />,
                 children: <Explorer id={dataProductId} type={'dataproduct'} />,
+            },
+            {
+                label: t('Team'),
+                key: TabKeys.Team,
+                icon: <TeamOutlined />,
+                children: <TeamTab dataProductId={dataProductId} />,
             },
             {
                 label: t('Settings'),
