@@ -1,19 +1,32 @@
 Snowflake:
   fields:
     - name: database
-      type: string
+      type: select
       required: true
+      label: Database
+      tooltip: The name of the Snowflake database to link the data output to
     - name: schema
       type: string
+      label: Schema
+      tooltip: The Snowflake schema to link the data output to
+    - name: bucket_identifier
+      type: string
+      hidden: true
+    - name: database_path
+      type: string
+      hidden: true
+    - name: table_path
+      type: string
+      hidden: true
+    - name: entire_schema
+      type: boolean
+      label: Include entire schema
     - name: table
       type: string
       default: '*'
-    - name: bucket_identifier
-      type: string
-    - name: database_path
-      type: string
-    - name: table_path
-      type: string
+      label: Table
+      tooltip: The table that your data output can access
+      depends_on: entire_schema
   # technical_label: "Schema"
   # subtitle_label: "Snowflake schema"
   # config_class: app.data_output_configuration.snowflake.schema.SnowflakeDataOutput
@@ -22,13 +35,14 @@ Snowflake:
 S3:
   fields:
     - name: bucket
-      type: string
+      type: select
       required: true
-    - name: suffix
-      type: string
+      label: Bucket
     - name: path
       type: string
       required: true
+      label: Path
+      tooltip: The name of the path to give write access to
   # technical_label: "Path"
   # subtitle_label: "S3 path"
   # config_class: app.data_output_configuration.s3.schema.S3DataOutput
@@ -37,49 +51,88 @@ S3:
 Redshift:
   fields:
     - name: database
-      type: string
+      type: select
       required: true
+      label: Database
+      tooltip: The name of the Redshift database to link the data output to
     - name: schema
       type: string
+      label: Schema
+      tooltip: The Redshift schema to link the data output to
+    - name: bucket_identifier
+      type: string
+      hidden: true
+    - name: database_path
+      type: string
+      hidden: true
+    - name: table_path
+      type: string
+      hidden: true
+    - name: entire_schema
+      type: boolean
+      label: Include entire schema
     - name: table
       type: string
       default: '*'
-    - name: bucket_identifier
-      type: string
-    - name: database_path
-      type: string
-    - name: table_path
-      type: string
+      label: Table
+      tooltip: The table that your data output can access
+      depends_on: entire_schema
 
 Glue:
   fields:
     - name: database
-      type: string
+      type: select
       required: true
+      label: Database
+      tooltip: The name of the Glue database to link the data output to
     - name: database_suffix
       type: string
+      label: Schema
+      tooltip: The Glue suffix to link the data output to
+    - name: bucket_identifier
+      type: string
+      hidden: true
+    - name: database_path
+      type: string
+      hidden: true
+    - name: table_path
+      type: string
+      hidden: true
+    - name: entire_schema
+      type: boolean
+      label: Include entire schema
     - name: table
       type: string
       default: '*'
-    - name: bucket_identifier
-      type: string
-    - name: database_path
-      type: string
-    - name: table_path
-      type: string
+      label: Table
+      tooltip: The table that your data output can access
+      depends_on: entire_schema
 Databricks:
   fields:
     - name: catalog
-      type: string
+      type: select
       required: true
+      label: Catalog
+      tooltip: The name of the Databricks catalog to link the data output to
     - name: schema
       type: string
+      label: Schema
+      tooltip: The Databricks schema to link the data output to
+    - name: bucket_identifier
+      type: string
+      hidden: true
+    - name: catalog_path
+      type: string
+      hidden: true
+    - name: table_path
+      type: string
+      hidden: true
+    - name: entire_schema
+      type: boolean
+      label: Include entire schema
     - name: table
       type: string
       default: '*'
-    - name: bucket_identifier
-      type: string
-    - name: catalog_path
-      type: string
-    - name: table_path
-      type: string
+      label: Table
+      tooltip: The table that your data output can access
+      depends_on: entire_schema

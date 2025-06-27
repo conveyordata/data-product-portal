@@ -3,6 +3,10 @@ export type FieldDefinition = {
     type: 'string' | 'boolean' | 'select';
     required?: boolean;
     default?: string | boolean;
+    label?: string;
+    tooltip?: string;
+    hidden?: boolean;
+    depends_on?: string;
 };
 
 export type OutputConfig = {

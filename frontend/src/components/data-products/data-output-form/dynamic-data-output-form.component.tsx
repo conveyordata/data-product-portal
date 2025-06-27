@@ -36,6 +36,7 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
     useEffect(() => {
         config?.fields.forEach((field) => {
             if (field.default !== undefined) {
+                console.log(field.default, field.name);
                 const fullName = configurationFieldName(field.name);
                 const current = form.getFieldValue(fullName);
                 if (current === undefined) {
@@ -53,6 +54,15 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
             resultTooltip={t('The resulting configuration')}
         >
             {config?.fields.map((field) => {
+                // Skip field if hidden
+                if (field.hidden) {
+                    return null;
+                }
+                // Skip field if depends_on is set and that value is true
+                if (field.depends_on && form.getFieldValue(configurationFieldName(field.depends_on)) === true) {
+                    return null;
+                }
+
                 // const fieldName = configurationFieldName(field.name);
                 const isRequired = !!field.required;
 
@@ -60,20 +70,21 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
 
                 const sharedProps = {
                     name: field.name,
-                    label: t(field.name),
+                    label: t(field.label ?? field.name),
                     rules,
+                    tooltip: field.tooltip ? t(field.tooltip) : undefined,
                 };
 
                 switch (field.type) {
                     case 'string':
                         return (
-                            <ConfigurationFormItem key={field.name} {...sharedProps}>
+                            <ConfigurationFormItem required={field.required} key={field.name} {...sharedProps}>
                                 <Input />
                             </ConfigurationFormItem>
                         );
                     case 'select':
                         return (
-                            <ConfigurationFormItem key={field.name} {...sharedProps}>
+                            <ConfigurationFormItem required={field.required} key={field.name} {...sharedProps}>
                                 <Select allowClear showSearch options={options} />
                             </ConfigurationFormItem>
                         );
@@ -81,11 +92,12 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
                         return (
                             <ConfigurationFormItem
                                 key={field.name}
+                                required={field.required}
                                 name={field.name}
                                 valuePropName="checked"
                                 initialValue={field.default || false}
                             >
-                                <Checkbox>{t(field.name)}</Checkbox>
+                                <Checkbox>{t(field.label ?? field.name)}</Checkbox>
                             </ConfigurationFormItem>
                         );
                     default:
