@@ -11,7 +11,7 @@ import type { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadc
 import { type ReactNode, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
-import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
+import { DataProductOutlined } from '@/components/icons';
 import { BreadcrumbLink } from '@/components/layout/navbar/breadcrumbs/breadcrumb-link/breadcrumb-link.component.tsx';
 import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
@@ -254,15 +254,9 @@ export const Breadcrumbs = () => {
                             Object.assign(breadcrumbItem, {
                                 path: `${path}#${DatasetTabKeys.About}`,
                                 title: (
-                                    <Space>
-                                        <DatasetOutlined />
-                                        <Typography.Text
-                                            ellipsis={{ tooltip: dataset.name }}
-                                            rootClassName={styles.title}
-                                        >
-                                            {dataset.name}
-                                        </Typography.Text>
-                                    </Space>
+                                    <Typography.Text ellipsis={{ tooltip: dataset.name }} rootClassName={styles.title}>
+                                        {dataset.name}
+                                    </Typography.Text>
                                 ),
                             });
                         }
