@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -36,7 +36,7 @@ def get_data_outputs(db: Session = Depends(get_db_session)) -> Sequence[DataOutp
 
 @router.get("/config")
 def get_data_output_configs(
-    type: str,
+    type: Optional[str] = None,
     db: Session = Depends(get_db_session),
 ) -> str:
     return DataOutputService(db).get_data_output_configs(type)

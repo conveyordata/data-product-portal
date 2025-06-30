@@ -21,6 +21,7 @@ Snowflake:
       hidden: true
     - name: entire_schema
       type: boolean
+      default: true
       label: Include entire schema
     - name: table
       type: string
@@ -28,12 +29,14 @@ Snowflake:
       label: Table
       tooltip: The table that your data output can access
       depends_on: entire_schema
-  # technical_label: "Schema"
-  # subtitle_label: "Snowflake schema"
+  technical_label: "Schema"
+  subtitle_label: "Snowflake schema"
+  type: SnowflakeDataOutput
   # config_class: app.data_output_configuration.snowflake.schema.SnowflakeDataOutput
   # model_class: app.data_output_configuration.snowflake.model.SnowflakeDataOutput
 
 S3:
+  platform: AWS
   fields:
     - name: bucket
       type: select
@@ -44,12 +47,14 @@ S3:
       required: true
       label: Path
       tooltip: The name of the path to give write access to
-  # technical_label: "Path"
-  # subtitle_label: "S3 path"
+  technical_label: "Path"
+  subtitle_label: "S3 path"
+  type: S3DataOutput
   # config_class: app.data_output_configuration.s3.schema.S3DataOutput
   # model_class: app.data_output_configuration.s3.model.S3DataOutput
 
 Redshift:
+  platform: AWS
   fields:
     - name: database
       type: select
@@ -72,6 +77,7 @@ Redshift:
       hidden: true
     - name: entire_schema
       type: boolean
+      default: true
       label: Include entire schema
     - name: table
       type: string
@@ -79,8 +85,12 @@ Redshift:
       label: Table
       tooltip: The table that your data output can access
       depends_on: entire_schema
+  technical_label: "Schema"
+  subtitle_label: "Redshift schema"
+  type: RedshiftDataOutput
 
 Glue:
+  platform: AWS
   fields:
     - name: database
       type: select
@@ -102,6 +112,7 @@ Glue:
       type: string
       hidden: true
     - name: entire_schema
+      default: true
       type: boolean
       label: Include entire schema
     - name: table
@@ -110,6 +121,10 @@ Glue:
       label: Table
       tooltip: The table that your data output can access
       depends_on: entire_schema
+  technical_label: "Database"
+  subtitle_label: "Glue database"
+  type: GlueDataOutput
+
 Databricks:
   fields:
     - name: catalog
@@ -132,6 +147,7 @@ Databricks:
       type: string
       hidden: true
     - name: entire_schema
+      default: true
       type: boolean
       label: Include entire schema
     - name: table
@@ -140,3 +156,6 @@ Databricks:
       label: Table
       tooltip: The table that your data output can access
       depends_on: entire_schema
+  technical_label: "Schema"
+  subtitle_label: "Databricks schema"
+  type: DatabricksDataOutput

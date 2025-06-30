@@ -22,7 +22,7 @@ import {
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
-import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
+import { type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
 import type { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
@@ -34,7 +34,7 @@ import { DynamicDataOutputForm } from './dynamic-data-output-form.component';
 
 type Props = {
     mode: 'create';
-    formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration> | null>;
+    formRef: RefObject<FormInstance<DataOutputCreateFormSchema> | null>;
     dataProductId: string;
     modalCallbackOnSubmit: () => void;
 };

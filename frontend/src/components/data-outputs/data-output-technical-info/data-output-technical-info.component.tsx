@@ -1,11 +1,15 @@
 import { Table, type TableColumnsType } from 'antd';
+import yaml from 'js-yaml';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import { DataOutputConfigurationTypes } from '@/types/data-output/data-output.contract';
+import {
+    useGetDataOutputByIdQuery,
+    useGetDataOutputConfigQuery,
+} from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetPlatformServiceConfigQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
+import type { OutputConfig } from '@/types/data-output';
 import type { TechnicalInfoContract } from '@/types/data-output/data-output-technical-info.contract';
-
 import { getTechnicalInformationColumns } from './data-output-table-columns';
 import styles from './data-output-technical-info.module.scss';
 
@@ -17,23 +21,24 @@ export function DataOutputTechnicalInfo({ data_output_id }: Props) {
     const { t } = useTranslation();
     const { data: data_output, isLoading } = useGetDataOutputByIdQuery(data_output_id);
     const technicalInfo = data_output?.technical_info || [];
-
-    const info_column = useMemo(() => {
-        switch (data_output?.configuration.configuration_type) {
-            case DataOutputConfigurationTypes.S3DataOutput:
-                return 'Path';
-            case DataOutputConfigurationTypes.GlueDataOutput:
-                return 'Database';
-            case DataOutputConfigurationTypes.DatabricksDataOutput:
-                return 'Schema';
-            case DataOutputConfigurationTypes.SnowflakeDataOutput:
-                return 'Schema';
-            case DataOutputConfigurationTypes.RedshiftDataOutput:
-                return 'Schema';
-            default:
-                return 'Info';
+    const { data: platforms } = useGetPlatformServiceConfigQuery(
+        { platformId: data_output?.platform_id, serviceId: data_output?.service_id },
+        {
+            skip: !data_output,
+        },
+    );
+    const { data: config_yaml } = useGetDataOutputConfigQuery(platforms?.service.name);
+    let config: OutputConfig | undefined;
+    if (config_yaml) {
+        try {
+            const parsed = yaml.load(config_yaml) as Record<string, OutputConfig>;
+            config = parsed[Object.keys(parsed)[0]];
+        } catch (_error) {
+            config = undefined;
         }
-    }, [data_output]);
+    }
+
+    const info_column = useMemo(() => config?.technical_label || 'info', [config]);
 
     const columns: TableColumnsType<TechnicalInfoContract> = useMemo(() => {
         return getTechnicalInformationColumns({

@@ -14,4 +14,6 @@ export type OutputConfig = {
     fields: FieldDefinition[];
     technical_label?: string;
     subtitle_label?: string;
+    platform?: string;
+    type: string;
 };

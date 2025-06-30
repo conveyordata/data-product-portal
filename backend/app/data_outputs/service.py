@@ -5,7 +5,7 @@ from typing import Optional, Sequence
 from uuid import UUID
 
 import pytz
-import yaml  # <-- add this import
+import yaml
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
@@ -52,21 +52,26 @@ class DataOutputService:
     ) -> DataOutputModel:
         return ensure_exists(data_output_id, self.db, DataOutputModel, **kwargs)
 
-    def get_data_output_configs(self, type: str) -> str:
+    def get_data_output_configs(self, type: Optional[str]) -> str:
         # Return only the YAML config for the given type (case-insensitive)
         yaml_path = Path(__file__).parent.parent.parent / "data_output_registry.yaml"
         with open(yaml_path, "r") as f:
             config = yaml.safe_load(f)
-        # Build a mapping of lowercased type names to actual config keys
-        type_map = {k.lower(): k for k in config}
-        type_lc = type.lower()
-        if type_lc not in type_map:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No config found for type '{type}'",
-            )
-        real_key = type_map[type_lc]
-        return yaml.dump({real_key: config[real_key]})
+
+        if type:
+            # Build a mapping of lowercased type names to actual config keys
+            type_map = {k.lower(): k for k in config}
+            type_lc = type.lower()
+            if type_lc not in type_map:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"No config found for type '{type}'",
+                )
+            real_key = type_map[type_lc]
+            return yaml.dump({real_key: config[real_key]})
+        else:
+            # If no type is specified, return the entire config
+            return yaml.dump(config)
 
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
         tags = []

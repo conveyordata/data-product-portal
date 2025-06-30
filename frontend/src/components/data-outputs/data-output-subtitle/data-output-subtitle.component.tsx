@@ -1,41 +1,41 @@
 import { Flex, Typography } from 'antd';
-import type { TFunction } from 'i18next';
+import yaml from 'js-yaml';
 import { useTranslation } from 'react-i18next';
-
-import { useGetDataOutputByIdQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
-import type { DataOutputContract } from '@/types/data-output';
-import { DataOutputConfigurationTypes } from '@/types/data-output/data-output.contract';
+import {
+    useGetDataOutputByIdQuery,
+    useGetDataOutputConfigQuery,
+} from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetPlatformServiceConfigQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
+import type { OutputConfig } from '@/types/data-output';
 
 type Props = {
     data_output_id: string;
 };
 
-function outputDescription(t: TFunction, data_output: DataOutputContract) {
-    switch (data_output.configuration.configuration_type) {
-        case DataOutputConfigurationTypes.S3DataOutput:
-            return t('S3 path');
-        case DataOutputConfigurationTypes.GlueDataOutput:
-            return t('Glue database');
-        case DataOutputConfigurationTypes.DatabricksDataOutput:
-            return t('Databricks schema');
-        case DataOutputConfigurationTypes.SnowflakeDataOutput:
-            return t('Snowflake schema');
-        case DataOutputConfigurationTypes.RedshiftDataOutput:
-            return t('Redshift schema');
-        default:
-            return null;
-    }
-}
-
 export function DataOutputSubtitle({ data_output_id }: Props) {
     const { t } = useTranslation();
     const { data: data_output } = useGetDataOutputByIdQuery(data_output_id);
-
+    const { data: platforms } = useGetPlatformServiceConfigQuery(
+        { platformId: data_output?.platform_id, serviceId: data_output?.service_id },
+        {
+            skip: !data_output,
+        },
+    );
+    const { data: config_yaml } = useGetDataOutputConfigQuery(platforms?.service.name);
+    let config: OutputConfig | undefined;
+    if (config_yaml) {
+        try {
+            const parsed = yaml.load(config_yaml) as Record<string, OutputConfig>;
+            config = parsed[Object.keys(parsed)[0]];
+        } catch (_error) {
+            config = undefined;
+        }
+    }
     if (!data_output) {
         return null;
     }
 
-    const description = outputDescription(t, data_output);
+    const description = t(config?.subtitle_label || '');
 
     if (!description) {
         return null;

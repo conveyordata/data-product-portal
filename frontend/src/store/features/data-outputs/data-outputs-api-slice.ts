@@ -40,10 +40,10 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
             }),
             providesTags: [{ type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST }],
         }),
-        getDataOutputConfig: builder.query<string, DataPlatform>({
+        getDataOutputConfig: builder.query<string, DataPlatform | undefined>({
             query: (type) => ({
                 url: ApiUrl.DataOutputConfig,
-                params: { type },
+                params: type ? { type } : undefined,
                 method: 'GET',
             }),
         }),
