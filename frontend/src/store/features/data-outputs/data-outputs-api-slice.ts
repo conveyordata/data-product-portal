@@ -14,10 +14,10 @@ import type {
     DataOutputUpdateRequest,
     DataOutputUpdateResponse,
 } from '@/types/data-output/data-output-update.contract';
+import type { DataPlatform } from '@/types/data-platform';
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import type { NamespaceLengthLimitsResponse, NamespaceSuggestionResponse } from '@/types/namespace/namespace';
-
 import { baseApiSlice } from '../api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
 import { datasetsApiSlice } from '../datasets/datasets-api-slice';
@@ -39,6 +39,13 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 method: 'GET',
             }),
             providesTags: [{ type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST }],
+        }),
+        getDataOutputConfig: builder.query<string, DataPlatform>({
+            query: (type) => ({
+                url: ApiUrl.DataOutputConfig,
+                params: { type },
+                method: 'GET',
+            }),
         }),
         getDataOutputById: builder.query<DataOutputContract, string>({
             query: (id) => ({
@@ -199,6 +206,7 @@ export const {
     useRemoveDataOutputMutation,
     useRequestDatasetAccessForDataOutputMutation,
     useGetDataOutputGraphDataQuery,
+    useGetDataOutputConfigQuery,
     useGetDataOutputHistoryQuery,
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,

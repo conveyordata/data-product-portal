@@ -1,6 +1,7 @@
 export enum ApiUrl {
     DataOutputs = '/api/data_outputs',
     DataOutputGet = '/api/data_outputs/:dataOutputId',
+    DataOutputConfig = '/api/data_outputs/config',
     DataOutputsDataset = '/api/data_outputs/:dataOutputId/dataset/:datasetId',
     DataOutputsDatasets = '/api/data_outputs_dataset_links',
     DataOutputDatasetLinkApprove = '/api/data_output_dataset_links/approve/:datasetLinkId',

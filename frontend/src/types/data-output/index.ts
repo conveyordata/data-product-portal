@@ -6,6 +6,7 @@ import type { SnowflakeDataOutput } from './snowflake-data-output.contract.ts';
 
 export type { DataOutputContract } from './data-output.contract.ts';
 export { DataOutputStatus } from './data-output.contract.ts';
+export type { FieldDefinition, OutputConfig } from './data-output-config.contract.ts';
 export type {
     DataOutputCreate,
     DataOutputCreateFormSchema,
