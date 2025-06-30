@@ -3,6 +3,7 @@ import {
     FileSearchOutlined,
     HomeOutlined,
     SettingOutlined,
+    ShopOutlined,
     TeamOutlined,
     UnorderedListOutlined,
 } from '@ant-design/icons';
@@ -12,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useMatches } from 'react-router';
 
 import { SidebarLogo } from '@/components/branding/sidebar-logo/sidebar-logo.tsx';
-import { DataProductOutlined, DatasetOutlined, ProductLogo } from '@/components/icons';
+import { DataProductOutlined, ProductLogo } from '@/components/icons';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetVersionQuery } from '@/store/features/version/version-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
@@ -21,9 +22,9 @@ import { ApplicationPaths } from '@/types/navigation.ts';
 import styles from './sidebar.module.scss';
 
 export const Sidebar = () => {
+    const { t } = useTranslation();
     const matches = useMatches();
     const { data: version } = useGetVersionQuery();
-    const { t } = useTranslation();
 
     let navigationMenuItems: MenuProps['items'] = [
         {
@@ -38,8 +39,13 @@ export const Sidebar = () => {
         },
         {
             label: <Link to={ApplicationPaths.Datasets}>{t('Marketplace')}</Link>,
-            icon: <DatasetOutlined />,
+            icon: <ShopOutlined />,
             key: ApplicationPaths.Datasets,
+        },
+        {
+            label: <Link to={ApplicationPaths.Explorer}>{t('Explorer')}</Link>,
+            icon: <CompassOutlined />,
+            key: ApplicationPaths.Explorer,
         },
         {
             label: <Link to={ApplicationPaths.People}>{t('People')}</Link>,
@@ -52,16 +58,11 @@ export const Sidebar = () => {
             key: ApplicationPaths.AuditLogs,
         },
         {
-            label: <Link to={ApplicationPaths.Explorer}>{t('Explorer')}</Link>,
-            icon: <CompassOutlined />,
-            key: ApplicationPaths.Explorer,
-        },
-        {
             label: (
                 <a
                     href={`https://d33vpinjygaq6n.cloudfront.net/docs/${version?.version.split('.').slice(0, 2).join('.')}.x/intro`}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                 >
                     {t('Documentation')}
                 </a>

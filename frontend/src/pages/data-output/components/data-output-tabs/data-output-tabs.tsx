@@ -1,4 +1,4 @@
-import Icon, { CodeOutlined, HistoryOutlined, PartitionOutlined } from '@ant-design/icons';
+import Icon, { CodeOutlined, CompassOutlined, HistoryOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,9 +36,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.Datasets);
     const { data: dataOutputHistoryData, isLoading: isFetchingDataOutputHistory } = useGetDataOutputHistoryQuery(
         dataOutputId,
-        {
-            skip: !dataOutputId,
-        },
+        { skip: !dataOutputId },
     );
 
     useEffect(() => {
@@ -61,16 +59,16 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 children: <DatasetTab dataOutputId={dataOutputId} />,
             },
             {
+                label: t('Explorer'),
+                key: TabKeys.Explorer,
+                icon: <CompassOutlined />,
+                children: <Explorer id={dataOutputId} type={'dataoutput'} />,
+            },
+            {
                 label: t('Technical information'),
                 key: TabKeys.Technologies,
                 icon: <CodeOutlined />,
                 children: <TechnologiesTab dataOutputId={dataOutputId} />,
-            },
-            {
-                label: t('Explorer'),
-                key: TabKeys.Explorer,
-                icon: <PartitionOutlined />,
-                children: <Explorer id={dataOutputId} type={'dataoutput'} />,
             },
             {
                 label: t('History'),

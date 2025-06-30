@@ -1,7 +1,8 @@
-import Icon, {
+import {
     CompassOutlined,
     HomeOutlined,
     SettingOutlined,
+    ShopOutlined,
     TeamOutlined,
     UnorderedListOutlined,
 } from '@ant-design/icons';
@@ -10,9 +11,7 @@ import type { BreadcrumbItemType, BreadcrumbSeparatorType } from 'antd/es/breadc
 import { type ReactNode, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
-
-import dataProductOutlineIcon from '@/assets/icons/data-product-outline-icon.svg?react';
-import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
+import { DataProductOutlined } from '@/components/icons';
 import { BreadcrumbLink } from '@/components/layout/navbar/breadcrumbs/breadcrumb-link/breadcrumb-link.component.tsx';
 import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
@@ -34,7 +33,6 @@ import {
     isEnvironmentConfigCreatePage,
     isEnvironmentConfigsPage,
 } from '@/utils/routes.helper.ts';
-
 import styles from './breadcrumbs.module.scss';
 
 type BreadcrumbType = Partial<BreadcrumbItemType & BreadcrumbSeparatorType> & { icon?: ReactNode };
@@ -97,7 +95,7 @@ export const Breadcrumbs = () => {
                     Object.assign(breadcrumbItem, {
                         title: (
                             <Space classNames={{ item: styles.breadcrumbItem }}>
-                                <Icon component={dataProductOutlineIcon} />
+                                <DataProductOutlined />
                                 {t('Data Products')}
                             </Space>
                         ),
@@ -112,7 +110,7 @@ export const Breadcrumbs = () => {
                     Object.assign(breadcrumbItem, {
                         title: (
                             <Space classNames={{ item: styles.breadcrumbItem }}>
-                                <Icon component={datasetOutlineIcon} />
+                                <ShopOutlined />
                                 {t('Marketplace')}
                             </Space>
                         ),
@@ -137,7 +135,7 @@ export const Breadcrumbs = () => {
                     Object.assign(breadcrumbItem, {
                         title: (
                             <Space classNames={{ item: styles.breadcrumbItem }}>
-                                <Icon component={CompassOutlined} />
+                                <CompassOutlined />
                                 {t('Explorer')}
                             </Space>
                         ),
@@ -203,7 +201,11 @@ export const Breadcrumbs = () => {
                     });
 
                     // Case for data product and dataset
-                    if (dataProduct && !isFetchingDataProduct && pathnames.includes('data-products')) {
+                    if (
+                        dataProduct &&
+                        !isFetchingDataProduct &&
+                        pathnames.includes(ApplicationPaths.DataProducts.replace('/', ''))
+                    ) {
                         if (
                             isDataProductEditPage(path, dataProduct.id) ||
                             (dataOutput && isDataOutputEditPage(path, dataOutput.id, dataProduct.id))
@@ -239,7 +241,11 @@ export const Breadcrumbs = () => {
                             }
                         }
                     }
-                    if (dataset && !isFetchingDataset && pathnames.includes('datasets')) {
+                    if (
+                        dataset &&
+                        !isFetchingDataset &&
+                        pathnames.includes(ApplicationPaths.Datasets.replace('/', ''))
+                    ) {
                         if (isDatasetEditPage(path, dataset.id)) {
                             Object.assign(breadcrumbItem, {
                                 title: <Space classNames={{ item: styles.breadcrumbItem }}>{t('Edit')}</Space>,
