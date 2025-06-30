@@ -32,6 +32,8 @@ Snowflake:
   technical_label: "Schema"
   subtitle_label: "Snowflake schema"
   type: SnowflakeDataOutput
+  provider: app.integration_providers.snowflake_integration_provider.SnowflakeIntegrationProvider
+
   # config_class: app.data_output_configuration.snowflake.schema.SnowflakeDataOutput
   # model_class: app.data_output_configuration.snowflake.model.SnowflakeDataOutput
 
@@ -50,6 +52,7 @@ S3:
   technical_label: "Path"
   subtitle_label: "S3 path"
   type: S3DataOutput
+  provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
   # config_class: app.data_output_configuration.s3.schema.S3DataOutput
   # model_class: app.data_output_configuration.s3.model.S3DataOutput
 
@@ -88,6 +91,7 @@ Redshift:
   technical_label: "Schema"
   subtitle_label: "Redshift schema"
   type: RedshiftDataOutput
+  provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
 
 Glue:
   platform: AWS
@@ -124,6 +128,7 @@ Glue:
   technical_label: "Database"
   subtitle_label: "Glue database"
   type: GlueDataOutput
+  provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
 
 Databricks:
   fields:
@@ -159,3 +164,9 @@ Databricks:
   technical_label: "Schema"
   subtitle_label: "Databricks schema"
   type: DatabricksDataOutput
+  provider: app.integration_providers.databricks_integration_provider.DatabricksIntegrationProvider
+
+AWS:
+  provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
+Conveyor:
+  provider: app.integration_providers.conveyor_integration_provider.ConveyorIntegrationProvider

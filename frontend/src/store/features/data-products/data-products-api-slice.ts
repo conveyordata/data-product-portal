@@ -133,42 +133,15 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.History as const, id: arg },
             ],
         }),
-        getDataProductSignInUrl: builder.mutation<DataProductGetSignInUrlResponse, DataProductGetSignInUrlRequest>({
-            query: ({ id, environment }) => ({
-                url: buildUrl(ApiUrl.DataProductSignInUrl, { dataProductId: id }),
-                method: 'GET',
-                params: { environment },
-            }),
-        }),
-        getDataProductConveyorIDEUrl: builder.mutation<
-            DataProductGetConveyorUrlResponse,
-            DataProductGetConveyorUrlRequest
-        >({
-            query: ({ id }) => ({
-                url: buildUrl(ApiUrl.DataProductConveyorIdeUrl, { dataProductId: id }),
-                method: 'GET',
-            }),
-        }),
-        getDataProductDatabricksWorkspaceUrl: builder.mutation<
-            DataProductGetDatabricksWorkspaceUrlResponse,
-            DataProductGetDatabricksWorkspaceUrlRequest
-        >({
-            query: ({ id, environment }) => ({
-                url: buildUrl(ApiUrl.DataProductDatabricksWorkspaceUrl, { dataProductId: id }),
-                method: 'GET',
-                params: { environment },
-            }),
-        }),
-        getDataProductSnowflakeUrl: builder.mutation<
-            DataProductGetSnowflakeUrlResponse,
-            DataProductGetSnowflakeUrlRequest
-        >({
-            query: ({ id, environment }) => ({
-                url: buildUrl(ApiUrl.DataProductSnowflakeUrl, { dataProductId: id }),
-                method: 'GET',
-                params: { environment },
-            }),
-        }),
+        getDataProductIntegrationUrl: builder.mutation<DataProductGetSignInUrlResponse, DataProductGetSignInUrlRequest>(
+            {
+                query: ({ id, environment, integration_type }) => ({
+                    url: buildUrl(ApiUrl.DataProductIntegrationUrl, { dataProductId: id }),
+                    method: 'GET',
+                    params: { environment, integration_type },
+                }),
+            },
+        ),
         requestDatasetAccessForDataProduct: builder.mutation<
             DataProductDatasetAccessResponse,
             DataProductDatasetAccessRequest
@@ -272,8 +245,7 @@ export const {
     useUpdateDataProductMutation,
     useGetDataProductByIdQuery,
     useGetAllDataProductsQuery,
-    useGetDataProductSignInUrlMutation,
-    useGetDataProductConveyorIDEUrlMutation,
+    useGetDataProductIntegrationUrlMutation,
     useRemoveDataProductMutation,
     useRemoveDatasetFromDataProductMutation,
     useRequestDatasetAccessForDataProductMutation,
@@ -281,9 +253,7 @@ export const {
     useGetUserDataProductsQuery,
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
-    useGetDataProductDatabricksWorkspaceUrlMutation,
     useGetDataProductHistoryQuery,
-    useGetDataProductSnowflakeUrlMutation,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,
     useGetDataProductNamespaceLengthLimitsQuery,

@@ -57,7 +57,7 @@ export function DataAccessTileGrid({
                                 isDisabled={isDisabled || isLoading || isLoadingEnvironments || !canAccessData}
                                 isLoading={isLoading || isLoadingEnvironments}
                                 onMenuItemClick={onDataPlatformClick}
-                                onTileClick={onTileClick}
+                                onTileClick={getEnvironment(dataPlatform.value) === undefined ? onTileClick : undefined}
                             />
                         ))}
                     </Space>

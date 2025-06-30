@@ -9,10 +9,7 @@ import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetDataProductByIdQuery,
-    useGetDataProductConveyorIDEUrlMutation,
-    useGetDataProductDatabricksWorkspaceUrlMutation,
-    useGetDataProductSignInUrlMutation,
-    useGetDataProductSnowflakeUrlMutation,
+    useGetDataProductIntegrationUrlMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
@@ -33,11 +30,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const user = useSelector(selectCurrentUser);
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const { data: availablePlatforms, isLoading: isLoadingPlatforms } = useGetAllPlatformsQuery();
-    const [getDataProductSignInUrl, { isLoading }] = useGetDataProductSignInUrlMutation();
-    const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
-    const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
-        useGetDataProductDatabricksWorkspaceUrlMutation();
-    const [getSnowflakeUrl, { isLoading: isSnowflakeLoading }] = useGetDataProductSnowflakeUrlMutation();
+    const [getDataProductIntegrationUrl, { isLoading }] = useGetDataProductIntegrationUrlMutation();
 
     const { data: request_access } = useCheckAccessQuery({
         action: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
@@ -80,71 +73,24 @@ export function DataProductActions({ dataProductId }: Props) {
     }
 
     async function handleAccessToData(environment: string, dataPlatform: DataPlatform) {
-        switch (dataPlatform) {
-            case DataPlatforms.AWS:
-                try {
-                    const signInUrl = await getDataProductSignInUrl({ id: dataProductId, environment }).unwrap();
-                    if (signInUrl) {
-                        window.open(signInUrl, '_blank');
-                    } else {
-                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                    }
-                } catch (_error) {
-                    dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                }
-                break;
-            case DataPlatforms.Databricks:
-                try {
-                    const signInUrl = await getDatabricksWorkspaceUrl({ id: dataProductId, environment }).unwrap();
-                    if (signInUrl) {
-                        window.open(signInUrl, '_blank');
-                    } else {
-                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                    }
-                } catch (_error) {
-                    dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                }
-                break;
-            case DataPlatforms.Snowflake:
-                try {
-                    const signInUrl = await getSnowflakeUrl({ id: dataProductId, environment }).unwrap();
-                    if (signInUrl) {
-                        window.open(signInUrl, '_blank');
-                    } else {
-                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                    }
-                } catch (_error) {
-                    dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
-                }
-                break;
-            default:
-                break;
+        try {
+            const signInUrl = await getDataProductIntegrationUrl({
+                id: dataProductId,
+                environment,
+                integration_type: dataPlatform,
+            }).unwrap();
+            if (signInUrl) {
+                window.open(signInUrl, '_blank');
+            } else {
+                dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+            }
+        } catch (_error) {
+            dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
         }
     }
 
     async function handleTileClick(dataPlatform: DataPlatform) {
-        switch (dataPlatform) {
-            case DataPlatforms.Conveyor:
-                try {
-                    const url = await getConveyorUrl({ id: dataProductId }).unwrap();
-                    if (url) {
-                        window.open(url, '_blank');
-                    } else {
-                        dispatchMessage({
-                            type: 'error',
-                            content: t('Failed to get Conveyor url'),
-                        });
-                    }
-                } catch (_error) {
-                    dispatchMessage({
-                        type: 'error',
-                        content: t('Failed to get Conveyor url'),
-                    });
-                }
-                break;
-            default:
-                break;
-        }
+        handleAccessToData('default', dataPlatform);
     }
 
     return (
@@ -159,13 +105,7 @@ export function DataProductActions({ dataProductId }: Props) {
                     onDataPlatformClick={handleAccessToData}
                     onTileClick={handleTileClick}
                     isDisabled={isLoading || !canReadIntegrations}
-                    isLoading={
-                        isLoading ||
-                        isConveyorLoading ||
-                        isDatabricksLoading ||
-                        isSnowflakeLoading ||
-                        isLoadingPlatforms
-                    }
+                    isLoading={isLoading || isLoadingPlatforms}
                 />
             </Flex>
         </Flex>
