@@ -14,7 +14,6 @@ import type {
     DataOutputUpdateRequest,
     DataOutputUpdateResponse,
 } from '@/types/data-output/data-output-update.contract';
-import type { DataPlatform } from '@/types/data-platform';
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import type { NamespaceLengthLimitsResponse, NamespaceSuggestionResponse } from '@/types/namespace/namespace';
@@ -40,7 +39,7 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
             }),
             providesTags: [{ type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST }],
         }),
-        getDataOutputConfig: builder.query<string, DataPlatform | undefined>({
+        getDataOutputConfig: builder.query<string, string | undefined>({
             query: (type) => ({
                 url: ApiUrl.DataOutputConfig,
                 params: type ? { type } : undefined,

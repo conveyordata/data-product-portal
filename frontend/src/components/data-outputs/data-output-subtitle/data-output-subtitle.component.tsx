@@ -16,7 +16,7 @@ export function DataOutputSubtitle({ data_output_id }: Props) {
     const { t } = useTranslation();
     const { data: data_output } = useGetDataOutputByIdQuery(data_output_id);
     const { data: platforms } = useGetPlatformServiceConfigQuery(
-        { platformId: data_output?.platform_id, serviceId: data_output?.service_id },
+        { platformId: data_output?.platform_id || '', serviceId: data_output?.service_id || '' },
         {
             skip: !data_output,
         },

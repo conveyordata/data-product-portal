@@ -38,9 +38,9 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
         config?.fields.forEach((field) => {
             if (field.default !== undefined) {
                 const fullName = configurationFieldName(field.name);
-                const current = form.getFieldValue(fullName);
+                const current = form.getFieldValue(fullName as unknown as keyof DataOutputCreateFormSchema);
                 if (current === undefined) {
-                    form.setFieldValue(fullName, field.default);
+                    form.setFieldValue(fullName as unknown as keyof DataOutputCreateFormSchema, field.default);
                 }
             }
             // if (field.depends_on) {
@@ -68,8 +68,12 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
                     // Skip field if depends_on is set and that value is true
                     if (
                         field.depends_on &&
-                        (form.getFieldValue(configurationFieldName(field.depends_on)) === true ||
-                            (form.getFieldValue(configurationFieldName(field.depends_on)) === undefined &&
+                        (form.getFieldValue(
+                            configurationFieldName(field.depends_on) as unknown as keyof DataOutputCreateFormSchema,
+                        ) === true ||
+                            (form.getFieldValue(
+                                configurationFieldName(field.depends_on) as unknown as keyof DataOutputCreateFormSchema,
+                            ) === undefined &&
                                 config.fields.find((f) => f.name === field.depends_on)?.default === true))
                     ) {
                         return null;
@@ -83,7 +87,10 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
                         : [];
                     const disabled = field.consumer_aligned_locked && !sourceAligned;
                     if (disabled) {
-                        form.setFieldValue(configurationFieldName(field.name), namespace);
+                        form.setFieldValue(
+                            configurationFieldName(field.name) as unknown as keyof DataOutputCreateFormSchema,
+                            namespace,
+                        );
                     }
                     const sharedProps = {
                         name: field.name,
