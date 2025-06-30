@@ -23,19 +23,14 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { type DataOutputConfiguration, type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
-import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
+import type { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { getDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 
 import styles from './data-output-form.module.scss';
-import { DatabricksDataOutputForm } from './databricks-data-output-form.component';
 import { DynamicDataOutputForm } from './dynamic-data-output-form.component';
-import { GlueDataOutputForm } from './glue-data-output-form.component';
-import { RedshiftDataOutputForm } from './redshift-data-output-form.component';
-import { S3DataOutputForm } from './s3-data-output-form.component';
-import { SnowflakeDataOutputForm } from './snowflake-data-output-form.component';
 
 type Props = {
     mode: 'create';
@@ -350,66 +345,13 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     </Space>
                 </Radio.Group>
             </Form.Item>
-            {(() => {
-                if (!currentDataProduct) {
-                    return null;
-                }
-                switch (selectedConfiguration?.value) {
-                    case DataPlatforms.S3:
-                        return (
-                            <S3DataOutputForm
-                                form={form}
-                                identifiers={identifiers}
-                                sourceAligned={sourceAligned}
-                                namespace={currentDataProduct.namespace}
-                            />
-                        );
-                    case DataPlatforms.Redshift:
-                        return (
-                            <RedshiftDataOutputForm
-                                identifiers={identifiers}
-                                form={form}
-                                namespace={currentDataProduct.namespace}
-                                sourceAligned={sourceAligned}
-                            />
-                        );
-                    case DataPlatforms.Glue:
-                        return (
-                            <GlueDataOutputForm
-                                identifiers={identifiers}
-                                form={form}
-                                namespace={currentDataProduct.namespace}
-                                sourceAligned={sourceAligned}
-                            />
-                        );
-                    case DataPlatforms.Databricks:
-                        return (
-                            <DatabricksDataOutputForm
-                                identifiers={identifiers}
-                                form={form}
-                                namespace={currentDataProduct.namespace}
-                                sourceAligned={sourceAligned}
-                            />
-                        );
-                    case DataPlatforms.Snowflake:
-                        return (
-                            <SnowflakeDataOutputForm
-                                identifiers={identifiers}
-                                form={form}
-                                namespace={currentDataProduct.namespace}
-                                sourceAligned={sourceAligned}
-                            />
-                        );
-                    default:
-                        return null;
-                }
-            })()}
             {currentDataProduct && selectedConfiguration && (
                 <DynamicDataOutputForm
                     form={form}
                     namespace={currentDataProduct.namespace}
                     sourceAligned={sourceAligned}
                     platform={selectedConfiguration.value}
+                    identifiers={identifiers}
                 />
             )}
         </Form>

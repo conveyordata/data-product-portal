@@ -7,6 +7,7 @@ export type FieldDefinition = {
     tooltip?: string;
     hidden?: boolean;
     depends_on?: string;
+    consumer_aligned_locked?: boolean;
 };
 
 export type OutputConfig = {

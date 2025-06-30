@@ -1,5 +1,5 @@
 import type { FormInstance } from 'antd';
-import { Checkbox, Form, Input, Select } from 'antd';
+import { Checkbox, Input, Select } from 'antd';
 import yaml from 'js-yaml';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,6 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
     const { t } = useTranslation();
     const { data: config_yaml } = useGetDataOutputConfigQuery(platform);
     const options = identifiers.map((id) => ({ label: id, value: id }));
-
     let config: OutputConfig | undefined;
     if (config_yaml) {
         try {
@@ -67,7 +66,10 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
                 const isRequired = !!field.required;
 
                 const rules = isRequired ? [{ required: true, message: t(`Field "${field.name}" is required`) }] : [];
-
+                const disabled = field.consumer_aligned_locked && !sourceAligned;
+                if (disabled) {
+                    form.setFieldValue(configurationFieldName(field.name), namespace);
+                }
                 const sharedProps = {
                     name: field.name,
                     label: t(field.label ?? field.name),
@@ -75,17 +77,25 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
                     tooltip: field.tooltip ? t(field.tooltip) : undefined,
                 };
 
+                //      useEffect(() => {
+                // -        if (!sourceAligned) {
+                // -            form.setFieldValue(configurationFieldName('catalog'), namespace);
+                // -        } else {
+                // -            form.setFieldValue(configurationFieldName('catalog'), undefined);
+                // -        }
+                // -    }, [namespace, form, sourceAligned]);
+
                 switch (field.type) {
                     case 'string':
                         return (
                             <ConfigurationFormItem required={field.required} key={field.name} {...sharedProps}>
-                                <Input />
+                                <Input disabled={disabled} />
                             </ConfigurationFormItem>
                         );
                     case 'select':
                         return (
                             <ConfigurationFormItem required={field.required} key={field.name} {...sharedProps}>
-                                <Select allowClear showSearch options={options} />
+                                <Select disabled={disabled} allowClear showSearch options={options} />
                             </ConfigurationFormItem>
                         );
                     case 'boolean':
@@ -97,7 +107,7 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
                                 valuePropName="checked"
                                 initialValue={field.default || false}
                             >
-                                <Checkbox>{t(field.label ?? field.name)}</Checkbox>
+                                <Checkbox disabled={disabled}>{t(field.label ?? field.name)}</Checkbox>
                             </ConfigurationFormItem>
                         );
                     default:

@@ -8,7 +8,6 @@ import type {
     DataOutputDatasetRemoveRequest,
     DataOutputDatasetRemoveResponse,
     DataOutputResultStringRequest,
-    OutputConfig,
 } from '@/types/data-output';
 import type { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import type {

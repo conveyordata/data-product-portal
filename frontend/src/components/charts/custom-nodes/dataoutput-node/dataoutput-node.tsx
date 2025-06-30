@@ -33,23 +33,21 @@ export function DataOutputNode({
     ...props
 }: NodeProps<DataOutputNodeProps>) {
     return (
-        <>
-            <BaseNode
-                data={{
-                    isMainNode,
-                    name,
-                    id,
-                    icon: getDataOutputIcon(icon_key),
-                    borderType: 'square',
-                    nodeToolbarActions,
-                    targetHandlePosition,
-                    sourceHandlePosition,
-                    isActive,
-                    domain,
-                    onClick,
-                }}
-                {...props}
-            />
-        </>
+        <BaseNode
+            data={{
+                isMainNode,
+                name,
+                id,
+                icon: getDataOutputIcon(icon_key),
+                borderType: 'square',
+                nodeToolbarActions,
+                targetHandlePosition,
+                sourceHandlePosition,
+                isActive,
+                domain,
+                onClick,
+            }}
+            {...props}
+        />
     );
 }

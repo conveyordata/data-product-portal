@@ -4,6 +4,7 @@ Snowflake:
       type: select
       required: true
       label: Database
+      consumer_aligned_locked: true
       tooltip: The name of the Snowflake database to link the data output to
     - name: schema
       type: string
@@ -54,6 +55,7 @@ Redshift:
       type: select
       required: true
       label: Database
+      consumer_aligned_locked: true
       tooltip: The name of the Redshift database to link the data output to
     - name: schema
       type: string
@@ -84,6 +86,7 @@ Glue:
       type: select
       required: true
       label: Database
+      consumer_aligned_locked: true
       tooltip: The name of the Glue database to link the data output to
     - name: database_suffix
       type: string
@@ -113,6 +116,7 @@ Databricks:
       type: select
       required: true
       label: Catalog
+      consumer_aligned_locked: true
       tooltip: The name of the Databricks catalog to link the data output to
     - name: schema
       type: string

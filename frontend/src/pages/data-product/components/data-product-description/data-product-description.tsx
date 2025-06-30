@@ -19,37 +19,35 @@ export function DataProductDescription({ lifecycle, type, description, domain, t
     const { t } = useTranslation();
 
     return (
-        <>
-            <Flex vertical className={styles.statusInfo}>
-                <Space className={styles.contentSubtitle}>
-                    <Flex className={styles.statusBadge}>
-                        <Typography.Text strong>{t('Status')}</Typography.Text>
-                        <Tag color={lifecycle.color}>{lifecycle.name}</Tag>
-                    </Flex>
-                    <Flex className={styles.statusBadge}>
-                        <Typography.Text strong>{t('Namespace')}</Typography.Text>
-                        <Typography.Text>{namespace}</Typography.Text>
-                    </Flex>
-                    <Flex className={styles.statusBadge}>
-                        <Typography.Text strong>{t('Domain')}</Typography.Text>
-                        <Typography.Text>{domain}</Typography.Text>
-                    </Flex>
-                    <Flex className={styles.statusBadge}>
-                        <Typography.Text strong>{t('Type')}</Typography.Text>
-                        <Typography.Text>{type}</Typography.Text>
-                    </Flex>
-                </Space>
-                <Flex>
-                    {tags.map((tag) => (
-                        <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.id}>
-                            {tag.value}
-                        </Tag>
-                    ))}
+        <Flex vertical className={styles.statusInfo}>
+            <Space className={styles.contentSubtitle}>
+                <Flex className={styles.statusBadge}>
+                    <Typography.Text strong>{t('Status')}</Typography.Text>
+                    <Tag color={lifecycle.color}>{lifecycle.name}</Tag>
                 </Flex>
-                <Space>
-                    <Typography.Paragraph italic>{description}</Typography.Paragraph>
-                </Space>
+                <Flex className={styles.statusBadge}>
+                    <Typography.Text strong>{t('Namespace')}</Typography.Text>
+                    <Typography.Text>{namespace}</Typography.Text>
+                </Flex>
+                <Flex className={styles.statusBadge}>
+                    <Typography.Text strong>{t('Domain')}</Typography.Text>
+                    <Typography.Text>{domain}</Typography.Text>
+                </Flex>
+                <Flex className={styles.statusBadge}>
+                    <Typography.Text strong>{t('Type')}</Typography.Text>
+                    <Typography.Text>{type}</Typography.Text>
+                </Flex>
+            </Space>
+            <Flex>
+                {tags.map((tag) => (
+                    <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.id}>
+                        {tag.value}
+                    </Tag>
+                ))}
             </Flex>
-        </>
+            <Space>
+                <Typography.Paragraph italic>{description}</Typography.Paragraph>
+            </Space>
+        </Flex>
     );
 }
