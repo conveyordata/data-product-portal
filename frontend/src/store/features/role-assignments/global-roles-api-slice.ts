@@ -12,14 +12,14 @@ export const globalRoleAssignmentsApiSlice = baseApiSlice
         endpoints: (builder) => ({
             getGlobalRoleAssignments: builder.query<
                 GlobalRoleAssignmentContract[],
-                { role_id?: string; user_id?: string; decision?: DecisionStatus }
+                { user_id?: string; role_id?: string; decision?: DecisionStatus }
             >({
                 query: (request) => ({
                     url: ApiUrl.RoleAssignmentsGlobal,
                     method: 'GET',
                     params: {
-                        ...(request.role_id ? { global_id: request.role_id } : {}),
                         ...(request.user_id ? { user_id: request.user_id } : {}),
+                        ...(request.role_id ? { role_id: request.role_id } : {}),
                         ...(request.decision ? { decision: request.decision } : {}),
                     },
                 }),

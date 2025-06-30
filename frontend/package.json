@@ -9,7 +9,7 @@
         "build:prd": "vite build --mode production",
         "copy-config": "cp config.local.js public/config.js",
         "check": "biome check",
-        "check:fix": "biome check --fix",
+        "check:fix": "biome check --write",
         "start": "npm run copy-config && npm run build && vite preview",
         "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js",
         "typecheck": "tsc --strict"

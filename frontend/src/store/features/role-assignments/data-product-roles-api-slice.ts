@@ -15,7 +15,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
         endpoints: (builder) => ({
             getDataProductRoleAssignments: builder.query<
                 DataProductRoleAssignmentContract[],
-                { data_product_id?: string; user_id?: string; decision?: DecisionStatus }
+                { data_product_id?: string; user_id?: string; role_id?: string; decision?: DecisionStatus }
             >({
                 query: (request) => ({
                     url: ApiUrl.RoleAssignmentsDataProductGet,
@@ -23,6 +23,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     params: {
                         ...(request.data_product_id ? { data_product_id: request.data_product_id } : {}),
                         ...(request.user_id ? { user_id: request.user_id } : {}),
+                        ...(request.role_id ? { role_id: request.role_id } : {}),
                         ...(request.decision ? { decision: request.decision } : {}),
                     },
                 }),

@@ -12,7 +12,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
         endpoints: (builder) => ({
             getDatasetRoleAssignments: builder.query<
                 DatasetRoleAssignmentContract[],
-                { dataset_id?: string; user_id?: string; decision?: DecisionStatus }
+                { dataset_id?: string; user_id?: string; role_id?: string; decision?: DecisionStatus }
             >({
                 query: (request) => ({
                     url: ApiUrl.RoleAssignmentsDatasetGet,
@@ -20,6 +20,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     params: {
                         ...(request.dataset_id ? { dataset_id: request.dataset_id } : {}),
                         ...(request.user_id ? { user_id: request.user_id } : {}),
+                        ...(request.role_id ? { role_id: request.role_id } : {}),
                         ...(request.decision ? { decision: request.decision } : {}),
                     },
                 }),
