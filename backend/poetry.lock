@@ -138,18 +138,18 @@ test = ["distro (>=1.9.0,<1.10.0)", "flake8 (>=6.1,<7.0)", "flake8-pyi (>=24.1.0
 
 [[package]]
 name = "boto3"
-version = "1.38.46"
+version = "1.39.0"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.38.46-py3-none-any.whl", hash = "sha256:9c8e88a32a6465e5905308708cff5b17547117f06982908bdfdb0108b4a65079"},
-    {file = "boto3-1.38.46.tar.gz", hash = "sha256:d1ca2b53138afd0341e1962bd52be6071ab7a63c5b4f89228c5ef8942c40c852"},
+    {file = "boto3-1.39.0-py3-none-any.whl", hash = "sha256:6257f6f7bb87b66342564eab579ce1f0f63a4c1a6f701492f959e59bd7af68e5"},
+    {file = "boto3-1.39.0.tar.gz", hash = "sha256:52a9f07fb9fa60ec6a2be07cd1586a97d8adae2be750121d4c032349cd113221"},
 ]
 
 [package.dependencies]
-botocore = ">=1.38.46,<1.39.0"
+botocore = ">=1.39.0,<1.40.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.13.0,<0.14.0"
 
@@ -158,14 +158,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.38.46"
+version = "1.39.0"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.38.46-py3-none-any.whl", hash = "sha256:89ca782ffbf2e8769ca9c89234cfa5ca577f1987d07d913ee3c68c4776b1eb5b"},
-    {file = "botocore-1.38.46.tar.gz", hash = "sha256:8798e5a418c27cf93195b077153644aea44cb171fcd56edc1ecebaa1e49e226e"},
+    {file = "botocore-1.39.0-py3-none-any.whl", hash = "sha256:d8e72850d3450aeca355b654efb32c8370bf824c1945a61cad2395dc2688581e"},
+    {file = "botocore-1.39.0.tar.gz", hash = "sha256:2b8701e529a80241b989d83262a629d0d91fbd7a06ded63ecc1c9d529a383d57"},
 ]
 
 [package.dependencies]
@@ -1898,4 +1898,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "fb6b76d5eb9468d98118407261eeb2f88e8163ac06f8b86be196a02722a14585"
+content-hash = "75e5f13f620f65ec813f28f7e51d94cd439f820432ec94e293b96143971c625b"
