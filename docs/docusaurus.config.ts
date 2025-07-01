@@ -9,7 +9,8 @@ const config: Config = {
   tagline: 'Open-source data product marketplace and process tool',
   favicon: 'img/favicon.svg',
   future: {
-    'experimental_faster': true
+    'experimental_faster': true,
+    v4: true,
   },
 
   // Set the production url of your site here
