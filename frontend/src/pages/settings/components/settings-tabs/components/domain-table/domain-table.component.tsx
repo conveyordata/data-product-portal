@@ -83,7 +83,7 @@ export function DomainTable() {
                     size={'small'}
                 />
             </Flex>
-            {isVisible && initial && (
+            {isVisible && (mode === 'create' || initial) && (
                 <CreateDomainModal isOpen={isVisible} onClose={handleClose} mode={mode} initial={initial} />
             )}
             {migrateModalVisible && migrateFrom && (

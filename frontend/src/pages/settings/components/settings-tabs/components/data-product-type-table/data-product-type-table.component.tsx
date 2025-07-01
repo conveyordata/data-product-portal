@@ -84,7 +84,7 @@ export function DataProductTypeTable() {
                 rowClassName={() => 'editable-row'}
                 size={'small'}
             />
-            {isVisible && initial && (
+            {isVisible && (mode === 'create' || initial) && (
                 <CreateDataProductTypeModal onClose={handleClose} isOpen={isVisible} mode={mode} initial={initial} />
             )}
             {migrateModalVisible && migrateFrom && (

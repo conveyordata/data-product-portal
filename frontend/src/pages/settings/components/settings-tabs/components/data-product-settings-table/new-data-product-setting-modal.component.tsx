@@ -121,7 +121,7 @@ type Props = {
     isOpen: boolean;
     mode: Mode;
     scope: DataProductSettingScope;
-    initial: DataProductSettingContract;
+    initial?: DataProductSettingContract;
 };
 export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Props) {
     const { t } = useTranslation();
@@ -156,7 +156,7 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
 
     const handleFinish = async (values: DataProductSettingValueForm) => {
         try {
-            if (mode === 'create') {
+            if (mode === 'create' || !initial) {
                 const newSetting: DataProductSettingContract = {
                     ...values,
                     default: values.default.toString(),

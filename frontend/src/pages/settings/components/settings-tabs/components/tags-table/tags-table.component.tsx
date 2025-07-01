@@ -60,7 +60,7 @@ export function TagsTable() {
                 rowClassName={() => 'editable-row'}
                 size={'small'}
             />
-            {isVisible && initial && (
+            {isVisible && (mode === 'create' || initial) && (
                 <CreateTagsModal isOpen={isVisible} onClose={handleClose} mode={mode} initial={initial} />
             )}
         </Flex>

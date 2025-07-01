@@ -16,7 +16,7 @@ type Props = {
     onClose: () => void;
     isOpen: boolean;
     mode: 'create' | 'edit';
-    initial: DomainContract;
+    initial?: DomainContract;
 };
 export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
     const { t } = useTranslation();
@@ -45,7 +45,7 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
             if (mode === 'create') {
                 await createDomain(values);
             } else {
-                await editDomain({ domain: values, domainId: initial.id });
+                await editDomain({ domain: values, domainId: initial?.id || '' });
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });
