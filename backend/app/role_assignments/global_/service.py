@@ -27,7 +27,11 @@ class RoleAssignmentService:
         return ensure_exists(id_, self.db, GlobalRoleAssignment)
 
     def list_assignments(
-        self, *, user_id: Optional[UUID] = None, role_id: Optional[UUID] = None, decision: Optional[DecisionStatus] = None
+        self,
+        *,
+        user_id: Optional[UUID] = None,
+        role_id: Optional[UUID] = None,
+        decision: Optional[DecisionStatus] = None,
     ) -> Sequence[RoleAssignment]:
         query = select(GlobalRoleAssignment)
         if user_id is not None:

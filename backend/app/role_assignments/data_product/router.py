@@ -41,7 +41,10 @@ def list_assignments(
     db: Session = Depends(get_db_session),
 ) -> Sequence[RoleAssignmentResponse]:
     return RoleAssignmentService(db).list_assignments(
-        data_product_id=data_product_id, user_id=user_id, role_id=role_id, decision=decision
+        data_product_id=data_product_id,
+        user_id=user_id,
+        role_id=role_id,
+        decision=decision,
     )
 
 
