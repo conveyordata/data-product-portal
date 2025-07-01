@@ -1,13 +1,19 @@
-import { Button, Skeleton, Typography } from 'antd';
+import { Alert, Button, List, Skeleton, Space, Typography } from 'antd';
 import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
-import styles from '@/pages/roles/components/create-role-modal.module.scss';
+import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice.ts';
 import { useGetDatasetRoleAssignmentsQuery } from '@/store/features/role-assignments/dataset-roles-api-slice.ts';
 import { useGetGlobalRoleAssignmentsQuery } from '@/store/features/role-assignments/global-roles-api-slice.ts';
 import { useDeleteRoleMutation } from '@/store/features/roles/roles-api-slice.ts';
+import type { DataProductContract } from '@/types/data-product';
+import type { DatasetContract } from '@/types/dataset';
+import { ApplicationPaths, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 import { type RoleContract, Scope } from '@/types/roles';
+import styles from './delete-role-modal.module.scss';
 
 const { Text } = Typography;
 
@@ -44,6 +50,8 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
         }
     })();
 
+    const numAssignments = assignments?.length ?? 0;
+
     const isLoading = (() => {
         switch (role.scope) {
             case Scope.GLOBAL:
@@ -57,14 +65,59 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
 
     const title = useMemo(() => {
         switch (role.scope) {
-            case 'global':
+            case Scope.GLOBAL:
                 return t('Delete {{ name }} global role', { name: role.name });
-            case 'data_product':
+            case Scope.DATA_PRODUCT:
                 return t('Delete {{ name }} data product role', { name: role.name });
-            case 'dataset':
+            case Scope.DATASET:
                 return t('Delete {{ name }} dataset role', { name: role.name });
         }
     }, [role, t]);
+
+    const additionalInfo = useMemo(() => {
+        switch (role.scope) {
+            case Scope.GLOBAL:
+                return (
+                    <Text>
+                        <Trans t={t}>
+                            Please have a look at the <Link to={ApplicationPaths.People}>People</Link> page.
+                        </Trans>
+                    </Text>
+                );
+            case Scope.DATA_PRODUCT:
+                return (
+                    <>
+                        <Text>{t('Please have a look at the following data products:')}</Text>
+                        <List
+                            bordered
+                            dataSource={dataProductAssignments?.map((assignment) => assignment.data_product)}
+                            renderItem={(item: DataProductContract) => (
+                                <List.Item>
+                                    <Link to={createDataProductIdPath(item.id, DataProductTabKeys.Team)}>
+                                        {item.name}
+                                    </Link>
+                                </List.Item>
+                            )}
+                        />
+                    </>
+                );
+            case Scope.DATASET:
+                return (
+                    <>
+                        <Text>{t('Please have a look at the following datasets:')}</Text>
+                        <List
+                            bordered
+                            dataSource={datasetAssignments?.map((assignment) => assignment.dataset)}
+                            renderItem={(item: DatasetContract) => (
+                                <List.Item>
+                                    <Link to={createDatasetIdPath(item.id, DatasetTabKeys.Team)}>{item.name}</Link>
+                                </List.Item>
+                            )}
+                        />
+                    </>
+                );
+        }
+    }, [role, dataProductAssignments, datasetAssignments, t]);
 
     const handleCancel = (): void => {
         onClose();
@@ -84,10 +137,10 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
             onClick={handleSubmit}
             type="primary"
             loading={deleteInProgress}
-            disabled={isLoading}
+            disabled={isLoading || numAssignments > 0}
             danger
         >
-            {t('Delete')}
+            {t('Delete Role')}
         </Button>,
     ];
 
@@ -96,16 +149,40 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
             {isLoading ? (
                 <Skeleton active />
             ) : assignments?.length === 0 ? (
-                <Text>
-                    {t('No assignment found for the {{ name }} role. No users will be impacted.', { name: role.name })}
-                </Text>
+                <Space direction="vertical" size={'middle'}>
+                    <Alert
+                        showIcon
+                        type="success"
+                        message={t('No assignments found for the {{ name }} role.', {
+                            name: role.name,
+                        })}
+                    />
+                    <Text>
+                        {t(
+                            'There are no users that have this role assigned. The role can be safely removed, but be aware that this cannot be undone.',
+                        )}
+                    </Text>
+                </Space>
             ) : (
-                <Text>
-                    {t(
-                        'Still found {{ amount }} assignments for the {{ name }} role. Deleting this role will cause these users to lose their assignment.',
-                        { amount: assignments?.length, name: role.name },
-                    )}
-                </Text>
+                <Space direction="vertical" size={'middle'}>
+                    <Alert
+                        showIcon
+                        type="warning"
+                        message={t('This role still has {{ count }} assignments.', {
+                            count: numAssignments,
+                        })}
+                    />
+                    <Text>
+                        {t(
+                            'This role is currently still assigned to {{ count }} users. Deletion of the {{ name }} role is only possible after these users have been assigned a new role.',
+                            {
+                                count: numAssignments,
+                                name: role.name,
+                            },
+                        )}
+                    </Text>
+                    {additionalInfo}
+                </Space>
             )}
         </FormModal>
     );
