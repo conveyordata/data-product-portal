@@ -1,5 +1,6 @@
 import uuid
 from copy import deepcopy
+from typing import Optional
 
 import pytest
 from fastapi.testclient import TestClient
@@ -452,6 +453,11 @@ class TestDataOutputsRouter:
         assert response.status_code == 200
         assert response.json() == "bucket/suffix/path"
 
+    def test_get_data_output_configs(self, client: TestClient):
+        response = self.get_data_output_configs(client)
+        assert response.status_code == 200
+        assert isinstance(response.json(), str)
+
     @staticmethod
     def create_data_output(client: TestClient, default_data_output_payload) -> Response:
         return client.post(
@@ -493,3 +499,9 @@ class TestDataOutputsRouter:
     @staticmethod
     def get_data_output_result_string(client, payload):
         return client.post(f"{ENDPOINT}/result_string", json=payload)
+
+    @staticmethod
+    def get_data_output_configs(
+        client: TestClient, type: Optional[str] = None
+    ) -> Response:
+        return client.get(f"{ENDPOINT}/config", params={"type": type})

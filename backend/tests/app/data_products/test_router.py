@@ -415,8 +415,8 @@ class TestDataProductsRouter:
             data_product_id=data_product.id,
         )
         response = client.get(
-            f"{ENDPOINT}/{data_product.id}/integration_url?\
-            integration_type=aws&environment=production"
+            f"{ENDPOINT}/{data_product.id}/integration_url?"
+            "integration_type=aws&environment=production"
         )
         assert (
             response.status_code == 501 or response.status_code == 400
@@ -755,8 +755,8 @@ class TestDataProductsRouter:
     @staticmethod
     def get_conveyor_ide_url(client: TestClient, data_product_id):
         return client.get(
-            f"{ENDPOINT}/{data_product_id}/integration_url?\
-            integration_type=conveyor&environment=default"
+            f"{ENDPOINT}/{data_product_id}/integration_url?"
+            "integration_type=conveyor&environment=default"
         )
 
     @staticmethod
