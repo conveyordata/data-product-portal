@@ -7,6 +7,7 @@ import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-gr
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+import { useGetDataOutputConfigQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import {
     useGetDataProductByIdQuery,
     useGetDataProductIntegrationUrlMutation,
@@ -17,8 +18,7 @@ import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-ass
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { DecisionStatus } from '@/types/roles';
-import { getDataPlatforms } from '@/utils/data-platforms';
-
+import { useDataPlatforms } from '@/utils/data-platforms';
 import styles from './data-product-actions.module.scss';
 
 type Props = {
@@ -31,6 +31,9 @@ export function DataProductActions({ dataProductId }: Props) {
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const { data: availablePlatforms, isLoading: isLoadingPlatforms } = useGetAllPlatformsQuery();
     const [getDataProductIntegrationUrl, { isLoading }] = useGetDataProductIntegrationUrlMutation();
+
+    const { data: outputYamlConfig } = useGetDataOutputConfigQuery(undefined);
+    const platforms = useDataPlatforms(outputYamlConfig ?? '', t);
 
     const { data: request_access } = useCheckAccessQuery({
         action: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
@@ -50,9 +53,10 @@ export function DataProductActions({ dataProductId }: Props) {
 
     const dataPlatforms = useMemo(() => {
         const names = availablePlatforms ? availablePlatforms.map((platform) => platform.name.toLowerCase()) : [];
-
-        return getDataPlatforms(t).filter((platform) => names.includes(platform.value));
-    }, [t, availablePlatforms]);
+        if (outputYamlConfig !== undefined) {
+            return platforms.filter((platform) => names.includes(platform.value));
+        }
+    }, [t, availablePlatforms, outputYamlConfig]);
 
     const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useGetDataProductRoleAssignmentsQuery({
         data_product_id: dataProductId,
@@ -98,16 +102,18 @@ export function DataProductActions({ dataProductId }: Props) {
             {canRequestAccess && allowRequesting && (
                 <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />
             )}
-            <Flex vertical className={styles.accessDataContainer}>
-                <DataAccessTileGrid
-                    canAccessData={canReadIntegrations}
-                    dataPlatforms={dataPlatforms}
-                    onDataPlatformClick={handleAccessToData}
-                    onTileClick={handleTileClick}
-                    isDisabled={isLoading || !canReadIntegrations}
-                    isLoading={isLoading || isLoadingPlatforms}
-                />
-            </Flex>
+            {dataPlatforms && (
+                <Flex vertical className={styles.accessDataContainer}>
+                    <DataAccessTileGrid
+                        canAccessData={canReadIntegrations}
+                        dataPlatforms={dataPlatforms}
+                        onDataPlatformClick={handleAccessToData}
+                        onTileClick={handleTileClick}
+                        isDisabled={isLoading || !canReadIntegrations}
+                        isLoading={isLoading || isLoadingPlatforms}
+                    />
+                </Flex>
+            )}
         </Flex>
     );
 }

@@ -11,6 +11,7 @@ import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import {
     useCreateDataOutputMutation,
+    useGetDataOutputConfigQuery,
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,
     useLazyGetDataOutputResultStringQuery,
@@ -26,7 +27,7 @@ import { type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-
 import type { DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
-import { getDataPlatforms } from '@/utils/data-platforms';
+import { useDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 
 import styles from './data-output-form.module.scss';
@@ -55,7 +56,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(dataProductId);
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const { data: platformConfig, isLoading: platformsLoading } = useGetAllPlatformsConfigsQuery();
-
+    const { data: outputYamlConfig, isLoading: isFetchingOutputYamlConfig } = useGetDataOutputConfigQuery(undefined);
     // Mutations
     const [createDataOutput, { isLoading: isCreating }] = useCreateDataOutputMutation();
 
@@ -82,27 +83,33 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     // Result string
     const [fetchResultString] = useLazyGetDataOutputResultStringQuery();
 
-    const isLoading = platformsLoading || isCreating || isFetchingInitialValues || isFetchingTags;
+    const isLoading =
+        platformsLoading || isCreating || isFetchingInitialValues || isFetchingTags || isFetchingOutputYamlConfig;
 
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id })) ?? [];
-
+    const platforms = useDataPlatforms(outputYamlConfig ?? '', t);
     const dataPlatforms = useMemo(
         () =>
-            getDataPlatforms(t)
-                // Configured platforms
-                .filter(
-                    (platform) =>
-                        platform.hasConfig && platformConfig?.some((config) => config.platform.name === platform.label),
-                )
-                // Configured services
-                .map((platform) => {
-                    const platformConfigs = platformConfig?.filter((config) => config.platform.name === platform.label);
-                    platform.children = platform.children?.filter((child) =>
-                        platformConfigs?.some((config) => config.service.name === child.label),
-                    );
-                    return platform;
-                }),
-        [platformConfig, t],
+            outputYamlConfig
+                ? platforms
+                      // Configured platforms
+                      .filter(
+                          (platform) =>
+                              platform.hasConfig &&
+                              platformConfig?.some((config) => config.platform.name === platform.label),
+                      )
+                      // Configured services
+                      .map((platform) => {
+                          const platformConfigs = platformConfig?.filter(
+                              (config) => config.platform.name === platform.label,
+                          );
+                          platform.children = platform.children?.filter((child) =>
+                              platformConfigs?.some((config) => config.service.name === child.label),
+                          );
+                          return platform;
+                      })
+                : [],
+        [platformConfig, outputYamlConfig, t],
     );
 
     const platformServiceConfigMap = useMemo(() => {
@@ -128,7 +135,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
 
     const onSubmit: FormProps<DataOutputCreateFormSchema>['onFinish'] = async (values) => {
         try {
-            if (!platformsLoading) {
+            if (!isLoading) {
                 await createDataOutput({ id: dataProductId, dataOutput: values }).unwrap();
                 dispatchMessage({ content: t('Data output created successfully'), type: 'success' });
                 modalCallbackOnSubmit();
@@ -150,7 +157,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
         if (selectedDataPlatform !== dropdown) {
             form.setFieldsValue({ configuration: undefined, result: undefined });
             setSelectedDataPlatform(dropdown);
-
             if (dropdown.children?.length === 0) {
                 setSelectedConfiguration(dropdown);
                 form.setFieldValue('service_id', platformServiceConfigMap.get(dropdown.value)?.service_id);
@@ -163,7 +169,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
     };
 
     const onConfigurationClick = (dropdown: CustomDropdownItemProps<DataPlatforms>) => {
-        if (!platformsLoading) {
+        if (!isLoading) {
             if (selectedConfiguration !== dropdown) {
                 form.setFieldsValue({ configuration: undefined, result: undefined });
                 setSelectedConfiguration(dropdown);

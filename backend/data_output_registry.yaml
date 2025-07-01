@@ -1,4 +1,7 @@
 Snowflake:
+  disabled: false
+  hasConfig: true
+  hasEnvironments: true
   fields:
     - name: database
       type: select
@@ -38,6 +41,9 @@ Snowflake:
   # model_class: app.data_output_configuration.snowflake.model.SnowflakeDataOutput
 
 S3:
+  disabled: false
+  hasConfig: true
+  hasEnvironments: true
   platform: AWS
   fields:
     - name: bucket
@@ -53,10 +59,11 @@ S3:
   subtitle_label: "S3 path"
   type: S3DataOutput
   provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
-  # config_class: app.data_output_configuration.s3.schema.S3DataOutput
-  # model_class: app.data_output_configuration.s3.model.S3DataOutput
 
 Redshift:
+  disabled: false
+  hasConfig: true
+  hasEnvironments: true
   platform: AWS
   fields:
     - name: database
@@ -94,6 +101,9 @@ Redshift:
   provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
 
 Glue:
+  disabled: false
+  hasConfig: true
+  hasEnvironments: true
   platform: AWS
   fields:
     - name: database
@@ -131,6 +141,9 @@ Glue:
   provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
 
 Databricks:
+  disabled: false
+  hasConfig: true
+  hasEnvironments: true
   fields:
     - name: catalog
       type: select
@@ -167,6 +180,18 @@ Databricks:
   provider: app.integration_providers.databricks_integration_provider.DatabricksIntegrationProvider
 
 AWS:
+  disabled: false
+  hasConfig: true
+  hasEnvironments: true
   provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
+
 Conveyor:
+  disabled: false
+  hasConfig: false
+  hasEnvironments: false
   provider: app.integration_providers.conveyor_integration_provider.ConveyorIntegrationProvider
+
+Tableau:
+  disabled: true
+  hasConfig: false
+  hasEnvironments: false

@@ -16,4 +16,7 @@ export type OutputConfig = {
     subtitle_label?: string;
     platform?: string;
     type: string;
+    hasEnvironments?: boolean;
+    hasConfig?: boolean;
+    disabled?: boolean;
 };
