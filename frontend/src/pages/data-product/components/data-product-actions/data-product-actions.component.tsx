@@ -16,7 +16,7 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
 import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
+import type { DataPlatform } from '@/types/data-platform';
 import { DecisionStatus } from '@/types/roles';
 import { useDataPlatforms } from '@/utils/data-platforms';
 import styles from './data-product-actions.module.scss';
@@ -56,7 +56,7 @@ export function DataProductActions({ dataProductId }: Props) {
         if (outputYamlConfig !== undefined) {
             return platforms.filter((platform) => names.includes(platform.value));
         }
-    }, [t, availablePlatforms, outputYamlConfig]);
+    }, [platforms, availablePlatforms, outputYamlConfig]);
 
     const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useGetDataProductRoleAssignmentsQuery({
         data_product_id: dataProductId,

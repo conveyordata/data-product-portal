@@ -109,7 +109,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                           return platform;
                       })
                 : [],
-        [platformConfig, outputYamlConfig, t],
+        [platformConfig, outputYamlConfig, platforms],
     );
 
     const platformServiceConfigMap = useMemo(() => {
