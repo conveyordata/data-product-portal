@@ -415,7 +415,8 @@ class TestDataProductsRouter:
             data_product_id=data_product.id,
         )
         response = client.get(
-            f"{ENDPOINT}/{data_product.id}/signin_url?environment=production"
+            f"{ENDPOINT}/{data_product.id}/integration_url?\
+            integration_type=aws&environment=production"
         )
         assert (
             response.status_code == 501 or response.status_code == 400
@@ -443,7 +444,7 @@ class TestDataProductsRouter:
             ),
         )
         response = client.get(
-            f"{ENDPOINT}/{data_product.id}/databricks_workspace_url?"
+            f"{ENDPOINT}/{data_product.id}/integration_url?integration_type=databricks&"
             "environment=production"
         )
         assert response.status_code == 200
@@ -469,7 +470,8 @@ class TestDataProductsRouter:
             config=json.dumps({"login_url": "test_1.com"}),
         )
         response = client.get(
-            f"{ENDPOINT}/{data_product.id}/snowflake_url?" "environment=production"
+            f"{ENDPOINT}/{data_product.id}/integration_url?integration_type=snowflake&"
+            "environment=production"
         )
         assert response.status_code == 200
         assert response.json() == "test_1.com"
@@ -752,7 +754,10 @@ class TestDataProductsRouter:
 
     @staticmethod
     def get_conveyor_ide_url(client: TestClient, data_product_id):
-        return client.get(f"{ENDPOINT}/{data_product_id}/conveyor_ide_url")
+        return client.get(
+            f"{ENDPOINT}/{data_product_id}/integration_url?\
+            integration_type=conveyor&environment=default"
+        )
 
     @staticmethod
     def get_namespace_suggestion(client: TestClient, name):
