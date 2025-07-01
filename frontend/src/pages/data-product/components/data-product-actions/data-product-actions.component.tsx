@@ -16,7 +16,6 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
 import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { DataPlatform } from '@/types/data-platform';
 import { DecisionStatus } from '@/types/roles';
 import { useDataPlatforms } from '@/utils/data-platforms';
 import styles from './data-product-actions.module.scss';
@@ -33,7 +32,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const [getDataProductIntegrationUrl, { isLoading }] = useGetDataProductIntegrationUrlMutation();
 
     const { data: outputYamlConfig } = useGetDataOutputConfigQuery(undefined);
-    const platforms = useDataPlatforms(outputYamlConfig ?? '', t);
+    const platforms = useDataPlatforms(outputYamlConfig, t);
 
     const { data: request_access } = useCheckAccessQuery({
         action: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
@@ -76,7 +75,7 @@ export function DataProductActions({ dataProductId }: Props) {
         return null;
     }
 
-    async function handleAccessToData(environment: string, dataPlatform: DataPlatform) {
+    async function handleAccessToData(environment: string, dataPlatform: string) {
         try {
             const signInUrl = await getDataProductIntegrationUrl({
                 id: dataProductId,
@@ -93,7 +92,7 @@ export function DataProductActions({ dataProductId }: Props) {
         }
     }
 
-    async function handleTileClick(dataPlatform: DataPlatform) {
+    async function handleTileClick(dataPlatform: string) {
         handleAccessToData('default', dataPlatform);
     }
 

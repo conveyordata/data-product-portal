@@ -11,12 +11,13 @@ export type FieldDefinition = {
 };
 
 export type OutputConfig = {
-    fields: FieldDefinition[];
+    fields?: FieldDefinition[];
     technical_label?: string;
     subtitle_label?: string;
     platform?: string;
-    type: string;
+    type?: string;
     hasEnvironments?: boolean;
     hasConfig?: boolean;
     disabled?: boolean;
+    marketplace?: boolean;
 };

@@ -5,7 +5,6 @@ import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetDataOutputConfigQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import type { DataOutputCreateFormSchema, OutputConfig } from '@/types/data-output';
-import type { DataPlatform } from '@/types/data-platform';
 import { configurationFieldName } from './components/configuration-field-name';
 import { ConfigurationFormItem } from './components/output-configuration-form-item';
 import { ConfigurationSubForm } from './components/output-configuration-sub-form.component';
@@ -15,7 +14,7 @@ type Props = {
     namespace: string;
     sourceAligned: boolean;
     identifiers?: string[];
-    platform: DataPlatform;
+    platform: string;
 };
 
 export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifiers = [], platform }: Props) {

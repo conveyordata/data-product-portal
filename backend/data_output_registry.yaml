@@ -191,7 +191,14 @@ Conveyor:
   hasEnvironments: false
   provider: app.integration_providers.conveyor_integration_provider.ConveyorIntegrationProvider
 
-Tableau:
+Datahub:
   disabled: true
   hasConfig: false
   hasEnvironments: false
+  marketplace: true
+
+Collibra:
+  disabled: true
+  hasConfig: false
+  hasEnvironments: false
+  marketplace: true

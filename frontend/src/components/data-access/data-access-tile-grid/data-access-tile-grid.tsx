@@ -2,23 +2,23 @@ import { Form, Space } from 'antd';
 
 import { AccessDataTile } from '@/components/data-access/data-access-tile/data-access-tile.component.tsx';
 import { useGetAllEnvironmentsQuery } from '@/store/features/environments/environments-api-slice.tsx';
-import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
+
 import type { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './data-access-tile-grid.module.scss';
 
 type Props = {
     canAccessData: boolean;
-    dataPlatforms: CustomDropdownItemProps<DataPlatform>[];
-    onDataPlatformClick?: (environment: string, dataPlatform: DataPlatform) => Promise<void>;
-    onTileClick?: (dataPlatform: DataPlatform) => void;
+    dataPlatforms: CustomDropdownItemProps<string>[];
+    onDataPlatformClick?: (environment: string, dataPlatform: string) => Promise<void>;
+    onTileClick?: (dataPlatform: string) => void;
     isLoading?: boolean;
     isDisabled?: boolean;
 };
 
 type AccessDataForm = {
     environment: string;
-    dataPlatform: DataPlatform;
+    dataPlatform: string;
 };
 
 export function DataAccessTileGrid({
@@ -32,13 +32,6 @@ export function DataAccessTileGrid({
     const { data: environments, isLoading: isLoadingEnvironments } = useGetAllEnvironmentsQuery();
     const [accessDataForm] = Form.useForm<AccessDataForm>();
 
-    function getEnvironment(platform: DataPlatform) {
-        if (platform === DataPlatforms.Conveyor) {
-            return [];
-        }
-        return environments;
-    }
-
     return (
         <Form<AccessDataForm>
             form={accessDataForm}
@@ -50,14 +43,14 @@ export function DataAccessTileGrid({
                 <div>
                     <Space wrap className={styles.radioButtonContainer}>
                         {dataPlatforms.map((dataPlatform) => (
-                            <AccessDataTile<DataPlatform>
+                            <AccessDataTile<string>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
-                                environments={getEnvironment(dataPlatform.value) ?? []}
+                                environments={environments ?? []}
                                 isDisabled={isDisabled || isLoading || isLoadingEnvironments || !canAccessData}
                                 isLoading={isLoading || isLoadingEnvironments}
                                 onMenuItemClick={onDataPlatformClick}
-                                onTileClick={getEnvironment(dataPlatform.value) === undefined ? onTileClick : undefined}
+                                onTileClick={!dataPlatform.hasMenu ? onTileClick : undefined}
                             />
                         ))}
                     </Space>
