@@ -1,3 +1,4 @@
+import json
 import uuid
 from copy import deepcopy
 
@@ -14,6 +15,9 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.factories.env_platform_config import EnvPlatformConfigFactory
+from tests.factories.environment import EnvironmentFactory
+from tests.factories.platform import PlatformFactory
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
@@ -117,6 +121,32 @@ class TestDatasetsRouter:
 
         created_dataset = self.create_default_dataset(client, create_payload)
         assert created_dataset.status_code == 400
+
+    def test_get_integration_url(self, client):
+        env = EnvironmentFactory(name="production")
+        platform = PlatformFactory(name="Snowflake")
+        user = UserFactory(external_id="sub")
+        dataset = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.DATASET__READ_INTEGRATIONS],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            dataset_id=dataset.id,
+        )
+        EnvPlatformConfigFactory(
+            environment=env,
+            platform=platform,
+            config=json.dumps({"login_url": "test_1.com"}),
+        )
+        response = client.get(
+            f"{ENDPOINT}/{dataset.id}/integration_url?integration_type=snowflake&"
+            "environment=production"
+        )
+        assert response.status_code == 200
+        assert response.json() == "test_1.com"
 
     def test_create_dataset_invalid_length_namespace(
         self, session, dataset_payload, client

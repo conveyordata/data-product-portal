@@ -17,7 +17,6 @@ import type {
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import type { NamespaceLengthLimitsResponse, NamespaceSuggestionResponse } from '@/types/namespace/namespace';
-
 import { baseApiSlice } from '../api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
 import { datasetsApiSlice } from '../datasets/datasets-api-slice';
@@ -39,6 +38,13 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
                 method: 'GET',
             }),
             providesTags: [{ type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST }],
+        }),
+        getDataOutputConfig: builder.query<string, string | undefined>({
+            query: (type) => ({
+                url: ApiUrl.DataOutputConfig,
+                params: type ? { type } : undefined,
+                method: 'GET',
+            }),
         }),
         getDataOutputById: builder.query<DataOutputContract, string>({
             query: (id) => ({
@@ -199,6 +205,7 @@ export const {
     useRemoveDataOutputMutation,
     useRequestDatasetAccessForDataOutputMutation,
     useGetDataOutputGraphDataQuery,
+    useGetDataOutputConfigQuery,
     useGetDataOutputHistoryQuery,
     useGetDataOutputNamespaceLengthLimitsQuery,
     useLazyGetDataOutputNamespaceSuggestionQuery,

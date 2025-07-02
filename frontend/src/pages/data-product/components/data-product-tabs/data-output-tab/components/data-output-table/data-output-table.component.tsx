@@ -64,32 +64,30 @@ export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
     if (!dataProduct) return null;
 
     return (
-        <>
-            <Flex className={styles.dataOutputListContainer}>
-                <Table<DataOutputsGetContract[0]>
-                    loading={isLoadingDataProduct}
-                    className={styles.dataOutputListTable}
-                    columns={columns}
-                    dataSource={dataOutputs}
-                    rowKey={({ id }) => id}
-                    onChange={onChange}
-                    pagination={{
-                        ...pagination,
-                        position: ['topRight'],
-                        size: 'small',
-                        showTotal: (total, range) =>
-                            t('Showing {{range0}}-{{range1}} of {{total}} data outputs', {
-                                range0: range[0],
-                                range1: range[1],
-                                total: total,
-                            }),
-                        hideOnSinglePage: false,
-                        className: styles.pagination,
-                    }}
-                    rowClassName={styles.tableRow}
-                    size={'small'}
-                />
-            </Flex>
-        </>
+        <Flex className={styles.dataOutputListContainer}>
+            <Table<DataOutputsGetContract[0]>
+                loading={isLoadingDataProduct}
+                className={styles.dataOutputListTable}
+                columns={columns}
+                dataSource={dataOutputs}
+                rowKey={({ id }) => id}
+                onChange={onChange}
+                pagination={{
+                    ...pagination,
+                    position: ['topRight'],
+                    size: 'small',
+                    showTotal: (total, range) =>
+                        t('Showing {{range0}}-{{range1}} of {{total}} data outputs', {
+                            range0: range[0],
+                            range1: range[1],
+                            total: total,
+                        }),
+                    hideOnSinglePage: false,
+                    className: styles.pagination,
+                }}
+                rowClassName={styles.tableRow}
+                size={'small'}
+            />
+        </Flex>
     );
 }

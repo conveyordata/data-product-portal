@@ -533,7 +533,7 @@ def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) 
 
 
 @router.get(
-    "/{id}/signin_url",
+    "/{id}/integration_url",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -542,65 +542,16 @@ def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) 
         ),
     ],
 )
-def get_signin_url(
+def get_integration_url(
     id: UUID,
+    integration_type: str,
     environment: str,
     db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
+    actor=Depends(get_authenticated_user),
 ) -> str:
-    return DataProductService(db).generate_signin_url(
-        id, environment, actor=authenticated_user
+    return DataProductService(db).get_integration_url(
+        id, environment, integration_type, actor=actor
     )
-
-
-@router.get(
-    "/{id}/conveyor_ide_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
-    return DataProductService(db).get_conveyor_ide_url(id)
-
-
-@router.get(
-    "/{id}/databricks_workspace_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_databricks_workspace_url(
-    id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-) -> str:
-    return DataProductService(db).get_databricks_workspace_url(id, environment)
-
-
-@router.get(
-    "/{id}/snowflake_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_snowflake_url(
-    id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-) -> str:
-    return DataProductService(db).get_snowflake_url(id, environment)
 
 
 @router.get("/{id}/data_outputs")

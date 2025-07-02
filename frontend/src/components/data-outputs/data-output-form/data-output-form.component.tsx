@@ -15,7 +15,7 @@ import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
+import type { DataOutputCreateFormSchema } from '@/types/data-output';
 import type { DataOutputUpdateRequest } from '@/types/data-output/data-output-update.contract';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
@@ -40,7 +40,7 @@ export function DataOutputForm({ mode, dataOutputId }: Props) {
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [updateDataOutput, { isLoading: isUpdating }] = useUpdateDataOutputMutation();
     const [deleteDataOutput, { isLoading: isArchiving }] = useRemoveDataOutputMutation();
-    const [form] = Form.useForm<DataOutputCreateFormSchema & DataOutputConfiguration>();
+    const [form] = Form.useForm<DataOutputCreateFormSchema>();
 
     const { data: update_access } = useCheckAccessQuery(
         {

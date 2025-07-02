@@ -137,6 +137,26 @@ def create_dataset(
     return {"id": new_dataset.id}
 
 
+@router.get(
+    "/{id}/integration_url",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.DATASET__READ_INTEGRATIONS, DatasetResolver)
+        ),
+    ],
+)
+def get_integration_url(
+    id: UUID,
+    integration_type: str,
+    environment: str,
+    db: Session = Depends(get_db_session),
+    actor=Depends(get_authenticated_user),
+) -> str:
+    return DatasetService(db).get_integration_url(
+        id, environment, integration_type, actor=actor
+    )
+
+
 def _assign_owner_role_assignments(
     dataset_id: UUID, owners: Sequence[UUID], db: Session, actor: User
 ) -> None:

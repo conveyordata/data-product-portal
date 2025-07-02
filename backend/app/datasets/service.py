@@ -37,6 +37,7 @@ from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.integration_providers.integration_provider import IntegrationProvider
 from app.role_assignments.dataset.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
@@ -143,6 +144,20 @@ class DatasetService:
             .unique()
             .all()
         )
+
+    def get_integration_url(
+        self, id: UUID, environment: str, integration_type: str, *, actor: User
+    ) -> str:
+        provider_cls = IntegrationProvider(self.db).INTEGRATION_PROVIDERS.get(
+            integration_type
+        )
+        if not provider_cls:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Integration '{integration_type}' not supported",
+            )
+        provider = provider_cls(self.db)
+        return provider.generate_url(id, environment, actor)
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
