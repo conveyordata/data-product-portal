@@ -1,6 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
+import type { DataProductGetSignInUrlRequest, DataProductGetSignInUrlResponse } from '@/types/data-product';
 import type {
     DatasetContract,
     DatasetCreateRequest,
@@ -40,6 +41,13 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 method: 'GET',
             }),
             providesTags: [{ type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST }],
+        }),
+        getDatasetIntegrationUrl: builder.mutation<DataProductGetSignInUrlResponse, DataProductGetSignInUrlRequest>({
+            query: ({ id, environment, integration_type }) => ({
+                url: buildUrl(ApiUrl.DatasetIntegrationUrl, { dataProductId: id }),
+                method: 'GET',
+                params: { environment, integration_type },
+            }),
         }),
         getDatasetById: builder.query<DatasetContract, string>({
             query: (id) => ({
@@ -169,5 +177,6 @@ export const {
     useGetDatasetHistoryQuery,
     useLazyGetDatasetNamespaceSuggestionQuery,
     useLazyValidateDatasetNamespaceQuery,
+    useGetDatasetIntegrationUrlMutation,
     useGetDatasetNamespaceLengthLimitsQuery,
 } = datasetsApiSlice;

@@ -71,6 +71,7 @@ export enum ApiUrl {
     DatasetSettingValue = '/api/datasets/:datasetId/settings/:settingId',
     DatasetAbout = '/api/datasets/:datasetId/about',
     DatasetGraph = '/api/datasets/:datasetId/graph',
+    DatasetIntegrationUrl = '/api/data_products/:dataProductId/integration_url',
     DatasetHistory = '/api/datasets/:datasetId/history',
     DatasetNamespaceValidation = '/api/datasets/validate_namespace',
     DatasetNamespaceSuggestion = '/api/datasets/namespace_suggestion',

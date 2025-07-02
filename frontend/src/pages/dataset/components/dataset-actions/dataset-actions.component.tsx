@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataOutputConfigQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { useGetDatasetIntegrationUrlMutation } from '@/store/features/datasets/datasets-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { useDataPlatforms } from '@/utils/data-platforms';
 import styles from './dataset-actions.module.scss';
@@ -16,19 +18,30 @@ export function DatasetActions({ datasetId }: Props) {
     const { t } = useTranslation();
     const { data: outputYamlConfig } = useGetDataOutputConfigQuery(undefined);
     const platforms = useDataPlatforms(outputYamlConfig, t);
+    const [getDatasetIntegrationUrl] = useGetDatasetIntegrationUrlMutation();
     const dataPlatforms = useMemo(() => platforms.filter((platform) => platform.marketplace), [platforms]);
 
     async function handleAccessToData(environment: string, dataPlatform: string) {
-        // Todo - implement endpoints to allow for dataset data access
-        // All tiles are currently disabled
-        console.log(dataPlatform, environment, datasetId);
+        try {
+            const signInUrl = await getDatasetIntegrationUrl({
+                id: datasetId,
+                environment,
+                integration_type: dataPlatform,
+            }).unwrap();
+            if (signInUrl) {
+                window.open(signInUrl, '_blank');
+            } else {
+                dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+            }
+        } catch (_error) {
+            dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+        }
     }
 
-    // const { data: request_access } = useCheckAccessQuery(
-    //     {
-    //         action: AuthorizationAction.GLOBAL__REQUEST_DATASET_ACCESS,
-    //     },
-    // );
+    async function handleTileClick(dataPlatform: string) {
+        handleAccessToData('default', dataPlatform);
+    }
+
     const { data: read_integrations } = useCheckAccessQuery(
         {
             resource: datasetId,
@@ -48,7 +61,7 @@ export function DatasetActions({ datasetId }: Props) {
                 canAccessData={canReadIntegrations}
                 dataPlatforms={dataPlatforms}
                 onDataPlatformClick={handleAccessToData}
-                isDisabled
+                onTileClick={handleTileClick}
             />
         </Flex>
     );
