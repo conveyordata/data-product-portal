@@ -53,7 +53,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const dataPlatforms = useMemo(() => {
         const names = availablePlatforms ? availablePlatforms.map((platform) => platform.name.toLowerCase()) : [];
         if (outputYamlConfig !== undefined) {
-            return platforms.filter((platform) => names.includes(platform.value));
+            return platforms.filter((platform) => names.includes(platform.value) && !platform.marketplace);
         }
     }, [platforms, availablePlatforms, outputYamlConfig]);
 
