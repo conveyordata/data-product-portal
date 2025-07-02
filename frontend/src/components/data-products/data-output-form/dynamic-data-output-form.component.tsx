@@ -34,7 +34,7 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
     }, [config_yaml]);
 
     useEffect(() => {
-        config?.fields.forEach((field) => {
+        config?.fields?.forEach((field) => {
             if (field.default !== undefined) {
                 const fullName = configurationFieldName(field.name);
                 const current = form.getFieldValue(fullName as unknown as keyof DataOutputCreateFormSchema);
@@ -52,14 +52,14 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
     }, [form, config?.fields]);
 
     return (
-        config && (
+        config?.type && (
             <ConfigurationSubForm
                 form={form}
                 type={config.type}
                 resultLabel={t('Result')}
                 resultTooltip={t('The resulting configuration')}
             >
-                {config.fields.map((field) => {
+                {config.fields?.map((field) => {
                     // Skip field if hidden
                     if (field.hidden) {
                         return null;
@@ -73,7 +73,7 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
                             (form.getFieldValue(
                                 configurationFieldName(field.depends_on) as unknown as keyof DataOutputCreateFormSchema,
                             ) === undefined &&
-                                config.fields.find((f) => f.name === field.depends_on)?.default === true))
+                                config.fields?.find((f) => f.name === field.depends_on)?.default === true))
                     ) {
                         return null;
                     }
