@@ -46,6 +46,13 @@ interface Config {
      * @description This is used to customize the appearance of your application.
      */
     THEME_CONFIGURATION: string;
+
+    /**
+     * The PostHog key and host for tracking events.
+     * @description This is used to send events to PostHog for analytics.
+     */
+    POSTHOG_KEY: string;
+    POSTHOG_HOST: string;
 }
 
 declare global {
