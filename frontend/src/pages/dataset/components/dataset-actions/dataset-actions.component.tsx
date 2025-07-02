@@ -8,6 +8,7 @@ import { useGetDataOutputConfigQuery } from '@/store/features/data-outputs/data-
 import { useGetDatasetIntegrationUrlMutation } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import { RenderLocation } from '@/types/data-output/data-output-config.contract';
 import { useDataPlatforms } from '@/utils/data-platforms';
 import styles from './dataset-actions.module.scss';
 
@@ -19,7 +20,10 @@ export function DatasetActions({ datasetId }: Props) {
     const { data: outputYamlConfig } = useGetDataOutputConfigQuery(undefined);
     const platforms = useDataPlatforms(outputYamlConfig, t);
     const [getDatasetIntegrationUrl] = useGetDatasetIntegrationUrlMutation();
-    const dataPlatforms = useMemo(() => platforms.filter((platform) => platform.marketplace), [platforms]);
+    const dataPlatforms = useMemo(
+        () => platforms.filter((platform) => platform.render_at?.includes(RenderLocation.MARKETPLACE)),
+        [platforms],
+    );
 
     async function handleAccessToData(environment: string, dataPlatform: string) {
         try {

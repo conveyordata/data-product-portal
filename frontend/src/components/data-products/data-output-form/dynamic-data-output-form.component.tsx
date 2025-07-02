@@ -57,7 +57,7 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
                 return field;
             });
         }
-    }, [sourceAligned, form]);
+    }, [sourceAligned, form, config?.fields]);
 
     return (
         config?.type && (

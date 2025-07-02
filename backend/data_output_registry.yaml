@@ -1,7 +1,5 @@
 Snowflake:
-  disabled: false
-  hasConfig: true
-  hasEnvironments: true
+  has_environments: true
   fields:
     - name: database
       type: select
@@ -35,15 +33,17 @@ Snowflake:
   technical_label: "Schema"
   subtitle_label: "Snowflake schema"
   type: SnowflakeDataOutput
+  icon: snowflake-logo.svg
+  render_at:
+    - data_products
+    - add_output
   provider: app.integration_providers.snowflake_integration_provider.SnowflakeIntegrationProvider
 
   # config_class: app.data_output_configuration.snowflake.schema.SnowflakeDataOutput
   # model_class: app.data_output_configuration.snowflake.model.SnowflakeDataOutput
 
 S3:
-  disabled: false
-  hasConfig: true
-  hasEnvironments: true
+  has_environments: true
   platform: AWS
   fields:
     - name: bucket
@@ -58,12 +58,13 @@ S3:
   technical_label: "Path"
   subtitle_label: "S3 path"
   type: S3DataOutput
+  icon: s3-logo.svg
+  render_at:
+    - add_output
   provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
 
 Redshift:
-  disabled: false
-  hasConfig: true
-  hasEnvironments: true
+  has_environments: true
   platform: AWS
   fields:
     - name: database
@@ -98,12 +99,13 @@ Redshift:
   technical_label: "Schema"
   subtitle_label: "Redshift schema"
   type: RedshiftDataOutput
+  icon: redshift-logo.svg
+  render_at:
+    - add_output
   provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
 
 Glue:
-  disabled: false
-  hasConfig: true
-  hasEnvironments: true
+  has_environments: true
   platform: AWS
   fields:
     - name: database
@@ -138,12 +140,13 @@ Glue:
   technical_label: "Database"
   subtitle_label: "Glue database"
   type: GlueDataOutput
+  icon: glue-logo.svg
+  render_at:
+    - add_output
   provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
 
 Databricks:
-  disabled: false
-  hasConfig: true
-  hasEnvironments: true
+  has_environments: true
   fields:
     - name: catalog
       type: select
@@ -177,28 +180,35 @@ Databricks:
   technical_label: "Schema"
   subtitle_label: "Databricks schema"
   type: DatabricksDataOutput
+  icon: databricks-logo.svg
+  render_at:
+    - data_products
+    - add_output
   provider: app.integration_providers.databricks_integration_provider.DatabricksIntegrationProvider
 
 AWS:
-  disabled: false
-  hasConfig: true
-  hasEnvironments: true
+  has_environments: true
+  icon: aws-logo.svg
+  render_at:
+    - data_products
+    - add_output
   provider: app.integration_providers.aws_integration_provider.AWSIntegrationProvider
 
 Conveyor:
-  disabled: false
-  hasConfig: false
-  hasEnvironments: false
+  icon: conveyor-logo.svg
+  has_environments: false
+  render_at:
+    - data_products
   provider: app.integration_providers.conveyor_integration_provider.ConveyorIntegrationProvider
 
 Datahub:
-  disabled: true
-  hasConfig: false
-  hasEnvironments: false
-  marketplace: true
+  has_environments: false
+  render_at:
+    - marketplace
+  icon: datahub-logo.svg
 
 Collibra:
-  disabled: true
-  hasConfig: false
-  hasEnvironments: false
-  marketplace: true
+  has_environments: false
+  render_at:
+    - marketplace
+  icon: collibra-logo.svg

@@ -28,12 +28,11 @@ export function generateDataPlatformsFromYaml(
                 const platformItem: CustomDropdownItemProps<string> = {
                     label: t(key),
                     value: key.toLocaleLowerCase(),
-                    icon: getIcon(key.toLocaleLowerCase()),
-                    disabled: config.disabled ?? false,
-                    hasMenu: config.hasEnvironments ?? false,
-                    hasConfig: config.hasConfig ?? false,
+                    icon: getIcon(config.icon),
+                    disabled: config.render_at.length === 0,
+                    hasMenu: config.has_environments ?? false,
+                    render_at: config.render_at,
                     children: [],
-                    marketplace: config.marketplace ?? false,
                 };
 
                 platformMap.set(key, platformItem);

@@ -5,7 +5,7 @@ type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 // Helper function for eager loading
 export function getIcon(name: string): IconComponent {
-    const rawIcons = import.meta.glob('/src/assets/icons/*-logo.svg', {
+    const rawIcons = import.meta.glob('/src/assets/icons/*', {
         eager: true,
         import: 'default',
         query: '?react',
@@ -14,13 +14,11 @@ export function getIcon(name: string): IconComponent {
     const icons: Record<string, IconComponent> = {};
 
     for (const fullPath in rawIcons) {
-        // Extract the name from the path (e.g., "/src/assets/icons/aws-logo.svg" -> "aws")
-        const match = fullPath.match(/\/([^/]+)-logo\.svg/);
+        // Extract the name from the path (e.g., "/src/assets/icons/aws-logo.svg" -> "aws-logo")
+        const fileName = fullPath.split('/').pop() || '';
+        const key = fileName.replace(/\.*$/, ''); // Remove .svg and any query string
 
-        if (match) {
-            const key = match[1]; // e.g., "aws", "snowflake"
-            icons[key] = rawIcons[fullPath] as IconComponent;
-        }
+        icons[key] = rawIcons[fullPath] as IconComponent;
     }
 
     const icon = icons[name];

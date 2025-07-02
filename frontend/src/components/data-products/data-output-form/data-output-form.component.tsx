@@ -24,11 +24,11 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useGetAllPlatformsConfigsQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { type DataOutputCreateFormSchema, DataOutputStatus } from '@/types/data-output';
+import { RenderLocation } from '@/types/data-output/data-output-config.contract';
 import { createDataProductIdPath } from '@/types/navigation';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { useDataPlatforms } from '@/utils/data-platforms';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
-
 import styles from './data-output-form.module.scss';
 import { DynamicDataOutputForm } from './dynamic-data-output-form.component';
 
@@ -94,7 +94,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                       // Configured platforms
                       .filter(
                           (platform) =>
-                              platform.hasConfig &&
+                              platform.render_at?.includes(RenderLocation.ADD_OUTPUT) &&
                               platformConfig?.some((config) => config.platform.name === platform.label),
                       )
                       // Configured services

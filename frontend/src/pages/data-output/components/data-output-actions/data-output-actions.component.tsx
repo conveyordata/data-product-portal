@@ -6,6 +6,7 @@ import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-gr
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataOutputConfigQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import { RenderLocation } from '@/types/data-output/data-output-config.contract';
 import { useDataPlatforms } from '@/utils/data-platforms';
 import styles from './data-output-actions.module.scss';
 
@@ -17,7 +18,10 @@ export function DataOutputActions({ dataProductId, dataOutputId }: Props) {
     const { t } = useTranslation();
     const { data: outputYamlConfig } = useGetDataOutputConfigQuery(undefined);
     const platforms = useDataPlatforms(outputYamlConfig, t);
-    const dataPlatforms = useMemo(() => platforms.filter((platform) => platform.marketplace), [platforms]);
+    const dataPlatforms = useMemo(
+        () => platforms.filter((platform) => platform.render_at?.includes(RenderLocation.DATA_OUTPUTS)),
+        [platforms],
+    );
 
     async function handleAccessToData(environment: string, dataPlatform: string) {
         // Todo - implement endpoints to allow for dataset data access
