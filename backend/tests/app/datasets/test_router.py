@@ -1,6 +1,5 @@
 import json
 import uuid
-from argparse import Action
 from copy import deepcopy
 
 import pytest
@@ -125,12 +124,12 @@ class TestDatasetsRouter:
 
     def test_get_integration_url(self, client):
         env = EnvironmentFactory(name="production")
-        platform = PlatformFactory(name="Soda")
+        platform = PlatformFactory(name="Snowflake")
         user = UserFactory(external_id="sub")
         dataset = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
-            permissions=[Action.DATASET__READ_INTEGRATIONS],
+            permissions=[AuthorizationAction.DATASET__READ_INTEGRATIONS],
         )
         DatasetRoleAssignmentFactory(
             user_id=user.id,
@@ -140,12 +139,10 @@ class TestDatasetsRouter:
         EnvPlatformConfigFactory(
             environment=env,
             platform=platform,
-            config=json.dumps(
-                {"workspace_urls": {str(dataset.domain.id): "test_1.com"}}
-            ),
+            config=json.dumps({"login_url": "test_1.com"}),
         )
         response = client.get(
-            f"{ENDPOINT}/{dataset.id}/integration_url?integration_type=databricks&"
+            f"{ENDPOINT}/{dataset.id}/integration_url?integration_type=snowflake&"
             "environment=production"
         )
         assert response.status_code == 200
