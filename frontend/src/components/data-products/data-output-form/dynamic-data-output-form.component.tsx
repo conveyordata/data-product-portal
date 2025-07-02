@@ -42,14 +42,22 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
                     form.setFieldValue(fullName as unknown as keyof DataOutputCreateFormSchema, field.default);
                 }
             }
-            // if (field.depends_on) {
-            //     const dependsOnValue = form.getFieldValue(configurationFieldName(field.depends_on));
-            //     if (dependsOnValue === true) {
-            //         form.resetFields()
-            //     }
-            // }
         });
     }, [form, config?.fields]);
+
+    useEffect(() => {
+        if (sourceAligned) {
+            config?.fields?.map((field) => {
+                if (field.consumer_aligned_locked) {
+                    form.setFieldValue(
+                        configurationFieldName(field.name) as unknown as keyof DataOutputCreateFormSchema,
+                        undefined,
+                    );
+                }
+                return field;
+            });
+        }
+    }, [sourceAligned, form]);
 
     return (
         config?.type && (
@@ -91,6 +99,7 @@ export function DynamicDataOutputForm({ form, namespace, sourceAligned, identifi
                             namespace,
                         );
                     }
+
                     const sharedProps = {
                         name: field.name,
                         label: t(field.label ?? field.name),
