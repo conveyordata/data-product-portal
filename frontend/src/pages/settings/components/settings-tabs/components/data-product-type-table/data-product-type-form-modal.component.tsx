@@ -25,7 +25,7 @@ type Props = {
     onClose: () => void;
     isOpen: boolean;
     mode: 'create' | 'edit';
-    initial: DataProductTypeContract;
+    initial?: DataProductTypeContract;
 };
 export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: Props) {
     const { t } = useTranslation();
@@ -54,7 +54,7 @@ export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: P
             if (mode === 'create') {
                 await createDataProductType(values);
             } else {
-                await editDataProductType({ dataProductType: values, dataProductTypeId: initial.id });
+                await editDataProductType({ dataProductType: values, dataProductTypeId: initial?.id || '' });
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });
