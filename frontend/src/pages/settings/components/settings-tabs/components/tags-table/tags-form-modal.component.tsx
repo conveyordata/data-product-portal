@@ -16,7 +16,7 @@ type Props = {
     onClose: () => void;
     isOpen: boolean;
     mode: 'create' | 'edit';
-    initial: TagContract;
+    initial?: TagContract;
 };
 export function CreateTagsModal({ isOpen, onClose, mode, initial }: Props) {
     const { t } = useTranslation();
@@ -45,7 +45,7 @@ export function CreateTagsModal({ isOpen, onClose, mode, initial }: Props) {
             if (mode === 'create') {
                 await createTag(values);
             } else {
-                await editTag({ tag: values, tagId: initial?.id });
+                await editTag({ tag: values, tagId: initial?.id || '' });
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });

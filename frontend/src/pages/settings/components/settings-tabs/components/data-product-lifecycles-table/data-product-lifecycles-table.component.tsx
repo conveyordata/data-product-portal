@@ -83,7 +83,7 @@ export function DataProductLifecyclesTable() {
                     size={'small'}
                 />
             </Flex>
-            {isVisible && (
+            {isVisible && (mode === 'create' || initial) && (
                 <CreateLifecycleModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />
             )}
         </Flex>
