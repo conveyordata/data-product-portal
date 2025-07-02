@@ -202,3 +202,10 @@ Collibra:
   hasConfig: false
   hasEnvironments: false
   marketplace: true
+
+Soda:
+  disabled: false
+  hasConfig: false
+  hasEnvironments: true
+  marketplace: true
+  provider: app.integration_providers.soda_integration_provider.SodaIntegrationProvider
