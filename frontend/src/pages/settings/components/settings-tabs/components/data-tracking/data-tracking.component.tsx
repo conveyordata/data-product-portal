@@ -1,8 +1,7 @@
-
-import { Switch, Flex, Space, Typography } from 'antd';
-import posthog from '@/config/posthog-config.ts';
+import { Flex, Space, Switch, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import posthog from '@/config/posthog-config.ts';
 
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 
@@ -20,12 +19,11 @@ export function DataTracking() {
         sessionStorage.setItem('tracking-enabled', checked.toString());
 
         if (checked) {
-            dispatchMessage({content: t('Data tracking has been enabled'), type: 'success'});
+            dispatchMessage({ content: t('Data tracking has been enabled'), type: 'success' });
             posthog.opt_in_capturing();
-        }
-        else {
+        } else {
             posthog.opt_out_capturing();
-            dispatchMessage({content: t('Data tracking has been disabled'), type: 'success'});
+            dispatchMessage({ content: t('Data tracking has been disabled'), type: 'success' });
         }
     };
 
@@ -36,7 +34,7 @@ export function DataTracking() {
             </Flex>
             <Space>
                 <Typography.Text>{t('Allow data to be sent to Posthog')}</Typography.Text>
-                <Switch defaultChecked={trackingEnabled} onClick={handleToggle}/>
+                <Switch defaultChecked={trackingEnabled} onClick={handleToggle} />
             </Space>
         </Flex>
     );

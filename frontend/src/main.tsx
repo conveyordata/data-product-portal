@@ -2,10 +2,10 @@ import '@/styles/_globals.scss';
 import './i18n.ts';
 import '@ant-design/v5-patch-for-react-19';
 
+import { PostHogProvider } from 'posthog-js/react';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
-import { PostHogProvider } from 'posthog-js/react';
 import { AuthProvider } from 'react-oidc-context';
 import { Provider } from 'react-redux';
 
@@ -36,7 +36,7 @@ ReactDOM.createRoot(root).render(
                         </Suspense>
                     </I18nextProvider>
                 </Provider>
-            </AuthProvider> 
+            </AuthProvider>
         </PostHogProvider>
     </React.StrictMode>,
 );
