@@ -17,6 +17,24 @@ import styles from './delete-role-modal.module.scss';
 
 const { Text } = Typography;
 
+function uniqueOrdered<T extends DataProductContract | DatasetContract>(array: T[] | undefined): T[] {
+    if (array === undefined) {
+        return [];
+    }
+
+    const seen = new Set<string>();
+    return array
+        .filter((item) => {
+            const fieldValue = item.id;
+            if (seen.has(fieldValue)) {
+                return false;
+            }
+            seen.add(fieldValue);
+            return true;
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 type Props = {
     role: RoleContract;
     isOpen: boolean;
@@ -90,7 +108,9 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                         <Text>{t('Please have a look at the following data products:')}</Text>
                         <List
                             bordered
-                            dataSource={dataProductAssignments?.map((assignment) => assignment.data_product)}
+                            dataSource={uniqueOrdered(
+                                dataProductAssignments?.map((assignment) => assignment.data_product),
+                            )}
                             renderItem={(item: DataProductContract) => (
                                 <List.Item>
                                     <Link to={createDataProductIdPath(item.id, DataProductTabKeys.Team)}>
@@ -107,7 +127,7 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                         <Text>{t('Please have a look at the following datasets:')}</Text>
                         <List
                             bordered
-                            dataSource={datasetAssignments?.map((assignment) => assignment.dataset)}
+                            dataSource={uniqueOrdered(datasetAssignments?.map((assignment) => assignment.dataset))}
                             renderItem={(item: DatasetContract) => (
                                 <List.Item>
                                     <Link to={createDatasetIdPath(item.id, DatasetTabKeys.Team)}>{item.name}</Link>

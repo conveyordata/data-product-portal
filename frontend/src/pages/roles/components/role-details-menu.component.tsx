@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Flex } from 'antd';
+import { Button, Flex, Tooltip } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DeleteRoleModal } from '@/pages/roles/components/delete-role-modal.component.tsx';
@@ -23,15 +23,20 @@ export function RoleDetailsMenu({ role }: Props) {
                 <Button type={'text'} icon={<EditOutlined />} onClick={() => setModifyModalOpen(true)}>
                     {t('Modify')}
                 </Button>
-                <Button
-                    type={'text'}
-                    icon={<DeleteOutlined />}
-                    onClick={() => setDeleteModalOpen(true)}
-                    disabled={disabled}
-                    danger
+                <Tooltip
+                    title={disabled ? t('This role is mandatory and cannot be deleted.') : undefined}
+                    placement={'bottom'}
                 >
-                    {t('Delete')}
-                </Button>
+                    <Button
+                        type={'text'}
+                        icon={<DeleteOutlined />}
+                        onClick={() => setDeleteModalOpen(true)}
+                        disabled={disabled}
+                        danger
+                    >
+                        {t('Delete')}
+                    </Button>
+                </Tooltip>
             </Flex>
 
             <ModifyRoleModal role={role} isOpen={modifyModalOpen} onClose={() => setModifyModalOpen(false)} />

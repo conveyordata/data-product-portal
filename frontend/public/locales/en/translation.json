@@ -398,6 +398,7 @@
     "Update {{ name }} dataset role": "Update {{ name }} dataset role",
     "Update": "Update",
     "Modify": "Modify",
+    "This role is mandatory and cannot be deleted.": "This role is mandatory and cannot be deleted.",
     "Create new global role": "Create new global role",
     "Create new data product role": "Create new data product role",
     "Create new dataset role": "Create new dataset role",
