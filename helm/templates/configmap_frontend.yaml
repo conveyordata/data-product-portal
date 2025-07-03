@@ -11,6 +11,8 @@ data:
                 OIDC_REDIRECT_URI: "{{ .Values.oidc.redirect_uri }}",
                 OIDC_POST_LOGOUT_REDIRECT_URI: "{{ .Values.oidc.redirect_uri }}logout/",
                 THEME_CONFIGURATION: "{{ .Values.theme_configuration }}",
+                POSTHOG_KEY: "{{ .Values.posthog.key }}",
+                POSTHOG_HOST: "{{ .Values.posthog.host }}",
             }
         })();
 kind: ConfigMap

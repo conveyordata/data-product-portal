@@ -41,5 +41,11 @@ const config = (() => {
          * @description This is used to customize the appearance of your application.
          */
         THEME_CONFIGURATION: 'datamindedthemeconfig',
+        /**
+         * The PostHog key and host for tracking events.
+         * @description This is used to send events to PostHog for analytics.
+         */
+        POSTHOG_KEY: 'phc_api_key_here', // Replace with your actual PostHog key
+        POSTHOG_HOST: 'https://eu.i.posthog.com',
     };
 })();
