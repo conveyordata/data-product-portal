@@ -16,29 +16,27 @@ export function Logout() {
     }
 
     return (
-        <>
-            <Watermark content={t('Logo')} gap={[500, 500]} className={styles.watermark}>
-                <Flex vertical className={styles.resultContainer}>
-                    <Result
-                        icon={<LogoText variant={'dark'} />}
-                        title={<Typography.Title level={3}>{t('You Are Logged Out')}</Typography.Title>}
-                        subTitle={t('You need to be authenticated to access the data portal')}
-                        extra={[
-                            <Button
-                                key={'sign-in-button'}
-                                type={'primary'}
-                                onClick={handleSigninRedirect}
-                                icon={<ArrowRightOutlined />}
-                                loading={isLoading}
-                                className={styles.largeButton}
-                            >
-                                {t('Sign in')}
-                            </Button>,
-                        ]}
-                        className={styles.result}
-                    />
-                </Flex>
-            </Watermark>
-        </>
+        <Watermark content={t('Logo')} gap={[500, 500]} className={styles.watermark}>
+            <Flex vertical className={styles.resultContainer}>
+                <Result
+                    icon={<LogoText variant={'dark'} />}
+                    title={<Typography.Title level={3}>{t('You Are Logged Out')}</Typography.Title>}
+                    subTitle={t('You need to be authenticated to access the data portal')}
+                    extra={[
+                        <Button
+                            key={'sign-in-button'}
+                            type={'primary'}
+                            onClick={handleSigninRedirect}
+                            icon={<ArrowRightOutlined />}
+                            loading={isLoading}
+                            className={styles.largeButton}
+                        >
+                            {t('Sign in')}
+                        </Button>,
+                    ]}
+                    className={styles.result}
+                />
+            </Flex>
+        </Watermark>
     );
 }

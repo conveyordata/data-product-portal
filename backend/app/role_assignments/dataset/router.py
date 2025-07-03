@@ -35,11 +35,12 @@ router = APIRouter(prefix="/dataset")
 def list_assignments(
     dataset_id: Optional[UUID] = None,
     user_id: Optional[UUID] = None,
+    role_id: Optional[UUID] = None,
     decision: Optional[DecisionStatus] = None,
     db: Session = Depends(get_db_session),
 ) -> Sequence[RoleAssignmentResponse]:
     return RoleAssignmentService(db).list_assignments(
-        dataset_id=dataset_id, user_id=user_id, decision=decision
+        dataset_id=dataset_id, user_id=user_id, role_id=role_id, decision=decision
     )
 
 

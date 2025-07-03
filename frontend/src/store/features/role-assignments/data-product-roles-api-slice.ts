@@ -15,7 +15,7 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
         endpoints: (builder) => ({
             getDataProductRoleAssignments: builder.query<
                 DataProductRoleAssignmentContract[],
-                { data_product_id?: string; user_id?: string; decision?: DecisionStatus }
+                { data_product_id?: string; user_id?: string; role_id?: string; decision?: DecisionStatus }
             >({
                 query: (request) => ({
                     url: ApiUrl.RoleAssignmentsDataProductGet,
@@ -23,14 +23,17 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     params: {
                         ...(request.data_product_id ? { data_product_id: request.data_product_id } : {}),
                         ...(request.user_id ? { user_id: request.user_id } : {}),
+                        ...(request.role_id ? { role_id: request.role_id } : {}),
                         ...(request.decision ? { decision: request.decision } : {}),
                     },
                 }),
-                providesTags: (assignments) =>
-                    (assignments || []).map((assignment) => ({
-                        type: TagTypes.DataProductAssignments as const,
+                providesTags: (assignments) => {
+                    const individual = (assignments || []).map((assignment) => ({
+                        type: TagTypes.DataProductAssignments,
                         id: assignment.data_product.id,
-                    })),
+                    }));
+                    return [...individual, { type: TagTypes.DataProductAssignments, id: STATIC_TAG_ID.LIST }];
+                },
             }),
             createDataProductRoleAssignment: builder.mutation<
                 DataProductRoleAssignmentContract,
@@ -45,11 +48,12 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     },
                 }),
                 invalidatesTags: (_, _error, { data_product_id }) => [
-                    { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProductAssignments as const, id: data_product_id },
-                    { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProduct as const, id: data_product_id },
-                    { type: TagTypes.History as const, id: data_product_id },
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProductAssignments, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProductAssignments, id: data_product_id },
+                    { type: TagTypes.UserDataProducts, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProduct, id: data_product_id },
+                    { type: TagTypes.History, id: data_product_id },
                 ],
             }),
             requestDataProductRoleAssignment: builder.mutation<
@@ -65,11 +69,11 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     },
                 }),
                 invalidatesTags: (_, _error, { data_product_id }) => [
-                    { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProductAssignments as const, id: data_product_id },
-                    { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProduct as const, id: data_product_id },
-                    { type: TagTypes.History as const, id: data_product_id },
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProductAssignments, id: data_product_id },
+                    { type: TagTypes.UserDataProducts, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProduct, id: data_product_id },
+                    { type: TagTypes.History, id: data_product_id },
                 ],
             }),
             updateDataProductRoleAssignment: builder.mutation<
@@ -84,11 +88,12 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     data: { role_id: request.role_id },
                 }),
                 invalidatesTags: (_, _error, { data_product_id }) => [
-                    { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProductAssignments as const, id: data_product_id },
-                    { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProduct as const, id: data_product_id },
-                    { type: TagTypes.History as const, id: data_product_id },
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProductAssignments, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProductAssignments, id: data_product_id },
+                    { type: TagTypes.UserDataProducts, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProduct, id: data_product_id },
+                    { type: TagTypes.History, id: data_product_id },
                 ],
             }),
             decideDataProductRoleAssignment: builder.mutation<
@@ -103,11 +108,12 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     data: { decision: request.decision_status },
                 }),
                 invalidatesTags: (_, _error, { data_product_id }) => [
-                    { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProductAssignments as const, id: data_product_id },
-                    { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProduct as const, id: data_product_id },
-                    { type: TagTypes.History as const, id: data_product_id },
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProductAssignments, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProductAssignments, id: data_product_id },
+                    { type: TagTypes.UserDataProducts, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProduct, id: data_product_id },
+                    { type: TagTypes.History, id: data_product_id },
                 ],
             }),
             deleteDataProductRoleAssignment: builder.mutation<
@@ -121,11 +127,12 @@ export const dataProductRoleAssignmentsApiSlice = baseApiSlice
                     method: 'DELETE',
                 }),
                 invalidatesTags: (_, _error, { data_product_id }) => [
-                    { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProductAssignments as const, id: data_product_id },
-                    { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DataProduct as const, id: data_product_id },
-                    { type: TagTypes.History as const, id: data_product_id },
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProductAssignments, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProductAssignments, id: data_product_id },
+                    { type: TagTypes.UserDataProducts, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DataProduct, id: data_product_id },
+                    { type: TagTypes.History, id: data_product_id },
                 ],
             }),
         }),

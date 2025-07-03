@@ -1,23 +1,33 @@
 import { Button, Form, Input } from 'antd';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
-import { useCreateRoleMutation } from '@/store/features/roles/roles-api-slice';
-import type { Scope } from '@/types/roles';
-import styles from './create-role-modal.module.scss';
+import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import styles from '@/pages/roles/components/create-role-modal.module.scss';
+import { useUpdateRoleMutation } from '@/store/features/roles/roles-api-slice.ts';
+import type { RoleContract } from '@/types/roles';
 
 type Props = {
-    scope: Scope;
-    title: string;
+    role: RoleContract;
     isOpen: boolean;
     onClose: () => void;
 };
-export function CreateRoleModal({ scope, title, isOpen, onClose }: Props) {
+export function ModifyRoleModal({ role, isOpen, onClose }: Props) {
     const { t } = useTranslation();
 
-    const [createRole, { isLoading }] = useCreateRoleMutation();
+    const [updateRole, { isLoading }] = useUpdateRoleMutation();
     const [form] = Form.useForm();
+
+    const title = useMemo(() => {
+        switch (role.scope) {
+            case 'global':
+                return t('Update {{ name }} global role', { name: role.name });
+            case 'data_product':
+                return t('Update {{ name }} data product role', { name: role.name });
+            case 'dataset':
+                return t('Update {{ name }} dataset role', { name: role.name });
+        }
+    }, [role, t]);
 
     const handleCancel = (): void => {
         onClose();
@@ -28,14 +38,13 @@ export function CreateRoleModal({ scope, title, isOpen, onClose }: Props) {
         form.validateFields()
             .then(() => {
                 const request = {
+                    id: role.id,
                     name: form.getFieldValue('name'),
-                    scope: scope,
                     description: form.getFieldValue('description'),
-                    permissions: [],
                 };
-                return createRole(request);
+                return updateRole(request);
             })
-            .then(handleCancel);
+            .then(onClose);
     };
 
     const footer = [
@@ -43,13 +52,18 @@ export function CreateRoleModal({ scope, title, isOpen, onClose }: Props) {
             {t('Cancel')}
         </Button>,
         <Button className={styles.formButton} key="submit" onClick={handleSubmit} type="primary" loading={isLoading}>
-            {t('Create')}
+            {t('Update')}
         </Button>,
     ];
 
     return (
         <FormModal title={title} isOpen={isOpen} onClose={onClose} footer={footer}>
-            <Form form={form} labelCol={FORM_GRID_WRAPPER_COLS} layout="vertical">
+            <Form
+                form={form}
+                labelCol={FORM_GRID_WRAPPER_COLS}
+                layout="vertical"
+                initialValues={{ name: role.name, description: role.description }}
+            >
                 <Form.Item
                     name={'name'}
                     label={t('Name')}
