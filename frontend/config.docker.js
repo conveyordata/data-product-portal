@@ -45,7 +45,7 @@ const config = (() => {
          * The PostHog key and host for tracking events.
          * @description This is used to send events to PostHog for analytics.
          */
-        POSTHOG_KEY: 'phc_api_key_here', // Replace with your actual PostHog key
+        POSTHOG_KEY: 'phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc',
         POSTHOG_HOST: 'https://eu.i.posthog.com',
     };
 })();
