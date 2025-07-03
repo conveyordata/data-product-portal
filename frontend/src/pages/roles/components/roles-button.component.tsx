@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { CreateRoleModal } from '@/pages/roles/components/create-role-modal.component';
 import styles from '@/pages/roles/components/roles-table.module.scss';
-import type { RoleScope } from '@/pages/roles/roles.page';
+import { Scope } from '@/types/roles';
 
 type RolesButtonProps = {
-    scope: RoleScope;
+    scope: Scope;
 };
 export function CreateRoleButton({ scope }: RolesButtonProps) {
     const { t } = useTranslation();
@@ -15,12 +15,14 @@ export function CreateRoleButton({ scope }: RolesButtonProps) {
 
     const message = useMemo(() => {
         switch (scope) {
-            case 'global':
+            case Scope.GLOBAL:
                 return t('Create new global role');
-            case 'data_product':
+            case Scope.DATA_PRODUCT:
                 return t('Create new data product role');
-            case 'dataset':
+            case Scope.DATASET:
                 return t('Create new dataset role');
+            default:
+                throw new Error('Invalid scope');
         }
     }, [scope, t]);
 

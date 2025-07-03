@@ -33,8 +33,9 @@ class RoleAssignmentService:
     def list_assignments(
         self,
         *,
-        data_product_id: Optional[UUID],
-        user_id: Optional[UUID],
+        data_product_id: Optional[UUID] = None,
+        user_id: Optional[UUID] = None,
+        role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
     ) -> Sequence[RoleAssignment]:
         query = select(DataProductRoleAssignment)
@@ -44,6 +45,8 @@ class RoleAssignmentService:
             )
         if user_id is not None:
             query = query.where(DataProductRoleAssignment.user_id == user_id)
+        if role_id is not None:
+            query = query.where(DataProductRoleAssignment.role_id == role_id)
         if decision is not None:
             query = query.where(DataProductRoleAssignment.decision == decision)
 

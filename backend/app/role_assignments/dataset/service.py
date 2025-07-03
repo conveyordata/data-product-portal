@@ -32,8 +32,9 @@ class RoleAssignmentService:
     def list_assignments(
         self,
         *,
-        dataset_id: Optional[UUID],
-        user_id: Optional[UUID],
+        dataset_id: Optional[UUID] = None,
+        user_id: Optional[UUID] = None,
+        role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
     ) -> Sequence[RoleAssignment]:
         query = select(DatasetRoleAssignment)
@@ -41,6 +42,8 @@ class RoleAssignmentService:
             query = query.where(DatasetRoleAssignment.dataset_id == dataset_id)
         if user_id is not None:
             query = query.where(DatasetRoleAssignment.user_id == user_id)
+        if role_id is not None:
+            query = query.where(DatasetRoleAssignment.role_id == role_id)
         if decision is not None:
             query = query.where(DatasetRoleAssignment.decision == decision)
 

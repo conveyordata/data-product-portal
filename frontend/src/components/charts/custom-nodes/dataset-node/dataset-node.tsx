@@ -31,23 +31,21 @@ export function DatasetNode({
     ...props
 }: NodeProps<DatasetNodeProps>) {
     return (
-        <>
-            <BaseNode
-                data={{
-                    isMainNode,
-                    name,
-                    id,
-                    icon: datasetBorderIcon,
-                    borderType: 'square',
-                    nodeToolbarActions,
-                    targetHandlePosition,
-                    sourceHandlePosition,
-                    isActive,
-                    domain,
-                    onClick,
-                }}
-                {...props}
-            />
-        </>
+        <BaseNode
+            data={{
+                isMainNode,
+                name,
+                id,
+                icon: datasetBorderIcon,
+                borderType: 'square',
+                nodeToolbarActions,
+                targetHandlePosition,
+                sourceHandlePosition,
+                isActive,
+                domain,
+                onClick,
+            }}
+            {...props}
+        />
     );
 }

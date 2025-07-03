@@ -12,10 +12,18 @@ export const Prototype = {
 
 export type Prototype = (typeof Prototype)[keyof typeof Prototype];
 
+export const Scope = {
+    GLOBAL: 'global',
+    DATA_PRODUCT: 'data_product',
+    DATASET: 'dataset',
+};
+
+export type Scope = (typeof Scope)[keyof typeof Scope];
+
 export interface RoleContract {
     id: string;
     name: string;
-    scope: string;
+    scope: Scope;
     description: string;
     permissions: number[];
     prototype: Prototype;
@@ -24,7 +32,7 @@ export interface RoleContract {
 export interface RoleUpdate {
     id: string;
     name?: string;
-    scope?: string;
+    scope?: Scope;
     description?: string;
     permissions?: number[];
 }
