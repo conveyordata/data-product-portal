@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Final
 from uuid import UUID
 
 from sqlalchemy import asc, select
@@ -9,6 +9,7 @@ from app.users.model import ensure_user_exists
 from app.users.schema_request import UserCreate
 from app.users.schema_response import UsersGet
 
+SYSTEM_ACCOUNT: Final[str] = "systemaccount@noreply.com"
 
 class UserService:
     def __init__(self, db: Session):
@@ -18,7 +19,7 @@ class UserService:
         return self.db.scalars(
             select(UserModel)
             .outerjoin(UserModel.global_role)
-            .where(UserModel.email != "systemaccount@noreply.com")
+            .where(UserModel.email != SYSTEM_ACCOUNT)
             .order_by(asc(UserModel.last_name), asc(UserModel.first_name))
         ).all()
 

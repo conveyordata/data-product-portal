@@ -14,9 +14,11 @@ from app.role_assignments.global_.schema import (
     RoleAssignmentRequest,
     UpdateRoleAssignment,
 )
-from app.roles.model import Role
+from app.roles.model import Role as RoleModel
 from app.roles.schema import Prototype, Scope
 from app.users.schema import User
+from app.users.model import User as UserModel
+from app.users.service import SYSTEM_ACCOUNT
 
 
 class RoleAssignmentService:
@@ -82,7 +84,7 @@ class RoleAssignmentService:
         return assignment
 
     def ensure_is_global_scope(self, role_id: UUID) -> None:
-        role = self.db.get(Role, role_id)
+        role = self.db.get(RoleModel, role_id)
         if role and role.scope != Scope.GLOBAL:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -105,7 +107,9 @@ class RoleAssignmentService:
         query = (
             select(func.count())
             .select_from(GlobalRoleAssignment)
-            .join(Role)
-            .where(Role.prototype == Prototype.ADMIN)
+            .join(GlobalRoleAssignment.user)
+            .where(UserModel.email != SYSTEM_ACCOUNT)
+            .join(GlobalRoleAssignment.role)
+            .where(RoleModel.prototype == Prototype.ADMIN)
         )
         return self.db.scalar(query)
