@@ -48,6 +48,10 @@ infrastructure_lambda_arn: ""
 # Pick from datamindedthemeconfig, bluethemeconfig, greenthemeconfig
 theme_configuration: "datamindedthemeconfig"
 
+posthog:
+  key: phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc
+  host: https://eu.i.posthog.com
+
 replicaCount: 1
 
 image:
