@@ -28,9 +28,10 @@ router = APIRouter(prefix="/global")
 @router.get("")
 def list_assignments(
     user_id: Optional[UUID] = None,
+    role_id: Optional[UUID] = None,
     db: Session = Depends(get_db_session),
 ) -> Sequence[RoleAssignmentResponse]:
-    return RoleAssignmentService(db).list_assignments(user_id=user_id)
+    return RoleAssignmentService(db).list_assignments(user_id=user_id, role_id=role_id)
 
 
 @router.post(

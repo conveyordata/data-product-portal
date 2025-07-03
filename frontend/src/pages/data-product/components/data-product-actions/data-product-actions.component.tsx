@@ -148,28 +148,26 @@ export function DataProductActions({ dataProductId }: Props) {
     }
 
     return (
-        <>
-            <Flex vertical className={styles.actionsContainer}>
-                {canRequestAccess && allowRequesting && (
-                    <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />
-                )}
-                <Flex vertical className={styles.accessDataContainer}>
-                    <DataAccessTileGrid
-                        canAccessData={canReadIntegrations}
-                        dataPlatforms={dataPlatforms}
-                        onDataPlatformClick={handleAccessToData}
-                        onTileClick={handleTileClick}
-                        isDisabled={isLoading || !canReadIntegrations}
-                        isLoading={
-                            isLoading ||
-                            isConveyorLoading ||
-                            isDatabricksLoading ||
-                            isSnowflakeLoading ||
-                            isLoadingPlatforms
-                        }
-                    />
-                </Flex>
+        <Flex vertical className={styles.actionsContainer}>
+            {canRequestAccess && allowRequesting && (
+                <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />
+            )}
+            <Flex vertical className={styles.accessDataContainer}>
+                <DataAccessTileGrid
+                    canAccessData={canReadIntegrations}
+                    dataPlatforms={dataPlatforms}
+                    onDataPlatformClick={handleAccessToData}
+                    onTileClick={handleTileClick}
+                    isDisabled={isLoading || !canReadIntegrations}
+                    isLoading={
+                        isLoading ||
+                        isConveyorLoading ||
+                        isDatabricksLoading ||
+                        isSnowflakeLoading ||
+                        isLoadingPlatforms
+                    }
+                />
             </Flex>
-        </>
+        </Flex>
     );
 }

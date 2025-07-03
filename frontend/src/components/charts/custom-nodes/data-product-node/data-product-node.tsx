@@ -39,24 +39,22 @@ export function DataProductNode({
     ...props
 }: NodeProps<DataProductNodeProps>) {
     return (
-        <>
-            <BaseNode
-                data={{
-                    name,
-                    id,
-                    isMainNode,
-                    icon: getDataProductTypeIcon(icon_key),
-                    nodeToolbarActions,
-                    sourceHandlePosition,
-                    targetHandlePosition,
-                    isActive,
-                    domain,
-                    assignments,
-                    description,
-                    onClick,
-                }}
-                {...props}
-            />
-        </>
+        <BaseNode
+            data={{
+                name,
+                id,
+                isMainNode,
+                icon: getDataProductTypeIcon(icon_key),
+                nodeToolbarActions,
+                sourceHandlePosition,
+                targetHandlePosition,
+                isActive,
+                domain,
+                assignments,
+                description,
+                onClick,
+            }}
+            {...props}
+        />
     );
 }

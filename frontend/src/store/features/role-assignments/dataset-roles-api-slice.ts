@@ -12,7 +12,7 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
         endpoints: (builder) => ({
             getDatasetRoleAssignments: builder.query<
                 DatasetRoleAssignmentContract[],
-                { dataset_id?: string; user_id?: string; decision?: DecisionStatus }
+                { dataset_id?: string; user_id?: string; role_id?: string; decision?: DecisionStatus }
             >({
                 query: (request) => ({
                     url: ApiUrl.RoleAssignmentsDatasetGet,
@@ -20,14 +20,18 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     params: {
                         ...(request.dataset_id ? { dataset_id: request.dataset_id } : {}),
                         ...(request.user_id ? { user_id: request.user_id } : {}),
+                        ...(request.role_id ? { role_id: request.role_id } : {}),
                         ...(request.decision ? { decision: request.decision } : {}),
                     },
                 }),
-                providesTags: (assignments) =>
-                    (assignments || []).map((assignment) => ({
-                        type: TagTypes.DatasetAssignments as const,
+                providesTags: (assignments) => {
+                    const individual = (assignments || []).map((assignment) => ({
+                        type: TagTypes.DatasetAssignments,
                         id: assignment.dataset.id,
-                    })),
+                    }));
+
+                    return [...individual, { type: TagTypes.DatasetAssignments as const, id: STATIC_TAG_ID.LIST }];
+                },
             }),
             createDatasetRoleAssignment: builder.mutation<
                 DatasetRoleAssignmentContract,
@@ -42,11 +46,12 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     },
                 }),
                 invalidatesTags: (_, _error, { dataset_id }) => [
-                    { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DatasetAssignments as const, id: dataset_id },
-                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.Dataset as const, id: dataset_id },
-                    { type: TagTypes.History as const, id: dataset_id },
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DatasetAssignments, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DatasetAssignments, id: dataset_id },
+                    { type: TagTypes.UserDatasets, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.Dataset, id: dataset_id },
+                    { type: TagTypes.History, id: dataset_id },
                 ],
             }),
             requestDatasetRoleAssignment: builder.mutation<
@@ -62,11 +67,11 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     },
                 }),
                 invalidatesTags: (_, _error, { dataset_id }) => [
-                    { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DatasetAssignments as const, id: dataset_id },
-                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.Dataset as const, id: dataset_id },
-                    { type: TagTypes.History as const, id: dataset_id },
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DatasetAssignments, id: dataset_id },
+                    { type: TagTypes.UserDatasets, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.Dataset, id: dataset_id },
+                    { type: TagTypes.History, id: dataset_id },
                 ],
             }),
             updateDatasetRoleAssignment: builder.mutation<
@@ -81,11 +86,12 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     data: { role_id: request.role_id },
                 }),
                 invalidatesTags: (_, _error, { dataset_id }) => [
-                    { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DatasetAssignments as const, id: dataset_id },
-                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.Dataset as const, id: dataset_id },
-                    { type: TagTypes.History as const, id: dataset_id },
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DatasetAssignments, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DatasetAssignments, id: dataset_id },
+                    { type: TagTypes.UserDatasets, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.Dataset, id: dataset_id },
+                    { type: TagTypes.History, id: dataset_id },
                 ],
             }),
             decideDatasetRoleAssignment: builder.mutation<
@@ -100,11 +106,12 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     data: { decision: request.decision_status },
                 }),
                 invalidatesTags: (_, _error, { dataset_id }) => [
-                    { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DatasetAssignments as const, id: dataset_id },
-                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.Dataset as const, id: dataset_id },
-                    { type: TagTypes.History as const, id: dataset_id },
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DatasetAssignments, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DatasetAssignments, id: dataset_id },
+                    { type: TagTypes.UserDatasets, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.Dataset, id: dataset_id },
+                    { type: TagTypes.History, id: dataset_id },
                 ],
             }),
             deleteDatasetRoleAssignment: builder.mutation<void, { role_assignment_id: string; dataset_id: string }>({
@@ -115,11 +122,12 @@ export const datasetRoleAssignmentsApiSlice = baseApiSlice
                     method: 'DELETE',
                 }),
                 invalidatesTags: (_, _error, { dataset_id }) => [
-                    { type: TagTypes.Role as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.DatasetAssignments as const, id: dataset_id },
-                    { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                    { type: TagTypes.Dataset as const, id: dataset_id },
-                    { type: TagTypes.History as const, id: dataset_id },
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DatasetAssignments, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.DatasetAssignments, id: dataset_id },
+                    { type: TagTypes.UserDatasets, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.Dataset, id: dataset_id },
+                    { type: TagTypes.History, id: dataset_id },
                 ],
             }),
         }),
