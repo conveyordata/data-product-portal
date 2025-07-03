@@ -70,14 +70,13 @@ export const getDatasetTeamColumns = ({
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: RoleContract, { user, id, decision }: DatasetRoleAssignmentContract) => {
+            render: (role: RoleContract, { id, decision }: DatasetRoleAssignmentContract) => {
                 const isApproved = decision === DecisionStatus.Approved;
                 const disabled = role.prototype === Prototype.OWNER && lockOwners;
 
                 return (
-                    <RoleChangeForm<DatasetRoleAssignmentContract>
+                    <RoleChangeForm
                         initialRole={role}
-                        userId={user.id}
                         onRoleChange={(role) => onRoleChange(role, id)}
                         disabled={disabled || !canEdit || !isApproved}
                         scope={'dataset'}
