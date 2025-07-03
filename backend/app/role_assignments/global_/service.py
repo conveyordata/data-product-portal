@@ -16,8 +16,8 @@ from app.role_assignments.global_.schema import (
 )
 from app.roles.model import Role as RoleModel
 from app.roles.schema import Prototype, Scope
-from app.users.schema import User
 from app.users.model import User as UserModel
+from app.users.schema import User
 from app.users.service import SYSTEM_ACCOUNT
 
 

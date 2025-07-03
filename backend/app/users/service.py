@@ -1,4 +1,4 @@
-from typing import Sequence, Final
+from typing import Final, Sequence
 from uuid import UUID
 
 from sqlalchemy import asc, select
@@ -10,6 +10,7 @@ from app.users.schema_request import UserCreate
 from app.users.schema_response import UsersGet
 
 SYSTEM_ACCOUNT: Final[str] = "systemaccount@noreply.com"
+
 
 class UserService:
     def __init__(self, db: Session):
