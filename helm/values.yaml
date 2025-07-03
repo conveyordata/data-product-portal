@@ -49,7 +49,7 @@ infrastructure_lambda_arn: ""
 theme_configuration: "datamindedthemeconfig"
 
 posthog:
-  key: phc_api_key_here
+  key: phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc
   host: https://eu.i.posthog.com
 
 replicaCount: 1
