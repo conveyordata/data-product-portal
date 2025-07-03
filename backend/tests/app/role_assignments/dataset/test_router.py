@@ -270,7 +270,6 @@ class TestDatasetRoleAssignmentsRouter:
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         response = client.patch(
@@ -290,7 +289,6 @@ class TestDatasetRoleAssignmentsRouter:
             dataset_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
-            decision=DecisionStatus.APPROVED,
         )
 
         response = client.get(f"{ENDPOINT}")

@@ -14,8 +14,6 @@ from app.core.authz.authorization import Authorization
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.main import app
-from app.roles import ADMIN_UUID
-from app.roles.schema import Prototype, Scope
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
@@ -117,9 +115,7 @@ def clear_db(session: scoped_session[Session]) -> None:
 
 @pytest.fixture
 def admin() -> UserFactory:
-    role = RoleFactory(
-        scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID, name="admin"
-    )
+    role = RoleFactory.admin()
     user = UserFactory(external_id="sub")
     GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
     return user

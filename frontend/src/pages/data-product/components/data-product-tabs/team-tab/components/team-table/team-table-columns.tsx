@@ -80,7 +80,7 @@ export const getDataProductUsersTableColumns = ({
                         initialRole={role}
                         userId={user.id}
                         onRoleChange={(role) => onRoleChange(role, id)}
-                        isDisabled={disabled || !canEdit || !isApproved}
+                        disabled={disabled || !canEdit || !isApproved}
                         scope={'data_product'}
                     />
                 );
