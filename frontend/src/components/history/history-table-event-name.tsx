@@ -21,10 +21,8 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    console.log(record);
     const { target_id, subject_id, subject_type, target_type, deleted_subject_identifier, deleted_target_identifier } =
         record;
-    console.log(!(subject_id === resourceId && type === subject_type));
     if (!(subject_id === resourceId && type === subject_type)) {
         const path = getEventReferenceEntityLinkPath(
             subject_id,
