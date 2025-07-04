@@ -4,7 +4,7 @@ import json
 
 import httpx
 
-from app.core.logging.logger import logger
+from app.core.logging import logger
 from app.settings import settings
 
 

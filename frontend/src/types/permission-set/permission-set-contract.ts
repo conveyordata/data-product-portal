@@ -1,4 +1,4 @@
-import { DataProductContract } from '../data-product';
+import type { DataProductContract } from '../data-product';
 
 export interface PermissionSetContract {
     id: string;

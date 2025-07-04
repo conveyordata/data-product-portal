@@ -1,6 +1,7 @@
 export enum TagTypes {
     DataProduct = 'DataProduct',
     DataProductAssignments = 'DataProductAssignments',
+    GlobalAssignments = 'GlobalAssignments',
     UserDataProducts = 'UserDataProducts',
     UserDatasets = 'UserDatasets',
     UserDataOutputs = 'UserDataOutputs',
@@ -16,12 +17,15 @@ export enum TagTypes {
     DatasetAssignments = 'DatasetAssignments',
     Domain = 'Domain',
     DataOutput = 'DataOutput',
+    Graph = 'Graph',
     Platform = 'Platform',
     PlatformService = 'PlatformService',
     PlatformServiceConfig = 'PlatformServiceConfig',
     EnvironmentConfigs = 'EnvironmentConfigs',
     Version = 'Version',
     ThemeSettings = 'ThemeSettings',
+    History = 'History',
+    Notifications = 'Notifications',
 }
 
 export const STATIC_TAG_ID = {

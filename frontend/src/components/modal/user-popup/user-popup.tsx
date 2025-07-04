@@ -5,9 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Searchbar } from '@/components/form';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
-import { RoleContract } from '@/types/roles';
-import { SearchForm } from '@/types/shared';
-import { UserContract } from '@/types/users';
+import type { RoleContract } from '@/types/roles';
+import type { SearchForm } from '@/types/shared';
+import type { UserContract } from '@/types/users';
 
 import styles from './user-popup.module.scss';
 

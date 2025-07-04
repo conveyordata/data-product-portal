@@ -1,5 +1,5 @@
-import { Flex, Table, TableColumnsType, TableProps } from 'antd';
-import { useCallback, useEffect, useMemo } from 'react';
+import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
@@ -8,9 +8,8 @@ import { useCheckAccessQuery } from '@/store/features/authorization/authorizatio
 import { useRemoveDataProductDatasetLinkMutation } from '@/store/features/data-products-datasets/data-products-datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { DataProductLink } from '@/types/dataset';
+import type { DataProductLink } from '@/types/dataset';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
-
 import styles from './data-product-table.module.scss';
 import { getDatasetDataProductsColumns } from './data-product-table-columns.tsx';
 
@@ -50,17 +49,13 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
     const canApprove = approve_access?.allowed || false;
     const canRevoke = revoke_access?.allowed || false;
 
-    const { pagination, handlePaginationChange, resetPagination } = useTablePagination({
+    const { pagination, handlePaginationChange } = useTablePagination(dataProducts, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
     const onChange: TableProps<DataProductLink>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
-
-    useEffect(() => {
-        resetPagination();
-    }, [dataProducts, resetPagination]);
 
     const handleRemoveDatasetFromDataProduct = useCallback(
         async (dataProductId: string, name: string, datasetLinkId: string) => {

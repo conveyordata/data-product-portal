@@ -30,6 +30,7 @@ export enum ApplicationPaths {
     Settings = '/settings',
     DataProductLifecycles = '/data-product-lifecycles',
     RoleConfiguration = '/configuration/roles',
+    People = '/people',
 }
 
 export const authenticatedPaths: string[] = [
@@ -53,10 +54,14 @@ export const authenticatedPaths: string[] = [
     ApplicationPaths.EnvironmentConfigs,
     ApplicationPaths.EnvironmentConfigNew,
     ApplicationPaths.Explorer,
+    ApplicationPaths.People,
 ];
 
-export function createDataProductIdPath(dataProductId: string, tabKey: DataProductTabKeys = DataProductTabKeys.About) {
-    return ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId)) + '#' + tabKey;
+export function createDataProductIdPath(
+    dataProductId: string,
+    tabKey: DataProductTabKeys = DataProductTabKeys.About,
+): string {
+    return `${ApplicationPaths.DataProduct.replace(':dataProductId', encodeURIComponent(dataProductId))}#${tabKey}`;
 }
 
 export function createDataOutputIdPath(
@@ -64,18 +69,14 @@ export function createDataOutputIdPath(
     dataProductId: string,
     tabKey: DataOutputTabKeys = DataOutputTabKeys.Datasets,
 ) {
-    return (
-        ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(
-            ':dataOutputId',
-            encodeURIComponent(dataOutputId),
-        ) +
-        '#' +
-        tabKey
-    );
+    return `${ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(
+        ':dataOutputId',
+        encodeURIComponent(dataOutputId),
+    )}#${tabKey}`;
 }
 
 export function createDatasetIdPath(datasetId: string, tabKey: DatasetTabKeys = DatasetTabKeys.About) {
-    return ApplicationPaths.Dataset.replace(':datasetId', encodeURIComponent(datasetId)) + '#' + tabKey;
+    return `${ApplicationPaths.Dataset.replace(':datasetId', encodeURIComponent(datasetId))}#${tabKey}`;
 }
 
 export function createPlatformServiceConfigIdPath(platformServiceConfigId: string) {

@@ -1,4 +1,4 @@
-import { LastVisitedItem } from '@/utils/local-storage.helper.ts';
+import type { LastVisitedItem } from '@/utils/local-storage.helper.ts';
 
 export const getLastVisitedItemTimestamp = (lastVisitedItems: LastVisitedItem[], itemId: string) => {
     const lastVisited = lastVisitedItems.find((lastVisited) => lastVisited.id === itemId);

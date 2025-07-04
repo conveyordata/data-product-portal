@@ -1,54 +1,49 @@
-import type { TablePaginationConfig } from 'antd';
-import { useCallback, useState } from 'react';
-
+import type { PaginationProps } from 'antd/es/pagination/Pagination';
+import { useCallback, useEffect, useState } from 'react';
 import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
 
-type Props = {
-    initialPagination?: TablePaginationConfig;
+const defaultValues: Props = {
+    initialPagination: DEFAULT_TABLE_PAGINATION,
 };
-export const useTablePagination = ({ initialPagination = DEFAULT_TABLE_PAGINATION }: Props) => {
-    const [pagination, setPagination] = useState<TablePaginationConfig>(initialPagination);
+
+type Props = {
+    initialPagination: PaginationProps;
+};
+export const useTablePagination = (elements: object[], props: Partial<Props> = {}) => {
+    const config = { ...defaultValues, ...props };
+    const [pagination, setPagination] = useState<PaginationProps>(config.initialPagination);
 
     const resetPagination = useCallback(() => {
-        setPagination(initialPagination);
-    }, [initialPagination]);
+        setPagination(config.initialPagination);
+    }, [config.initialPagination]);
 
-    const handleTotalChange = (total: number) => {
-        setPagination((prev) =>
-            prev.total === total
-                ? prev
-                : {
-                      ...prev,
-                      total,
-                  },
-        );
+    const handleTotalChange = useCallback((total: number) => {
+        setPagination((prev) => (prev.total === total ? prev : { ...prev, total }));
+    }, []);
+
+    const handleCurrentPageChange = useCallback((current: number) => {
+        if (current > 0) {
+            setPagination((prev) => (prev.current === current ? prev : { ...prev, current }));
+        }
+    }, []);
+
+    const handlePageSizeChange = useCallback((pageSize: number) => {
+        setPagination((prev) => (prev.pageSize === pageSize ? prev : { ...prev, pageSize }));
+    }, []);
+
+    const handlePaginationChange = (pagination: PaginationProps) => {
+        setPagination((prev) => ({ ...prev, ...pagination }));
     };
 
-    const handleCurrentPageChange = (current: number) => {
-        setPagination((prev) =>
-            prev.current === current
-                ? prev
-                : {
-                      ...prev,
-                      current,
-                  },
-        );
-    };
+    useEffect(() => {
+        if (elements.length !== pagination.total) {
+            handleTotalChange(elements.length);
 
-    const handlePageSizeChange = (pageSize: number) => {
-        setPagination((prev) =>
-            prev.pageSize === pageSize
-                ? prev
-                : {
-                      ...prev,
-                      pageSize,
-                  },
-        );
-    };
-
-    const handlePaginationChange = (pagination: TablePaginationConfig) => {
-        setPagination(pagination);
-    };
+            if (pagination.current && pagination.current > elements.length) {
+                handleCurrentPageChange(elements.length);
+            }
+        }
+    }, [elements, pagination, handleTotalChange, handleCurrentPageChange]);
 
     return {
         pagination,

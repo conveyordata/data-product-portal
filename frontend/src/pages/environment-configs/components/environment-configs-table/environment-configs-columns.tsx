@@ -1,11 +1,11 @@
-import { TableColumnsType } from 'antd';
-import { TFunction } from 'i18next';
+import { Flex, type TableColumnsType } from 'antd';
+import type { TFunction } from 'i18next';
 
 import deleteIcon from '@/assets/icons/delete-button.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { EnvironmentConfigContract } from '@/types/environment';
+import type { EnvironmentConfigContract } from '@/types/environment';
 
 const iconColumnWidth = 100;
 export const getEnvironmentConfigTableColumns = ({
@@ -54,14 +54,14 @@ export const getEnvironmentConfigTableColumns = ({
                 dispatchMessage({ content: t('Environment configuration deleted successfully'), type: 'success' });
             };
             return (
-                <div
+                <Flex
                     onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(record.id);
                     }}
                 >
                     <CustomSvgIconLoader iconComponent={deleteIcon} size="x-small" color={'dark'} />
-                </div>
+                </Flex>
             );
         },
     },

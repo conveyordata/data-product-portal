@@ -8,8 +8,10 @@ export enum ApiUrl {
     DataOutputDatasetLinkRemove = '/api/data_output_dataset_links/remove/:datasetLinkId',
     DataOutputDatasetPendingActions = '/api/data_output_dataset_links/actions',
     DataOutputGraph = '/api/data_outputs/:dataOutputId/graph',
+    DataOutputHistory = '/api/data_outputs/:dataOutputId/history',
     DataOutputNamespaceSuggestion = '/api/data_outputs/namespace_suggestion',
     DataOutputNamespaceLimits = '/api/data_outputs/namespace_length_limits',
+    DataOutputResultString = '/api/data_outputs/result_string',
     DataProducts = '/api/data_products',
     DataProductsDataOutput = '/api/data_products/:dataProductId/data_outputs',
     DataProductGet = '/api/data_products/:dataProductId',
@@ -24,12 +26,14 @@ export enum ApiUrl {
     DataProductSettingNamespaceLimits = '/api/data_product_settings/namespace_length_limits',
     DataProductOutputCreate = '/api/data_products/:dataProductId/data_output',
     DataProductSettingGet = '/api/data_product_settings/:settingId',
-    DataProductSettingValue = '/api/data_products/:dataProductId/settings/:dataProductSettingId',
+    DataProductSettingValue = '/api/data_products/:dataProductId/settings/:settingId',
     DataProductSignInUrl = '/api/data_products/:dataProductId/signin_url',
     DataProductConveyorIdeUrl = '/api/data_products/:dataProductId/conveyor_ide_url',
     DataProductDatabricksWorkspaceUrl = '/api/data_products/:dataProductId/databricks_workspace_url',
+    DataProductSnowflakeUrl = '/api/data_products/:dataProductId/snowflake_url',
     DataProductDataset = '/api/data_products/:dataProductId/dataset/:datasetId',
     DataProductAbout = '/api/data_products/:dataProductId/about',
+    DataProductHistory = '/api/data_products/:dataProductId/history',
     DataProductGraph = '/api/data_products/:dataProductId/graph',
     DataProductNamespaceValidation = '/api/data_products/validate_namespace',
     DataProductNamespaceSuggestion = '/api/data_products/namespace_suggestion',
@@ -50,6 +54,11 @@ export enum ApiUrl {
     RoleAssignmentsDataset = '/api/role_assignments/dataset/:assignmentId',
     RoleAssignmentsDatasetRequest = '/api/role_assignments/dataset/request/:datasetId',
     RoleAssignmentsDatasetDecide = '/api/role_assignments/dataset/:assignmentId/decide',
+    RoleAssignmentsGlobal = '/api/role_assignments/global',
+    RoleAssignmentsGlobalDelete = '/api/role_assignments/global/:assignmentId',
+    RoleAssignmentsGlobalRequest = '/api/role_assignments/global/request',
+    RoleAssignmentsGlobalDecide = '/api/role_assignments/global/:assignmentId/decide',
+    RoleAssignmentsGlobalUpdate = '/api/role_assignments/global/:assignmentId/role',
     Tags = '/api/tags',
     TagsId = '/api/tags/:tagId',
     Environments = '/api/envs',
@@ -61,9 +70,10 @@ export enum ApiUrl {
     Datasets = '/api/datasets',
     DatasetUser = '/api/datasets/:datasetId/user/:userId',
     DatasetGet = '/api/datasets/:datasetId',
-    DatasetSettingValue = '/api/datasets/:datasetId/settings/:dataProductSettingId',
+    DatasetSettingValue = '/api/datasets/:datasetId/settings/:settingId',
     DatasetAbout = '/api/datasets/:datasetId/about',
     DatasetGraph = '/api/datasets/:datasetId/graph',
+    DatasetHistory = '/api/datasets/:datasetId/history',
     DatasetNamespaceValidation = '/api/datasets/validate_namespace',
     DatasetNamespaceSuggestion = '/api/datasets/namespace_suggestion',
     DatasetNamespaceLimits = '/api/datasets/namespace_length_limits',
@@ -84,21 +94,34 @@ export enum ApiUrl {
     Version = '/api/version',
     ThemeSettings = '/api/theme_settings',
     AccessCheck = '/api/authz/access',
+    AdminCheck = '/api/authz/admin',
     Graph = '/api/graph',
+    Notifications = '/api/notifications',
+    NotificationDelete = '/api/notifications/:notificationId',
+    NotificationDeleteAll = '/api/notifications/all',
 }
 
 export type DynamicPathParams =
     | 'dataProductId'
-    | 'userId'
+    | 'dataProductTypeId'
+    | 'dataOutputId'
     | 'datasetId'
     | 'datasetLinkId'
+    | 'domainId'
+    | 'fromId'
+    | 'toId'
     | 'platformId'
     | 'serviceId'
     | 'environmentId'
+    | 'settingId'
+    | 'lifecycleId'
     | 'configId'
     | 'scope'
+    | 'userId'
     | 'roleId'
-    | 'assignmentId';
+    | 'assignmentId'
+    | 'notificationId'
+    | 'tagId';
 
 export function buildUrl(url: string, pathParams: Partial<Record<DynamicPathParams, string>>): string {
     return Object.keys(pathParams).reduce((acc, key) => {

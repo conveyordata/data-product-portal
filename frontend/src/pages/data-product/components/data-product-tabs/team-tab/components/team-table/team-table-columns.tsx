@@ -71,16 +71,15 @@ export const getDataProductUsersTableColumns = ({
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: RoleContract, { user, id, decision }: DataProductRoleAssignmentContract) => {
+            render: (role: RoleContract, { id, decision }: DataProductRoleAssignmentContract) => {
                 const isApproved = decision === DecisionStatus.Approved;
                 const disabled = role.prototype === Prototype.OWNER && lockOwners;
 
                 return (
-                    <RoleChangeForm<DataProductRoleAssignmentContract>
+                    <RoleChangeForm
                         initialRole={role}
-                        userId={user.id}
                         onRoleChange={(role) => onRoleChange(role, id)}
-                        isDisabled={disabled || !canEdit || !isApproved}
+                        disabled={disabled || !canEdit || !isApproved}
                         scope={'data_product'}
                     />
                 );

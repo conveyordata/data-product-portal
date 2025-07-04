@@ -1,6 +1,5 @@
 import { Button, Form, Input, Select } from 'antd';
-import { TFunction } from 'i18next';
-
+import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useGetAllDomainsQuery,
@@ -8,27 +7,21 @@ import {
     useRemoveDomainMutation,
 } from '@/store/features/domains/domains-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { DomainContract } from '@/types/domain';
+import type { DomainContract } from '@/types/domain';
 
 const { Option } = Select;
-
-interface CreateDomainMigrateModalProps {
-    onClose: () => void;
-    t: TFunction;
-    isOpen: boolean;
-    migrateFrom?: DomainContract;
-}
 
 interface DomainMigrateFormValues {
     toId: string;
 }
 
-export const CreateDomainMigrateModal: React.FC<CreateDomainMigrateModalProps> = ({
-    isOpen,
-    t,
-    onClose,
-    migrateFrom,
-}) => {
+type Props = {
+    onClose: () => void;
+    isOpen: boolean;
+    migrateFrom: DomainContract;
+};
+export function CreateDomainMigrateModal({ isOpen, onClose, migrateFrom }: Props) {
+    const { t } = useTranslation();
     const [form] = Form.useForm();
     const { data: domains = [] } = useGetAllDomainsQuery();
     const [migrateDomain] = useMigrateDomainMutation();
@@ -36,8 +29,8 @@ export const CreateDomainMigrateModal: React.FC<CreateDomainMigrateModalProps> =
 
     const handleFinish = async (values: DomainMigrateFormValues) => {
         try {
-            await migrateDomain({ fromId: migrateFrom!.id, toId: values.toId });
-            await onRemoveDomain(migrateFrom!.id);
+            await migrateDomain({ fromId: migrateFrom.id, toId: values.toId });
+            await onRemoveDomain(migrateFrom.id);
             dispatchMessage({ content: t('Domain migrated and deleted successfully'), type: 'success' });
             form.resetFields();
             onClose();
@@ -87,7 +80,7 @@ export const CreateDomainMigrateModal: React.FC<CreateDomainMigrateModalProps> =
                 >
                     <Select>
                         {domains
-                            .filter((domain) => domain.id !== migrateFrom!.id)
+                            .filter((domain) => domain.id !== migrateFrom.id)
                             .map((domain) => (
                                 <Option key={domain.id} value={domain.id}>
                                     {domain.name}
@@ -98,4 +91,4 @@ export const CreateDomainMigrateModal: React.FC<CreateDomainMigrateModalProps> =
             </Form>
         </FormModal>
     );
-};
+}

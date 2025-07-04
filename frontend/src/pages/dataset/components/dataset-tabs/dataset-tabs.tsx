@@ -1,25 +1,21 @@
-import {
-    HistoryOutlined,
-    InfoCircleOutlined,
-    PartitionOutlined,
-    SettingOutlined,
-    TeamOutlined,
-} from '@ant-design/icons';
+import { CompassOutlined, HistoryOutlined, InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
 import { Explorer } from '@/components/explorer/explorer';
+import { HistoryTab } from '@/components/history/history-tab.tsx';
 import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+import { useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice.ts';
+import { EventReferenceEntity } from '@/types/events/event-reference-entity.ts';
 
 import { AboutTab } from './about-tab/about-tab.tsx';
 import styles from './dataset-tabs.module.scss';
-import { HistoryTab } from './history-tab/history-tab';
 import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
 
@@ -40,6 +36,10 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
 
     const location = useLocation();
     const navigate = useNavigate();
+
+    const { data: datasetHistoryData, isLoading: isFetchingDatasetHistory } = useGetDatasetHistoryQuery(datasetId, {
+        skip: !datasetId,
+    });
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
 
     useEffect(() => {
@@ -64,12 +64,6 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 children: <DataOutputTab datasetId={datasetId} />,
             },
             {
-                label: t('Team'),
-                key: TabKeys.Team,
-                icon: <TeamOutlined />,
-                children: <TeamTab datasetId={datasetId} />,
-            },
-            {
                 label: t('Consuming Data Products'),
                 key: TabKeys.DataProduct,
                 icon: <DataProductOutlined />,
@@ -78,8 +72,14 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
             {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
-                icon: <PartitionOutlined />,
+                icon: <CompassOutlined />,
                 children: <Explorer id={datasetId} type={'dataset'} />,
+            },
+            {
+                label: t('Team'),
+                key: TabKeys.Team,
+                icon: <TeamOutlined />,
+                children: <TeamTab datasetId={datasetId} />,
             },
             {
                 label: t('Settings'),
@@ -91,10 +91,17 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 label: t('History'),
                 key: TabKeys.History,
                 icon: <HistoryOutlined />,
-                children: <HistoryTab datasetId={datasetId} />,
+                children: (
+                    <HistoryTab
+                        id={datasetId}
+                        type={EventReferenceEntity.Dataset}
+                        history={datasetHistoryData}
+                        isFetching={isFetchingDatasetHistory}
+                    />
+                ),
             },
         ];
-    }, [datasetId, t]);
+    }, [datasetId, t, datasetHistoryData, isFetchingDatasetHistory]);
 
     if (isLoading) {
         return <LoadingSpinner />;

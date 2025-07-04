@@ -35,6 +35,17 @@ const config = (() => {
          * This should be a route in the application that handles post-logout actions.
          */
         OIDC_POST_LOGOUT_REDIRECT_URI: '',
+        /**
+         * The Theme configuration for your application.
+         * Pick one from blueThemeConfig, datamindedThemeConfig, greenThemeConfig.
+         * @description This is used to customize the appearance of your application.
+         */
         THEME_CONFIGURATION: 'datamindedthemeconfig',
+        /**
+         * The PostHog key and host for tracking events.
+         * @description This is used to send events to PostHog for analytics.
+         */
+        POSTHOG_KEY: 'phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc', //gitleaks:allow
+        POSTHOG_HOST: 'https://eu.i.posthog.com',
     };
 })();

@@ -1,28 +1,18 @@
 import Icon from '@ant-design/icons';
 import { Button, Form, Input, Select } from 'antd';
-import { TFunction } from 'i18next';
-
+import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useCreateDataProductTypeMutation,
     useUpdateDataProductTypeMutation,
 } from '@/store/features/data-product-types/data-product-types-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { DataProductTypeContract, DataProductTypeCreateRequest } from '@/types/data-product-type';
+import type { DataProductTypeContract, DataProductTypeCreateRequest } from '@/types/data-product-type';
 import { DataProductIcon, dataProductIcons } from '@/types/data-product-type/data-product-type.contract';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
-
 import styles from './data-product-type-table.module.scss';
 
 const { Option } = Select;
-
-interface CreateDataProductTypeModalProps {
-    onClose: () => void;
-    t: TFunction;
-    isOpen: boolean;
-    mode: 'create' | 'edit';
-    initial?: DataProductTypeContract;
-}
 
 interface DataProductTypeFormText {
     title: string;
@@ -31,13 +21,14 @@ interface DataProductTypeFormText {
     submitButtonText: string;
 }
 
-export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProps> = ({
-    isOpen,
-    t,
-    onClose,
-    mode,
-    initial,
-}) => {
+type Props = {
+    onClose: () => void;
+    isOpen: boolean;
+    mode: 'create' | 'edit';
+    initial?: DataProductTypeContract;
+};
+export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: Props) {
+    const { t } = useTranslation();
     const [form] = Form.useForm();
     const [createDataProductType] = useCreateDataProductTypeMutation();
     const [editDataProductType] = useUpdateDataProductTypeMutation();
@@ -63,7 +54,7 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
             if (mode === 'create') {
                 await createDataProductType(values);
             } else {
-                await editDataProductType({ dataProductType: values, dataProductTypeId: initial!.id });
+                await editDataProductType({ dataProductType: values, dataProductTypeId: initial?.id || '' });
             }
 
             dispatchMessage({ content: variableText.successMessage, type: 'success' });
@@ -137,4 +128,4 @@ export const CreateDataProductTypeModal: React.FC<CreateDataProductTypeModalProp
             </Form>
         </FormModal>
     );
-};
+}

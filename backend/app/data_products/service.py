@@ -1,3 +1,4 @@
+import copy
 import json
 from datetime import datetime
 from typing import Sequence
@@ -13,7 +14,6 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
@@ -62,12 +62,13 @@ from app.users.schema import User
 
 
 class DataProductService:
-    def __init__(self):
+    def __init__(self, db: Session):
+        self.db = db
         self.namespace_validator = NamespaceValidator(DataProductModel)
         self.data_output_namespace_validator = DataOutputNamespaceValidator()
 
-    def get_data_product(self, id: UUID, db: Session) -> DataProductGet:
-        data_product = db.get(
+    def get_data_product(self, id: UUID) -> DataProductGet:
+        data_product = self.db.get(
             DataProductModel,
             id,
             options=[
@@ -79,8 +80,7 @@ class DataProductService:
                 ),
             ],
         )
-
-        default_lifecycle = db.scalar(
+        default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
             )
@@ -104,14 +104,14 @@ class DataProductService:
             data_product.lifecycle = default_lifecycle
         return data_product
 
-    def get_data_products(self, db: Session) -> Sequence[DataProductsGet]:
-        default_lifecycle = db.scalar(
+    def get_data_products(self) -> Sequence[DataProductsGet]:
+        default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
             )
         )
         dps = (
-            db.scalars(
+            self.db.scalars(
                 select(DataProductModel)
                 .options(
                     joinedload(DataProductModel.dataset_links).raiseload("*"),
@@ -129,10 +129,10 @@ class DataProductService:
                 dp.lifecycle = default_lifecycle
         return dps
 
-    def get_owners(self, id: UUID, db: Session) -> Sequence[User]:
+    def get_owners(self, id: UUID) -> Sequence[User]:
         data_product = ensure_data_product_exists(
             id,
-            db,
+            self.db,
             options=[joinedload(DataProductModel.assignments)],
             populate_existing=True,
         )
@@ -141,13 +141,13 @@ class DataProductService:
             for assignment in data_product.assignments
             if assignment.role.prototype == Prototype.OWNER
         ]
-        return db.scalars(select(UserModel).filter(UserModel.id.in_(user_ids))).all()
+        return self.db.scalars(
+            select(UserModel).filter(UserModel.id.in_(user_ids))
+        ).all()
 
-    def get_user_data_products(
-        self, user_id: UUID, db: Session
-    ) -> Sequence[DataProductsGet]:
+    def get_user_data_products(self, user_id: UUID) -> Sequence[DataProductsGet]:
         return (
-            db.scalars(
+            self.db.scalars(
                 select(DataProductModel)
                 .options(
                     joinedload(DataProductModel.dataset_links).raiseload("*"),
@@ -165,17 +165,16 @@ class DataProductService:
             .all()
         )
 
-    def _get_tags(self, db: Session, tag_ids: list[UUID]) -> list[TagModel]:
-        return [ensure_tag_exists(tag_id, db) for tag_id in tag_ids]
+    def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
+        return [ensure_tag_exists(tag_id, self.db) for tag_id in tag_ids]
 
     def create_data_product(
         self,
         data_product: DataProductCreate,
-        db: Session,
     ) -> DataProductModel:
         if (
             validity := self.namespace_validator.validate_namespace(
-                data_product.namespace, db
+                data_product.namespace, self.db
             ).validity
         ) != NamespaceValidityType.VALID:
             raise HTTPException(
@@ -184,37 +183,39 @@ class DataProductService:
             )
 
         data_product_schema = data_product.parse_pydantic_schema()
-        tags = self._get_tags(db, data_product_schema.pop("tag_ids", []))
+        tags = self._get_tags(data_product_schema.pop("tag_ids", []))
         _ = data_product_schema.pop("owners", [])
         model = DataProductModel(**data_product_schema, tags=tags)
-        db.add(model)
-        db.commit()
-
-        RefreshInfrastructureLambda().trigger()
+        self.db.add(model)
+        self.db.commit()
         return model
 
-    def remove_data_product(self, id: UUID, db: Session) -> None:
-        data_product = db.get(DataProductModel, id)
+    def remove_data_product(self, id: UUID) -> DataProductModel:
+        data_product = self.db.get(DataProductModel, id)
         if not data_product:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data Product {id} not found",
             )
 
-        db.delete(data_product)
-        db.commit()
+        result = copy.deepcopy(data_product)
+        self.db.delete(data_product)
+        self.db.commit()
+        return result
 
     def update_data_product(
-        self, id: UUID, data_product: DataProductUpdate, db: Session
+        self,
+        id: UUID,
+        data_product: DataProductUpdate,
     ) -> dict[str, UUID]:
-        current_data_product = ensure_data_product_exists(id, db)
+        current_data_product = ensure_data_product_exists(id, self.db)
         update_data_product = data_product.model_dump(exclude_unset=True)
 
         if (
             current_data_product.namespace != data_product.namespace
             and (
                 validity := self.namespace_validator.validate_namespace(
-                    data_product.namespace, db
+                    data_product.namespace, self.db
                 ).validity
             )
             != NamespaceValidityType.VALID
@@ -226,43 +227,52 @@ class DataProductService:
 
         for k, v in update_data_product.items():
             if k == "tag_ids":
-                new_tags = self._get_tags(db, v)
+                new_tags = self._get_tags(v)
                 current_data_product.tags = new_tags
             else:
                 setattr(current_data_product, k, v) if v else None
 
-        db.commit()
-        RefreshInfrastructureLambda().trigger()
+        self.db.commit()
         return {"id": current_data_product.id}
 
     def update_data_product_about(
-        self, id: UUID, data_product: DataProductAboutUpdate, db: Session
-    ) -> None:
-        current_data_product = ensure_data_product_exists(id, db)
+        self,
+        id: UUID,
+        data_product: DataProductAboutUpdate,
+    ) -> DataProductModel:
+        current_data_product = ensure_data_product_exists(id, self.db)
         current_data_product.about = data_product.about
-        db.commit()
+        self.db.commit()
+        return current_data_product
 
     def update_data_product_status(
-        self, id: UUID, data_product: DataProductStatusUpdate, db: Session
-    ) -> None:
-        current_data_product = ensure_data_product_exists(id, db)
+        self,
+        id: UUID,
+        data_product: DataProductStatusUpdate,
+    ) -> DataProductModel:
+        current_data_product = ensure_data_product_exists(id, self.db)
         current_data_product.status = data_product.status
-        db.commit()
+        self.db.commit()
+        return current_data_product
 
     def link_dataset_to_data_product(
         self,
         id: UUID,
         dataset_id: UUID,
-        authenticated_user: User,
-        db: Session,
+        *,
+        actor: User,
     ) -> DataProductDatasetModel:
         dataset = ensure_dataset_exists(
             dataset_id,
-            db,
-            options=[joinedload(DatasetModel.data_product_links)],
+            self.db,
+            options=[
+                joinedload(DatasetModel.data_product_links)
+                .joinedload(DataProductDatasetModel.data_product)
+                .joinedload(DataProductModel.dataset_links)
+            ],
         )
         data_product = ensure_data_product_exists(
-            id, db, options=[joinedload(DataProductModel.dataset_links)]
+            id, self.db, options=[joinedload(DataProductModel.dataset_links)]
         )
 
         if dataset.id in [
@@ -275,7 +285,7 @@ class DataProductService:
                 detail=f"Dataset {dataset_id} already exists in data product {id}",
             )
 
-        if not DatasetService(db).is_visible_to_user(dataset, authenticated_user):
+        if not DatasetService(self.db).is_visible_to_user(dataset, actor):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private dataset",
@@ -290,21 +300,21 @@ class DataProductService:
         dataset_link = DataProductDatasetModel(
             dataset_id=dataset_id,
             status=approval_status,
-            requested_by=authenticated_user,
+            requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.dataset_links.append(dataset_link)
-        db.commit()
-        db.refresh(data_product)
-        RefreshInfrastructureLambda().trigger()
+        self.db.commit()
         return dataset_link
 
     def unlink_dataset_from_data_product(
-        self, id: UUID, dataset_id: UUID, db: Session
-    ) -> None:
-        ensure_dataset_exists(dataset_id, db)
+        self,
+        id: UUID,
+        dataset_id: UUID,
+    ) -> DataProductDatasetModel:
+        ensure_dataset_exists(dataset_id, self.db)
         data_product = ensure_data_product_exists(
-            id, db, options=[joinedload(DataProductModel.dataset_links)]
+            id, self.db, options=[joinedload(DataProductModel.dataset_links)]
         )
         data_product_dataset = next(
             (
@@ -319,26 +329,28 @@ class DataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data product {id} not found",
             )
-        data_product.dataset_links.remove(data_product_dataset)
-        db.commit()
-        RefreshInfrastructureLambda().trigger()
 
-    def get_data_product_role_arn(self, id: UUID, environment: str, db: Session) -> str:
+        data_product.dataset_links.remove(data_product_dataset)
+        self.db.commit()
+        return data_product_dataset
+
+    def get_data_product_role_arn(self, id: UUID, environment: str) -> str:
         environment_context = (
-            db.execute(
+            self.db.execute(
                 select(EnvironmentModel).where(EnvironmentModel.name == environment)
             )
             .scalar_one()
             .context
         )
-        namespace = db.get(DataProductModel, id).namespace
+        namespace = self.db.get(DataProductModel, id).namespace
         role_arn = environment_context.replace("{{}}", namespace)
         return role_arn
 
+    @classmethod
     def get_aws_temporary_credentials(
-        self, role_arn: str, authenticated_user: User
+        cls, role_arn: str, *, actor: User
     ) -> AWSCredentials:
-        email = authenticated_user.email
+        email = actor.email
         try:
             response = get_client("sts").assume_role(
                 RoleArn=role_arn,
@@ -352,16 +364,15 @@ class DataProductService:
 
         return AWSCredentials(**response.get("Credentials"))
 
-    def generate_signin_url(
-        self, id: UUID, environment: str, authenticated_user: User, db: Session
-    ) -> str:
-        role = self.get_data_product_role_arn(id, environment, db)
-        json_credentials = self.get_aws_temporary_credentials(role, authenticated_user)
+    def generate_signin_url(self, id: UUID, environment: str, *, actor: User) -> str:
+        role = self.get_data_product_role_arn(id, environment)
+        json_credentials = self.get_aws_temporary_credentials(role, actor=actor)
 
-        url_credentials = {}
-        url_credentials["sessionId"] = json_credentials.AccessKeyId
-        url_credentials["sessionKey"] = json_credentials.SecretAccessKey
-        url_credentials["sessionToken"] = json_credentials.SessionToken
+        url_credentials = {
+            "sessionId": json_credentials.AccessKeyId,
+            "sessionKey": json_credentials.SecretAccessKey,
+            "sessionToken": json_credentials.SessionToken,
+        }
         json_dump = json.dumps(url_credentials)
 
         request_parameters = "?Action=getSigninToken"
@@ -383,15 +394,16 @@ class DataProductService:
 
         return request_url
 
-    def get_conveyor_ide_url(self, id: UUID, db: Session) -> str:
-        data_product = db.get(DataProductModel, id)
+    def get_conveyor_ide_url(self, id: UUID) -> str:
+        data_product = self.db.get(DataProductModel, id)
         return CONVEYOR_SERVICE.generate_ide_url(data_product.namespace)
 
-    def get_data_outputs(self, id: UUID, db: Session) -> Sequence[DataOutputGet]:
+    def get_data_outputs(self, id: UUID) -> Sequence[DataOutputGet]:
         return (
-            db.scalars(
+            self.db.scalars(
                 select(DataOutputModel)
                 .options(
+                    joinedload(DataOutputModel.environment_configurations),
                     joinedload(DataOutputModel.dataset_links)
                     .joinedload(DataOutputDatasetAssociation.dataset)
                     .raiseload("*"),
@@ -402,15 +414,14 @@ class DataProductService:
             .all()
         )
 
-    def get_databricks_workspace_url(
-        self, id: UUID, environment: str, db: Session
+    def get_env_platform_config(
+        self, id: UUID, environment: str, platform_name: str
     ) -> str:
-        data_product = db.get(DataProductModel, id)
-        environment_model = db.scalar(
+        environment_model = self.db.scalar(
             select(EnvironmentModel).where(EnvironmentModel.name == environment)
         )
-        platform = db.scalar(
-            select(PlatformModel).where(PlatformModel.name == "Databricks")
+        platform = self.db.scalar(
+            select(PlatformModel).where(PlatformModel.name == platform_name)
         )
 
         stmt = select(EnvironmentPlatformConfigurationModel).where(
@@ -418,16 +429,20 @@ class DataProductService:
             == environment_model.id,
             EnvironmentPlatformConfigurationModel.platform_id == platform.id,
         )
-        config = db.scalar(stmt)
+        config = self.db.scalar(stmt)
         if not config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for" f"domain {data_product.domain.name}"
+                    f"Missing Platform Environment configuration for {platform_name}"
                 ),
             )
+        return config.config
 
-        config = json.loads(config.config)["workspace_urls"]
+    def get_databricks_workspace_url(self, id: UUID, environment: str) -> str:
+        platform_config = self.get_env_platform_config(id, environment, "Databricks")
+        data_product = self.db.get(DataProductModel, id)
+        config = json.loads(platform_config)["workspace_urls"]
         if not str(data_product.domain_id) in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -437,8 +452,17 @@ class DataProductService:
             )
         return config[str(data_product.domain_id)]
 
-    def get_graph_data(self, id: UUID, level: int, db: Session) -> Graph:
-        product = db.get(
+    def get_snowflake_url(self, id: UUID, environment: str) -> str:
+        config = json.loads(self.get_env_platform_config(id, environment, "Snowflake"))
+        if "login_url" not in config.keys():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="login_url missing from Snowflake configuration",
+            )
+        return config["login_url"]
+
+    def get_graph_data(self, id: UUID, level: int) -> Graph:
+        product = self.db.get(
             DataProductModel,
             id,
             options=[
@@ -555,20 +579,20 @@ class DataProductService:
 
         return Graph(nodes=set(nodes), edges=set(edges))
 
-    def validate_data_product_namespace(
-        self, namespace: str, db: Session
-    ) -> NamespaceValidation:
-        return self.namespace_validator.validate_namespace(namespace, db)
+    def validate_data_product_namespace(self, namespace: str) -> NamespaceValidation:
+        return self.namespace_validator.validate_namespace(namespace, self.db)
 
-    def data_product_namespace_suggestion(self, name: str) -> NamespaceSuggestion:
-        return self.namespace_validator.namespace_suggestion(name)
+    @classmethod
+    def data_product_namespace_suggestion(cls, name: str) -> NamespaceSuggestion:
+        return NamespaceValidator.namespace_suggestion(name)
 
-    def data_product_namespace_length_limits(self) -> NamespaceLengthLimits:
-        return self.namespace_validator.namespace_length_limits()
+    @classmethod
+    def data_product_namespace_length_limits(cls) -> NamespaceLengthLimits:
+        return NamespaceValidator.namespace_length_limits()
 
     def validate_data_output_namespace(
-        self, namespace: str, data_product_id: UUID, db: Session
+        self, namespace: str, data_product_id: UUID
     ) -> NamespaceValidation:
         return self.data_output_namespace_validator.validate_namespace(
-            namespace, db, data_product_id
+            namespace, self.db, data_product_id
         )

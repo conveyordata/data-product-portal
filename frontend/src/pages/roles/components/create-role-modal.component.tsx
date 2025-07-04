@@ -1,15 +1,14 @@
 import { Button, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import type { RoleScope } from '@/pages/roles/roles.page.tsx';
-import { useCreateRoleMutation } from '@/store/features/roles/roles-api-slice.ts';
-
+import { FormModal } from '@/components/modal/form-modal/form-modal.component';
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
+import { useCreateRoleMutation } from '@/store/features/roles/roles-api-slice';
+import type { Scope } from '@/types/roles';
 import styles from './create-role-modal.module.scss';
 
 type Props = {
-    scope: RoleScope;
+    scope: Scope;
     title: string;
     isOpen: boolean;
     onClose: () => void;
@@ -21,20 +20,22 @@ export function CreateRoleModal({ scope, title, isOpen, onClose }: Props) {
     const [form] = Form.useForm();
 
     const handleCancel = (): void => {
-        form.resetFields();
         onClose();
+        form.resetFields();
     };
 
     const handleSubmit = (): void => {
-        form.validateFields().then(() => {
-            const request = {
-                name: form.getFieldValue('name'),
-                scope: scope,
-                description: form.getFieldValue('description'),
-                permissions: [],
-            };
-            createRole(request).then(handleCancel);
-        });
+        form.validateFields()
+            .then(() => {
+                const request = {
+                    name: form.getFieldValue('name'),
+                    scope: scope,
+                    description: form.getFieldValue('description'),
+                    permissions: [],
+                };
+                return createRole(request);
+            })
+            .then(handleCancel);
     };
 
     const footer = [

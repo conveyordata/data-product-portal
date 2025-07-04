@@ -13,28 +13,41 @@ export type DataOutputNodeProps = Node<{
     sourceHandlePosition?: Position;
     isActive?: boolean;
     icon_key: string;
+    domain?: string;
+    onClick?: () => void;
 }>;
 
 export function DataOutputNode({
-    data: { name, id, isMainNode, nodeToolbarActions, targetHandlePosition, sourceHandlePosition, icon_key, isActive },
+    data: {
+        name,
+        id,
+        isMainNode,
+        nodeToolbarActions,
+        targetHandlePosition,
+        sourceHandlePosition,
+        icon_key,
+        isActive,
+        domain,
+        onClick,
+    },
     ...props
 }: NodeProps<DataOutputNodeProps>) {
     return (
-        <>
-            <BaseNode
-                data={{
-                    isMainNode,
-                    name,
-                    id,
-                    icon: getDataOutputIcon(icon_key)!,
-                    borderType: 'square',
-                    nodeToolbarActions,
-                    targetHandlePosition,
-                    sourceHandlePosition,
-                    isActive,
-                }}
-                {...props}
-            />
-        </>
+        <BaseNode
+            data={{
+                isMainNode,
+                name,
+                id,
+                icon: getDataOutputIcon(icon_key),
+                borderType: 'square',
+                nodeToolbarActions,
+                targetHandlePosition,
+                sourceHandlePosition,
+                isActive,
+                domain,
+                onClick,
+            }}
+            {...props}
+        />
     );
 }

@@ -139,7 +139,7 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 200
         assert len(response.json()) == 2
 
-        response = client.delete(f"{ENDPOINT}/{assignment.id}")
+        response = self.delete_data_product_role_assignment(client, assignment.id)
         assert response.status_code == 200
 
         response = client.get(f"{ENDPOINT}")
@@ -195,10 +195,7 @@ class TestDataProductRoleAssignmentsRouter:
             decision=DecisionStatus.PENDING,
         )
 
-        response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/decide",
-            json={"decision": DecisionStatus.APPROVED},
-        )
+        response = self.approve_data_product_role_assignment(client, assignment.id)
         assert response.status_code == 200
 
         data = response.json()
@@ -224,10 +221,7 @@ class TestDataProductRoleAssignmentsRouter:
             decision=DecisionStatus.DENIED,
         )
 
-        response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/decide",
-            json={"decision": DecisionStatus.APPROVED},
-        )
+        response = self.approve_data_product_role_assignment(client, assignment.id)
 
         assert response.status_code == 422
         assert "already decided" in response.json()["detail"]
@@ -251,10 +245,8 @@ class TestDataProductRoleAssignmentsRouter:
             decision=DecisionStatus.DENIED,
         )
 
-        response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/decide",
-            json={"decision": DecisionStatus.DENIED},
-        )
+        response = self.deny_data_product_role_assignment(client, assignment.id)
+
         assert response.status_code == 200
 
     def test_decide_assignment_no_role(self, client: TestClient):
@@ -274,10 +266,7 @@ class TestDataProductRoleAssignmentsRouter:
             role_id=None,
         )
 
-        response = client.patch(
-            f"{ENDPOINT}/{assignment.id}/decide",
-            json={"decision": DecisionStatus.APPROVED},
-        )
+        response = self.approve_data_product_role_assignment(client, assignment.id)
 
         assert response.status_code == 422
         assert "does not have a role assignment" in response.json()["detail"]
@@ -353,6 +342,121 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 0
+
+    def test_history_event_created_on_data_product_role_assignment_requested(
+        self, client: TestClient
+    ):
+        data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}/{str(data_product.id)}",
+            json={
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_product_role_assignment_approved(
+        self, client: TestClient
+    ):
+        data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+
+        response = self.approve_data_product_role_assignment(client, assignment.id)
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_product_role_assignment_modified(
+        self, client: TestClient
+    ):
+        data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        new_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        response = client.patch(
+            f"{ENDPOINT}/{assignment.id}", json={"role_id": str(new_role.id)}
+        )
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_history_event_created_on_data_product_role_assignment_removed(
+        self, client: TestClient
+    ):
+        data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id="sub")
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.DATA_PRODUCT__DELETE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, data_product_id=data_product.id
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+        assignment: RoleAssignment = DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+        )
+
+        response = client.get(f"{ENDPOINT}")
+        assert response.status_code == 200
+        assert len(response.json()) == 2
+
+        response = self.delete_data_product_role_assignment(client, assignment.id)
+        assert response.status_code == 200
+
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
 
     def test_get_pending_actions_no_action(self, client: TestClient):
         user = UserFactory(external_id="sub")
@@ -444,3 +548,36 @@ class TestDataProductRoleAssignmentsRouter:
     @staticmethod
     def delete_data_product(client: TestClient, data_product_id: str):
         return client.delete(f"{ENDPOINT_DATA_PRODUCT}/{data_product_id}")
+
+    @staticmethod
+    def create_data_product_role_assignment(client: TestClient, json):
+        return client.post(
+            f"{ENDPOINT}",
+            json=json,
+        )
+
+    @staticmethod
+    def delete_data_product_role_assignment(client: TestClient, assignment_id):
+        return client.delete(f"{ENDPOINT}/{assignment_id}")
+
+    @staticmethod
+    def approve_data_product_role_assignment(client: TestClient, assignment_id):
+        return client.patch(
+            f"{ENDPOINT}/{assignment_id}/decide",
+            json={"decision": DecisionStatus.APPROVED},
+        )
+
+    @staticmethod
+    def deny_data_product_role_assignment(client: TestClient, assignment_id):
+        return client.patch(
+            f"{ENDPOINT}/{assignment_id}/decide",
+            json={"decision": DecisionStatus.DENIED},
+        )
+
+    @staticmethod
+    def modify_data_product_role_assignment(client: TestClient, assignment_id, json):
+        return client.patch(f"{ENDPOINT}/{assignment_id}/role", json=json)
+
+    @staticmethod
+    def get_data_product_history(client: TestClient, data_product_id):
+        return client.get(f"{ENDPOINT_DATA_PRODUCT}/{data_product_id}/history")

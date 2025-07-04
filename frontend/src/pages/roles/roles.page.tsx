@@ -7,37 +7,36 @@ import { useTranslation } from 'react-i18next';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { CreateRoleButton } from '@/pages/roles/components/roles-button.component';
 import { RolesTable } from '@/pages/roles/components/roles-table.component';
+import { Scope } from '@/types/roles/role.contract';
 
 const { Paragraph } = Typography;
 
 type TabItem = Required<TabsProps>['items'][number];
 
-export type RoleScope = 'global' | 'data_product' | 'dataset';
-
 export function RoleConfiguration() {
     const { t } = useTranslation();
-    const [current, setCurrent] = useState<RoleScope>('global');
+    const [current, setCurrent] = useState<Scope>(Scope.GLOBAL);
 
     const items: TabItem[] = [
         {
             label: t('Global'),
-            key: 'global',
+            key: Scope.GLOBAL,
             icon: <GlobalOutlined />,
         },
         {
             label: t('Data Product'),
-            key: 'data_product',
+            key: Scope.DATA_PRODUCT,
             icon: <DataProductOutlined />,
         },
         {
             label: t('Dataset'),
-            key: 'dataset',
+            key: Scope.DATASET,
             icon: <DatasetOutlined />,
         },
     ];
 
     const onChange: TabsProps['onChange'] = (key) => {
-        setCurrent(key as RoleScope);
+        setCurrent(key as Scope);
     };
 
     return (

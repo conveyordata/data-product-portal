@@ -22,8 +22,6 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
-    ignore:
-    - dependency-name: eslint
     groups:
       react:
         patterns:
@@ -32,12 +30,14 @@ updates:
       i18n:
         patterns:
           - "i18next"
+          - "i18next-http-backend"
           - "react-i18next"
-      eslint:
+      vite:
         patterns:
-          - "*eslint*"
-          - "@eslint/*"
-          - "@typescript-eslint/parser"
+          - "vite"
+          - "vite-plugin-*"
+          - "@vitejs/*"
+          - "esbuild"
       tiptap:
         patterns:
           - "@tiptap/*"
@@ -47,6 +47,19 @@ updates:
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
+  - package-ecosystem: "npm"
+    directory: "/docs"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    groups:
+      docusaurus:
+        patterns:
+          - "@docusaurus/*"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
   - package-ecosystem: "pip"
     directory: "/backend"
     schedule:

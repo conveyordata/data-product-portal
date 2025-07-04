@@ -1,6 +1,6 @@
 import { PartitionOutlined, TeamOutlined } from '@ant-design/icons';
 import { Button, Tabs, Typography } from 'antd';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -11,7 +11,7 @@ import {
     useGetUserDataProductsQuery,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import { getItemFromLocalStorage, LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
+import { getItemFromLocalStorage, type LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
 
 import styles from './data-products-inbox.module.scss';
 import { DataProductsList } from './data-products-list.tsx';
@@ -36,8 +36,10 @@ export function DataProductsInbox({ userId }: Props) {
     const { t } = useTranslation();
     const { data: dataProducts, isFetching } = useGetAllDataProductsQuery();
     const { data: userDataProducts, isFetching: isFetchingUserDataProducts } = useGetUserDataProductsQuery(userId);
-    const [lastVisitedDataProducts, setLastVisitedDataProducts] = useState<LastVisitedItem[]>([]);
 
+    const lastVisitedDataProducts: LastVisitedItem[] = getItemFromLocalStorage(
+        LocalStorageKeys.LastVisitedDataProducts,
+    );
     const filteredLastVisitedDataProducts = useMemo(() => {
         return filterOutNonMatchingItems(lastVisitedDataProducts, dataProducts)?.slice(0, 4);
     }, [dataProducts, lastVisitedDataProducts]);
@@ -79,10 +81,6 @@ export function DataProductsInbox({ userId }: Props) {
     );
 
     const items: InboxTab[] = useMemo(() => [lastViewed, owned], [lastViewed, owned]);
-
-    useEffect(() => {
-        setLastVisitedDataProducts(getItemFromLocalStorage(LocalStorageKeys.LastVisitedDataProducts));
-    }, []);
 
     if (isFetching) return <LoadingSpinner />;
     return (

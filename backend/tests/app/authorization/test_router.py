@@ -39,3 +39,13 @@ class TestAuthorizationRouter:
 
         access = AccessResponse(**response.json())
         assert access.allowed is True
+
+    def test_is_admin(self, client: TestClient):
+        response = client.get(f"{ENDPOINT}/admin")
+        assert response.status_code == 200
+        assert response.json() is False
+
+    def test_is_admin_authorized(self, client: TestClient, admin):
+        response = client.get(f"{ENDPOINT}/admin")
+        assert response.status_code == 200
+        assert response.json() is True

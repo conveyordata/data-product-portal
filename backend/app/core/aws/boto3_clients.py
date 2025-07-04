@@ -3,7 +3,7 @@ from botocore.exceptions import NoRegionError
 from fastapi import HTTPException, status
 
 from app.core.aws.refreshable_session import RefreshableBotoSession
-from app.core.logging.logger import logger
+from app.core.logging import logger
 
 disabled_aws = False
 try:

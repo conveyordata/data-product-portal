@@ -11,7 +11,7 @@ import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedba
 import { useGetPlatformServiceConfigQuery } from '@/store/features/platform-service-configs/platform-service-configs-api-slice';
 import { useGetAllPlatformServicesQuery } from '@/store/features/platform-services/platform-services-api-slice';
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
-import { EnvironmentConfigCreateFormSchema, EnvironmentConfigCreateRequest } from '@/types/environment';
+import type { EnvironmentConfigCreateFormSchema, EnvironmentConfigCreateRequest } from '@/types/environment';
 import { ApplicationPaths } from '@/types/navigation.ts';
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
@@ -34,9 +34,7 @@ export function EnvironmentConfigCreateForm() {
 
     const { data: services = [], isFetching: isFetchingServices } = useGetAllPlatformServicesQuery(
         platformIdFormValue,
-        {
-            skip: !platformIdFormValue,
-        },
+        { skip: !platformIdFormValue },
     );
 
     const { data: platformServiceConfig } = useGetPlatformServiceConfigQuery(
@@ -82,7 +80,7 @@ export function EnvironmentConfigCreateForm() {
     useEffect(() => {
         if (platformServiceConfig) {
             const configTemplateName = `${platformServiceConfig.platform.name.toLowerCase()}-${platformServiceConfig.service.name.toLocaleLowerCase()}`;
-            const identifiers = platformServiceConfig.config.identifiers;
+            const identifiers = platformServiceConfig.config;
             const configTemplate = identifiers.reduce(
                 (acc, identifier) => {
                     acc[identifier] = ENV_PLATFORM_SERVICE_CONFIG_MAPPING[configTemplateName];

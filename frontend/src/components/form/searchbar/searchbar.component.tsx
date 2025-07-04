@@ -1,8 +1,8 @@
-import { Flex, Form, FormInstance, FormItemProps, FormProps, Input, InputRef } from 'antd';
-import { SearchProps } from 'antd/lib/input';
-import { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
+import { Flex, Form, type FormInstance, type FormItemProps, type FormProps, Input, type InputRef } from 'antd';
+import type { SearchProps } from 'antd/es/input';
+import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 
-import { SearchForm } from '@/types/shared';
+import type { SearchForm } from '@/types/shared';
 
 import styles from './searchbar.module.scss';
 
@@ -29,6 +29,7 @@ export const Searchbar = ({
     const handleSearch = (values: SearchForm) => {
         onSearch?.(values);
     };
+
     return (
         <Flex className={styles.searchContainer}>
             <Form form={form} onFinish={handleSearch} disabled={isDisabled} {...formProps}>

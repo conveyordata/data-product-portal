@@ -24,12 +24,14 @@ class AuthRole(_AuthRole):
             permissions=role.permissions,
         )
 
-    def sync(self) -> None:
+    def sync(self) -> bool:
         authorizer = Authorization()
         if self.prototype == Prototype.EVERYONE:
-            authorizer.sync_everyone_role_permissions(actions=self.permissions)
+            return authorizer.sync_everyone_role_permissions(actions=self.permissions)
         else:
-            authorizer.sync_role_permissions(role_id=self.id, actions=self.permissions)
+            return authorizer.sync_role_permissions(
+                role_id=self.id, actions=self.permissions
+            )
 
     def remove(self) -> None:
         authorizer = Authorization()

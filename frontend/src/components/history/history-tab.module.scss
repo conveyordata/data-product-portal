@@ -1,0 +1,15 @@
+@use '@/styles/globals';
+
+.pagination {
+    margin-top: 0 !important;
+    margin-bottom: globals.$spacing-regular !important;
+}
+
+.margin-bottom-large {
+    margin-bottom: globals.$spacing-l;
+    padding-bottom: globals.$spacing-xs;
+}
+
+.pagination-gap {
+    gap: globals.$spacing-m;
+}

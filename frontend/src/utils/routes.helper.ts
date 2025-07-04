@@ -17,7 +17,7 @@ export function isDatasetEditPage(path: string, datasetId: string) {
 export function isDataOutputEditPage(path: string, dataOutputId: string, dataProductId: string) {
     return (
         getDynamicRoutePath(ApplicationPaths.DataOutputEdit, DynamicPathParams.DataOutputId, dataOutputId).replace(
-            ':' + DynamicPathParams.DataProductId,
+            `:${DynamicPathParams.DataProductId}`,
             dataProductId,
         ) === path
     );

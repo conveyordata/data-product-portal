@@ -6,10 +6,10 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
+from app.environments.model import Environment
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
-    from app.environments.model import Environment
     from app.platform_services.model import PlatformService
     from app.platforms.model import Platform
 

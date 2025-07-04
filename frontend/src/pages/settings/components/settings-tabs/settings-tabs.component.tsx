@@ -1,6 +1,6 @@
 import Icon, { InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
-import { ReactNode, useMemo } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import chipIcon from '@/assets/icons/chip-icon.svg?react';

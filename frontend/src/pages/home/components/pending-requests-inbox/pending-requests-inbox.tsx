@@ -1,26 +1,39 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
-import { Badge, Col, Empty, Flex, Pagination, theme, Typography } from 'antd';
-import { TFunction } from 'i18next';
-import { useEffect, useMemo, useState } from 'react';
+import { Badge, Col, Empty, Flex, Pagination, Typography, theme } from 'antd';
+import type { TFunction } from 'i18next';
+import { type ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
-import { useListPagination } from '@/hooks/use-list-pagination';
+import { useTablePagination } from '@/hooks/use-table-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import { ActionResolveRequest, PendingAction, PendingActionTypes } from '@/types/pending-actions/pending-actions';
+import {
+    type ActionResolveRequest,
+    type PendingAction,
+    PendingActionTypes,
+} from '@/types/pending-actions/pending-actions';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
-
 import styles from './pending-requests-inbox.module.scss';
-import { PendingRequestsList } from './pending-requests-list';
-import { CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
+import { type PendingActionItem, PendingRequestsList } from './pending-requests-list';
+import { type CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
 
-const createPendingItem = (action: PendingAction, t: TFunction, color: string) => {
-    let link, description, navigatePath, date, author, initials, message, tag, type, request, icon;
+const createPendingItem = (action: PendingAction, t: TFunction, color: string): PendingActionItem | null => {
+    let link: string;
+    let description: ReactElement;
+    let navigatePath: string;
+    let date: string;
+    let author: string;
+    let initials: string;
+    let message: ReactElement;
+    let tag: ReactElement;
+    let type: PendingActionTypes;
+    let request: ActionResolveRequest;
+    let icon: ReactElement;
 
     function getInitials(firstName: string, lastName: string) {
         return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
@@ -60,8 +73,9 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
             date = action.requested_on;
-            author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
+            author = `${action.requested_by.first_name} ${action.requested_by.last_name}`;
             initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
+            type = PendingActionTypes.DataProductDataset as PendingActionTypes.DataProductDataset;
             request = {
                 type: PendingActionTypes.DataProductDataset as PendingActionTypes.DataProductDataset,
                 request: {
@@ -105,8 +119,9 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
             date = action.requested_on;
-            author = action.requested_by.first_name + ' ' + action.requested_by.last_name;
+            author = `${action.requested_by.first_name} ${action.requested_by.last_name}`;
             initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
+            type = PendingActionTypes.DataOutputDataset as PendingActionTypes.DataOutputDataset;
             request = {
                 type: PendingActionTypes.DataOutputDataset as PendingActionTypes.DataOutputDataset,
                 request: {
@@ -155,8 +170,9 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string) =
             );
             navigatePath = createDataProductIdPath(action.data_product.id, DataProductTabKeys.Team);
             date = action.requested_on ?? '';
-            author = action.user.first_name + ' ' + action.user.last_name;
+            author = `${action.user.first_name} ${action.user.last_name}`;
             initials = getInitials(action.user.first_name, action.user.last_name);
+            type = PendingActionTypes.DataProductRoleAssignment as PendingActionTypes.DataProductRoleAssignment;
             request = {
                 type: PendingActionTypes.DataProductRoleAssignment as PendingActionTypes.DataProductRoleAssignment,
                 request: { assignment_id: action.id, data_product_id: action.data_product.id },
@@ -207,8 +223,8 @@ export function PendingRequestsInbox() {
             createPendingItem(
                 action,
                 t,
-                action.pending_action_type == PendingActionTypes.DataOutputDataset ||
-                    action.pending_action_type == PendingActionTypes.DataProductDataset
+                action.pending_action_type === PendingActionTypes.DataOutputDataset ||
+                    action.pending_action_type === PendingActionTypes.DataProductDataset
                     ? datasetColor
                     : dataProductColor,
             ),
@@ -224,7 +240,7 @@ export function PendingRequestsInbox() {
             });
     }, [pendingActions, t, dataProductColor, datasetColor]);
 
-    const { pagination, handlePaginationChange, resetPagination } = useListPagination({});
+    const { pagination, handlePaginationChange, resetPagination } = useTablePagination([]);
 
     const handlePageChange = (page: number, pageSize: number) => {
         handlePaginationChange({
@@ -246,14 +262,16 @@ export function PendingRequestsInbox() {
 
     useEffect(() => {
         resetPagination();
-    }, [slicedPendingActionItems, resetPagination]);
+    }, [resetPagination]);
 
     const handleTabChange = (key: CustomPendingRequestsTabKey) => {
         setActiveTab(key);
 
         const typesSet = new Set<PendingActionTypes>();
         if (key === 'all') {
-            Object.values(PendingActionTypes).forEach((type) => typesSet.add(type));
+            for (const type of Object.values(PendingActionTypes)) {
+                typesSet.add(type);
+            }
         } else if (key === 'dataProduct') {
             typesSet.add(PendingActionTypes.DataProductRoleAssignment);
         } else if (key === 'dataset') {
@@ -291,7 +309,7 @@ export function PendingRequestsInbox() {
         }
     };
 
-    if (pendingItems.length == 0 && isFetching == false) {
+    if (pendingItems.length === 0 && !isFetching) {
         return (
             <div className={styles.requestsInbox}>
                 <Typography.Title level={1} className={styles.welcomeContent}>
@@ -301,10 +319,10 @@ export function PendingRequestsInbox() {
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
                     description={
                         <Typography.Text>
-                            <CheckCircleOutlined /> {t(`You have no requests to handle.`)}
+                            <CheckCircleOutlined /> {t('You have no requests to handle.')}
                         </Typography.Text>
                     }
-                ></Empty>
+                />
             </div>
         );
     }

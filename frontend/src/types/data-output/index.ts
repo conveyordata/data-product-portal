@@ -1,8 +1,8 @@
-import { DatabricksDataOutput } from './databricks-data-output.contract.ts';
-import { GlueDataOutput } from './glue-data-output.contract.ts';
-import { RedshiftDataOutput } from './redshift-data-output.contract.ts';
-import { S3DataOutput } from './s3-data-output.contract.ts';
-import { SnowflakeDataOutput } from './snowflake-data-output.contract.ts';
+import type { DatabricksDataOutput } from './databricks-data-output.contract.ts';
+import type { GlueDataOutput } from './glue-data-output.contract.ts';
+import type { RedshiftDataOutput } from './redshift-data-output.contract.ts';
+import type { S3DataOutput } from './s3-data-output.contract.ts';
+import type { SnowflakeDataOutput } from './snowflake-data-output.contract.ts';
 
 export type { DataOutputContract } from './data-output.contract.ts';
 export { DataOutputStatus } from './data-output.contract.ts';
@@ -19,6 +19,7 @@ export type {
     DataOutputDatasetRemoveRequest,
     DataOutputDatasetRemoveResponse,
 } from './data-output-dataset-remove.contract.ts';
+export type { DataOutputResultStringRequest } from './data-output-result-string-request.contract.ts';
 export type { DataOutputsGetContract } from './data-outputs-get.contract.ts';
 export type { DatabricksDataOutput, DatabricksDataOutputContract } from './databricks-data-output.contract.ts';
 export type { DataOutputDatasetLink } from './dataset-link.contract.ts';

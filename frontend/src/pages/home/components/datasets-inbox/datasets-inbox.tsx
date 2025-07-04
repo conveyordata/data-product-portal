@@ -1,6 +1,6 @@
 import { PartitionOutlined, TeamOutlined } from '@ant-design/icons';
 import { Button, Tabs, Typography } from 'antd';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -9,7 +9,7 @@ import { DatasetList } from '@/pages/home/components/datasets-inbox/datasets-lis
 import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
 import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
-import { getItemFromLocalStorage, LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
+import { getItemFromLocalStorage, type LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
 
 import styles from './datasets-inbox.module.scss';
 
@@ -34,8 +34,8 @@ export function DatasetsInbox({ userId }: Props) {
     const { t } = useTranslation();
     const { data: datasets, isFetching } = useGetAllDatasetsQuery();
     const { data: userDatasets, isFetching: isFetchingOwnedDatasets } = useGetUserDatasetsQuery(userId);
-    const [lastVisitedDatasets, setLastVisitedDatasets] = useState<LastVisitedItem[]>([]);
 
+    const lastVisitedDatasets: LastVisitedItem[] = getItemFromLocalStorage(LocalStorageKeys.LastVisitedDatasets);
     const filteredLastVisitedDatasets = useMemo(
         () => filterOutNonMatchingItems(lastVisitedDatasets, datasets)?.slice(0, 4),
         [datasets, lastVisitedDatasets],
@@ -78,10 +78,6 @@ export function DatasetsInbox({ userId }: Props) {
     );
 
     const items: DatasetInboxTab[] = useMemo(() => [lastViewed, owned], [lastViewed, owned]);
-
-    useEffect(() => {
-        setLastVisitedDatasets(getItemFromLocalStorage(LocalStorageKeys.LastVisitedDatasets));
-    }, []);
 
     if (isFetching) return <LoadingSpinner />;
 

@@ -1,0 +1,51 @@
+@use '@/styles/globals';
+
+.select {
+    width: 100%;
+}
+
+.table-container {
+    width: 100%;
+    height: 100%;
+    gap: globals.$column-gap-l;
+
+    .search-container {
+        justify-content: space-between;
+        align-items: center;
+        gap: globals.$column-gap-m;
+        h3 {
+            margin: 0;
+            text-wrap: avoid;
+            white-space: nowrap;
+        }
+    }
+
+    .search-form {
+        width: 100%;
+
+        .form-item {
+            margin-bottom: unset;
+        }
+    }
+
+    .table-filters {
+        display: flex;
+        width: 100%;
+        gap: globals.$column-gap-m;
+    }
+}
+
+.table {
+    width: 100%;
+    height: 100%;
+
+    .row {
+        &:hover {
+            cursor: pointer;
+        }
+    }
+}
+
+.table-bar {
+    width: 100%;
+}

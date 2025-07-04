@@ -1,13 +1,22 @@
-import { Checkbox, type CheckboxChangeEvent, Flex, Table, type TableColumnType, Typography } from 'antd';
+import { MoreOutlined } from '@ant-design/icons';
+import {
+    Button,
+    Checkbox,
+    type CheckboxChangeEvent,
+    Flex,
+    Popover,
+    Space,
+    Table,
+    type TableColumnType,
+    Typography,
+} from 'antd';
 import { type ReactElement, useCallback, useMemo } from 'react';
-
 import QuestionTooltip from '@/components/tooltip/question-tooltip';
-import type { RoleScope } from '@/pages/roles/roles.page';
+import { RoleDetailsMenu } from '@/pages/roles/components/role-details-menu.component.tsx';
 import { useGetRolesQuery, useUpdateRoleMutation } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { RoleContract } from '@/types/roles';
-import { Prototype } from '@/types/roles/role.contract';
-
+import { Prototype, Scope } from '@/types/roles';
 import styles from './roles-table.module.scss';
 
 const { Text } = Typography;
@@ -63,7 +72,7 @@ function prototypePrecedence(role_a: RoleContract, role_b: RoleContract) {
 }
 
 type RolesTableProps = {
-    scope: RoleScope;
+    scope: Scope;
 };
 export function RolesTable({ scope }: RolesTableProps) {
     const { data: rawRoles = [], isFetching } = useGetRolesQuery(scope);
@@ -78,8 +87,10 @@ export function RolesTable({ scope }: RolesTableProps) {
 
     const handleCheckboxChange = useCallback(
         (record: PermissionInstance, id: string, checked: boolean) => {
-            console.log(record, id, checked);
-            const role = roles.find((role) => role.id === id)!;
+            const role = roles.find((role) => role.id === id);
+            if (!role) {
+                throw new Error('Role not found');
+            }
 
             const permissions = [...role.permissions];
             if (checked && !permissions.includes(record.id)) {
@@ -96,14 +107,13 @@ export function RolesTable({ scope }: RolesTableProps) {
 
     const renderPermission = (_: string, record: Permission) => {
         if (record.type === 'Instance') {
-            record = record as PermissionInstance;
             return (
                 <QuestionTooltip title={record.description}>
                     <Text className={styles.permissionInstance}>{record.name}</Text>
                 </QuestionTooltip>
             );
-        } else if (record.type === 'Group') {
-            record = record as PermissionGroup;
+        }
+        if (record.type === 'Group') {
             return (
                 <Text className={styles.permissionGroup} strong>
                     {record.name}
@@ -114,7 +124,10 @@ export function RolesTable({ scope }: RolesTableProps) {
 
     const renderCheckbox = (id: string) => (value: boolean, record: Permission) => {
         if (record.type === 'Instance') {
-            const role = roles.find((role) => role.id === id)!;
+            const role = roles.find((role) => role.id === id);
+            if (!role) {
+                throw new Error('Role not found');
+            }
 
             let checkbox: ReactElement;
             if (role.prototype === Prototype.ADMIN) {
@@ -136,11 +149,28 @@ export function RolesTable({ scope }: RolesTableProps) {
     };
 
     const createColumn = (title: string, id: string, description: string): TableColumnType<Permission> => {
+        const alignToQuestionTooltip = [0, 3];
+        const overlapPadding = { marginLeft: '4px', marginRight: '-20px' };
+
+        const role = roles.find((role) => role.id === id);
+        if (!role) {
+            throw new Error('Role not found');
+        }
+
         return {
             title: (
-                <QuestionTooltip title={description}>
-                    <Text>{title}</Text>
-                </QuestionTooltip>
+                <Space align={'center'} size={0}>
+                    <QuestionTooltip title={description}>
+                        <Text>{title}</Text>
+                    </QuestionTooltip>
+                    <Popover
+                        placement={'bottom'}
+                        align={{ offset: alignToQuestionTooltip }}
+                        content={<RoleDetailsMenu role={role} />}
+                    >
+                        <Button icon={<MoreOutlined />} type={'text'} style={overlapPadding} />
+                    </Popover>
+                </Space>
             ),
             dataIndex: ['access', id],
             render: renderCheckbox(id),
@@ -177,11 +207,11 @@ export function RolesTable({ scope }: RolesTableProps) {
     );
 }
 
-function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): Permission[] {
+function determinePermissionsForScope(scope: Scope, roles: RoleContract[]): Permission[] {
     let permissions: Permission[] = [];
 
     switch (scope) {
-        case 'global':
+        case Scope.GLOBAL:
             permissions = [
                 {
                     type: 'Group',
@@ -247,7 +277,7 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
             ];
             break;
-        case 'data_product':
+        case Scope.DATA_PRODUCT:
             permissions = [
                 {
                     type: 'Group',
@@ -366,7 +396,7 @@ function determinePermissionsForScope(scope: RoleScope, roles: RoleContract[]): 
                 },
             ];
             break;
-        case 'dataset':
+        case Scope.DATASET:
             permissions = [
                 {
                     type: 'Group',

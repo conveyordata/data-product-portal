@@ -1,7 +1,9 @@
+from typing import Optional
 from uuid import UUID
 
 from pydantic import EmailStr
 
+from app.role_assignments.global_.schema import RoleAssignmentResponse
 from app.shared.schema import ORMModel
 
 
@@ -11,7 +13,6 @@ class BaseUserGet(ORMModel):
     external_id: str
     first_name: str
     last_name: str
-    is_admin: bool
 
 
 class UserGet(BaseUserGet):
@@ -19,4 +20,4 @@ class UserGet(BaseUserGet):
 
 
 class UsersGet(BaseUserGet):
-    pass
+    global_role: Optional[RoleAssignmentResponse]

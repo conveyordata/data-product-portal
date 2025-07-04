@@ -1,5 +1,5 @@
 import type { ButtonProps, TooltipProps } from 'antd';
-import { Button, ConfigProvider, theme, Tooltip } from 'antd';
+import { Button, ConfigProvider, Tooltip, theme } from 'antd';
 import type { ReactNode } from 'react';
 
 import styles from './circle-icon-button.module.scss';

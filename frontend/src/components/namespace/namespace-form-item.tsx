@@ -3,7 +3,7 @@ import { Button, Form, type FormInstance, Input, Space } from 'antd';
 import type { Rule } from 'antd/es/form';
 import { useTranslation } from 'react-i18next';
 
-import { NamespaceValidationResponse, ValidationType } from '@/types/namespace/namespace';
+import { type NamespaceValidationResponse, ValidationType } from '@/types/namespace/namespace';
 
 import styles from './namespace-form-item.module.scss';
 

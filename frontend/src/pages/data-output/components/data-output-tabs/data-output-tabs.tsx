@@ -1,4 +1,4 @@
-import Icon, { CodeOutlined, PartitionOutlined } from '@ant-design/icons';
+import Icon, { CodeOutlined, CompassOutlined, HistoryOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,9 +6,12 @@ import { useLocation, useNavigate } from 'react-router';
 
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer';
+import { HistoryTab } from '@/components/history/history-tab';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
+import { useGetDataOutputHistoryQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
+import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 
 import styles from './data-output-tabs.module.scss';
 import { TechnologiesTab } from './technologies-tab/technologies-tab';
@@ -31,6 +34,10 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
     const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.Datasets);
+    const { data: dataOutputHistoryData, isLoading: isFetchingDataOutputHistory } = useGetDataOutputHistoryQuery(
+        dataOutputId,
+        { skip: !dataOutputId },
+    );
 
     useEffect(() => {
         const hash = location.hash.slice(1);
@@ -52,19 +59,32 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
                 children: <DatasetTab dataOutputId={dataOutputId} />,
             },
             {
+                label: t('Explorer'),
+                key: TabKeys.Explorer,
+                icon: <CompassOutlined />,
+                children: <Explorer id={dataOutputId} type={'dataoutput'} />,
+            },
+            {
                 label: t('Technical information'),
                 key: TabKeys.Technologies,
                 icon: <CodeOutlined />,
                 children: <TechnologiesTab dataOutputId={dataOutputId} />,
             },
             {
-                label: t('Explorer'),
-                key: TabKeys.Explorer,
-                icon: <PartitionOutlined />,
-                children: <Explorer id={dataOutputId} type={'dataoutput'} />,
+                label: t('History'),
+                key: TabKeys.History,
+                icon: <HistoryOutlined />,
+                children: (
+                    <HistoryTab
+                        id={dataOutputId}
+                        type={EventReferenceEntity.DataOutput}
+                        history={dataOutputHistoryData}
+                        isFetching={isFetchingDataOutputHistory}
+                    />
+                ),
             },
         ];
-    }, [dataOutputId, t]);
+    }, [dataOutputId, t, dataOutputHistoryData, isFetchingDataOutputHistory]);
 
     if (isLoading) {
         return <LoadingSpinner />;

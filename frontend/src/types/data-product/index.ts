@@ -27,6 +27,10 @@ export type {
     DataProductGetSignInUrlResponse,
 } from './data-product-sign-in-url.contract.ts';
 export type {
+    DataProductGetSnowflakeUrlRequest,
+    DataProductGetSnowflakeUrlResponse,
+} from './data-product-snowflake-url.contract.ts';
+export type {
     DataProductUpdateFormSchema,
     DataProductUpdateRequest,
     DataProductUpdateResponse,

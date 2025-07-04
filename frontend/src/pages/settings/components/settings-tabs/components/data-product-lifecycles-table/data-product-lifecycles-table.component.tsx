@@ -10,8 +10,7 @@ import {
     useRemoveDataProductLifecycleMutation,
 } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-
+import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import styles from './data-product-lifecycles-table.module.scss';
 import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
 import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.component.tsx';
@@ -19,7 +18,7 @@ import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.compon
 export function DataProductLifecyclesTable() {
     const { t } = useTranslation();
     const { data: dataProductLifecycles = [], isFetching } = useGetAllDataProductLifecyclesQuery();
-    const { pagination, handlePaginationChange } = useTablePagination({});
+    const { pagination, handlePaginationChange } = useTablePagination(dataProductLifecycles);
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductLifeCycleContract | undefined>(undefined);
@@ -84,7 +83,7 @@ export function DataProductLifecyclesTable() {
                     size={'small'}
                 />
             </Flex>
-            {isVisible && (
+            {isVisible && (mode === 'create' || initial) && (
                 <CreateLifecycleModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />
             )}
         </Flex>

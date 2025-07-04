@@ -1,9 +1,9 @@
-import { DataOutputLink, DataProductLink } from '@/types/dataset';
-import { DomainContract } from '@/types/domain';
-import { TagContract } from '@/types/tag';
+import type { DataOutputLink, DataProductLink } from '@/types/dataset';
+import type { DomainContract } from '@/types/domain';
+import type { TagContract } from '@/types/tag';
 
-import { DataProductLifeCycleContract } from '../data-product-lifecycle';
-import { DataProductSettingValueContract } from '../data-product-setting';
+import type { DataProductLifeCycleContract } from '../data-product-lifecycle';
+import type { DataProductSettingValueContract } from '../data-product-setting';
 
 export enum DatasetStatus {
     Pending = 'pending',

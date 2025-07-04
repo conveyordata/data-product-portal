@@ -48,17 +48,21 @@ infrastructure_lambda_arn: ""
 # Pick from datamindedthemeconfig, bluethemeconfig, greenthemeconfig
 theme_configuration: "datamindedthemeconfig"
 
+posthog:
+  key: phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc #gitleaks:allow
+  host: https://eu.i.posthog.com
+
 replicaCount: 1
 
 image:
   repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/backend
   pullPolicy: Always
-  tag: 0.3.0
+  tag: 0.3.3
 
 frontendimage:
   repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/frontend
   pullPolicy: Always
-  tag: 0.3.0
+  tag: 0.3.3
 
 imagePullSecrets: []
 nameOverride: ""

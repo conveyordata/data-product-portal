@@ -1,5 +1,5 @@
-import { Flex, Popover, PopoverProps, Space, Typography } from 'antd';
-import { ReactNode } from 'react';
+import { Flex, Popover, type PopoverProps, Space, Typography } from 'antd';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 
 import styles from './table-cell-avatar.module.scss';

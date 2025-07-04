@@ -1,11 +1,11 @@
-import { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
-import { DatasetLink } from '@/types/data-product/dataset-link.contract.ts';
-import { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import { DataProductTypeContract } from '@/types/data-product-type';
-import { DomainContract } from '@/types/domain';
-import { TagContract } from '@/types/tag';
+import type { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract.ts';
+import type { DatasetLink } from '@/types/data-product/dataset-link.contract.ts';
+import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import type { DataProductTypeContract } from '@/types/data-product-type';
+import type { DomainContract } from '@/types/domain';
+import type { TagContract } from '@/types/tag';
 
-import { DataProductSettingValueContract } from '../data-product-setting';
+import type { DataProductSettingValueContract } from '../data-product-setting';
 
 export enum DataProductStatus {
     Pending = 'pending',

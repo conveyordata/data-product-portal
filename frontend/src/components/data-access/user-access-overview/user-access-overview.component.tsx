@@ -1,4 +1,4 @@
-import { Flex, theme, Typography } from 'antd';
+import { Flex, Typography, theme } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
@@ -10,7 +10,7 @@ import styles from './user-access-overview.module.scss';
 const { useToken } = theme;
 
 type Props = {
-    users: UserContract[];
+    users: UserContract[] | undefined;
     title?: ReactNode;
 };
 

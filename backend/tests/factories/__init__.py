@@ -10,7 +10,9 @@ from .domain import DomainFactory
 from .env_platform_config import EnvPlatformConfigFactory
 from .env_platform_service_config import EnvPlatformServiceConfigFactory
 from .environment import EnvironmentFactory
+from .event import EventFactory
 from .lifecycle import LifecycleFactory
+from .notification import NotificationFactory
 from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
 from .platform_service_config import PlatformServiceConfigFactory
@@ -47,6 +49,8 @@ factories = [
     TagFactory,
     UserFactory,
     ThemeSettingsFactory,
+    EventFactory,
+    NotificationFactory,
 ]
 
 for factory_model in factories:

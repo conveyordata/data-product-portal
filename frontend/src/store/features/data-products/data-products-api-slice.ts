@@ -1,8 +1,8 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DataOutputsGetContract } from '@/types/data-output';
-import {
+import type { DataOutputsGetContract } from '@/types/data-output';
+import type {
     DataProductContract,
     DataProductCreate,
     DataProductCreateResponse,
@@ -16,12 +16,15 @@ import {
     DataProductGetDatabricksWorkspaceUrlResponse,
     DataProductGetSignInUrlRequest,
     DataProductGetSignInUrlResponse,
+    DataProductGetSnowflakeUrlRequest,
+    DataProductGetSnowflakeUrlResponse,
     DataProductsGetContract,
     DataProductUpdateRequest,
     DataProductUpdateResponse,
 } from '@/types/data-product';
-import { GraphContract } from '@/types/graph/graph-contract';
-import {
+import type { EventContract } from '@/types/events/event.contract';
+import type { GraphContract } from '@/types/graph/graph-contract';
+import type {
     NamespaceLengthLimitsResponse,
     NamespaceSuggestionResponse,
     NamespaceValidationResponse,
@@ -32,6 +35,7 @@ export const dataProductTags: string[] = [
     TagTypes.UserDataProducts,
     TagTypes.Dataset,
     TagTypes.UserDatasets,
+    TagTypes.History,
 ];
 
 export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dataProductTags }).injectEndpoints({
@@ -72,15 +76,16 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
+        getDataProductHistory: builder.query<EventContract[], string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DataProductHistory, { dataProductId: id }),
+                method: 'GET',
+            }),
+            providesTags: (_, __, id) => [{ type: TagTypes.History as const, id: id }],
+        }),
         getDataProductGraphData: builder.query<GraphContract, string>({
             query: (id) => ({
                 url: buildUrl(ApiUrl.DataProductGraph, { dataProductId: id }),
-                method: 'GET',
-            }),
-        }),
-        getGraphData: builder.query<GraphContract, string>({
-            query: () => ({
-                url: ApiUrl.Graph,
                 method: 'GET',
             }),
         }),
@@ -112,6 +117,7 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: data_product_id },
             ],
         }),
         removeDataProduct: builder.mutation<void, string>({
@@ -119,9 +125,12 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 url: buildUrl(ApiUrl.DataProductGet, { dataProductId: id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: [
+            invalidatesTags: (_, _error, arg) => [
                 { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const, id: arg },
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.UserDataProducts as const, id: arg },
+                { type: TagTypes.History as const, id: arg },
             ],
         }),
         getDataProductSignInUrl: builder.mutation<DataProductGetSignInUrlResponse, DataProductGetSignInUrlRequest>({
@@ -150,6 +159,16 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 params: { environment },
             }),
         }),
+        getDataProductSnowflakeUrl: builder.mutation<
+            DataProductGetSnowflakeUrlResponse,
+            DataProductGetSnowflakeUrlRequest
+        >({
+            query: ({ id, environment }) => ({
+                url: buildUrl(ApiUrl.DataProductSnowflakeUrl, { dataProductId: id }),
+                method: 'GET',
+                params: { environment },
+            }),
+        }),
         requestDatasetAccessForDataProduct: builder.mutation<
             DataProductDatasetAccessResponse,
             DataProductDatasetAccessRequest
@@ -163,6 +182,8 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const, id: arg.datasetId },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: arg.datasetId },
+                { type: TagTypes.History as const, id: arg.dataProductId },
             ],
         }),
         removeDatasetFromDataProduct: builder.mutation<
@@ -178,6 +199,8 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.Dataset as const, id: arg.datasetId },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.History as const, id: arg.datasetId },
+                { type: TagTypes.History as const, id: arg.dataProductId },
             ],
         }),
         updateDataProductAbout: builder.mutation<
@@ -205,7 +228,10 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
 
                 queryFulfilled.catch(patchResult.undo);
             },
-            invalidatesTags: (_, __, { dataProductId }) => [{ type: TagTypes.DataProduct as const, id: dataProductId }],
+            invalidatesTags: (_, __, { dataProductId }) => [
+                { type: TagTypes.DataProduct as const, id: dataProductId },
+                { type: TagTypes.History as const, id: dataProductId },
+            ],
         }),
         validateDataProductNamespace: builder.query<NamespaceValidationResponse, string>({
             query: (namespace) => ({
@@ -255,8 +281,9 @@ export const {
     useGetUserDataProductsQuery,
     useGetDataProductDataOutputsQuery,
     useGetDataProductGraphDataQuery,
-    useGetGraphDataQuery,
     useGetDataProductDatabricksWorkspaceUrlMutation,
+    useGetDataProductHistoryQuery,
+    useGetDataProductSnowflakeUrlMutation,
     useLazyGetDataProductNamespaceSuggestionQuery,
     useLazyValidateDataProductNamespaceQuery,
     useGetDataProductNamespaceLengthLimitsQuery,

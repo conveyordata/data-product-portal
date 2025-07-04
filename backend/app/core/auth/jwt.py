@@ -6,7 +6,7 @@ from jwt.exceptions import ExpiredSignatureError, PyJWTError
 from pydantic import BaseModel
 
 from app.core.auth.oidc import OIDCConfiguration
-from app.core.logging.logger import logger
+from app.core.logging import logger
 
 oidc = OIDCConfiguration()
 
@@ -42,6 +42,7 @@ class JWTTokenValid:
                 key=public_keys[kid],
                 algorithms=["RS256"],
                 issuer=self.oidc.authority,
+                audience=self.oidc.audience,
             )
         except ExpiredSignatureError as e:
             self.logger.debug("jwt token is expired", e)

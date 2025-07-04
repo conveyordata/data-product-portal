@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     OIDC_CLIENT_SECRET: Optional[str] = None
     OIDC_AUTHORITY: Optional[str] = None
     OIDC_REDIRECT_URI: Optional[str] = None
+    OIDC_AUDIENCE: Optional[str] = None
 
     # Conveyor
     CONVEYOR_API_KEY: Optional[str] = None
@@ -51,8 +52,8 @@ class Settings(BaseSettings):
     EMAIL_BUTTON_COLOR: str = "#3B9672"
 
     # Authorizer
-    AUTHORIZER_ENABLED: bool = True
     AUTHORIZER_CACHE_SIZE: int = 128
+    AUTHORIZER_STARTUP_SYNC: bool = True
 
     # Namespace validation
     NAMESPACE_MAX_LENGTH: int = 64

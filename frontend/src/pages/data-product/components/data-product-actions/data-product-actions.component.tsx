@@ -12,12 +12,13 @@ import {
     useGetDataProductConveyorIDEUrlMutation,
     useGetDataProductDatabricksWorkspaceUrlMutation,
     useGetDataProductSignInUrlMutation,
+    useGetDataProductSnowflakeUrlMutation,
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllPlatformsQuery } from '@/store/features/platforms/platforms-api-slice';
 import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { DataPlatform, DataPlatforms } from '@/types/data-platform';
+import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { DecisionStatus } from '@/types/roles';
 import { getDataPlatforms } from '@/utils/data-platforms';
 
@@ -36,6 +37,7 @@ export function DataProductActions({ dataProductId }: Props) {
     const [getConveyorUrl, { isLoading: isConveyorLoading }] = useGetDataProductConveyorIDEUrlMutation();
     const [getDatabricksWorkspaceUrl, { isLoading: isDatabricksLoading }] =
         useGetDataProductDatabricksWorkspaceUrlMutation();
+    const [getSnowflakeUrl, { isLoading: isSnowflakeLoading }] = useGetDataProductSnowflakeUrlMutation();
 
     const { data: request_access } = useCheckAccessQuery({
         action: AuthorizationAction.GLOBAL__REQUEST_DATAPRODUCT_ACCESS,
@@ -103,6 +105,18 @@ export function DataProductActions({ dataProductId }: Props) {
                     dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
                 }
                 break;
+            case DataPlatforms.Snowflake:
+                try {
+                    const signInUrl = await getSnowflakeUrl({ id: dataProductId, environment }).unwrap();
+                    if (signInUrl) {
+                        window.open(signInUrl, '_blank');
+                    } else {
+                        dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+                    }
+                } catch (_error) {
+                    dispatchMessage({ content: t('Failed to get sign in url'), type: 'error' });
+                }
+                break;
             default:
                 break;
         }
@@ -134,22 +148,26 @@ export function DataProductActions({ dataProductId }: Props) {
     }
 
     return (
-        <>
-            <Flex vertical className={styles.actionsContainer}>
-                {canRequestAccess && allowRequesting && (
-                    <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />
-                )}
-                <Flex vertical className={styles.accessDataContainer}>
-                    <DataAccessTileGrid
-                        canAccessData={canReadIntegrations}
-                        dataPlatforms={dataPlatforms}
-                        onDataPlatformClick={handleAccessToData}
-                        onTileClick={handleTileClick}
-                        isDisabled={isLoading || !canReadIntegrations}
-                        isLoading={isLoading || isConveyorLoading || isDatabricksLoading || isLoadingPlatforms}
-                    />
-                </Flex>
+        <Flex vertical className={styles.actionsContainer}>
+            {canRequestAccess && allowRequesting && (
+                <DataProductRequestAccessButton dataProductId={dataProductId} userId={user.id} />
+            )}
+            <Flex vertical className={styles.accessDataContainer}>
+                <DataAccessTileGrid
+                    canAccessData={canReadIntegrations}
+                    dataPlatforms={dataPlatforms}
+                    onDataPlatformClick={handleAccessToData}
+                    onTileClick={handleTileClick}
+                    isDisabled={isLoading || !canReadIntegrations}
+                    isLoading={
+                        isLoading ||
+                        isConveyorLoading ||
+                        isDatabricksLoading ||
+                        isSnowflakeLoading ||
+                        isLoadingPlatforms
+                    }
+                />
             </Flex>
-        </>
+        </Flex>
     );
 }

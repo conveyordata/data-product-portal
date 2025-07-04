@@ -1,7 +1,7 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import { DataProductDatasetContract, DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
+import type { DataProductDatasetContract, DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 
 export const dataProductsDatasetsTags: string[] = [
     TagTypes.DataProduct,
@@ -26,6 +26,8 @@ export const dataProductsDatasetsApiSlice = baseApiSlice
                     { type: TagTypes.Dataset as const, id: arg.dataset_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.History as const, id: arg.data_product_id },
+                    { type: TagTypes.History as const, id: arg.dataset_id },
                 ],
             }),
             rejectDataProductLink: builder.mutation<void, DataProductDatasetLinkRequest>({
@@ -41,6 +43,8 @@ export const dataProductsDatasetsApiSlice = baseApiSlice
                     { type: TagTypes.Dataset as const, id: arg.dataset_id },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.History as const, id: arg.data_product_id },
+                    { type: TagTypes.History as const, id: arg.dataset_id },
                 ],
             }),
             removeDataProductDatasetLink: builder.mutation<
@@ -60,6 +64,8 @@ export const dataProductsDatasetsApiSlice = baseApiSlice
                     { type: TagTypes.Dataset as const, id: arg.datasetId },
                     { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
                     { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.History as const, id: arg.dataProductId },
+                    { type: TagTypes.History as const, id: arg.datasetId },
                 ],
             }),
             getDataProductDatasetPendingActions: builder.query<DataProductDatasetContract[], void>({

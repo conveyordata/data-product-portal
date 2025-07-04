@@ -8,7 +8,6 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
@@ -20,8 +19,13 @@ from app.users.schema import User
 
 
 class DataOutputDatasetService:
-    def approve_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
+    def __init__(self, db: Session):
+        self.db = db
+
+    def approve_data_output_link(
+        self, id: UUID, *, actor: User
+    ) -> DataOutputDatasetAssociationModel:
+        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -34,13 +38,15 @@ class DataOutputDatasetService:
             )
 
         current_link.status = DecisionStatus.APPROVED
-        current_link.approved_by = authenticated_user
+        current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        RefreshInfrastructureLambda().trigger()
-        db.commit()
+        self.db.commit()
+        return current_link
 
-    def deny_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
+    def deny_data_output_link(
+        self, id: UUID, *, actor: User
+    ) -> DataOutputDatasetAssociationModel:
+        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -48,27 +54,30 @@ class DataOutputDatasetService:
             )
 
         current_link.status = DecisionStatus.DENIED
-        current_link.denied_by = authenticated_user
+        current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        db.commit()
+        self.db.commit()
+        return current_link
 
-    def remove_data_output_link(self, id: UUID, db: Session, authenticated_user: User):
-        current_link = db.get(DataOutputDatasetAssociationModel, id)
+    def remove_data_output_link(
+        self, id: UUID, *, actor: User
+    ) -> DataOutputDatasetAssociationModel:
+        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Dataset data output link {id} not found",
             )
 
-        db.delete(current_link)
-        RefreshInfrastructureLambda().trigger()
-        db.commit()
+        self.db.delete(current_link)
+        self.db.commit()
+        return current_link
 
     def get_user_pending_actions(
-        self, db: Session, user: User
+        self, user: User
     ) -> Sequence[DataOutputDatasetPendingAction]:
         requested_associations = (
-            db.scalars(
+            self.db.scalars(
                 select(DataOutputDatasetAssociationModel)
                 .where(
                     DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,

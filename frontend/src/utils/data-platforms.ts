@@ -8,8 +8,8 @@ import glueLogo from '@/assets/icons/glue-logo.svg?react';
 import s3Logo from '@/assets/icons/s3-logo.svg?react';
 import snowflakeLogo from '@/assets/icons/snowflake-logo.svg?react';
 import tableauLogo from '@/assets/icons/tableau-logo.svg?react';
-import { DataPlatform, DataPlatforms } from '@/types/data-platform';
-import { CustomDropdownItemProps } from '@/types/shared';
+import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
+import type { CustomDropdownItemProps } from '@/types/shared';
 
 export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlatform>[] => [
     {
@@ -59,6 +59,7 @@ export const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<DataPlat
         icon: snowflakeLogo,
         disabled: false,
         hasConfig: true,
+        hasMenu: true,
         children: [],
     },
     {

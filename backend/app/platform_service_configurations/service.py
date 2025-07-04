@@ -1,4 +1,5 @@
 from typing import Sequence
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -28,7 +29,7 @@ class PlatformServiceConfigurationService:
         return self.db.scalars(select(PlatformServiceConfigurationModel)).all()
 
     def get_single_platform_service_configuration(
-        self, config_id
+        self, config_id: UUID
     ) -> PlatformServiceConfiguration:
         return self.db.scalar(
             select(PlatformServiceConfigurationModel).filter_by(id=config_id)

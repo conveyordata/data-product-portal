@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
@@ -7,7 +8,6 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
     NamespaceLengthLimits,
@@ -18,6 +18,7 @@ from app.core.namespace.validation import (
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_request import (
     DataOutputCreate,
+    DataOutputResultStringRequest,
     DataOutputStatusUpdate,
     DataOutputUpdate,
 )
@@ -32,6 +33,7 @@ from app.database.database import ensure_exists
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.graph.graph import Graph
+from app.platform_services.model import PlatformService
 from app.role_assignments.enums import DecisionStatus
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
@@ -59,6 +61,7 @@ class DataOutputService:
         return (
             self.db.scalars(
                 select(DataOutputModel).options(
+                    joinedload(DataOutputModel.environment_configurations),
                     joinedload(DataOutputModel.dataset_links)
                     .joinedload(DataOutputDatasetAssociationModel.dataset)
                     .raiseload("*"),
@@ -70,14 +73,17 @@ class DataOutputService:
 
     def get_data_output(self, id: UUID) -> Optional[DataOutputGet]:
         return self.db.get(
-            DataOutputModel, id, options=[joinedload(DataOutputModel.dataset_links)]
+            DataOutputModel,
+            id,
+            options=[
+                joinedload(DataOutputModel.dataset_links),
+                joinedload(DataOutputModel.environment_configurations),
+            ],
         )
 
     def create_data_output(
-        self,
-        id: UUID,
-        data_output: DataOutputCreate,
-    ) -> dict[str, UUID]:
+        self, id: UUID, data_output: DataOutputCreate
+    ) -> DataOutputModel:
         if (
             validity := self.namespace_validator.validate_namespace(
                 data_output.namespace, self.db, id
@@ -100,29 +106,25 @@ class DataOutputService:
         data_output_schema = data_output.parse_pydantic_schema()
         tags = self._get_tags(data_output_schema.pop("tag_ids", []))
         model = DataOutputModel(**data_output_schema, tags=tags, owner_id=id)
-
         self.db.add(model)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
-        return {"id": model.id}
+        return model
 
-    def remove_data_output(self, id: UUID) -> None:
-        data_output = self.db.get(
-            DataOutputModel,
-            id,
-        )
+    def remove_data_output(self, id: UUID) -> DataOutputModel:
+        data_output = self.db.get(DataOutputModel, id)
         if not data_output:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data Output {id} not found",
             )
 
+        result = copy.deepcopy(data_output)
         self.db.delete(data_output)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
+        return result
 
     def update_data_output_status(
-        self, id: UUID, data_output: DataOutputStatusUpdate
+        self, id: UUID, data_output: DataOutputStatusUpdate, *, actor: User
     ) -> None:
         current_data_output = self.ensure_data_output_exists(id)
         current_data_output.status = data_output.status
@@ -132,7 +134,8 @@ class DataOutputService:
         self,
         id: UUID,
         dataset_id: UUID,
-        authenticated_user: User,
+        *,
+        actor: User,
     ) -> DataOutputDatasetAssociationModel:
         dataset = ensure_dataset_exists(
             dataset_id, self.db, options=[joinedload(DatasetModel.data_product_links)]
@@ -155,17 +158,16 @@ class DataOutputService:
         dataset_link = DataOutputDatasetAssociationModel(
             dataset_id=dataset_id,
             status=DecisionStatus.PENDING,
-            requested_by=authenticated_user,
+            requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_output.dataset_links.append(dataset_link)
-
         self.db.commit()
-        self.db.refresh(data_output)
-        RefreshInfrastructureLambda().trigger()
         return dataset_link
 
-    def unlink_dataset_from_data_output(self, id: UUID, dataset_id: UUID) -> None:
+    def unlink_dataset_from_data_output(
+        self, id: UUID, dataset_id: UUID
+    ) -> DataOutputModel:
         ensure_dataset_exists(dataset_id, self.db)
         data_output = self.ensure_data_output_exists(
             id, options=[joinedload(DataOutputModel.dataset_links)]
@@ -184,10 +186,10 @@ class DataOutputService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Data product dataset for data output {id} not found",
             )
-        data_output.dataset_links.remove(data_output_dataset)
 
+        data_output.dataset_links.remove(data_output_dataset)
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
+        return data_output
 
     def update_data_output(
         self, id: UUID, data_output: DataOutputUpdate
@@ -203,14 +205,11 @@ class DataOutputService:
                 setattr(current_data_output, k, v) if v else None
 
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
         return {"id": current_data_output.id}
 
     def get_graph_data(self, id: UUID, level: int) -> Graph:
         data_output = self.db.get(DataOutputModel, id)
-        graph = DataProductService().get_graph_data(
-            data_output.owner_id, level, self.db
-        )
+        graph = DataProductService(self.db).get_graph_data(data_output.owner_id, level)
 
         for node in graph.nodes:
             if node.isMain:
@@ -227,3 +226,22 @@ class DataOutputService:
     @classmethod
     def data_output_namespace_length_limits(cls) -> NamespaceLengthLimits:
         return NamespaceValidator.namespace_length_limits()
+
+    def get_data_output_result_string(
+        self,
+        request: DataOutputResultStringRequest,
+    ) -> str:
+        template = self.db.scalar(
+            select(PlatformService.result_string_template).where(
+                PlatformService.id == request.service_id,
+                PlatformService.platform_id == request.platform_id,
+            )
+        )
+
+        if not template:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Template not found for the given platform and service",
+            )
+
+        return request.configuration.render_template(template)

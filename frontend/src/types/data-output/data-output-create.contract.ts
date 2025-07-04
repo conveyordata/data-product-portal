@@ -1,4 +1,4 @@
-import { DataOutputContract } from './data-output.contract';
+import type { DataOutputContract } from './data-output.contract';
 
 export type DataOutputCreate = Pick<
     DataOutputContract,
@@ -10,8 +10,6 @@ export type DataOutputCreate = Pick<
 };
 
 export type DataOutputCreateFormSchema = DataOutputCreate & {
-    owner: string;
-    is_source_aligned: boolean;
     result: string;
 };
 

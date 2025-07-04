@@ -13,8 +13,7 @@ from app.roles.schema import Scope
 class TestDataProductRoleAssignmentsService:
 
     def test_user_has_permission(self, session):
-        user = UserFactory()
-        service = RoleAssignmentService(db=session, user=user)
+        service = RoleAssignmentService(db=session)
         data_product = DataProductFactory()
         action = Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS
 
@@ -24,6 +23,7 @@ class TestDataProductRoleAssignmentsService:
         )
         assert len(authorized_users) == 0
 
+        user = UserFactory()
         role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[action])
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id, user_id=user.id, role_id=role.id

@@ -26,6 +26,7 @@ import { EnvironmentConfigCreate } from './pages/environment-config-create/envir
 import { EnvironmentConfigs } from './pages/environment-configs/environment-configs.page.tsx';
 import { EnvironmentCreate } from './pages/environment-create/environment-create.page.tsx';
 import { Environments } from './pages/environments/environments.page.tsx';
+import { People } from './pages/people/people.page.tsx';
 import { PlatformServiceConfig } from './pages/platform-service-config/platform-service-config.page.tsx';
 import { PlatformServiceConfigCreate } from './pages/platform-service-config-create/platform-service-config-create.page.tsx';
 import { PlatformsConfigs } from './pages/platforms-configs/platforms-configs.page.tsx';
@@ -95,6 +96,10 @@ const router = createBrowserRouter([
                                 element: <DatasetEdit />,
                             },
                         ],
+                    },
+                    {
+                        path: ApplicationPaths.People,
+                        element: <People />,
                     },
                     {
                         path: ApplicationPaths.AuditLogs,

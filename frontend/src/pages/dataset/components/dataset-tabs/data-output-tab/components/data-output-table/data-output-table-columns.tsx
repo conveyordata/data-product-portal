@@ -1,10 +1,10 @@
-import { Badge, Button, Flex, Popconfirm, TableColumnsType } from 'antd';
-import { TFunction } from 'i18next';
+import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
+import type { TFunction } from 'i18next';
 
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import { DataOutputLink } from '@/types/dataset';
+import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
+import type { DataOutputLink } from '@/types/dataset';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
@@ -48,7 +48,7 @@ export const getDatasetDataProductsColumns = ({
                         linkTo={createDataProductIdPath(data_output.owner_id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getDataProductTypeIcon(data_output.owner.type.icon_key)!}
+                                iconComponent={getDataProductTypeIcon(data_output.owner.type.icon_key)}
                                 hasRoundBorder
                                 size={'default'}
                             />
@@ -76,7 +76,7 @@ export const getDatasetDataProductsColumns = ({
                         linkTo={createDataOutputIdPath(data_output.id, data_output.owner.id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(data_output.configuration.configuration_type)!}
+                                iconComponent={getDataOutputIcon(data_output.configuration.configuration_type)}
                                 size={'default'}
                             />
                         }

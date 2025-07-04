@@ -1,17 +1,17 @@
 import { ApiUrl, buildUrl } from '@/api/api-urls.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/features/api/tag-types.ts';
-import {
+import type {
     DataProductSettingContract,
     DataProductSettingCreateRequest,
     DataProductSettingCreateResponse,
     DataProductSettingScope,
 } from '@/types/data-product-setting';
-import {
+import type {
     DataProductSettingValueCreateRequest,
     DataProductSettingValueCreateResponse,
 } from '@/types/data-product-setting/data-product-setting-create';
-import {
+import type {
     NamespaceLengthLimitsResponse,
     NamespaceSuggestionResponse,
     NamespaceValidationResponse,
@@ -42,7 +42,7 @@ export const dataProductSettingsApiSlice = baseApiSlice
                 query: (request) => ({
                     url: buildUrl(
                         buildUrl(ApiUrl.DataProductSettingValue, { dataProductId: request.data_product_id }),
-                        { dataProductSettingId: request.data_product_settings_id },
+                        { settingId: request.data_product_settings_id },
                     ),
                     method: 'POST',
                     params: {
@@ -61,7 +61,7 @@ export const dataProductSettingsApiSlice = baseApiSlice
             >({
                 query: (request) => ({
                     url: buildUrl(buildUrl(ApiUrl.DatasetSettingValue, { datasetId: request.data_product_id }), {
-                        dataProductSettingId: request.data_product_settings_id,
+                        settingId: request.data_product_settings_id,
                     }),
                     method: 'POST',
                     params: {
