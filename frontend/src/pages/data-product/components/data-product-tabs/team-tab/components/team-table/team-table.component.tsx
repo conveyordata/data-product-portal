@@ -91,7 +91,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
                 }).unwrap();
                 dispatchMessage({ content: t('User role has been updated'), type: 'success' });
             } catch (_error) {
-                console.log(_error);
+                console.error(_error);
                 dispatchMessage({ content: t('Failed to update user role'), type: 'error' });
             }
         },

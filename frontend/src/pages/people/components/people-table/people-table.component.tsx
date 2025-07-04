@@ -14,11 +14,11 @@ import {
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { GlobalRoleAssignmentContract } from '@/types/roles/role.contract';
+import { type GlobalRoleAssignmentContract, Scope } from '@/types/roles/role.contract';
 import type { SearchForm } from '@/types/shared';
 import type { UsersGetContract } from '@/types/users/user.contract';
-import styles from './users-table.module.scss';
-import { getUserTableColumns } from './users-table-columns';
+import styles from './people-table.module.scss';
+import { getPeopleTableColumns } from './people-table-columns';
 
 function filterUsers(users: UsersGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -31,10 +31,10 @@ function filterUsers(users: UsersGetContract, searchTerm?: string) {
     );
 }
 
-export function UsersTable() {
+export function PeopleTable() {
     const { t } = useTranslation();
     const { data: users = [], isFetching } = useGetAllUsersQuery();
-    const { data: roles = [] } = useGetRolesQuery('global');
+    const { data: roles = [] } = useGetRolesQuery(Scope.GLOBAL);
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
     const canAssignGlobalRole = access?.allowed ?? false;
 
@@ -42,10 +42,10 @@ export function UsersTable() {
     const searchTerm = Form.useWatch('search', searchForm);
     const filteredUsers = useMemo(() => filterUsers(users, searchTerm), [users, searchTerm]);
     const { pagination, handlePaginationChange } = useTablePagination(filteredUsers);
-    const [createGlobalRole] = useCreateGlobalRoleAssignmentMutation();
-    const [updateGlobalRole] = useUpdateGlobalRoleAssignmentMutation();
-    const [decideGlobalRole] = useDecideGlobalRoleAssignmentMutation();
-    const [deleteGlobalRole] = useDeleteGlobalRoleAssignmentMutation();
+    const [createGlobalRoleAssignment] = useCreateGlobalRoleAssignmentMutation();
+    const [updateGlobalRoleAssignment] = useUpdateGlobalRoleAssignmentMutation();
+    const [decideGlobalRoleAssignment] = useDecideGlobalRoleAssignmentMutation();
+    const [deleteGlobalRoleAssignment] = useDeleteGlobalRoleAssignmentMutation();
 
     const onChangeGlobalRole = useCallback(
         (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => {
@@ -53,73 +53,79 @@ export function UsersTable() {
                 return;
             }
             if (original !== null && !value) {
-                deleteGlobalRole({
+                deleteGlobalRoleAssignment({
                     role_assignment_id: original.id,
                 })
                     .unwrap()
                     .then(() => {
                         dispatchMessage({
-                            content: t('Global role removed successfully'),
+                            content: t('Global role assignment successfully reset'),
                             type: 'success',
                         });
                     })
                     .catch(() => {
-                        dispatchMessage({ content: t('Could not remove global role'), type: 'error' });
+                        dispatchMessage({ content: t('Could not reset global role assignment'), type: 'error' });
                     });
             }
             if (original !== null && value) {
-                updateGlobalRole({
+                updateGlobalRoleAssignment({
                     role_assignment_id: original.id,
                     role_id: value,
                 })
                     .unwrap()
                     .then(() => {
                         dispatchMessage({
-                            content: t('Global role updated successfully'),
+                            content: t('Global role assignment successfully changed'),
                             type: 'success',
                         });
                     })
                     .catch(() => {
-                        dispatchMessage({ content: t('Could not update global role'), type: 'error' });
+                        dispatchMessage({ content: t('Could not change global role assignment'), type: 'error' });
                     });
             }
             if (original === null && value) {
-                createGlobalRole({
+                createGlobalRoleAssignment({
                     user_id,
                     role_id: value,
                 })
                     .unwrap()
                     .then((result: GlobalRoleAssignmentContract) => {
-                        decideGlobalRole({
+                        decideGlobalRoleAssignment({
                             role_assignment_id: result.id,
                             decision_status: 'approved',
                         })
                             .unwrap()
                             .then(() => {
                                 dispatchMessage({
-                                    content: t('Global role created successfully'),
+                                    content: t('Global role successfully assigned'),
                                     type: 'success',
                                 });
                             })
                             .catch(() => {
-                                dispatchMessage({ content: t('Could not create global role'), type: 'error' });
+                                dispatchMessage({ content: t('Could not assign global role'), type: 'error' });
                             });
                     })
                     .catch(() => {
-                        dispatchMessage({ content: t('Could not create global role'), type: 'error' });
+                        dispatchMessage({ content: t('Could not assign global role'), type: 'error' });
                     });
             }
         },
-        [t, deleteGlobalRole, updateGlobalRole, createGlobalRole, decideGlobalRole],
+        [
+            t,
+            deleteGlobalRoleAssignment,
+            updateGlobalRoleAssignment,
+            createGlobalRoleAssignment,
+            decideGlobalRoleAssignment,
+        ],
     );
 
     const columns = useMemo(
         () =>
-            getUserTableColumns({
+            getPeopleTableColumns({
                 t,
                 users: filteredUsers,
                 canAssignRole: canAssignGlobalRole,
-                allRoles: roles.filter((role) => role.name.toLowerCase() !== 'everyone'),
+                allRoles: roles,
                 onChange: onChangeGlobalRole,
             }),
         [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole],
@@ -139,7 +145,7 @@ export function UsersTable() {
                 <Typography.Title level={3}>{t('People')}</Typography.Title>
                 <Form<SearchForm> form={searchForm} className={styles.searchForm}>
                     <Form.Item<SearchForm> name={'search'} initialValue={''} className={styles.formItem}>
-                        <Input.Search placeholder={t('Search users by name')} allowClear />
+                        <Input.Search placeholder={t('Search people by name')} allowClear />
                     </Form.Item>
                 </Form>
             </Flex>
@@ -152,10 +158,10 @@ export function UsersTable() {
                         onChange={handlePageChange}
                         size="small"
                         showTotal={(total, range) =>
-                            t('Showing {{range0}}-{{range1}} of {{total}} users', {
+                            t('Showing {{range0}}-{{range1}} of {{count}} people', {
                                 range0: range[0],
                                 range1: range[1],
-                                total: total,
+                                count: total,
                             })
                         }
                     />
