@@ -1,5 +1,5 @@
 import { Button, Flex, Form, Input, Pagination, type RadioChangeEvent, Space, Table, Typography } from 'antd';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
@@ -17,7 +17,7 @@ import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import type { SearchForm } from '@/types/shared';
 import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
 
-import styles from './datasets-table.module.scss';
+import styles from './datasets-table.module.scss';import posthog from '@/config/posthog-config.ts';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -48,6 +48,31 @@ export function DatasetsTable() {
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination(filteredDatasets);
 
     const columns = useMemo(() => getDatasetTableColumns({ t, datasets: filteredDatasets }), [t, filteredDatasets]);
+    
+    const CAPTURE_SEARCH_EVENT_DELAY = 750;
+
+    useEffect(() => {
+        if (searchTerm === undefined || 
+            searchTerm === '' ||
+            containsPII(searchTerm)) return;
+
+        const oldTerm = searchTerm;
+        const timeoutId = setTimeout(() => {
+            posthog.capture('marketplace_searched', {
+                search_term: oldTerm
+            });
+        }, CAPTURE_SEARCH_EVENT_DELAY);
+
+        return () => clearTimeout(timeoutId); // clear if searchTerm gets updated beforehand
+    }, [searchTerm]);
+
+    function containsPII(searchTerm: string) {
+        // placeholder
+        return searchTerm.includes("John") ||
+               searchTerm.includes("Alice") ||
+               searchTerm.includes("Bob") ||
+               searchTerm.includes("Jane");
+    }
 
     const handlePageChange = (page: number, pageSize: number) => {
         handlePaginationChange({
