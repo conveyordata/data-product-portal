@@ -7,6 +7,9 @@ import { Sidebar } from '@/components/layout/sidebar/sidebar.component.tsx';
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 import styles from './root.module.scss';
+import { PosthogEvents } from '@/constants/posthog.constants';
+import posthog from '@/config/posthog-config';
+import { useEffect } from 'react';
 
 export default function RootLayout() {
     const { pathname } = useLocation();
@@ -15,6 +18,10 @@ export default function RootLayout() {
     const layoutChildrenWrapperClasses = clsx(styles.childrenWrapper, {
         [styles.layoutContentHome]: isHome,
     });
+
+    useEffect(() => {
+        posthog.capture(PosthogEvents.PATHNAME_CHANGED, {pathname: pathname});
+    }, [pathname]);
 
     return (
         <Layout className={styles.layoutWrapper} hasSider>

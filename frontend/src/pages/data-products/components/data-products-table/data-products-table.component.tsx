@@ -22,6 +22,8 @@ import type { SearchForm } from '@/types/shared';
 import { QuickFilterParticipation } from '@/types/shared/table-filters';
 
 import styles from './data-products-table.module.scss';
+import posthog from '@/config/posthog-config';
+import { PosthogEvents } from '@/constants/posthog.constants';
 
 function filterDataProducts(dataProducts: DataProductsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -66,6 +68,9 @@ export function DataProductsTable() {
     };
 
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
+        posthog.capture(PosthogEvents.DATA_PRODUCTS_FILTER_USED, {
+                    filter_value: value
+        });
         onQuickFilterChange(value);
     };
 

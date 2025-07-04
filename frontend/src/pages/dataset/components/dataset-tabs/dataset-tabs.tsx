@@ -18,6 +18,8 @@ import { AboutTab } from './about-tab/about-tab.tsx';
 import styles from './dataset-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
+import posthog from '@/config/posthog-config.ts';
+import { PosthogEvents } from '@/constants/posthog.constants.ts';
 
 type Tab = {
     label: string;
@@ -41,6 +43,12 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
         skip: !datasetId,
     });
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
+
+    useEffect(() => {
+        posthog.capture(PosthogEvents.MARKETPLACE_DATASET_TAB_CLICKED, {
+            tab_name: activeTab
+        });
+    }, [activeTab]);
 
     useEffect(() => {
         const hash = location.hash.slice(1);
