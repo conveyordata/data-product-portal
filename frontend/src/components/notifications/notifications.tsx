@@ -19,7 +19,7 @@ const MAX_ITEMS_DEFAULT = 10;
 
 export function Notifications() {
     const {
-        token: { colorPrimary },
+        token: { colorError },
     } = theme.useToken();
     const { t } = useTranslation();
 
@@ -145,7 +145,7 @@ export function Notifications() {
             <Badge
                 count={(notifications ?? []).length}
                 showZero={false}
-                color={colorPrimary}
+                color={colorError}
                 style={{ fontSize: 10 }}
                 size="small"
             >

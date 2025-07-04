@@ -6,7 +6,7 @@ import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import { EventType } from '@/types/events/event-types';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 
-export function getTypeDisplayName(t: TFunction, type: EventReferenceEntity): string {
+export function getTypeDisplayName(t: TFunction, type: EventReferenceEntity | undefined): string {
     switch (type) {
         case EventReferenceEntity.Dataset:
             return t('Dataset');
@@ -16,6 +16,8 @@ export function getTypeDisplayName(t: TFunction, type: EventReferenceEntity): st
             return t('Data Output');
         case EventReferenceEntity.User:
             return t('User');
+        default:
+            return t('Unknown');
     }
 }
 
@@ -77,7 +79,7 @@ export function getEventReferenceEntityLinkPath(
 export function getEventTypeDisplayName(
     t: TFunction,
     event_type: EventType,
-    entity_reference: EventReferenceEntity,
+    entity_reference: EventReferenceEntity | undefined,
     entity: string,
     element: ReactElement,
 ): ReactNode {
