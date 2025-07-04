@@ -1,4 +1,5 @@
 import factory
+from faker import Faker
 from tests import test_session
 
 from app.core.authz.actions import AuthorizationAction
@@ -7,13 +8,15 @@ from app.roles import ADMIN_UUID
 from app.roles.model import Role
 from app.roles.schema import Prototype
 
+faker: Final[Faker] = Faker()
+
 
 class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Role
 
     id = factory.Faker("uuid4")
-    name = factory.Faker("word")
+    name = factory.Sequence(lambda _: faker.unique.name())
     scope = factory.Faker(
         "random_element", elements=("global", "data_product", "dataset")
     )
