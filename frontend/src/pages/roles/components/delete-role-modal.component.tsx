@@ -1,4 +1,4 @@
-import { Alert, Button, List, Skeleton, Space, Typography } from 'antd';
+import { Alert, Badge, Button, List, Skeleton, Space, Typography, theme } from 'antd';
 import { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -17,22 +17,26 @@ import styles from './delete-role-modal.module.scss';
 
 const { Text } = Typography;
 
-function uniqueOrdered<T extends DataProductContract | DatasetContract>(array: T[] | undefined): T[] {
+function uniqueOrderedWithCount<T extends DataProductContract | DatasetContract>(
+    array: T[] | undefined,
+): (T & { count: number })[] {
     if (array === undefined) {
         return [];
     }
 
-    const seen = new Set<string>();
+    const seen = new Map<string, number>();
     return array
         .filter((item) => {
             const fieldValue = item.id;
             if (seen.has(fieldValue)) {
+                seen.set(fieldValue, (seen.get(fieldValue) ?? 0) + 1);
                 return false;
             }
-            seen.add(fieldValue);
+            seen.set(fieldValue, 1);
             return true;
         })
-        .sort((a, b) => a.name.localeCompare(b.name));
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((item) => ({ ...item, count: seen.get(item.id) ?? 0 }));
 }
 
 type Props = {
@@ -42,6 +46,9 @@ type Props = {
 };
 export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
     const { t } = useTranslation();
+    const {
+        token: { colorIcon: badgeColor },
+    } = theme.useToken();
 
     const [deleteRole, { isLoading: deleteInProgress }] = useDeleteRoleMutation();
     const { data: dataProductAssignments, isLoading: dataProductLoading } = useGetDataProductRoleAssignmentsQuery(
@@ -108,14 +115,15 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                         <Text>{t('Please have a look at the following data products:')}</Text>
                         <List
                             bordered
-                            dataSource={uniqueOrdered(
+                            dataSource={uniqueOrderedWithCount(
                                 dataProductAssignments?.map((assignment) => assignment.data_product),
                             )}
-                            renderItem={(item: DataProductContract) => (
+                            renderItem={(item: DataProductContract & { count: number }) => (
                                 <List.Item>
                                     <Link to={createDataProductIdPath(item.id, DataProductTabKeys.Team)}>
                                         {item.name}
                                     </Link>
+                                    <Badge count={item.count} color={badgeColor} />
                                 </List.Item>
                             )}
                         />
@@ -127,17 +135,20 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                         <Text>{t('Please have a look at the following datasets:')}</Text>
                         <List
                             bordered
-                            dataSource={uniqueOrdered(datasetAssignments?.map((assignment) => assignment.dataset))}
-                            renderItem={(item: DatasetContract) => (
+                            dataSource={uniqueOrderedWithCount(
+                                datasetAssignments?.map((assignment) => assignment.dataset),
+                            )}
+                            renderItem={(item: DatasetContract & { count: number }) => (
                                 <List.Item>
                                     <Link to={createDatasetIdPath(item.id, DatasetTabKeys.Team)}>{item.name}</Link>
+                                    <Badge count={item.count} color={badgeColor} />
                                 </List.Item>
                             )}
                         />
                     </>
                 );
         }
-    }, [role, dataProductAssignments, datasetAssignments, t]);
+    }, [role, dataProductAssignments, datasetAssignments, t, badgeColor]);
 
     const handleCancel = (): void => {
         onClose();
