@@ -19,6 +19,7 @@ import styles from './dataset-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
 import posthog from '@/config/posthog-config.ts';
+import { PosthogEvents } from '@/constants/posthog.constants.ts';
 
 type Tab = {
     label: string;
@@ -44,7 +45,7 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
 
     useEffect(() => {
-        posthog.capture('marketplace_dataset_tab_viewed', {
+        posthog.capture(PosthogEvents.MARKETPLACE_DATASET_TAB_CLICKED, {
             tab_name: activeTab
         });
     }, [activeTab]);

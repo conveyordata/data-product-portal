@@ -1,5 +1,5 @@
 import { Button, Flex, Form, Input, Pagination, type RadioChangeEvent, Space, Table, Typography } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
@@ -18,6 +18,7 @@ import type { SearchForm } from '@/types/shared';
 import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
 
 import styles from './datasets-table.module.scss';import posthog from '@/config/posthog-config.ts';
+import { PosthogEvents } from '@/constants/posthog.constants';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -58,7 +59,7 @@ export function DatasetsTable() {
 
         const oldTerm = searchTerm;
         const timeoutId = setTimeout(() => {
-            posthog.capture('marketplace_searched', {
+            posthog.capture(PosthogEvents.MARKETPLACE_SEARCHED_DATASET, {
                 search_term: oldTerm
             });
         }, CAPTURE_SEARCH_EVENT_DELAY);
@@ -83,6 +84,9 @@ export function DatasetsTable() {
     };
 
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
+        posthog.capture(PosthogEvents.MARKETPLACE_FILTER_USED, {
+            filter_value: value
+        });
         onQuickFilterChange(value);
         resetPagination();
     };
