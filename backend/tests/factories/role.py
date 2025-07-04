@@ -1,3 +1,5 @@
+from typing import Final
+
 import factory
 from faker import Faker
 from tests import test_session
