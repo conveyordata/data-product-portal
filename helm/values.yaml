@@ -57,12 +57,12 @@ replicaCount: 1
 image:
   repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/backend
   pullPolicy: Always
-  tag: 0.3.3
+  tag: 0.3.4
 
 frontendimage:
   repository: dataminded.docker.scarf.sh/conveyordata/data-product-portal/frontend
   pullPolicy: Always
-  tag: 0.3.3
+  tag: 0.3.4
 
 imagePullSecrets: []
 nameOverride: ""
