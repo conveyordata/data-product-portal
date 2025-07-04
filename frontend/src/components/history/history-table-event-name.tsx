@@ -23,7 +23,6 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
 
     const { target_id, subject_id, subject_type, target_type, deleted_subject_identifier, deleted_target_identifier } =
         record;
-
     if (!(subject_id === resourceId && type === subject_type)) {
         const path = getEventReferenceEntityLinkPath(
             subject_id,
@@ -77,6 +76,5 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
             </Typography.Text>
         );
     }
-
-    throw new Error(`Unable to render event ${record}`);
+    return <Typography.Text>{getEventTypeDisplayName(t, record.name, undefined, '', <></>)}</Typography.Text>;
 }
