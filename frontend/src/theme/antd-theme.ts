@@ -153,7 +153,7 @@ const datamindedThemeConfig: ThemeConfig = {
         colorPrimaryActive: '#543EDC',
         colorPrimaryText: '#543EDC',
         colorPrimaryTextHover: '#543EDC',
-        colorPrimaryTextActive: '#543EDC',
+        colorPrimaryTextActive: '#ba3ddbff',
         colorLink: '#543EDC',
         // Success
         colorSuccess: token.green6,
@@ -178,14 +178,14 @@ const datamindedThemeConfig: ThemeConfig = {
         colorWarningTextHover: token.gold5,
         colorWarningTextActive: token.gold7,
         // Error
-        colorError: '#FF4D4F',
+        colorError: '#fc6b51ff',
         colorErrorBg: '#FFF2F0',
         colorErrorBgHover: '#FFF1F0',
         colorErrorBorder: '#FFCCC7',
         colorErrorBorderHover: '#FFA39E',
         colorErrorHover: '#FF7875',
         colorErrorActive: '#D9363E',
-        colorErrorText: '#FF4D4F',
+        colorErrorText: '##fc6b51ff',
         colorErrorTextHover: '#FF7875',
         colorErrorTextActive: '#D9363E',
         colorErrorOutline: '#FF2696',
@@ -262,6 +262,7 @@ const greenThemeConfig: ThemeConfig = {
         colorTextBase: '#463f3f',
         colorBgContainer: '#FFF',
         colorPrimaryBg: '#107072',
+        colorPrimaryTextActive: '#0ddd5d',
         // -------- Font ---------
         fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
         fontSize: 16,
