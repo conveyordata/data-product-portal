@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
 
 import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter.tsx';
+import posthog from '@/config/posthog-config.ts';
+import { PosthogEvents } from '@/constants/posthog.constants';
 import { useQuickFilter } from '@/hooks/use-quick-filter.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { getDatasetTableColumns } from '@/pages/datasets/components/datasets-table/datasets-table-columns.tsx';
@@ -16,9 +18,7 @@ import type { DatasetsGetContract } from '@/types/dataset';
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import type { SearchForm } from '@/types/shared';
 import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
-
-import styles from './datasets-table.module.scss';import posthog from '@/config/posthog-config.ts';
-import { PosthogEvents } from '@/constants/posthog.constants';
+import styles from './datasets-table.module.scss';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -49,18 +49,16 @@ export function DatasetsTable() {
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination(filteredDatasets);
 
     const columns = useMemo(() => getDatasetTableColumns({ t, datasets: filteredDatasets }), [t, filteredDatasets]);
-    
+
     const CAPTURE_SEARCH_EVENT_DELAY = 750;
 
     useEffect(() => {
-        if (searchTerm === undefined || 
-            searchTerm === '' ||
-            containsPII(searchTerm)) return;
+        if (searchTerm === undefined || searchTerm === '' || containsPII(searchTerm)) return;
 
         const oldTerm = searchTerm;
         const timeoutId = setTimeout(() => {
             posthog.capture(PosthogEvents.MARKETPLACE_SEARCHED_DATASET, {
-                search_term: oldTerm
+                search_term: oldTerm,
             });
         }, CAPTURE_SEARCH_EVENT_DELAY);
 
@@ -69,10 +67,12 @@ export function DatasetsTable() {
 
     function containsPII(searchTerm: string) {
         // placeholder
-        return searchTerm.includes("John") ||
-               searchTerm.includes("Alice") ||
-               searchTerm.includes("Bob") ||
-               searchTerm.includes("Jane");
+        return (
+            searchTerm.includes('John') ||
+            searchTerm.includes('Alice') ||
+            searchTerm.includes('Bob') ||
+            searchTerm.includes('Jane')
+        );
     }
 
     const handlePageChange = (page: number, pageSize: number) => {
@@ -85,7 +85,7 @@ export function DatasetsTable() {
 
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
         posthog.capture(PosthogEvents.MARKETPLACE_FILTER_USED, {
-            filter_value: value
+            filter_value: value,
         });
         onQuickFilterChange(value);
         resetPagination();

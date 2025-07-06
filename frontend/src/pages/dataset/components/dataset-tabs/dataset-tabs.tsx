@@ -8,18 +8,17 @@ import { Explorer } from '@/components/explorer/explorer';
 import { HistoryTab } from '@/components/history/history-tab.tsx';
 import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import posthog from '@/config/posthog-config.ts';
+import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity.ts';
-
 import { AboutTab } from './about-tab/about-tab.tsx';
 import styles from './dataset-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
-import posthog from '@/config/posthog-config.ts';
-import { PosthogEvents } from '@/constants/posthog.constants.ts';
 
 type Tab = {
     label: string;
@@ -46,7 +45,7 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
 
     useEffect(() => {
         posthog.capture(PosthogEvents.MARKETPLACE_DATASET_TAB_CLICKED, {
-            tab_name: activeTab
+            tab_name: activeTab,
         });
     }, [activeTab]);
 
