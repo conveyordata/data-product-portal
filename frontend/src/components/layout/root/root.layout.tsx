@@ -1,15 +1,13 @@
 import { Layout } from 'antd';
 import clsx from 'clsx';
+import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
-
 import { Navbar } from '@/components/layout/navbar/navbar.component.tsx';
 import { Sidebar } from '@/components/layout/sidebar/sidebar.component.tsx';
-import { ApplicationPaths } from '@/types/navigation.ts';
-
-import styles from './root.module.scss';
-import { PosthogEvents } from '@/constants/posthog.constants';
 import posthog from '@/config/posthog-config';
-import { useEffect } from 'react';
+import { PosthogEvents } from '@/constants/posthog.constants';
+import { ApplicationPaths } from '@/types/navigation.ts';
+import styles from './root.module.scss';
 
 export default function RootLayout() {
     const { pathname } = useLocation();
@@ -20,7 +18,7 @@ export default function RootLayout() {
     });
 
     useEffect(() => {
-        posthog.capture(PosthogEvents.PATHNAME_CHANGED, {pathname: pathname});
+        posthog.capture(PosthogEvents.PATHNAME_CHANGED, { pathname: pathname });
     }, [pathname]);
 
     return (
