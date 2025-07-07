@@ -53,7 +53,7 @@ export function DatasetsTable() {
     const CAPTURE_SEARCH_EVENT_DELAY = 750;
 
     useEffect(() => {
-        if (searchTerm === undefined || searchTerm === '' || containsPII(searchTerm)) return;
+        if (searchTerm === undefined || searchTerm === '') return;
 
         const oldTerm = searchTerm;
         const timeoutId = setTimeout(() => {
@@ -64,16 +64,6 @@ export function DatasetsTable() {
 
         return () => clearTimeout(timeoutId); // clear if searchTerm gets updated beforehand
     }, [searchTerm]);
-
-    function containsPII(searchTerm: string) {
-        // placeholder
-        return (
-            searchTerm.includes('John') ||
-            searchTerm.includes('Alice') ||
-            searchTerm.includes('Bob') ||
-            searchTerm.includes('Jane')
-        );
-    }
 
     const handlePageChange = (page: number, pageSize: number) => {
         handlePaginationChange({
