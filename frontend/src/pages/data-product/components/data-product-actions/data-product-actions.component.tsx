@@ -23,6 +23,8 @@ import { DecisionStatus } from '@/types/roles';
 import { getDataPlatforms } from '@/utils/data-platforms';
 
 import styles from './data-product-actions.module.scss';
+import { PosthogEvents } from '@/constants/posthog.constants';
+import posthog from '@/config/posthog-config';
 
 type Props = {
     dataProductId: string;
@@ -80,6 +82,10 @@ export function DataProductActions({ dataProductId }: Props) {
     }
 
     async function handleAccessToData(environment: string, dataPlatform: DataPlatform) {
+        posthog.capture(PosthogEvents.DATA_PRODUCTS_PLATFORM_ACCESS, {
+            platform_name: dataPlatform
+        });
+
         switch (dataPlatform) {
             case DataPlatforms.AWS:
                 try {

@@ -25,6 +25,8 @@ import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 
 import styles from './data-product-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
+import posthog from '@/config/posthog-config';
+import { PosthogEvents } from '@/constants/posthog.constants';
 
 type Props = {
     dataProductId: string;
@@ -47,6 +49,12 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
         { skip: !dataProductId },
     );
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
+
+    useEffect(() => {
+        posthog.capture(PosthogEvents.DATA_PRODUCTS_TAB_CLICKED, {
+            tab_name: activeTab,
+        });
+    }, [activeTab]);
 
     useEffect(() => {
         const hash = location.hash.slice(1);

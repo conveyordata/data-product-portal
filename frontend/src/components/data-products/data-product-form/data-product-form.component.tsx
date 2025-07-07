@@ -29,6 +29,8 @@ import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
 import styles from './data-product-form.module.scss';
+import posthog from 'posthog-js';
+import { PosthogEvents } from '@/constants/posthog.constants';
 
 const { TextArea } = Input;
 
@@ -117,6 +119,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 };
                 const response = await createDataProduct(request).unwrap();
                 dispatchMessage({ content: t('Data product created successfully'), type: 'success' });
+
+                posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_COMPLETED);
 
                 navigate(createDataProductIdPath(response.id));
             } else if (mode === 'edit' && dataProductId) {
