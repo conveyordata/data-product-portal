@@ -1,11 +1,12 @@
 import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space } from 'antd';
+import posthog from 'posthog-js';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
-
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { PosthogEvents } from '@/constants/posthog.constants';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
@@ -27,7 +28,6 @@ import type { DataProductCreate, DataProductCreateFormSchema, DataProductUpdateR
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
-
 import styles from './data-product-form.module.scss';
 
 const { TextArea } = Input;
@@ -117,6 +117,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 };
                 const response = await createDataProduct(request).unwrap();
                 dispatchMessage({ content: t('Data product created successfully'), type: 'success' });
+
+                posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_COMPLETED);
 
                 navigate(createDataProductIdPath(response.id));
             } else if (mode === 'edit' && dataProductId) {

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
+import posthog from '@/config/posthog-config';
+import { PosthogEvents } from '@/constants/posthog.constants';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
@@ -21,7 +23,6 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { type DataPlatform, DataPlatforms } from '@/types/data-platform';
 import { DecisionStatus } from '@/types/roles';
 import { getDataPlatforms } from '@/utils/data-platforms';
-
 import styles from './data-product-actions.module.scss';
 
 type Props = {
@@ -80,6 +81,10 @@ export function DataProductActions({ dataProductId }: Props) {
     }
 
     async function handleAccessToData(environment: string, dataPlatform: DataPlatform) {
+        posthog.capture(PosthogEvents.DATA_PRODUCTS_PLATFORM_ACCESS, {
+            platform_name: dataPlatform,
+        });
+
         switch (dataPlatform) {
             case DataPlatforms.AWS:
                 try {
