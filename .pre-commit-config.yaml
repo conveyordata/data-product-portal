@@ -53,7 +53,7 @@ repos:
     - id: isort
       name: isort (python)
 - repo: https://github.com/gitleaks/gitleaks
-  rev: v8.23.2
+  rev: v8.27.2
   hooks:
     - id: gitleaks
 - repo: local
