@@ -83,8 +83,10 @@ export function DataProductsTable() {
                     </Form.Item>
                 </Form>
                 <Space>
-                    <Link to={ApplicationPaths.DataProductNew}
-                          onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}>
+                    <Link
+                        to={ApplicationPaths.DataProductNew}
+                        onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}
+                    >
                         <Button className={styles.formButton} type={'primary'} disabled={!canCreateDataProduct}>
                             {t('Create Data Product')}
                         </Button>
