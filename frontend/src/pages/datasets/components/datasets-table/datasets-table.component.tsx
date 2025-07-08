@@ -1,10 +1,12 @@
 import { Button, Flex, Form, Input, Pagination, type RadioChangeEvent, Space, Table, Typography } from 'antd';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
 
 import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter.tsx';
+import posthog from '@/config/posthog-config.ts';
+import { PosthogEvents } from '@/constants/posthog.constants';
 import { useQuickFilter } from '@/hooks/use-quick-filter.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { getDatasetTableColumns } from '@/pages/datasets/components/datasets-table/datasets-table-columns.tsx';
@@ -16,7 +18,6 @@ import type { DatasetsGetContract } from '@/types/dataset';
 import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import type { SearchForm } from '@/types/shared';
 import { QuickFilterParticipation } from '@/types/shared/table-filters.ts';
-
 import styles from './datasets-table.module.scss';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
@@ -49,6 +50,21 @@ export function DatasetsTable() {
 
     const columns = useMemo(() => getDatasetTableColumns({ t, datasets: filteredDatasets }), [t, filteredDatasets]);
 
+    const CAPTURE_SEARCH_EVENT_DELAY = 750;
+
+    useEffect(() => {
+        if (searchTerm === undefined || searchTerm === '') return;
+
+        const oldTerm = searchTerm;
+        const timeoutId = setTimeout(() => {
+            posthog.capture(PosthogEvents.MARKETPLACE_SEARCHED_DATASET, {
+                search_term: oldTerm,
+            });
+        }, CAPTURE_SEARCH_EVENT_DELAY);
+
+        return () => clearTimeout(timeoutId); // clear if searchTerm gets updated beforehand
+    }, [searchTerm]);
+
     const handlePageChange = (page: number, pageSize: number) => {
         handlePaginationChange({
             ...pagination,
@@ -58,6 +74,9 @@ export function DatasetsTable() {
     };
 
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
+        posthog.capture(PosthogEvents.MARKETPLACE_FILTER_USED, {
+            filter_value: value,
+        });
         onQuickFilterChange(value);
         resetPagination();
     };

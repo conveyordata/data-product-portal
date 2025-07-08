@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
 
 import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter';
+import posthog from '@/config/posthog-config';
+import { PosthogEvents } from '@/constants/posthog.constants';
 import { useQuickFilter } from '@/hooks/use-quick-filter';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductTableColumns } from '@/pages/data-products/components/data-products-table/data-products-table-columns.tsx';
@@ -20,7 +22,6 @@ import type { DataProductsGetContract } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import type { SearchForm } from '@/types/shared';
 import { QuickFilterParticipation } from '@/types/shared/table-filters';
-
 import styles from './data-products-table.module.scss';
 
 function filterDataProducts(dataProducts: DataProductsGetContract, searchTerm?: string) {
@@ -66,6 +67,9 @@ export function DataProductsTable() {
     };
 
     const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
+        posthog.capture(PosthogEvents.DATA_PRODUCTS_FILTER_USED, {
+            filter_value: value,
+        });
         onQuickFilterChange(value);
     };
 
