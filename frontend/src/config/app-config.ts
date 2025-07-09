@@ -53,6 +53,7 @@ interface Config {
      */
     POSTHOG_KEY: string;
     POSTHOG_HOST: string;
+    POSTHOG_ENABLED: boolean;
 }
 
 declare global {
