@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import ClassVar, Final, Optional
+from typing import Final, Optional
 
 from pydantic import BaseModel
 from sqlalchemy import UUID, and_, exists, select
@@ -33,7 +33,7 @@ class NamespaceLengthLimits(BaseModel):
 
 
 class NamespaceValidator:
-    max_length: ClassVar[Final[int]] = settings.NAMESPACE_MAX_LENGTH
+    max_length: Final[int] = settings.NAMESPACE_MAX_LENGTH
 
     def __init__(self, model: Base):
         self.model = model

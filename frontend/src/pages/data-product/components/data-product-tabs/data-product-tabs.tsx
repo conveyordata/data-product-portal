@@ -15,6 +15,8 @@ import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer';
 import { HistoryTab } from '@/components/history/history-tab';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import posthog from '@/config/posthog-config';
+import { PosthogEvents } from '@/constants/posthog.constants';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
 import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
@@ -22,7 +24,6 @@ import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/da
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { useGetDataProductHistoryQuery } from '@/store/features/data-products/data-products-api-slice';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
-
 import styles from './data-product-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 
@@ -47,6 +48,12 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
         { skip: !dataProductId },
     );
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.About);
+
+    useEffect(() => {
+        posthog.capture(PosthogEvents.DATA_PRODUCTS_TAB_CLICKED, {
+            tab_name: activeTab,
+        });
+    }, [activeTab]);
 
     useEffect(() => {
         const hash = location.hash.slice(1);
