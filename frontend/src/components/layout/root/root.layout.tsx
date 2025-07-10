@@ -19,10 +19,10 @@ export default function RootLayout() {
 
     useEffect(() => {
         // general capture
-            // if the pathname contains a UUID, replace it.
+        // if the pathname contains a UUID, replace it.
         const UUID_REGEX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}/gi;
         posthog.capture(PosthogEvents.PATHNAME_CHANGED, {
-            pathname: pathname.replace(UUID_REGEX, '{uuid}')
+            pathname: pathname.replace(UUID_REGEX, '{uuid}'),
         });
 
         // explicit captures for sidebar/main pages
@@ -47,8 +47,7 @@ export default function RootLayout() {
             }
         })();
         
-        if (changed_event)
-            posthog.capture(changed_event);
+        if (changed_event) posthog.capture(changed_event);
 
     }, [pathname]);
 
