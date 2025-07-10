@@ -12,6 +12,5 @@ if (config.POSTHOG_ENABLED) {
 } else {
     posthog.opt_out_capturing();
 }
-    
 
 export default posthog;
