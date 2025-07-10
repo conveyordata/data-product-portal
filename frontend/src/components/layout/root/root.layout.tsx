@@ -31,29 +31,30 @@ export default function RootLayout() {
         posthog.capture(PosthogEvents.PATHNAME_CHANGED, { pathname: abstract_pathname });
 
         // explicit captures for sidebar/main pages
-        switch (pathname) {
-            case ApplicationPaths.Home:
-                posthog.capture(PosthogEvents.PATHNAME_CHANGED_HOMEPAGE);
-                break;
-            case ApplicationPaths.DataProducts:
-                posthog.capture(PosthogEvents.PATHNAME_CHANGED_DATA_PRODUCTS);
-                break;
-            case ApplicationPaths.Datasets:
-                posthog.capture(PosthogEvents.PATHNAME_CHANGED_MARKETPLACE);
-                break;
-            case ApplicationPaths.Explorer:
-                posthog.capture(PosthogEvents.PATHNAME_CHANGED_EXPLORER);
-                break;
-            case ApplicationPaths.People:
-                posthog.capture(PosthogEvents.PATHNAME_CHANGED_PEOPLE);
-                break;
-            case ApplicationPaths.AuditLogs:
-                posthog.capture(PosthogEvents.PATHNAME_CHANGED_AUDIT_LOGS);
-                break;
-            case ApplicationPaths.Settings:
-                posthog.capture(PosthogEvents.PATHNAME_CHANGED_SETTINGS);
-                break;
-            default:
+        const changed_event = (() => {
+            switch (pathname) {
+                case ApplicationPaths.Home:
+                    return PosthogEvents.PATHNAME_CHANGED_HOMEPAGE;
+                case ApplicationPaths.DataProducts:
+                    return PosthogEvents.PATHNAME_CHANGED_DATA_PRODUCTS;
+                case ApplicationPaths.Datasets:
+                    return PosthogEvents.PATHNAME_CHANGED_MARKETPLACE;
+                case ApplicationPaths.Explorer:
+                    return PosthogEvents.PATHNAME_CHANGED_EXPLORER;
+                case ApplicationPaths.People:
+                    return PosthogEvents.PATHNAME_CHANGED_PEOPLE;
+                case ApplicationPaths.AuditLogs:
+                    return PosthogEvents.PATHNAME_CHANGED_AUDIT_LOGS;
+                case ApplicationPaths.Settings:
+                    return PosthogEvents.PATHNAME_CHANGED_SETTINGS;
+                default:
+                    return undefined;
+            }
+        })();
+        
+        if (changed_event) {
+            posthog.capture(changed_event);
+        }
         }
     }, [pathname]);
 
