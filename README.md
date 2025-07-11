@@ -93,7 +93,7 @@ overview of all ongoing data initiatives.
 
 ## Data Tracking Transparancy
 
-This project has the possibility to track the actions of users using Data Product Portal with as goal to improve the UI and design. It also helps with error tracking and efficinet debugging. The tracking is off by default and kept to a minimum. Check [frontend/README.md](frontend/README.md) for more info.
+This project has the possibility to track the actions of users using Data Product Portal with as goal to improve the UI and design. It also helps with error tracking and efficient debugging. The tracking is off by default and kept to a minimum. Check [frontend/README.md](frontend/README.md) for more info.
 
 # Additional resources
 
