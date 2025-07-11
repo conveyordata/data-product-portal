@@ -46,9 +46,8 @@ export default function RootLayout() {
                     return undefined;
             }
         })();
-        
-        if (changed_event) posthog.capture(changed_event);
 
+        if (changed_event) posthog.capture(changed_event);
     }, [pathname]);
 
     return (
