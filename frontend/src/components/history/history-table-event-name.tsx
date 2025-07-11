@@ -76,5 +76,5 @@ export function HistoryTableEventName({ record, resourceId, type }: HistoryTable
             </Typography.Text>
         );
     }
-    return <Typography.Text>{getEventTypeDisplayName(t, record.name, undefined, '', <></>)}</Typography.Text>;
+    return <Typography.Text>{getEventTypeDisplayName(t, record.name, undefined, '', <div />)}</Typography.Text>;
 }

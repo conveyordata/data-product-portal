@@ -47,5 +47,6 @@ const config = (() => {
          */
         POSTHOG_KEY: 'phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc',
         POSTHOG_HOST: 'https://eu.i.posthog.com',
+        POSTHOG_ENABLED: false,
     };
 })();

@@ -13,6 +13,7 @@ data:
                 THEME_CONFIGURATION: "{{ .Values.theme_configuration }}",
                 POSTHOG_KEY: "{{ .Values.posthog.key }}",
                 POSTHOG_HOST: "{{ .Values.posthog.host }}",
+                POSTHOG_ENABLED: "{{ .Values.posthog.enabled }}",
             }
         })();
 kind: ConfigMap
