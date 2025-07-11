@@ -91,6 +91,10 @@ central team. 
 - **Comprehensive Overview:** Combines data catalogs, data platforms and data governance aspects into a single 360
 overview of all ongoing data initiatives.
 
+## Data Tracking Transparancy
+
+This project has the possibility to track the data of users with as goal to improve the UI and design. It also helps with error tracking and efficinet debugging. The tracking is off by default and kept to a minimum. Check [frontend/README.md](frontend/README.md) for more info.
+
 # Additional resources
 
 ## General Blogposts
