@@ -5,12 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import posthog from '@/config/posthog-config';
+import { PosthogEvents } from '@/constants/posthog.constants';
 import { DatasetList } from '@/pages/home/components/datasets-inbox/datasets-list.tsx';
 import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
 import { useGetAllDatasetsQuery, useGetUserDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 import { getItemFromLocalStorage, type LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
-
 import styles from './datasets-inbox.module.scss';
 
 type Props = {
@@ -89,7 +90,13 @@ export function DatasetsInbox({ userId }: Props) {
                     <Button className={styles.formButton}>{t('See All')}</Button>
                 </Link>
             </div>
-            <Tabs defaultActiveKey={InboxTabKeys.LastViewed} items={items} />
+            <Tabs
+                defaultActiveKey={InboxTabKeys.LastViewed}
+                items={items}
+                onChange={(activeKey) =>
+                    posthog.capture(PosthogEvents.HOMEPAGE_DATASETS_TAB_CLICKED, { tab_name: activeKey })
+                }
+            />
         </div>
     );
 }
