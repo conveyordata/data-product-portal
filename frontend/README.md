@@ -71,7 +71,7 @@ module.exports = config;
 ```
 
 ### Data Tracking
-This project uses [Posthog](https://posthog.com/) to capture actions of users. The tracking is off by default. To enable it and help us improve Data Product Portal, the `POSTHOG_ENABLED` environment variable must be set to true in the `config.local.js` file. The type of data captured is limited to actions of users on the webpage and only include:
+This project uses [Posthog](https://posthog.com/) to capture actions of users. The tracking is off by default. To enable it and help us improve Data Product Portal, the `POSTHOG_ENABLED` environment variable must be set to true in the `config.local.js` file. The type of data captured is limited to actions of users interacting with the webpage and only include:
 - clicks
 - timing of those clicks
 - path changes
