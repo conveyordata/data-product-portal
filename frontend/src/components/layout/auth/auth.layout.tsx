@@ -1,15 +1,14 @@
+import { sha256 } from 'js-sha256';
 import { useCallback, useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router';
-
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { AppConfig } from '@/config/app-config.ts';
+import posthog from '@/config/posthog-config';
 import { useAppDispatch } from '@/store';
 import { useAuthorizeMutation } from '@/store/features/auth/auth-api-slice.ts';
 import { selectAuthState, setCredentials } from '@/store/features/auth/auth-slice.ts';
-import posthog from '@/config/posthog-config';
-import { sha256 } from 'js-sha256';
 
 const oidcCognitoParams = AppConfig.getOidcCognitoLogoutParams();
 
@@ -106,7 +105,6 @@ export const AuthLayout = () => {
             // Is the user logged out here??
             posthog.reset();
         }
-           
     }, [user]);
 
     if (activeNavigator) {
