@@ -8,6 +8,8 @@ import { AppConfig } from '@/config/app-config.ts';
 import { useAppDispatch } from '@/store';
 import { useAuthorizeMutation } from '@/store/features/auth/auth-api-slice.ts';
 import { selectAuthState, setCredentials } from '@/store/features/auth/auth-slice.ts';
+import posthog from '@/config/posthog-config';
+import { sha256 } from 'js-sha256';
 
 const oidcCognitoParams = AppConfig.getOidcCognitoLogoutParams();
 
@@ -94,6 +96,18 @@ export const AuthLayout = () => {
             });
         });
     }, [events, handleAuthorizeUser, signinSilent, signoutRedirect]);
+
+    useEffect(() => {
+        if (user?.email) {
+            const hashed_id = sha256(user.email);
+            console.log(`User email: ${user.email} hashed to :${hashed_id}`);
+            posthog.identify(hashed_id);
+        } else {
+            // Is the user logged out here??
+            posthog.reset();
+        }
+           
+    }, [user]);
 
     if (activeNavigator) {
         switch (activeNavigator) {
