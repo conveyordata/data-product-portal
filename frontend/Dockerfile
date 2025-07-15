@@ -11,7 +11,7 @@ RUN npm ci
 RUN npm run build:prd
 
 # Use official nginx image as the base image
-FROM --platform=${PLATFORM} nginx:1.29.0-alpine@sha256:b2e814d28359e77bd0aa5fed1939620075e4ffa0eb20423cc557b375bd5c14ad
+FROM --platform=${PLATFORM} nginx:1.29.0-alpine@sha256:6e39bb3765ac959c7e1240509636173417a5e37abf140f418401e2fa73970bbe
 
 # Copy the build output
 COPY --from=build-stage /app/dist /app/dist
