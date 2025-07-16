@@ -71,14 +71,14 @@ module.exports = config;
 ```
 
 ### Data Tracking
-This project uses [Posthog](https://posthog.com/) to capture actions of users. The tracking is off by default. To enable it and help us improve Data Product Portal, the `POSTHOG_ENABLED` environment variable needs to be configured in helm in deployment. The type of data captured is limited to actions of users interacting with the webpage and only include:
+This project uses [Posthog](https://posthog.com/) to capture actions of users. The tracking is off by default. To enable it and help us improve Data Product Portal, the `POSTHOG_ENABLED` environment variable needs to be set to true in values.yaml in helm in deployment. The type of data captured is limited to actions of users interacting with the webpage and only include:
 - clicks
 - timing of those clicks
 - path changes
 - tab changes
 - pageviews
 - search queries (for datasets, etc.)
-All data captured is kept pseudo-anonymous, meaning we use unique IDs per user but the user is never explicitly stored with the captured data. If however, the user and unique ID of certain events were already given, the user could be verfied to have made these actions.
+All data captured is kept pseudo-anonymous, meaning we use unique IDs per user (by hashing) but the user is never explicitly stored with the captured data. If however, the user and unique ID of certain events were already given, the user could be verfied to have made these actions.
 
 ### Docker (only when you want to use Docker for local execution)
 - Install [Docker](https://docs.docker.com/get-docker/) on your machine.
