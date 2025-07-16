@@ -58,10 +58,35 @@ const config = {
    * This should be a route in the application that handles post-logout actions.
    */
   OIDC_POST_LOGOUT_REDIRECT_URI: 'http://localhost:3000/logout/',
+  /**
+   * The PostHog key and host for tracking events.
+   * This is used to send events to PostHog for analytics.
+   */
+  POSTHOG_KEY: 'phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc',
+  POSTHOG_HOST: 'https://eu.i.posthog.com',
+  POSTHOG_ENABLED: false,
 };
 
 module.exports = config;
 ```
+
+### Data Tracking
+This project integrates with [Posthog](https://posthog.com/) to track user interactions. Tracking is disabled by default.
+
+To enable tracking and help us improve the Data Product Portal, the config value `POSTHOG_ENABLED` must be set to true in the frontend configuration. This can be done in one of two ways:
+
+- By setting the posthog value to true in your values.yaml file (used during Helm deployment), or
+- By explicitly setting the `POSTHOG_ENABLED` config variable to true in the frontend configuration.
+
+When enabled, tracking is limited strictly to user interactions within the web interface.
+At the moment, it only captures the following:
+- clicks
+- timing of those clicks
+- path changes
+- tab changes
+- pageviews
+- search queries (for datasets, etc.)
+All data captured is kept pseudo-anonymous, meaning we use unique IDs per user (by hashing) but the user is never explicitly stored with the captured data. If however, the user and unique ID of certain events were already given, the user could be verfied to have made these actions.
 
 ### Docker (only when you want to use Docker for local execution)
 - Install [Docker](https://docs.docker.com/get-docker/) on your machine.
