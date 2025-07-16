@@ -55,7 +55,6 @@
     },
     "devDependencies": {
         "@biomejs/biome": "2.1.1",
-        "@biomejs/cli": "^1.6.1",
         "@types/node": "^24.0.12",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
