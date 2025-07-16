@@ -35,6 +35,7 @@ from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
+from app.role_assignments.data_product.auth import DataProductAuthAssignment
 from app.role_assignments.data_product.schema import (
     CreateRoleAssignment,
     UpdateRoleAssignment,
@@ -169,10 +170,11 @@ def _assign_owner_role_assignments(
             ),
             actor=actor,
         )
-        assignment_service.update_assignment(
+        assignment = assignment_service.update_assignment(
             UpdateRoleAssignment(id=response.id, decision=DecisionStatus.APPROVED),
             actor=actor,
         )
+        DataProductAuthAssignment(assignment).add()
         EventService(db).create_event(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,
