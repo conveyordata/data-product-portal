@@ -55,7 +55,6 @@ from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype
-from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User as UserModel
@@ -387,7 +386,7 @@ class DataProductService:
         signin_token = json.loads(r.text)
 
         request_parameters = "?Action=login"
-        request_parameters += f"&Issuer={settings.HOST}"
+        request_parameters += "&Issuer=portal.demo1.conveyordata.com"
         athena_link = "https://console.aws.amazon.com/athena/home#/query-editor"
         request_parameters += f"&Destination={parse.quote_plus(athena_link)}"
         request_parameters += f"&SigninToken={signin_token['SigninToken']}"
