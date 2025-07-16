@@ -7,6 +7,8 @@ import { Link } from 'react-router';
 
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import posthog from '@/config/posthog-config';
+import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
@@ -265,6 +267,9 @@ export function PendingRequestsInbox() {
     }, [resetPagination]);
 
     const handleTabChange = (key: CustomPendingRequestsTabKey) => {
+        posthog.capture(PosthogEvents.REQUESTS_TAB_CLICKED, {
+            tab_name: key,
+        });
         setActiveTab(key);
 
         const typesSet = new Set<PendingActionTypes>();
@@ -283,6 +288,8 @@ export function PendingRequestsInbox() {
     };
 
     const handleAccept = (request: ActionResolveRequest) => {
+        posthog.capture(PosthogEvents.REQUESTS_ACCEPT);
+
         switch (request.type) {
             case PendingActionTypes.DataProductDataset:
                 handleAcceptDataProductDatasetLink(request.request);
@@ -296,6 +303,8 @@ export function PendingRequestsInbox() {
         }
     };
     const handleDeny = (request: ActionResolveRequest) => {
+        posthog.capture(PosthogEvents.REQUESTS_REJECT);
+
         switch (request.type) {
             case PendingActionTypes.DataProductDataset:
                 handleRejectDataProductDatasetLink(request.request);

@@ -18,7 +18,35 @@ export default function RootLayout() {
     });
 
     useEffect(() => {
-        posthog.capture(PosthogEvents.PATHNAME_CHANGED, { pathname: pathname });
+        // if the pathname contains a UUID, replace it.
+        const UUID_REGEX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}/gi;
+        posthog.capture(PosthogEvents.PATHNAME_CHANGED, {
+            pathname: pathname.replace(UUID_REGEX, '{uuid}'),
+        });
+
+        // explicit captures for sidebar/main pages
+        const changed_event = (() => {
+            switch (pathname) {
+                case ApplicationPaths.Home:
+                    return PosthogEvents.PATHNAME_CHANGED_HOMEPAGE;
+                case ApplicationPaths.DataProducts:
+                    return PosthogEvents.PATHNAME_CHANGED_DATA_PRODUCTS;
+                case ApplicationPaths.Datasets:
+                    return PosthogEvents.PATHNAME_CHANGED_MARKETPLACE;
+                case ApplicationPaths.Explorer:
+                    return PosthogEvents.PATHNAME_CHANGED_EXPLORER;
+                case ApplicationPaths.People:
+                    return PosthogEvents.PATHNAME_CHANGED_PEOPLE;
+                case ApplicationPaths.AuditLogs:
+                    return PosthogEvents.PATHNAME_CHANGED_AUDIT_LOGS;
+                case ApplicationPaths.Settings:
+                    return PosthogEvents.PATHNAME_CHANGED_SETTINGS;
+                default:
+                    return undefined;
+            }
+        })();
+
+        if (changed_event) posthog.capture(changed_event);
     }, [pathname]);
 
     return (

@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
+import posthog from '@/config/posthog-config.ts';
+import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
 import {
     useGetAllDataProductsQuery,
@@ -12,7 +14,6 @@ import {
 } from '@/store/features/data-products/data-products-api-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 import { getItemFromLocalStorage, type LastVisitedItem, LocalStorageKeys } from '@/utils/local-storage.helper.ts';
-
 import styles from './data-products-inbox.module.scss';
 import { DataProductsList } from './data-products-list.tsx';
 
@@ -91,7 +92,13 @@ export function DataProductsInbox({ userId }: Props) {
                     <Button className={styles.formButton}>{t('See All')}</Button>
                 </Link>
             </div>
-            <Tabs defaultActiveKey={InboxTabKeys.LastViewed} items={items} />
+            <Tabs
+                defaultActiveKey={InboxTabKeys.LastViewed}
+                items={items}
+                onChange={(activeKey) =>
+                    posthog.capture(PosthogEvents.HOMEPAGE_DATA_PRODUCTS_TAB_CLICKED, { tab_name: activeKey })
+                }
+            />
         </div>
     );
 }

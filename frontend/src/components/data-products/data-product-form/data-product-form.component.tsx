@@ -1,10 +1,10 @@
 import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space } from 'antd';
-import posthog from 'posthog-js';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
+import posthog from '@/config/posthog-config';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';

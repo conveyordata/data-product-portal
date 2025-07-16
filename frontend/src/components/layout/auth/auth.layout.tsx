@@ -1,10 +1,11 @@
+import { sha256 } from 'js-sha256';
 import { useCallback, useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router';
-
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { AppConfig } from '@/config/app-config.ts';
+import posthog from '@/config/posthog-config';
 import { useAppDispatch } from '@/store';
 import { useAuthorizeMutation } from '@/store/features/auth/auth-api-slice.ts';
 import { selectAuthState, setCredentials } from '@/store/features/auth/auth-slice.ts';
@@ -94,6 +95,16 @@ export const AuthLayout = () => {
             });
         });
     }, [events, handleAuthorizeUser, signinSilent, signoutRedirect]);
+
+    useEffect(() => {
+        if (user?.email) {
+            const hashed_id = sha256(user.email);
+            posthog.identify(hashed_id);
+        } else {
+            // user not logged in properly
+            posthog.reset();
+        }
+    }, [user]);
 
     if (activeNavigator) {
         switch (activeNavigator) {
