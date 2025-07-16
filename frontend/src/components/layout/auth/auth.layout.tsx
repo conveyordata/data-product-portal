@@ -99,10 +99,9 @@ export const AuthLayout = () => {
     useEffect(() => {
         if (user?.email) {
             const hashed_id = sha256(user.email);
-            console.log(`User email: ${user.email} hashed to :${hashed_id}`);
             posthog.identify(hashed_id);
         } else {
-            // Is the user logged out here??
+            // user not logged in properly
             posthog.reset();
         }
     }, [user]);
