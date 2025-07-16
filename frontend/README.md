@@ -71,14 +71,14 @@ module.exports = config;
 ```
 
 ### Data Tracking
-This project integrates with [Posthog](https://posthog.com/) to track user interactions. Tracking is disabled by default. 
+This project integrates with [Posthog](https://posthog.com/) to track user interactions. Tracking is disabled by default.
 
 To enable tracking and help us improve the Data Product Portal, the config value `POSTHOG_ENABLED` must be set to true in the frontend configuration. This can be done in one of two ways:
 
 - By setting the posthog value to true in your values.yaml file (used during Helm deployment), or
 - By explicitly setting the `POSTHOG_ENABLED` config variable to true in the frontend configuration.
 
-When enabled, tracking is limited strictly to user interactions within the web interface. 
+When enabled, tracking is limited strictly to user interactions within the web interface.
 At the moment, it only captures the following:
 - clicks
 - timing of those clicks
