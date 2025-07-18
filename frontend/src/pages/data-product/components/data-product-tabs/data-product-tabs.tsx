@@ -1,4 +1,5 @@
 import Icon, {
+    BarChartOutlined,
     CompassOutlined,
     HistoryOutlined,
     InfoCircleOutlined,
@@ -26,6 +27,7 @@ import { useGetDataProductHistoryQuery } from '@/store/features/data-products/da
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import styles from './data-product-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
+import { UsageTab } from './usage-tab/usage-tab';
 
 type Props = {
     dataProductId: string;
@@ -69,6 +71,12 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 key: TabKeys.About,
                 icon: <InfoCircleOutlined />,
                 children: <AboutTab dataProductId={dataProductId} />,
+            },
+            {
+                label: t('Usage'),
+                key: TabKeys.Usage,
+                icon: <BarChartOutlined />,
+                children: <UsageTab dataProductId={dataProductId} />,
             },
             {
                 label: t('Input Datasets'),

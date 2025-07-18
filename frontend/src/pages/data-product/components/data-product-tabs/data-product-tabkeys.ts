@@ -1,5 +1,6 @@
 export enum TabKeys {
     About = 'about',
+    Usage = 'usage',
     DataOutputs = 'dataoutputs',
     Datasets = 'datasets',
     Explorer = 'explorer',
