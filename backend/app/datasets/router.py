@@ -29,6 +29,7 @@ from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
+from app.role_assignments.dataset.auth import DatasetAuthAssignment
 from app.role_assignments.dataset.schema import (
     CreateRoleAssignment,
     UpdateRoleAssignment,
@@ -158,10 +159,11 @@ def _assign_owner_role_assignments(
             ),
             actor=actor,
         )
-        assignment_service.update_assignment(
+        assignment = assignment_service.update_assignment(
             UpdateRoleAssignment(id=assignment.id, decision=DecisionStatus.APPROVED),
             actor=actor,
         )
+        DatasetAuthAssignment(assignment).add()
         event_service.create_event(
             CreateEvent(
                 name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
