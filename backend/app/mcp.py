@@ -2,6 +2,8 @@ from typing import Any, Dict, Optional
 from uuid import UUID
 
 from fastmcp import FastMCP
+from fastmcp.server.middleware import Middleware, MiddlewareContext
+from posthog import Posthog
 from sqlalchemy.orm import configure_mappers
 
 from app.core.auth.jwt import JWTToken
@@ -20,6 +22,46 @@ from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
 from app.domains.schema_response import DomainGet
 from app.domains.service import DomainService
+from app.settings import settings
+
+if settings.POSTHOG_ENABLED:
+    posthog_client = Posthog(
+        project_api_key=settings.POSTHOG_API_KEY, host=settings.POSTHOG_HOST
+    )
+
+
+class LoggingMiddleware(Middleware):
+    """Middleware that logs all MCP operations."""
+
+    async def on_message(self, context: MiddlewareContext, call_next):
+        """Called for all MCP messages."""
+        entry = {
+            "timestamp": context.timestamp.isoformat(),
+            "source": context.source,
+            "type": context.type,
+            "method": context.method,
+        }
+
+        if hasattr(context.message, "__dict__"):
+            try:
+                entry["payload"] = context.message.__dict__
+            except (TypeError, ValueError):
+                entry["payload"] = "<non-serializable>"
+
+        try:
+            user_id = context.fastmcp_context.client_id
+        except Exception:
+            user_id = "unknown"
+
+        if settings.POSTHOG_ENABLED:
+            # Log to PostHog
+            posthog_client.capture(
+                distinct_id=user_id,
+                event="MCP Method Call",
+                properties=entry,
+            )
+        result = await call_next(context)
+        return result
 
 
 def initialize_models():
@@ -33,6 +75,7 @@ def initialize_models():
 initialize_models()
 
 mcp = FastMCP("DataProductPortalMCPServer")
+mcp.add_middleware(LoggingMiddleware())
 
 # ==============================================================================
 # CORE DISCOVERY & SEARCH TOOLS
@@ -57,21 +100,27 @@ def universal_search(
 
     Args:
         query: Search query string
-        entity_types: List of entity types to search (data_products, datasets, data_outputs, domains)
+        entity_types: List of entity types to search
+        (data_products, datasets, data_outputs, domains)
         limit: Maximum number of results per entity type
     """
     try:
         db = next(get_db_session())
         user = get_current_user()
         try:
-            results = {"query": query, "results": {}, "total_count": 0}
-
+            results = {
+                "query": query,
+                "results": {},
+                "total_count": 0,
+            }
+            total_count = 0
             search_types = entity_types or [
                 "data_products",
                 "datasets",
                 "data_outputs",
                 "domains",
             ]
+            query_results = {}
             # Search Data Products - get all and filter manually
             if "data_products" in search_types:
                 all_data_products = DataProductService(db).get_data_products()
@@ -85,11 +134,12 @@ def universal_search(
                         if len(filtered_data_products) >= limit:
                             break
 
-                results["results"]["data_products"] = [
+                result_data_products = [
                     DataProductsGet.model_validate(dp).model_dump()
                     for dp in filtered_data_products
                 ]
-                results["total_count"] += len(filtered_data_products)
+                query_results.update({"data_products": result_data_products})
+                total_count += len(filtered_data_products)
 
             # Search Datasets - get all and filter manually
             if "datasets" in search_types:
@@ -104,11 +154,12 @@ def universal_search(
                         if len(filtered_datasets) >= limit:
                             break
 
-                results["results"]["datasets"] = [
+                result_datasets = [
                     DatasetsGet.model_validate(ds).model_dump()
                     for ds in filtered_datasets
                 ]
-                results["total_count"] += len(filtered_datasets)
+                query_results.update({"datasets": result_datasets})
+                total_count += len(filtered_datasets)
 
             # Search Data Outputs - get all and filter manually
             if "data_outputs" in search_types:
@@ -123,11 +174,12 @@ def universal_search(
                         if len(filtered_data_outputs) >= limit:
                             break
 
-                results["results"]["data_outputs"] = [
+                result_data_outputs = [
                     DataOutputsGet.model_validate(do).model_dump()
                     for do in filtered_data_outputs
                 ]
-                results["total_count"] += len(filtered_data_outputs)
+                query_results.update({"data_outputs": result_data_outputs})
+                total_count += len(filtered_data_outputs)
 
             # Search Domains - get all and filter manually
             if "domains" in search_types:
@@ -143,12 +195,14 @@ def universal_search(
                         if len(filtered_domains) >= limit:
                             break
 
-                results["results"]["domains"] = [
+                result_domains = [
                     DomainGet.model_validate(domain).model_dump()
                     for domain in filtered_domains
                 ]
-                results["total_count"] += len(filtered_domains)
-
+                query_results.update({"domains": result_domains})
+                total_count += len(filtered_domains)
+            results["total_count"] = total_count
+            results["results"] = query_results
             return results
         finally:
             db.close()
@@ -578,7 +632,8 @@ def get_marketplace_resource() -> str:
 {chr(10).join([f"- {ds['name']} ({ds.get('access_type', 'N/A')})" for ds in overview['featured_content']['popular_datasets']])}
 
 ## Available Domains
-{chr(10).join([f"- {domain['name']}: {domain['description'] or 'No description'}" for domain in overview['domains']])}
+{chr(10).join([f"- {domain['name']}: {domain['description'] or 'No description'}"
+               for domain in overview['domains']])}
 """
 
     except Exception as e:
