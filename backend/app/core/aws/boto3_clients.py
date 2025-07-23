@@ -4,18 +4,25 @@ from fastapi import HTTPException, status
 
 from app.core.aws.refreshable_session import RefreshableBotoSession
 from app.core.logging import logger
+from app.settings import settings
 
 disabled_aws = False
-try:
-    session = RefreshableBotoSession().refreshable_session()
-    clients = {
-        "s3": session.client("s3"),
-        "sts": session.client("sts"),
-        "lambda": session.client("lambda"),
-    }
-except (AttributeError, NoRegionError):
+if not settings.DISABLED_AWS:
+    try:
+        session = RefreshableBotoSession().refreshable_session()
+        clients = {
+            "s3": session.client("s3"),
+            "sts": session.client("sts"),
+            "lambda": session.client("lambda"),
+        }
+    except (AttributeError, NoRegionError):
+        logger.warning(
+            "Could not instantiate AWS session. All AWS functionality will be disabled"
+        )
+        disabled_aws = True
+else:
     logger.warning(
-        "Could not instantiate AWS session. All AWS functionality will be disabled"
+        "AWS functionality is disabled in settings. All AWS functionality will be disabled"
     )
     disabled_aws = True
 

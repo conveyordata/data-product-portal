@@ -58,6 +58,8 @@ class Settings(BaseSettings):
     # Namespace validation
     NAMESPACE_MAX_LENGTH: int = 64
 
+    DISABLED_AWS: bool = False
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"

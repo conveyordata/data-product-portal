@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from uuid import UUID
 
 from fastmcp import FastMCP
@@ -50,7 +50,7 @@ def get_current_user():
 
 @mcp.tool
 def universal_search(
-    query: str, entity_types: Optional[List[str]] = None, limit: int = 10
+    query: str, entity_types: list[str] = [], limit: int = 10
 ) -> Dict[str, Any]:
     """
     Universal search across data products, datasets, and data outputs.
@@ -72,7 +72,6 @@ def universal_search(
                 "data_outputs",
                 "domains",
             ]
-
             # Search Data Products - get all and filter manually
             if "data_products" in search_types:
                 all_data_products = DataProductService(db).get_data_products()
