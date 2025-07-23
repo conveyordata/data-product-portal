@@ -75,14 +75,19 @@ type RolesTableProps = {
     scope: Scope;
 };
 export function RolesTable({ scope }: RolesTableProps) {
-    const { data: rawRoles = [], isFetching } = useGetRolesQuery(scope);
+    const { data: globalRoles = [], isFetching: isFetchingGlobalRoles } = useGetRolesQuery(Scope.GLOBAL);
+    const { data: rawRoles = [], isFetching: isFetchingRoles } = useGetRolesQuery(scope);
+    const isFetching = isFetchingGlobalRoles || isFetchingRoles;
     const [updateRole, { isLoading }] = useUpdateRoleMutation();
 
     const roles = useMemo(() => {
-        const data = [...rawRoles];
+        const data = [
+            ...rawRoles.filter((role) => role.prototype !== Prototype.EVERYONE),
+            ...globalRoles.filter((role) => role.prototype === Prototype.EVERYONE),
+        ];
         data.sort(prototypePrecedence);
         return [...data];
-    }, [rawRoles]);
+    }, [rawRoles, globalRoles]);
     const permissions = useMemo(() => determinePermissionsForScope(scope, roles), [roles, scope]);
 
     const handleCheckboxChange = useCallback(
@@ -434,13 +439,13 @@ function determinePermissionsForScope(scope: Scope, roles: RoleContract[]): Perm
                 },
                 {
                     type: 'Instance',
-                    id: 405,
+                    id: AuthorizationAction.DATASET__CREATE_USER,
                     name: 'Add User',
                     description: 'Allows adding a user as member to this Dataset and assigning a role',
                 },
                 {
                     type: 'Instance',
-                    id: 407,
+                    id: AuthorizationAction.DATASET__DELETE_USER,
                     name: 'Remove User',
                     description: 'Allows removing a user as member from this Dataset',
                 },
