@@ -12,14 +12,14 @@ type Props = {
     scope: 'data_product' | 'dataset';
 };
 export function RoleChangeForm({ initialRole, onRoleChange, disabled = true, scope }: Props) {
-    const { data: roles, isLoading } = useGetRolesQuery(scope, { skip: disabled });
+    const { data: roles, isLoading } = useGetRolesQuery(scope);
 
     const options = roles?.map((role) => ({ label: role.name, value: role.id }));
-
     return (
         <Flex className={styles.selectRoleWrapper}>
             <Select
                 className={styles.selectRoleInput}
+                disabled={disabled}
                 loading={isLoading}
                 options={options}
                 defaultValue={initialRole.id}
