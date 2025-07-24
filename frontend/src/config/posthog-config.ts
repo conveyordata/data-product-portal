@@ -5,7 +5,7 @@ posthog.init(config.POSTHOG_KEY, {
     autocapture: false,
     capture_pageview: true,
     disable_session_recording: true,
-    person_profiles: 'never', // do not link events with personal information (profiles)
+    person_profiles: 'identified_only',
 });
 
 if (config.POSTHOG_ENABLED) {
