@@ -1,18 +1,22 @@
 from typing import Sequence
+from uuid import UUID
 
 import emailgen
+from sqlalchemy.orm import Session
 
 from app.core.email.send_mail import send_mail
-from app.role_assignments.data_product.schema import (
-    RoleAssignment,
+from app.role_assignments.data_product.model import (
+    DataProductRoleAssignment as RoleAssignmentModel,
 )
 from app.settings import settings
 from app.users.schema import User
 
 
 def send_role_assignment_request_email(
-    role_assignment: RoleAssignment, approvers: Sequence[User]
+    id: UUID, approvers: Sequence[User], db: Session
 ) -> None:
+    role_assignment = db.get(RoleAssignmentModel, id)
+
     url = (
         f"{settings.HOST.rstrip('/')}/data-products/"
         f"{role_assignment.data_product_id}#team"
