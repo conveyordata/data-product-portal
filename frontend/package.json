@@ -44,7 +44,7 @@
         "i18next-http-backend": "^3.0.2",
         "js-sha256": "^0.11.1",
         "oidc-client-ts": "^3.3.0",
-        "posthog-js": "^1.257.2",
+        "posthog-js": "^1.258.2",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
         "react-i18next": "^15.6.1",
