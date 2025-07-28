@@ -17,7 +17,12 @@ router = APIRouter(prefix="/authz", tags=["authz"])
         200: {
             "description": "Access check result",
             "content": {
-                "application/json": {"access": "true"},
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {"access": {"type": "boolean"}},
+                    }
+                }
             },
         },
     },
@@ -45,9 +50,7 @@ def check_access(
     responses={
         200: {
             "description": "Admin role assignment",
-            "content": {
-                "application/json": "true",
-            },
+            "content": {"application/json": {"schema": {"type": "boolean"}}},
         },
     },
 )

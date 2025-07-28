@@ -1,12 +1,15 @@
 from typing import Any, Dict, Optional
 from uuid import UUID
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from fastmcp.server.auth import BearerAuthProvider
+from fastmcp.server.dependencies import AccessToken, get_access_token
 from fastmcp.server.middleware import Middleware, MiddlewareContext
 from posthog import Posthog
 from sqlalchemy.orm import configure_mappers
 
-from app.core.auth.jwt import JWTToken
+from app.core.auth.auth import get_authenticated_user
+from app.core.auth.jwt import JWTToken, get_oidc
 
 # Import Pydantic schemas - corrected paths
 from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
@@ -23,6 +26,9 @@ from app.datasets.service import DatasetService
 from app.domains.schema_response import DomainGet
 from app.domains.service import DomainService
 from app.settings import settings
+
+# from app.core.auth.jwt import JWTToken, get_oidc
+
 
 if settings.POSTHOG_ENABLED:
     posthog_client = Posthog(
@@ -49,15 +55,19 @@ class LoggingMiddleware(Middleware):
                 entry["payload"] = "<non-serializable>"
 
         try:
-            user_id = context.fastmcp_context.client_id
+            access_token: AccessToken = get_access_token()
+            user_id = get_authenticated_user(
+                token=JWTToken(sub="", token=f"Bearer {access_token.token}"),
+                db=next(get_db_session()),
+            ).id
         except Exception:
-            user_id = "unknown"
+            user_id = None
 
         if settings.POSTHOG_ENABLED:
             # Log to PostHog
             posthog_client.capture(
                 distinct_id=user_id,
-                event="MCP Method Call",
+                event="MCP Method Call API",
                 properties=entry,
             )
         result = await call_next(context)
@@ -74,21 +84,37 @@ def initialize_models():
 
 initialize_models()
 
-mcp = FastMCP("DataProductPortalMCPServer")
-mcp.add_middleware(LoggingMiddleware())
+auth = BearerAuthProvider(
+    issuer=get_oidc().authority,
+    jwks_uri=get_oidc().jwks_uri,
+)
+
+mcp = FastMCP(name="DataProductPortalMCP", auth=auth)
 
 # ==============================================================================
 # CORE DISCOVERY & SEARCH TOOLS
 # ==============================================================================
 
 
-def get_current_user():
-    from app.core.auth.auth import get_authenticated_user
-
+def get_current_user(token: str):
     user = get_authenticated_user(
-        token=JWTToken(sub="systemaccount_bot", token=""), db=next(get_db_session())
+        token=JWTToken(sub="", token=f"Bearer {token}"), db=next(get_db_session())
     )
-    return user
+    return {
+        "id": user.id,
+        "external_id": user.external_id,
+        "first_name": user.first_name,
+        "email": user.email,
+        "last_name": user.last_name,
+    }
+
+
+@mcp.tool
+async def get_my_data(ctx: Context) -> dict[str, Any]:
+    """Get my data from the MCP. You can use this to
+    get information about the authenticated user."""
+    access_token: AccessToken = get_access_token()
+    return get_current_user(token=access_token.token)
 
 
 @mcp.tool
@@ -105,8 +131,10 @@ def universal_search(
         limit: Maximum number of results per entity type
     """
     try:
+        access_token: AccessToken = get_access_token()
+
         db = next(get_db_session())
-        user = get_current_user()
+        user = get_current_user(token=access_token.token)
         try:
             results = {
                 "query": query,
@@ -275,7 +303,8 @@ def search_datasets(
     """Search datasets with filters using the existing service layer."""
     try:
         db = next(get_db_session())
-        user = get_current_user()
+        access_token: AccessToken = get_access_token()
+        user = get_current_user(token=access_token.token)
         try:
             # Get all datasets and filter manually
             all_datasets = DatasetService(db).get_datasets(user=user)
@@ -356,7 +385,8 @@ def get_dataset_details(dataset_id: str) -> Dict[str, Any]:
     """Get detailed information about a specific dataset."""
     try:
         db = next(get_db_session())
-        user = get_current_user()
+        access_token: AccessToken = get_access_token()
+        user = get_current_user(token=access_token.token)
         try:
             dataset = DatasetService(db).get_dataset(id=UUID(dataset_id), user=user)
 
@@ -423,7 +453,8 @@ def get_marketplace_overview() -> Dict[str, Any]:
     """Get marketplace overview with statistics and featured content."""
     try:
         db = next(get_db_session())
-        user = get_current_user()
+        access_token: AccessToken = get_access_token()
+        user = get_current_user(token=access_token.token)
         try:
             # Get counts by querying all and taking length
             all_data_products = DataProductService(db).get_data_products()
@@ -469,7 +500,8 @@ def get_data_product_analytics(data_product_id: str) -> Dict[str, Any]:
     """Get analytics and usage statistics for a data product."""
     try:
         db = next(get_db_session())
-        user = get_current_user()
+        access_token: AccessToken = get_access_token()
+        user = get_current_user(token=access_token.token)
         try:
             # Get the data product using service
             data_product = DataProductService(db).get_data_product(
@@ -573,7 +605,8 @@ def get_dataset_resource(dataset_id: str) -> str:
     """Get dataset as a resource."""
     try:
         db = next(get_db_session())
-        user = get_current_user()
+        access_token: AccessToken = get_access_token()
+        user = get_current_user(token=access_token.token)
         try:
             dataset = DatasetService(db).get_dataset(id=UUID(dataset_id), user=user)
 

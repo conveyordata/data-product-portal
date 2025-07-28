@@ -49,6 +49,11 @@ class OIDCConfiguration:
                 self.jwks_keys = httpx.get(
                     url=f"{self.authority}/.well-known/jwks.json"
                 ).json()
+            self.jwks_uri = (
+                json_config.get("jwks_uri")
+                if json_config.get("jwks_uri")
+                else f"{self.authority}/.well-known/jwks.json"
+            )
             self.oidc_dependency = OpenIdConnect(
                 openIdConnectUrl=self.configuration_url, auto_error=False
             )
