@@ -130,14 +130,43 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
         targets: string[]
     }
 
+    const parentNodes = nodes.filter((node) => !node.parentId);
+    const childNodes = nodes.filter((node) => node.parentId);
+
+    const graphChildren = parentNodes.map((parentNode) => {
+        // If this is a group node (= domain node), include its children
+        if (parentNode.type === "group") {
+            const children = childNodes.filter((child) => child.parentId === parentNode.id)
+                                       .map((child) => ({ id: child.id,
+                                                          width: defaultNodeWidth,
+                                                          height: defaultNodeHeight,
+                                                        }));
+
+            return {
+                id: parentNode.id,
+                width: Math.max(100, children.length * 200), // Dynamic width based on children
+                height: Math.max(100, Math.ceil(children.length / 3) * 150), // Dynamic height
+                children: children,
+                layoutOptions: {
+                    "elk.algorithm": "box", // Use box layout for children within parent
+                    "elk.spacing.nodeNode": "50.0",
+                    "elk.padding": "[top=30.0,left=30.0,bottom=30.0,right=30.0]",
+                },
+            }
+        } else {
+            // Regular node
+            return {
+                id: parentNode.id,
+                width: defaultNodeWidth,
+                height: defaultNodeHeight,
+            }
+        }
+        });
+
     const elkGraph = {
         id: "root",
         layoutOptions: advancedLayout? advancedLayoutOptions : basicLayoutOptions,
-        children: nodes.map((node): ElkNode => ({
-            id: node.id,
-            width: defaultNodeWidth,
-            height: defaultNodeHeight,
-        })),
+        children: graphChildren,
         edges: edges.map((edge): ElkEdge => ({
             id: edge.id,
             sources: [edge.source],
@@ -150,23 +179,53 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
     console.log("ELK layout calculated:", layout);
 
     // Map the layout positions back to the nodes
-    return nodes.map((node) => {
-        const layoutNode = layout.children?.find(n => n.id === node.id);
+    const elkedNodes: Node[] = [];
 
-        if (layoutNode && layoutNode.x !== undefined && layoutNode.y !== undefined) {
-            return {
+    layout.children?.forEach((layoutNode: any) => {
+        const node = nodes.find((n) => n.id === layoutNode.id)
+        if (!node) return; // for children of domain nodes
+
+        if (node.type === 'group') {
+            // domain node itself
+            elkedNodes.push({
                 ...node,
                 position: {
                     x: layoutNode.x,
                     y: layoutNode.y,
                 },
-            };
+                style: {
+                    ...node.style,
+                    width: layoutNode.width - 60,
+                    height: layoutNode.height,
+                },
+            });
+
+            // children of domain node
+            layoutNode.children?.forEach((childLayoutNode: any) => {
+                const childNode = nodes.find((n) => n.id == childLayoutNode.id);
+                if (!childNode) { console.warn("A childnode after layout couldn't be found in the original nodes!"); }
+                else {
+                    elkedNodes.push({
+                        ...childNode,
+                        position: { // position in layout: relative -> position in react flow: absolute
+                            x: childLayoutNode.x,
+                            y: childLayoutNode.y,
+                        }
+                    });
+                }
+            });
         } else {
-            console.warn(`Couldn't find the layout position for node ${node.id}, defaulting the position.`);
-            return {
+            // regular node not contained in any domain node
+            elkedNodes.push({
                 ...node,
-                position: defaultNodePosition,
-            };
+                position: {
+                    x: layoutNode.x,
+                    y: layoutNode.y,
+                }
+            });
         }
+
     });
+
+    return elkedNodes;
 }
