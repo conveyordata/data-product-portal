@@ -28,3 +28,7 @@ class DataProductAboutUpdate(ORMModel):
 
 class DataProductStatusUpdate(ORMModel):
     status: DataProductStatus
+
+
+class DataProductUsageUpdate(ORMModel):
+    usage: str

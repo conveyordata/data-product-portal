@@ -20,6 +20,7 @@ from app.datasets.schema_request import (
     DatasetCreate,
     DatasetStatusUpdate,
     DatasetUpdate,
+    DatasetUsageUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
@@ -323,10 +324,11 @@ def update_dataset_status(
 )
 def update_dataset_usage(
     id: UUID,
-    usage: str,
+    usage: DatasetUsageUpdate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
+    print("usage:", usage)
     DatasetService(db).update_dataset_usage(id, usage)
     EventService(db).create_event(
         CreateEvent(

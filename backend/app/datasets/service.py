@@ -32,6 +32,7 @@ from app.datasets.schema_request import (
     DatasetCreate,
     DatasetStatusUpdate,
     DatasetUpdate,
+    DatasetUsageUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.graph.edge import Edge
@@ -233,10 +234,10 @@ class DatasetService:
     def update_dataset_usage(
         self,
         id: UUID,
-        usage: str,
+        usage: DatasetUsageUpdate,
     ) -> DatasetModel:
         current_dataset = ensure_dataset_exists(id, self.db)
-        current_dataset.usage = usage
+        current_dataset.usage = usage.usage
         self.db.commit()
         return current_dataset
 

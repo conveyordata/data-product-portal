@@ -36,6 +36,7 @@ from app.data_products.schema_request import (
     DataProductCreate,
     DataProductStatusUpdate,
     DataProductUpdate,
+    DataProductUsageUpdate,
 )
 from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products_datasets.model import (
@@ -259,10 +260,10 @@ class DataProductService:
     def update_data_product_usage(
         self,
         id: UUID,
-        usage: str,
+        usage: DataProductUsageUpdate,
     ) -> DataProductModel:
         current_data_product = ensure_data_product_exists(id, self.db)
-        current_data_product.usage = usage
+        current_data_product.usage = usage.usage
         self.db.commit()
         return current_data_product
 
