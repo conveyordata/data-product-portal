@@ -230,6 +230,16 @@ class DatasetService:
         current_dataset.status = dataset.status
         self.db.commit()
 
+    def update_dataset_usage(
+        self,
+        id: UUID,
+        usage: str,
+    ) -> DatasetModel:
+        current_dataset = ensure_dataset_exists(id, self.db)
+        current_dataset.usage = usage
+        self.db.commit()
+        return current_dataset
+
     def get_graph_data(self, id: UUID, level: int) -> Graph:
         dataset = self.db.get(
             DatasetModel,

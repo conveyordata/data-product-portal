@@ -256,6 +256,16 @@ class DataProductService:
         self.db.commit()
         return current_data_product
 
+    def update_data_product_usage(
+        self,
+        id: UUID,
+        usage: str,
+    ) -> DataProductModel:
+        current_data_product = ensure_data_product_exists(id, self.db)
+        current_data_product.usage = usage
+        self.db.commit()
+        return current_data_product
+
     def link_dataset_to_data_product(
         self,
         id: UUID,

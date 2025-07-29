@@ -382,6 +382,33 @@ def update_data_product_status(
     )
 
 
+@router.put(
+    "/{id}/usage",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
+            )
+        ),
+    ],
+)
+def update_data_product_usage(
+    id: UUID,
+    usage: str,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    DataProductService(db).update_data_product_usage(id, usage)
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_UPDATED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        )
+    )
+
+
 @router.post(
     "/{id}/dataset/{dataset_id}",
     responses={

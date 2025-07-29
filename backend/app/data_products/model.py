@@ -32,6 +32,7 @@ class DataProduct(Base, BaseORM):
     status: DataProductStatus = Column(
         Enum(DataProductStatus), default=DataProductStatus.ACTIVE
     )
+    usage = Column(String, nullable=True)
 
     # Foreign keys
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))

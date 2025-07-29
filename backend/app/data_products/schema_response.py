@@ -23,6 +23,7 @@ class BaseDataProductGet(ORMModel):
 
     # Nested schemas
     tags: list[Tag]
+    usage: Optional[str]
     domain: Domain
     type: DataProductType
     lifecycle: Optional[DataProductLifeCycle]

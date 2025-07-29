@@ -21,6 +21,7 @@ export interface DatasetContract {
     id: string;
     name: string;
     description: string;
+    usage?: string;
     about: string;
     status: DatasetStatus;
     tags: TagContract[];
