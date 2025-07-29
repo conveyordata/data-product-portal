@@ -1,27 +1,23 @@
 import type { Connection, Edge, Node, OnConnect } from '@xyflow/react';
-import { addEdge, Position, useEdgesState, useNodesState } from '@xyflow/react';
+import { addEdge, useEdgesState, useNodesState } from '@xyflow/react';
 import { useCallback } from 'react';
-
-import { generateDagreLayout } from '@/utils/node-editor.helper.ts';
+import ELK from 'elkjs';
 
 const defaultNodeWidth = 180;
 const defaultNodeHeight = 80;
 const defaultNodePosition = { x: 0, y: 0 };
-const defaultDirection = Position.Left;
 
 export function useNodeEditor() {
     const [nodes, setNodes, onNodesChange] = useNodesState([] as Node[]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[]);
     // const { fitView } = useReactFlow();
 
-    const setNodesAndEdges = useCallback(
-        (nodes: Node[], edges: Edge[], direction: Position = defaultDirection) => {
-            const layouted = generateDagreLayout(nodes, edges, direction, defaultNodeWidth, defaultNodeHeight);
-
-            setNodes([...layouted.nodes]);
-            setEdges([...layouted.edges]);
+    const applyLayout = useCallback(
+        async (nodes: Node[], edges: Edge[], advancedLayout: boolean = false) => {
+            const elkedNodes = await applyElkLayout(nodes, edges, advancedLayout);
+            return elkedNodes;
         },
-        [setEdges, setNodes],
+        [],
     );
 
     const onConnect: OnConnect = useCallback(
@@ -33,7 +29,7 @@ export function useNodeEditor() {
     );
 
     return {
-        setNodesAndEdges,
+        applyLayout,
         setNodes,
         setEdges,
         nodes,
@@ -43,4 +39,134 @@ export function useNodeEditor() {
         onConnect,
         defaultNodePosition,
     };
+}
+
+const basicLayoutOptions = {
+    // Core algorithm
+    "elk.algorithm": "layered",
+    "elk.direction": "RIGHT",
+
+    // Spacing options (use string values, not numbers)
+    "elk.spacing.nodeNode": "80.0",
+    "elk.spacing.edgeNode": "40.0",
+    "elk.spacing.edgeEdge": "20.0",
+
+    // Layered algorithm specific options
+    "elk.layered.spacing.nodeNodeBetweenLayers": "100.0",
+    "elk.layered.spacing.edgeNodeBetweenLayers": "50.0",
+    "elk.layered.nodePlacement.strategy": "SIMPLE",
+    "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
+
+    // Port constraints
+    "elk.portConstraints": "FIXED_SIDE",
+
+    // Padding
+    "elk.padding": "[top=50.0,left=50.0,bottom=50.0,right=50.0]",
+}
+
+const advancedLayoutOptions = {
+  // Core algorithm
+  "elk.algorithm": "layered",
+  "elk.direction": "RIGHT",
+
+  // INCREASED SPACING for larger graphs
+  "elk.spacing.nodeNode": "50.0",
+  "elk.spacing.edgeNode": "10.0", // More space between edges and nodes
+  "elk.spacing.edgeEdge": "20.0", 
+
+  // LAYERED ALGORITHM - Better for complex graphs
+  "elk.layered.spacing.nodeNodeBetweenLayers": "200.0", // Much more space between layers
+  "elk.layered.spacing.edgeNodeBetweenLayers": "100.0", // More edge-to-node spacing between layers
+
+  // ADVANCED NODE PLACEMENT for cleaner layouts
+  "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX", // Better than SIMPLE for complex graphs
+  "elk.layered.nodePlacement.favorStraightEdges": "true", // Reduces edge bends
+
+  // CROSSING MINIMIZATION - Critical for readability
+  "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
+  "elk.layered.crossingMinimization.greedySwitch.type": "TWO_SIDED", // Better crossing reduction
+  "elk.layered.crossingMinimization.semiInteractive": "true",
+
+  // EDGE ROUTING for smoother edges
+  "elk.edgeRouting": "ORTHOGONAL", // Creates clean 90-degree angles
+  "elk.layered.edgeRouting.sloppiness": "0.2", // Allows slight curves for better aesthetics
+
+  // CYCLE BREAKING for complex domain graphs
+  "elk.layered.cycleBreaking.strategy": "GREEDY", // Handles circular dependencies better
+
+  // PORT CONSTRAINTS - Important for edge cleanliness
+  "elk.portConstraints": "FIXED_SIDE",
+  "elk.layered.portSortingStrategy": "INPUT_ORDER", // Maintains logical port order
+
+  // COMPACTION for better space utilization
+  "elk.layered.compaction.postCompaction.strategy": "LEFT", // Reduces unnecessary whitespace
+  "elk.layered.compaction.connectedComponents": "true", // Groups related components
+
+  // THOROUGHNESS - Spend more time for better results
+  "elk.layered.thoroughness": "10", // Higher values = better layout (default is 7)
+
+  // PADDING - More generous for complex graphs
+  "elk.padding": "[top=100.0,left=100.0,bottom=100.0,right=100.0]",
+
+  // ADDITIONAL TWEAKS for domain-heavy graphs
+  "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES", // Respects your node ordering
+  "elk.layered.layering.strategy": "NETWORK_SIMPLEX", // Better layer assignment
+}
+
+async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: boolean): Promise<Node[]> {
+    const elk = new ELK();
+
+    interface ElkNode {
+        id: string
+        width?: number
+        height?: number
+        x?: number
+        y?: number
+    }
+
+    interface ElkEdge {
+        id: string
+        sources: string[]
+        targets: string[]
+    }
+
+    const elkGraph = {
+        id: "root",
+        layoutOptions: advancedLayout? advancedLayoutOptions : basicLayoutOptions,
+        children: nodes.map((node): ElkNode => ({
+            id: node.id,
+            width: defaultNodeWidth,
+            height: defaultNodeHeight,
+        })),
+        edges: edges.map((edge): ElkEdge => ({
+            id: edge.id,
+            sources: [edge.source],
+            targets: [edge.target],
+        })),
+    };
+
+    // Calculate the layout
+    const layout = await elk.layout(elkGraph);
+    console.log("ELK layout calculated:", layout);
+
+    // Map the layout positions back to the nodes
+    return nodes.map((node) => {
+        const layoutNode = layout.children?.find(n => n.id === node.id);
+
+        if (layoutNode && layoutNode.x !== undefined && layoutNode.y !== undefined) {
+            return {
+                ...node,
+                position: {
+                    x: layoutNode.x,
+                    y: layoutNode.y,
+                },
+            };
+        } else {
+            console.warn(`Couldn't find the layout position for node ${node.id}, defaulting the position.`);
+            return {
+                ...node,
+                position: defaultNodePosition,
+            };
+        }
+    });
 }

@@ -83,7 +83,7 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
 
 function InternalExplorer({ id, type }: Props) {
     const { token } = theme.useToken();
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout, defaultNodePosition } =
         useNodeEditor();
 
     const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== 'dataproduct' || !id });
@@ -102,13 +102,17 @@ function InternalExplorer({ id, type }: Props) {
     }, [dataProductQuery, datasetQuery, dataOutputQuery, type]);
 
     const { data: graph, isFetching } = graphDataQuery;
-    const generateGraph = useCallback(() => {
+    const generateGraph = useCallback(async () => {
         if (graph) {
             const nodes = parseNodes(graph.nodes, defaultNodePosition);
             const edges = parseEdges(graph.edges, token);
-            setNodesAndEdges(nodes, edges);
+            console.log("smol explorer");
+            const positionedNodes = await applyLayout(nodes, edges);
+            
+            setNodes(positionedNodes);
+            setEdges(edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges, token]);
+    }, [defaultNodePosition, graph, setNodes, setEdges, applyLayout, token]);
 
     useEffect(() => {
         generateGraph();

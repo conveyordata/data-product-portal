@@ -89,20 +89,17 @@ function parseFullNodes(
         });
 
     // count how many children each parent has
-    //let childCounts = regular_nodes.reduce((acc: Record<string, number>, node) => {
-    //    if (node.parentId) {
-    //        if (!acc[node.parentId]) {
-    //            acc[node.parentId] = 0;
-    //        }
-    //        acc[node.parentId]++;
-    //    }
-    //    return acc;
-    //}, {});
+    let childCounts = regular_nodes.reduce((acc: Record<string, number>, node) => {
+       if (node.parentId) {
+           acc[node.parentId] ? acc[node.parentId]++ : acc[node.parentId] = 1;
+       }
+       return acc;
+    }, {});
 
-    // Only include domain nodes if domains are enabled
+    // Only include domain node if domains are enabled and has at least one child
     const domain_nodes = domainsEnabled
         ? nodes
-              .filter((node) => node.type === CustomNodeTypes.DomainNode)
+              .filter((node) => node.type === CustomNodeTypes.DomainNode && childCounts[node.id] > 0)
               .map((node) => {
                   //const childCount = childCounts[node.id] || 1;
                   //const width = Math.max(200, childCount * 120); // Base width of 400px, 200px per child
@@ -113,8 +110,8 @@ function parseFullNodes(
                       deletable: false,
                       type: 'group', // TODO: double use of the 'type' field by reactflow and ourselves
                       style: {
-                          width: 10,
-                          height: 10 * 0.6,
+                          width: 500, // constant size for testing
+                          height: 500,
                           backgroundColor: 'rgba(0, 255, 42, 0.1)',
                           border: '1px solid rgba(0, 255, 42, 0.5)',
                           borderRadius: '8em',
@@ -131,7 +128,7 @@ function parseFullNodes(
                   };
               })
         : [];
-
+    
     const result = [...domain_nodes, ...regular_nodes];
 
     return result;
@@ -141,7 +138,7 @@ function InternalFullExplorer() {
     // Same as InternalExplorer but this one does not filter anything, it shows the full graph
     // Also includes a sidebar to select nodes
 
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setNodesAndEdges, defaultNodePosition } =
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout, defaultNodePosition } =
         useNodeEditor();
     const currentInstance = useReactFlow();
     const { token } = theme.useToken();
@@ -149,7 +146,7 @@ function InternalFullExplorer() {
         dataProductsEnabled: true,
         datasetsEnabled: true,
         dataOutputsEnabled: true,
-        domainsEnabled: false,
+        domainsEnabled: true,
     });
 
     useEffect(() => {
@@ -176,15 +173,17 @@ function InternalFullExplorer() {
         },
     );
 
-    const generateGraph = useCallback(() => {
+    const generateGraph = useCallback(async () => {
         if (graph) {
             const nodes = parseFullNodes(graph.nodes, setNodeId, defaultNodePosition, sidebarFilters.domainsEnabled);
             const edges = parseEdges(graph.edges, token);
-            setNodesAndEdges(nodes, edges);
-            //const new_nodes = setDomainPositions(nodes);  // TODO: does not work yet but we are disabling domain nodes for now
-            //setNodesAndEdges(new_nodes, edges);
+
+            const positionedNodes = await applyLayout(nodes, edges, true); // positions the nodes with a layout algorithm
+
+            setNodes(positionedNodes);
+            setEdges(edges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges, sidebarFilters, token]);
+    }, [defaultNodePosition, graph, applyLayout, sidebarFilters, token]);
 
     useEffect(() => {
         generateGraph();

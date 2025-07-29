@@ -73,7 +73,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
 
     return (
         <div className={styles.sidebarContainer}>
-            {/* <Tag.CheckableTag
+            {<Tag.CheckableTag
                 checked={sidebarFilters.domainsEnabled}
                 className={styles.checkableTag}
                 onChange={(e) => {
@@ -84,7 +84,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
                 }}
             >
                 {t('Domains')}
-            </Tag.CheckableTag> */}
+            </Tag.CheckableTag>}
             <Tag.CheckableTag
                 checked={sidebarFilters.dataProductsEnabled}
                 className={styles.checkableTag}
