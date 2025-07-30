@@ -23,6 +23,7 @@ from app.data_products.schema_request import (
     DataProductCreate,
     DataProductStatusUpdate,
     DataProductUpdate,
+    DataProductUsageUpdate,
 )
 from app.data_products.schema_response import DataProductGet, DataProductsGet
 from app.data_products.service import DataProductService
@@ -378,6 +379,33 @@ def update_data_product_status(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
             subject_id=data_product.id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        )
+    )
+
+
+@router.put(
+    "/{id}/usage",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_PROPERTIES, DataProductResolver
+            )
+        ),
+    ],
+)
+def update_data_product_usage(
+    id: UUID,
+    usage: DataProductUsageUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    DataProductService(db).update_data_product_usage(id, usage)
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_UPDATED,
+            subject_id=id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         )

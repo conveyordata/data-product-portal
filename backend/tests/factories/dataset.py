@@ -19,3 +19,4 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
     status = DatasetStatus.ACTIVE.value
     access_type = DatasetAccessType.PUBLIC.value
     domain = factory.SubFactory(DomainFactory)
+    usage = factory.Faker("word")

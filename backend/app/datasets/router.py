@@ -20,6 +20,7 @@ from app.datasets.schema_request import (
     DatasetCreate,
     DatasetStatusUpdate,
     DatasetUpdate,
+    DatasetUsageUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
@@ -305,6 +306,31 @@ def update_dataset_status(
 ) -> None:
     DatasetService(db).update_dataset_status(id, dataset)
 
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATASET_UPDATED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        )
+    )
+
+
+@router.put(
+    "/{id}/usage",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+        ),
+    ],
+)
+def update_dataset_usage(
+    id: UUID,
+    usage: DatasetUsageUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    DatasetService(db).update_dataset_usage(id, usage)
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_UPDATED,
