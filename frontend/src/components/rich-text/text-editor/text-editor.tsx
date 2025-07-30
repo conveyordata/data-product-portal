@@ -1,11 +1,9 @@
 import { CheckOutlined, EditOutlined } from '@ant-design/icons';
-import Link from '@tiptap/extension-link';
-import Table from '@tiptap/extension-table';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
-import TableRow from '@tiptap/extension-table-row';
-import Typography from '@tiptap/extension-typography';
-import Underline from '@tiptap/extension-underline';
+import { Table } from '@tiptap/extension-table';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { TableRow } from '@tiptap/extension-table-row';
+import { Typography } from '@tiptap/extension-typography';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Button, Popover } from 'antd';
@@ -26,19 +24,7 @@ type Props = {
     isInitialEditMode?: boolean;
 };
 
-const extensions = [
-    StarterKit,
-    Link.configure({
-        autolink: true,
-    }),
-    Underline,
-    Typography,
-    TextStyleCustomExtension,
-    Table,
-    TableCell,
-    TableHeader,
-    TableRow,
-];
+const extensions = [StarterKit, Typography, TextStyleCustomExtension, Table, TableCell, TableHeader, TableRow];
 
 export const TextEditor = ({
     initialContent,
