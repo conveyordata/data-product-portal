@@ -2,8 +2,9 @@ import type { Connection, Edge, Node, OnConnect } from '@xyflow/react';
 import { addEdge, useEdgesState, useNodesState } from '@xyflow/react';
 import { useCallback } from 'react';
 import ELK from 'elkjs';
+import { CustomNodeTypes } from '@/components/charts/node-editor/node-types';
 
-const defaultNodeWidth = 180;
+const defaultNodeWidth = 80;
 const defaultNodeHeight = 80;
 const defaultNodePosition = { x: 0, y: 0 };
 
@@ -65,64 +66,31 @@ const basicLayoutOptions = {
 }
 
 const advancedLayoutOptions = {
-  // Core algorithm
-  "elk.algorithm": "layered",
-  "elk.direction": "RIGHT",
-
-  // INCREASED SPACING for larger graphs
-  "elk.spacing.nodeNode": "50.0",
-  "elk.spacing.edgeNode": "10.0", // More space between edges and nodes
-  "elk.spacing.edgeEdge": "20.0", 
-
-  // LAYERED ALGORITHM - Better for complex graphs
-  "elk.layered.spacing.nodeNodeBetweenLayers": "200.0", // Much more space between layers
-  "elk.layered.spacing.edgeNodeBetweenLayers": "100.0", // More edge-to-node spacing between layers
-
-  // ADVANCED NODE PLACEMENT for cleaner layouts
-  "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX", // Better than SIMPLE for complex graphs
-  "elk.layered.nodePlacement.favorStraightEdges": "true", // Reduces edge bends
-
-  // CROSSING MINIMIZATION - Critical for readability
-  "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
-  "elk.layered.crossingMinimization.greedySwitch.type": "TWO_SIDED", // Better crossing reduction
-  "elk.layered.crossingMinimization.semiInteractive": "true",
-
-  // EDGE ROUTING for smoother edges
-  "elk.edgeRouting": "ORTHOGONAL", // Creates clean 90-degree angles
-  "elk.layered.edgeRouting.sloppiness": "0.2", // Allows slight curves for better aesthetics
-
-  // CYCLE BREAKING for complex domain graphs
-  "elk.layered.cycleBreaking.strategy": "GREEDY", // Handles circular dependencies better
-
-  // PORT CONSTRAINTS - Important for edge cleanliness
-  "elk.portConstraints": "FIXED_SIDE",
-  "elk.layered.portSortingStrategy": "INPUT_ORDER", // Maintains logical port order
-
-  // COMPACTION for better space utilization
-  "elk.layered.compaction.postCompaction.strategy": "LEFT", // Reduces unnecessary whitespace
-  "elk.layered.compaction.connectedComponents": "true", // Groups related components
-
-  // THOROUGHNESS - Spend more time for better results
-  "elk.layered.thoroughness": "10", // Higher values = better layout (default is 7)
-
-  // PADDING - More generous for complex graphs
-  "elk.padding": "[top=100.0,left=100.0,bottom=100.0,right=100.0]",
-
-  // ADDITIONAL TWEAKS for domain-heavy graphs
-  "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES", // Respects your node ordering
-  "elk.layered.layering.strategy": "NETWORK_SIMPLEX", // Better layer assignment
+  "elk.algorithm": "force",
+  "elk.force.repulsivePower": "1.5",
+  "elk.force.model": "FRUCHTERMAN_REINGOLD",
+  "elk.force.iterations": "300",
+  "elk.force.repulsion": "200.0",
+  "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+  "elk.spacing.nodeNode": "60.0", // Spacing between domain nodes
+  "elk.padding": "[top=20.0,left=20.0,bottom=20.0,right=20.0]",
+  "elk.aspectRatio": "1.0",
+  "elk.compaction.connectedComponents": "true",
 }
+
+// const advancedLayoutOptions = {
+//   "elk.algorithm": "stress",
+//   "elk.stress.iterationLimit": "1000",
+//   "elk.stress.epsilon": "0.0001",
+//   "elk.stress.desiredEdgeLength": "100.0",
+//   "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+//   "elk.spacing.nodeNode": "60.0",
+//   "elk.padding": "[top=40.0,left=30.0,bottom=30.0,right=30.0]",
+//   "elk.aspectRatio": "1.0",
+// }
 
 async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: boolean): Promise<Node[]> {
     const elk = new ELK();
-
-    interface ElkNode {
-        id: string
-        width?: number
-        height?: number
-        x?: number
-        y?: number
-    }
 
     interface ElkEdge {
         id: string
@@ -132,26 +100,25 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
 
     const parentNodes = nodes.filter((node) => !node.parentId);
     const childNodes = nodes.filter((node) => node.parentId);
-
     const graphChildren = parentNodes.map((parentNode) => {
-        // If this is a group node (= domain node), include its children
-        if (parentNode.type === "group") {
-            const children = childNodes.filter((child) => child.parentId === parentNode.id)
-                                       .map((child) => ({ id: child.id,
-                                                          width: defaultNodeWidth,
-                                                          height: defaultNodeHeight,
-                                                        }));
+        if (parentNode.type === CustomNodeTypes.DomainNode) {
+            // If this is a domain node, include its children
+            const children = childNodes
+                .filter((child) => child.parentId === parentNode.id)
+                .map((child) => ({ 
+                    id: child.id,
+                    width: defaultNodeWidth,
+                    height: defaultNodeHeight,
+                }));
 
             return {
                 id: parentNode.id,
-                width: Math.max(100, children.length * 200), // Dynamic width based on children
-                height: Math.max(100, Math.ceil(children.length / 3) * 150), // Dynamic height
                 children: children,
                 layoutOptions: {
-                    "elk.algorithm": "box", // Use box layout for children within parent
-                    "elk.spacing.nodeNode": "50.0",
-                    "elk.padding": "[top=30.0,left=30.0,bottom=30.0,right=30.0]",
-                },
+          "elk.algorithm": "force",
+          "elk.spacing.nodeNode": "30.0",
+          "elk.padding": "[top=30.0,left=30.0,bottom=30.0,right=30.0]",
+        },
             }
         } else {
             // Regular node
@@ -163,6 +130,7 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
         }
         });
 
+    // build graph that elk understands (using only necessary info)
     const elkGraph = {
         id: "root",
         layoutOptions: advancedLayout? advancedLayoutOptions : basicLayoutOptions,
@@ -178,14 +146,19 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
     const layout = await elk.layout(elkGraph);
     console.log("ELK layout calculated:", layout);
 
-    // Map the layout positions back to the nodes
+    // Map the layout positions back to the nodes 
+    // (e.g. instert positions of the nodes (override default position) + set size for domain nodes)
     const elkedNodes: Node[] = [];
 
     layout.children?.forEach((layoutNode: any) => {
         const node = nodes.find((n) => n.id === layoutNode.id)
-        if (!node) return; // for children of domain nodes
+        if (!node) return; // happens for children of domain nodes (not top level)
 
-        if (node.type === 'group') {
+        if (node.type === CustomNodeTypes.DomainNode) {
+            console.log(`Domain node ${node.data.name}:`, {
+                elkCalculated: { width: layoutNode.width, height: layoutNode.height },
+                position: { x: layoutNode.x, y: layoutNode.y },
+            })
             // domain node itself
             elkedNodes.push({
                 ...node,
@@ -195,7 +168,7 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
                 },
                 style: {
                     ...node.style,
-                    width: layoutNode.width - 60,
+                    width: layoutNode.width,
                     height: layoutNode.height,
                 },
             });
@@ -207,7 +180,7 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
                 else {
                     elkedNodes.push({
                         ...childNode,
-                        position: { // position in layout: relative -> position in react flow: absolute
+                        position: { // position in layout is absolute
                             x: childLayoutNode.x,
                             y: childLayoutNode.y,
                         }

@@ -6,7 +6,7 @@ import { Flex, theme } from 'antd';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
-import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
+import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
 import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
@@ -106,11 +106,16 @@ function InternalExplorer({ id, type }: Props) {
         if (graph) {
             const nodes = parseNodes(graph.nodes, defaultNodePosition);
             const edges = parseEdges(graph.edges, token);
-            console.log("smol explorer");
-            const positionedNodes = await applyLayout(nodes, edges);
+            
+            const straightEdges = edges.map(edge => ({
+                ...edge,
+                type: CustomEdgeTypes.StraightEdge,
+            }));
+
+            const positionedNodes = await applyLayout(nodes, straightEdges);
             
             setNodes(positionedNodes);
-            setEdges(edges);
+            setEdges(straightEdges);
         }
     }, [defaultNodePosition, graph, setNodes, setEdges, applyLayout, token]);
 

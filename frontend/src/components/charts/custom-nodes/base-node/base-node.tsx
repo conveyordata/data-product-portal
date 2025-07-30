@@ -35,8 +35,8 @@ export function BaseNode<T extends BaseNodeProps>({
     return (
         <>
             <Flex className={styles.nodeContainer} onClick={onClick}>
-                <DefaultHandle id={'left_t'} type={'target'} position={Position.Left} isConnectable={false} />
-                <DefaultHandle id={'left_s'} type={'source'} position={Position.Left} isConnectable={false} />
+                <DefaultHandle id={'left_t'} type={'target'} position={Position.Top} isConnectable={false} />
+                <DefaultHandle id={'left_s'} type={'source'} position={Position.Top} isConnectable={false} />
                 <Flex className={styles.nodeWrapper}>
                     <CustomSvgIconLoader
                         iconComponent={icon}
@@ -47,8 +47,8 @@ export function BaseNode<T extends BaseNodeProps>({
                         color={isActive ? 'primary' : 'light'}
                     />
                 </Flex>
-                <DefaultHandle id={'right_t'} type={'target'} position={Position.Right} isConnectable={false} />
-                <DefaultHandle id={'right_s'} type={'source'} position={Position.Right} isConnectable={false} />
+                <DefaultHandle id={'right_t'} type={'target'} position={Position.Top} isConnectable={false} />
+                <DefaultHandle id={'right_s'} type={'source'} position={Position.Top} isConnectable={false} />
                 {nodeToolbarActions && <NodeToolbar position={Position.Bottom}>{nodeToolbarActions}</NodeToolbar>}
             </Flex>
             <Typography.Paragraph onClick={onClick} ellipsis={{ tooltip: name, rows: 2 }} className={styles.nodeLabel}>

@@ -1,11 +1,12 @@
-import type { EdgeTypes, NodeTypes } from '@xyflow/react';
+import { type EdgeTypes, type NodeTypes } from '@xyflow/react';
 
-import { DefaultEdge } from '@/components/charts/custom-edges/default-edge/default-edge.tsx';
+import { DefaultEdge } from '@/components/charts/custom-edges/default-edge';
 import { DataProductNode } from '@/components/charts/custom-nodes/data-product-node/data-product-node.tsx';
 import { DatasetNode } from '@/components/charts/custom-nodes/dataset-node/dataset-node.tsx';
 import { DomainNode } from '@/components/charts/custom-nodes/domain-node/domain-node.tsx';
 
-import { DataOutputNode } from '../custom-nodes/dataoutput-node/dataoutput-node';
+import { DataOutputNode } from '@/components/charts/custom-nodes/dataoutput-node/dataoutput-node';
+import { StraightEdge } from '@/components/charts/custom-edges/straight-edge';
 
 export enum CustomNodeTypes {
     DataProductNode = 'dataProductNode',
@@ -16,6 +17,7 @@ export enum CustomNodeTypes {
 
 export enum CustomEdgeTypes {
     DefaultEdge = 'defaultEdge',
+    StraightEdge = 'straightEdge',
 }
 
 export const nodeTypes: NodeTypes = {
@@ -27,4 +29,5 @@ export const nodeTypes: NodeTypes = {
 
 export const edgeTypes: EdgeTypes = {
     [CustomEdgeTypes.DefaultEdge]: DefaultEdge,
+    [CustomEdgeTypes.StraightEdge]: StraightEdge,
 };

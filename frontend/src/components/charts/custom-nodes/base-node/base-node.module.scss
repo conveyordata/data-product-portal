@@ -1,13 +1,14 @@
 @use '@/styles/globals';
 
-$node-width: 120px;
-$node-height: 180px;
+$node-width: 80px;
+$node-height: 50px;
 
 .node-container {
     position: relative;
     flex-direction: column;
     align-items: center;
     width: $node-width;
+    height: $node-height;
     justify-content: center;
 }
 

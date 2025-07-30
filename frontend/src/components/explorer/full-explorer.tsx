@@ -6,7 +6,7 @@ import { Flex, theme } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
-import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
+import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
 import { useGetGraphDataQuery } from '@/store/features/graph/graph-api-slice.ts';
@@ -16,6 +16,7 @@ import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from '
 import styles from './explorer.module.scss';
 import { Sidebar, type SidebarFilters } from './sidebar';
 import { parseEdges } from './utils';
+import { NodeParsers } from '@/utils/node-parser.helper';
 
 function parseFullNodes(
     nodes: NodeContract[],
@@ -23,113 +24,63 @@ function parseFullNodes(
     defaultNodePosition: XYPosition,
     domainsEnabled = true,
 ): Node[] {
-    // Regular nodes and domain nodes. In domain nodes, we count how many children they have so we can estimate their size.
-    const regular_nodes = nodes
+
+    // Count how many children each domain node has
+    let childCounts = nodes
+        .filter((node) => node.type !== CustomNodeTypes.DomainNode)
+        .reduce((acc: Record<string, number>, node) => {
+            if (node.data.domain_id) {
+                acc[node.data.domain_id] = (acc[node.data.domain_id] || 0) + 1;
+            }
+            return acc;
+    }, {});
+
+    // Parse regular nodes
+    const regularNodes = nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
         .map((node) => {
             let extra_attributes = {};
             switch (node.type) {
-                case CustomNodeTypes.DataOutputNode:
-                    extra_attributes = {
-                        nodeToolbarActions: node.isMain ? (
-                            ''
-                        ) : (
-                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id} />
-                        ),
-                        sourceHandlePosition: Position.Left,
-                        isActive: true,
-                        targetHandlePosition: Position.Right,
-                        targetHandleId: 'left_t',
-                    };
+                case CustomNodeTypes.DataProductNode:
+                    extra_attributes = { 
+                            targetHandlePosition: Position.Left,
+                            assignments: node.data.assignments,
+                            nodeToolbarActions: node.isMain ? null : <LinkToDataProductNode id={node.data.id} />,
+                        }
                     break;
                 case CustomNodeTypes.DatasetNode:
                     extra_attributes = {
                         nodeToolbarActions: node.isMain ? '' : <LinkToDatasetNode id={node.data.id} />,
                         targetHandlePosition: Position.Right,
                         targetHandleId: 'left_t',
-                    };
+                    }
                     break;
-                case CustomNodeTypes.DataProductNode:
+                case CustomNodeTypes.DataOutputNode:
                     extra_attributes = {
-                        targetHandlePosition: Position.Left,
-                        nodeToolbarActions: node.isMain ? '' : <LinkToDataProductNode id={node.data.id} />,
-                        assignments: node.data.assignments,
-                    };
+                        nodeToolbarActions: node.isMain ? ('') : <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id} />,
+                        sourceHandlePosition: Position.Left,
+                        isActive: true,
+                        targetHandlePosition: Position.Right,
+                        targetHandleId: 'left_t',
+                    }
                     break;
                 default:
-                    break;
+                    throw new Error(`Unknown node type: ${node.type}`)
             }
-
-            return {
-                id: node.id,
-                position: defaultNodePosition,
-                draggable: true,
-                deletable: false,
-                type: node.type,
-                // Only set parentId if domains are enabled and there is a domain_id in the node
-                ...(domainsEnabled && node.data.domain_id
-                    ? {
-                          parentId: node.data.domain_id,
-                          //extent: 'parent', // node not draggable outside of the parent
-                      }
-                    : {}),
-                data: {
-                    name: node.data.name,
-                    id: node.data.id,
-                    icon_key: node.data.icon_key,
-                    isMainNode: node.isMain,
-                    domain: node.data.domain,
-                    description: node.data.description,
-                    onClick: () => {
-                        setNodeId(node.id);
-                    },
-                    ...extra_attributes,
-                },
-            };
+            return NodeParsers.parseRegularNode(node, setNodeId, defaultNodePosition, domainsEnabled, extra_attributes);
         });
 
-    // count how many children each parent has
-    let childCounts = regular_nodes.reduce((acc: Record<string, number>, node) => {
-       if (node.parentId) {
-           acc[node.parentId] ? acc[node.parentId]++ : acc[node.parentId] = 1;
-       }
-       return acc;
-    }, {});
+    // Parse domain nodes (only if domains are enabled and they have children)
+    const domainNodes = domainsEnabled 
+    ? nodes
+        .filter((node) => node.type === CustomNodeTypes.DomainNode && childCounts[node.id] > 0)
+        .map((node) => NodeParsers.parseDomainNode(node, setNodeId, defaultNodePosition))
+    : []
 
-    // Only include domain node if domains are enabled and has at least one child
-    const domain_nodes = domainsEnabled
-        ? nodes
-              .filter((node) => node.type === CustomNodeTypes.DomainNode && childCounts[node.id] > 0)
-              .map((node) => {
-                  //const childCount = childCounts[node.id] || 1;
-                  //const width = Math.max(200, childCount * 120); // Base width of 400px, 200px per child
-                  return {
-                      id: node.id,
-                      position: defaultNodePosition,
-                      draggable: true,
-                      deletable: false,
-                      type: 'group', // TODO: double use of the 'type' field by reactflow and ourselves
-                      style: {
-                          width: 500, // constant size for testing
-                          height: 500,
-                          backgroundColor: 'rgba(0, 255, 42, 0.1)',
-                          border: '1px solid rgba(0, 255, 42, 0.5)',
-                          borderRadius: '8em',
-                      },
-                      data: {
-                          name: node.data.name,
-                          id: node.data.id,
-                          icon_key: node.data.icon_key,
-                          isMainNode: node.isMain,
-                          description: node.data.description,
-                          extent: 'parent',
-                          type: 'group',
-                      },
-                  };
-              })
-        : [];
+    console.log(regularNodes);
     
-    const result = [...domain_nodes, ...regular_nodes];
+    // domain nodes are parents so should come before their children in the array
+    const result = [...domainNodes, ...regularNodes];
 
     return result;
 }
@@ -178,10 +129,15 @@ function InternalFullExplorer() {
             const nodes = parseFullNodes(graph.nodes, setNodeId, defaultNodePosition, sidebarFilters.domainsEnabled);
             const edges = parseEdges(graph.edges, token);
 
-            const positionedNodes = await applyLayout(nodes, edges, true); // positions the nodes with a layout algorithm
+            const straightEdges = edges.map(edge => ({
+                ...edge,
+                type: CustomEdgeTypes.StraightEdge,
+            }));
+
+            const positionedNodes = await applyLayout(nodes, straightEdges, true); // positions the nodes
 
             setNodes(positionedNodes);
-            setEdges(edges);
+            setEdges(straightEdges);
         }
     }, [defaultNodePosition, graph, applyLayout, sidebarFilters, token]);
 

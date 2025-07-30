@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { edgeTypes, nodeTypes } from '@/components/charts/node-editor/node-types.ts';
+import { SimpleDebugButton } from '../node-editor/debug-button';
 
 import styles from './node-editor.module.scss';
 
@@ -71,6 +72,7 @@ export function NodeEditor({
                     fitViewOptions={{ ...defaultFitViewOptions, duration: 500 }}
                 />
             </ReactFlow>
+            <SimpleDebugButton nodes={nodes}/>
             {debug && (
                 <>
                     <Typography.Text strong>{t('Nodes')}</Typography.Text>
