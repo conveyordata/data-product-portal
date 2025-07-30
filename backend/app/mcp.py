@@ -84,10 +84,12 @@ def initialize_models():
 
 initialize_models()
 
-auth = BearerAuthProvider(
-    issuer=get_oidc().authority,
-    jwks_uri=get_oidc().jwks_uri,
-)
+auth = None
+if settings.OIDC_ENABLED:
+    auth = BearerAuthProvider(
+        issuer=get_oidc().authority,
+        jwks_uri=get_oidc().jwks_uri,
+    )
 
 mcp = FastMCP(name="DataProductPortalMCP", auth=auth)
 
