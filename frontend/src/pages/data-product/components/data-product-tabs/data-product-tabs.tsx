@@ -1,12 +1,13 @@
 import Icon, {
+    BarChartOutlined,
     CompassOutlined,
     HistoryOutlined,
     InfoCircleOutlined,
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
-import { Tabs } from 'antd';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { Badge, Flex, Tabs } from 'antd';
+import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
@@ -24,6 +25,7 @@ import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/da
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { useGetDataProductHistoryQuery } from '@/store/features/data-products/data-products-api-slice';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import { UsageTab } from '../../../../components/tabs/usage-tab/usage-tab';
 import styles from './data-product-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 
@@ -33,7 +35,7 @@ type Props = {
 };
 
 type Tab = {
-    label: string;
+    label: string | ReactElement;
     key: TabKeys;
     icon?: ReactNode;
     children: ReactNode;
@@ -69,6 +71,17 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 key: TabKeys.About,
                 icon: <InfoCircleOutlined />,
                 children: <AboutTab dataProductId={dataProductId} />,
+            },
+            {
+                label: (
+                    <Flex className={styles.betaContainer}>
+                        {t('Usage')}
+                        <Badge className={styles.beta} count={t('BETA')} />
+                    </Flex>
+                ),
+                key: TabKeys.Usage,
+                icon: <BarChartOutlined />,
+                children: <UsageTab dataProductId={dataProductId} />,
             },
             {
                 label: t('Input Datasets'),

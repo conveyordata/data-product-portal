@@ -18,7 +18,6 @@ from sqlalchemy.orm import Session
 
 from app.authorization.service import AuthorizationService
 from app.core.authz import Action, Authorization
-from app.datasets.model import Dataset
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.enums import DecisionStatus
@@ -32,6 +31,12 @@ revision: str = "6fd335d0dcfe"
 down_revision: Union[str, None] = "b3a391db07dd"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
+
+dataset_table = sa.Table(
+    "datasets",
+    sa.MetaData(),
+    sa.Column("id", PGUUID(as_uuid=True), primary_key=True),
+)
 
 data_product_membership = sa.Table(
     "data_product_memberships",
@@ -166,7 +171,7 @@ class RoleMigrationService:
         owner_role = self.role_service.find_prototype(Scope.DATASET, Prototype.OWNER)
         assert owner_role is not None
 
-        datasets = self.db.scalars(sa.select(Dataset)).unique().all()
+        datasets = self.db.scalars(sa.select(dataset_table)).unique().all()
         for dataset in datasets:
             for owner in dataset.owners:
                 self.db.add(
