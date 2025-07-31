@@ -22,7 +22,8 @@ if not settings.DISABLED_AWS:
         disabled_aws = True
 else:
     logger.warning(
-        "AWS functionality is disabled in settings. All AWS functionality will be disabled"
+        "AWS functionality is disabled in settings. "
+        "All AWS functionality will be disabled"
     )
     disabled_aws = True
 

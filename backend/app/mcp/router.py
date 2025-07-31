@@ -82,9 +82,7 @@ async def register(request: Request):
         logger.info("/register parsed data received (fields redacted for privacy)")
     except Exception as e:
         logger.error(f"Failed to parse JSON body: {e}")
-        return JSONResponse(
-            {"error": "Invalid JSON body", "details": str(e)}, status_code=400
-        )
+        return JSONResponse({"error": "Invalid JSON body"}, status_code=400)
 
     # Generate client credentials
     client_id = get_oidc().client_id
