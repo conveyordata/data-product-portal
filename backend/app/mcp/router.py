@@ -19,7 +19,7 @@ def oauth_metadata() -> JSONResponse:
             "authorization_endpoint": get_oidc().authorization_endpoint,
             "token_endpoint": get_oidc().token_endpoint,
             "jwks_uri": get_oidc().jwks_uri,
-            "registration_endpoint": f"{settings.HOST}api/register",
+            "registration_endpoint": f"{settings.HOST.rstrip('/')}/api/register",
             "response_types_supported": ["code"],
             "code_challenge_methods_supported": ["S256"],
             "token_endpoint_auth_methods_supported": ["client_secret_post"],
@@ -51,7 +51,7 @@ async def openid_config():
 @router.get("/.well-known/oauth-protected-resource")
 def oauth_protected_resource():
     """OAuth 2.1 Protected Resource Metadata."""
-    BASE_URL = settings.HOST
+    BASE_URL = f"{settings.HOST.rstrip('/')}/"
     return JSONResponse(
         {
             "resource": BASE_URL,
@@ -92,7 +92,7 @@ async def register(request: Request):
         "client_secret": client_secret,
         "client_id_issued_at": now,
         "client_secret_expires_at": 0,  # 0 means no expiration
-        "redirect_uris": [settings.HOST],  # data.get("redirect_uris", []),
+        "redirect_uris": [settings.HOST.rstrip("/")],
         "token_endpoint_auth_method": data.get(
             "token_endpoint_auth_method", "client_secret_post"
         ),
