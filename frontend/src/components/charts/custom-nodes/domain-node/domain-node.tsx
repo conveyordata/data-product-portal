@@ -15,11 +15,13 @@ export type DomainNodeProps = Node<{
     sourceHandlePosition?: Position;
     isActive?: boolean;
     onClick?: () => void;
+    backgroundColor: string;
+    borderColor: string;
 }>;
 
 export function DomainNode<T extends DomainNodeProps>(nodeProps: NodeProps<T>) {
     const { data, width, height } = nodeProps;
-    const { onClick, nodeToolbarActions, name } = data;
+    const { onClick, nodeToolbarActions, name, backgroundColor, borderColor } = data;
     return (
         <>
             <Flex className={styles.nodeContainer} onClick={onClick}>
@@ -27,7 +29,8 @@ export function DomainNode<T extends DomainNodeProps>(nodeProps: NodeProps<T>) {
                     <div
                         className={styles.nodeBox}
                         style={{
-                            backgroundColor: 'rgba(255, 0, 255, 0.2)',
+                            backgroundColor: backgroundColor, // override backgroundColor in domain-node.module.scss
+                            borderColor: borderColor, // override boder in domain-node.module.scss
                             height: height,
                             width: width,
                             visibility: 'visible',
@@ -39,7 +42,7 @@ export function DomainNode<T extends DomainNodeProps>(nodeProps: NodeProps<T>) {
                 {nodeToolbarActions && <NodeToolbar position={Position.Bottom}>{nodeToolbarActions}</NodeToolbar>}
             </Flex>
             <Typography.Paragraph ellipsis={{ tooltip: name, rows: 2 }} className={styles.nodeLabel}>
-                {name} Domain
+                {name}
             </Typography.Paragraph>
         </>
     );

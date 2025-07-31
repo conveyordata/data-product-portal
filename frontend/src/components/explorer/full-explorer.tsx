@@ -74,7 +74,7 @@ function parseFullNodes(
     const domainNodes = domainsEnabled 
     ? nodes
         .filter((node) => node.type === CustomNodeTypes.DomainNode && childCounts[node.id] > 0)
-        .map((node) => NodeParsers.parseDomainNode(node, setNodeId, defaultNodePosition))
+        .map((node, index) => NodeParsers.parseDomainNode(node, setNodeId, defaultNodePosition, index))
     : []
 
     console.log(regularNodes);
@@ -134,7 +134,7 @@ function InternalFullExplorer() {
                 type: CustomEdgeTypes.StraightEdge,
             }));
 
-            const positionedNodes = await applyLayout(nodes, straightEdges, true); // positions the nodes
+            const positionedNodes = await applyLayout(nodes, straightEdges, sidebarFilters.domainsEnabled); // positions the nodes
 
             setNodes(positionedNodes);
             setEdges(straightEdges);

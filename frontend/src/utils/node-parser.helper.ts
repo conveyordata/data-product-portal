@@ -1,6 +1,23 @@
 import type { Node, XYPosition } from "@xyflow/react"
 import type { NodeContract } from "@/types/graph/graph-contract"
 
+// Define colors for domain nodes
+// Should have the same corresponding colors with domainBorderColors for a clean look
+const domainBackgroundColors = [
+    'rgba(15, 200, 0, 0.1)', // green
+    'rgba(0, 0, 255, 0.1)', // blue
+    'rgba(255, 0, 0, 0.1)', // red
+    'rgba(255, 0, 255, 0.1)', // purple
+    'rgba(255, 165, 0, 0.1)', // orange
+];
+const domainBorderColors = [
+    'rgba(15, 200, 0, 0.4)', // green
+    'rgba(0, 0, 255, 0.4)', // blue
+    'rgba(255, 0, 0, 0.4)', // red
+    'rgba(255, 0, 255, 0.4)', // purple
+    'rgba(255, 165, 0, 0.4)', // orange
+];
+
 // Separate parser for Regular nodes and Domain nodes
 export class NodeParsers {
     static sharedAttributes(
@@ -51,21 +68,19 @@ export class NodeParsers {
         node: NodeContract,
         setNodeId: (id: string) => void,
         defaultPosition: XYPosition,
+        nodeColorIndex: number = 0,
     ): Node {
         const parsedNode = this.sharedAttributes(node, setNodeId, defaultPosition, false); //trick: set domains to false to not have a parentId
         return {
             ...parsedNode,
-            // style: {
-            //     width: 500, // constant size for testing
-            //     height: 500,
-            //     backgroundColor: 'rgba(238, 255, 0, 0.1)',
-            //     border: '1px solid rgba(0, 255, 42, 0.5)',
-            //     borderRadius: '8em',
-            // },
             data: {
                 ...parsedNode.data,
                 extent: 'parent',
                 type: 'group',
+
+                // sneaky trick to parse colors for domain node to the component, but this isn't a style sheet
+                backgroundColor: domainBackgroundColors[nodeColorIndex % domainBackgroundColors.length],
+                borderColor: domainBorderColors[nodeColorIndex % domainBorderColors.length],
             }
         };
     }

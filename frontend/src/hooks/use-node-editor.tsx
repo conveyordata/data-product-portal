@@ -42,20 +42,16 @@ export function useNodeEditor() {
     };
 }
 
+// layout options without domain nodes (e.g. for explorer.tsx)
 const basicLayoutOptions = {
     // Core algorithm
     "elk.algorithm": "layered",
     "elk.direction": "RIGHT",
 
-    // Spacing options (use string values, not numbers)
-    "elk.spacing.nodeNode": "80.0",
-    "elk.spacing.edgeNode": "40.0",
-    "elk.spacing.edgeEdge": "20.0",
-
-    // Layered algorithm specific options
-    "elk.layered.spacing.nodeNodeBetweenLayers": "100.0",
-    "elk.layered.spacing.edgeNodeBetweenLayers": "50.0",
-    "elk.layered.nodePlacement.strategy": "SIMPLE",
+    "elk.spacing.nodeNode": "80.0", // spacing between nodes vertically
+    "elk.layered.spacing.edgeNodeBetweenLayers": "50.0", // spacing between nodes horizontally
+    
+    "elk.layered.nodePlacement.strategy": "SIMPLE", // keeps the flow clean and symmetrical
     "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
 
     // Port constraints
@@ -65,29 +61,19 @@ const basicLayoutOptions = {
     "elk.padding": "[top=50.0,left=50.0,bottom=50.0,right=50.0]",
 }
 
-const advancedLayoutOptions = {
-  "elk.algorithm": "force",
-  "elk.force.repulsivePower": "1.5",
-  "elk.force.model": "FRUCHTERMAN_REINGOLD",
-  "elk.force.iterations": "300",
-  "elk.force.repulsion": "200.0",
-  "elk.hierarchyHandling": "INCLUDE_CHILDREN",
-  "elk.spacing.nodeNode": "60.0", // Spacing between domain nodes
-  "elk.padding": "[top=20.0,left=20.0,bottom=20.0,right=20.0]",
-  "elk.aspectRatio": "1.0",
-  "elk.compaction.connectedComponents": "true",
+// layout options between domain nodes (e.g. for full-explorer.tsx with domain nodes visible)
+const interDomainLayoutOptions = {
+    "elk.algorithm": "force",
+    "elk.spacing.nodeNode": "60.0", // spacing between domain nodes
+    "elk.aspectRatio": "1.5", // lower => layout more vertical <-> higher => layout more horizontal
 }
 
-// const advancedLayoutOptions = {
-//   "elk.algorithm": "stress",
-//   "elk.stress.iterationLimit": "1000",
-//   "elk.stress.epsilon": "0.0001",
-//   "elk.stress.desiredEdgeLength": "100.0",
-//   "elk.hierarchyHandling": "INCLUDE_CHILDREN",
-//   "elk.spacing.nodeNode": "60.0",
-//   "elk.padding": "[top=40.0,left=30.0,bottom=30.0,right=30.0]",
-//   "elk.aspectRatio": "1.0",
-// }
+// layout options within a domain node
+const intraDomainLayoutOptions = {
+    "elk.algorithm": "force",
+    "elk.spacing.nodeNode": "20.0", // spacing between regular nodes within domain nodes
+    "elk.padding": "[top=30.0,left=30.0,bottom=30.0,right=30.0]", // spacing between children and edges
+}
 
 async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: boolean): Promise<Node[]> {
     const elk = new ELK();
@@ -114,11 +100,7 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
             return {
                 id: parentNode.id,
                 children: children,
-                layoutOptions: {
-          "elk.algorithm": "force",
-          "elk.spacing.nodeNode": "30.0",
-          "elk.padding": "[top=30.0,left=30.0,bottom=30.0,right=30.0]",
-        },
+                layoutOptions: intraDomainLayoutOptions,
             }
         } else {
             // Regular node
@@ -133,7 +115,7 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
     // build graph that elk understands (using only necessary info)
     const elkGraph = {
         id: "root",
-        layoutOptions: advancedLayout? advancedLayoutOptions : basicLayoutOptions,
+        layoutOptions: advancedLayout? interDomainLayoutOptions : basicLayoutOptions,
         children: graphChildren,
         edges: edges.map((edge): ElkEdge => ({
             id: edge.id,
