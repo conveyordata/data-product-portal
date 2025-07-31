@@ -67,14 +67,19 @@ def oauth_protected_resource():
 @router.post("/api/register")
 async def register(request: Request):
     """OAuth 2.1 Dynamic Client Registration endpoint."""
-    logger.info(f"/register headers: {dict(request.headers)}")
-    raw_body = await request.body()
-    logger.info(f"/register raw body: {raw_body}")
+    # Redact sensitive headers before logging
+    headers = dict(request.headers)
+    for sensitive_header in ["authorization", "cookie", "set-cookie"]:
+        if sensitive_header in headers:
+            headers[sensitive_header] = "[REDACTED]"
+    logger.info(f"/register headers: {headers}")
+
+    # Do not log raw body to avoid leaking sensitive information
 
     try:
         data = await request.json()
-        print(data)
-        logger.info(f"/register parsed data: {data}")
+        # Do not print or log raw data directly, as it may contain sensitive information
+        logger.info("/register parsed data received (fields redacted for privacy)")
     except Exception as e:
         logger.error(f"Failed to parse JSON body: {e}")
         return JSONResponse(
