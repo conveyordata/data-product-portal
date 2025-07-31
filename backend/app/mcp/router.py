@@ -102,5 +102,9 @@ async def register(request: Request):
         "scope": data.get("scope", ""),
     }
 
-    logger.info(f"/register response: {response_data}")
+    # Redact client_secret before logging
+    redacted_response_data = dict(response_data)
+    if "client_secret" in redacted_response_data:
+        redacted_response_data["client_secret"] = "[REDACTED]"
+    logger.info(f"/register response: {redacted_response_data}")
     return JSONResponse(response_data, status_code=201)
