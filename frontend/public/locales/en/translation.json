@@ -10,6 +10,8 @@
     "Data output updated successfully": "Data output updated successfully",
     "Please check for invalid form fields": "Please check for invalid form fields",
     "Name": "Name",
+    "BETA": "BETA",
+    "Not available": "Not available",
     "The name of your data output": "The name of your data output",
     "Please input the name of the data output": "Please input the name of the data output",
     "The namespace of the data output": "The namespace of the data output",

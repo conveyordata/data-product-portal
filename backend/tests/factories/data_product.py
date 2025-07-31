@@ -22,3 +22,4 @@ class DataProductFactory(factory.alchemy.SQLAlchemyModelFactory):
     type = factory.SubFactory(DataProductTypeFactory)
     domain = factory.SubFactory(DomainFactory)
     lifecycle = factory.SubFactory(LifecycleFactory)
+    usage = factory.Faker("word")

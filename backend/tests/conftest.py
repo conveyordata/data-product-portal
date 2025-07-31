@@ -26,7 +26,6 @@ def setup_and_teardown_database():
     from app.db_tool import init  # noqa: E402
 
     init(force=True)
-
     yield
 
 

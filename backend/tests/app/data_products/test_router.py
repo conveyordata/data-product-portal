@@ -300,6 +300,33 @@ class TestDataProductsRouter:
         response = self.get_data_product_by_id(client, data_product.id)
         assert response.json()["status"] == "active"
 
+    def test_update_usage_not_owner(self, client):
+        data_product = DataProductFactory()
+        response = self.update_data_product_usage(
+            client, {"usage": "new usage"}, data_product.id
+        )
+        assert response.status_code == 403
+
+    def test_update_usage(self, client):
+        user = UserFactory(external_id="sub")
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        response = self.get_data_product_by_id(client, data_product.id)
+        assert response.json()["status"] == "pending"
+        _ = self.update_data_product_usage(
+            client, {"usage": "new usage"}, data_product.id
+        )
+        response = self.get_data_product_by_id(client, data_product.id)
+        assert response.json()["usage"] == "new usage"
+
     def test_get_data_product_by_id_with_invalid_id(self, client):
         data_product = self.get_data_product_by_id(client, self.invalid_id)
         assert data_product.status_code == 404
@@ -729,6 +756,10 @@ class TestDataProductsRouter:
     @staticmethod
     def update_data_product_status(client: TestClient, status, data_product_id):
         return client.put(f"{ENDPOINT}/{data_product_id}/status", json=status)
+
+    @staticmethod
+    def update_data_product_usage(client: TestClient, usage, data_product_id):
+        return client.put(f"{ENDPOINT}/{data_product_id}/usage", json=usage)
 
     @staticmethod
     def delete_data_product(client: TestClient, data_product_id):

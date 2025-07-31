@@ -289,6 +289,28 @@ class TestDatasetsRouter:
         response = self.get_dataset_by_id(client, ds.id)
         assert response.json()["status"] == "pending"
 
+    def test_update_status_not_owner(self, client):
+        dataset = DatasetFactory()
+        response = self.update_dataset_usage(client, {"usage": "new usage"}, dataset.id)
+        assert response.status_code == 403
+
+    def test_update_usage(self, client):
+        user = UserFactory(external_id="sub")
+        dataset = DatasetFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.DATASET__UPDATE_PROPERTIES],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            dataset_id=dataset.id,
+        )
+        response = self.get_dataset_by_id(client, dataset.id)
+        _ = self.update_dataset_usage(client, {"usage": "new usage"}, dataset.id)
+        response = self.get_dataset_by_id(client, dataset.id)
+        assert response.json()["usage"] == "new usage"
+
     def test_get_graph_data(self, client):
         ds = DatasetFactory()
         response = client.get(f"{ENDPOINT}/{ds.id}/graph")
@@ -578,6 +600,10 @@ class TestDatasetsRouter:
     @staticmethod
     def update_dataset_status(client, status, dataset_id):
         return client.put(f"{ENDPOINT}/{dataset_id}/status", json=status)
+
+    @staticmethod
+    def update_dataset_usage(client, usage, dataset_id):
+        return client.put(f"{ENDPOINT}/{dataset_id}/usage", json=usage)
 
     @staticmethod
     def update_default_dataset(client, default_dataset_payload, dataset_id):

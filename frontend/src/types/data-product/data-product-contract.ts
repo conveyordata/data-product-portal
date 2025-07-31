@@ -30,6 +30,7 @@ export interface DataProductContract {
     domain: DomainContract;
     domain_id: string;
     namespace: string;
+    usage?: string;
     data_outputs: DataOutputsGetContract;
     data_product_settings: DataProductSettingValueContract[];
 }
