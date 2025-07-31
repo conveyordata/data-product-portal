@@ -58,6 +58,11 @@ class Settings(BaseSettings):
     # Namespace validation
     NAMESPACE_MAX_LENGTH: int = 64
 
+    DISABLED_AWS: bool = False
+    POSTHOG_API_KEY: str = "phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc"
+    POSTHOG_HOST: str = "https://eu.i.posthog.com"
+    POSTHOG_ENABLED: bool = True
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"
