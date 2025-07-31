@@ -76,8 +76,6 @@ function parseFullNodes(
         .filter((node) => node.type === CustomNodeTypes.DomainNode && childCounts[node.id] > 0)
         .map((node, index) => NodeParsers.parseDomainNode(node, setNodeId, defaultNodePosition, index))
     : []
-
-    console.log(regularNodes);
     
     // domain nodes are parents so should come before their children in the array
     const result = [...domainNodes, ...regularNodes];
@@ -129,6 +127,7 @@ function InternalFullExplorer() {
             const nodes = parseFullNodes(graph.nodes, setNodeId, defaultNodePosition, sidebarFilters.domainsEnabled);
             const edges = parseEdges(graph.edges, token);
 
+            // explicitly specify straight edge so it doesn't default to default edge (which is a bezier curve)
             const straightEdges = edges.map(edge => ({
                 ...edge,
                 type: CustomEdgeTypes.StraightEdge,
