@@ -52,8 +52,7 @@ def OAuth(
     server_base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
     # Setup OAuth client
-    # TODO SOLVE THIS?
-    redirect_port = 57453  # find_available_port()
+    redirect_port = 57453
     redirect_uri = f"http://localhost:{redirect_port}/callback"
 
     if isinstance(scopes, list):
@@ -123,8 +122,8 @@ def OAuth(
     return oauth_provider
 
 
-oauth = OAuth(mcp_url=f"{settings.HOST}/api")
-client = Client(f"{settings.HOST}/mcp/mcp", auth=oauth)
+oauth = OAuth(mcp_url=f"{settings.HOST}/mcp/mcp/")
+client = Client(f"{settings.HOST}/mcp/mcp/", auth="oauth")
 
 server = FastMCP.as_proxy(client, name="AuthenticatedProxyDataProductPortal")
 

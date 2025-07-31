@@ -89,7 +89,7 @@ app = FastAPI(
     **oidc_kwargs,
 )
 
-mcp_app = mcp.http_app(path="/mcp/")
+mcp_app = mcp.http_app(path="/mcp")
 mcp.add_middleware(LoggingMiddleware())
 
 app.include_router(router, prefix="/api")
@@ -107,14 +107,6 @@ app.add_middleware(
 )
 app.add_middleware(BaseHTTPMiddleware, dispatch=log_middleware)
 
-
-class LogHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        logger.info(f"Incoming request headers: {request.headers}")
-        return await call_next(request)
-
-
-app.add_middleware(LogHeadersMiddleware)
 app.add_middleware(
     CorrelationIdMiddleware,
     header_name="X-Request-ID",
