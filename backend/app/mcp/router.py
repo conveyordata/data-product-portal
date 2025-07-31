@@ -58,7 +58,7 @@ def oauth_protected_resource():
             "authorization_servers": [BASE_URL],
             "jwks_uri": get_oidc().jwks_uri,
             "bearer_methods_supported": ["header"],
-            "resource_documentation": f"{BASE_URL}/docs",
+            "resource_documentation": f"{BASE_URL}docs",
         }
     )
 

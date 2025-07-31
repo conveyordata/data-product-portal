@@ -123,7 +123,7 @@ def OAuth(
 
 
 oauth = OAuth(mcp_url=f"{settings.HOST}/mcp/mcp/")
-client = Client(f"{settings.HOST}/mcp/mcp/", auth="oauth")
+client = Client(f"{settings.HOST}/mcp/mcp/", auth=oauth)
 
 server = FastMCP.as_proxy(client, name="AuthenticatedProxyDataProductPortal")
 
