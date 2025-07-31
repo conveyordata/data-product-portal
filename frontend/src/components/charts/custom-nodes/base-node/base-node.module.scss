@@ -1,14 +1,16 @@
 @use '@/styles/globals';
 
-$node-width: 80px;
-$node-height: 50px;
+:root {
+    --node-width: 100px;
+    --node-height: 50px;
+}
 
 .node-container {
     position: relative;
     flex-direction: column;
     align-items: center;
-    width: $node-width;
-    height: $node-height;
+    width: var(--node-width);
+    height: var(--node-height);
     justify-content: center;
 }
 
@@ -23,7 +25,8 @@ $node-height: 50px;
 .node-label {
     text-align: center;
     width: 100%;
-    max-width: $node-width;
+    max-width: var(--node-width);
     font-size: globals.$font-size-sm;
     margin-bottom: 0 !important;
+    margin-top: 0 !important;
 }

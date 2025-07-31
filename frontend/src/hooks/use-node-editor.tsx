@@ -4,8 +4,15 @@ import { useCallback } from 'react';
 import ELK from 'elkjs';
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types';
 
-const defaultNodeWidth = 80;
-const defaultNodeHeight = 80;
+const getNodeDimensions = () => {
+    const style = getComputedStyle(document.documentElement);
+    return {
+        width: parseInt(style.getPropertyValue('--node-width')),
+        height: parseInt(style.getPropertyValue('--node-height'))
+    };
+};
+
+const {width: defaultNodeWidth, height: defaultNodeHeight} = getNodeDimensions();
 const defaultNodePosition = { x: 0, y: 0 };
 
 export function useNodeEditor() {
@@ -65,14 +72,17 @@ const basicLayoutOptions = {
 const interDomainLayoutOptions = {
     "elk.algorithm": "force",
     "elk.spacing.nodeNode": "60.0", // spacing between domain nodes
-    "elk.aspectRatio": "1.5", // lower => layout more vertical <-> higher => layout more horizontal
+    "elk.aspectRatio": "2", // lower => layout more vertical <-> higher => layout more horizontal
 }
 
 // layout options within a domain node
 const intraDomainLayoutOptions = {
     "elk.algorithm": "force",
-    "elk.spacing.nodeNode": "20.0", // spacing between regular nodes within domain nodes
-    "elk.padding": "[top=30.0,left=30.0,bottom=30.0,right=30.0]", // spacing between children and edges
+    "elk.spacing.nodeNode": "40.0", // spacing between regular nodes within domain nodes
+    
+    // A bit more padding at the top looks visually nicer because we perceive the icon closer to the top edge as worse than the label text close the the bottom edge.
+    // Most of the time, the label doesn't take up the whole height of the node anyways, so this trick evens it out for short labels (taking up 1 instead of 2 lines).
+    "elk.padding": "[top=50.0,left=30.0,bottom=30.0,right=30.0]", // spacing between children and edges | 
 }
 
 async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: boolean): Promise<Node[]> {
@@ -126,7 +136,6 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
 
     // Calculate the layout
     const layout = await elk.layout(elkGraph);
-    console.log("ELK layout calculated:", layout);
 
     // Map the layout positions back to the nodes 
     // (e.g. instert positions of the nodes (override default position) + set size for domain nodes)
@@ -137,10 +146,6 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
         if (!node) return; // happens for children of domain nodes (not top level)
 
         if (node.type === CustomNodeTypes.DomainNode) {
-            console.log(`Domain node ${node.data.name}:`, {
-                elkCalculated: { width: layoutNode.width, height: layoutNode.height },
-                position: { x: layoutNode.x, y: layoutNode.y },
-            })
             // domain node itself
             elkedNodes.push({
                 ...node,

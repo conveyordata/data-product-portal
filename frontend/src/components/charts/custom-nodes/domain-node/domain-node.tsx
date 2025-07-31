@@ -24,13 +24,17 @@ export function DomainNode<T extends DomainNodeProps>(nodeProps: NodeProps<T>) {
     const { onClick, nodeToolbarActions, name, backgroundColor, borderColor } = data;
     return (
         <>
+            <Typography.Paragraph ellipsis={{ tooltip: name, rows: 2 }} className={styles.nodeLabel}>
+                {name}
+            </Typography.Paragraph>
             <Flex className={styles.nodeContainer} onClick={onClick}>
                 <Flex className={styles.nodeWrapper}>
                     <div
                         className={styles.nodeBox}
+                        // override styles.nodeBox on the parts that need to be dynamic
                         style={{
-                            backgroundColor: backgroundColor, // override backgroundColor in domain-node.module.scss
-                            borderColor: borderColor, // override boder in domain-node.module.scss
+                            backgroundColor: backgroundColor, // although there is a default color specified in domain-node.module.scss
+                            borderColor: borderColor, // although there is a default color in domain-node.module.scss
                             height: height,
                             width: width,
                             visibility: 'visible',
@@ -41,9 +45,6 @@ export function DomainNode<T extends DomainNodeProps>(nodeProps: NodeProps<T>) {
                 </Flex>
                 {nodeToolbarActions && <NodeToolbar position={Position.Bottom}>{nodeToolbarActions}</NodeToolbar>}
             </Flex>
-            <Typography.Paragraph ellipsis={{ tooltip: name, rows: 2 }} className={styles.nodeLabel}>
-                {name}
-            </Typography.Paragraph>
         </>
     );
 }
