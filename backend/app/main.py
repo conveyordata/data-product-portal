@@ -10,7 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.authorization.service import AuthorizationService
-from app.core import logging
 from app.core.auth.jwt import oidc
 from app.core.auth.router import router as auth
 from app.core.errors.error_handling import add_exception_handlers
@@ -111,7 +110,7 @@ app.add_middleware(BaseHTTPMiddleware, dispatch=log_middleware)
 
 class LogHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
-        logging.info(f"Incoming request headers: {request.headers}")
+        logger.info(f"Incoming request headers: {request.headers}")
         return await call_next(request)
 
 
