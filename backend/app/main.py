@@ -89,7 +89,7 @@ app = FastAPI(
     **oidc_kwargs,
 )
 
-mcp_app = mcp.http_app(path="/mcp")
+mcp_app = mcp.http_app(path="/mcp/")
 mcp.add_middleware(LoggingMiddleware())
 
 app.include_router(router, prefix="/api")
