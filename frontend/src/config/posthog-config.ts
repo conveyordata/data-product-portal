@@ -3,7 +3,7 @@ import posthog from 'posthog-js';
 posthog.init(config.POSTHOG_KEY, {
     api_host: config.POSTHOG_HOST,
     autocapture: false,
-    capture_pageview: true,
+    capture_pageview: false,
     disable_session_recording: true,
     person_profiles: 'identified_only',
 });
