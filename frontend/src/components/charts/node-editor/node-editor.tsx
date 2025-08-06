@@ -13,9 +13,10 @@ import styles from './node-editor.module.scss';
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 2;
 
-const defaultFitViewOptions: FitViewOptions = {
+export const defaultFitViewOptions: FitViewOptions = {
     padding: 0.1,
     maxZoom: 1.25,
+    duration: 650,
 };
 
 type Props = {
@@ -24,6 +25,7 @@ type Props = {
     onConnect: (connection: Connection) => void;
     onNodesChange: (changes: NodeChange[]) => void;
     onEdgesChange: (changes: EdgeChange[]) => void;
+    onNodeClick?: ReactFlowProps["onNodeClick"]
     editorProps?: Omit<ReactFlowProps, 'nodes' | 'edges' | 'onConnect' | 'onNodesChange' | 'onEdgesChange'>;
     debug?: boolean;
 };
@@ -34,6 +36,7 @@ export function NodeEditor({
     onConnect,
     onNodesChange,
     onEdgesChange,
+    onNodeClick,
     debug,
     editorProps,
 }: Props) {
@@ -48,6 +51,7 @@ export function NodeEditor({
                 onConnect={onConnect}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
+                onNodeClick={onNodeClick}
                 fitView
                 onInit={(instance) => instance.fitView(defaultFitViewOptions)}
                 minZoom={MIN_ZOOM}
@@ -68,7 +72,7 @@ export function NodeEditor({
                 <Controls
                     position={'top-right'}
                     showInteractive={false}
-                    fitViewOptions={{ ...defaultFitViewOptions, duration: 500 }}
+                    fitViewOptions={defaultFitViewOptions}
                 />
             </ReactFlow>
             {debug && (

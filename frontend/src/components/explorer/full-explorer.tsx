@@ -5,7 +5,7 @@ import { Position, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { Flex, theme } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 
-import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
+import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
@@ -77,7 +77,7 @@ function parseFullNodes(
         .map((node, index) => NodeParsers.parseDomainNode(node, setNodeId, defaultNodePosition, index))
     : []
     
-    // domain nodes are parents so should come before their children in the array
+    // Domain nodes are parents so should come before their children in the array
     const result = [...domainNodes, ...regularNodes];
 
     return result;
@@ -127,7 +127,7 @@ function InternalFullExplorer() {
             const nodes = parseFullNodes(graph.nodes, setNodeId, defaultNodePosition, sidebarFilters.domainsEnabled);
             const edges = parseEdges(graph.edges, token);
 
-            // explicitly specify straight edge so it doesn't default to default edge (which is a bezier curve)
+            // Explicitly specify straight edge so it doesn't default to default edge (which is a bezier curve)
             const straightEdges = edges.map(edge => ({
                 ...edge,
                 type: CustomEdgeTypes.StraightEdge,
@@ -148,6 +148,17 @@ function InternalFullExplorer() {
         return <LoadingSpinner />;
     }
 
+    // Custom node click handler
+    function handleNodeClick(event: React.MouseEvent, node: Node) {
+        if(node)
+            setTimeout(() => {
+                currentInstance.fitView({
+                    ...defaultFitViewOptions,
+                    nodes: [node],
+                });
+            }, 50); // Small delay to let React Flow's internal logic complete, otherwise there seems to be an automattic (internally managed) fit view, but to the wrong position.
+    }
+
     return (
         <Flex className={styles.nodeWrapper}>
             <Sidebar
@@ -164,6 +175,7 @@ function InternalFullExplorer() {
                 onConnect={onConnect}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
+                onNodeClick={handleNodeClick}
                 editorProps={{
                     draggable: false,
                     edgesReconnectable: false,
