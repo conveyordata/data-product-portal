@@ -23,12 +23,11 @@ export class NodeParsers {
     static sharedAttributes(
         node: NodeContract,
         setNodeId: (id: string) => void,
-        defaultPosition: XYPosition,
         domainsEnabled: boolean,
     ): Node {
         return {
             id: node.id,
-            position: defaultPosition,
+            position: {x: 0, y: 0} as XYPosition, // Default position, will be updated later by the layout algorithm
             draggable: true,
             deletable: false,
             type: node.type,
@@ -49,11 +48,10 @@ export class NodeParsers {
     static parseRegularNode(
         node: NodeContract,
         setNodeId: (id: string) => void,
-        defaultPosition: XYPosition,
         domainsEnabled: boolean,
         extra_attributes: any,
     ): Node {
-        const parsedNode = this.sharedAttributes(node, setNodeId, defaultPosition, domainsEnabled);
+        const parsedNode = this.sharedAttributes(node, setNodeId, domainsEnabled);
         return {
             ...parsedNode,
             data: {
@@ -67,10 +65,9 @@ export class NodeParsers {
     static parseDomainNode(
         node: NodeContract,
         setNodeId: (id: string) => void,
-        defaultPosition: XYPosition,
         nodeColorIndex: number = 0,
     ): Node {
-        const parsedNode = this.sharedAttributes(node, setNodeId, defaultPosition, false); //trick: set domains to false to not have a parentId
+        const parsedNode = this.sharedAttributes(node, setNodeId, false); //trick: set domains to false to not have a parentId
         return {
             ...parsedNode,
             data: {

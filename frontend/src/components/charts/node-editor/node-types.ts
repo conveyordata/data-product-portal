@@ -1,4 +1,4 @@
-import { type EdgeTypes, type NodeTypes } from '@xyflow/react';
+import type { EdgeTypes, NodeTypes } from '@xyflow/react';
 
 import { DefaultEdge } from '@/components/charts/custom-edges/default-edge';
 import { DataProductNode } from '@/components/charts/custom-nodes/data-product-node/data-product-node.tsx';

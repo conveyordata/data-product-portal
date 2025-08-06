@@ -14,7 +14,6 @@ const getNodeDimensions = () => {
 };
 
 const {width: defaultNodeWidth, height: defaultNodeHeight} = getNodeDimensions();
-const defaultNodePosition = { x: 0, y: 0 };
 
 export function useNodeEditor() {
     const [nodes, setNodes, onNodesChange] = useNodesState([] as Node[]);
@@ -46,7 +45,6 @@ export function useNodeEditor() {
         onNodesChange,
         onEdgesChange,
         onConnect,
-        defaultNodePosition,
     };
 }
 

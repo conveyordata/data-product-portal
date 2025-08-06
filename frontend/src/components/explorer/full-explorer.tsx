@@ -1,6 +1,6 @@
 import '@xyflow/react/dist/base.css';
 
-import type { Node, XYPosition } from '@xyflow/react';
+import type { Node } from '@xyflow/react';
 import { Position, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { Flex, theme } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
@@ -21,7 +21,6 @@ import { NodeParsers } from '@/utils/node-parser.helper';
 function parseFullNodes(
     nodes: NodeContract[],
     setNodeId: (id: string) => void,
-    defaultNodePosition: XYPosition,
     domainsEnabled = true,
 ): Node[] {
 
@@ -67,14 +66,14 @@ function parseFullNodes(
                 default:
                     throw new Error(`Unknown node type: ${node.type}`)
             }
-            return NodeParsers.parseRegularNode(node, setNodeId, defaultNodePosition, domainsEnabled, extra_attributes);
+            return NodeParsers.parseRegularNode(node, setNodeId, domainsEnabled, extra_attributes);
         });
 
     // Parse domain nodes (only if domains are enabled and they have children)
     const domainNodes = domainsEnabled 
     ? nodes
         .filter((node) => node.type === CustomNodeTypes.DomainNode && childCounts[node.id] > 0)
-        .map((node, index) => NodeParsers.parseDomainNode(node, setNodeId, defaultNodePosition, index))
+        .map((node, index) => NodeParsers.parseDomainNode(node, setNodeId, index))
     : []
     
     // Domain nodes are parents so should come before their children in the array
@@ -87,7 +86,7 @@ function InternalFullExplorer() {
     // Same as InternalExplorer but this one does not filter anything, it shows the full graph
     // Also includes a sidebar to select nodes
 
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout, defaultNodePosition } =
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout} =
         useNodeEditor();
     const currentInstance = useReactFlow();
     const { token } = theme.useToken();
@@ -124,7 +123,7 @@ function InternalFullExplorer() {
 
     const generateGraph = useCallback(async () => {
         if (graph) {
-            const nodes = parseFullNodes(graph.nodes, setNodeId, defaultNodePosition, sidebarFilters.domainsEnabled);
+            const nodes = parseFullNodes(graph.nodes, setNodeId, sidebarFilters.domainsEnabled);
             const edges = parseEdges(graph.edges, token);
 
             // Explicitly specify straight edge so it doesn't default to default edge (which is a bezier curve)
@@ -138,7 +137,7 @@ function InternalFullExplorer() {
             setNodes(positionedNodes);
             setEdges(straightEdges);
         }
-    }, [defaultNodePosition, graph, applyLayout, sidebarFilters, token]);
+    }, [graph, applyLayout, sidebarFilters, token]);
 
     useEffect(() => {
         generateGraph();
@@ -156,7 +155,7 @@ function InternalFullExplorer() {
                     ...defaultFitViewOptions,
                     nodes: [node],
                 });
-            }, 50); // Small delay to let React Flow's internal logic complete, otherwise there seems to be an automattic (internally managed) fit view, but to the wrong position.
+            }, 50); // Small delay to let React Flow's internal logic complete, otherwise there seems to be an automatic (internally managed) fit view, but to the wrong position.
     }
 
     return (
