@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import ELK from 'elkjs';
 import { CustomNodeTypes } from '@/components/charts/node-editor/node-types';
 
+// gets node width and height from base-node.module.scss
 const getNodeDimensions = () => {
     const style = getComputedStyle(document.documentElement);
     return {
