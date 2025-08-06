@@ -11,28 +11,22 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
 import { useGetGraphDataQuery } from '@/store/features/graph/graph-api-slice.ts';
 import type { NodeContract } from '@/types/graph/graph-contract.ts';
-
+import { NodeParsers } from '@/utils/node-parser.helper';
 import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common';
 import styles from './explorer.module.scss';
 import { Sidebar, type SidebarFilters } from './sidebar';
 import { parseEdges } from './utils';
-import { NodeParsers } from '@/utils/node-parser.helper';
 
-function parseFullNodes(
-    nodes: NodeContract[],
-    setNodeId: (id: string) => void,
-    domainsEnabled = true,
-): Node[] {
-
+function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void, domainsEnabled = true): Node[] {
     // Count how many children each domain node has
-    let childCounts = nodes
+    const childCounts = nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
         .reduce((acc: Record<string, number>, node) => {
             if (node.data.domain_id) {
                 acc[node.data.domain_id] = (acc[node.data.domain_id] || 0) + 1;
             }
             return acc;
-    }, {});
+        }, {});
 
     // Parse regular nodes
     const regularNodes = nodes
@@ -41,41 +35,45 @@ function parseFullNodes(
             let extra_attributes = {};
             switch (node.type) {
                 case CustomNodeTypes.DataProductNode:
-                    extra_attributes = { 
-                            targetHandlePosition: Position.Left,
-                            assignments: node.data.assignments,
-                            nodeToolbarActions: node.isMain ? null : <LinkToDataProductNode id={node.data.id} />,
-                        }
+                    extra_attributes = {
+                        targetHandlePosition: Position.Left,
+                        assignments: node.data.assignments,
+                        nodeToolbarActions: node.isMain ? null : <LinkToDataProductNode id={node.data.id} />,
+                    };
                     break;
                 case CustomNodeTypes.DatasetNode:
                     extra_attributes = {
                         nodeToolbarActions: node.isMain ? '' : <LinkToDatasetNode id={node.data.id} />,
                         targetHandlePosition: Position.Right,
                         targetHandleId: 'left_t',
-                    }
+                    };
                     break;
                 case CustomNodeTypes.DataOutputNode:
                     extra_attributes = {
-                        nodeToolbarActions: node.isMain ? ('') : <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id} />,
+                        nodeToolbarActions: node.isMain ? (
+                            ''
+                        ) : (
+                            <LinkToDataOutputNode id={node.id} product_id={node.data.link_to_id} />
+                        ),
                         sourceHandlePosition: Position.Left,
                         isActive: true,
                         targetHandlePosition: Position.Right,
                         targetHandleId: 'left_t',
-                    }
+                    };
                     break;
                 default:
-                    throw new Error(`Unknown node type: ${node.type}`)
+                    throw new Error(`Unknown node type: ${node.type}`);
             }
             return NodeParsers.parseRegularNode(node, setNodeId, domainsEnabled, extra_attributes);
         });
 
     // Parse domain nodes (only if domains are enabled and they have children)
-    const domainNodes = domainsEnabled 
-    ? nodes
-        .filter((node) => node.type === CustomNodeTypes.DomainNode && childCounts[node.id] > 0)
-        .map((node, index) => NodeParsers.parseDomainNode(node, setNodeId, index))
-    : []
-    
+    const domainNodes = domainsEnabled
+        ? nodes
+              .filter((node) => node.type === CustomNodeTypes.DomainNode && childCounts[node.id] > 0)
+              .map((node, index) => NodeParsers.parseDomainNode(node, setNodeId, index))
+        : [];
+
     // Domain nodes are parents so should come before their children in the array
     const result = [...domainNodes, ...regularNodes];
 
@@ -86,8 +84,7 @@ function InternalFullExplorer() {
     // Same as InternalExplorer but this one does not filter anything, it shows the full graph
     // Also includes a sidebar to select nodes
 
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout} =
-        useNodeEditor();
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout } = useNodeEditor();
     const currentInstance = useReactFlow();
     const { token } = theme.useToken();
     const [sidebarFilters, setSidebarFilters] = useState<SidebarFilters>({
@@ -127,7 +124,7 @@ function InternalFullExplorer() {
             const edges = parseEdges(graph.edges, token);
 
             // Explicitly specify straight edge so it doesn't default to default edge (which is a bezier curve)
-            const straightEdges = edges.map(edge => ({
+            const straightEdges = edges.map((edge) => ({
                 ...edge,
                 type: CustomEdgeTypes.StraightEdge,
             }));
@@ -149,7 +146,7 @@ function InternalFullExplorer() {
 
     // Custom node click handler
     function handleNodeClick(event: React.MouseEvent, node: Node) {
-        if(node)
+        if (node)
             setTimeout(() => {
                 currentInstance.fitView({
                     ...defaultFitViewOptions,

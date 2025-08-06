@@ -40,8 +40,7 @@ export function DomainNode<T extends DomainNodeProps>(nodeProps: NodeProps<T>) {
                             visibility: 'visible',
                             borderRadius: '8px',
                         }}
-                    >
-                    </div>
+                    />
                 </Flex>
                 {nodeToolbarActions && <NodeToolbar position={Position.Bottom}>{nodeToolbarActions}</NodeToolbar>}
             </Flex>

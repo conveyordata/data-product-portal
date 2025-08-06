@@ -25,7 +25,7 @@ type Props = {
     onConnect: (connection: Connection) => void;
     onNodesChange: (changes: NodeChange[]) => void;
     onEdgesChange: (changes: EdgeChange[]) => void;
-    onNodeClick?: ReactFlowProps["onNodeClick"]
+    onNodeClick?: ReactFlowProps['onNodeClick'];
     editorProps?: Omit<ReactFlowProps, 'nodes' | 'edges' | 'onConnect' | 'onNodesChange' | 'onEdgesChange'>;
     debug?: boolean;
 };
@@ -69,11 +69,7 @@ export function NodeEditor({
                 {...editorProps}
             >
                 <Background />
-                <Controls
-                    position={'top-right'}
-                    showInteractive={false}
-                    fitViewOptions={defaultFitViewOptions}
-                />
+                <Controls position={'top-right'} showInteractive={false} fitViewOptions={defaultFitViewOptions} />
             </ReactFlow>
             {debug && (
                 <>

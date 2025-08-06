@@ -83,8 +83,17 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
 
 function InternalExplorer({ id, type }: Props) {
     const { token } = theme.useToken();
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout, defaultNodePosition } =
-        useNodeEditor();
+    const {
+        edges,
+        onEdgesChange,
+        nodes,
+        onNodesChange,
+        onConnect,
+        setNodes,
+        setEdges,
+        applyLayout,
+        defaultNodePosition,
+    } = useNodeEditor();
 
     const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== 'dataproduct' || !id });
     const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== 'dataset' || !id });
@@ -106,14 +115,14 @@ function InternalExplorer({ id, type }: Props) {
         if (graph) {
             const nodes = parseNodes(graph.nodes, defaultNodePosition);
             const edges = parseEdges(graph.edges, token);
-            
-            const straightEdges = edges.map(edge => ({
+
+            const straightEdges = edges.map((edge) => ({
                 ...edge,
                 type: CustomEdgeTypes.StraightEdge,
             }));
 
             const positionedNodes = await applyLayout(nodes, straightEdges);
-            
+
             setNodes(positionedNodes);
             setEdges(straightEdges);
         }

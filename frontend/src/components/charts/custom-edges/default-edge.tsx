@@ -8,5 +8,5 @@ export function DefaultEdge({ id, sourceX, sourceY, targetX, targetY, style }: E
         targetY,
     });
 
-    return <BaseEdge id={id} path={edgePath} style={style}/>;
+    return <BaseEdge id={id} path={edgePath} style={style} />;
 }
