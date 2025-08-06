@@ -29,3 +29,7 @@ class DatasetAboutUpdate(ORMModel):
 
 class DatasetStatusUpdate(ORMModel):
     status: DatasetStatus
+
+
+class DatasetUsageUpdate(ORMModel):
+    usage: str

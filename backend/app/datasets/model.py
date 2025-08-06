@@ -31,6 +31,7 @@ class Dataset(Base, BaseORM):
     about = Column(String)
     access_type = Column(Enum(DatasetAccessType), default=DatasetAccessType.PUBLIC)
     status: DatasetStatus = Column(Enum(DatasetStatus), default=DatasetStatus.ACTIVE)
+    usage = Column(String, nullable=True)
 
     # Foreign keys
     lifecycle_id: Mapped[UUID] = mapped_column(

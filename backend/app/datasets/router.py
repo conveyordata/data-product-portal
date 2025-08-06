@@ -20,6 +20,7 @@ from app.datasets.schema_request import (
     DatasetCreate,
     DatasetStatusUpdate,
     DatasetUpdate,
+    DatasetUsageUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
@@ -29,6 +30,7 @@ from app.events.schema_response import EventGet
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
+from app.role_assignments.dataset.auth import DatasetAuthAssignment
 from app.role_assignments.dataset.schema import (
     CreateRoleAssignment,
     UpdateRoleAssignment,
@@ -158,10 +160,11 @@ def _assign_owner_role_assignments(
             ),
             actor=actor,
         )
-        assignment_service.update_assignment(
+        assignment = assignment_service.update_assignment(
             UpdateRoleAssignment(id=assignment.id, decision=DecisionStatus.APPROVED),
             actor=actor,
         )
+        DatasetAuthAssignment(assignment).add()
         event_service.create_event(
             CreateEvent(
                 name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
@@ -303,6 +306,31 @@ def update_dataset_status(
 ) -> None:
     DatasetService(db).update_dataset_status(id, dataset)
 
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATASET_UPDATED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        )
+    )
+
+
+@router.put(
+    "/{id}/usage",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.DATASET__UPDATE_PROPERTIES, DatasetResolver)
+        ),
+    ],
+)
+def update_dataset_usage(
+    id: UUID,
+    usage: DatasetUsageUpdate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    DatasetService(db).update_dataset_usage(id, usage)
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_UPDATED,

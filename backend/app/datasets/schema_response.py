@@ -33,6 +33,7 @@ class BaseDatasetGet(ORMModel):
     name: str
     description: str
     status: DatasetStatus
+    usage: Optional[str]
     access_type: DatasetAccessType
 
     # Nested schemas

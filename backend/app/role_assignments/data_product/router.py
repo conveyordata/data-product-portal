@@ -97,11 +97,8 @@ def create_assignment(
         )
     else:
         background_tasks.add_task(
-            email.send_role_assignment_request_email,
-            role_assignment,
-            approvers,
+            email.send_role_assignment_request_email, role_assignment.id, approvers, db
         )
-
     return role_assignment
 
 
@@ -124,7 +121,6 @@ def request_assignment(
 ) -> RoleAssignmentResponse:
     service = RoleAssignmentService(db=db)
     role_assignment = service.create_assignment(id, request, actor=user)
-
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REQUESTED,
@@ -141,9 +137,7 @@ def request_assignment(
         action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
     )
     background_tasks.add_task(
-        email.send_role_assignment_request_email,
-        role_assignment,
-        approvers,
+        email.send_role_assignment_request_email, role_assignment.id, approvers, db
     )
     return role_assignment
 

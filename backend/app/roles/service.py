@@ -48,11 +48,10 @@ class RoleService:
                 status.HTTP_403_FORBIDDEN,
                 detail="You cannot change the permissions of the admin role",
             )
-
         for k, v in update.items():
             if k == "permissions":
                 v = self._canonical_permissions(v)
-            setattr(role, k, v) if v else None
+            setattr(role, k, v)
 
         self.db.commit()
         return role

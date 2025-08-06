@@ -1,6 +1,13 @@
-import { CompassOutlined, HistoryOutlined, InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
-import { Tabs } from 'antd';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import {
+    BarChartOutlined,
+    CompassOutlined,
+    HistoryOutlined,
+    InfoCircleOutlined,
+    SettingOutlined,
+    TeamOutlined,
+} from '@ant-design/icons';
+import { Badge, Flex, Tabs } from 'antd';
+import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
@@ -8,6 +15,7 @@ import { Explorer } from '@/components/explorer/explorer';
 import { HistoryTab } from '@/components/history/history-tab.tsx';
 import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
 import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
@@ -21,7 +29,7 @@ import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
 
 type Tab = {
-    label: string;
+    label: string | ReactElement;
     key: TabKeys;
     icon?: ReactNode;
     children: ReactNode;
@@ -63,6 +71,17 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
                 key: TabKeys.About,
                 icon: <InfoCircleOutlined />,
                 children: <AboutTab datasetId={datasetId} />,
+            },
+            {
+                label: (
+                    <Flex className={styles.betaContainer}>
+                        {t('Usage')}
+                        <Badge className={styles.beta} count={t('BETA')} />
+                    </Flex>
+                ),
+                key: TabKeys.Usage,
+                icon: <BarChartOutlined />,
+                children: <UsageTab datasetId={datasetId} />,
             },
             {
                 label: t('Producing Data Products'),

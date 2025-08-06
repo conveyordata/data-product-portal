@@ -9,3 +9,24 @@
         width: 100%;
     }
 }
+
+
+.beta-container {
+    position: relative;
+    display: inline-block;
+
+    .beta {
+        margin-left: globals.$spacing-s;
+
+        :global(.ant-badge-count) {
+            background-color: globals.$primary-color;
+            font-size: globals.$font-size-xs;
+            height: globals.$spacing-m;
+            line-height: globals.$spacing-m;
+            border-radius: border-radius;
+            padding: 0 globals.$spacing-s;
+            min-width: auto;
+            transform: translateY(-4px);
+        }
+    }
+}
