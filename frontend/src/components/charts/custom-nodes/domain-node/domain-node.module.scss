@@ -21,8 +21,6 @@
     justify-content: center;
     text-align: center;
     border-radius: 8% !important; // 50% forces circular shape
-    //width: 350px; // set dymanically in use-node-editor.tsx by the layout algorithm
-    //height: 350px;
     background-color: rgba(255, 0, 255, 0.2);
     border: 2px solid rgba(255, 0, 255, 0.4);
     transition: all 0.2s ease;
