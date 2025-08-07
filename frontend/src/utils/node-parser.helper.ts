@@ -1,5 +1,6 @@
-import type { Node, XYPosition } from '@xyflow/react';
+import type { Node, Position, XYPosition } from '@xyflow/react';
 import type { NodeContract } from '@/types/graph/graph-contract';
+import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 
 // Define colors for domain nodes
 // Should have the same corresponding colors with domainBorderColors for a clean look
@@ -18,63 +19,67 @@ const domainBorderColors = [
     'rgba(255, 165, 0, 0.4)', // orange
 ];
 
-// Separate parser for Regular nodes and Domain nodes
-export class NodeParsers {
-    static sharedAttributes(node: NodeContract, setNodeId: (id: string) => void, domainsEnabled: boolean): Node {
-        return {
-            id: node.id,
-            position: { x: 0, y: 0 } as XYPosition, // Default position, will be updated later by the layout algorithm
-            draggable: true,
-            deletable: false,
-            type: node.type,
-            ...(domainsEnabled && node.data.domain_id
-                ? {
-                      parentId: node.data.domain_id,
-                  }
-                : {}),
-            data: {
-                name: node.data.name,
-                id: node.data.id,
-                icon_key: node.data.icon_key,
-                isMainNode: node.isMain,
-                description: node.data.description,
-                onClick: () => {
-                    setNodeId(node.id);
-                },
+function sharedAttributes(node: NodeContract, setNodeId: (id: string) => void, domainsEnabled: boolean): Node {
+    return {
+        id: node.id,
+        position: { x: 0, y: 0 } as XYPosition, // Default position, will be updated later by the layout algorithm
+        draggable: true,
+        deletable: false,
+        type: node.type,
+        ...(domainsEnabled && node.data.domain_id
+            ? {
+                  parentId: node.data.domain_id,
+              }
+            : {}),
+        data: {
+            name: node.data.name,
+            id: node.data.id,
+            icon_key: node.data.icon_key,
+            isMainNode: node.isMain,
+            description: node.data.description,
+            onClick: () => {
+                setNodeId(node.id);
             },
-        };
-    }
+        },
+    };
+}
 
-    static parseRegularNode(
-        node: NodeContract,
-        setNodeId: (id: string) => void,
-        domainsEnabled: boolean,
-        extra_attributes: any,
-    ): Node {
-        const parsedNode = NodeParsers.sharedAttributes(node, setNodeId, domainsEnabled);
-        return {
-            ...parsedNode,
-            data: {
-                domain: node.data.domain,
-                ...parsedNode.data,
-                ...extra_attributes,
-            },
-        };
-    }
+export function parseRegularNode(
+    node: NodeContract,
+    setNodeId: (id: string) => void,
+    domainsEnabled: boolean,
+    extra_attributes: {
+        nodeToolbarActions?: React.ReactNode;
+        targetHandlePosition?: Position;
+        sourceHandlePosition?: Position;
+        isActive?: boolean;
+        targetHandleId?: string;
+        assignments?: DataProductRoleAssignmentContract[];
+    },
+): Node {
+    const parsedNode = sharedAttributes(node, setNodeId, domainsEnabled);
+    return {
+        ...parsedNode,
+        data: {
+            domain: node.data.domain,
+            ...parsedNode.data,
+            ...extra_attributes,
+        },
+    };
+}
 
-    static parseDomainNode(node: NodeContract, setNodeId: (id: string) => void, nodeColorIndex = 0): Node {
-        const parsedNode = NodeParsers.sharedAttributes(node, setNodeId, false); //trick: set domains to false to not have a parentId
-        return {
-            ...parsedNode,
-            data: {
-                ...parsedNode.data,
-                extent: 'parent',
-                type: 'group',
+export function parseDomainNode(node: NodeContract, setNodeId: (id: string) => void, nodeColorIndex = 0): Node {
+    const parsedNode = sharedAttributes(node, setNodeId, false); //trick: set domains to false to not have a parentId
+    return {
+        ...parsedNode,
+        data: {
+            ...parsedNode.data,
+            extent: 'parent',
+            type: 'group',
 
-                // sneaky trick to parse colors for domain node to the component, but this isn't a style sheet
-                backgroundColor: domainBackgroundColors[nodeColorIndex % domainBackgroundColors.length],
-                borderColor: domainBorderColors[nodeColorIndex % domainBorderColors.length],
-            },
-        };
-    }
+            // sneaky trick to parse colors for domain node to the component, but this isn't a style sheet
+            backgroundColor: domainBackgroundColors[nodeColorIndex % domainBackgroundColors.length],
+            borderColor: domainBorderColors[nodeColorIndex % domainBorderColors.length],
+        },
+    };
 }

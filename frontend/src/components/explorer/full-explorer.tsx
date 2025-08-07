@@ -11,7 +11,7 @@ import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spi
 import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
 import { useGetGraphDataQuery } from '@/store/features/graph/graph-api-slice.ts';
 import type { NodeContract } from '@/types/graph/graph-contract.ts';
-import { NodeParsers } from '@/utils/node-parser.helper';
+import { parseDomainNode, parseRegularNode } from '@/utils/node-parser.helper';
 import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common';
 import styles from './explorer.module.scss';
 import { Sidebar, type SidebarFilters } from './sidebar';
@@ -36,9 +36,9 @@ function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void, 
             switch (node.type) {
                 case CustomNodeTypes.DataProductNode:
                     extra_attributes = {
+                        nodeToolbarActions: node.isMain ? null : <LinkToDataProductNode id={node.data.id} />,
                         targetHandlePosition: Position.Left,
                         assignments: node.data.assignments,
-                        nodeToolbarActions: node.isMain ? null : <LinkToDataProductNode id={node.data.id} />,
                     };
                     break;
                 case CustomNodeTypes.DatasetNode:
@@ -64,14 +64,14 @@ function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void, 
                 default:
                     throw new Error(`Unknown node type: ${node.type}`);
             }
-            return NodeParsers.parseRegularNode(node, setNodeId, domainsEnabled, extra_attributes);
+            return parseRegularNode(node, setNodeId, domainsEnabled, extra_attributes);
         });
 
     // Parse domain nodes (only if domains are enabled and they have children)
     const domainNodes = domainsEnabled
         ? nodes
               .filter((node) => node.type === CustomNodeTypes.DomainNode && childCounts[node.id] > 0)
-              .map((node, index) => NodeParsers.parseDomainNode(node, setNodeId, index))
+              .map((node, index) => parseDomainNode(node, setNodeId, index))
         : [];
 
     // Domain nodes are parents so should come before their children in the array
@@ -134,7 +134,7 @@ function InternalFullExplorer() {
             setNodes(positionedNodes);
             setEdges(straightEdges);
         }
-    }, [graph, applyLayout, sidebarFilters, token]);
+    }, [graph, applyLayout, sidebarFilters, token, setEdges, setNodes]);
 
     useEffect(() => {
         generateGraph();
@@ -145,7 +145,7 @@ function InternalFullExplorer() {
     }
 
     // Custom node click handler
-    function handleNodeClick(event: React.MouseEvent, node: Node) {
+    function handleNodeClick(_event: React.MouseEvent, node: Node) {
         if (node)
             setTimeout(() => {
                 currentInstance.fitView({

@@ -84,6 +84,27 @@ const intraDomainLayoutOptions = {
 async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: boolean): Promise<Node[]> {
     const elk = new ELK();
 
+    interface ElkNode {
+        id: string;
+        width?: number;
+        height?: number;
+        children?: ElkNode[];
+        layoutOptions?: {
+            'elk.algorithm'?: string;
+            'elk.direction'?: string;
+            'elk.spacing.nodeNode'?: string;
+            'elk.aspectRatio'?: string;
+            'elk.layered.spacing.edgeNodeBetweenLayers'?: string;
+            'elk.layered.nodePlacement.strategy'?: string;
+            'elk.layered.crossingMinimization.strategy'?: string;
+            'elk.portConstraints'?: string;
+            'elk.padding'?: string;
+            // Add any other possible layout options as needed
+        };
+        x?: number; // optional, as it only exists after the layout
+        y?: number; // optional, as it only exists after the layout
+    }
+
     interface ElkEdge {
         id: string;
         sources: string[];
@@ -138,7 +159,7 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
     // (e.g. inject positions of the nodes (override default position) + set size for domain nodes
     const elkedNodes: Node[] = [];
 
-    layout.children?.forEach((layoutNode: any) => {
+    layout.children?.forEach((layoutNode: ElkNode) => {
         const node = nodes.find((n) => n.id === layoutNode.id);
         if (!node) return; // happens for children of domain nodes (not top level)
 
@@ -147,8 +168,8 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
             elkedNodes.push({
                 ...node,
                 position: {
-                    x: layoutNode.x,
-                    y: layoutNode.y,
+                    x: layoutNode.x || 0,
+                    y: layoutNode.y || 0,
                 },
                 style: {
                     ...node.style,
@@ -158,8 +179,8 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
             });
 
             // children of domain node
-            layoutNode.children?.forEach((childLayoutNode: any) => {
-                const childNode = nodes.find((n) => n.id == childLayoutNode.id);
+            layoutNode.children?.forEach((childLayoutNode: ElkNode) => {
+                const childNode = nodes.find((n) => n.id === childLayoutNode.id);
                 if (!childNode) {
                     console.warn("A childnode after layout couldn't be found in the original nodes!");
                 } else {
@@ -167,8 +188,8 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
                         ...childNode,
                         position: {
                             // position in layout is absolute
-                            x: childLayoutNode.x,
-                            y: childLayoutNode.y,
+                            x: childLayoutNode.x || 0,
+                            y: childLayoutNode.y || 0,
                         },
                     });
                 }
@@ -178,8 +199,8 @@ async function applyElkLayout(nodes: Node[], edges: Edge[], advancedLayout: bool
             elkedNodes.push({
                 ...node,
                 position: {
-                    x: layoutNode.x,
-                    y: layoutNode.y,
+                    x: layoutNode.x || 0,
+                    y: layoutNode.y || 0,
                 },
             });
         }
