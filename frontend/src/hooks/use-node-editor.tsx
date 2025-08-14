@@ -74,6 +74,11 @@ const interDomainLayoutOptions = {
 // Layout options within a domain node.
 const intraDomainLayoutOptions = {
     'elk.algorithm': 'force',
+
+    // these are for a left to right layered design *within* a domain node
+    // 'elk.algorithm': 'layered',
+    // 'elk.direction': 'RIGHT',
+    // 'elk.layered.spacing.edgeNodeBetweenLayers': '50.0',
     'elk.spacing.nodeNode': '40.0', // spacing between regular nodes within a domain node
 
     // A bit more padding at the top.
