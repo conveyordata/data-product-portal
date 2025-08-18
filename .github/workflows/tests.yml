@@ -73,7 +73,7 @@ jobs:
       - name: Install dependencies
         working-directory: ./backend
         run: |
-          poetry env use $PYTHON_VERSION
+          poetry env use "$PYTHON_VERSION"
           poetry install --with test
 
       - name: Run the automated tests
