@@ -53,7 +53,7 @@ jobs:
           python-version: "3.13"
 
       - name: Run image
-        uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
+        uses: abatilo/actions-poetry@65c61eae400c65c9510a584af85138c1ae19bbc0 # v3.0.2
         with:
           poetry-version: "2.1.1"
 
