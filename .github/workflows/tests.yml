@@ -55,7 +55,7 @@ jobs:
       - name: Run image
         uses: abatilo/actions-poetry@65c61eae400c65c9510a584af85138c1ae19bbc0 # v3.0.2
         with:
-          poetry-version: "2.1.1"
+          poetry-version: "2.1.4"
 
       - name: Setup a local virtual environment (if no poetry.toml file)
         run: |
