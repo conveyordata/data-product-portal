@@ -52,7 +52,12 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
-          python-version: "$PYTHON_VERSION"
+          python-version: {{ env.PYTHON_VERSION }}
+          cache: 'poetry'
+
+      - name: Alias Python
+        run: |
+          alias python3=python # Required to correctly use `actions-poetry` since v4.0.0
 
       - name: Run image
         uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
@@ -73,7 +78,7 @@ jobs:
       - name: Install dependencies
         working-directory: ./backend
         run: |
-          poetry env use "$PYTHON_VERSION"
+          poetry env use {{ env.PYTHON_VERSION }}
           poetry install --with test
 
       - name: Run the automated tests
