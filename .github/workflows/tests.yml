@@ -27,6 +27,8 @@ jobs:
     name: Run backend tests
     runs-on: ubuntu-latest
     needs: [environment]
+    env:
+      PYTHON_VERSION: "3.13"
     services:
       postgres:
         image: postgres
@@ -50,7 +52,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
-          python-version: "3.13"
+          python-version: $PYTHON_VERSION
 
       - name: Run image
         uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
@@ -70,7 +72,9 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./backend
-        run: poetry install --with test
+        run: |
+          poetry env use $PYTHON_VERSION
+          poetry install --with test
 
       - name: Run the automated tests
         working-directory: ./backend
