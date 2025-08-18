@@ -52,12 +52,8 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Alias Python
-        run: |
-          alias python3=python # Required to correctly use `actions-poetry` since v4.0.0
-
       - name: Run image
-        uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
+        uses: abatilo/actions-poetry@65c61eae400c65c9510a584af85138c1ae19bbc0 # v3.0.2
         with:
           poetry-version: "2.1.1"
 
@@ -74,8 +70,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./backend
-        run: |
-          poetry install --with test
+        run: poetry install --with test
 
       - name: Run the automated tests
         working-directory: ./backend
