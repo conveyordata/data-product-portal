@@ -62,7 +62,7 @@
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.25.9",
         "i18next-parser": "^9.3.0",
-        "msw": "^2.10.4",
+        "msw": "^2.10.5",
         "sass": "^1.90.0",
         "typescript": "^5.9.2",
         "vite": "^7.1.2",
