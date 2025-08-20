@@ -138,18 +138,18 @@ test = ["distro (>=1.9.0,<1.10.0)", "flake8 (>=6.1,<7.0)", "flake8-pyi (>=24.1.0
 
 [[package]]
 name = "boto3"
-version = "1.40.12"
+version = "1.40.13"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.40.12-py3-none-any.whl", hash = "sha256:3c3d6731390b5b11f5e489d5d9daa57f0c3e171efb63ac8f47203df9c71812b3"},
-    {file = "boto3-1.40.12.tar.gz", hash = "sha256:c6b32aee193fbd2eb84696d2b5b2410dcda9fb4a385e1926cff908377d222247"},
+    {file = "boto3-1.40.13-py3-none-any.whl", hash = "sha256:b43110b6ad30e683fab769b4c5659b6b0606afa535627de831f7181306009d5e"},
+    {file = "boto3-1.40.13.tar.gz", hash = "sha256:7ff74221328868c5f7dcd7a9b959e7b882c1ab1b04cc9df868ea70de7d8bd004"},
 ]
 
 [package.dependencies]
-botocore = ">=1.40.12,<1.41.0"
+botocore = ">=1.40.13,<1.41.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.13.0,<0.14.0"
 
@@ -158,14 +158,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.40.12"
+version = "1.40.13"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.40.12-py3-none-any.whl", hash = "sha256:84e96004a8b426c5508f6b5600312d6271364269466a3a957dc377ad8effc438"},
-    {file = "botocore-1.40.12.tar.gz", hash = "sha256:c6560578e799b47b762b7e555bd9c5dd5c29c5d23bd778a8a72e98c979b3c727"},
+    {file = "botocore-1.40.13-py3-none-any.whl", hash = "sha256:5bf7334d6a0a87a907d607b115710bede2440376cefa8c33b0d99571fb226d87"},
+    {file = "botocore-1.40.13.tar.gz", hash = "sha256:d7003526a9169e8ab3566db2227cf0b85d9e689e9ff97f2803c629a8e4624fb5"},
 ]
 
 [package.dependencies]
@@ -1899,4 +1899,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "deabf692f5edccdfdb0d507ac41771352f18612e36ca1df40ce3a38d4b36b526"
+content-hash = "52b0d5d44eaf94328b5eedf9fa2e79605641804b3feb4cc247aaa534c839c7d6"
