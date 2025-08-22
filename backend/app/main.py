@@ -17,7 +17,8 @@ from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.webhook import call_webhook
 from app.database import database
-from app.mcp.mcp import LoggingMiddleware, mcp
+from app.mcp.mcp import mcp
+from app.mcp.middleware import LoggingMiddleware
 from app.mcp.router import router as mcp_router
 from app.roles.service import RoleService
 from app.settings import settings
