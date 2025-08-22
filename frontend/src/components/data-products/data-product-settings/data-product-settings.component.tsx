@@ -125,7 +125,7 @@ export function DataProductSettings({ id, scope }: Props) {
     }, [t]);
 
     useEffect(() => {
-        updatedSettings.map((setting) => {
+        updatedSettings.forEach((setting) => {
             switch (setting.type) {
                 case 'checkbox':
                     form.setFieldsValue({ [`value_${setting.id}`]: setting.value === 'true' });
