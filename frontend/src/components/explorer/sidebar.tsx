@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { DataProductContract } from '@/types/data-product';
-
+import { defaultFitViewOptions } from '../charts/node-editor/node-editor';
 import { NodeContext } from './node-context';
 import styles from './sidebar.module.scss';
 
@@ -25,8 +25,9 @@ type Props = {
 };
 
 export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNodeId }: Props) {
-    const { setCenter, getNode, setNodes } = useReactFlow();
+    const { getNode, setNodes } = useReactFlow();
     const { t } = useTranslation();
+    const currentInstance = useReactFlow();
     useMemo(() => {
         setNodes((nodes: Node[]) =>
             nodes.map((node) => ({
@@ -42,20 +43,15 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
 
     useEffect(() => {
         if (!nodeId) return;
-
-        // Give React Flow time to update its internals
         const timeout = setTimeout(() => {
-            const nodeToFocus = getNode(nodeId);
-            if (nodeToFocus) {
-                setCenter(nodeToFocus.position.x, nodeToFocus.position.y, {
-                    zoom: 1.2,
-                    duration: 800,
-                });
-            }
-        }, 50); // 50ms is usually enough
+            currentInstance.fitView({
+                ...defaultFitViewOptions,
+                nodes: [{ id: nodeId }],
+            });
+        }, 50);
 
         return () => clearTimeout(timeout);
-    }, [nodeId, getNode, setCenter]);
+    }, [nodeId, getNode]);
 
     function getNodeDataForSideBar(nodeId: string) {
         const node = getNode(nodeId);
