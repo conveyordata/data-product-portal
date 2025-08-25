@@ -3,8 +3,9 @@ import '@xyflow/react/dist/base.css';
 import type { Node } from '@xyflow/react';
 import { Position, ReactFlowProvider } from '@xyflow/react';
 import { Flex, theme } from 'antd';
+import type { TFunction } from 'i18next';
 import { useCallback, useEffect, useMemo } from 'react';
-
+import { useTranslation } from 'react-i18next';
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
@@ -12,6 +13,7 @@ import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
 import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { NodeContract } from '@/types/graph/graph-contract.ts';
 import { parseRegularNode } from '@/utils/node-parser.helper.ts';
 import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common.tsx';
@@ -23,9 +25,7 @@ type Props = {
     type: 'dataset' | 'dataproduct' | 'dataoutput';
 };
 
-function parseNodes(nodes: NodeContract[]): Node[] {
-    // TODO: revert to old parseNodes function - separate from parseFullNodes
-    // Regular nodes and domain nodes. In domain nodes, we count how many children they have so we can estimate their size.
+function parseNodes(nodes: NodeContract[], t: TFunction): Node[] {
     return nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
         .map((node) => {
@@ -60,7 +60,7 @@ function parseNodes(nodes: NodeContract[]): Node[] {
                     };
                     break;
                 default:
-                    throw new Error(`Unknown node type: ${node.type}`);
+                    dispatchMessage({ content: t(`Unknown node type: ${node.type}`), type: 'error' });
             }
 
             return parseRegularNode(
@@ -77,7 +77,7 @@ function parseNodes(nodes: NodeContract[]): Node[] {
 function InternalExplorer({ id, type }: Props) {
     const { token } = theme.useToken();
     const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout } = useNodeEditor();
-
+    const { t } = useTranslation();
     const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== 'dataproduct' || !id });
     const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== 'dataset' || !id });
     const dataOutputQuery = useGetDataOutputGraphDataQuery(id, { skip: type !== 'dataoutput' || !id });
@@ -96,7 +96,7 @@ function InternalExplorer({ id, type }: Props) {
     const { data: graph, isFetching } = graphDataQuery;
     const generateGraph = useCallback(async () => {
         if (graph) {
-            const nodes = parseNodes(graph.nodes);
+            const nodes = parseNodes(graph.nodes, t);
             const edges = parseEdges(graph.edges, token);
 
             const straightEdges = edges.map((edge) => ({
