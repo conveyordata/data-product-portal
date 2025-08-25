@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { DataProductContract } from '@/types/data-product';
 import { defaultFitViewOptions } from '../charts/node-editor/node-editor';
+import { CustomNodeTypes } from '../charts/node-editor/node-types';
 import { NodeContext } from './node-context';
 import styles from './sidebar.module.scss';
 
@@ -66,6 +67,23 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
             description: String(data.description || ''),
         };
     }
+
+    const groupedNodes = useMemo(() => {
+        console.log(nodes);
+        const groups = {
+            Domains: nodes.filter((node) => node.type === CustomNodeTypes.DomainNode),
+            'Data Products': nodes.filter((node) => node.type === CustomNodeTypes.DataProductNode),
+            Datasets: nodes.filter((node) => node.type === CustomNodeTypes.DatasetNode),
+            'Data Outputs': nodes.filter((node) => node.type === CustomNodeTypes.DataOutputNode),
+        };
+
+        // Sort each group by name
+        Object.values(groups).forEach((group) => {
+            group.sort((a, b) => String(a.data.name || '').localeCompare(String(b.data.name || '')));
+        });
+
+        return groups;
+    }, [nodes]);
 
     return (
         <div className={styles.sidebarContainer}>
@@ -131,11 +149,18 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                 }
             >
-                {nodes.map((node) => (
-                    <Select.Option key={node.id} label={node.data.name} value={node.id}>
-                        {String(node.data.name)}
-                    </Select.Option>
-                ))}
+                {Object.entries(groupedNodes).map(
+                    ([groupName, nodes]) =>
+                        nodes.length > 0 && (
+                            <Select.OptGroup key={groupName} label={t(groupName)}>
+                                {nodes.map((node) => (
+                                    <Select.Option key={node.id} label={node.data.name} value={node.id}>
+                                        {String(node.data.name)}
+                                    </Select.Option>
+                                ))}
+                            </Select.OptGroup>
+                        ),
+                )}
             </Select>
             <NodeContext className={styles.p} nodeId={nodeId} getNodeDataForSideBar={getNodeDataForSideBar} />
         </div>
