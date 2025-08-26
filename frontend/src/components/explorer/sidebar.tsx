@@ -69,7 +69,6 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
     }
 
     const groupedNodes = useMemo(() => {
-        console.log(nodes);
         const groups = {
             Domains: nodes.filter((node) => node.type === CustomNodeTypes.DomainNode),
             'Data Products': nodes.filter((node) => node.type === CustomNodeTypes.DataProductNode),
