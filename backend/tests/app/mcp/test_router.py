@@ -131,7 +131,7 @@ class TestOAuthProtectedResource:
         mock_get_oidc.return_value = mock_oidc
         mock_settings.HOST = "https://api.example.com"
 
-        response = test_client.get("/.well-known/oauth-protected-resourcegit ")
+        response = test_client.get("/.well-known/oauth-protected-resource")
 
         assert response.status_code == 200
         data = response.json()
