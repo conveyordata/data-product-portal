@@ -23,6 +23,26 @@ from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
 from app.domains.schema_response import DomainGet
 from app.domains.service import DomainService
+from app.role_assignments.data_product.schema import (
+    RoleAssignmentResponse as DataProductRoleAssignmentResponse,
+)
+
+# Add role assignment imports
+from app.role_assignments.data_product.service import (
+    RoleAssignmentService as DataProductRoleAssignmentService,
+)
+from app.role_assignments.dataset.schema import (
+    RoleAssignmentResponse as DatasetRoleAssignmentResponse,
+)
+from app.role_assignments.dataset.service import (
+    RoleAssignmentService as DatasetRoleAssignmentService,
+)
+from app.role_assignments.global_.schema import (
+    RoleAssignmentResponse as GlobalRoleAssignmentResponse,
+)
+from app.role_assignments.global_.service import (
+    RoleAssignmentService as GlobalRoleAssignmentService,
+)
 from app.settings import settings
 
 
@@ -627,3 +647,202 @@ def get_marketplace_resource() -> str:
 
     except Exception as e:
         return f"Error retrieving marketplace overview: {str(e)}"
+
+
+# ==============================================================================
+# USER ROLES & PERMISSIONS
+# ==============================================================================
+
+
+@mcp.tool
+def get_user_roles(
+    user_id: Optional[str] = None,
+    scope_type: Optional[str] = None,
+    limit: int = 50,
+) -> Dict[str, Any]:
+    """
+    Get user roles and role assignments.
+
+    Args:
+        user_id: Specific user ID to get roles for (optional, defaults to current user)
+        scope_type: Filter by scope type ('global', 'data_product', 'dataset')
+        limit: Maximum number of role assignments to return
+    """
+    try:
+        db = next(get_db_session())
+        access_token: AccessToken = get_access_token()
+        current_user = get_mcp_authenticated_user(token=access_token.token)
+
+        try:
+            # Use current user if no user_id specified
+            target_user_id = user_id or str(current_user["id"])
+
+            # Get role assignments using the different service classes
+            global_roles: list[Dict[str, Any]] = []
+            data_product_roles: Dict[str, list[Dict[str, Any]]] = {}
+            dataset_roles: Dict[str, list[Dict[str, Any]]] = {}
+
+            # Get global roles if not filtered or if specifically requested
+            if not scope_type or scope_type == "global":
+                global_role_service = GlobalRoleAssignmentService(db)
+                global_assignments = global_role_service.list_assignments(
+                    user_id=UUID(target_user_id)
+                )
+                global_roles = [
+                    GlobalRoleAssignmentResponse.model_validate(assignment).model_dump()
+                    for assignment in global_assignments[:limit]
+                ]
+
+            # Get data product roles if not filtered or if specifically requested
+            if not scope_type or scope_type == "data_product":
+                data_product_role_service = DataProductRoleAssignmentService(db)
+                dp_assignments = data_product_role_service.list_assignments(
+                    user_id=UUID(target_user_id)
+                )
+
+                for assignment in dp_assignments[:limit]:
+                    assignment_data = DataProductRoleAssignmentResponse.model_validate(
+                        assignment
+                    ).model_dump()
+                    dp_id = str(assignment.data_product_id)
+                    if dp_id not in data_product_roles:
+                        data_product_roles[dp_id] = []
+                    data_product_roles[dp_id].append(assignment_data)
+
+            # Get dataset roles if not filtered or if specifically requested
+            if not scope_type or scope_type == "dataset":
+                dataset_role_service = DatasetRoleAssignmentService(db)
+                dataset_assignments = dataset_role_service.list_assignments(
+                    user_id=UUID(target_user_id)
+                )
+
+                for assignment in dataset_assignments[:limit]:
+                    assignment_data = DatasetRoleAssignmentResponse.model_validate(
+                        assignment
+                    ).model_dump()
+                    ds_id = str(assignment.dataset_id)
+                    if ds_id not in dataset_roles:
+                        dataset_roles[ds_id] = []
+                    dataset_roles[ds_id].append(assignment_data)
+
+            total_assignments = (
+                len(global_roles)
+                + sum(len(roles) for roles in data_product_roles.values())
+                + sum(len(roles) for roles in dataset_roles.values())
+            )
+
+            return {
+                "user_id": target_user_id,
+                "is_current_user": target_user_id == str(current_user["id"]),
+                "total_assignments": total_assignments,
+                "roles": {
+                    "global": global_roles,
+                    "data_products": data_product_roles,
+                    "datasets": dataset_roles,
+                },
+                "filters_applied": {
+                    "scope_type": scope_type,
+                },
+                "summary": {
+                    "global_roles_count": len(global_roles),
+                    "data_product_roles_count": len(data_product_roles),
+                    "dataset_roles_count": len(dataset_roles),
+                },
+            }
+
+        finally:
+            db.close()
+
+    except Exception as e:
+        return {"error": f"Failed to get user roles: {str(e)}"}
+
+
+@mcp.tool
+def get_resource_roles(
+    resource_type: str,
+    resource_id: str,
+    limit: int = 50,
+) -> Dict[str, Any]:
+    """
+    Get all user roles for a specific resource (data product or dataset).
+
+    Args:
+        resource_type: Type of resource ('data_product' or 'dataset')
+        resource_id: ID of the resource
+        limit: Maximum number of role assignments to return
+    """
+    try:
+        db = next(get_db_session())
+
+        try:
+            resource_uuid = UUID(resource_id)
+
+            # Get role assignments based on resource type
+            assignment_responses: list[Dict[str, Any]] = []
+            if resource_type == "data_product":
+                assignments = DataProductRoleAssignmentService(db).list_assignments(
+                    data_product_id=resource_uuid
+                )
+                assignment_responses = [
+                    DataProductRoleAssignmentResponse.model_validate(
+                        assignment
+                    ).model_dump()
+                    for assignment in assignments[:limit]
+                ]
+            elif resource_type == "dataset":
+                assignments = DatasetRoleAssignmentService(db).list_assignments(
+                    dataset_id=resource_uuid
+                )
+                assignment_responses = [
+                    DatasetRoleAssignmentResponse.model_validate(
+                        assignment
+                    ).model_dump()
+                    for assignment in assignments[:limit]
+                ]
+            else:
+                return {
+                    "error": f"Invalid resource_type: {resource_type}.\
+                        Must be 'data_product' or 'dataset'"
+                }
+
+            # Group by role for better organization
+            roles_by_type: Dict[str, list[Dict[str, Any]]] = {}
+            users_with_roles: list[Dict[str, Any]] = []
+
+            for assignment_data in assignment_responses:
+                role_info = assignment_data.get("role", {})
+                role_name = (
+                    role_info.get("name", "Unknown")
+                    if isinstance(role_info, dict)
+                    else "Unknown"
+                )
+                if role_name not in roles_by_type:
+                    roles_by_type[role_name] = []
+                roles_by_type[role_name].append(assignment_data)
+
+                users_with_roles.append(
+                    {
+                        "user_id": assignment_data.get("user_id"),
+                        "role_name": role_name,
+                        "assignment_id": assignment_data.get("id"),
+                        "created_at": assignment_data.get("created_at"),
+                    }
+                )
+
+            return {
+                "resource_type": resource_type,
+                "resource_id": resource_id,
+                "total_assignments": len(assignment_responses),
+                "roles_by_type": roles_by_type,
+                "users_with_roles": users_with_roles,
+                "summary": {
+                    "unique_roles": list(roles_by_type.keys()),
+                    "total_users": len(users_with_roles),
+                },
+            }
+
+        finally:
+            db.close()
+
+    except Exception as e:
+        return {"error": f"Failed to get resource roles: {str(e)}"}
