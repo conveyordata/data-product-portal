@@ -32,3 +32,10 @@ data:
   WEBHOOK_URL: {{ .Values.webhook.url }}
   {{- end }}
   NAMESPACE_MAX_LENGTH: {{ .Values.namespace_max_length }}
+  {{- if .Values.posthog.enabled }}
+  POSTHOG_ENABLED: "true"
+  {{- else }}
+  POSTHOG_ENABLED: "false"
+  {{- end }}
+  POSTHOG_API_KEY: {{ .Values.posthog.key }}
+  POSTHOG_HOST: {{ .Values.posthog.host }}

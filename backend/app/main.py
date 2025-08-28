@@ -17,6 +17,9 @@ from app.core.logging import logger
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.webhook import call_webhook
 from app.database import database
+from app.mcp.mcp import mcp
+from app.mcp.middleware import LoggingMiddleware
+from app.mcp.router import router as mcp_router
 from app.roles.service import RoleService
 from app.settings import settings
 from app.shared.router import router
@@ -67,6 +70,15 @@ async def lifespan(_: FastAPI):
     yield
 
 
+# Combine both lifespans
+@asynccontextmanager
+async def combined_lifespan(app: FastAPI):
+    # Run both lifespans
+    async with lifespan(app):
+        async with mcp_app.lifespan(app):
+            yield
+
+
 app = FastAPI(
     title=TITLE,
     summary="Backend API implementation for Data product portal",
@@ -74,12 +86,16 @@ app = FastAPI(
     contact={"name": "Stijn Janssens", "email": "stijn.janssens@dataminded.com"},
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
-    lifespan=lifespan,
-    **oidc_kwargs
+    lifespan=combined_lifespan,
+    **oidc_kwargs,
 )
+
+mcp_app = mcp.http_app(path="/mcp")
+mcp.add_middleware(LoggingMiddleware())
 
 app.include_router(router, prefix="/api")
 app.include_router(auth, prefix="/api")
+app.include_router(mcp_router)
 
 add_exception_handlers(app)
 
@@ -91,11 +107,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(BaseHTTPMiddleware, dispatch=log_middleware)
+
 app.add_middleware(
     CorrelationIdMiddleware,
     header_name="X-Request-ID",
     update_request_header=True,
 )
+app.mount("/mcp", mcp_app)
 
 
 @app.middleware("http")
@@ -133,12 +151,3 @@ def root():
 @app.get("/api/version")
 def get_version():
     return {"version": app.version}
-
-
-@app.webhooks.post("generic")
-def new_data_product():
-    """
-    Whenever something changes in the Portal state,
-    this webhook will be triggered.
-    All POST, PUT and DELETE calls are forwarded
-    """

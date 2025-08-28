@@ -83,6 +83,10 @@ poetry run python -m app.local_startup
   docker run --name data-product-portal-backend-container --env-file .env -p 3000:8080  data-product-portal-backend
   ```
 
+## Enabling the MCP server
+The MCP server can work (locally or remotely) via Claude Desktop.
+Install Claude Desktop and run `poetry run fastmcp install claude-desktop app/remote_proxy.py -e $(pwd) --env-file ./.env --env DISABLED_AWS='true'` in the `backend` folder. Make sure the `HOST` in your .env file is either referring to your localhost backend or the remote deployed backend.
+
 ## Local Development
 
 ### Virtual environment
