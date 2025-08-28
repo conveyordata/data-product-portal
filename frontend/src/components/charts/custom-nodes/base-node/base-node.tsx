@@ -26,11 +26,21 @@ export type BaseNodeProps = Node<{
     domain?: string;
     assignments?: Array<DataProductRoleAssignmentContract>;
     description?: string;
+    centeredHandles?: boolean;
     onClick?: () => void;
 }>;
 
 export function BaseNode<T extends BaseNodeProps>({
-    data: { name, isMainNode, icon, borderType = 'round', nodeToolbarActions, isActive = true, onClick },
+    data: {
+        name,
+        isMainNode,
+        centeredHandles,
+        icon,
+        borderType = 'round',
+        nodeToolbarActions,
+        isActive = true,
+        onClick,
+    },
 }: NodeProps<T>) {
     return (
         <>
@@ -38,13 +48,13 @@ export function BaseNode<T extends BaseNodeProps>({
                 <DefaultHandle
                     id={'left_t'}
                     type={'target'}
-                    position={Position.Top} /* Position.Left for left handles */
+                    position={centeredHandles ? Position.Top : Position.Left}
                     isConnectable={false}
                 />
                 <DefaultHandle
                     id={'left_s'}
                     type={'source'}
-                    position={Position.Top} /* Position.Left for left handles */
+                    position={centeredHandles ? Position.Top : Position.Left}
                     isConnectable={false}
                 />
                 <Flex className={styles.nodeWrapper}>
@@ -60,13 +70,13 @@ export function BaseNode<T extends BaseNodeProps>({
                 <DefaultHandle
                     id={'right_t'}
                     type={'target'}
-                    position={Position.Top} /* Position.Right for right handles */
+                    position={centeredHandles ? Position.Top : Position.Right}
                     isConnectable={false}
                 />
                 <DefaultHandle
                     id={'right_s'}
                     type={'source'}
-                    position={Position.Top} /* Position.Right for right handles */
+                    position={centeredHandles ? Position.Top : Position.Right}
                     isConnectable={false}
                 />
                 {nodeToolbarActions && <NodeToolbar position={Position.Bottom}>{nodeToolbarActions}</NodeToolbar>}

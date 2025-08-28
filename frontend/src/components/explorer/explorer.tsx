@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
 import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
@@ -18,6 +17,7 @@ import type { NodeContract } from '@/types/graph/graph-contract.ts';
 import { parseRegularNode } from '@/utils/node-parser.helper.ts';
 import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common.tsx';
 import styles from './explorer.module.scss';
+import { useNodeEditor } from './use-node-editor.tsx';
 import { parseEdges } from './utils.tsx';
 
 type Props = {
@@ -69,6 +69,7 @@ function parseNodes(nodes: NodeContract[], t: TFunction): Node[] {
                     /*no sidebar with node info so no need for nodeId*/
                 },
                 false,
+                false,
                 extra_attributes,
             );
         });
@@ -101,7 +102,7 @@ function InternalExplorer({ id, type }: Props) {
 
             const straightEdges = edges.map((edge) => ({
                 ...edge,
-                type: CustomEdgeTypes.StraightEdge,
+                type: CustomEdgeTypes.DefaultEdge,
             }));
 
             const positionedNodes = await applyLayout(nodes, straightEdges);

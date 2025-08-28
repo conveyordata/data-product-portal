@@ -15,6 +15,7 @@ export type DomainNodeProps = Node<{
     sourceHandlePosition?: Position;
     isActive?: boolean;
     onClick?: () => void;
+    centeredHandles?: boolean;
     backgroundColor: string;
     borderColor: string;
 }>;

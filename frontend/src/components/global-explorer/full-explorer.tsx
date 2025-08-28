@@ -8,14 +8,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { defaultFitViewOptions, NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
 import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
 import { useGetGraphDataQuery } from '@/store/features/graph/graph-api-slice.ts';
 import type { NodeContract } from '@/types/graph/graph-contract.ts';
-import { parseDomainNode, parseRegularNode } from '@/utils/node-parser.helper';
-import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common';
-import styles from './explorer.module.scss';
-import { Sidebar, type SidebarFilters } from './sidebar';
-import { parseEdges } from './utils';
+import { parseRegularNode } from '@/utils/node-parser.helper';
+import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from '../explorer/common';
+import styles from '../explorer/explorer.module.scss';
+import { parseEdges } from '../explorer/utils';
+import { parseDomainNode } from './nodes/domain-node-parser.helper';
+import { Sidebar, type SidebarFilters } from './sidebar/sidebar';
+import { useNodeEditor } from './use-node-editor';
 
 function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void, domainsEnabled = true): Node[] {
     // Count how many children each domain node has
@@ -64,7 +65,7 @@ function parseFullNodes(nodes: NodeContract[], setNodeId: (id: string) => void, 
                 default:
                     throw new Error(`Unknown node type: ${node.type}`);
             }
-            return parseRegularNode(node, setNodeId, domainsEnabled, extra_attributes);
+            return parseRegularNode(node, setNodeId, domainsEnabled, true, extra_attributes);
         });
 
     // Parse domain nodes (only if domains are enabled and they have children)

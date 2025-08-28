@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { DataProductContract } from '@/types/data-product';
 import { defaultFitViewOptions } from '../../charts/node-editor/node-editor';
 import { CustomNodeTypes } from '../../charts/node-editor/node-types';
-import { NodeContext } from '../../explorer/node-context';
+import { NodeContext } from './node-context';
 import styles from './sidebar.module.scss';
 
 export type SidebarFilters = {
@@ -86,7 +86,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
 
     return (
         <div className={styles.sidebarContainer}>
-            {
+            {/* {
                 <Tag.CheckableTag
                     checked={sidebarFilters.domainsEnabled}
                     className={styles.checkableTag}
@@ -99,7 +99,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
                 >
                     {t('Domains')}
                 </Tag.CheckableTag>
-            }
+            } */}
             <Tag.CheckableTag
                 checked={sidebarFilters.dataProductsEnabled}
                 className={styles.checkableTag}

@@ -1,7 +1,7 @@
 import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { FullExplorer } from '@/components/global-explorer/sidebar/full-explorer';
+import { FullExplorer } from '@/components/global-explorer/full-explorer';
 
 import styles from './explorer.page.module.scss';
 
