@@ -26,17 +26,37 @@ export type BaseNodeProps = Node<{
     domain?: string;
     assignments?: Array<DataProductRoleAssignmentContract>;
     description?: string;
+    centeredHandles?: boolean;
     onClick?: () => void;
 }>;
 
 export function BaseNode<T extends BaseNodeProps>({
-    data: { name, isMainNode, icon, borderType = 'round', nodeToolbarActions, isActive = true, onClick },
+    data: {
+        name,
+        isMainNode,
+        centeredHandles,
+        icon,
+        borderType = 'round',
+        nodeToolbarActions,
+        isActive = true,
+        onClick,
+    },
 }: NodeProps<T>) {
     return (
         <>
             <Flex className={styles.nodeContainer} onClick={onClick}>
-                <DefaultHandle id={'left_t'} type={'target'} position={Position.Left} isConnectable={false} />
-                <DefaultHandle id={'left_s'} type={'source'} position={Position.Left} isConnectable={false} />
+                <DefaultHandle
+                    id={'left_t'}
+                    type={'target'}
+                    position={centeredHandles ? Position.Top : Position.Left}
+                    isConnectable={false}
+                />
+                <DefaultHandle
+                    id={'left_s'}
+                    type={'source'}
+                    position={centeredHandles ? Position.Top : Position.Left}
+                    isConnectable={false}
+                />
                 <Flex className={styles.nodeWrapper}>
                     <CustomSvgIconLoader
                         iconComponent={icon}
@@ -47,8 +67,18 @@ export function BaseNode<T extends BaseNodeProps>({
                         color={isActive ? 'primary' : 'light'}
                     />
                 </Flex>
-                <DefaultHandle id={'right_t'} type={'target'} position={Position.Right} isConnectable={false} />
-                <DefaultHandle id={'right_s'} type={'source'} position={Position.Right} isConnectable={false} />
+                <DefaultHandle
+                    id={'right_t'}
+                    type={'target'}
+                    position={centeredHandles ? Position.Top : Position.Right}
+                    isConnectable={false}
+                />
+                <DefaultHandle
+                    id={'right_s'}
+                    type={'source'}
+                    position={centeredHandles ? Position.Top : Position.Right}
+                    isConnectable={false}
+                />
                 {nodeToolbarActions && <NodeToolbar position={Position.Bottom}>{nodeToolbarActions}</NodeToolbar>}
             </Flex>
             <Typography.Paragraph onClick={onClick} ellipsis={{ tooltip: name, rows: 2 }} className={styles.nodeLabel}>

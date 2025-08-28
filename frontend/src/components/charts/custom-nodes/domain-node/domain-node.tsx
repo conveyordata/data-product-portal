@@ -3,11 +3,9 @@ import { NodeToolbar, Position } from '@xyflow/react';
 import { Flex, Typography } from 'antd';
 import type { ReactNode } from 'react';
 
-import { DefaultHandle } from '@/components/charts/custom-handles/default-handle.tsx';
+import styles from '@/components/charts/custom-nodes/domain-node/domain-node.module.scss';
 
-import styles from '../base-node/base-node.module.scss';
 // Domain nodes are not BaseNodes because they don't have icons
-
 export type DomainNodeProps = Node<{
     id: string;
     name: string;
@@ -17,36 +15,36 @@ export type DomainNodeProps = Node<{
     sourceHandlePosition?: Position;
     isActive?: boolean;
     onClick?: () => void;
+    centeredHandles?: boolean;
+    backgroundColor: string;
+    borderColor: string;
 }>;
 
-export function DomainNode<T extends DomainNodeProps>({ data: { name, nodeToolbarActions, onClick } }: NodeProps<T>) {
+export function DomainNode<T extends DomainNodeProps>(nodeProps: NodeProps<T>) {
+    const { data, width, height } = nodeProps;
+    const { onClick, nodeToolbarActions, name, backgroundColor, borderColor } = data;
     return (
         <>
+            <Typography.Paragraph ellipsis={{ tooltip: name, rows: 2 }} className={styles.nodeLabel}>
+                {name}
+            </Typography.Paragraph>
             <Flex className={styles.nodeContainer} onClick={onClick}>
-                <DefaultHandle id={'left_t'} type={'target'} position={Position.Left} isConnectable={false} />
-                <DefaultHandle id={'left_s'} type={'source'} position={Position.Left} isConnectable={false} />
                 <Flex className={styles.nodeWrapper}>
                     <div
                         className={styles.nodeBox}
+                        // override styles.nodeBox on the parts that need to be dynamic
                         style={{
-                            backgroundColor: 'rgba(255, 0, 255, 0.2)',
-                            height: 150,
-                            width: 270,
+                            backgroundColor: backgroundColor, // although there is a default color specified in domain-node.module.scss
+                            borderColor: borderColor, // although there is a default color in domain-node.module.scss
+                            height: height,
+                            width: width,
                             visibility: 'visible',
                             borderRadius: '8px',
-                            //backgroundColor: isActive ? '#f0f0f0' : '#e0e0e0',
                         }}
-                    >
-                        <Typography.Text strong>Domain {name}</Typography.Text>
-                    </div>
+                    />
                 </Flex>
-                <DefaultHandle id={'right_t'} type={'target'} position={Position.Right} isConnectable={false} />
-                <DefaultHandle id={'right_s'} type={'source'} position={Position.Right} isConnectable={false} />
                 {nodeToolbarActions && <NodeToolbar position={Position.Bottom}>{nodeToolbarActions}</NodeToolbar>}
             </Flex>
-            <Typography.Paragraph ellipsis={{ tooltip: name, rows: 2 }} className={styles.nodeLabel}>
-                Domain {name}
-            </Typography.Paragraph>
         </>
     );
 }

@@ -4,7 +4,8 @@ import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { DataProductContract } from '@/types/data-product';
-
+import { defaultFitViewOptions } from '../../charts/node-editor/node-editor';
+import { CustomNodeTypes } from '../../charts/node-editor/node-types';
 import { NodeContext } from './node-context';
 import styles from './sidebar.module.scss';
 
@@ -25,8 +26,9 @@ type Props = {
 };
 
 export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNodeId }: Props) {
-    const { setCenter, getNode, setNodes } = useReactFlow();
+    const { getNode, setNodes } = useReactFlow();
     const { t } = useTranslation();
+    const currentInstance = useReactFlow();
     useMemo(() => {
         setNodes((nodes: Node[]) =>
             nodes.map((node) => ({
@@ -42,20 +44,15 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
 
     useEffect(() => {
         if (!nodeId) return;
-
-        // Give React Flow time to update its internals
         const timeout = setTimeout(() => {
-            const nodeToFocus = getNode(nodeId);
-            if (nodeToFocus) {
-                setCenter(nodeToFocus.position.x, nodeToFocus.position.y, {
-                    zoom: 1.2,
-                    duration: 800,
-                });
-            }
-        }, 50); // 50ms is usually enough
+            currentInstance.fitView({
+                ...defaultFitViewOptions,
+                nodes: [{ id: nodeId }],
+            });
+        }, 50);
 
         return () => clearTimeout(timeout);
-    }, [nodeId, getNode, setCenter]);
+    }, [nodeId, getNode]);
 
     function getNodeDataForSideBar(nodeId: string) {
         const node = getNode(nodeId);
@@ -71,20 +68,38 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
         };
     }
 
+    const groupedNodes = useMemo(() => {
+        const groups = {
+            Domains: nodes.filter((node) => node.type === CustomNodeTypes.DomainNode),
+            'Data Products': nodes.filter((node) => node.type === CustomNodeTypes.DataProductNode),
+            Datasets: nodes.filter((node) => node.type === CustomNodeTypes.DatasetNode),
+            'Data Outputs': nodes.filter((node) => node.type === CustomNodeTypes.DataOutputNode),
+        };
+
+        // Sort each group by name
+        Object.values(groups).forEach((group) => {
+            group.sort((a, b) => String(a.data.name || '').localeCompare(String(b.data.name || '')));
+        });
+
+        return groups;
+    }, [nodes]);
+
     return (
         <div className={styles.sidebarContainer}>
-            {/* <Tag.CheckableTag
-                checked={sidebarFilters.domainsEnabled}
-                className={styles.checkableTag}
-                onChange={(e) => {
-                    onFilterChange({
-                        ...sidebarFilters,
-                        domainsEnabled: e.valueOf(),
-                    });
-                }}
-            >
-                {t('Domains')}
-            </Tag.CheckableTag> */}
+            {/* {
+                <Tag.CheckableTag
+                    checked={sidebarFilters.domainsEnabled}
+                    className={styles.checkableTag}
+                    onChange={(e) => {
+                        onFilterChange({
+                            ...sidebarFilters,
+                            domainsEnabled: e.valueOf(),
+                        });
+                    }}
+                >
+                    {t('Domains')}
+                </Tag.CheckableTag>
+            } */}
             <Tag.CheckableTag
                 checked={sidebarFilters.dataProductsEnabled}
                 className={styles.checkableTag}
@@ -133,11 +148,18 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                 }
             >
-                {nodes.map((node) => (
-                    <Select.Option key={node.id} label={node.data.name} value={node.id}>
-                        {String(node.data.name)}
-                    </Select.Option>
-                ))}
+                {Object.entries(groupedNodes).map(
+                    ([groupName, nodes]) =>
+                        nodes.length > 0 && (
+                            <Select.OptGroup key={groupName} label={t(groupName)}>
+                                {nodes.map((node) => (
+                                    <Select.Option key={node.id} label={node.data.name} value={node.id}>
+                                        {String(node.data.name)}
+                                    </Select.Option>
+                                ))}
+                            </Select.OptGroup>
+                        ),
+                )}
             </Select>
             <NodeContext className={styles.p} nodeId={nodeId} getNodeDataForSideBar={getNodeDataForSideBar} />
         </div>

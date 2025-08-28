@@ -1,21 +1,23 @@
 import '@xyflow/react/dist/base.css';
 
-import type { Node, XYPosition } from '@xyflow/react';
+import type { Node } from '@xyflow/react';
 import { Position, ReactFlowProvider } from '@xyflow/react';
 import { Flex, theme } from 'antd';
+import type { TFunction } from 'i18next';
 import { useCallback, useEffect, useMemo } from 'react';
-
+import { useTranslation } from 'react-i18next';
 import { NodeEditor } from '@/components/charts/node-editor/node-editor.tsx';
-import { CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
+import { CustomEdgeTypes, CustomNodeTypes } from '@/components/charts/node-editor/node-types.ts';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { useNodeEditor } from '@/hooks/use-node-editor.tsx';
 import { useGetDataOutputGraphDataQuery } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetDataProductGraphDataQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { useGetDatasetGraphDataQuery } from '@/store/features/datasets/datasets-api-slice';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import type { NodeContract } from '@/types/graph/graph-contract.ts';
-
+import { parseRegularNode } from '@/utils/node-parser.helper.ts';
 import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode } from './common.tsx';
 import styles from './explorer.module.scss';
+import { useNodeEditor } from './use-node-editor.tsx';
 import { parseEdges } from './utils.tsx';
 
 type Props = {
@@ -23,9 +25,7 @@ type Props = {
     type: 'dataset' | 'dataproduct' | 'dataoutput';
 };
 
-function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Node[] {
-    // TODO: revert to old parseNodes function - separate from parseFullNodes
-    // Regular nodes and domain nodes. In domain nodes, we count how many children they have so we can estimate their size.
+function parseNodes(nodes: NodeContract[], t: TFunction): Node[] {
     return nodes
         .filter((node) => node.type !== CustomNodeTypes.DomainNode)
         .map((node) => {
@@ -60,32 +60,25 @@ function parseNodes(nodes: NodeContract[], defaultNodePosition: XYPosition): Nod
                     };
                     break;
                 default:
-                    break;
+                    dispatchMessage({ content: t(`Unknown node type: ${node.type}`), type: 'error' });
             }
 
-            return {
-                id: node.id,
-                position: defaultNodePosition,
-                draggable: true,
-                deletable: false,
-                type: node.type,
-                data: {
-                    name: node.data.name,
-                    id: node.data.id,
-                    icon_key: node.data.icon_key,
-                    isMainNode: node.isMain,
-                    domain: node.data.domain,
-                    ...extra_attributes,
+            return parseRegularNode(
+                node,
+                () => {
+                    /*no sidebar with node info so no need for nodeId*/
                 },
-            };
+                false,
+                false,
+                extra_attributes,
+            );
         });
 }
 
 function InternalExplorer({ id, type }: Props) {
     const { token } = theme.useToken();
-    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodesAndEdges, defaultNodePosition } =
-        useNodeEditor();
-
+    const { edges, onEdgesChange, nodes, onNodesChange, onConnect, setNodes, setEdges, applyLayout } = useNodeEditor();
+    const { t } = useTranslation();
     const dataProductQuery = useGetDataProductGraphDataQuery(id, { skip: type !== 'dataproduct' || !id });
     const datasetQuery = useGetDatasetGraphDataQuery(id, { skip: type !== 'dataset' || !id });
     const dataOutputQuery = useGetDataOutputGraphDataQuery(id, { skip: type !== 'dataoutput' || !id });
@@ -102,13 +95,22 @@ function InternalExplorer({ id, type }: Props) {
     }, [dataProductQuery, datasetQuery, dataOutputQuery, type]);
 
     const { data: graph, isFetching } = graphDataQuery;
-    const generateGraph = useCallback(() => {
+    const generateGraph = useCallback(async () => {
         if (graph) {
-            const nodes = parseNodes(graph.nodes, defaultNodePosition);
+            const nodes = parseNodes(graph.nodes, t);
             const edges = parseEdges(graph.edges, token);
-            setNodesAndEdges(nodes, edges);
+
+            const straightEdges = edges.map((edge) => ({
+                ...edge,
+                type: CustomEdgeTypes.DefaultEdge,
+            }));
+
+            const positionedNodes = await applyLayout(nodes, straightEdges);
+
+            setNodes(positionedNodes);
+            setEdges(straightEdges);
         }
-    }, [defaultNodePosition, graph, setNodesAndEdges, token]);
+    }, [graph, setNodes, setEdges, applyLayout, token]);
 
     useEffect(() => {
         generateGraph();
