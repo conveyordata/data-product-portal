@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload, raiseload
+from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 
 from app.core.authz import Authorization
 from app.core.namespace.validation import (
@@ -101,14 +101,14 @@ class DatasetService:
             for dataset in self.db.scalars(
                 select(DatasetModel)
                 .options(
-                    joinedload(DatasetModel.data_product_links)
-                    .joinedload(DataProductDatasetAssociationModel.data_product)
+                    selectinload(DatasetModel.data_product_links)
+                    .selectinload(DataProductDatasetAssociationModel.data_product)
                     .raiseload("*"),
-                    joinedload(DatasetModel.data_output_links)
-                    .joinedload(DataOutputDatasetAssociationModel.data_output)
+                    selectinload(DatasetModel.data_output_links)
+                    .selectinload(DataOutputDatasetAssociationModel.data_output)
                     .options(
-                        joinedload(DataOutput.configuration),
-                        joinedload(DataOutput.owner),
+                        selectinload(DataOutput.configuration),
+                        selectinload(DataOutput.owner),
                         raiseload("*"),
                     ),
                 )

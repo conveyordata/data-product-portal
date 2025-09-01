@@ -10,7 +10,7 @@ import pytz
 from botocore.exceptions import ClientError
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
@@ -74,10 +74,10 @@ class DataProductService:
             DataProductModel,
             id,
             options=[
-                joinedload(DataProductModel.dataset_links)
-                .joinedload(DataProductDatasetModel.dataset)
-                .joinedload(DatasetModel.data_output_links),
-                joinedload(DataProductModel.data_outputs).joinedload(
+                selectinload(DataProductModel.dataset_links)
+                .selectinload(DataProductDatasetModel.dataset)
+                .selectinload(DatasetModel.data_output_links),
+                selectinload(DataProductModel.data_outputs).selectinload(
                     DataOutputModel.dataset_links
                 ),
             ],
@@ -116,9 +116,9 @@ class DataProductService:
             self.db.scalars(
                 select(DataProductModel)
                 .options(
-                    joinedload(DataProductModel.dataset_links).raiseload("*"),
-                    joinedload(DataProductModel.assignments).raiseload("*"),
-                    joinedload(DataProductModel.data_outputs).raiseload("*"),
+                    selectinload(DataProductModel.dataset_links).raiseload("*"),
+                    selectinload(DataProductModel.assignments).raiseload("*"),
+                    selectinload(DataProductModel.data_outputs).raiseload("*"),
                 )
                 .order_by(asc(DataProductModel.name))
             )
