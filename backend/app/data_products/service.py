@@ -10,7 +10,7 @@ import pytz
 from botocore.exceptions import ClientError
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
@@ -479,7 +479,7 @@ class DataProductService:
             id,
             options=[
                 selectinload(DataProductModel.dataset_links),
-                selectinload(DataProductModel.data_outputs)
+                joinedload(DataProductModel.data_outputs)
                 .selectinload(DataOutputModel.dataset_links)
                 .selectinload(DataOutputDatasetAssociation.dataset)
                 .selectinload(DatasetModel.data_product_links),
