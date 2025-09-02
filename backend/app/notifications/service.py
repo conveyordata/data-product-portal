@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import delete, desc, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.authz.authorization import Authorization
 from app.events.model import Event as EventModel
@@ -24,8 +24,8 @@ class NotificationService:
         return self.db.scalars(
             select(NotificationModel)
             .options(
-                joinedload(NotificationModel.user),
-                joinedload(NotificationModel.event),
+                selectinload(NotificationModel.user),
+                selectinload(NotificationModel.event),
             )
             .where(NotificationModel.user_id == user.id)
             .order_by(desc(NotificationModel.created_on))

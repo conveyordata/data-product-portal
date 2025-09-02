@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 from app.data_product_types.model import DataProductType as DataProductTypeModel
 from app.data_product_types.model import ensure_data_product_type_exists
@@ -25,7 +25,7 @@ class DataProductTypeService:
         return (
             self.db.scalars(
                 select(DataProductTypeModel)
-                .options(joinedload(DataProductTypeModel.data_products))
+                .options(selectinload(DataProductTypeModel.data_products))
                 .order_by(DataProductTypeModel.name)
             )
             .unique()
@@ -36,7 +36,7 @@ class DataProductTypeService:
         data_product_type = self.db.get(
             DataProductTypeModel,
             id,
-            options=[joinedload(DataProductTypeModel.data_products)],
+            options=[selectinload(DataProductTypeModel.data_products)],
         )
 
         if not data_product_type:
@@ -73,7 +73,7 @@ class DataProductTypeService:
         data_product_type = self.db.get(
             DataProductTypeModel,
             id,
-            options=[joinedload(DataProductTypeModel.data_products)],
+            options=[selectinload(DataProductTypeModel.data_products)],
         )
 
         if data_product_type.data_products:
@@ -92,7 +92,7 @@ class DataProductTypeService:
         data_product_type = ensure_data_product_type_exists(
             from_id,
             self.db,
-            options=[joinedload(DataProductTypeModel.data_products)],
+            options=[selectinload(DataProductTypeModel.data_products)],
         )
         new_data_product_type = ensure_data_product_type_exists(to_id, self.db)
 

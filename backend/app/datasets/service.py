@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
+from sqlalchemy.orm import Session, raiseload, selectinload
 
 from app.core.authz import Authorization
 from app.core.namespace.validation import (
@@ -58,8 +58,8 @@ class DatasetService:
             DatasetModel,
             id,
             options=[
-                joinedload(DatasetModel.data_product_links),
-                joinedload(DatasetModel.data_output_links),
+                selectinload(DatasetModel.data_product_links),
+                selectinload(DatasetModel.data_output_links),
             ],
         )
 
@@ -129,12 +129,12 @@ class DatasetService:
             self.db.scalars(
                 select(DatasetModel)
                 .options(
-                    joinedload(DatasetModel.data_product_links).raiseload("*"),
-                    joinedload(DatasetModel.data_output_links)
-                    .joinedload(DataOutputDatasetAssociationModel.data_output)
+                    selectinload(DatasetModel.data_product_links).raiseload("*"),
+                    selectinload(DatasetModel.data_output_links)
+                    .selectinload(DataOutputDatasetAssociationModel.data_output)
                     .options(
-                        joinedload(DataOutput.configuration),
-                        joinedload(DataOutput.owner),
+                        selectinload(DataOutput.configuration),
+                        selectinload(DataOutput.owner),
                         raiseload("*"),
                     ),
                 )
@@ -246,8 +246,8 @@ class DatasetService:
             DatasetModel,
             id,
             options=[
-                joinedload(DatasetModel.data_product_links),
-                joinedload(DatasetModel.data_output_links),
+                selectinload(DatasetModel.data_product_links),
+                selectinload(DatasetModel.data_output_links),
             ],
         )
         nodes = [

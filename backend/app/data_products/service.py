@@ -10,7 +10,7 @@ import pytz
 from botocore.exceptions import ClientError
 from fastapi import HTTPException, status
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
@@ -135,7 +135,7 @@ class DataProductService:
         data_product = ensure_data_product_exists(
             id,
             self.db,
-            options=[joinedload(DataProductModel.assignments)],
+            options=[selectinload(DataProductModel.assignments)],
             populate_existing=True,
         )
         user_ids = [
@@ -152,9 +152,9 @@ class DataProductService:
             self.db.scalars(
                 select(DataProductModel)
                 .options(
-                    joinedload(DataProductModel.dataset_links).raiseload("*"),
-                    joinedload(DataProductModel.assignments).raiseload("*"),
-                    joinedload(DataProductModel.data_outputs).raiseload("*"),
+                    selectinload(DataProductModel.dataset_links).raiseload("*"),
+                    selectinload(DataProductModel.assignments).raiseload("*"),
+                    selectinload(DataProductModel.data_outputs).raiseload("*"),
                 )
                 .filter(
                     DataProductModel.assignments.any(
@@ -278,13 +278,13 @@ class DataProductService:
             dataset_id,
             self.db,
             options=[
-                joinedload(DatasetModel.data_product_links)
-                .joinedload(DataProductDatasetModel.data_product)
-                .joinedload(DataProductModel.dataset_links)
+                selectinload(DatasetModel.data_product_links)
+                .selectinload(DataProductDatasetModel.data_product)
+                .selectinload(DataProductModel.dataset_links)
             ],
         )
         data_product = ensure_data_product_exists(
-            id, self.db, options=[joinedload(DataProductModel.dataset_links)]
+            id, self.db, options=[selectinload(DataProductModel.dataset_links)]
         )
 
         if dataset.id in [
@@ -326,7 +326,7 @@ class DataProductService:
     ) -> DataProductDatasetModel:
         ensure_dataset_exists(dataset_id, self.db)
         data_product = ensure_data_product_exists(
-            id, self.db, options=[joinedload(DataProductModel.dataset_links)]
+            id, self.db, options=[selectinload(DataProductModel.dataset_links)]
         )
         data_product_dataset = next(
             (
@@ -415,9 +415,9 @@ class DataProductService:
             self.db.scalars(
                 select(DataOutputModel)
                 .options(
-                    joinedload(DataOutputModel.environment_configurations),
-                    joinedload(DataOutputModel.dataset_links)
-                    .joinedload(DataOutputDatasetAssociation.dataset)
+                    selectinload(DataOutputModel.environment_configurations),
+                    selectinload(DataOutputModel.dataset_links)
+                    .selectinload(DataOutputDatasetAssociation.dataset)
                     .raiseload("*"),
                 )
                 .filter(DataOutputModel.owner_id == id)
@@ -478,11 +478,11 @@ class DataProductService:
             DataProductModel,
             id,
             options=[
-                joinedload(DataProductModel.dataset_links),
-                joinedload(DataProductModel.data_outputs)
-                .joinedload(DataOutputModel.dataset_links)
-                .joinedload(DataOutputDatasetAssociation.dataset)
-                .joinedload(DatasetModel.data_product_links),
+                selectinload(DataProductModel.dataset_links),
+                selectinload(DataProductModel.data_outputs)
+                .selectinload(DataOutputModel.dataset_links)
+                .selectinload(DataOutputDatasetAssociation.dataset)
+                .selectinload(DatasetModel.data_product_links),
             ],
             # As this is also called from the DataOutputService, we need to ensure
             # that the DataOutput for which this is called is not loaded from cache,
