@@ -22,7 +22,7 @@ requests = "^2.32.5"
 httpx = "^0.28.1"
 alembic = "^1.16.5"
 sqlalchemy = { version = "^2.0.43", extras = ['asyncio'] }
-sqlalchemy-utils = "^0.41.2"
+sqlalchemy-utils = "^0.42.0"
 sqlalchemy-easy-softdelete = "^0.8.3"
 psycopg2-binary = "^2.9.10"
 pyyaml = "^6.0.2"
