@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -12,5 +13,5 @@ router = APIRouter(prefix="/events", tags=["events"])
 @router.get("/latest")
 def get_latest_event_timestamp(
     db: Session = Depends(get_db_session),
-) -> datetime:
+) -> Optional[datetime]:
     return EventService(db).get_latest_event_timestamp()
