@@ -14,6 +14,7 @@ export type DataOutputNodeProps = Node<{
     isActive?: boolean;
     icon_key: string;
     domain?: string;
+    centeredHandles?: boolean;
     onClick?: () => void;
 }>;
 
@@ -28,6 +29,7 @@ export function DataOutputNode({
         icon_key,
         isActive,
         domain,
+        centeredHandles,
         onClick,
     },
     ...props
@@ -45,6 +47,7 @@ export function DataOutputNode({
                 sourceHandlePosition,
                 isActive,
                 domain,
+                centeredHandles,
                 onClick,
             }}
             {...props}

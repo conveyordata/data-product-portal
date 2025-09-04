@@ -1,16 +1,9 @@
 @use '@/styles/globals';
 
-:root {
-    --node-width: 100px;
-    --node-height: 50px;
-}
-
 .node-container {
     position: relative;
     flex-direction: column;
     align-items: center;
-    width: var(--node-width);
-    height: var(--node-height);
     justify-content: center;
 }
 
@@ -22,11 +15,26 @@
     align-items: center;
 }
 
+.node-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 8% !important; // 50% forces circular shape
+    background-color: rgba(255, 0, 255, 0.2);
+    border: 2px solid rgba(255, 0, 255, 0.4);
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
 .node-label {
     text-align: center;
     width: 100%;
-    max-width: var(--node-width);
+    color: black;
     font-size: globals.$font-size-sm;
+    font-weight: bold;
     margin-bottom: 0 !important;
-    margin-top: 0 !important;
 }
