@@ -361,5 +361,14 @@ def set_value_for_dataset(
     setting_id: UUID,
     value: str,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    return DataProductSettingService(db).set_value_for_product(setting_id, id, value)
+    DataProductSettingService(db).set_value_for_product(setting_id, id, value)
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATASET_SETTING_UPDATED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        )
+    )

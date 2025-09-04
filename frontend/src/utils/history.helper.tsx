@@ -156,7 +156,8 @@ export function getEventTypeDisplayName(
             return <Trans t={t} i18nKey="EventDataProductUpdated" defaults="Data product updated" />;
         case EventType.DATA_PRODUCT_REMOVED:
             return <Trans t={t} i18nKey="EventDataProductRemoved" defaults="Data product removed" />;
-
+        case EventType.DATA_PRODUCT_SETTING_UPDATED:
+            return <Trans t={t} i18nKey="EventDataProductSettingUpdated" defaults="Data product setting updated" />;
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED:
             return (
                 <Trans
@@ -326,7 +327,8 @@ export function getEventTypeDisplayName(
             return <Trans t={t} i18nKey="EventDatasetUpdated" defaults="Dataset updated" />;
         case EventType.DATASET_REMOVED:
             return <Trans t={t} i18nKey="EventDatasetRemoved" defaults="Dataset removed" />;
-
+        case EventType.DATASET_SETTING_UPDATED:
+            return <Trans t={t} i18nKey="EventDatasetSettingUpdated" defaults="Dataset setting updated" />;
         default:
             throw new Error(`Unsupported event type ${event_type}`);
     }
@@ -418,6 +420,9 @@ export function getNotificationDisplayName(
                 />
             );
         case EventType.DATA_PRODUCT_UPDATED:
+        case EventType.DATASET_UPDATED:
+        case EventType.DATA_PRODUCT_SETTING_UPDATED:
+        case EventType.DATASET_SETTING_UPDATED:
             return;
         case EventType.DATA_PRODUCT_REMOVED:
         case EventType.DATASET_REMOVED:
@@ -531,6 +536,8 @@ function getEventTypeDisplayTranslation(
             return t('EventDataProductUpdated', { entity, entity_type });
         case EventType.DATA_PRODUCT_REMOVED:
             return t('EventDataProductRemoved', { entity, entity_type });
+        case EventType.DATA_PRODUCT_SETTING_UPDATED:
+            return t('EventDataProductSettingUpdated', { entity, entity_type });
 
         case EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED:
             return t('EventDataProductRoleAssignmentCreated', { entity, entity_type });
@@ -573,7 +580,8 @@ function getEventTypeDisplayTranslation(
             return t('EventDatasetUpdated', { entity, entity_type });
         case EventType.DATASET_REMOVED:
             return t('EventDatasetRemoved', { entity, entity_type });
-
+        case EventType.DATASET_SETTING_UPDATED:
+            return t('EventDatasetSettingUpdated', { entity, entity_type });
         default:
             throw new Error(`Unsupported event type ${event_type}`);
     }
