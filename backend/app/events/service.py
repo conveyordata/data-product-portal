@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Sequence
 from uuid import UUID
 
@@ -132,3 +133,10 @@ class EventService:
             )
             .order_by(EventModel.created_on.desc())
         ).all()
+
+    def get_latest_event_timestamp(self) -> datetime:
+        return self.db.scalar(
+            select(EventModel.created_on)
+            .order_by(EventModel.created_on.desc())
+            .limit(1)
+        )
