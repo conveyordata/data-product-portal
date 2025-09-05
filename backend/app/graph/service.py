@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.logging import logger
 from app.data_outputs.model import DataOutput
@@ -37,9 +37,9 @@ class GraphService:
         data_products = (
             self.db.scalars(
                 select(DataProduct).options(
-                    joinedload(DataProduct.dataset_links),
-                    joinedload(DataProduct.data_outputs),
-                    joinedload(DataProduct.assignments),
+                    selectinload(DataProduct.dataset_links),
+                    selectinload(DataProduct.data_outputs),
+                    selectinload(DataProduct.assignments),
                 )
             )
             .unique()
@@ -49,8 +49,8 @@ class GraphService:
         datasets = (
             self.db.scalars(
                 select(Dataset).options(
-                    joinedload(Dataset.data_product_links),
-                    joinedload(Dataset.data_output_links),
+                    selectinload(Dataset.data_product_links),
+                    selectinload(Dataset.data_output_links),
                 )
             )
             .unique()
@@ -61,8 +61,8 @@ class GraphService:
         domains = (
             self.db.scalars(
                 select(Domain).options(
-                    joinedload(Domain.datasets),
-                    joinedload(Domain.data_products),
+                    selectinload(Domain.datasets),
+                    selectinload(Domain.data_products),
                 )
             )
             .unique()
@@ -70,7 +70,7 @@ class GraphService:
         )
         data_outputs = (
             self.db.scalars(
-                select(DataOutput).options(joinedload(DataOutput.dataset_links))
+                select(DataOutput).options(selectinload(DataOutput.dataset_links))
             )
             .unique()
             .all()

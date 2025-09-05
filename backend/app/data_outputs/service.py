@@ -6,7 +6,7 @@ from uuid import UUID
 import pytz
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.namespace.validation import (
     DataOutputNamespaceValidator,
@@ -61,9 +61,9 @@ class DataOutputService:
         return (
             self.db.scalars(
                 select(DataOutputModel).options(
-                    joinedload(DataOutputModel.environment_configurations),
-                    joinedload(DataOutputModel.dataset_links)
-                    .joinedload(DataOutputDatasetAssociationModel.dataset)
+                    selectinload(DataOutputModel.environment_configurations),
+                    selectinload(DataOutputModel.dataset_links)
+                    .selectinload(DataOutputDatasetAssociationModel.dataset)
                     .raiseload("*"),
                 )
             )
@@ -76,8 +76,8 @@ class DataOutputService:
             DataOutputModel,
             id,
             options=[
-                joinedload(DataOutputModel.dataset_links),
-                joinedload(DataOutputModel.environment_configurations),
+                selectinload(DataOutputModel.dataset_links),
+                selectinload(DataOutputModel.environment_configurations),
             ],
         )
 
@@ -138,10 +138,10 @@ class DataOutputService:
         actor: User,
     ) -> DataOutputDatasetAssociationModel:
         dataset = ensure_dataset_exists(
-            dataset_id, self.db, options=[joinedload(DatasetModel.data_product_links)]
+            dataset_id, self.db, options=[selectinload(DatasetModel.data_product_links)]
         )
         data_output = self.ensure_data_output_exists(
-            id, options=[joinedload(DataOutputModel.dataset_links)]
+            id, options=[selectinload(DataOutputModel.dataset_links)]
         )
 
         if dataset.id in [
@@ -170,7 +170,7 @@ class DataOutputService:
     ) -> DataOutputModel:
         ensure_dataset_exists(dataset_id, self.db)
         data_output = self.ensure_data_output_exists(
-            id, options=[joinedload(DataOutputModel.dataset_links)]
+            id, options=[selectinload(DataOutputModel.dataset_links)]
         )
 
         data_output_dataset = next(

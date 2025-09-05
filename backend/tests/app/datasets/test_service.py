@@ -1,4 +1,4 @@
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 from tests import test_session
 from tests.factories import (
     DataProductDatasetAssociationFactory,
@@ -60,6 +60,6 @@ class TestDatasetsService:
         return test_session.get(
             Dataset,
             dataset.id,
-            options=[joinedload(Dataset.data_product_links)],
+            options=[selectinload(Dataset.data_product_links)],
             populate_existing=True,
         )
