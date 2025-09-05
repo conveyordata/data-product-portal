@@ -47,7 +47,7 @@ posthog = "^6.7.3"
 optional = true
 
 [tool.poetry.group.test.dependencies]
-pytest = "^8.4.1"
+pytest = "^8.4.2"
 pytest-cov = "^6.2.1"
 pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
