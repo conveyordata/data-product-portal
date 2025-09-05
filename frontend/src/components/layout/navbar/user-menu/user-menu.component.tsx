@@ -23,7 +23,7 @@ export function UserMenu() {
     const { signoutRedirect } = useAuth();
     const user = useSelector(selectCurrentUser);
     const {
-        token: { colorErrorBorder, colorPrimary },
+        token: { colorPrimary },
     } = theme.useToken();
     const userInitials = user?.first_name?.charAt(0) + (user?.last_name ? user.last_name.charAt(0) : '');
 
@@ -62,7 +62,7 @@ export function UserMenu() {
                     style={{ fontSize: 10 }}
                     size="small"
                 >
-                    <Avatar style={{ backgroundColor: colorErrorBorder }} className={styles.avatar}>
+                    <Avatar style={{ backgroundColor: colorPrimary }} className={styles.avatar}>
                         {userInitials || <UserOutlined />}
                     </Avatar>
                 </Badge>
