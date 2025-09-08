@@ -47,7 +47,6 @@ async def openid_config():
 
 
 # OAuth Protected Resource Metadata
-# @router.get("/.well-known/oauth-protected-resource/mcp/mcp")
 @router.get("/.well-known/oauth-protected-resource")
 def oauth_protected_resource():
     """OAuth 2.1 Protected Resource Metadata."""

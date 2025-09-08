@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import webbrowser
 from pathlib import Path
 from typing import Any
@@ -15,7 +16,6 @@ from fastmcp.client.oauth_callback import (
 from fastmcp.utilities.logging import get_logger
 from pydantic import AnyHttpUrl
 
-from app.settings import settings
 from mcp.client.auth import OAuthClientProvider
 from mcp.shared.auth import (
     OAuthClientMetadata,
@@ -122,8 +122,9 @@ def OAuth(
     return oauth_provider
 
 
-oauth = OAuth(mcp_url=f"{settings.HOST}/mcp/mcp/")
-client = Client(f"{settings.HOST}/mcp/mcp/", auth=oauth)
+host = os.getenv("HOST", "http://localhost:5050")
+oauth = OAuth(mcp_url=f"{host}/mcp/mcp/")
+client = Client(f"{host}/mcp/mcp/", auth=oauth)
 
 server = FastMCP.as_proxy(client, name="AuthenticatedProxyDataProductPortal")
 
