@@ -57,15 +57,17 @@ def initialize_models():
 initialize_models()  # TODO Figure out if this is still needed
 
 
-def get_auth_provider() -> Optional[JWTVerifier]:
-    if settings.OIDC_ENABLED:
-        print(get_oidc().authority)
-        print(get_oidc().jwks_uri)
-        return JWTVerifier(issuer=get_oidc().authority, jwks_uri=get_oidc().jwks_uri)
-    return None
+# def get_auth_provider() -> Optional[JWTVerifier]:
+#     if settings.OIDC_ENABLED:
+#         print(get_oidc().authority)
+#         print(get_oidc().jwks_uri)
+#         return JWTVerifier(issuer=get_oidc().authority, jwks_uri=get_oidc().jwks_uri)
+#     return None
+auth = None
+if settings.OIDC_ENABLED:
+    auth = JWTVerifier(issuer=get_oidc().authority, jwks_uri=get_oidc().jwks_uri)
 
-
-mcp = FastMCP(name="DataProductPortalMCP", auth=get_auth_provider())
+mcp = FastMCP(name="DataProductPortalMCP", auth=auth)
 
 # ==============================================================================
 # CORE DISCOVERY & SEARCH TOOLS
