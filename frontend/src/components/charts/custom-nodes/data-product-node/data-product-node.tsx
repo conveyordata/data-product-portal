@@ -18,6 +18,7 @@ export type DataProductNodeProps = Node<{
     domain?: string;
     assignments?: Array<DataProductRoleAssignmentContract>;
     description?: string;
+    centeredHandles?: boolean;
     onClick?: () => void;
 }>;
 
@@ -34,6 +35,7 @@ export function DataProductNode({
         domain,
         assignments,
         description,
+        centeredHandles,
         onClick,
     },
     ...props
@@ -52,6 +54,7 @@ export function DataProductNode({
                 domain,
                 assignments,
                 description,
+                centeredHandles,
                 onClick,
             }}
             {...props}

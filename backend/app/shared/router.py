@@ -13,6 +13,7 @@ from app.data_products_datasets.router import router as data_product_dataset
 from app.datasets.router import router as dataset
 from app.domains.router import router as domain
 from app.environments.router import router as environment
+from app.events.router import router as events
 from app.graph.router import router as graph
 from app.notifications.router import router as notification
 from app.pending_actions.router import router as pending_action
@@ -49,3 +50,4 @@ router.include_router(theme_settings)
 router.include_router(graph)
 router.include_router(notification)
 router.include_router(pending_action)
+router.include_router(events)

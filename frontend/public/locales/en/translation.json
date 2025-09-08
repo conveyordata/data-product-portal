@@ -559,6 +559,8 @@
     "EventDatasetRoleAssignmentRequested": "Requested role for <element>{{entity}}</element>",
     "EventDatasetRoleAssignmentApproved": "Approved role for <element>{{entity}}</element>",
     "EventDatasetRoleAssignmentDenied": "Denied role for <element>{{entity}}</element>",
+    "EventDatasetSettingUpdated": "Dataset setting updated",
+    "EventDataProductSettingUpdated": "Data product setting updated",
     "EventDatasetCreated": "Dataset created",
     "EventDatasetUpdated": "Dataset updated",
     "EventDatasetRemoved": "Dataset removed",
