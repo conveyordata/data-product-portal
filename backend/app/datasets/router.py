@@ -372,3 +372,4 @@ def set_value_for_dataset(
             actor_id=authenticated_user.id,
         )
     )
+    RefreshInfrastructureLambda().trigger()
