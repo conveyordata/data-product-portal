@@ -2,8 +2,6 @@ from typing import Any, Dict, Optional
 from uuid import UUID
 
 from fastmcp import Context, FastMCP
-
-# from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.auth import BearerAuthProvider
 from fastmcp.server.dependencies import AccessToken, get_access_token
 from sqlalchemy.orm import configure_mappers
@@ -61,8 +59,6 @@ initialize_models()  # TODO Figure out if this is still needed
 
 def get_auth_provider() -> Optional[BearerAuthProvider]:
     if settings.OIDC_ENABLED:
-        print(get_oidc().authority)
-        print(get_oidc().jwks_uri)
         return BearerAuthProvider(
             issuer=get_oidc().authority, jwks_uri=get_oidc().jwks_uri
         )
