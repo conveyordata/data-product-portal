@@ -122,9 +122,9 @@ def OAuth(
     return oauth_provider
 
 
-host = os.getenv("HOST", "http://localhost:5050")
-oauth = OAuth(mcp_url=f"{host}/mcp/mcp/")
-client = Client(f"{host}/mcp/mcp/", auth=oauth)
+endpoint = os.getenv("ENDPOINT", "http://localhost:5050")
+oauth = OAuth(mcp_url=f"{endpoint}/mcp/mcp/")
+client = Client(f"{endpoint}/mcp/mcp/", auth=oauth)
 
 server = FastMCP.as_proxy(client, name="AuthenticatedProxyDataProductPortal")
 

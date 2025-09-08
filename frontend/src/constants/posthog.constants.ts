@@ -10,6 +10,7 @@ export enum PosthogEvents {
 
     HOMEPAGE_DATA_PRODUCTS_TAB_CLICKED = 'homepage_data_products_tab_clicked',
     HOMEPAGE_DATASETS_TAB_CLICKED = 'homepage_datasets_tab_clicked',
+    HOMEPAGE_MCP_CLICKED = 'homepage_mcp_clicked',
 
     REQUESTS_TAB_CLICKED = 'requests_tab_clicked',
     REQUESTS_ACCEPT = 'requests_accept',
