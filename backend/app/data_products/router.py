@@ -673,3 +673,4 @@ def set_value_for_data_product(
             actor_id=authenticated_user.id,
         )
     )
+    RefreshInfrastructureLambda().trigger()

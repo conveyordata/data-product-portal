@@ -185,18 +185,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.40.24"
+version = "1.40.25"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.40.24-py3-none-any.whl", hash = "sha256:24a19e275d33e918afc22a78c6a1e20c14d02cc00e2f786b05e2a4a32191457e"},
-    {file = "boto3-1.40.24.tar.gz", hash = "sha256:cc147ad13e8edf7ec69cbb4df8fe60f187f8b2c9ab8befa0fd1fbcfa4fc80b1f"},
+    {file = "boto3-1.40.25-py3-none-any.whl", hash = "sha256:d39bc3deb6780d910f00580837b720132055b0604769fd978780865ed3c019ea"},
+    {file = "boto3-1.40.25.tar.gz", hash = "sha256:debfa4b2c67492d53629a52c999d71cddc31041a8b62ca1a8b1fb60fb0712ee1"},
 ]
 
 [package.dependencies]
-botocore = ">=1.40.24,<1.41.0"
+botocore = ">=1.40.25,<1.41.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.13.0,<0.14.0"
 
@@ -205,14 +205,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.40.24"
+version = "1.40.25"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.40.24-py3-none-any.whl", hash = "sha256:d566840f2291bb5df1c0903ad385c61c865927d562d41dcf6468c9cee4cc313a"},
-    {file = "botocore-1.40.24.tar.gz", hash = "sha256:af2b49e52950a12229440d7c297aaad0a7b75fd1c4f8700b164948b207a08cf0"},
+    {file = "botocore-1.40.25-py3-none-any.whl", hash = "sha256:5603ea9955cd31974446f0b5688911a5dad71fbdfbf7457944cda8a83fcf2a9e"},
+    {file = "botocore-1.40.25.tar.gz", hash = "sha256:41fd186018a48dc517a4312a8d3085d548cb3fb1f463972134140bf7ee55a397"},
 ]
 
 [package.dependencies]
@@ -1340,14 +1340,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "6.7.3"
+version = "6.7.4"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "posthog-6.7.3-py3-none-any.whl", hash = "sha256:c669d0a43ddd2c34762fdbfd4d89e453430991e7ff9c2baf8e7c36619525d624"},
-    {file = "posthog-6.7.3.tar.gz", hash = "sha256:3d03ab7e6328a2407dcafa5615760bd99a4c20b18b7d548160175634ab53e73c"},
+    {file = "posthog-6.7.4-py3-none-any.whl", hash = "sha256:7f1872c53ec7e9a29b088a5a1ad03fa1be3b871d10d70c8bf6c2dafb91beaac5"},
+    {file = "posthog-6.7.4.tar.gz", hash = "sha256:2bfa74f321ac18efe4a48a256d62034a506ca95477af7efa32292ed488a742c5"},
 ]
 
 [package.dependencies]
@@ -2359,14 +2359,14 @@ full = ["httpx (>=0.27.0,<0.29.0)", "itsdangerous", "jinja2", "python-multipart 
 
 [[package]]
 name = "typer"
-version = "0.17.3"
+version = "0.17.4"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "typer-0.17.3-py3-none-any.whl", hash = "sha256:643919a79182ab7ac7581056d93c6a2b865b026adf2872c4d02c72758e6f095b"},
-    {file = "typer-0.17.3.tar.gz", hash = "sha256:0c600503d472bcf98d29914d4dcd67f80c24cc245395e2e00ba3603c9332e8ba"},
+    {file = "typer-0.17.4-py3-none-any.whl", hash = "sha256:015534a6edaa450e7007eba705d5c18c3349dcea50a6ad79a5ed530967575824"},
+    {file = "typer-0.17.4.tar.gz", hash = "sha256:b77dc07d849312fd2bb5e7f20a7af8985c7ec360c45b051ed5412f64d8dc1580"},
 ]
 
 [package.dependencies]
@@ -2442,4 +2442,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "cbf2eac040801403358d0a4d31c2f861bd11c9a1c9b6b2875640414112d67fdd"
+content-hash = "9cef6341b75adf09a58374f8e4179c3aee8d4a54219c334e636c23b47cb79575"
