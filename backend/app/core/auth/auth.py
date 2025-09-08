@@ -52,7 +52,6 @@ if settings.OIDC_ENABLED:
         jwt = JWTTokenValid(token)
         if not jwt.is_valid():
             raise PyJWTError()
-        print(jwt.token)
         return JWTToken(sub=jwt.valid_jwt_token.get("sub"), token=token)
 
     def authorize_user(
