@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 from app.domains.model import Domain as DomainModel
 from app.domains.model import ensure_domain_exists
@@ -20,8 +20,8 @@ class DomainService:
             self.db.scalars(
                 select(DomainModel)
                 .options(
-                    joinedload(DomainModel.datasets),
-                    joinedload(DomainModel.data_products),
+                    selectinload(DomainModel.datasets),
+                    selectinload(DomainModel.data_products),
                 )
                 .order_by(DomainModel.name)
             )
@@ -34,8 +34,8 @@ class DomainService:
             DomainModel,
             id,
             options=[
-                joinedload(DomainModel.datasets),
-                joinedload(DomainModel.data_products),
+                selectinload(DomainModel.datasets),
+                selectinload(DomainModel.data_products),
             ],
         )
 
@@ -68,8 +68,8 @@ class DomainService:
             DomainModel,
             id,
             options=[
-                joinedload(DomainModel.datasets),
-                joinedload(DomainModel.data_products),
+                selectinload(DomainModel.datasets),
+                selectinload(DomainModel.data_products),
             ],
         )
 
@@ -90,8 +90,8 @@ class DomainService:
             from_id,
             self.db,
             options=[
-                joinedload(DomainModel.datasets),
-                joinedload(DomainModel.data_products),
+                selectinload(DomainModel.datasets),
+                selectinload(DomainModel.data_products),
             ],
         )
         new_domain = ensure_domain_exists(to_id, self.db)
