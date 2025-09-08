@@ -105,6 +105,14 @@ ingress:
   pathType: Prefix
   hosts:
     - paths:
+      - path: /mcp
+        pathType: Prefix
+        name: data-product-portal
+        number: 5050
+      - path: /.well-known
+        pathType: Prefix
+        name: data-product-portal
+        number: 5050
       - path: /api
         pathType: Prefix
         name: data-product-portal
