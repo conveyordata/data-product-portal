@@ -37,11 +37,11 @@ pip install uv
 
 #### 2. Download the MCP proxy script
 
-Download the MCP proxy script from the [following location](https://raw.githubusercontent.com/conveyordata/data-product-portal/refs/heads/main/backend/app/remote_proxy.py).
+Download the MCP proxy script from the [following location](https://raw.githubusercontent.com/conveyordata/data-product-portal/refs/heads/main/mcp/remote_proxy.py).
 For example:
 
 ```
-wget https://raw.githubusercontent.com/conveyordata/data-product-portal/refs/heads/main/backend/app/remote_proxy.py
+wget https://raw.githubusercontent.com/conveyordata/data-product-portal/refs/heads/main/mcp/remote_proxy.py
 ```
 
 Please note the path where you save the file.
