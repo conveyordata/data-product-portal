@@ -6,7 +6,7 @@ toolchain go1.24.1
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.39.0
-	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.57.4
+	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.57.5
 	github.com/briandowns/spinner v1.23.2
 	github.com/deepmap/oapi-codegen v1.16.3
 	github.com/fatih/color v1.18.0
