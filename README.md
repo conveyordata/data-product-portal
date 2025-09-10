@@ -194,6 +194,19 @@ request with the integration you would like to see in the data product portal.
 
 Please find the relevant info in [Installation](docs/INSTALLATION.md)
 
+# Release Process
+To prepare a new release follow these steps, use the next minor or patch version (in this example 0.3.6):
+- Create a new branch from main called `chore/version_bump_036`
+- If you do a patch version bump: run `task bump-version -- 0.3.6` in root.
+- If you do a minor / major version bump: also run `task bump-docs -- 0.3.x` in root. *DO NOT REPLACE x in this case.*
+
+- PRs will be created automatically, add important changes manually to the changelog.
+- Merge the version bump to main when approved.
+- Test out the current version of main both locally and on deployed installations to make sure the code is stable for a new release.
+- To actually execute the release: checkout main branch (and pull), run `git tag v0.3.6` and `git push --tags`.
+
+Congratulations, the release will be happening automatically.
+
 # Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any
