@@ -242,9 +242,8 @@ def link_dataset_to_data_output(
         email.send_link_dataset_email(
             dataset_link.dataset,
             dataset_link.data_output,
-            requester_id=authenticated_user.id,
-            approver_ids=[approver.id for approver in approvers],
-            db=db,
+            requester=authenticated_user,
+            approvers=approvers,
         )
     )
     return {"id": dataset_link.id}

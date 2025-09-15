@@ -33,11 +33,10 @@ def send_role_assignment_request_email(
     )
 
     return send_mail(
-        [approver.id for approver in approvers],
+        approvers,
         action,
         url,
         f"Action Required: {role_assignment.user.first_name} "
         f"{role_assignment.user.last_name} wants "
         f"to join {role_assignment.data_product.name}",
-        db=db,
     )
