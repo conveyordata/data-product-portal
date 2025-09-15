@@ -1,27 +1,18 @@
-import type { RadioChangeEvent } from 'antd';
 import { Button, Flex, Form, Input, Pagination, Space, Table, Typography } from 'antd';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
-
-import { TableQuickFilter } from '@/components/list/table-quick-filter/table-quick-filter';
+import { RoleFilter } from '@/components/filters/role-filter.component';
 import posthog from '@/config/posthog-config';
 import { PosthogEvents } from '@/constants/posthog.constants';
-import { useQuickFilter } from '@/hooks/use-quick-filter';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductTableColumns } from '@/pages/data-products/components/data-products-table/data-products-table-columns.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import {
-    useGetAllDataProductsQuery,
-    useGetUserDataProductsQuery,
-} from '@/store/features/data-products/data-products-api-slice.ts';
+import { useGetAllDataProductsQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { DataProductsGetContract } from '@/types/data-product';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import type { SearchForm } from '@/types/shared';
-import { QuickFilterParticipation } from '@/types/shared/table-filters';
 import styles from './data-products-table.module.scss';
 
 function filterDataProducts(dataProducts: DataProductsGetContract, searchTerm?: string) {
@@ -31,22 +22,35 @@ function filterDataProducts(dataProducts: DataProductsGetContract, searchTerm?: 
     return dataProducts.filter((dataProduct) => dataProduct.name.toLowerCase().includes(searchTerm.toLowerCase()));
 }
 
+function filterDataProductsByRoles(dataProducts: DataProductsGetContract, selectedProductIds: string[]) {
+    if (!selectedProductIds.length) {
+        return dataProducts;
+    }
+
+    return dataProducts.filter((dataProduct) => {
+        return selectedProductIds.includes(dataProduct.id);
+    });
+}
+
 export function DataProductsTable() {
-    const currentUser = useSelector(selectCurrentUser);
     const { t } = useTranslation();
-    const { quickFilter, onQuickFilterChange, quickFilterOptions } = useQuickFilter({});
     const navigate = useNavigate();
+    const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+    const [selectedRole, setSelectedRole] = useState<string>('');
+
     const { data: dataProducts = [], isFetching } = useGetAllDataProductsQuery();
-    const { data: userDataProducts = [] } = useGetUserDataProductsQuery(currentUser?.id || '', { skip: !currentUser });
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const canCreateDataProduct = access?.allowed ?? false;
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
+
     const filteredDataProducts = useMemo(() => {
-        const data = quickFilter === QuickFilterParticipation.Me ? userDataProducts : dataProducts;
-        return filterDataProducts(data, searchTerm);
-    }, [quickFilter, userDataProducts, dataProducts, searchTerm]);
+        let filtered = filterDataProducts(dataProducts, searchTerm);
+        filtered = filterDataProductsByRoles(filtered, selectedProductIds);
+        return filtered;
+    }, [dataProducts, searchTerm, selectedProductIds]);
+
     const { pagination, handlePaginationChange } = useTablePagination(filteredDataProducts);
 
     const columns = useMemo(
@@ -66,11 +70,9 @@ export function DataProductsTable() {
         navigate(createDataProductIdPath(dataProductId));
     };
 
-    const handleQuickFilterChange = ({ target: { value } }: RadioChangeEvent) => {
-        posthog.capture(PosthogEvents.DATA_PRODUCTS_FILTER_USED, {
-            filter_value: value,
-        });
-        onQuickFilterChange(value);
+    const handleRoleChange = (selected: { productIds: string[]; role: string }) => {
+        setSelectedProductIds(selected.productIds);
+        setSelectedRole(selected.role);
     };
 
     return (
@@ -95,11 +97,7 @@ export function DataProductsTable() {
             </Flex>
             <Flex vertical className={styles.tableFilters}>
                 <Flex align="flex-end" justify="space-between" className={styles.tableBar}>
-                    <TableQuickFilter
-                        value={quickFilter}
-                        onFilterChange={handleQuickFilterChange}
-                        quickFilterOptions={quickFilterOptions}
-                    />
+                    <RoleFilter mode={'data_products'} selectedRole={selectedRole} onRoleChange={handleRoleChange} />
                     <Pagination
                         current={pagination.current}
                         pageSize={pagination.pageSize}
