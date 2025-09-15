@@ -1,12 +1,14 @@
 import smtplib
 from email.mime.text import MIMEText
 from typing import Sequence
+from uuid import UUID
 
 import emailgen
+from sqlalchemy.orm import Session
 
 from app.core.logging import logger
 from app.settings import settings
-from app.users.schema import User
+from app.users.model import User as UserModel
 
 # For most simple use cases, this should be all you need to define.
 generator = emailgen.Generator(
@@ -22,8 +24,13 @@ generator = emailgen.Generator(
 
 
 def send_mail(
-    recipients: Sequence[User], action: emailgen.Table, url: str, subject: str
+    recipient_ids: Sequence[UUID],
+    action: emailgen.Table,
+    url: str,
+    subject: str,
+    db: Session,
 ):
+    recipients = [db.get(UserModel, recipient) for recipient in recipient_ids]
     for recipient in recipients:
         try:
             email = emailgen.Email(f"{recipient.first_name}")
