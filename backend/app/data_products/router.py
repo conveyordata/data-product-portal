@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Sequence
 from uuid import UUID
 
@@ -486,8 +487,8 @@ def _send_dataset_link_emails(
             email.send_dataset_link_email(
                 dataset_link.data_product,
                 dataset_link.dataset,
-                requester=actor,
-                approvers=approvers,
+                requester=deepcopy(actor),
+                approvers=[deepcopy(approver) for approver in approvers],
             )
         )
 
