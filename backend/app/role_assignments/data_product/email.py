@@ -9,14 +9,13 @@ from app.role_assignments.data_product.model import (
     DataProductRoleAssignment as RoleAssignmentModel,
 )
 from app.settings import settings
-from app.users.model import User as UserModel
+from app.users.schema import User
 
 
 def send_role_assignment_request_email(
-    id: UUID, approver_ids: Sequence[UUID], db: Session
+    id: UUID, approvers: Sequence[User], db: Session
 ) -> None:
     role_assignment = db.get(RoleAssignmentModel, id)
-    approvers = [db.get(UserModel, approver_id) for approver_id in approver_ids]
 
     url = (
         f"{settings.HOST.rstrip('/')}/data-products/"
