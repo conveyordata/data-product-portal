@@ -15,8 +15,8 @@ import { generateDagreLayout } from '@/utils/node-editor.helper';
 const getNodeDimensions = () => {
     const style = getComputedStyle(document.documentElement);
     return {
-        width: Number.parseInt(style.getPropertyValue('--node-width')),
-        height: Number.parseInt(style.getPropertyValue('--node-height')),
+        width: Number.parseInt(style.getPropertyValue('--node-width'), 10),
+        height: Number.parseInt(style.getPropertyValue('--node-height'), 10),
     };
 };
 

@@ -52,7 +52,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
         }, 50);
 
         return () => clearTimeout(timeout);
-    }, [nodeId, getNode]);
+    }, [nodeId, currentInstance]);
 
     function getNodeDataForSideBar(nodeId: string) {
         const node = getNode(nodeId);
