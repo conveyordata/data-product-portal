@@ -97,7 +97,10 @@ def create_assignment(
         )
     else:
         background_tasks.add_task(
-            email.send_role_assignment_request_email, role_assignment.id, approvers, db
+            email.send_role_assignment_request_email,
+            role_assignment.id,
+            [approver.id for approver in approvers],
+            db,
         )
     return role_assignment
 
@@ -137,7 +140,10 @@ def request_assignment(
         action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
     )
     background_tasks.add_task(
-        email.send_role_assignment_request_email, role_assignment.id, approvers, db
+        email.send_role_assignment_request_email,
+        role_assignment.id,
+        [approver.id for approver in approvers],
+        db,
     )
     return role_assignment
 
