@@ -74,12 +74,9 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 url: buildUrl(ApiUrl.DatasetGet, { datasetId: id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: (_, _error, arg) => [
+            invalidatesTags: (_, _error) => [
                 { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.Dataset as const, id: arg },
-                { type: TagTypes.UserDatasets as const, id: arg },
-                { type: TagTypes.History as const, id: arg },
             ],
         }),
         updateDataset: builder.mutation<
