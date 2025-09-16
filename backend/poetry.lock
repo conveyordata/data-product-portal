@@ -1482,14 +1482,14 @@ files = [
 
 [[package]]
 name = "pydantic"
-version = "2.11.7"
+version = "2.11.9"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pydantic-2.11.7-py3-none-any.whl", hash = "sha256:dde5df002701f6de26248661f6835bbe296a47bf73990135c7d07ce741b9623b"},
-    {file = "pydantic-2.11.7.tar.gz", hash = "sha256:d989c3c6cb79469287b1569f7447a17848c998458d49ebe294e975b9baf0f0db"},
+    {file = "pydantic-2.11.9-py3-none-any.whl", hash = "sha256:c42dd626f5cfc1c6950ce6205ea58c93efa406da65f479dcb4029d5934857da2"},
+    {file = "pydantic-2.11.9.tar.gz", hash = "sha256:6b8ffda597a14812a7975c90b82a8a2e777d9257aba3453f973acd3c032a18e2"},
 ]
 
 [package.dependencies]
@@ -2469,4 +2469,4 @@ standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "cbeaa6a01f2060a32befe608b3886f2580d369d53236cb3a3e91368ba1c3248f"
+content-hash = "d8e2449bceace7499937e16757d9a88c7dd40786c0fce9a42446ae30b1d96ddc"
