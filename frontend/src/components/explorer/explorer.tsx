@@ -110,7 +110,7 @@ function InternalExplorer({ id, type }: Props) {
             setNodes(positionedNodes);
             setEdges(straightEdges);
         }
-    }, [graph, setNodes, setEdges, applyLayout, token]);
+    }, [graph, setNodes, setEdges, applyLayout, token, t]);
 
     useEffect(() => {
         generateGraph();
