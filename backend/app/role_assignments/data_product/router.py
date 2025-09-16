@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Optional, Sequence
 from uuid import UUID
 
@@ -97,7 +98,10 @@ def create_assignment(
         )
     else:
         background_tasks.add_task(
-            email.send_role_assignment_request_email, role_assignment.id, approvers, db
+            email.send_role_assignment_request_email,
+            deepcopy(role_assignment.user),
+            deepcopy(role_assignment.data_product),
+            [deepcopy(approver) for approver in approvers],
         )
     return role_assignment
 
@@ -137,7 +141,10 @@ def request_assignment(
         action=Action.DATA_PRODUCT__APPROVE_USER_REQUEST,
     )
     background_tasks.add_task(
-        email.send_role_assignment_request_email, role_assignment.id, approvers, db
+        email.send_role_assignment_request_email,
+        deepcopy(role_assignment.user),
+        deepcopy(role_assignment.data_product),
+        [deepcopy(approver) for approver in approvers],
     )
     return role_assignment
 
