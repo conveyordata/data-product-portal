@@ -8,9 +8,10 @@ import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { useGetDatasetRoleAssignmentsQuery } from '@/store/features/role-assignments/dataset-roles-api-slice';
+import type { DataProductRoleAssignmentContract, DatasetRoleAssignmentContract } from '@/types/roles/role.contract';
 
 interface RoleFilterProps {
-    selectedRole: string;
+    selectedRole: string | undefined;
     onRoleChange: (selected: { productIds: string[]; role: string }) => void;
     mode: 'data_products' | 'datasets';
 }
@@ -20,29 +21,33 @@ export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps
     const currentUser = useSelector(selectCurrentUser);
     const { data: userDatasetRoles = [] } = useGetDatasetRoleAssignmentsQuery(
         { user_id: currentUser?.id || '' },
-        { skip: !currentUser },
+        { skip: !currentUser || mode !== 'datasets' },
     );
     const { data: userDataProductRoles = [] } = useGetDataProductRoleAssignmentsQuery(
         { user_id: currentUser?.id || '' },
-        { skip: !currentUser },
+        { skip: !currentUser || mode !== 'data_products' },
     );
-    const userRoles = mode === 'data_products' ? userDataProductRoles : userDatasetRoles;
 
     // Get unique roles that the current user has across all data products
     const uniqueUserRoles = useMemo(() => {
+        const userRoles = mode === 'data_products' ? userDataProductRoles : userDatasetRoles;
         if (!userRoles.length) return [];
 
         const uniqueRoles = new Map<string, { label: string; value: string; productIds: string[] }>();
+
+        const get_id = (assignment: DataProductRoleAssignmentContract | DatasetRoleAssignmentContract): string => {
+            if (mode === 'data_products') {
+                return (assignment as DataProductRoleAssignmentContract).data_product.id;
+            }
+            if (mode === 'datasets') {
+                return (assignment as DatasetRoleAssignmentContract).dataset.id;
+            }
+            throw new Error('Invalid assignment type for mode');
+        };
+
         userRoles.forEach((assignment) => {
             const roleId = assignment.role.id;
-            let productId: string;
-            if (mode === 'data_products' && 'data_product' in assignment) {
-                productId = assignment.data_product.id;
-            } else if (mode === 'datasets' && 'dataset' in assignment) {
-                productId = assignment.dataset.id;
-            } else {
-                return;
-            }
+            const productId = get_id(assignment);
             const roleName = assignment.role.name;
             if (!uniqueRoles.has(roleId)) {
                 uniqueRoles.set(roleId, { label: roleName, value: roleId, productIds: [productId] });
@@ -51,8 +56,8 @@ export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps
             }
         });
 
-        return Array.from(uniqueRoles.values());
-    }, [userRoles]);
+        return Array.from(uniqueRoles.values()).sort((a, b) => a.label.localeCompare(b.label));
+    }, [userDataProductRoles, userDatasetRoles, mode]);
 
     const handleRoleFilterChange = (roleId: string) => {
         const selectedRoleData = uniqueUserRoles.find((role) => role.value === roleId);

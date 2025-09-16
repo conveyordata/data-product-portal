@@ -40,7 +40,7 @@ export function DatasetsTable() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [selectedDatasetIds, setSelectedDatasetIds] = useState<string[]>([]);
-    const [selectedRole, setSelectedRole] = useState<string>('');
+    const [selectedRole, setSelectedRole] = useState<string | undefined>(undefined);
 
     const { data: datasets = [], isFetching } = useGetAllDatasetsQuery();
     const { data: access } = useCheckAccessQuery(

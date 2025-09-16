@@ -36,7 +36,7 @@ export function DataProductsTable() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
-    const [selectedRole, setSelectedRole] = useState<string>('');
+    const [selectedRole, setSelectedRole] = useState<string | undefined>(undefined);
 
     const { data: dataProducts = [], isFetching } = useGetAllDataProductsQuery();
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
