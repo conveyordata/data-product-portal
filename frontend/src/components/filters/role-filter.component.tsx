@@ -52,7 +52,7 @@ export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps
             if (!uniqueRoles.has(roleId)) {
                 uniqueRoles.set(roleId, { label: roleName, value: roleId, productIds: [productId] });
             } else {
-                uniqueRoles.get(roleId)!.productIds.push(productId);
+                uniqueRoles.get(roleId)?.productIds.push(productId);
             }
         });
 
