@@ -67,7 +67,7 @@
         "msw": "^2.11.2",
         "sass": "^1.92.1",
         "typescript": "^5.9.2",
-        "vite": "^7.1.5",
+        "vite": "^7.1.6",
         "vite-plugin-svgr": "^4.5.0"
     },
     "optionalDependencies": {
