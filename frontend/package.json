@@ -18,7 +18,7 @@
         "@ant-design/colors": "^8.0.0",
         "@ant-design/v5-patch-for-react-19": "^1.0.3",
         "@dagrejs/dagre": "^1.1.5",
-        "@fontsource/inter": "^5.2.7",
+        "@fontsource/inter": "^5.2.8",
         "@reduxjs/toolkit": "^2.9.0",
         "@tiptap/extension-bubble-menu": "^3.4.4",
         "@tiptap/extension-document": "^3.4.4",
