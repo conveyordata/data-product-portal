@@ -202,7 +202,7 @@ To prepare a new release follow these steps, use the next minor or patch version
 
 - PRs will be created automatically, add important changes manually to the [Changelog](docs/docs/release-notes.md).
 - Merge the version bump to main when approved.
-- Test out the current version of main both locally and on deployed installations to make sure the code is stable for a new release.
+- Test out the current version of main locally
 - To actually execute the release: checkout main branch (and pull), run `git tag v0.3.6` and `git push --tags`.
 
 Congratulations, the release will be happening automatically.
