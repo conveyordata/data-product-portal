@@ -1,0 +1,43 @@
+@use '@/styles/globals';
+
+.radioGroup {
+  display: flex;
+}
+
+.radioDropdownButton {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.dropdownButton {
+  display: flex;
+  align-items: center;
+  padding: 0 globals.$spacing-s;
+  height: 100%;
+  box-shadow: none;
+  color: inherit;
+  background: none;
+  border: none;
+}
+
+.dropdownButtonSelected {
+  color: #fff;
+  border-color: globals.$primary-color;
+}
+
+.selectedRoleLabel {
+  font-weight: 500;
+}
+
+.dropdownSelected {
+  color: #fff;
+  font-weight: 600;
+}
+
+.dropdownSelectedBg {
+  background: globals.$primary-color !important;
+}
