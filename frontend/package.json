@@ -65,7 +65,7 @@
         "esbuild": "^0.25.10",
         "i18next-parser": "^9.3.0",
         "msw": "^2.11.2",
-        "sass": "^1.93.0",
+        "sass": "^1.93.1",
         "typescript": "^5.9.2",
         "vite": "^7.1.7",
         "vite-plugin-svgr": "^4.5.0"
