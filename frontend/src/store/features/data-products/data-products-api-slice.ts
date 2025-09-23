@@ -125,12 +125,9 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 url: buildUrl(ApiUrl.DataProductGet, { dataProductId: id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: (_, _error, arg) => [
+            invalidatesTags: (_, _error) => [
                 { type: TagTypes.DataProduct as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.DataProduct as const, id: arg },
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.UserDataProducts as const, id: arg },
-                { type: TagTypes.History as const, id: arg },
             ],
         }),
         getDataProductSignInUrl: builder.mutation<DataProductGetSignInUrlResponse, DataProductGetSignInUrlRequest>({

@@ -129,7 +129,6 @@ export const dataOutputsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: 
             }),
             invalidatesTags: (_, _error, arg) => [
                 { type: TagTypes.DataOutput as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.DataOutput as const, id: arg },
                 { type: TagTypes.History as const, id: arg },
             ],
         }),
