@@ -128,7 +128,7 @@ const config: Config = {
         {
           title: 'More',
           items: [
-            { label: 'Changelog', to: '/docs/changelog' },
+            { label: 'Release notes', to: '/docs/release-notes' },
             { label: 'Roadmap', to: '/docs/roadmap' },
           ],
         },
