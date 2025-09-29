@@ -60,7 +60,7 @@
         "@types/node": "^24.5.2",
         "@types/react": "^19.1.14",
         "@types/react-dom": "^19.1.9",
-        "@vitejs/plugin-react": "^5.0.3",
+        "@vitejs/plugin-react": "^5.0.4",
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.25.10",
         "i18next-parser": "^9.3.0",
