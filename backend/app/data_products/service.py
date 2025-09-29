@@ -54,6 +54,9 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.platforms.model import Platform as PlatformModel
+from app.role_assignments.data_product.model import (
+    DataProductRoleAssignment as DataProductAssignmentModel,
+)
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype
 from app.settings import settings
@@ -117,7 +120,9 @@ class DataProductService:
                 select(DataProductModel)
                 .options(
                     selectinload(DataProductModel.dataset_links).raiseload("*"),
-                    selectinload(DataProductModel.assignments).raiseload("*"),
+                    selectinload(DataProductModel.assignments)
+                    .selectinload(DataProductAssignmentModel.user)
+                    .raiseload("*"),
                     selectinload(DataProductModel.data_outputs).raiseload("*"),
                 )
                 .order_by(asc(DataProductModel.name))
@@ -129,6 +134,12 @@ class DataProductService:
         for dp in dps:
             if not dp.lifecycle:
                 dp.lifecycle = default_lifecycle
+
+            assignments = []
+            for assignment in dp.assignments:
+                if assignment.decision == DecisionStatus.APPROVED:
+                    assignments.append(assignment)
+            dp.assignments = assignments
         return dps
 
     def get_owners(self, id: UUID) -> Sequence[User]:

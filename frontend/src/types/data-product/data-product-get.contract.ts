@@ -1,5 +1,6 @@
 import type { DataProductContract } from '@/types/data-product';
 import type { TagContract } from '@/types/tag';
+import type { DataProductRoleAssignmentContract } from '../roles/role.contract';
 
 export type DataProductsGetContract = (Omit<
     DataProductContract,
@@ -11,4 +12,5 @@ export type DataProductsGetContract = (Omit<
     data_outputs_count: number;
     tags: Omit<TagContract, 'id'>[];
     rolled_up_tags: Omit<TagContract, 'id'>[];
+    assignments: DataProductRoleAssignmentContract[];
 })[];

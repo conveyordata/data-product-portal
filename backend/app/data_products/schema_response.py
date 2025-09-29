@@ -10,6 +10,7 @@ from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.schema import Dataset
 from app.domains.schema import Domain
+from app.role_assignments.data_product.schema import RoleAssignment
 from app.shared.schema import ORMModel
 from app.tags.schema import Tag
 
@@ -53,3 +54,4 @@ class DataProductsGet(BaseDataProductGet):
     user_count: int
     dataset_count: int
     data_outputs_count: int
+    assignments: list[RoleAssignment]

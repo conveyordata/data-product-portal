@@ -1,5 +1,5 @@
-import { TeamOutlined } from '@ant-design/icons';
-import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
+import { CrownOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Badge, Popover, type TableColumnsType, Tag, Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
@@ -15,6 +15,72 @@ import { Sorter } from '@/utils/table-sorter.helper';
 import styles from './data-products-table.module.scss';
 
 const iconColumnWidth = 30;
+
+function renderTeamCell(
+    team: { user: { id: string; first_name: string; last_name: string; email: string }; role: { name: string } }[],
+    t: TFunction,
+) {
+    if (!team || team.length === 0) return null;
+
+    // Group users by role
+    const grouped: Record<string, { role: string; users: typeof team }> = {};
+    team.forEach((member) => {
+        const role = member.role.name;
+        if (!grouped[role]) {
+            grouped[role] = { role, users: [] };
+        }
+        grouped[role].users.push(member);
+    });
+    // Sort roles: owners first, then alphabetically
+    const sortedRoles = Object.keys(grouped).sort((a, b) => {
+        if (a.toLowerCase() === 'owner') return -1;
+        if (b.toLowerCase() === 'owner') return 1;
+        return a.localeCompare(b);
+    });
+
+    return (
+        <div className={styles.teamCell}>
+            {sortedRoles.map((role) => {
+                const users = grouped[role].users;
+                const showUsers = users.slice(0, 2);
+                const extraCount = users.length - showUsers.length;
+                const isOwner = role.toLowerCase() === 'owner';
+                const roleIcon = isOwner ? (
+                    <CrownOutlined style={{ marginRight: 4 }} />
+                ) : (
+                    <UserOutlined style={{ marginRight: 4 }} />
+                );
+                return (
+                    <div key={role} className={styles.teamRoleGroup}>
+                        <span className={styles.teamRoleLabel}>
+                            {roleIcon}
+                            {role}
+                        </span>
+                        <span className={styles.teamAvatars}>
+                            {showUsers.map((member) => (
+                                <Tooltip
+                                    key={member.user.id}
+                                    title={`${member.user.first_name} ${member.user.last_name} ${member.user.email}`}
+                                >
+                                    <Avatar size="small" className={styles.avatar}>
+                                        {member.user.first_name.split('')[0].toUpperCase()}
+                                        {member.user.last_name.split('')[0].toUpperCase()}
+                                    </Avatar>
+                                </Tooltip>
+                            ))}
+                            {extraCount > 0 && (
+                                <span className={styles.teamMore}>
+                                    +{extraCount} {t('more')}
+                                </span>
+                            )}
+                        </span>
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
 export const getDataProductTableColumns = ({
     t,
     dataProducts: data,
@@ -114,6 +180,12 @@ export const getDataProductTableColumns = ({
             render: (dataOutputCount: number) => {
                 return <TableCellItem text={t('{{count}} data outputs', { count: dataOutputCount })} />;
             },
+        },
+        {
+            title: t('Team'),
+            dataIndex: 'assignments',
+            render: (assignments) => renderTeamCell(assignments, t),
+            width: 180,
         },
     ];
 };

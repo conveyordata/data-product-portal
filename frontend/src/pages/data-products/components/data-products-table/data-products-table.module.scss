@@ -45,3 +45,36 @@
 .table-bar {
     width: 100%;
 }
+
+.teamCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.teamRoleGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.teamRoleLabel {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 4px;
+  gap: 2px;
+}
+
+.teamAvatars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.teamMore {
+  font-size: 12px;
+  color: #888;
+  margin-left: 4px;
+}
