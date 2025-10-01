@@ -37,7 +37,7 @@ export function Home() {
                         );
                     }}
                 >
-                    {t('Try out our new MCP Server (Experimental)')}
+                    {t('Talk to your data!')}
                 </Button>
             </div>
 
