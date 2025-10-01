@@ -41,7 +41,7 @@
         "clsx": "^2.1.1",
         "date-fns": "^4.1.0",
         "elkjs": "^0.11.0",
-        "i18next": "^25.5.2",
+        "i18next": "^25.5.3",
         "i18next-http-backend": "^3.0.2",
         "js-sha256": "^0.11.1",
         "oidc-client-ts": "^3.3.0",
