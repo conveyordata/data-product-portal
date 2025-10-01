@@ -31,7 +31,7 @@ export function Home() {
                     onClick={() => {
                         posthog.capture(PosthogEvents.HOMEPAGE_MCP_CLICKED);
                         window.open(
-                            'https://d33vpinjygaq6n.cloudfront.net/docs/user-guide/experimental-features',
+                            'https://docs.dataproductportal.com/docs/user-guide/experimental-features',
                             '_blank',
                             'noopener,noreferrer',
                         );

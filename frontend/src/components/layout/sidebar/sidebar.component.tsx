@@ -60,7 +60,7 @@ export const Sidebar = () => {
         {
             label: (
                 <a
-                    href={`https://d33vpinjygaq6n.cloudfront.net/docs/${version?.version.split('.').slice(0, 2).join('.')}.x/intro`}
+                    href={`https://docs.dataproductportal.com/docs/${version?.version.split('.').slice(0, 2).join('.')}.x/intro`}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
