@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
 import {
     useCreateGlobalRoleAssignmentMutation,
     useDecideGlobalRoleAssignmentMutation,
@@ -14,7 +15,11 @@ import {
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { type GlobalRoleAssignmentContract, Scope } from '@/types/roles/role.contract';
+import {
+    type DataProductRoleAssignmentContract,
+    type GlobalRoleAssignmentContract,
+    Scope,
+} from '@/types/roles/role.contract';
 import type { SearchForm } from '@/types/shared';
 import type { UsersGetContract } from '@/types/users/user.contract';
 import styles from './people-table.module.scss';
@@ -37,6 +42,15 @@ export function PeopleTable() {
     const { data: roles = [] } = useGetRolesQuery(Scope.GLOBAL);
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
     const canAssignGlobalRole = access?.allowed ?? false;
+    const { data: assignments = [] } = useGetDataProductRoleAssignmentsQuery({ decision: 'approved' });
+    const userAssignments = useMemo(() => {
+        const map: Record<string, DataProductRoleAssignmentContract[]> = {};
+        assignments.forEach((a) => {
+            if (!map[a.user.id]) map[a.user.id] = [];
+            map[a.user.id].push(a);
+        });
+        return map;
+    }, [assignments]);
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -127,8 +141,9 @@ export function PeopleTable() {
                 canAssignRole: canAssignGlobalRole,
                 allRoles: roles,
                 onChange: onChangeGlobalRole,
+                userAssignments,
             }),
-        [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole],
+        [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole, userAssignments],
     );
 
     const handlePageChange = (page: number, pageSize: number) => {

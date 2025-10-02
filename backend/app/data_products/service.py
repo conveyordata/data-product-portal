@@ -164,7 +164,9 @@ class DataProductService:
                 select(DataProductModel)
                 .options(
                     selectinload(DataProductModel.dataset_links).raiseload("*"),
-                    selectinload(DataProductModel.assignments).raiseload("*"),
+                    selectinload(DataProductModel.assignments)
+                    .selectinload(DataProductAssignmentModel.user)
+                    .raiseload("*"),
                     selectinload(DataProductModel.data_outputs).raiseload("*"),
                 )
                 .filter(

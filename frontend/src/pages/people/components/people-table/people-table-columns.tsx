@@ -1,7 +1,12 @@
-import { Select, type TableColumnsType } from 'antd';
+import { Select, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { type GlobalRoleAssignmentContract, Prototype, type RoleContract } from '@/types/roles/role.contract';
+import {
+    type DataProductRoleAssignmentContract,
+    type GlobalRoleAssignmentContract,
+    Prototype,
+    type RoleContract,
+} from '@/types/roles/role.contract';
 import type { UserContract, UsersGetContract } from '@/types/users/user.contract';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
@@ -32,12 +37,14 @@ export const getPeopleTableColumns = ({
     canAssignRole,
     allRoles,
     onChange,
+    userAssignments,
 }: {
     t: TFunction;
     users: UsersGetContract;
     canAssignRole: boolean;
     allRoles: RoleContract[];
     onChange: (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => void;
+    userAssignments: Record<string, DataProductRoleAssignmentContract[]>;
 }): TableColumnsType<UsersGetContract[0]> => {
     const sorter = new Sorter<UsersGetContract[0]>();
     const everyone = allRoles.find((role) => role.prototype === Prototype.EVERYONE);
@@ -59,7 +66,7 @@ export const getPeopleTableColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             ellipsis: { showTitle: false },
-            width: 4,
+            width: 2,
             render: (_, record) => {
                 return <TableCellItem text={`${record.first_name} ${record.last_name}`} />;
             },
@@ -71,7 +78,7 @@ export const getPeopleTableColumns = ({
             title: t('Email'),
             dataIndex: 'email',
             ellipsis: { showTitle: false },
-            width: 4,
+            width: 2,
             render: (email) => {
                 return <TableCellItem text={email} />;
             },
@@ -83,7 +90,7 @@ export const getPeopleTableColumns = ({
             title: t('Global Role'),
             dataIndex: 'global_role',
             ellipsis: { showTitle: false },
-            width: 4,
+            width: 2,
             render: (role: GlobalRoleAssignmentContract | null, user: UserContract) => {
                 if (canAssignRole) {
                     const disabled = role?.role.prototype === Prototype.ADMIN && lockAdmins;
@@ -101,6 +108,46 @@ export const getPeopleTableColumns = ({
                     );
                 }
                 return <TableCellItem text={role?.role.name || everyone?.name} />;
+            },
+        },
+        {
+            title: t('Projects'),
+            dataIndex: 'projects',
+            ellipsis: { showTitle: false },
+            width: 6,
+            render: (_, user: UserContract) => {
+                const assignments = userAssignments[user.id] || [];
+                if (!assignments.length) return null;
+
+                // Group by project and role
+                const grouped: { project: string; role: string }[] = assignments.map((a) => ({
+                    project: a.data_product.name,
+                    role: a.role.name,
+                    prototype: a.role.prototype,
+                }));
+
+                // Sort: admins/owners first, then alphabetically by role, then project
+                grouped.sort((a, b) => {
+                    const roleOrder = (role: string) => {
+                        if (role.toLowerCase().includes('owner')) return 0;
+                        return 1;
+                    };
+                    const aOrder = roleOrder(a.role);
+                    const bOrder = roleOrder(b.role);
+                    if (aOrder !== bOrder) return aOrder - bOrder;
+                    if (a.role !== b.role) return a.role.localeCompare(b.role);
+                    return a.project.localeCompare(b.project);
+                });
+
+                return (
+                    <div className={styles.projectTagWrap}>
+                        {grouped.map(({ project, role }) => (
+                            <Tag key={project + role} className={styles.projectTag}>
+                                {project} ({role})
+                            </Tag>
+                        ))}
+                    </div>
+                );
             },
         },
     ];

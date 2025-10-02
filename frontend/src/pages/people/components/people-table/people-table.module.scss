@@ -49,3 +49,15 @@
 .table-bar {
     width: 100%;
 }
+
+.projectTagWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 2px;
+}
+
+.projectTag {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
