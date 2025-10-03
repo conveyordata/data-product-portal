@@ -16,6 +16,8 @@ data:
   {{- else }}
   OIDC_ENABLED: "false"
   {{- end }}
+  SMTP_HOST: {{ .Values.smtp.host }}
+  SMTP_PORT: {{ .Values.smtp.port }}
   {{- if .Values.smtp.no_login}}
   SMTP_NO_LOGIN: "true"
   {{- else }}
@@ -39,3 +41,4 @@ data:
   {{- end }}
   POSTHOG_API_KEY: {{ .Values.posthog.key }}
   POSTHOG_HOST: {{ .Values.posthog.host }}
+  INFRASTRUCTURE_LAMBDA_ARN: {{ .Values.infrastructure_lambda_arn }}
