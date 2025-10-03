@@ -63,7 +63,7 @@ export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps
     }, [userDataProductRoles, userDatasetRoles, mode]);
 
     if (uniqueUserRoles.length === 0) {
-        return null;
+        return <div style={{ display: 'flex' }} />;
     }
 
     const menuItems: MenuProps['items'] = uniqueUserRoles.map((role) => ({
