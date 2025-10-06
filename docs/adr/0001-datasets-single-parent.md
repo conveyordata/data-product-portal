@@ -35,4 +35,4 @@ In this new design:
 
 ## Alternatives Considered
 1. **Keep multi-product datasets:** Retain flexibility but continue complexity and unclear ownership.
-3. **Single parent model (chosen):** Simplifies ownership and governance. Flexibility is not really used right now.
+2. **Single parent model (chosen):** Simplifies ownership and governance. Flexibility is not really used right now.
