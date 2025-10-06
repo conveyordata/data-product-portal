@@ -1,38 +1,56 @@
-# ADR 0001: Datasets Belong to a Single Data Product
+# Datasets Belong to a Single Data Product
 
-## Status
-Accepted
+## Context and Problem Statement
 
-## Context
 Originally, datasets in our system could be composed of data outputs originating from multiple data products.
-This design was flexible, but it introduced significant complexity:
-- Ownership and lineage tracking became difficult, as datasets could span multiple product boundaries.
-- The UX was clunky because every object could be somehow linked, resulting in a lot of clicks everywhere.
-- In our current user base we see barely any usage of this feature, which means we introduce complexity and flexibility for little benefit.
+While this design offered flexibility, it introduced significant complexity and confusion for both users and maintainers.
 
-As the platform evolves toward stronger product boundaries and clearer ownership, this flexibility is no longer beneficial.
+Ownership and lineage tracking became difficult, as datasets could span multiple product boundaries. The user experience also suffered because almost any object could be linked, creating excessive complexity and unnecessary navigation steps.
 
-## Decision
-We will change the model so that **each dataset belongs to a single data product**.
+In practice, we observed very little usage of multi-product datasets, suggesting that this flexibility adds complexity with minimal real-world benefit.
+As the platform evolves toward clearer product ownership and stronger boundaries, this flexibility is no longer justified.
 
-In this new design:
-- Data outputs linked to a dataset must all originate from the same parent data product.
-- Cross-product combinations are achieved by requesting access to a dataset from within a data product.
-- Datasets will be linked to a data product at creation time.
+## Decision Drivers
 
-## Consequences
-**Positive:**
-- Clearer data lineage and ownership.
-- Simplified governance, access control, and auditing.
-- Reduced operational complexity and fewer cross-product dependencies.
+* Simplify ownership and data lineage.
+* Improve user experience and reduce unnecessary linking complexity.
+* Strengthen product boundaries and governance.
+* Align with actual usage patterns (low use of cross-product datasets).
+* Reduce operational and maintenance overhead.
 
-**Negative:**
-- Some existing datasets that combined outputs from multiple products will need to be identified and refactored.
+## Considered Options
 
-**Migration considerations:**
-- Introduce validation to ensure that all outputs in a dataset share the same parent product.
-- Provide migration tooling to split or reassign existing multi-product datasets.
+* **Option 1:** Keep multi-product datasets.
+* **Option 2:** Move to a single-parent (single data product) dataset model.
 
-## Alternatives Considered
-1. **Keep multi-product datasets:** Retain flexibility but continue complexity and unclear ownership.
-2. **Single parent model (chosen):** Simplifies ownership and governance. Flexibility is not really used right now.
+## Decision Outcome
+
+**Chosen option:** *Option 2 – Move to a single-parent dataset model*, because it simplifies ownership and governance, aligns with product boundaries, and matches real user behavior without sacrificing critical functionality.
+
+### Confirmation
+
+This change will be confirmed by:
+
+* Schema validation ensuring all data outputs within a dataset share the same parent product.
+* Migration tooling to identify and reassign existing multi-product datasets.
+* Code and model reviews verifying that dataset creation enforces single-product linkage.
+
+## Pros and Cons of the Options
+
+### Option 1 – Keep Multi-Product Datasets
+
+* **Good, because** it preserves flexibility for advanced users.
+* **Neutral, because** it maintains the current system behavior.
+* **Bad, because** it leads to unclear ownership and complex lineage.
+* **Bad, because** it complicates UX, permissions, and governance.
+* **Bad, because** it increases maintenance and debugging burden for limited benefit.
+* **Bad, because** it currently is not really used.
+
+### Option 2 – Single-Parent Dataset Model
+
+* **Good, because** ownership, governance, and lineage are simplified.
+* **Good, because** it matches actual user behavior and reduces cognitive load.
+* **Good, because** the data model and UI become easier to maintain.
+* **Good, because** certain links are automatically in place, lowering the amount of UX overhead.
+* **Bad, because** migration requires effort to update legacy datasets, they need to be identified and refactored.
+* **Neutral, because** flexibility is reduced, but the trade-off is intentional and low-impact.
