@@ -1,5 +1,5 @@
 ARG PLATFORM=linux/amd64
-FROM --platform=${PLATFORM} python:3.14.0-slim-bookworm@sha256:2c01e29d1ce40e67a7d76bc6851053f78588cb5ad29d8a2102e5e53d6f3fa9e1 AS base-image
+FROM --platform=${PLATFORM} python:3.13.7-slim-bookworm@sha256:adafcc17694d715c905b4c7bebd96907a1fd5cf183395f0ebc4d3428bd22d92d AS base-image
 
 FROM base-image AS build-stage
 
