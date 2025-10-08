@@ -58,8 +58,8 @@
     "devDependencies": {
         "@biomejs/biome": "2.2.5",
         "@types/node": "^24.7.0",
-        "@types/react": "^19.2.1",
-        "@types/react-dom": "^19.2.0",
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.1",
         "@vitejs/plugin-react": "^5.0.4",
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.25.10",
