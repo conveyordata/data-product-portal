@@ -481,8 +481,7 @@ class DataProductService:
                 joinedload(DataProductModel.dataset_links),
                 joinedload(DataProductModel.data_outputs)
                 .joinedload(DataOutputModel.dataset_links)
-                .selectinload(DataOutputDatasetAssociation.dataset)
-                .selectinload(DatasetModel.data_product_links),
+                .selectinload(DataOutputDatasetAssociation.dataset),
             ],
             # As this is also called from the DataOutputService, we need to ensure
             # that the DataOutput for which this is called is not loaded from cache,
@@ -561,9 +560,15 @@ class DataProductService:
                         )
                     )
                     if level >= 3:
-                        for (
-                            downstream_dps
-                        ) in downstream_datasets.dataset.data_product_links:
+                        downstream_dataset = self.db.get(
+                            DatasetModel,
+                            downstream_datasets.dataset_id,
+                            options=[
+                                joinedload(DatasetModel.data_product_links),
+                            ],
+                            populate_existing=True,
+                        )
+                        for downstream_dps in downstream_dataset.data_product_links:
                             icon = downstream_dps.data_product.type.icon_key
                             nodes.append(
                                 Node(
