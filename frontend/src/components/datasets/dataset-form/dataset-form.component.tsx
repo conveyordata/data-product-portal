@@ -23,6 +23,7 @@ import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
+import { useGetAllDataProductsQuery } from '@/store/features/data-products/data-products-api-slice';
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
@@ -47,7 +48,6 @@ import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
-
 import styles from './dataset-form.module.scss';
 
 type Props = {
@@ -96,6 +96,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
         skip: mode === 'create' || !datasetId,
     });
     const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
+    const { data: dataProducts = [], isFetching: isFetchingDataProducts } = useGetAllDataProductsQuery();
     const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
@@ -136,6 +137,8 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
     const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
+
+    const dataProductSelectOptions = dataProducts.map((dp) => ({ label: dp.name, value: dp.id }));
     const userSelectOptions = users.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
         value: owner.id,
@@ -148,6 +151,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 const request: DatasetCreateRequest = {
                     name: values.name,
                     namespace: values.namespace,
+                    data_product_id: values.data_product_id,
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
@@ -169,6 +173,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     name: values.name,
                     namespace: values.namespace,
                     description: values.description,
+                    data_product_id: values.data_product_id,
                     tag_ids: values.tag_ids,
                     domain_id: values.domain_id,
                     lifecycle_id: values.lifecycle_id,
@@ -252,6 +257,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const initialValues = {
         name: currentDataset?.name,
         namespace: currentDataset?.namespace,
+        data_product_id: currentDataset?.data_product_id,
         description: currentDataset?.description,
         access_type: mode === 'create' ? DatasetAccess.Public : currentDataset?.access_type,
         lifecycle_id: currentDataset?.lifecycle.id,
@@ -316,6 +322,25 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     disabled={mode !== 'create'}
                     tokenSeparators={[',']}
                     allowClear
+                />
+            </Form.Item>
+            <Form.Item<DatasetCreateFormSchema>
+                name={'data_product_id'}
+                label={t('Data Product Parent')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please select the data product parent of the dataset'),
+                    },
+                ]}
+            >
+                <Select
+                    disabled={mode !== 'create'}
+                    loading={isFetchingDataProducts}
+                    options={dataProductSelectOptions}
+                    filterOption={selectFilterOptionByLabelAndValue}
+                    allowClear
+                    showSearch
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>

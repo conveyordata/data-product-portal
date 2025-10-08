@@ -38,6 +38,7 @@ class Dataset(Base, BaseORM):
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
     domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
+    data_product_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_products.id"))
 
     # Relationships
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
