@@ -1,20 +1,16 @@
-import { Button, Flex, Form, Input, Pagination, Space, Table, Typography } from 'antd';
+import { Flex, Form, Input, Pagination, Table, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { RoleFilter } from '@/components/filters/role-filter.component';
 import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { getDatasetTableColumns } from '@/pages/datasets/components/datasets-table/datasets-table-columns.tsx';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { DatasetsGetContract } from '@/types/dataset';
-import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
+import { createDatasetIdPath } from '@/types/navigation.ts';
 import type { SearchForm } from '@/types/shared';
 import styles from './datasets-table.module.scss';
 
@@ -36,18 +32,12 @@ function filterDatasetsByRoles(datasets: DatasetsGetContract, selectedDatasetIds
 }
 
 export function DatasetsTable() {
-    const currentUser = useSelector(selectCurrentUser);
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [selectedDatasetIds, setSelectedDatasetIds] = useState<string[]>([]);
     const [selectedRole, setSelectedRole] = useState<string | undefined>(undefined);
 
     const { data: datasets = [], isFetching } = useGetAllDatasetsQuery();
-    const { data: access } = useCheckAccessQuery(
-        { action: AuthorizationAction.GLOBAL__CREATE_DATASET },
-        { skip: !currentUser },
-    );
-    const canCreateDataset = access?.allowed || false;
 
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -103,13 +93,6 @@ export function DatasetsTable() {
                         <Input.Search placeholder={t('Search datasets by name')} allowClear />
                     </Form.Item>
                 </Form>
-                <Space>
-                    <Link to={ApplicationPaths.DatasetNew}>
-                        <Button className={styles.formButton} type={'primary'} disabled={!canCreateDataset}>
-                            {t('Create Dataset')}
-                        </Button>
-                    </Link>
-                </Space>
             </Flex>
             <Flex vertical className={styles.tableFilters}>
                 <Flex align="flex-end" justify="space-between" className={styles.tableBar}>
