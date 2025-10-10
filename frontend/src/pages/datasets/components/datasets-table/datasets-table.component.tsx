@@ -87,7 +87,7 @@ export function DatasetsTable() {
     return (
         <Flex vertical className={styles.tableContainer}>
             <Flex className={styles.searchContainer}>
-                <Typography.Title level={3}>{t('Datasets')}</Typography.Title>
+                <Typography.Title level={3}>{t('Marketplace')}</Typography.Title>
                 <Form<SearchForm> form={searchForm} className={styles.searchForm}>
                     <Form.Item<SearchForm> name={'search'} initialValue={''} className={styles.formItem}>
                         <Input.Search placeholder={t('Search datasets by name')} allowClear />
