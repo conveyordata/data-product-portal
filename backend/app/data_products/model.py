@@ -18,6 +18,7 @@ from app.tags.model import Tag, tag_data_product_table
 if TYPE_CHECKING:
     from app.data_outputs.model import DataOutput
     from app.data_product_lifecycles.model import DataProductLifecycle
+    from app.datasets.model import Dataset
     from app.domains.model import Domain
 
 
@@ -63,6 +64,12 @@ class DataProduct(Base, BaseORM):
         back_populates="data_product",
         cascade="all, delete-orphan",
         order_by="DataProductDatasetAssociation.status.desc()",
+        lazy="raise",
+    )
+    datasets: Mapped[list["Dataset"]] = relationship(
+        "Dataset",
+        back_populates="data_product",
+        cascade="all, delete-orphan",
         lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(

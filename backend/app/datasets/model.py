@@ -17,6 +17,7 @@ from app.tags.model import Tag, tag_dataset_table
 if TYPE_CHECKING:
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_product_settings.model import DataProductSettingValue
+    from app.data_products.model import DataProduct
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.role_assignments.dataset.model import DatasetRoleAssignment
 
@@ -73,6 +74,9 @@ class Dataset(Base, BaseORM):
         lazy="joined",
     )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
+        back_populates="datasets", lazy="joined"
+    )
+    data_product: Mapped["DataProduct"] = relationship(
         back_populates="datasets", lazy="joined"
     )
     domain: Mapped["Domain"] = relationship(back_populates="datasets", lazy="joined")

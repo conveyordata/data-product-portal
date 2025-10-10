@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 
 from app.datasets.enums import DatasetAccessType
@@ -13,4 +12,4 @@ class Dataset(ORMModel):
     description: str
     status: DatasetStatus
     access_type: DatasetAccessType
-    data_product_id: Optional[UUID]
+    data_product_id: UUID

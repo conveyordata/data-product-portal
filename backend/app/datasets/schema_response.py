@@ -35,7 +35,7 @@ class BaseDatasetGet(ORMModel):
     status: DatasetStatus
     usage: Optional[str]
     access_type: DatasetAccessType
-    data_product_id: Optional[UUID]
+    data_product_id: UUID
 
     # Nested schemas
     tags: list[Tag]
