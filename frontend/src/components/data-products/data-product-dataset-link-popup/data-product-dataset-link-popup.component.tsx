@@ -1,4 +1,4 @@
-import { Button, type FormInstance, Space } from 'antd';
+import { Button, Flex, type FormInstance } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -33,17 +33,22 @@ export function DataProductDatasetLinkPopup({
     const { t } = useTranslation();
     return (
         <FormModal title={title} onClose={onClose} isOpen={isOpen} footer={(_, { CancelBtn }) => <CancelBtn />}>
-            <Space
-                direction={'horizontal'}
-                style={{ width: '100%', justifyContent: 'space-between', alignItems: 'center' }}
-            >
-                <Searchbar form={searchForm} formItemProps={{ initialValue: '' }} placeholder={searchPlaceholder} />
+            <Flex>
+                <Searchbar
+                    form={searchForm}
+                    formItemProps={{ initialValue: '', style: { width: '100%' } }}
+                    placeholder={searchPlaceholder}
+                />
                 <Link to={`${ApplicationPaths.DatasetNew}?dataProductId=${dataProductId}&dataOutputId=${dataOutputId}`}>
-                    <Button className={styles.formButton} type={'primary'} disabled={!canCreateDataset}>
+                    <Button
+                        className={`${styles.formButton} ${styles.button}`}
+                        type={'primary'}
+                        disabled={!canCreateDataset}
+                    >
                         {t('Create Dataset')}
                     </Button>
                 </Link>
-            </Space>
+            </Flex>
             <div className={styles.list}>{children}</div>
         </FormModal>
     );
