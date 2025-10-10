@@ -8,16 +8,17 @@ import { DataProductDatasetLinkPopup } from '@/components/data-products/data-pro
 import { DatasetTitle } from '@/components/datasets/dataset-title/dataset-title';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useGetDataOutputByIdQuery,
     useRequestDatasetAccessForDataOutputMutation,
 } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import type { DataOutputDatasetLink } from '@/types/data-output/dataset-link.contract';
 import type { DatasetsGetContract } from '@/types/dataset';
 import type { SearchForm } from '@/types/shared';
-
 import styles from './add-dataset-popup.module.scss';
 
 type Props = {
@@ -57,8 +58,11 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
         const datasetLinks = dataOutput?.dataset_links ?? [];
 
         const unlinkedDatasets = filterOutAlreadyAddedDatasets(allDatasets, datasetLinks);
-        return searchTerm ? handleDatasetListFilter(unlinkedDatasets, searchTerm) : unlinkedDatasets;
-    }, [dataOutput?.dataset_links, allDatasets, searchTerm]);
+        const onlyDatasetsOfDataProduct = unlinkedDatasets.filter(
+            (dataset) => dataset.data_product_id === dataOutput?.owner.id,
+        );
+        return searchTerm ? handleDatasetListFilter(onlyDatasetsOfDataProduct, searchTerm) : onlyDatasetsOfDataProduct;
+    }, [dataOutput?.dataset_links, allDatasets, searchTerm, dataOutput?.owner.id]);
 
     const handleRequestAccessToDataset = useCallback(
         async (datasetId: string) => {
@@ -75,12 +79,20 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
         [requestDatasetAccessForDataOutput, dataOutputId, t, onClose],
     );
 
+    const { data: canCreateDataset } = useCheckAccessQuery(
+        { action: AuthorizationAction.GLOBAL__CREATE_DATASET },
+        { skip: !dataOutputId },
+    );
+
     return (
         <DataProductDatasetLinkPopup
             onClose={onClose}
             isOpen={isOpen}
+            dataProductId={dataOutput?.owner.id || ''}
+            dataOutputId={dataOutputId}
             searchForm={searchForm}
             title={t('Link Dataset')}
+            canCreateDataset={canCreateDataset?.allowed || false}
             searchPlaceholder={t('Search datasets by name')}
         >
             <List

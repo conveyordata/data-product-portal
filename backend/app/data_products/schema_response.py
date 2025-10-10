@@ -28,6 +28,7 @@ class BaseDataProductGet(ORMModel):
     type: DataProductType
     lifecycle: Optional[DataProductLifeCycle]
     data_product_settings: list[DataProductSettingValue]
+    datasets: list[Dataset]
 
 
 class DataOutputLinks(DataOutput):

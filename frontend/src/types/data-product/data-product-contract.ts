@@ -6,6 +6,7 @@ import type { DomainContract } from '@/types/domain';
 import type { TagContract } from '@/types/tag';
 
 import type { DataProductSettingValueContract } from '../data-product-setting';
+import type { DatasetsGetContract } from '../dataset';
 
 export enum DataProductStatus {
     Pending = 'pending',
@@ -32,6 +33,7 @@ export interface DataProductContract {
     namespace: string;
     usage?: string;
     data_outputs: DataOutputsGetContract;
+    datasets: DatasetsGetContract;
     data_product_settings: DataProductSettingValueContract[];
 }
 

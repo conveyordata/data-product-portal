@@ -20,6 +20,7 @@ class DatasetUpdate(ORMModel):
 
 
 class DatasetCreate(DatasetUpdate):
+    data_product_id: UUID
     owners: Annotated[list[UUID], MinLen(1)]
 
 

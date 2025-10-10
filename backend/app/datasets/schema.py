@@ -12,3 +12,4 @@ class Dataset(ORMModel):
     description: str
     status: DatasetStatus
     access_type: DatasetAccessType
+    data_product_id: UUID

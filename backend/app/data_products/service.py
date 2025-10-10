@@ -77,6 +77,7 @@ class DataProductService:
                 selectinload(DataProductModel.dataset_links)
                 .selectinload(DataProductDatasetModel.dataset)
                 .selectinload(DatasetModel.data_output_links),
+                selectinload(DataProductModel.datasets).raiseload("*"),
                 selectinload(DataProductModel.data_outputs).selectinload(
                     DataOutputModel.dataset_links
                 ),
@@ -118,6 +119,7 @@ class DataProductService:
                 .options(
                     selectinload(DataProductModel.dataset_links).raiseload("*"),
                     selectinload(DataProductModel.assignments).raiseload("*"),
+                    selectinload(DataProductModel.datasets).raiseload("*"),
                     selectinload(DataProductModel.data_outputs).raiseload("*"),
                 )
                 .order_by(asc(DataProductModel.name))
@@ -154,6 +156,7 @@ class DataProductService:
                 .options(
                     selectinload(DataProductModel.dataset_links).raiseload("*"),
                     selectinload(DataProductModel.assignments).raiseload("*"),
+                    selectinload(DataProductModel.datasets).raiseload("*"),
                     selectinload(DataProductModel.data_outputs).raiseload("*"),
                 )
                 .filter(
@@ -477,16 +480,6 @@ class DataProductService:
         product = self.db.get(
             DataProductModel,
             id,
-            options=[
-                joinedload(DataProductModel.dataset_links),
-                joinedload(DataProductModel.data_outputs)
-                .joinedload(DataOutputModel.dataset_links)
-                .selectinload(DataOutputDatasetAssociation.dataset)
-                .selectinload(DatasetModel.data_product_links),
-            ],
-            # As this is also called from the DataOutputService, we need to ensure
-            # that the DataOutput for which this is called is not loaded from cache,
-            # but instead loaded anew with all necessary fields eagerly loaded
             populate_existing=True,
         )
         nodes = [
@@ -498,7 +491,30 @@ class DataProductService:
             )
         ]
         edges = []
-        for upstream_datasets in product.dataset_links:
+
+        dataset_links = (
+            self.db.scalars(
+                select(DataProductDatasetModel).filter_by(data_product_id=id)
+            )
+            .unique()
+            .all()
+        )
+        data_outputs = (
+            self.db.scalars(
+                select(DataOutputModel)
+                .options(
+                    joinedload(DataOutputModel.dataset_links)
+                    .selectinload(DataOutputDatasetAssociation.dataset)
+                    .selectinload(DatasetModel.data_product_links)
+                )
+                .filter_by(owner_id=id)
+                .execution_options(populate_existing=True)
+            )
+            .unique()
+            .all()
+        )
+
+        for upstream_datasets in dataset_links:
             nodes.append(
                 Node(
                     id=upstream_datasets.id,
@@ -518,7 +534,7 @@ class DataProductService:
                 )
             )
 
-        for data_output in product.data_outputs:
+        for data_output in data_outputs:
             nodes.append(
                 Node(
                     id=data_output.id,

@@ -34,10 +34,27 @@ class TestDataOutputsDatasetsRouter:
         )
 
         data_output = DataOutputFactory(owner=data_product)
-        ds = DatasetFactory()
+        ds = DatasetFactory(data_product=data_product)
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 200
+
+    def test_request_data_output_link_on_dataset_with_diff_parent(self, client):
+        user = UserFactory(external_id="sub")
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+
+        data_output = DataOutputFactory(owner=data_product)
+        ds = DatasetFactory()
+
+        response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
+        assert response.status_code == 400
 
     def test_request_already_exists(self, client):
         user = UserFactory(external_id="sub")
@@ -51,7 +68,7 @@ class TestDataOutputsDatasetsRouter:
         )
 
         data_output = DataOutputFactory(owner=data_product)
-        ds = DatasetFactory()
+        ds = DatasetFactory(data_product=data_product)
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 200
@@ -70,7 +87,9 @@ class TestDataOutputsDatasetsRouter:
         user = UserFactory(external_id="sub")
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
-        ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
+        ds = DatasetFactory(
+            access_type=DatasetAccessType.PRIVATE, data_product=data_product
+        )
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
@@ -85,7 +104,7 @@ class TestDataOutputsDatasetsRouter:
         user = UserFactory(external_id="sub")
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
-        ds = DatasetFactory()
+        ds = DatasetFactory(data_product=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
@@ -110,7 +129,7 @@ class TestDataOutputsDatasetsRouter:
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
 
-        ds = DatasetFactory()
+        ds = DatasetFactory(data_product=data_product)
 
         link = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert link.status_code == 200
@@ -250,7 +269,7 @@ class TestDataOutputsDatasetsRouter:
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
-        ds = DatasetFactory()
+        ds = DatasetFactory(data_product=data_product)
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_DATA_OUTPUT_LINK_REQUEST],
@@ -275,7 +294,7 @@ class TestDataOutputsDatasetsRouter:
         )
 
         data_output = DataOutputFactory(owner=data_product)
-        ds = DatasetFactory()
+        ds = DatasetFactory(data_product=data_product)
 
         response = self.request_data_output_dataset_link(client, data_output.id, ds.id)
         assert response.status_code == 200
@@ -338,7 +357,7 @@ class TestDataOutputsDatasetsRouter:
         user = UserFactory(external_id="sub")
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
-        ds = DatasetFactory()
+        ds = DatasetFactory(data_product=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[

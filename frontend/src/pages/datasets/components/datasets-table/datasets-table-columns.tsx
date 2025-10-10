@@ -3,15 +3,15 @@ import type { TFunction } from 'i18next';
 
 import { DatasetAccessIcon } from '@/components/datasets/dataset-access-icon/dataset-access-icon';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import type { DataProductContract } from '@/types/data-product';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
-import type { DataOutputLink, DatasetAccess, DatasetsGetContract } from '@/types/dataset';
+import type { DatasetAccess, DatasetsGetContract } from '@/types/dataset';
 import type { DatasetStatus } from '@/types/dataset/dataset.contract';
 import type { DomainContract } from '@/types/domain';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
-
 import styles from './datasets-table.module.scss';
 
 const iconColumnWidth = 30;
@@ -101,20 +101,10 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
         },
         {
             title: t('Produced by Data Product'),
-            dataIndex: 'data_output_links',
-            render: (data_output_links: DataOutputLink[]) => {
-                if (data_output_links !== undefined) {
-                    return (
-                        <TableCellItem
-                            text={[
-                                ...new Set(
-                                    data_output_links.map(
-                                        (data_output_link) => data_output_link.data_output.owner.name,
-                                    ),
-                                ),
-                            ].join(',')}
-                        />
-                    );
+            dataIndex: 'data_product',
+            render: (data_product: DataProductContract) => {
+                if (data_product !== undefined) {
+                    return <TableCellItem text={data_product.name} />;
                 }
             },
             width: '25%',

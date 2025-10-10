@@ -144,6 +144,12 @@ class DataOutputService:
             id, options=[selectinload(DataOutputModel.dataset_links)]
         )
 
+        if dataset.data_product_id != data_output.owner_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Dataset {dataset_id} does not belong to data product {id}",
+            )
+
         if dataset.id in [
             link.dataset_id
             for link in data_output.dataset_links

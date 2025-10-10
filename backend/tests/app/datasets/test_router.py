@@ -28,6 +28,7 @@ ENDPOINT = "/api/datasets"
 def dataset_payload():
     user = UserFactory()
     domain = DomainFactory()
+    data_product = DataProductFactory()
     return {
         "name": "Test Dataset",
         "description": "Test Description",
@@ -38,6 +39,7 @@ def dataset_payload():
         ],
         "access_type": DatasetAccessType.RESTRICTED.value,
         "domain_id": str(domain.id),
+        "data_product_id": str(data_product.id),
     }
 
 
