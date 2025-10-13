@@ -81,11 +81,7 @@ A standalone CLI tool is available for interacting with the portal. You can find
 
 ## Local Developer Set-up
 
-For local development:
-- Have a look at the [developer documentation](../developer-guide/setup).
-- Refer to the individual folder `README.md` files in the repository.
-- These contain setup and contribution instructions for the backend and frontend codebases.
-
+For local development ave a look at the [developer documentation](../developer-guide/contributing).
 ---
 
 Need help? Reach out to the team or check our [FAQ](../faq).

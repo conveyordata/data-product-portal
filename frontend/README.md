@@ -11,129 +11,77 @@
 ### Configuration (config.local.js file)
 Both for local execution and local development, you need to specify some configuration arguments.
 All configuration values for this project are read from a `config.local.js` file in the frontend folder.
-Please look at [config.docker.js](config.docker.js) to see which values are mandatory and which can be omitted.
-Then copy and paste the content of `config.docker.js` to `config.local.js` you created and replace values where necessary.
+You can sue the following template to get started:
 
-#### Minimal `config.local.js` file
 ```js
-const config = {
-  /**
-   * The base URL of the API.
-   * This is where your frontend will send API requests.
-   */
-  API_BASE_URL: 'http://localhost:5050',
+const config = (() => {
+    return {
+        /**
+         * The base URL of the API.
+         * This is where the frontend will send API requests.
+         */
+        API_BASE_URL: 'http://localhost:5050',
+        /**
+         * Indicates whether OpenID Connect (OIDC) should be enabled.
+         * If true, OIDC is enabled.
+         */
+        OIDC_ENABLED: false,
+        /**
+         * The client ID for the OIDC provider.
+         * This is used to identify the application to the OIDC provider.
+         */
+        OIDC_CLIENT_ID: '',
+        /**
+         * The client secret for the OIDC provider.
+         * This is used along with the client ID to authenticate the application to the OIDC provider.
+         */
+        OIDC_CLIENT_SECRET: '',
+        /**
+         * The URL of the OIDC provider.
+         * This is the endpoint where the application will communicate with the OIDC provider.
+         */
+        OIDC_AUTHORITY: '',
+        /**
+         * The URL where the OIDC provider will redirect to after successful authentication.
+         * This should be a route in the application that handles the authentication response.
+         */
+        OIDC_REDIRECT_URI: '',
+        /**
+         * The URL where the OIDC provider will redirect to after successful logout.
+         * This should be a route in the application that handles post-logout actions.
+         */
+        OIDC_POST_LOGOUT_REDIRECT_URI: '',
+        /**
+         * The Theme configuration for your application.
+         * Pick one from blueThemeConfig, datamindedThemeConfig, greenThemeConfig.
+         * @description This is used to customize the appearance of your application.
+         */
+        THEME_CONFIGURATION: 'datamindedthemeconfig',
+        /**
+         * The PostHog key and host for tracking events.
+         * @description This is used to send events to PostHog for analytics.
+         */
+        POSTHOG_KEY: '<>',
+        POSTHOG_HOST: 'https://eu.i.posthog.com',
+        POSTHOG_ENABLED: false,
+    };
+})();
 
-  /**
-   * Indicates whether OpenID Connect (OIDC) is enabled.
-   * If true, OIDC is enabled.
-   */
-  OIDC_ENABLED: true,
-
-  /**
-   * The client ID for the OIDC provider.
-   * This is used to identify the application to the OIDC provider.
-   */
-  OIDC_CLIENT_ID: '<YOUR_OIDC_CLIENT_ID>',
-
-  /**
-   * The client secret for the OIDC provider.
-   * This is used along with the client ID to authenticate the application to the OIDC provider.
-   */
-  OIDC_CLIENT_SECRET: '<YOUR_OIDC_CLIENT_SECRET>',
-
-  /**
-   * The URL of the OIDC provider.
-   * This is the endpoint where the application will communicate with the OIDC provider.
-   */
-  OIDC_AUTHORITY: '<YOUR_OIDC_AUTHORITY>',
-
-  /**
-   * The URL where the OIDC provider will redirect to after successful authentication.
-   * This should be a route in the application that handles the authentication response.
-   */
-  OIDC_REDIRECT_URI: 'http://localhost:3000/',
-
-  /**
-   * The URL where the OIDC provider will redirect to after successful logout.
-   * This should be a route in the application that handles post-logout actions.
-   */
-  OIDC_POST_LOGOUT_REDIRECT_URI: 'http://localhost:3000/logout/',
-  /**
-   * The PostHog key and host for tracking events.
-   * This is used to send events to PostHog for analytics.
-   */
-  POSTHOG_KEY: 'phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc',
-  POSTHOG_HOST: 'https://eu.i.posthog.com',
-  POSTHOG_ENABLED: false,
-};
-
-module.exports = config;
 ```
 
-### Data Tracking
-This project integrates with [Posthog](https://posthog.com/) to track user interactions. Tracking is disabled by default.
+## Running the front end locally for development
 
-To enable tracking and help us improve the Data Product Portal, the config value `POSTHOG_ENABLED` must be set to true in the frontend configuration. This can be done in one of two ways:
+First you need to install all project dependencies using NPM. Execute the following command:
+```sh
+npm install
+```
 
-- By setting the posthog value to true in your values.yaml file (used during Helm deployment), or
-- By explicitly setting the `POSTHOG_ENABLED` config variable to true in the frontend configuration.
+To run a dev server please run:
+```sh
+npm run dev
+```
 
-When enabled, tracking is limited strictly to user interactions within the web interface.
-At the moment, it only captures the following:
-- clicks
-- timing of those clicks
-- path changes
-- tab changes
-- pageviews
-- search queries (for datasets, etc.)
-All data captured is kept pseudo-anonymous, meaning we use unique IDs per user (by hashing) but the user is never explicitly stored with the captured data. If however, the user and unique ID of certain events were already given, the user could be verfied to have made these actions.
-
-### Docker (only when you want to use Docker for local execution)
-- Install [Docker](https://docs.docker.com/get-docker/) on your machine.
-
-## Installation
-
-In order to install all project dependencies using NPM, execute the command below.
-  ```sh
-  npm install
-  ```
-
-## Local Execution
-
-In order to just run the frontend in a 'production-like' setup locally, you can choose between the 2 options below.
-
-### Using Vite
-
-- Copy configuration, build the project and start it in preview mode by simply executing the command below.
-  ```sh
-  npm start
-  ```
-
-### Using Docker
-
-- Ensure your Docker service is running.
-- Ensure a correct config.js file is available in the '/public' folder by executing the command below.
-  ```sh
-  npm run copy-config
-  ```
-- Build the Docker image by executing the command below.
-  ```sh
-  docker build . -t data-product-portal-frontend
-  ```
-- Run the Docker container by executing the command below.
-  ```sh
-  docker run --name data-product-portal-frontend-container -p 3000:8080  data-product-portal-frontend
-  ```
-
-## Local Development
-
-### Run in dev mode
-In order to run the project in development mode (auto refresh using HMR), execute the command below.
-  ```sh
-  npm run dev
-  ```
-
-### Linting and Formatting
+## Linting and Formatting
 This project has been set up using [biome](https://biomejs.dev) for linting and formatting.
 The configuration file is called [biome.json](biome.json).
 For ease of use we advise you to configure your IDE to use the above-mentioned files automatically on format or save actions.
@@ -147,50 +95,41 @@ npm run check
 npm run check:fix
 ```
 
-### Translations
+## Translations
 Static frontend translations are managed by using [i18next](https://www.i18next.com/).
 Currently, the only language available is English, but this can be extended over time.
 The English value of the translatable labels is deliberately being used as the translation key for ease of use.
 
-#### Adding translatable fields
+### Adding translatable fields
 
-##### Using the useTranslation hook
+#### Using the useTranslation hook
 
-- Use the `t` function from the useTranslation hook in your components.
-  ```jsx
-    import { useTranslation } from 'react-i18next';
+Use the `t` function from the useTranslation hook in your components or hooks:
+```jsx
+import { useTranslation } from 'react-i18next';
 
-    const MyComponent = () => {
-      const { t } = useTranslation();
+const MyComponent = () => {
+  const { t } = useTranslation();
 
-      return (
-        <div>
-          <h1>{t('key')}</h1>
-          <p>{t('key2')}</p>
-        </div>
-      );
-    };
+  return (
+    <div>
+      <h1>{t('key')}</h1>
+      <p>{t('key2')}</p>
+    </div>
+  );
+};
 
-    export default MyComponent;
-  ```
+const MyHook = () => {
+  const { t } = useTranslation();
 
-- Use the `t` function in your hooks.
-  ```js
-    import { useTranslation } from 'react-i18next';
+  return {
+    key: t('key'),
+    key2: t('key2'),
+  };
+};
+```
 
-    const MyHook = () => {
-      const { t } = useTranslation();
-
-      return {
-        key: t('key'),
-        key2: t('key2'),
-      };
-    };
-
-    export default MyHook;
-    ```
-
-##### Using the i18n object
+#### Using the i18n object
 
 Use the `i18n` object directly inside utility functions.
   When using this method, make sure to import the `i18n` object
@@ -208,15 +147,15 @@ const myUtilityFunction = () => {
 export default myUtilityFunction;
 ```
 
-#### Extracting translatable fields
+### Extracting translatable fields
 
 You can extract all translatable fields into JSON locales files that can be found in the 'public/locales/{language}'
-folders (e.g. [en/translation.json](public/locales/en/translation.json)) by executing the command below.
-  ```sh
-  npm run extract-translations
-  ```
+folders (e.g. [en/translation.json](public/locales/en/translation.json)) by executing the command below:
+```sh
+npm run extract-translations
+```
 
-#### Modifying translation labels
+### Modifying translation labels
 
 When you want to modify translation labels, you can simply look up the translatable key in the JSON locales files that
 can be found in the 'public/locales/{language}' folders (e.g. [en/translation.json](public/locales/en/translation.json))
@@ -250,7 +189,7 @@ const MyComponent = () => {
 export default MyComponent;
 ```
 
-#### Interpolating variables in translations
+### Interpolating variables in translations
 
 You can interpolate variables in translations by using the `t` function from the useTranslation hook.
 
@@ -278,7 +217,7 @@ And in the JSON locales files, you can define the translation with the variable 
 }
 ```
 
-#### Adding new languages
+### Adding new languages
 
 When you want to add a new language, you can create a new folder in the 'public/locales' folder with the language code
 (e.g. 'de' for German) and add a translation file (e.g. 'public/locales/de/translation.json').
@@ -323,7 +262,7 @@ i18n
 export default i18n;
 ```
 
-#### Switching languages
+### Switching languages
 
 You can easily implement a language switcher in the application by calling the i18n.changeLanguage function with the
 desired language code.
@@ -351,7 +290,7 @@ const MyComponent = () => {
 export default MyComponent;
 ```
 
-#### Debugging translations
+### Debugging translations
 
 When you want to debug translations, you can enable the debug mode in the i18n configuration file.
 This will log all translation keys that are missing in the JSON locales files to the console, as well as the
@@ -377,6 +316,25 @@ export default i18n;
 
 For more information on how to use i18next with React, please refer to
 the [react-i18next documentation](https://react.i18next.com/getting-started).
+
+
+## Data Tracking
+This project integrates with [Posthog](https://posthog.com/) to track user interactions. Tracking is disabled by default.
+
+To enable tracking and help us improve the Data Product Portal, the config value `POSTHOG_ENABLED` must be set to true in the frontend configuration. This can be done in one of two ways:
+
+- By setting the posthog value to true in your values.yaml file (used during Helm deployment), or
+- By explicitly setting the `POSTHOG_ENABLED` config variable to true in the frontend configuration.
+
+When enabled, tracking is limited strictly to user interactions within the web interface.
+At the moment, it only captures the following:
+- clicks
+- timing of those clicks
+- path changes
+- tab changes
+- pageviews
+- search queries (for datasets, etc.)
+All data captured is kept pseudo-anonymous, meaning we use unique IDs per user (by hashing) but the user is never explicitly stored with the captured data. If however, the user and unique ID of certain events were already given, the user could be verfied to have made these actions.
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
