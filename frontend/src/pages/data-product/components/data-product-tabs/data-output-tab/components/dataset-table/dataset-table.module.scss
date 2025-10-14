@@ -27,3 +27,27 @@
     margin-top: 0 !important;
     margin-bottom: globals.$spacing-regular !important;
 }
+
+.container {
+    flex: 1;
+    padding: globals.$spacing-m;
+    min-height: 400px;
+    width: 100%;
+}
+
+.header {
+    margin-bottom: globals.$spacing-l;
+}
+
+.cardsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: globals.$spacing-m;
+    width: 100%;
+}
+
+.emptyState {
+    text-align: center;
+    padding: globals.$spacing-xl;
+    // color: globals.$text-color-secondary;
+}

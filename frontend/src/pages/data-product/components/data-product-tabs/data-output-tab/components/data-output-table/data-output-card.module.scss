@@ -1,0 +1,47 @@
+@use '@/styles/globals';
+
+.card {
+    width: 100%;
+    border-radius: 8px;
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: globals.$color-text;
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
+}
+
+.title {
+    margin: 0 !important;
+    font-size: 16px;
+    font-weight: 600;
+
+    a {
+        color: inherit;
+        text-decoration: none;
+
+        // &:hover {
+        //     // color: globals.$color-primary;
+        // }
+    }
+}
+
+.description {
+    font-size: 14px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
