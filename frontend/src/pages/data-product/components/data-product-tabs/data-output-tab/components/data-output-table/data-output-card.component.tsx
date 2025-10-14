@@ -72,7 +72,6 @@ export function DataOutputCard({ dataOutput, dataProductId }: Props) {
                     <Flex gap={12} align="flex-start">
                         <CustomSvgIconLoader
                             iconComponent={getDataOutputIcon(dataOutput.configuration.configuration_type)}
-                            className={styles.icon}
                         />
                         <div className={styles.content}>
                             <Link to={createDataOutputIdPath(dataOutput.id, dataOutput.owner_id)}>
