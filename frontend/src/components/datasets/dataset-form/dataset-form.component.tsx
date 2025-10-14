@@ -345,7 +345,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the data product parent of the dataset'),
+                        message: t('Please select the data product to which this dataset belongs'),
                     },
                 ]}
             >
