@@ -28,7 +28,6 @@ class BaseDataProductGet(ORMModel):
     type: DataProductType
     lifecycle: Optional[DataProductLifeCycle]
     data_product_settings: list[DataProductSettingValue]
-    datasets: list[Dataset]
 
 
 class DataOutputLinks(DataOutput):
@@ -47,6 +46,7 @@ class DataProductGet(BaseDataProductGet):
     # Nested schemas
     dataset_links: list[DatasetLinks]
     data_outputs: list[DataOutputLinks]
+    datasets: list[Dataset]
     rolled_up_tags: set[Tag]
 
 
