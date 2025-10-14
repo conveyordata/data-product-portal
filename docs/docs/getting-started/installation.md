@@ -81,11 +81,7 @@ A standalone CLI tool is available for interacting with the portal. You can find
 
 ## Local Developer Set-up
 
-For local development:
-- Have a look at the [developer documentation](../developer-guide/setup).
-- Refer to the individual folder `README.md` files in the repository.
-- These contain setup and contribution instructions for the backend and frontend codebases.
-
+Take a look at the [backend documentation](https://github.com/conveyordata/data-product-portal/blob/main/backend/README.md) and the [frontend documentation](https://github.com/conveyordata/data-product-portal/blob/main/backend/README.md) to get started.
 ---
 
 Need help? Reach out to the team or check our [FAQ](../faq).

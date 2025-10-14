@@ -10,7 +10,7 @@
 
 ### Python
 
-- Install [Python 3.12](https://www.python.org/downloads) on your machine.
+- Install [Python 3.13](https://www.python.org/downloads) on your machine.
 
 ### Poetry
 
@@ -20,16 +20,11 @@
 ### Configuration (.env file)
 
 Both for local execution and local development, you need to specify some configuration arguments.
-All configuration values for this project are read from a `.env` file in the `backend (current)` folder.
-Please look at [example.env](../example.env) to see which values are mandatory and which can be omitted.
-Then copy and paste the content of `example.env` to `.env` you created and replace values where necessary.
 
-#### Minimal `.env` file
+You can use the following `'env` file to get started:
 
-A minimal example of a `.env` file can be found below. This is enough to get things started.
-
-```
-POSTGRES_PASSWORD=vy/*&4%osdivdadkr238ry7t2123
+```dotenv
+POSTGRES_PASSWORD=abc123
 POSTGRES_PORT=5432
 POSTGRES_USER=postgres
 POSTGRES_DB=data-product-portal
@@ -41,11 +36,9 @@ LOGGING_DIRECTORY=./tmp/logs
 HOST=http://localhost:3000/
 ```
 
-### Docker (only when you want to use Docker for local execution)
+## Running the project
 
-- Install [Docker](https://docs.docker.com/get-docker/) on your machine.
-
-## Installation
+### Installation
 
 In order to install all project dependencies using poetry,
 open the 'backend' directory as a workspace in your favorite IDE and execute the command below.
@@ -54,67 +47,27 @@ open the 'backend' directory as a workspace in your favorite IDE and execute the
 poetry install
 ```
 
-## Local Execution
+### Starting required services
 
-In order to just run the backend locally, you can choose between the 2 options below.
+Required services can be started using docker compose:
 
-### Using Python
-
-To start a local server, simply execute the command below.
-This will start a backend server on port 5050.
-
-```sh
-poetry run python -m app.local_startup
+```bash
+docker compose up -d postgresql mailhog
 ```
 
-### Using Docker
+### Populating the database
 
-- Ensure your Docker service is running.
-
-- Build the Docker image by executing the command below.
-
-  ```sh
-  docker build . -t data-product-portal-backend
-  ```
-
-- Run the Docker container by executing the command below.
-
-  ```sh
-  docker run --name data-product-portal-backend-container --env-file .env -p 3000:8080  data-product-portal-backend
-  ```
-
-## Enabling the MCP server
-The MCP server can work (locally or remotely) via Claude Desktop.
-Install Claude Desktop and run `poetry run fastmcp install claude-desktop app/remote_proxy.py -e $(pwd) --env-file ./.env --env DISABLED_AWS='true'` in the `backend` folder. Make sure the `HOST` in your .env file is either referring to your localhost backend or the remote deployed backend.
-
-## Local Development
-
-### Virtual environment
-
-To effectively develop you need to activate a virtual environment.
-This allows you to run a python interpreter with the same dependencies installed as your package requires.
-
-To activate a virtual environment, execute the command below.
+In order to initialize your database with the correct structure, execute the command below from the backend folder.
 
 ```sh
-poetry shell
+poetry run python -m app.db_tool init "sample_data.sql"
 ```
 
-### Including the virtual environment in your IDE
+This populates the database with sample data from [sample_data.sql](sample_data.sql) .
+If you want to use your custom data, you should create a .sql file similar to
+the [sample_data.sql](sample_data.sql) file and reference that one in the command above.
 
-- Execute the command below to display the location of your virtual environment.
-
-  ```sh
-  poetry env info --path
-  ```
-
-- You can use this location to pass in your IDE to be able to run the source code from your IDE and to resolve all imports.
-
-
-### Run in dev mode
-
-Before running the project in development mode, make sure you have the database up and
-running [as described here](#Database-initialization).
+### Running the backend
 
 In order to run the project in development mode, after initializing the database, execute the command below.
 
@@ -122,40 +75,32 @@ In order to run the project in development mode, after initializing the database
 python -m app.local_startup
 ```
 
-## Data
+:tada:
+
+The backend is now running on port 5050.
+
+## Enabling the MCP server
+The MCP server can work (locally or remotely) via Claude Desktop.
+Install Claude Desktop and run `poetry run fastmcp install claude-desktop app/remote_proxy.py -e $(pwd) --env-file ./.env --env DISABLED_AWS='true'` in the `backend` folder. Make sure the `HOST` in your .env file is either referring to your localhost backend or the remote deployed backend.
+
+## Development utilities
+
+### Including the virtual environment in your IDE
+
+- Execute the command below to display the location of your virtual environment.
+
+```sh
+poetry env info --path
+```
+
+- You can use this location to pass in your IDE to be able to run the source code from your IDE and to resolve all imports.
+
+### Data
 
 A small CLI tool is delivered to enable database setup / migrations.
 The CLI tool fetches database configuration from the `.env` file in the current folder.
 Make sure your database connection variables are set up correctly.
 Execute `python -m app.db_tool --help` from the `backend` folder to receive the help text from this tool.
-
-### Database
-
-The easiest way of setting up your database is to run `docker compose up postgresql` in the root of the project,
-this will create a Postgres database that your local development server will connect to.
-
-### Database initialization
-
-#### Structure
-
-In order to initialize your database with the correct structure, execute the command below from the backend folder.
-
-```sh
-python -m app.db_tool init
-```
-
-#### Sample Data
-
-If you want to seed your database with sample data, you can optionally pass in the path to a .sql file that will populate the tables.
-
-Below you can see the command you need to execute if you want to use the dummy sample data available in this repository.
-
-```sh
-python -m app.db_tool init "sample_data.sql"
-```
-
-If you want to use your custom data, you should create a .sql file similar to
-the [sample_data.sql](sample_data.sql) file and reference that one in the command above.
 
 #### Force Database recreation
 
@@ -182,25 +127,15 @@ python -m app.db_tool migrate
 
 ### Integration testing
 
-- Install the test dependencies by running
+To run the integration tests, execute the following commands:
 
-  ```sh
-  poetry install --with test
-  ```
+```sh
+poetry install --with test
+docker compose --file test-compose.yaml up
+poetry run pytest -v
+```
 
-- Ensure your Docker service is running.
-
-- Get the test database up and running by executing the command below.
-
-  ```sh
-  docker compose --file test-compose.yaml up
-  ```
-
-- Run the tests by executing the command below.
-
-  ```sh
-  poetry run pytest -v
-  ```
+It will install test dependencies, boot up the test database and run the tests.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
