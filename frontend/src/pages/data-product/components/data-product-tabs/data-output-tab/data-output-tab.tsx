@@ -1,12 +1,11 @@
 import { Flex, Form } from 'antd';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { data } from 'react-router';
 import { Searchbar } from '@/components/form';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import type { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import type { SearchForm } from '@/types/shared';
-
 import { DataOutputTable } from './components/data-output-table/data-output-table.component';
 import { DatasetTable } from './components/dataset-table/dataset-table.component';
 import styles from './data-output-tab.module.scss';
@@ -30,6 +29,19 @@ export function DataOutputTab({ dataProductId }: Props) {
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
+    const [isDragging, setIsDragging] = useState(false);
+    const [draggedDataOutput, setDraggedDataOutput] = useState<string | null>(null);
+
+    const handleDragStart = (dataOutputId: string) => {
+        setIsDragging(true);
+        console.log(dataOutputId);
+        setDraggedDataOutput(dataOutputId);
+    };
+
+    const handleDragEnd = () => {
+        setIsDragging(false);
+        setDraggedDataOutput(null);
+    };
 
     const filteredDataOutputs = useMemo(() => {
         return filterDataOutputs(dataProduct?.data_outputs ?? [], searchTerm);
@@ -43,8 +55,18 @@ export function DataOutputTab({ dataProductId }: Props) {
                 form={searchForm}
             />
             <Flex>
-                <DatasetTable datasets={dataProduct?.datasets ?? []} dataProductId={dataProductId} />
-                <DataOutputTable dataProductId={dataProductId} dataOutputs={filteredDataOutputs} />
+                <DatasetTable
+                    datasets={dataProduct?.datasets ?? []}
+                    dataProductId={dataProductId}
+                    isDragActive={isDragging}
+                    draggedDataOutputId={draggedDataOutput}
+                />
+                <DataOutputTable
+                    dataProductId={dataProductId}
+                    dataOutputs={filteredDataOutputs}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                />
             </Flex>
         </Flex>
     );

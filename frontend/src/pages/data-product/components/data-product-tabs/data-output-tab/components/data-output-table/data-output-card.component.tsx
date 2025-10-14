@@ -2,7 +2,7 @@ import { Badge, Button, Card, Flex, Popconfirm, Tag, Typography } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-
+import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtitle/data-output-subtitle.component';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRemoveDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
@@ -19,9 +19,11 @@ import styles from './data-output-card.module.scss';
 type Props = {
     dataOutput: DataOutputsGetContract[0];
     dataProductId: string;
+    onDragStart?: () => void;
+    onDragEnd?: () => void;
 };
 
-export function DataOutputCard({ dataOutput, dataProductId }: Props) {
+export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragEnd }: Props) {
     const { t } = useTranslation();
 
     const { data: deleteAccess } = useCheckAccessQuery({
@@ -63,10 +65,27 @@ export function DataOutputCard({ dataOutput, dataProductId }: Props) {
         [unlinkDataset, dataOutput.id, t],
     );
 
+    const handleDragStart = (event: React.DragEvent) => {
+        event.dataTransfer.setData(
+            'text/plain',
+            JSON.stringify({
+                type: 'data-output',
+                id: dataOutput.id,
+                name: dataOutput.name,
+            }),
+        );
+        // 2️⃣ Allow copy or move
+        event.dataTransfer.effectAllowed = 'copyMove';
+
+        // 3️⃣ (Optional) add a CSS class or visual hint
+        event.currentTarget.classList.add('dragging');
+        onDragStart?.();
+    };
+
     const canRemove = deleteAccess?.allowed ?? false;
 
     return (
-        <Card className={styles.card}>
+        <Card className={styles.card} draggable onDragStart={handleDragStart} onDragEnd={onDragEnd}>
             <Flex vertical gap={12}>
                 <Flex justify="space-between" align="flex-start">
                     <Flex gap={12} align="flex-start">
@@ -103,6 +122,8 @@ export function DataOutputCard({ dataOutput, dataProductId }: Props) {
 
                 <Flex vertical gap={8}>
                     <Badge status={getBadgeStatus(dataOutput.status)} text={getStatusLabel(t, dataOutput.status)} />
+
+                    <DataOutputSubtitle data_output_id={dataOutput.id} />
 
                     {dataOutput.dataset_links && dataOutput.dataset_links.length > 0 && (
                         <Flex wrap gap={4}>

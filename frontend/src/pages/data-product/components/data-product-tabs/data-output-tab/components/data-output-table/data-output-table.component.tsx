@@ -1,4 +1,5 @@
 import { Button, Flex, Typography } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal.tsx';
@@ -14,13 +15,15 @@ import styles from './data-output-table.module.scss';
 type Props = {
     dataProductId: string;
     dataOutputs: DataOutputsGetContract;
+    onDragStart?: (dataOutputId: string) => void;
+    onDragEnd?: () => void;
 };
 
-export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
+export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDragEnd }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
     const { isVisible, handleOpen, handleClose } = useModal();
-
+    const [isDragging, setIsDragging] = useState(false);
     const { data: access } = useCheckAccessQuery(
         {
             resource: dataProductId,
@@ -33,8 +36,18 @@ export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
 
     const canCreateDataOutput = access?.allowed || false;
 
+    const handleDragStart = (dataOutputId: string) => {
+        setIsDragging(true);
+        onDragStart?.(dataOutputId);
+    };
+
+    const handleDragEnd = () => {
+        setIsDragging(false);
+        onDragEnd?.();
+    };
+
     return (
-        <Flex vertical className={styles.container}>
+        <Flex vertical className={`${styles.container} ${isDragging ? styles.dragging : ''}`}>
             <Flex justify="space-between" align="center" className={styles.header}>
                 <Typography.Title level={4}>{t('Data Outputs')}</Typography.Title>
                 <Button
@@ -49,7 +62,13 @@ export function DataOutputTable({ dataProductId, dataOutputs }: Props) {
 
             <div className={styles.cardsGrid}>
                 {dataOutputs.map((dataOutput) => (
-                    <DataOutputCard key={dataOutput.id} dataOutput={dataOutput} dataProductId={dataProductId} />
+                    <DataOutputCard
+                        key={dataOutput.id}
+                        dataOutput={dataOutput}
+                        dataProductId={dataProductId}
+                        onDragStart={() => handleDragStart(dataOutput.id)}
+                        onDragEnd={handleDragEnd}
+                    />
                 ))}
 
                 {dataOutputs.length === 0 && (
