@@ -101,10 +101,10 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
         },
         {
             title: t('Produced by Data Product'),
-            dataIndex: 'data_product',
-            render: (data_product: DataProductContract) => {
-                if (data_product !== undefined) {
-                    return <TableCellItem text={data_product.name} />;
+            dataIndex: 'data_product_name',
+            render: (data_product_name: string) => {
+                if (data_product_name !== undefined) {
+                    return <TableCellItem text={data_product_name} />;
                 }
             },
             width: '25%',

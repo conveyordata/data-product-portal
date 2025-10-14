@@ -90,6 +90,10 @@ class Dataset(Base, BaseORM):
         ]
         return len(accepted_product_links)
 
+    @property
+    def data_product_name(self) -> str:
+        return self.data_product.name
+
 
 def ensure_dataset_exists(dataset_id: UUID, db: Session, **kwargs) -> Dataset:
     return ensure_exists(dataset_id, db, Dataset, **kwargs)
