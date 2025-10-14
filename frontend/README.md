@@ -11,7 +11,7 @@
 ### Configuration (config.local.js file)
 Both for local execution and local development, you need to specify some configuration arguments.
 All configuration values for this project are read from a `config.local.js` file in the frontend folder.
-You can sue the following template to get started:
+You can use the following template to get started:
 
 ```js
 const config = (() => {
