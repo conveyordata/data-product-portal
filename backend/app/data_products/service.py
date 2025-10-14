@@ -119,7 +119,6 @@ class DataProductService:
                 .options(
                     selectinload(DataProductModel.dataset_links).raiseload("*"),
                     selectinload(DataProductModel.assignments).raiseload("*"),
-                    selectinload(DataProductModel.datasets).raiseload("*"),
                     selectinload(DataProductModel.data_outputs).raiseload("*"),
                 )
                 .order_by(asc(DataProductModel.name))
