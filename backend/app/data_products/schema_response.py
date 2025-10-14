@@ -2,7 +2,9 @@ from typing import Optional
 from uuid import UUID
 
 from app.data_outputs.schema import DataOutput
-from app.data_outputs_datasets.schema import DataOutputDatasetAssociation
+from app.data_outputs_datasets.schema_response import (
+    BaseDataOutputDatasetAssociationGet,
+)
 from app.data_product_lifecycles.schema import DataProductLifeCycle
 from app.data_product_settings.schema import DataProductSettingValue
 from app.data_product_types.schema import DataProductType
@@ -33,7 +35,7 @@ class BaseDataProductGet(ORMModel):
 
 class DataOutputLinks(DataOutput):
     # Nested schemas
-    dataset_links: list[DataOutputDatasetAssociation]
+    dataset_links: list[BaseDataOutputDatasetAssociationGet]
 
 
 class DatasetLinks(DataProductDatasetAssociation):

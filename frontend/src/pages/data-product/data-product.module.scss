@@ -3,6 +3,11 @@
 .data-product-container {
     @extend .container;
     gap: globals.$column-gap-xl;
+    position: relative;
+
+    &:has(.sidebarCollapsed) {
+        gap: 0;
+    }
 }
 
 .header-container {
@@ -29,12 +34,33 @@
 
 .content {
     @extend .container;
-
     .overview {
+
         flex: 1;
         gap: globals.$column-gap-regular;
         justify-content: flex-start;
         align-items: flex-start;
+    }
+
+    flex: 1;
+    transition: all 0.3s ease;
+
+    .data-product-container:has(.sidebarCollapsed) & {
+        flex: 1;
+        width: 100%;
+    }
+}
+
+.sidebarToggle {
+    position: absolute;
+    top: 50%;
+    right: 300px; // Adjust based on sidebar width
+    transform: translateY(-50%);
+    z-index: 10;
+    transition: right 0.3s ease;
+
+    .data-product-container:has(.sidebarCollapsed) & {
+        right: 20px;
     }
 }
 
@@ -44,6 +70,17 @@
     gap: globals.$column-gap-xl;
     justify-content: flex-start;
     align-items: flex-start;
+    transition: all 0.3s ease;
+
+    &.sidebarCollapsed {
+        flex: 0;
+        min-width: 0;
+        width: 0;
+        transform: translateX(100%);
+        opacity: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
 }
 
 .main-content {

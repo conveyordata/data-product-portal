@@ -12,6 +12,7 @@ import type { SearchForm } from '@/types/shared';
 
 import { AddDataOutputPopup } from './components/add-data-output-popup/add-data-output-popup';
 import { DataOutputTable } from './components/data-output-table/data-output-table.component';
+import { DatasetTable } from './components/dataset-table/dataset-table.component';
 import styles from './data-output-tab.module.scss';
 
 function filterDataOutputs(data_outputs: DataOutputsGetContract, searchTerm: string) {
@@ -29,7 +30,7 @@ type Props = {
 };
 export function DataOutputTab({ dataProductId }: Props) {
     const { t } = useTranslation();
-    const { isVisible, handleOpen, handleClose } = useModal();
+
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
@@ -37,15 +38,6 @@ export function DataOutputTab({ dataProductId }: Props) {
     const filteredDataOutputs = useMemo(() => {
         return filterDataOutputs(dataProduct?.data_outputs ?? [], searchTerm);
     }, [dataProduct?.data_outputs, searchTerm]);
-
-    const { data: access } = useCheckAccessQuery(
-        {
-            resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__CREATE_DATA_OUTPUT,
-        },
-        { skip: !dataProductId },
-    );
-    const canCreateDataOutput = access?.allowed || false;
 
     return (
         <>
@@ -57,21 +49,22 @@ export function DataOutputTab({ dataProductId }: Props) {
                     placeholder={t('Search data outputs by name')}
                     formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
                     form={searchForm}
-                    actionButton={
-                        <Button
-                            disabled={!canCreateDataOutput}
-                            type={'primary'}
-                            className={styles.formButton}
-                            onClick={handleOpen}
-                        >
-                            {t('Add Data Output')}
-                        </Button>
-                    }
+                    // actionButton={
+                    //     <Button
+                    //         disabled={!canCreateDataOutput}
+                    //         type={'primary'}
+                    //         className={styles.formButton}
+                    //         onClick={handleOpen}
+                    //     >
+                    //         {t('Add Data Output')}
+                    //     </Button>
+                    // }
                 />
-
-                <DataOutputTable dataProductId={dataProductId} dataOutputs={filteredDataOutputs} />
+                <Flex>
+                    <DatasetTable datasets={dataProduct?.datasets ?? []} dataProductId={dataProductId} />
+                    <DataOutputTable dataProductId={dataProductId} dataOutputs={filteredDataOutputs} />
+                </Flex>
             </Flex>
-            {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </>
     );
 }

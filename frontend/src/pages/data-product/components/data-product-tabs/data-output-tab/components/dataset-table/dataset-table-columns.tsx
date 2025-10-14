@@ -6,28 +6,27 @@ import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtit
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component';
-import type { DataOutputsGetContract } from '@/types/data-output/data-outputs-get.contract';
+import { type DatasetContract, DatasetsGetContract } from '@/types/dataset';
 import { createDataOutputIdPath } from '@/types/navigation';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
-
-import styles from './data-output-table.module.scss';
+import styles from './dataset-table.module.scss';
 
 type Props = {
     t: TFunction;
     loading?: boolean;
-    canRemove: boolean;
-    onRemoveDataOutput: (id: string, name: string) => void;
-    onRemoveDatasetLink?: (dataOutputId: string, datasetId: string, datasetLinkId: string) => void;
+    onRemoveDataset: (id: string, name: string) => void;
+    getCanRemove: (datasetId: string) => boolean;
+    onRemoveDataOutputLink?: (datasetId: string, dataOutputId: string) => void;
 };
 
-export const getDataProductDataOutputsColumns = ({
+export const getDataProductDatasetsColumns = ({
     t,
     loading,
-    canRemove,
-    onRemoveDataOutput,
-    onRemoveDatasetLink,
-}: Props): TableColumnsType<DataOutputsGetContract[0]> => {
+    onRemoveDataset,
+    getCanRemove,
+    onRemoveDataOutputLink,
+}: Props): TableColumnsType<DatasetContract> => {
     return [
         {
             title: t('Id'),
@@ -37,14 +36,15 @@ export const getDataProductDataOutputsColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { id, name, namespace, status, description, configuration, owner_id, dataset_links }) => {
+            render: (_, { id, name, status, description, data_output_links }) => {
+                console.log('data_output_links', data_output_links);
                 return (
                     <TableCellAvatar
                         popover={{ title: name, content: description }}
-                        linkTo={createDataOutputIdPath(id, owner_id)}
-                        icon={
-                            <CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration.configuration_type)} />
-                        }
+                        // linkTo={createDataOutputIdPath(id, owner_id)}
+                        // icon={
+                        //     <CustomSvgIconLoader iconComponent={getDataOutputIcon(configuration.configuration_type)} />
+                        // }
                         title={name}
                         subtitle={
                             <Flex vertical gap={4}>
@@ -53,19 +53,20 @@ export const getDataProductDataOutputsColumns = ({
                                     text={getStatusLabel(t, status)}
                                     className={styles.noSelect}
                                 />
-                                {dataset_links && dataset_links.length > 0 && (
+
+                                {data_output_links && data_output_links.length > 0 && (
                                     <Flex wrap gap={4}>
-                                        {dataset_links.map((link) => (
+                                        {data_output_links.map((link) => (
                                             <Tag
-                                                key={link.dataset.id}
-                                                color="green"
-                                                closable={!!onRemoveDatasetLink}
+                                                key={link.data_output.id}
+                                                color="blue"
+                                                closable={!!onRemoveDataOutputLink}
                                                 onClose={(e) => {
                                                     e.preventDefault();
-                                                    onRemoveDatasetLink?.(id, link.dataset.id, link.id);
+                                                    onRemoveDataOutputLink?.(id, link.data_output.id);
                                                 }}
                                             >
-                                                {link.dataset.name}
+                                                {link.data_output.name}
                                             </Tag>
                                         ))}
                                     </Flex>
@@ -78,25 +79,20 @@ export const getDataProductDataOutputsColumns = ({
             width: '30%',
         },
         {
-            title: t('Technical information'),
-            render: (_, { id }) => {
-                return <DataOutputSubtitle data_output_id={id} />;
-            },
-            width: '30%',
-        },
-        {
             title: t('Actions'),
             key: 'action',
             width: '10%',
             render: (_, { id, name }) => {
+                const canRemove = getCanRemove(id);
+
                 return (
                     <Flex vertical>
                         <Popconfirm
                             title={t('Remove')}
                             description={t(
-                                'Are you sure you want to delete the data output? This can have impact on downstream dependencies',
+                                'Are you sure you want to delete the dataset? This can have impact on downstream dependencies',
                             )}
-                            onConfirm={() => onRemoveDataOutput(id, name)}
+                            onConfirm={() => onRemoveDataset(id, name)}
                             placement={'leftTop'}
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
