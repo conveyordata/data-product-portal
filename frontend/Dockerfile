@@ -8,7 +8,7 @@ COPY . .
 RUN --mount=type=cache,target=/app/node_modules npm ci && npm run build:prd
 
 # Use official nginx image as the base image
-FROM --platform=${PLATFORM} nginx:1.29.2-alpine@sha256:7c1b9a91514d1eb5288d7cd6e91d9f451707911bfaea9307a3acbc811d4aa82e
+FROM --platform=${PLATFORM} nginx:1.29.2-alpine@sha256:61e01287e546aac28a3f56839c136b31f590273f3b41187a36f46f6a03bbfe22
 
 # Copy the build output
 COPY --from=build-stage /app/dist /app/dist
