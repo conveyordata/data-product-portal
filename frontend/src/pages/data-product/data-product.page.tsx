@@ -111,7 +111,7 @@ export function DataProduct() {
                     </Flex>
                 </Flex>
             </Flex>
-            {/* Sidebar toggle button */}
+            {/* Sidebar */}
             <div className={styles.sidebarToggle}>
                 <CircleIconButton
                     icon={sidebarCollapsed ? <LeftOutlined /> : <RightOutlined />}
@@ -119,8 +119,8 @@ export function DataProduct() {
                     onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                 />
             </div>
-            {/* Sidebar */}
             <Flex vertical className={clsx(styles.sidebar, { [styles.sidebarCollapsed]: sidebarCollapsed })}>
+                {/* Sidebar toggle button */}
                 <DataProductActions dataProductId={dataProductId} />
                 {/*  Data product owners overview */}
                 <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />

@@ -53,14 +53,15 @@
 
 .sidebarToggle {
     position: absolute;
-    top: 50%;
-    right: 300px; // Adjust based on sidebar width
+    top: 0%;
+    right: globals.$min-sidebar-width; // Adjust based on sidebar width
     transform: translateY(-50%);
     z-index: 10;
     transition: right 0.3s ease;
 
     .data-product-container:has(.sidebarCollapsed) & {
-        right: 20px;
+        right: 0px;
+        top: 25%;
     }
 }
 
