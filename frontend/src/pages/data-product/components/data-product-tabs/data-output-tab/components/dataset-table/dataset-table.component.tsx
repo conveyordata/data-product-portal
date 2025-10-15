@@ -1,14 +1,12 @@
 import { Button, Flex, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-
+import { DatasetCard } from '@/components/datasets/dataset-card/dataset-card.component';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
-
-import { DatasetCard } from './dataset-card.component';
 import styles from './dataset-table.module.scss';
 
 type Props = {

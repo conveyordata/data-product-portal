@@ -1,3 +1,4 @@
+import Icon, { DeleteOutlined } from '@ant-design/icons';
 import { Badge, Button, Card, Flex, Popconfirm, Tag, Typography } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +13,7 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputsGetContract } from '@/types/data-output';
 import { createDataOutputIdPath } from '@/types/navigation';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
-import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
+import { getBadgeStatus, getDecisionStatusBadgeStatus, getStatusLabel } from '@/utils/status.helper';
 
 import styles from './data-output-card.module.scss';
 
@@ -97,10 +98,10 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                                 <Typography.Title level={5} className={styles.title}>
                                     {dataOutput.name}
                                 </Typography.Title>
+                                <Typography.Text type="secondary" className={styles.description}>
+                                    {dataOutput.description}
+                                </Typography.Text>
                             </Link>
-                            <Typography.Text type="secondary" className={styles.description}>
-                                {dataOutput.description}
-                            </Typography.Text>
                         </div>
                     </Flex>
                     <Popconfirm
@@ -115,7 +116,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                         okButtonProps={{ loading: isRemoving }}
                     >
                         <Button loading={isRemoving} disabled={!canRemove} type="text" size="small" danger>
-                            {t('Remove')}
+                            {t('Delete')}
                         </Button>
                     </Popconfirm>
                 </Flex>
@@ -132,11 +133,16 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                                     key={link.dataset.id}
                                     color="green"
                                     closable
+                                    closeIcon={<Icon component={DeleteOutlined} />}
                                     onClose={(e) => {
                                         e.preventDefault();
                                         handleRemoveDatasetLink(link.dataset.id, link.id);
                                     }}
                                 >
+                                    <Badge
+                                        className={styles.badge}
+                                        status={getDecisionStatusBadgeStatus(link.status)}
+                                    />
                                     {link.dataset.name}
                                 </Tag>
                             ))}

@@ -1,15 +1,13 @@
 import { Button, Flex, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { DataOutputCard } from '@/components/data-outputs/data-output-card/data-output-card.component.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputsGetContract } from '@/types/data-output';
-
 import { AddDataOutputPopup } from '../add-data-output-popup/add-data-output-popup.tsx';
-import { DataOutputCard } from './data-output-card.component';
 import styles from './data-output-table.module.scss';
 
 type Props = {

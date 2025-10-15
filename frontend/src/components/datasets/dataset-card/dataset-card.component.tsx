@@ -1,7 +1,8 @@
+import Icon, { DeleteOutlined } from '@ant-design/icons';
 import { Badge, Button, Card, Flex, Popconfirm, Tag, Typography } from 'antd';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { Link } from 'react-router';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
     useRemoveDatasetFromDataOutputMutation,
@@ -11,7 +12,8 @@ import { useApproveDataOutputLinkMutation } from '@/store/features/data-outputs-
 import { useGetDatasetByIdQuery, useRemoveDatasetMutation } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper';
+import { createDatasetIdPath } from '@/types/navigation';
+import { getBadgeStatus, getDecisionStatusBadgeStatus, getStatusLabel } from '@/utils/status.helper';
 import styles from './dataset-card.module.scss';
 
 type Props = {
@@ -118,6 +120,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                     content: t('Data output {{name}} linked to dataset successfully', { name: dragData.name }),
                     type: 'success',
                 });
+                // TODO make this dependable on access rights
                 await approveLink({ id: result.id, data_output_id: dragData.id, dataset_id: dataset.id }).unwrap();
             }
         } catch (error) {
@@ -145,12 +148,14 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
             <Flex vertical gap={12}>
                 <Flex justify="space-between" align="flex-start">
                     <div>
-                        <Typography.Title level={5} className={styles.title}>
-                            {dataset.name}
-                        </Typography.Title>
-                        <Typography.Text type="secondary" className={styles.description}>
-                            {dataset.description}
-                        </Typography.Text>
+                        <Link to={createDatasetIdPath(dataset.id)}>
+                            <Typography.Title level={5} className={styles.title}>
+                                {dataset.name}
+                            </Typography.Title>
+                            <Typography.Text type="secondary" className={styles.description}>
+                                {dataset.description}
+                            </Typography.Text>
+                        </Link>
                     </div>
                     <Popconfirm
                         title={t('Remove')}
@@ -164,7 +169,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                         okButtonProps={{ loading: isRemoving }}
                     >
                         <Button loading={isRemoving} disabled={!canRemove} type="text" size="small" danger>
-                            {t('Remove')}
+                            {t('Delete')}
                         </Button>
                     </Popconfirm>
                 </Flex>
@@ -178,12 +183,17 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                 <Tag
                                     key={link.data_output.id}
                                     color="blue"
+                                    closeIcon={<Icon component={DeleteOutlined} />}
                                     closable
                                     onClose={(e) => {
                                         e.preventDefault();
                                         handleRemoveDataOutputLink(link.data_output.id);
                                     }}
                                 >
+                                    <Badge
+                                        className={styles.badge}
+                                        status={getDecisionStatusBadgeStatus(link.status)}
+                                    />
                                     {link.data_output.name}
                                 </Tag>
                             ))}

@@ -1,7 +1,6 @@
 import { Flex, Form } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { data } from 'react-router';
 import { Searchbar } from '@/components/form';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import type { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
