@@ -1,12 +1,14 @@
-import { Button, Flex, Typography } from 'antd';
-import { useState } from 'react';
+import { Button, Flex, Form, Typography } from 'antd';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DataOutputCard } from '@/components/data-outputs/data-output-card/data-output-card.component.tsx';
+import { Searchbar } from '@/components/form';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputsGetContract } from '@/types/data-output';
+import type { SearchForm } from '@/types/shared';
 import { AddDataOutputPopup } from '../add-data-output-popup/add-data-output-popup.tsx';
 import styles from './data-output-table.module.scss';
 
@@ -29,6 +31,18 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
         },
         { skip: !dataProductId },
     );
+    const [searchForm] = Form.useForm<SearchForm>();
+    const searchTerm = Form.useWatch('search', searchForm);
+
+    const filteredDataOutputs = useMemo(() => {
+        if (!searchTerm) return dataOutputs;
+        return dataOutputs.filter(
+            (dataOutput) =>
+                dataOutput?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                dataOutput?.namespace?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                dataOutput?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+        );
+    }, [dataOutputs, searchTerm]);
 
     if (!dataProduct) return null;
 
@@ -58,8 +72,14 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
                 </Button>
             </Flex>
 
+            <Searchbar
+                placeholder={t('Search data outputs by name or namespace')}
+                formItemProps={{ initialValue: '', className: styles.searchBar }}
+                form={searchForm}
+            />
+
             <div className={styles.cardsGrid}>
-                {dataOutputs.map((dataOutput) => (
+                {filteredDataOutputs.map((dataOutput) => (
                     <DataOutputCard
                         key={dataOutput.id}
                         dataOutput={dataOutput}
@@ -69,9 +89,11 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
                     />
                 ))}
 
-                {dataOutputs.length === 0 && (
+                {filteredDataOutputs.length === 0 && (
                     <div className={styles.emptyState}>
-                        <Typography.Text type="secondary">{t('No data outputs found')}</Typography.Text>
+                        <Typography.Text type="secondary">
+                            {searchTerm ? t('No data outputs found matching your search') : t('No data outputs found')}
+                        </Typography.Text>
                     </div>
                 )}
             </div>

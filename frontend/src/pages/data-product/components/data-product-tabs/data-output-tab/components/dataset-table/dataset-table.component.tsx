@@ -1,12 +1,15 @@
-import { Button, Flex, Typography } from 'antd';
+import { Button, Flex, Form, Typography } from 'antd';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { DatasetCard } from '@/components/datasets/dataset-card/dataset-card.component';
+import { Searchbar } from '@/components/form';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
+import type { SearchForm } from '@/types/shared';
 import styles from './dataset-table.module.scss';
 
 type Props = {
@@ -34,6 +37,16 @@ export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDat
         },
         { skip: !dataProductId },
     );
+    const [searchForm] = Form.useForm<SearchForm>();
+    const searchTerm = Form.useWatch('search', searchForm);
+    const filteredDatasets = useMemo(() => {
+        if (!searchTerm) return datasets;
+        return datasets.filter(
+            (dataset) =>
+                dataset?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                dataset?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+        );
+    }, [datasets, searchTerm]);
 
     if (!dataProduct) return null;
 
@@ -50,8 +63,14 @@ export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDat
                 </Link>
             </Flex>
 
+            <Searchbar
+                placeholder={t('Search datasets by name or description')}
+                formItemProps={{ initialValue: '', className: styles.searchBar }}
+                form={searchForm}
+            />
+
             <div className={styles.cardsGrid}>
-                {datasets.map((dataset) => (
+                {filteredDatasets.map((dataset) => (
                     <DatasetCard
                         key={dataset.id}
                         datasetId={dataset.id}
@@ -60,9 +79,11 @@ export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDat
                     />
                 ))}
 
-                {datasets.length === 0 && (
+                {filteredDatasets.length === 0 && (
                     <div className={styles.emptyState}>
-                        <Typography.Text type="secondary">{t('No datasets found')}</Typography.Text>
+                        <Typography.Text type="secondary">
+                            {searchTerm ? t('No datasets found matching your search') : t('No datasets found')}
+                        </Typography.Text>
                     </div>
                 )}
             </div>
