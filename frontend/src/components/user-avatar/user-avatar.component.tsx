@@ -1,30 +1,29 @@
 import { Avatar, Flex, Typography } from 'antd';
-import type { ComponentProps } from 'react';
 
 import styles from './user-avatar.module.scss';
-
-const { Text, Link } = Typography;
 
 type Props = {
     name: string;
     email: string;
-    color?: string;
-    linkProps?: ComponentProps<typeof Link>;
-    textProps?: ComponentProps<typeof Text>;
+    color: string;
+    size?: 'small' | 'default' | 'large';
+    hideText?: boolean;
 };
 
-export function UserAvatar({ name, email, color, linkProps, textProps }: Props) {
+export function UserAvatar({ name, email, color, size = 'default', hideText = false }: Props) {
     return (
-        <Flex className={styles.userAvatarContainer}>
-            <Avatar className={styles.avatar} style={{ background: color }}>
-                {name.split('')[0].toUpperCase()}
+        <Flex align="center" className={styles.userAvatarContainer}>
+            <Avatar size={size} className={styles.avatar} style={{ backgroundColor: color }}>
+                {name.charAt(0)}
             </Avatar>
-            <Flex vertical className={styles.userInfo}>
-                <Text strong {...textProps}>
-                    {name}
-                </Text>
-                <Link {...linkProps}>{email}</Link>
-            </Flex>
+            {!hideText && (
+                <Flex vertical>
+                    <Typography.Text strong>{name}</Typography.Text>
+                    <Typography.Text type="secondary" className={styles.email}>
+                        {email}
+                    </Typography.Text>
+                </Flex>
+            )}
         </Flex>
     );
 }

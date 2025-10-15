@@ -1,4 +1,4 @@
-import { Flex, Typography, theme } from 'antd';
+import { Avatar, Flex, Tooltip, Typography, theme } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
@@ -12,9 +12,10 @@ const { useToken } = theme;
 type Props = {
     users: UserContract[] | undefined;
     title?: ReactNode;
+    showAvatarsOnly?: boolean;
 };
 
-export function UserAccessOverview({ users = [], title }: Props) {
+export function UserAccessOverview({ users = [], title = '', showAvatarsOnly = false }: Props) {
     const { token } = useToken();
 
     const sorted = useMemo(() => {
@@ -25,6 +26,26 @@ export function UserAccessOverview({ users = [], title }: Props) {
         );
         return [...users].sort(compareFn);
     }, [users]);
+
+    if (showAvatarsOnly) {
+        return (
+            <div className={styles.avatarsOnly}>
+                {sorted.map((user) => (
+                    <Tooltip key={user.id} title={`${user.first_name} ${user.last_name}`}>
+                        <div className={styles.avatarWrapper}>
+                            <UserAvatar
+                                name={`${user.first_name} ${user.last_name}`}
+                                email={user.email}
+                                color={token.colorPrimary}
+                                size="small"
+                                hideText={true}
+                            />
+                        </div>
+                    </Tooltip>
+                ))}
+            </div>
+        );
+    }
 
     return (
         <Flex vertical className={styles.container}>

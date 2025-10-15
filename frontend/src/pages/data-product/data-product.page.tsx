@@ -111,19 +111,36 @@ export function DataProduct() {
                     </Flex>
                 </Flex>
             </Flex>
+
             {/* Sidebar */}
-            <div className={styles.sidebarToggle}>
-                <CircleIconButton
-                    icon={sidebarCollapsed ? <LeftOutlined /> : <RightOutlined />}
-                    tooltip={sidebarCollapsed ? t('Show sidebar') : t('Hide sidebar')}
-                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                />
-            </div>
             <Flex vertical className={clsx(styles.sidebar, { [styles.sidebarCollapsed]: sidebarCollapsed })}>
-                {/* Sidebar toggle button */}
-                <DataProductActions dataProductId={dataProductId} />
-                {/*  Data product owners overview */}
-                <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
+                {!sidebarCollapsed ? (
+                    <>
+                        <DataProductActions dataProductId={dataProductId} />
+                        <div className={styles.ownersSection}>
+                            <div className={styles.sidebarToggle}>
+                                <CircleIconButton
+                                    icon={<RightOutlined />}
+                                    tooltip={t('Hide sidebar')}
+                                    onClick={() => setSidebarCollapsed(true)}
+                                />
+                            </div>
+                            <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
+                        </div>
+                    </>
+                ) : (
+                    <div className={styles.collapsedSidebar}>
+                        <div className={styles.spacer} />
+                        <div className={styles.expandButton}>
+                            <CircleIconButton
+                                icon={<LeftOutlined />}
+                                tooltip={t('Show sidebar')}
+                                onClick={() => setSidebarCollapsed(false)}
+                            />
+                        </div>
+                        <UserAccessOverview users={dataProductOwners} title="" showAvatarsOnly={true} />
+                    </div>
+                )}
             </Flex>
         </Flex>
     );
