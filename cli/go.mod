@@ -1,19 +1,17 @@
 module portal
 
-go 1.23.4
-
-toolchain go1.24.1
+go 1.25.3
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.39.2
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.57.7
 	github.com/briandowns/spinner v1.23.2
-	github.com/deepmap/oapi-codegen v1.16.3
 	github.com/fatih/color v1.18.0
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/oapi-codegen/oapi-codegen/v2 v2.5.0
 	github.com/oapi-codegen/runtime v1.1.2
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
