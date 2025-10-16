@@ -11,13 +11,11 @@ export function DataOutputTab({ dataProductId }: Props) {
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
 
     return (
-        <>
-            <Flex vertical className={styles.container}>
-                <Flex>
-                    <DatasetTable datasets={dataProduct?.datasets ?? []} dataProductId={dataProductId} />
-                    <DataOutputTable dataProductId={dataProductId} dataOutputs={dataProduct?.data_outputs ?? []} />
-                </Flex>
+        <Flex vertical className={styles.container}>
+            <Flex>
+                <DatasetTable datasets={dataProduct?.datasets ?? []} dataProductId={dataProductId} />
+                <DataOutputTable dataProductId={dataProductId} dataOutputs={dataProduct?.data_outputs ?? []} />
             </Flex>
-        </>
+        </Flex>
     );
 }
