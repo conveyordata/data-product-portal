@@ -61,19 +61,19 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
     return (
         <Flex vertical className={`${styles.container} ${isDragging ? styles.dragging : ''}`}>
             <Flex justify="space-between" align="center" className={styles.header}>
-                <Typography.Title level={4}>{t('Data Outputs')}</Typography.Title>
+                <Typography.Title level={4}>{t('Technical Assets')}</Typography.Title>
                 <Button
                     disabled={!canCreateDataOutput}
                     type="primary"
                     loading={isLoadingDataProduct}
                     onClick={handleOpen}
                 >
-                    {t('Add Data Output')}
+                    {t('Add Technical Asset')}
                 </Button>
             </Flex>
 
             <Searchbar
-                placeholder={t('Search data outputs by name or namespace')}
+                placeholder={t('Search technical assets by name or namespace')}
                 formItemProps={{ initialValue: '', className: styles.searchBar }}
                 form={searchForm}
             />
@@ -92,7 +92,9 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
                 {filteredDataOutputs.length === 0 && (
                     <div className={styles.emptyState}>
                         <Typography.Text type="secondary">
-                            {searchTerm ? t('No data outputs found matching your search') : t('No data outputs found')}
+                            {searchTerm
+                                ? t('No technical assets found matching your search')
+                                : t('No technical assets found')}
                         </Typography.Text>
                     </div>
                 )}

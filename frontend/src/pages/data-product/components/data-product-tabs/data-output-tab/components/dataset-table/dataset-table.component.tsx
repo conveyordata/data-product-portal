@@ -55,16 +55,16 @@ export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDat
     return (
         <Flex vertical className={`${styles.container} ${isDragActive ? styles.dragActive : ''}`}>
             <Flex justify="space-between" align="center" className={styles.header}>
-                <Typography.Title level={4}>{t('Datasets')}</Typography.Title>
+                <Typography.Title level={4}>{t('Output Ports')}</Typography.Title>
                 <Link to={`${ApplicationPaths.DatasetNew}?dataProductId=${dataProductId}`}>
                     <Button disabled={!canCreateDataset} type="primary" loading={isLoadingDataProduct}>
-                        {t('Add Dataset')}
+                        {t('Add Output Port')}
                     </Button>
                 </Link>
             </Flex>
 
             <Searchbar
-                placeholder={t('Search datasets by name or description')}
+                placeholder={t('Search output ports by name or description')}
                 formItemProps={{ initialValue: '', className: styles.searchBar }}
                 form={searchForm}
             />

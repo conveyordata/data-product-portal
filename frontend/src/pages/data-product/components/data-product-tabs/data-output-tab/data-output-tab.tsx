@@ -26,7 +26,7 @@ export function DataOutputTab({ dataProductId }: Props) {
     };
 
     return (
-        <Flex vertical className={styles.container}>
+        <Flex vertical>
             <Flex>
                 <DatasetTable
                     datasets={dataProduct?.datasets ?? []}
