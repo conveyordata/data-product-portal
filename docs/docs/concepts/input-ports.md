@@ -7,7 +7,7 @@ sidebar_position: 4
 # 🔷 Input Ports
 
 **Input Ports** are logical counterparts of **Output Ports**.
-Their function is to record and facilitate access to the data of other products. 
+Their function is to record and facilitate access to the data of other products.
 
 ## 🧩 What’s in an Input Port?
 

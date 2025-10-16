@@ -27,7 +27,7 @@ An Output Port might contain:
 
 ## 💎 Quality Control
 
-Data Contracts can be put in place on an Output Port. 
+Data Contracts can be put in place on an Output Port.
 This offers an additional way for data owners to communicate expectations to their consumers.
 
 The possibility exists for a Data Product to offer Output Ports that expose similar data, but with different quality guarantees.

@@ -10,7 +10,7 @@ sidebar_position: 1
 Their goal is to facilitate and simplify data management.
 
 A Data Product can be thought of as a container that brings together people, technology and data.
-It is governed and maintained by a group of people, who are responsible for assuring the quality of the product. 
+It is governed and maintained by a group of people, who are responsible for assuring the quality of the product.
 A Data Product can consume data from other products through Input Ports, and expose data to other products via Output Ports.
 Data does not exist in a void, but it is tied to certain storage infrastructure, and transformed through data pipelines defined in code.
 These technical aspects are also governed by the Data Product concept.
