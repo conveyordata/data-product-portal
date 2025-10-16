@@ -1,15 +1,11 @@
 import Icon, { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Badge, Button, Card, Flex, Popconfirm, Tag, Typography } from 'antd';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useModal } from '@/hooks/use-modal';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import {
-    useRemoveDatasetFromDataOutputMutation,
-    useRequestDatasetAccessForDataOutputMutation,
-} from '@/store/features/data-outputs/data-outputs-api-slice.ts';
-import { useApproveDataOutputLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
+import { useRemoveDatasetFromDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useGetDatasetByIdQuery, useRemoveDatasetMutation } from '@/store/features/datasets/datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
@@ -20,14 +16,10 @@ import styles from './dataset-card.module.scss';
 
 type Props = {
     datasetId: string;
-    isDragActive?: boolean;
-    draggedDataOutputId?: string | null;
 };
 
-export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Props) {
+export function DatasetCard({ datasetId }: Props) {
     const { t } = useTranslation();
-    const [dragOver, setDragOver] = useState(false);
-    const [invalidDrop, setInvalidDrop] = useState(false);
     const { isVisible, handleOpen, handleClose } = useModal();
 
     const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId);
@@ -38,8 +30,6 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
 
     const [removeDataset, { isLoading: isRemoving }] = useRemoveDatasetMutation();
     const [unlinkDataset] = useRemoveDatasetFromDataOutputMutation();
-    const [linkDataset] = useRequestDatasetAccessForDataOutputMutation();
-    const [approveLink] = useApproveDataOutputLinkMutation();
 
     const handleRemoveDataset = useCallback(async () => {
         if (!dataset) return;
@@ -74,67 +64,6 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
         [unlinkDataset, dataset, t],
     );
 
-    const handleDragOver = (event: React.DragEvent) => {
-        event.preventDefault();
-        // Check if the dragged data output is already linked to this dataset
-        if (draggedDataOutputId && dataset) {
-            const isAlreadyLinked = dataset.data_output_links?.some(
-                (link) => link.data_output.id === draggedDataOutputId,
-            );
-
-            if (isAlreadyLinked) {
-                event.dataTransfer.dropEffect = 'none';
-                setInvalidDrop(true);
-                setDragOver(false);
-                return;
-            }
-        }
-
-        event.dataTransfer.dropEffect = 'copy';
-        setInvalidDrop(false);
-        setDragOver(true);
-    };
-
-    const handleDragLeave = () => {
-        setDragOver(false);
-        setInvalidDrop(false);
-    };
-
-    const handleDrop = async (event: React.DragEvent) => {
-        event.preventDefault();
-        setDragOver(false);
-
-        try {
-            const dragData = JSON.parse(event.dataTransfer.getData('text/plain'));
-            if (dragData.type === 'data-output' && dataset) {
-                // Check if already linked
-                const isAlreadyLinked = dataset.data_output_links?.some((link) => link.data_output.id === dragData.id);
-
-                if (isAlreadyLinked) {
-                    dispatchMessage({
-                        content: t('Data output {{name}} is already linked to this dataset', { name: dragData.name }),
-                        type: 'warning',
-                    });
-                    return;
-                }
-
-                const result = await linkDataset({ dataOutputId: dragData.id, datasetId: dataset.id }).unwrap();
-                dispatchMessage({
-                    content: t('Data output {{name}} linked to dataset successfully', { name: dragData.name }),
-                    type: 'success',
-                });
-                // TODO make this dependable on access rights
-                await approveLink({ id: result.id, data_output_id: dragData.id, dataset_id: dataset.id }).unwrap();
-            }
-        } catch (error) {
-            console.error('Failed to link data output to dataset:', error);
-            dispatchMessage({
-                content: t('Failed to link data output to dataset'),
-                type: 'error',
-            });
-        }
-    };
-
     if (isLoading || !dataset) {
         return <Card loading={true} className={styles.card} />;
     }
@@ -143,12 +72,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
 
     return (
         <>
-            <Card
-                className={`${styles.card} ${isDragActive ? styles.dropZone : ''} ${dragOver ? styles.dragOver : ''} ${invalidDrop ? styles.invalidDrop : ''}`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-            >
+            <Card className={styles.card}>
                 <Flex vertical gap={12}>
                     <Flex justify="space-between" align="flex-start">
                         <div>

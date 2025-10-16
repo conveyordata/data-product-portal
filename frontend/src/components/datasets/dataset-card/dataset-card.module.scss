@@ -1,30 +1,12 @@
 @use '@/styles/globals';
 
 .card {
-    margin-bottom: globals.$spacing-m;
+    width: 100%;
     border-radius: 8px;
-    transition: all 0.2s ease;
+    transition: box-shadow 0.2s ease;
 
     &:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    &.dropZone {
-        border: 2px dashed transparent;
-        background-color: rgba(24, 144, 255, 0.02);
-    }
-
-    &.dragOver {
-        border: 2px dashed #1890ff;
-        background-color: rgba(24, 144, 255, 0.1);
-        transform: scale(1.02);
-        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
-    }
-
-    &.invalidDrop {
-        border: 2px dashed #ff4d4f;
-        background-color: rgba(255, 77, 79, 0.1);
-        cursor: not-allowed;
     }
 }
 

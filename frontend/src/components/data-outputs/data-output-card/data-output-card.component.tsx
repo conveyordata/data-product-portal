@@ -20,11 +20,9 @@ import styles from './data-output-card.module.scss';
 type Props = {
     dataOutput: DataOutputsGetContract[0];
     dataProductId: string;
-    onDragStart?: () => void;
-    onDragEnd?: () => void;
 };
 
-export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragEnd }: Props) {
+export function DataOutputCard({ dataOutput, dataProductId }: Props) {
     const { t } = useTranslation();
 
     const { data: deleteAccess } = useCheckAccessQuery({
@@ -66,27 +64,10 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
         [unlinkDataset, dataOutput.id, t],
     );
 
-    const handleDragStart = (event: React.DragEvent) => {
-        event.dataTransfer.setData(
-            'text/plain',
-            JSON.stringify({
-                type: 'data-output',
-                id: dataOutput.id,
-                name: dataOutput.name,
-            }),
-        );
-        // 2️⃣ Allow copy or move
-        event.dataTransfer.effectAllowed = 'copyMove';
-
-        // 3️⃣ (Optional) add a CSS class or visual hint
-        event.currentTarget.classList.add('dragging');
-        onDragStart?.();
-    };
-
     const canRemove = deleteAccess?.allowed ?? false;
 
     return (
-        <Card className={styles.card} draggable onDragStart={handleDragStart} onDragEnd={onDragEnd}>
+        <Card className={styles.card}>
             <Flex vertical gap={12}>
                 <Flex justify="space-between" align="flex-start">
                     <Flex gap={12} align="flex-start">
