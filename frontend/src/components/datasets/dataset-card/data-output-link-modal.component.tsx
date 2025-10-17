@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Searchbar } from '@/components/form';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
+import { DATA_OUTPUTS_TABLE_PAGINATION } from '@/constants/table.constants';
+import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useApproveDataOutputLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
@@ -24,6 +26,7 @@ type Props = {
 export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, existingLinks }: Props) {
     const { t } = useTranslation();
     const [selectedOutputs, setSelectedOutputs] = useState<Set<string>>(new Set());
+
     const [searchForm] = Form.useForm<SearchForm>();
     const searchTerm = Form.useWatch('search', searchForm);
     const { data: dataset } = useGetDatasetByIdQuery(datasetId);
@@ -51,6 +54,10 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
                 output.namespace.toLowerCase().includes(searchTerm.toLowerCase()),
         );
     }, [availableDataOutputs, searchTerm]);
+
+    const { pagination, handleCurrentPageChange } = useTablePagination(filteredDataOutputs, {
+        initialPagination: DATA_OUTPUTS_TABLE_PAGINATION,
+    });
 
     const handleOutputToggle = (outputId: string) => {
         setSelectedOutputs((prev) => {
@@ -142,6 +149,18 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
                 <div className={styles.listContainer}>
                     <List
                         dataSource={filteredDataOutputs}
+                        pagination={{
+                            ...pagination,
+                            size: 'small',
+                            className: styles.pagination,
+                            showTotal: (total: number, range: [number, number]) =>
+                                t('Showing {{range0}}-{{range1}} of {{total}} technical assets', {
+                                    range0: range[0],
+                                    range1: range[1],
+                                    total: total,
+                                }),
+                            onChange: handleCurrentPageChange,
+                        }}
                         locale={{ emptyText: t('No technical assets available') }}
                         renderItem={(output) => (
                             <List.Item className={styles.listItem}>
