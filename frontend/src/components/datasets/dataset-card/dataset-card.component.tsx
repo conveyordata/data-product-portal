@@ -1,4 +1,4 @@
-import Icon, { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import Icon, { DeleteOutlined } from '@ant-design/icons';
 import { Badge, Button, Card, Flex, Popconfirm, Tag, Typography } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
