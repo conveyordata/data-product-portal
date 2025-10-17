@@ -1097,22 +1097,6 @@ files = [
 ]
 
 [[package]]
-name = "jeepney"
-version = "0.9.0"
-description = "Low-level, pure Python DBus protocol wrapper."
-optional = false
-python-versions = ">=3.7"
-groups = ["main"]
-files = [
-    {file = "jeepney-0.9.0-py3-none-any.whl", hash = "sha256:97e5714520c16fc0a45695e5365a2e11b81ea79bba796e26f9f1d178cb182683"},
-    {file = "jeepney-0.9.0.tar.gz", hash = "sha256:cf0e9e845622b81e4a28df94c40345400256ec608d0e55bb8a3feaa9163f5732"},
-]
-
-[package.extras]
-test = ["async-timeout ; python_version < \"3.11\"", "pytest", "pytest-asyncio (>=0.17)", "pytest-trio", "testpath", "trio"]
-trio = ["trio"]
-
-[[package]]
 name = "jinja2"
 version = "3.1.6"
 description = "A very fast and expressive template engine."
@@ -1605,14 +1589,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "6.7.7"
+version = "6.7.8"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "posthog-6.7.7-py3-none-any.whl", hash = "sha256:bf8187ce8e6da33d5c122ee03a759efa8f181630380260526294454dab0c8bab"},
-    {file = "posthog-6.7.7.tar.gz", hash = "sha256:ffb7bac388f66e5c9e2e3d6028572386ad3c98bba7a9a4669db05b10ac23357a"},
+    {file = "posthog-6.7.8-py3-none-any.whl", hash = "sha256:842ccb518f925425f714bae29e4ac36a059a8948c45f6ed155543ca7386d554b"},
+    {file = "posthog-6.7.8.tar.gz", hash = "sha256:999e65134571827061332f1f311df9b24730b386c6eabe0057bf768e514d87a8"},
 ]
 
 [package.dependencies]
@@ -2425,22 +2409,6 @@ botocore = ">=1.37.4,<2.0a.0"
 crt = ["botocore[crt] (>=1.37.4,<2.0a.0)"]
 
 [[package]]
-name = "secretstorage"
-version = "3.4.0"
-description = "Python bindings to FreeDesktop.org Secret Service API"
-optional = false
-python-versions = ">=3.10"
-groups = ["main"]
-files = [
-    {file = "secretstorage-3.4.0-py3-none-any.whl", hash = "sha256:0e3b6265c2c63509fb7415717607e4b2c9ab767b7f344a57473b779ca13bd02e"},
-    {file = "secretstorage-3.4.0.tar.gz", hash = "sha256:c46e216d6815aff8a8a18706a2fbfd8d53fcbb0dce99301881687a1b0289ef7c"},
-]
-
-[package.dependencies]
-cryptography = ">=2.0"
-jeepney = ">=0.6"
-
-[[package]]
 name = "shellingham"
 version = "1.5.4"
 description = "Tool to Detect Surrounding Shell"
@@ -2782,4 +2750,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "b865a960287b3220b3668bdd5c95914f3546eb96309bb3005bd80dc6721a6401"
+content-hash = "d6c49d83078ee6c8e9d1eba70a8bac05bf9436ee2e6ff3ac0f3b67433e00e85b"
