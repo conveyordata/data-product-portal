@@ -22,7 +22,9 @@ import { useDebouncedCallback } from 'use-debounce';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
+import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
+import { useGetAllDataProductsQuery } from '@/store/features/data-products/data-products-api-slice';
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
@@ -43,16 +45,17 @@ import {
     type DatasetCreateRequest,
     type DatasetUpdateRequest,
 } from '@/types/dataset';
-import { ApplicationPaths, createDatasetIdPath } from '@/types/navigation.ts';
+import { ApplicationPaths, createDataOutputIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
-
 import styles from './dataset-form.module.scss';
 
 type Props = {
     mode: 'create' | 'edit';
     datasetId?: string;
+    dataProductId?: string;
+    dataOutputId?: string;
 };
 
 const { TextArea } = Input;
@@ -88,7 +91,7 @@ const getAccessTypeOptions = (t: TFunction) => {
     ];
 };
 
-export function DatasetForm({ mode, datasetId }: Props) {
+export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
@@ -96,10 +99,12 @@ export function DatasetForm({ mode, datasetId }: Props) {
         skip: mode === 'create' || !datasetId,
     });
     const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
+    const { data: dataProducts = [], isFetching: isFetchingDataProducts } = useGetAllDataProductsQuery();
     const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
+    const [requestDatasetAccessForDataOutput] = useRequestDatasetAccessForDataOutputMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
     const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
     const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDatasetNamespaceSuggestionQuery();
@@ -136,6 +141,8 @@ export function DatasetForm({ mode, datasetId }: Props) {
 
     const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
+
+    const dataProductSelectOptions = dataProducts.map((dp) => ({ label: dp.name, value: dp.id }));
     const userSelectOptions = users.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
         value: owner.id,
@@ -148,6 +155,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 const request: DatasetCreateRequest = {
                     name: values.name,
                     namespace: values.namespace,
+                    data_product_id: values.data_product_id,
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
@@ -158,7 +166,16 @@ export function DatasetForm({ mode, datasetId }: Props) {
                 const response = await createDataset(request).unwrap();
                 dispatchMessage({ content: t('Dataset created successfully'), type: 'success' });
 
-                navigate(createDatasetIdPath(response.id));
+                // If dataProductId was provided, navigate back to the data product page
+                if (dataOutputId && dataProductId) {
+                    await requestDatasetAccessForDataOutput({
+                        dataOutputId: dataOutputId,
+                        datasetId: response.id,
+                    }).unwrap();
+                    navigate(createDataOutputIdPath(dataOutputId, dataProductId));
+                } else {
+                    navigate(createDatasetIdPath(response.id));
+                }
             } else if (mode === 'edit' && datasetId) {
                 if (!canEdit) {
                     dispatchMessage({ content: t('You are not allowed to edit this dataset'), type: 'error' });
@@ -169,6 +186,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     name: values.name,
                     namespace: values.namespace,
                     description: values.description,
+                    data_product_id: values.data_product_id,
                     tag_ids: values.tag_ids,
                     domain_id: values.domain_id,
                     lifecycle_id: values.lifecycle_id,
@@ -192,6 +210,8 @@ export function DatasetForm({ mode, datasetId }: Props) {
         form.resetFields();
         if (mode === 'edit' && datasetId) {
             navigate(createDatasetIdPath(datasetId));
+        } else if (dataOutputId && dataProductId) {
+            navigate(createDataOutputIdPath(dataOutputId, dataProductId));
         } else {
             navigate(ApplicationPaths.Datasets);
         }
@@ -252,6 +272,7 @@ export function DatasetForm({ mode, datasetId }: Props) {
     const initialValues = {
         name: currentDataset?.name,
         namespace: currentDataset?.namespace,
+        data_product_id: dataProductId || currentDataset?.data_product_id,
         description: currentDataset?.description,
         access_type: mode === 'create' ? DatasetAccess.Public : currentDataset?.access_type,
         lifecycle_id: currentDataset?.lifecycle.id,
@@ -316,6 +337,25 @@ export function DatasetForm({ mode, datasetId }: Props) {
                     disabled={mode !== 'create'}
                     tokenSeparators={[',']}
                     allowClear
+                />
+            </Form.Item>
+            <Form.Item<DatasetCreateFormSchema>
+                name={'data_product_id'}
+                label={t('Data Product Parent')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please select the data product to which this dataset belongs'),
+                    },
+                ]}
+            >
+                <Select
+                    disabled={mode !== 'create' || !!dataProductId}
+                    loading={isFetchingDataProducts}
+                    options={dataProductSelectOptions}
+                    filterOption={selectFilterOptionByLabelAndValue}
+                    allowClear
+                    showSearch
                 />
             </Form.Item>
             <Form.Item<DatasetCreateFormSchema>

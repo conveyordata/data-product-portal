@@ -4,6 +4,7 @@ from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset
 from app.datasets.status import DatasetStatus
 
+from .data_product import DataProductFactory
 from .domain import DomainFactory
 
 
@@ -20,3 +21,4 @@ class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
     access_type = DatasetAccessType.PUBLIC.value
     domain = factory.SubFactory(DomainFactory)
     usage = factory.Faker("word")
+    data_product = factory.SubFactory(DataProductFactory)

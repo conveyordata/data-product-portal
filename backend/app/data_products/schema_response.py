@@ -46,6 +46,7 @@ class DataProductGet(BaseDataProductGet):
     # Nested schemas
     dataset_links: list[DatasetLinks]
     data_outputs: list[DataOutputLinks]
+    datasets: list[Dataset]
     rolled_up_tags: set[Tag]
 
 

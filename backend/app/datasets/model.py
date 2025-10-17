@@ -17,6 +17,7 @@ from app.tags.model import Tag, tag_dataset_table
 if TYPE_CHECKING:
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
     from app.data_product_settings.model import DataProductSettingValue
+    from app.data_products.model import DataProduct
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.role_assignments.dataset.model import DatasetRoleAssignment
 
@@ -38,6 +39,7 @@ class Dataset(Base, BaseORM):
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
     domain_id: Mapped[UUID] = Column(ForeignKey("domains.id"))
+    data_product_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_products.id"))
 
     # Relationships
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
@@ -74,6 +76,9 @@ class Dataset(Base, BaseORM):
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="datasets", lazy="joined"
     )
+    data_product: Mapped["DataProduct"] = relationship(
+        back_populates="datasets", lazy="joined"
+    )
     domain: Mapped["Domain"] = relationship(back_populates="datasets", lazy="joined")
 
     @property
@@ -84,6 +89,10 @@ class Dataset(Base, BaseORM):
             if link.status == DecisionStatus.APPROVED
         ]
         return len(accepted_product_links)
+
+    @property
+    def data_product_name(self) -> str:
+        return self.data_product.name
 
 
 def ensure_dataset_exists(dataset_id: UUID, db: Session, **kwargs) -> Dataset:

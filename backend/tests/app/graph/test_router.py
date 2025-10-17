@@ -6,7 +6,7 @@ ENDPOINT = "/api/graph"
 class TestGraphRouter:
     def test_get_graph_data(self, client):
         data_product = DataProductFactory()
-        DatasetFactory()
+        DatasetFactory(data_product=data_product)
         DataOutputFactory(owner=data_product)
         response = client.get(f"{ENDPOINT}")
         assert len(response.json()["edges"]) == 1
