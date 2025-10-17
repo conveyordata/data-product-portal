@@ -26,7 +26,6 @@ const config: Config = {
   projectName: 'data-product-portal', // Usually your repo name.
 
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -36,7 +35,10 @@ const config: Config = {
     locales: ['en'],
   },
   markdown: {
-    mermaid: true
+    mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    }
   },
   themes: ['@docusaurus/theme-mermaid'],
   presets: [
