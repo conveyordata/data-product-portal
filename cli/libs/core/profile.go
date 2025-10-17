@@ -74,8 +74,20 @@ func InitConfig() {
 
 	writeViper()
 }
-func EnsureValidConfig(cmd *cobra.Command, args []string) {
-	if cmd.Use != "configure" && !CurrentConfigValid() {
+
+func isCompletionCommand(cmd *cobra.Command) bool {
+	if cmd.Name() == "completion" {
+		return true
+	}
+	if cmd.Parent() != nil {
+		return cmd.Parent().Name() == "completion"
+	}
+	return false
+}
+
+func EnsureValidConfig(cmd *cobra.Command, _ []string) {
+	println(cmd.Parent().Use)
+	if cmd.Name() != "configure" && !isCompletionCommand(cmd) && !CurrentConfigValid() {
 		logger.Errorf("Please set up a default configuration with at least a single OIDC host, run portal auth configure -h for extra information")
 		os.Exit(1)
 	}
