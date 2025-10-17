@@ -17,3 +17,9 @@ export const HISTORY_PAGINATION: TablePaginationConfig = {
     pageSize: 7,
     total: 0,
 };
+
+export const DATA_OUTPUTS_TABLE_PAGINATION: TablePaginationConfig = {
+    current: 1,
+    pageSize: 4,
+    total: 0,
+};

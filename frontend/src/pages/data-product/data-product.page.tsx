@@ -1,7 +1,7 @@
-import Icon, { SettingOutlined } from '@ant-design/icons';
+import Icon, { LeftOutlined, RightOutlined, SettingOutlined } from '@ant-design/icons';
 import { Flex, Space, Typography } from 'antd';
 import clsx from 'clsx';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 
@@ -26,6 +26,7 @@ export function DataProduct() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { dataProductId = '' } = useParams();
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     const { data: dataProduct, isLoading } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
     const { data: edit_access } = useCheckAccessQuery(
@@ -69,7 +70,7 @@ export function DataProduct() {
 
     return (
         <Flex className={styles.dataProductContainer}>
-            <Flex vertical className={styles.content}>
+            <Flex vertical className={clsx(styles.content, { [styles.contentExpanded]: sidebarCollapsed })}>
                 <Flex className={styles.headerContainer}>
                     <Space className={styles.header}>
                         <Icon
@@ -110,11 +111,36 @@ export function DataProduct() {
                     </Flex>
                 </Flex>
             </Flex>
+
             {/* Sidebar */}
-            <Flex vertical className={styles.sidebar}>
-                <DataProductActions dataProductId={dataProductId} />
-                {/*  Data product owners overview */}
-                <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
+            <Flex vertical className={clsx(styles.sidebar, { [styles.sidebarCollapsed]: sidebarCollapsed })}>
+                {!sidebarCollapsed ? (
+                    <>
+                        <DataProductActions dataProductId={dataProductId} />
+                        <div className={styles.ownersSection}>
+                            <div className={styles.sidebarToggle}>
+                                <CircleIconButton
+                                    icon={<RightOutlined />}
+                                    tooltip={t('Hide sidebar')}
+                                    onClick={() => setSidebarCollapsed(true)}
+                                />
+                            </div>
+                            <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
+                        </div>
+                    </>
+                ) : (
+                    <div className={styles.collapsedSidebar}>
+                        <div className={styles.spacer} />
+                        <div className={styles.expandButton}>
+                            <CircleIconButton
+                                icon={<LeftOutlined />}
+                                tooltip={t('Show sidebar')}
+                                onClick={() => setSidebarCollapsed(false)}
+                            />
+                        </div>
+                        <UserAccessOverview users={dataProductOwners} title="" showAvatarsOnly={true} />
+                    </div>
+                )}
             </Flex>
         </Flex>
     );

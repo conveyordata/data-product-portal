@@ -3,4 +3,6 @@ export interface DataOutputDatasetAccessRequest {
     datasetId: string;
 }
 
-export type DataOutputDatasetAccessResponse = object;
+export type DataOutputDatasetAccessResponse = {
+    id: string;
+};

@@ -1,0 +1,49 @@
+@use '@/styles/globals';
+
+.listContainer {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.checkbox {
+    margin-left: globals.$spacing-m;
+}
+
+.container {
+    margin-bottom: globals.$spacing-m;
+}
+
+.listItem {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background-color: #fafafa;
+    }
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: globals.$color-text;
+}
+
+.description {
+    font-size: 13px;
+    line-height: 1.4;
+    margin-top: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: rgba(0, 0, 0, 0.65);
+}

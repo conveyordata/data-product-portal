@@ -84,13 +84,13 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 children: <UsageTab dataProductId={dataProductId} />,
             },
             {
-                label: t('Input Datasets'),
+                label: t('Input Data'),
                 key: TabKeys.Datasets,
                 icon: <Icon component={datasetOutlineIcon} />,
                 children: <DatasetTab dataProductId={dataProductId} />,
             },
             {
-                label: t('Data Outputs'),
+                label: t('Output Ports'),
                 key: TabKeys.DataOutputs,
                 icon: <Icon component={dataOutputOutlineIcon} />,
                 children: <DataOutputTab dataProductId={dataProductId} />,

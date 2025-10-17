@@ -3,6 +3,11 @@
 .data-product-container {
     @extend .container;
     gap: globals.$column-gap-xl;
+    position: relative;
+
+    &:has(.sidebarCollapsed) {
+        gap: 0;
+    }
 }
 
 .header-container {
@@ -29,13 +34,31 @@
 
 .content {
     @extend .container;
-
     .overview {
         flex: 1;
         gap: globals.$column-gap-regular;
         justify-content: flex-start;
         align-items: flex-start;
     }
+
+    flex: 1;
+    transition: all 0.3s ease;
+
+    &.contentExpanded {
+        margin-right: 60px; // Space for collapsed sidebar
+    }
+}
+
+.ownersSection {
+    position: relative;
+    flex: 1;
+}
+
+.sidebarToggle {
+    position: absolute;
+    top: -12px;
+    right: -20px;
+    z-index: 10;
 }
 
 .sidebar {
@@ -44,6 +67,47 @@
     gap: globals.$column-gap-xl;
     justify-content: flex-start;
     align-items: flex-start;
+    transition: all 0.3s ease;
+
+    &.sidebarCollapsed {
+        flex: 0;
+        min-width: 60px;
+        width: 60px;
+        overflow: visible;
+    }
+}
+
+.collapsedSidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.spacer {
+    height: calc(#{globals.$column-gap-xl} + var(--data-product-actions-height, 200px));
+}
+
+.expandButton {
+    margin-bottom: 12px;
+    align-self: center;
+}
+
+.avatarList {
+    display: flex;
+    flex-direction: column;
+    gap: globals.$spacing-s;
+    align-items: center;
+    width: 100%;
+}
+
+.avatarWrapper {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .main-content {

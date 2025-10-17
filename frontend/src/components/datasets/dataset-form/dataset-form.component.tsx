@@ -21,6 +21,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
@@ -45,7 +46,12 @@ import {
     type DatasetCreateRequest,
     type DatasetUpdateRequest,
 } from '@/types/dataset';
-import { ApplicationPaths, createDataOutputIdPath, createDatasetIdPath } from '@/types/navigation.ts';
+import {
+    ApplicationPaths,
+    createDataOutputIdPath,
+    createDataProductIdPath,
+    createDatasetIdPath,
+} from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
@@ -174,7 +180,11 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                     }).unwrap();
                     navigate(createDataOutputIdPath(dataOutputId, dataProductId));
                 } else {
-                    navigate(createDatasetIdPath(response.id));
+                    if (dataProductId) {
+                        navigate(createDataProductIdPath(dataProductId, TabKeys.DataOutputs));
+                    } else {
+                        navigate(createDatasetIdPath(response.id));
+                    }
                 }
             } else if (mode === 'edit' && datasetId) {
                 if (!canEdit) {

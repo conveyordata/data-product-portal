@@ -19,7 +19,12 @@ export function AddDataOutputPopup({ onClose, isOpen, dataProductId }: Props) {
     const ref = useRef<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration>>(null);
 
     return (
-        <DataProductDataOutputLinkPopup onClose={onClose} isOpen={isOpen} title={t('Add Data Output')} formRef={ref}>
+        <DataProductDataOutputLinkPopup
+            onClose={onClose}
+            isOpen={isOpen}
+            title={t('Add Technical Asset')}
+            formRef={ref}
+        >
             <DataOutputForm
                 formRef={ref}
                 modalCallbackOnSubmit={onClose}
