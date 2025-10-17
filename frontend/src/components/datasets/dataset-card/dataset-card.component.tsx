@@ -27,6 +27,10 @@ export function DatasetCard({ datasetId }: Props) {
         resource: datasetId,
         action: AuthorizationAction.DATASET__DELETE,
     });
+    const { data: linkAccess } = useCheckAccessQuery({
+        resource: dataset?.data_product_id,
+        action: AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
+    });
 
     const [removeDataset, { isLoading: isRemoving }] = useRemoveDatasetMutation();
     const [unlinkDataset] = useRemoveDatasetFromDataOutputMutation();
@@ -68,6 +72,7 @@ export function DatasetCard({ datasetId }: Props) {
         return <Card loading={true} className={styles.card} />;
     }
 
+    const canLink = linkAccess?.allowed ?? false;
     const canRemove = deleteAccess?.allowed ?? false;
 
     return (
@@ -87,12 +92,14 @@ export function DatasetCard({ datasetId }: Props) {
                         </div>
                         <Flex gap={4}>
                             <Button
-                                type="text"
-                                size="small"
-                                icon={<PlusOutlined />}
                                 onClick={handleOpen}
-                                title={t('Link Data Outputs')}
-                            />
+                                loading={isRemoving}
+                                disabled={!canLink}
+                                type="link"
+                                size="small"
+                            >
+                                {t('Link Technical Assets')}
+                            </Button>
                             <Popconfirm
                                 title={t('Remove')}
                                 description={t(
