@@ -1,5 +1,5 @@
-import Icon, { DeleteOutlined } from '@ant-design/icons';
-import { Badge, Button, Card, Flex, Popconfirm, Tag, Typography } from 'antd';
+import { DownOutlined, RightOutlined } from '@ant-design/icons';
+import { Badge, Button, Card, Flex, List, Popconfirm, Typography } from 'antd';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -28,6 +28,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
     const { t } = useTranslation();
     const [dragOver, setDragOver] = useState(false);
     const [invalidDrop, setInvalidDrop] = useState(false);
+    const [expanded, setExpanded] = useState(false);
     const { isVisible, handleOpen, handleClose } = useModal();
 
     const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId);
@@ -139,6 +140,15 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
         }
     };
 
+    const handleMouseDown = (event: React.MouseEvent) => {
+        // Prevent drag start on interactive elements
+        const target = event.target as HTMLElement;
+        if (target.closest('button, a, .ant-btn, [role="button"]')) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    };
+
     if (isLoading || !dataset) {
         return <Card loading={true} className={styles.card} />;
     }
@@ -153,6 +163,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onMouseDown={handleMouseDown}
             >
                 <Flex vertical gap={12}>
                     <Flex justify="space-between" align="flex-start">
@@ -198,26 +209,57 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                         <Badge status={getBadgeStatus(dataset.status)} text={getStatusLabel(t, dataset.status)} />
 
                         {dataset.data_output_links && dataset.data_output_links.length > 0 && (
-                            <Flex wrap gap={4}>
-                                {dataset.data_output_links.map((link) => (
-                                    <Tag
-                                        key={link.data_output.id}
-                                        color="blue"
-                                        closeIcon={<Icon component={DeleteOutlined} />}
-                                        closable
-                                        onClose={(e) => {
-                                            e.preventDefault();
-                                            handleRemoveDataOutputLink(link.data_output.id);
-                                        }}
-                                    >
-                                        <Badge
-                                            className={styles.badge}
-                                            status={getDecisionStatusBadgeStatus(link.status)}
+                            <div className={styles.linkedAssetsSection}>
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    onClick={() => setExpanded(!expanded)}
+                                    className={styles.expandButton}
+                                    icon={expanded ? <DownOutlined /> : <RightOutlined />}
+                                >
+                                    {t('{{count}} linked technical assets', {
+                                        count: dataset.data_output_links.length,
+                                    })}
+                                </Button>
+
+                                {expanded && (
+                                    <div className={styles.linkedAssetsList}>
+                                        <List
+                                            size="small"
+                                            dataSource={dataset.data_output_links}
+                                            renderItem={(link) => (
+                                                <List.Item className={styles.linkedAssetItem}>
+                                                    <Flex
+                                                        justify="space-between"
+                                                        align="center"
+                                                        style={{ width: '100%' }}
+                                                    >
+                                                        <Flex align="center" gap={8}>
+                                                            <Badge
+                                                                status={getDecisionStatusBadgeStatus(link.status)}
+                                                                size="small"
+                                                            />
+                                                            <Typography.Text className={styles.assetName}>
+                                                                {link.data_output.name}
+                                                            </Typography.Text>
+                                                        </Flex>
+                                                        <Button
+                                                            type="text"
+                                                            size="small"
+                                                            danger
+                                                            onClick={() =>
+                                                                handleRemoveDataOutputLink(link.data_output.id)
+                                                            }
+                                                        >
+                                                            {t('Delete')}
+                                                        </Button>
+                                                    </Flex>
+                                                </List.Item>
+                                            )}
                                         />
-                                        {link.data_output.name}
-                                    </Tag>
-                                ))}
-                            </Flex>
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </Flex>
                 </Flex>

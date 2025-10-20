@@ -11,6 +11,18 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
+    // Prevent dragging on interactive elements
+    button,
+    a,
+    .ant-btn,
+    [role="button"] {
+        -webkit-user-drag: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+        pointer-events: auto;
+    }
+
     &.dropZone {
         border: 2px dashed transparent;
         background-color: rgba(24, 144, 255, 0.02);
@@ -70,4 +82,41 @@
 
 .badge {
     margin-right: globals.$spacing-s;
+}
+
+.linkedAssetsSection {
+    margin-top: 8px;
+}
+
+.expandButton {
+    padding: 4px 8px;
+    height: auto;
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.65);
+
+    &:hover {
+        color: globals.$primary-color;
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+}
+
+.linkedAssetsList {
+    margin-top: 8px;
+    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+    background-color: #fafafa;
+}
+
+.linkedAssetItem {
+    padding: 8px 12px !important;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.assetName {
+    font-size: 13px;
+    font-weight: 500;
 }

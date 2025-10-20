@@ -12,3 +12,15 @@
 .pagination-gap {
     gap: globals.$spacing-m;
 }
+
+.container {
+    height: 100%;
+    width: 100%;
+
+    > div {
+        align-items: flex-start;
+        height: 100%;
+        width: 100%;
+        min-width: 0; // Prevent flex items from overflowing
+    }
+}

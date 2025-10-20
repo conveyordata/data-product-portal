@@ -2,9 +2,14 @@
 
 .card {
     width: 100%;
-    border-radius: 8px;
-    transition: box-shadow 0.2s ease;
+    transition: all 0.2s ease;
     cursor: grab;
+    position: relative;
+
+    // Remove Ant Design's default card body padding
+    :global(.ant-card-body) {
+        padding: 0;
+    }
 
     &:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -12,6 +17,32 @@
 
     &:active {
         cursor: grabbing;
+    }
+
+    &.dragging {
+        opacity: 0.6;
+        // transform: rotate(5deg) scale(0.95);
+        cursor: grabbing;
+        z-index: 1000;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+
+        .dragHandle {
+            color: rgba(0, 0, 0, 0.65);
+        }
+    }
+
+    &[draggable="true"] {
+        user-select: none;
+
+        // Hide scrollbars during drag
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
     }
 }
 
@@ -36,9 +67,9 @@
         color: inherit;
         text-decoration: none;
 
-        // &:hover {
-        //     // color: globals.$color-primary;
-        // }
+        &:hover {
+            color: globals.$primary-color;
+        }
     }
 }
 
@@ -52,4 +83,64 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.expandButton {
+    padding: globals.$spacing-s;
+    height: auto;
+    color: rgba(0, 0, 0, 0.65);
+
+    &:hover {
+        color: globals.$primary-color;
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+}
+
+.linkedDatasetsList {
+    margin-top: globals.$spacing-s;
+    border: 1px solid #f0f0f0;
+    border-radius: globals.$border-radius;
+    background-color: #fafafa;
+}
+
+.linkedDatasetItem {
+    padding: globals.$spacing-xs globals.$spacing-s !important;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.datasetName {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.dragHandle {
+    color: rgba(0, 0, 0, 0.25);
+    font-size: 18px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    flex-shrink: 0;
+    margin-right: 12px;
+    align-self: stretch;
+
+    &:hover {
+        color: rgba(0, 0, 0, 0.45);
+    }
+}
+
+.cardContent {
+    display: flex;
+    position: relative;
+    padding: globals.$spacing-m;
+}
+
+.mainContent {
+    flex: 1;
+    min-width: 0;
 }

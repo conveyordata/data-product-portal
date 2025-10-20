@@ -1,19 +1,21 @@
-import Icon, { DeleteOutlined } from '@ant-design/icons';
-import { Badge, Button, Card, Flex, Popconfirm, Tag, Typography } from 'antd';
-import { useCallback } from 'react';
+import { DownOutlined, HolderOutlined, RightOutlined } from '@ant-design/icons';
+import { Badge, Button, Card, Flex, List, Popconfirm, Typography } from 'antd';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { DataOutputSubtitle } from '@/components/data-outputs/data-output-subtitle/data-output-subtitle.component';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useRemoveDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
+import {
+    useGetDataOutputByIdQuery,
+    useRemoveDataOutputMutation,
+} from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useRemoveDataOutputDatasetLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DataOutputsGetContract } from '@/types/data-output';
 import { createDataOutputIdPath } from '@/types/navigation';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
-import { getBadgeStatus, getDecisionStatusBadgeStatus, getStatusLabel } from '@/utils/status.helper';
+import { getDecisionStatusBadgeStatus } from '@/utils/status.helper';
 
 import styles from './data-output-card.module.scss';
 
@@ -26,11 +28,13 @@ type Props = {
 
 export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragEnd }: Props) {
     const { t } = useTranslation();
+    const [expanded, setExpanded] = useState(false);
 
     const { data: deleteAccess } = useCheckAccessQuery({
         resource: dataProductId,
         action: AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
     });
+    const { data: data_output } = useGetDataOutputByIdQuery(dataOutput.id);
 
     const [removeDataOutput, { isLoading: isRemoving }] = useRemoveDataOutputMutation();
     const [unlinkDataset] = useRemoveDataOutputDatasetLinkMutation();
@@ -75,78 +79,130 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                 name: dataOutput.name,
             }),
         );
-        // 2️⃣ Allow copy or move
+
         event.dataTransfer.effectAllowed = 'copyMove';
 
-        // 3️⃣ (Optional) add a CSS class or visual hint
-        event.currentTarget.classList.add('dragging');
+        // Add dragging class to the card
+        const cardElement = event.currentTarget as HTMLElement;
+        cardElement.classList.add(styles.dragging);
+
         onDragStart?.();
+    };
+
+    const handleDragEnd = (event: React.DragEvent) => {
+        const cardElement = event.currentTarget as HTMLElement;
+        cardElement.classList.remove(styles.dragging);
+        onDragEnd?.();
     };
 
     const canRemove = deleteAccess?.allowed ?? false;
 
-    return (
-        <Card className={styles.card} draggable onDragStart={handleDragStart} onDragEnd={onDragEnd}>
-            <Flex vertical gap={12}>
-                <Flex justify="space-between" align="flex-start">
-                    <Flex gap={12} align="flex-start">
-                        <CustomSvgIconLoader
-                            iconComponent={getDataOutputIcon(dataOutput.configuration.configuration_type)}
-                        />
-                        <div className={styles.content}>
-                            <Link to={createDataOutputIdPath(dataOutput.id, dataOutput.owner_id)}>
-                                <Typography.Title level={5} className={styles.title}>
-                                    {dataOutput.name}
-                                </Typography.Title>
-                                <Typography.Text type="secondary" className={styles.description}>
-                                    {dataOutput.description}
-                                </Typography.Text>
-                            </Link>
-                        </div>
-                    </Flex>
-                    <Popconfirm
-                        title={t('Remove')}
-                        description={t(
-                            'Are you sure you want to delete the data output? This can have impact on downstream dependencies',
+    const getDeleteDescription = () => {
+        if (dataOutput.dataset_links && dataOutput.dataset_links.length > 0) {
+            return (
+                <Flex vertical>
+                    {t(
+                        'Are you sure you want to delete this technical asset? This asset is still used in the following output ports:',
+                    )}
+                    <List
+                        size="small"
+                        dataSource={dataOutput.dataset_links}
+                        renderItem={(link) => (
+                            <List.Item style={{ padding: '0 0', border: 'none' }}>• {link.dataset.name}</List.Item>
                         )}
-                        onConfirm={handleRemoveDataOutput}
-                        placement="topRight"
-                        okText={t('Confirm')}
-                        cancelText={t('Cancel')}
-                        okButtonProps={{ loading: isRemoving }}
-                    >
-                        <Button loading={isRemoving} disabled={!canRemove} type="text" size="small" danger>
-                            {t('Delete')}
-                        </Button>
-                    </Popconfirm>
+                    />
                 </Flex>
+            );
+        }
+        return t(
+            'Are you sure you want to delete this technical asset? This can have impact on downstream dependencies',
+        );
+    };
 
-                <Flex vertical gap={8}>
-                    <Badge status={getBadgeStatus(dataOutput.status)} text={getStatusLabel(t, dataOutput.status)} />
-
-                    <DataOutputSubtitle data_output_id={dataOutput.id} />
+    return (
+        <Card className={styles.card} draggable onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <Flex className={styles.cardContent}>
+                <Flex className={styles.dragHandle}>
+                    <HolderOutlined />
+                </Flex>
+                <Flex vertical className={styles.mainContent}>
+                    <Flex justify="space-between" align="flex-start">
+                        <Flex gap={12} align="flex-start">
+                            <CustomSvgIconLoader
+                                iconComponent={getDataOutputIcon(dataOutput.configuration.configuration_type)}
+                            />
+                            <div className={styles.content}>
+                                <Link to={createDataOutputIdPath(dataOutput.id, dataOutput.owner_id)}>
+                                    <Typography.Title level={5} className={styles.title}>
+                                        {data_output?.result_string || ''}
+                                    </Typography.Title>
+                                    <Typography.Text type="secondary" className={styles.description}>
+                                        {dataOutput.name}
+                                    </Typography.Text>
+                                </Link>
+                            </div>
+                        </Flex>
+                        <Popconfirm
+                            title={t('Remove Technical Asset')}
+                            description={getDeleteDescription()}
+                            onConfirm={handleRemoveDataOutput}
+                            placement="topRight"
+                            okText={t('Confirm')}
+                            cancelText={t('Cancel')}
+                            okButtonProps={{ loading: isRemoving }}
+                        >
+                            <Button loading={isRemoving} disabled={!canRemove} type="text" size="small" danger>
+                                {t('Delete')}
+                            </Button>
+                        </Popconfirm>
+                    </Flex>
 
                     {dataOutput.dataset_links && dataOutput.dataset_links.length > 0 && (
-                        <Flex wrap gap={4}>
-                            {dataOutput.dataset_links.map((link) => (
-                                <Tag
-                                    key={link.dataset.id}
-                                    color="green"
-                                    closable
-                                    closeIcon={<Icon component={DeleteOutlined} />}
-                                    onClose={(e) => {
-                                        e.preventDefault();
-                                        handleRemoveDatasetLink(link.dataset.id, link.id);
-                                    }}
-                                >
-                                    <Badge
-                                        className={styles.badge}
-                                        status={getDecisionStatusBadgeStatus(link.status)}
+                        <div className={styles.linkedDatasetsSection}>
+                            <Button
+                                type="text"
+                                size="small"
+                                onClick={() => setExpanded(!expanded)}
+                                className={styles.expandButton}
+                                icon={expanded ? <DownOutlined /> : <RightOutlined />}
+                            >
+                                {t('{{count}} linked output ports', { count: dataOutput.dataset_links.length })}
+                            </Button>
+
+                            {expanded && (
+                                <div className={styles.linkedDatasetsList}>
+                                    <List
+                                        size="small"
+                                        dataSource={dataOutput.dataset_links}
+                                        renderItem={(link) => (
+                                            <List.Item className={styles.linkedDatasetItem}>
+                                                <Flex justify="space-between" align="center" style={{ width: '100%' }}>
+                                                    <Flex align="center" gap={8}>
+                                                        <Badge
+                                                            status={getDecisionStatusBadgeStatus(link.status)}
+                                                            size="small"
+                                                        />
+                                                        <Typography.Text className={styles.datasetName}>
+                                                            {link.dataset.name}
+                                                        </Typography.Text>
+                                                    </Flex>
+                                                    <Button
+                                                        type="text"
+                                                        size="small"
+                                                        danger
+                                                        onClick={() =>
+                                                            handleRemoveDatasetLink(link.dataset.id, link.id)
+                                                        }
+                                                    >
+                                                        {t('Unlink')}
+                                                    </Button>
+                                                </Flex>
+                                            </List.Item>
+                                        )}
                                     />
-                                    {link.dataset.name}
-                                </Tag>
-                            ))}
-                        </Flex>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </Flex>
             </Flex>
