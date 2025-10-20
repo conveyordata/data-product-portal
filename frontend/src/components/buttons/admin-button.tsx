@@ -4,11 +4,11 @@ import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { PosthogEvents } from '@/constants/posthog.constants';
-import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import {
     useBecomeAdminMutation,
     useRevokeAdminMutation,
-} from '@/store/features/role-assignments/global-roles-api-slice';
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 
 type Props = {
     onAdminAction?: () => void;
@@ -30,7 +30,7 @@ export function AdminButton({ onAdminAction, isAdmin }: Props): Required<MenuPro
         if (isAdmin) {
             posthog.capture(PosthogEvents.ADMIN_PRIVILEGES_REVOKED);
             // Revoke admin access
-            await revokeAdmin({ user_id: currentUser.id }).unwrap();
+            await revokeAdmin().unwrap();
 
             onAdminAction?.();
             return;
@@ -39,7 +39,6 @@ export function AdminButton({ onAdminAction, isAdmin }: Props): Required<MenuPro
         const expiry = new Date();
         expiry.setMinutes(expiry.getMinutes() + 10); // expire 10 minutes from now
         await becomeAdmin({
-            user_id: currentUser.id,
             expiry: expiry.toISOString(),
         }).unwrap();
         onAdminAction?.();
