@@ -7,7 +7,7 @@ from fastmcp.server.dependencies import AccessToken, get_access_token
 from sqlalchemy.orm import configure_mappers
 
 from app.authorization.role_assignments.data_product.schema import (
-    RoleAssignmentResponse as DataProductRoleAssignmentResponse,
+    DataProductRoleAssignmentResponse as DataProductRoleAssignmentResponse,
 )
 
 # Add role assignment imports
@@ -15,13 +15,13 @@ from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
 )
 from app.authorization.role_assignments.global_.schema import (
-    RoleAssignmentResponse as GlobalRoleAssignmentResponse,
+    GlobalRoleAssignmentResponse as GlobalRoleAssignmentResponse,
 )
 from app.authorization.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
 )
 from app.authorization.role_assignments.output_port.schema import (
-    RoleAssignmentResponse as DatasetRoleAssignmentResponse,
+    OutputPortRoleAssignmentResponse as DatasetRoleAssignmentResponse,
 )
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,

@@ -3,15 +3,16 @@ import type { TFunction } from 'i18next';
 
 import { RoleChangeForm } from '@/components/roles/role-change-form/role-change-form';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
+import type { DataProductRoleAssignmentResponse } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { DecisionStatus, type RoleContract } from '@/types/roles';
-import { type DataProductRoleAssignmentContract, Prototype } from '@/types/roles/role.contract';
+import { Prototype } from '@/types/roles/role.contract';
 import { getRoleAssignmentBadgeStatus, getRoleAssignmentStatusLabel } from '@/utils/status.helper';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    dataProductUsers: DataProductRoleAssignmentContract[];
+    dataProductUsers: DataProductRoleAssignmentResponse[];
     onRemoveUserAccess: (assignmentId: string) => void;
     onAcceptAccessRequest: (assignmentId: string) => void;
     onRejectAccessRequest: (assignmentId: string) => void;
@@ -34,10 +35,10 @@ export const getDataProductUsersTableColumns = ({
     canEdit,
     canRemove,
     canApprove,
-}: Props): TableColumnsType<DataProductRoleAssignmentContract> => {
-    const sorter = new Sorter<DataProductRoleAssignmentContract>();
+}: Props): TableColumnsType<DataProductRoleAssignmentResponse> => {
+    const sorter = new Sorter<DataProductRoleAssignmentResponse>();
     const numberOfOwners = dataProductUsers.filter(
-        (assignment) => assignment.role.prototype === Prototype.OWNER,
+        (assignment) => assignment.role?.prototype === Prototype.OWNER,
     ).length;
     const lockOwners = numberOfOwners <= 1;
 
@@ -63,7 +64,7 @@ export const getDataProductUsersTableColumns = ({
         {
             title: t('Role'),
             dataIndex: 'role',
-            render: (role: RoleContract, { id, decision }: DataProductRoleAssignmentContract) => {
+            render: (role: RoleContract, { id, decision }: DataProductRoleAssignmentResponse) => {
                 const isApproved = decision === DecisionStatus.Approved;
                 const disabled = role.prototype === Prototype.OWNER && lockOwners;
 
@@ -77,8 +78,8 @@ export const getDataProductUsersTableColumns = ({
                 );
             },
             width: '25%',
-            ...new FilterSettings(dataProductUsers, (assignment) => assignment.role.name),
-            sorter: sorter.stringSorter((assignment) => assignment.role.name),
+            ...new FilterSettings(dataProductUsers, (assignment) => assignment.role?.name ?? ''),
+            sorter: sorter.stringSorter((assignment) => assignment.role?.name),
         },
         {
             title: t('Status'),
@@ -101,7 +102,7 @@ export const getDataProductUsersTableColumns = ({
             title: t('Actions'),
             key: 'action',
             hidden: !(canRemove || canApprove),
-            render: (_, { user, id, decision }: DataProductRoleAssignmentContract) => (
+            render: (_, { user, id, decision }: DataProductRoleAssignmentResponse) => (
                 <Space>
                     {decision === DecisionStatus.Pending ? (
                         <Space>

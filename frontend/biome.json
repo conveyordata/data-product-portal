@@ -1,7 +1,10 @@
 {
     "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
     "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-    "files": { "ignoreUnknown": false, "includes": ["**", "!**/config.docker.js", "!**/*.d.ts"] },
+    "files": {
+        "ignoreUnknown": false,
+        "includes": ["**", "!**/config.docker.js", "!**/*.d.ts", "!src/store/api/services/generated"]
+    },
     "formatter": {
         "enabled": true,
         "useEditorconfig": true,

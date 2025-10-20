@@ -4,28 +4,29 @@ import { useTranslation } from 'react-i18next';
 
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
+import {
+    type OutputPortRoleAssignmentResponse,
+    useDeleteOutputPortRoleAssignmentMutation,
+    useModifyOutputPortRoleAssignmentMutation,
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import {
-    useDeleteDatasetRoleAssignmentMutation,
-    useUpdateDatasetRoleAssignmentMutation,
-} from '@/store/features/role-assignments/dataset-roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { DatasetRoleAssignmentContract, RoleContract } from '@/types/roles/role.contract';
+import type { RoleContract } from '@/types/roles/role.contract';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 import styles from './team-table.module.scss';
 import { getDatasetTeamColumns } from './team-table-columns';
 
 type Props = {
     datasetId: string;
-    datasetUsers: DatasetRoleAssignmentContract[];
+    datasetUsers: OutputPortRoleAssignmentResponse[];
 };
 export function TeamTable({ datasetId, datasetUsers }: Props) {
     const { t } = useTranslation();
     const { data: dataset, isLoading: isFetchingDataset } = useGetDatasetByIdQuery(datasetId);
-    const [deleteRoleAssignment, { isLoading: isRemovingUser }] = useDeleteDatasetRoleAssignmentMutation();
-    const [updateRoleAssignment] = useUpdateDatasetRoleAssignmentMutation();
+    const [deleteRoleAssignment, { isLoading: isRemovingUser }] = useDeleteOutputPortRoleAssignmentMutation();
+    const [updateRoleAssignment] = useModifyOutputPortRoleAssignmentMutation();
 
     const { handleGrantAccessToDataset, handleDenyAccessToDataset } = usePendingActionHandlers();
 
@@ -50,7 +51,7 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
-    const onChange: TableProps<DatasetRoleAssignmentContract>['onChange'] = (pagination) => {
+    const onChange: TableProps<OutputPortRoleAssignmentResponse>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
@@ -59,7 +60,7 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
             try {
                 if (!dataset) return;
 
-                await deleteRoleAssignment({ role_assignment_id: id, dataset_id: dataset.id }).unwrap();
+                await deleteRoleAssignment(id).unwrap();
                 dispatchMessage({ content: t('User access to output port has been removed'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
@@ -73,9 +74,10 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
             if (!dataset) return;
             try {
                 await updateRoleAssignment({
-                    role_assignment_id: assignmentId,
-                    role_id: role.id,
-                    dataset_id: dataset.id,
+                    id: assignmentId,
+                    modifyOutputPortRoleAssignment: {
+                        role_id: role.id,
+                    },
                 }).unwrap();
                 dispatchMessage({ content: t('User role has been updated'), type: 'success' });
             } catch (_error) {
@@ -102,7 +104,7 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
         [dataset, handleDenyAccessToDataset],
     );
 
-    const columns: TableColumnsType<DatasetRoleAssignmentContract> = useMemo(() => {
+    const columns: TableColumnsType<OutputPortRoleAssignmentResponse> = useMemo(() => {
         return getDatasetTeamColumns({
             t,
             datasetUsers: datasetUsers,
@@ -134,7 +136,7 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
 
     return (
         <Flex className={styles.teamListContainer}>
-            <Table<DatasetRoleAssignmentContract>
+            <Table<OutputPortRoleAssignmentResponse>
                 loading={isFetchingDataset || isRemovingUser}
                 className={styles.teamListTable}
                 columns={columns}

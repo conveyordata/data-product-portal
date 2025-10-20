@@ -7,26 +7,25 @@ import { Searchbar } from '@/components/form';
 import { UserPopup } from '@/components/modal/user-popup/user-popup.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { TeamTable } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table.component.tsx';
+import {
+    type DataProductRoleAssignmentResponse,
+    useCreateDataProductRoleAssignmentMutation,
+    useListDataProductRoleAssignmentsQuery,
+} from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
-import {
-    useCreateDataProductRoleAssignmentMutation,
-    useGetDataProductRoleAssignmentsQuery,
-} from '@/store/features/role-assignments/data-product-roles-api-slice';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import type { DataProductRoleAssignmentContract } from '@/types/roles/role.contract';
 import type { SearchForm } from '@/types/shared';
 import type { UserContract } from '@/types/users';
-
 import styles from './team-tab.module.scss';
 
 function filterUsers(
-    users: DataProductRoleAssignmentContract[],
+    users: DataProductRoleAssignmentResponse[],
     searchTerm: string,
-): DataProductRoleAssignmentContract[] {
+): DataProductRoleAssignmentResponse[] {
     if (!searchTerm) return users;
 
     const searchString = searchTerm.toLowerCase();
@@ -48,8 +47,8 @@ export function TeamTab({ dataProductId }: Props) {
     const { isVisible, handleOpen, handleClose } = useModal();
     const user = useSelector(selectCurrentUser);
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
-    const { data: roleAssignments, isFetching } = useGetDataProductRoleAssignmentsQuery({
-        data_product_id: dataProductId,
+    const { data: roleAssignments, isFetching } = useListDataProductRoleAssignmentsQuery({
+        dataProductId: dataProductId,
     });
     const [addUserToDataProduct, { isLoading: isAddingUser }] = useCreateDataProductRoleAssignmentMutation();
 
@@ -58,7 +57,7 @@ export function TeamTab({ dataProductId }: Props) {
     const { data: DATA_PRODUCT_ROLES } = useGetRolesQuery('data_product');
 
     const filteredUsers = useMemo(() => {
-        return filterUsers(roleAssignments ?? [], searchTerm);
+        return filterUsers(roleAssignments?.role_assignments ?? [], searchTerm);
     }, [searchTerm, roleAssignments]);
     const dataProductUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
 

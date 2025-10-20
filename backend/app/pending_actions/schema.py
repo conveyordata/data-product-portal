@@ -1,7 +1,7 @@
 from typing import Literal, Union
 
 from app.authorization.role_assignments.data_product.schema import (
-    RoleAssignmentResponse,
+    DataProductRoleAssignmentResponse,
 )
 from app.data_outputs_datasets.schema_response import DataOutputDatasetAssociationsGet
 from app.data_products_datasets.schema_response import DataProductDatasetAssociationsGet
@@ -20,7 +20,7 @@ class DataOutputDatasetPendingAction(DataOutputDatasetAssociationsGet):
     )
 
 
-class DataProductRoleAssignmentPendingAction(RoleAssignmentResponse):
+class DataProductRoleAssignmentPendingAction(DataProductRoleAssignmentResponse):
     pending_action_type: Literal[PendingActionTypes.DataProductRoleAssignment] = (
         PendingActionTypes.DataProductRoleAssignment
     )

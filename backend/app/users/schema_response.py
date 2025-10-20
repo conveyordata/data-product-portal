@@ -4,7 +4,9 @@ from uuid import UUID
 
 from pydantic import EmailStr
 
-from app.authorization.role_assignments.global_.schema import RoleAssignmentResponse
+from app.authorization.role_assignments.global_.schema import (
+    GlobalRoleAssignmentResponse,
+)
 from app.shared.schema import ORMModel
 
 
@@ -24,7 +26,7 @@ class UserGet(BaseUserGet):
 
 
 class UsersGet(BaseUserGet):
-    global_role: Optional[RoleAssignmentResponse]
+    global_role: Optional[GlobalRoleAssignmentResponse]
 
 
 class GetUsersResponse(ORMModel):
