@@ -81,6 +81,9 @@ class DataProductService:
                 selectinload(DataProductModel.data_outputs).selectinload(
                     DataOutputModel.dataset_links
                 ),
+                selectinload(DataProductModel.data_outputs).selectinload(
+                    DataOutputModel.environment_configurations
+                ),
             ],
         )
         default_lifecycle = self.db.scalar(

@@ -174,9 +174,9 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
                                         iconComponent={getDataOutputIcon(output.configuration.configuration_type)}
                                     />
                                     <Flex vertical style={{ flex: 1 }}>
-                                        <Typography.Text strong>{output.name}</Typography.Text>
+                                        <Typography.Text strong>{output.result_string}</Typography.Text>
                                         <Typography.Text type="secondary" className={styles.description}>
-                                            {output.description}
+                                            {output.name}
                                         </Typography.Text>
                                     </Flex>
                                 </Flex>
