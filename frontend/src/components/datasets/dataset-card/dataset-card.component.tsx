@@ -167,14 +167,11 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
             >
                 <Flex vertical gap={12}>
                     <Flex justify="space-between" align="flex-start">
-                        <div>
+                        <div className={styles.titleSection}>
                             <Link to={createDatasetIdPath(dataset.id)}>
                                 <Typography.Title level={5} className={styles.title}>
                                     {dataset.name}
                                 </Typography.Title>
-                                <Typography.Text type="secondary" className={styles.description}>
-                                    {dataset.description}
-                                </Typography.Text>
                             </Link>
                         </div>
                         <Flex gap={4}>
@@ -204,6 +201,12 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                             </Popconfirm>
                         </Flex>
                     </Flex>
+
+                    <div className={styles.descriptionSection}>
+                        <Typography.Text type="secondary" className={styles.description}>
+                            {dataset.description}
+                        </Typography.Text>
+                    </div>
 
                     <Flex vertical gap={8}>
                         <Badge status={getBadgeStatus(dataset.status)} text={getStatusLabel(t, dataset.status)} />
