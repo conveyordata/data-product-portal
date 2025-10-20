@@ -15,9 +15,11 @@ import styles from './dataset-table.module.scss';
 type Props = {
     dataProductId: string;
     datasets: DatasetsGetContract;
+    isDragActive?: boolean;
+    draggedDataOutputId?: string | null;
 };
 
-export function DatasetTable({ dataProductId, datasets }: Props) {
+export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDataOutputId }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
@@ -51,7 +53,7 @@ export function DatasetTable({ dataProductId, datasets }: Props) {
     const canCreateDataset = (access?.allowed && access2?.allowed) || false;
 
     return (
-        <Flex vertical className={styles.container}>
+        <Flex vertical className={`${styles.container} ${isDragActive ? styles.dragActive : ''}`}>
             <Flex justify="space-between" align="center" className={styles.header}>
                 <Typography.Title level={4}>{t('Output Ports')}</Typography.Title>
                 <Link to={`${ApplicationPaths.DatasetNew}?dataProductId=${dataProductId}`}>
@@ -69,7 +71,12 @@ export function DatasetTable({ dataProductId, datasets }: Props) {
 
             <div className={styles.cardsGrid}>
                 {filteredDatasets.map((dataset) => (
-                    <DatasetCard key={dataset.id} datasetId={dataset.id} />
+                    <DatasetCard
+                        key={dataset.id}
+                        datasetId={dataset.id}
+                        isDragActive={isDragActive}
+                        draggedDataOutputId={draggedDataOutputId}
+                    />
                 ))}
 
                 {filteredDatasets.length === 0 && (
