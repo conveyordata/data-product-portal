@@ -14,7 +14,8 @@
         "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js",
         "validate-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js --fail-on-update",
         "typecheck": "tsc --strict --noEmit",
-        "dep-viz": "npm run build && npx open-cli dependencies.html"
+        "dep-viz": "npm run build && npx open-cli dependencies.html",
+        "generate-api": "rm -rf src/store/api/services/generated/* && npx @rtk-query/codegen-openapi src/store/api/openapi-config.ts"
     },
     "dependencies": {
         "@ant-design/charts": "^2.6.6",
@@ -63,12 +64,14 @@
     },
     "devDependencies": {
         "@biomejs/biome": "2.3.10",
+        "@rtk-query/codegen-openapi": "^2.0.0",
         "@types/node": "^25.0.3",
         "@types/react": "^19.2.7",
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^5.1.2",
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.27.2",
+        "esbuild-runner": "^2.2.2",
         "i18next-parser": "^9.3.0",
         "msw": "^2.12.4",
         "rollup-plugin-visualizer": "^6.0.5",
