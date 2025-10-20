@@ -12,6 +12,7 @@
         "check:fix": "biome check --write",
         "start": "npm run copy-config && npm run build && vite preview",
         "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js",
+        "generate-api": "rm -rf src/store/api/services/generated/* && cd ../backend && poetry run python -m app.openapi_export -o ./openapi.json && cd ../frontend && npx @rtk-query/codegen-openapi src/store/api/openapi-config.ts",
         "typecheck": "tsc --strict"
     },
     "dependencies": {
@@ -57,12 +58,14 @@
     },
     "devDependencies": {
         "@biomejs/biome": "2.2.7",
+        "@rtk-query/codegen-openapi": "^2.0.0",
         "@types/node": "^24.9.1",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
         "@vitejs/plugin-react": "^5.0.4",
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.25.11",
+        "esbuild-runner": "^2.2.2",
         "i18next-parser": "^9.3.0",
         "msw": "^2.11.6",
         "sass": "^1.93.2",
