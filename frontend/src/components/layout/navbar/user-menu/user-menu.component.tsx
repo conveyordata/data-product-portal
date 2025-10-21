@@ -5,12 +5,12 @@ import { useAuth } from 'react-oidc-context';
 import { useSelector } from 'react-redux';
 
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
+import { CartButton } from '@/components/cart/cart-button.component.tsx';
 import headerStyles from '@/components/layout/navbar/navbar.module.scss';
 import { Notifications } from '@/components/notifications/notifications';
 import { AppConfig } from '@/config/app-config.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useIsAdminQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-
 import { DownloadCLIButton } from '../cli-download/cli-download-button.component';
 import styles from './user-menu.module.scss';
 
@@ -50,6 +50,9 @@ export function UserMenu() {
         <Flex className={styles.userMenuContainer}>
             <Flex>
                 <Notifications />
+            </Flex>
+            <Flex>
+                <CartButton />
             </Flex>
             <Flex>
                 <DownloadCLIButton />
