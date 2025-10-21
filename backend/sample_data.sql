@@ -105,8 +105,8 @@ begin
     RETURNING id INTO admin_role_id;
 
     -- ENVIRONMENTS
-    INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'arn:aws:iam::130966031144:role/cvr-pbac-iam-{{}}-dev-demo', 'dev', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_dev;
-    INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'arn:aws:iam::130966031144:role/cvr-pbac-iam-{{}}-prd-demo', 'prd', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_prd;
+    INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('development', 'arn:aws:iam::123456789123:role/{{}}-dev-demo', 'dev', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_dev;
+    INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('production', 'arn:aws:iam::123456789123:role/{{}}-prd-demo', 'prd', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO returned_environment_id_prd;
 
     INSERT INTO public.env_platform_configs (id, environment_id, platform_id, "config", created_on, updated_on, deleted_at) VALUES ('daa8e3e8-1485-4eb2-8b4b-575e8d10a570', returned_environment_id_dev, returned_platform_id, '{"account_id": "123456789123", "region": "eu-west-1", "can_read_from": ["production"]}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.env_platform_configs (id, environment_id, platform_id, "config", created_on, updated_on, deleted_at) VALUES ('e2aa2f6d-585f-4b43-8ea4-982b7bab0142', returned_environment_id_prd, returned_platform_id, '{"account_id": "123456789123", "region": "eu-west-1", "can_read_from": []}', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
