@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next';
 
 import { DatasetAccessIcon } from '@/components/datasets/dataset-access-icon/dataset-access-icon';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import type { DataProductContract } from '@/types/data-product';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import type { DatasetAccess, DatasetsGetContract } from '@/types/dataset';
 import type { DatasetStatus } from '@/types/dataset/dataset.contract';

@@ -3,7 +3,7 @@ package cliapi
 import (
 	"context"
 
-	"github.com/deepmap/oapi-codegen/pkg/securityprovider"
+	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
 
 	"portal/libs/core"
 	"portal/pkg/api"
@@ -19,11 +19,11 @@ func AuthenticatedContext(ctx context.Context) (api.ClientInterface, error) {
 		return nil, err
 	}
 	config := core.GetCurrentConfig()
-	base_url := config.Api
+	baseUrl := config.Api
 	if config.DevMode {
-		base_url = "http://localhost:5050"
+		baseUrl = "http://localhost:5050"
 	}
-	client, err := api.NewClient(base_url, api.WithRequestEditorFn(bearerTokenProvider.Intercept))
+	client, err := api.NewClient(baseUrl, api.WithRequestEditorFn(bearerTokenProvider.Intercept))
 	if err != nil {
 		return nil, err
 	}
@@ -37,11 +37,11 @@ func BasicAuthenticatedContext() (api.ClientInterface, error) {
 		return nil, err
 	}
 
-	base_url := config.Api
+	baseUrl := config.Api
 	if config.DevMode {
-		base_url = "http://localhost:5050"
+		baseUrl = "http://localhost:5050"
 	}
-	client, err := api.NewClient(base_url, api.WithRequestEditorFn(bearerTokenProvider.Intercept))
+	client, err := api.NewClient(baseUrl, api.WithRequestEditorFn(bearerTokenProvider.Intercept))
 	if err != nil {
 		return nil, err
 	}

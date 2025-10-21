@@ -1,27 +1,23 @@
 ARG PLATFORM=linux/amd64
-FROM --platform=${PLATFORM} node:24-alpine@sha256:77f3c4d1f33c17dfa4af4b0add57d86957187873e313c2c37f52831d117645c8 AS build-stage
+FROM --platform=${PLATFORM} node:25-alpine@sha256:809972647175c30a4c7763d3e6cc064dec588972af57e540e5a6f27442bb0845 AS build-stage
 
 WORKDIR /app
 COPY . .
 
 # Install all the dependencies
-RUN npm ci
-
-# Build the application in production mode
-RUN npm run build:prd
+RUN --mount=type=cache,target=/app/node_modules npm ci && npm run build:prd
 
 # Use official nginx image as the base image
-FROM --platform=${PLATFORM} nginx:1.29.1-alpine@sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8
+FROM --platform=${PLATFORM} nginx:1.29.2-alpine@sha256:61e01287e546aac28a3f56839c136b31f590273f3b41187a36f46f6a03bbfe22
 
 # Copy the build output
 COPY --from=build-stage /app/dist /app/dist
 
 # Copy the nginx config
-COPY --from=build-stage /app/deploy/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY deploy/nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Copy the entrypoint and configuration setup scripts
-COPY --from=build-stage /app/deploy/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+COPY --chmod=+x deploy/entrypoint.sh /app/entrypoint.sh
 
 WORKDIR /app
 

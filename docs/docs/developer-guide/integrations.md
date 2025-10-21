@@ -43,23 +43,23 @@ If there's a platform you want us to support, let us know — or better yet, ope
 
 Here's how the core concepts of the Data Product Portal map to AWS resources:
 
-| Portal Concept     | AWS Resource(s) |
-|--------------------|-----------------|
-| **Data Environments** | S3 buckets, Glue databases/tables |
-| **Data Products**      | IAM roles/policies granting scoped access to S3 and Glue |
-| **Datasets**           | Groups of S3 paths and Glue tables |
-| **Data Outputs**       | Shareable outputs: S3 paths, Glue tables, Athena queries |
-| **Users**              | Access is managed via IAM roles and policies provisioned by the portal |
+| Portal Concept        | AWS Resource(s)                                                        |
+|-----------------------|------------------------------------------------------------------------|
+| **Data Environments** | S3 buckets, Glue databases/tables                                      |
+| **Data Products**     | IAM roles/policies granting scoped access to S3 and Glue               |
+| **Datasets**          | Groups of S3 paths and Glue tables                                     |
+| **Data Outputs**      | Shareable outputs: S3 paths, Glue tables, Athena queries               |
+| **Users**             | Access is managed via IAM roles and policies provisioned by the portal |
 
 ---
 
 ## Conveyor Mapping
 
-| Portal Concept     | Conveyor Resource |
-|--------------------|-------------------|
-| **Data Environments** | Conveyor environments (execution isolation) |
-| **Data Products**      | Conveyor projects (build, deploy, run workflows) |
-| **Users**              | Portal-managed access to Conveyor projects and datasets |
+| Portal Concept        | Conveyor Resource                                       |
+|-----------------------|---------------------------------------------------------|
+| **Data Environments** | Conveyor environments (execution isolation)             |
+| **Data Products**     | Conveyor projects (build, deploy, run workflows)        |
+| **Users**             | Portal-managed access to Conveyor projects and datasets |
 
 The portal manages the mapping of users to Conveyor roles through its UI and API.
 
