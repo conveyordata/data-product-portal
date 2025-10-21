@@ -25,7 +25,7 @@ from .factories.user import UserFactory
 def setup_and_teardown_database():
     from app.db_tool import init  # noqa: E402
 
-    init(force=True)
+    init(force=True, seed_path=None)
     yield
 
 
