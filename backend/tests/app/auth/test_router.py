@@ -8,6 +8,7 @@ from tests.factories import (
 
 from app.core.authz.actions import AuthorizationAction
 from app.roles.schema import Scope
+from app.settings import settings
 
 ENDPOINT = "/api/auth"
 
@@ -16,11 +17,11 @@ class TestAuthRouter:
     def test_authorize_user(self, client):
         response = client.get(f"{ENDPOINT}/user")
         assert response.status_code == 200
-        assert response.json()["external_id"] == "sub"
+        assert response.json()["external_id"] == settings.DEFAULT_USERNAME
 
     def test_aws_credentials(self, client):
         EnvironmentFactory(name="production")
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,

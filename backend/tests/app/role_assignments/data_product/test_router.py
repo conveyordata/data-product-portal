@@ -14,6 +14,7 @@ from app.data_products.model import DataProduct
 from app.role_assignments.data_product.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype, Role, Scope
+from app.settings import settings
 from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/data_product"
@@ -51,7 +52,7 @@ class TestDataProductRoleAssignmentsRouter:
     )
     def test_create_assignment(self, permissions: list[Action], client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=permissions,
@@ -78,7 +79,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_request_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__REQUEST_DATAPRODUCT_ACCESS],
@@ -103,7 +104,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_request_assignment_no_right(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        UserFactory(external_id="sub")
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
 
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
@@ -119,7 +120,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_delete_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATA_PRODUCT__DELETE_USER],
@@ -148,7 +149,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_delete_last_owner_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATA_PRODUCT__DELETE_USER],
@@ -178,7 +179,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
@@ -204,7 +205,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment_already_decided(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
@@ -228,7 +229,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment_idempotency(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
@@ -251,7 +252,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_decide_assignment_no_role(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
@@ -273,7 +274,7 @@ class TestDataProductRoleAssignmentsRouter:
 
     def test_modify_assigned_role(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__UPDATE_USER],
@@ -318,7 +319,7 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 403
 
     def test_delete_data_product_with_role_assignment(self, client: TestClient):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product: DataProduct = DataProductFactory()
         role: Role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -347,7 +348,7 @@ class TestDataProductRoleAssignmentsRouter:
         self, client: TestClient
     ):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__CREATE_USER],
@@ -374,7 +375,7 @@ class TestDataProductRoleAssignmentsRouter:
         self, client: TestClient
     ):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
@@ -401,7 +402,7 @@ class TestDataProductRoleAssignmentsRouter:
         self, client: TestClient
     ):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__UPDATE_USER],
@@ -432,7 +433,7 @@ class TestDataProductRoleAssignmentsRouter:
         self, client: TestClient
     ):
         data_product: DataProduct = DataProductFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATA_PRODUCT__DELETE_USER],
@@ -459,7 +460,7 @@ class TestDataProductRoleAssignmentsRouter:
         assert len(history) == 1
 
     def test_get_pending_actions_no_action(self, client: TestClient):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product: DataProduct = DataProductFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
         DataProductRoleAssignmentFactory(
@@ -474,7 +475,7 @@ class TestDataProductRoleAssignmentsRouter:
         self, client: TestClient
     ):
         data_product: DataProduct = DataProductFactory()
-        user: User = UserFactory(external_id="sub")
+        user: User = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role1: Role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
@@ -515,7 +516,7 @@ class TestDataProductRoleAssignmentsRouter:
         self, client: TestClient
     ):
         data_product: DataProduct = DataProductFactory()
-        user: User = UserFactory(external_id="sub")
+        user: User = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role1: Role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__CREATE_USER],

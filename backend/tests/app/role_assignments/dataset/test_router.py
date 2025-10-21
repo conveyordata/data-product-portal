@@ -14,6 +14,7 @@ from app.datasets.model import Dataset
 from app.role_assignments.dataset.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype, Role, Scope
+from app.settings import settings
 from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/dataset"
@@ -50,7 +51,7 @@ class TestDatasetRoleAssignmentsRouter:
     )
     def test_create_assignment(self, permissions: list[Action], client: TestClient):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=permissions,
@@ -77,7 +78,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_request_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__REQUEST_DATASET_ACCESS],
@@ -102,7 +103,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_request_assignment_no_right(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        UserFactory(external_id="sub")
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
 
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -118,7 +119,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_delete_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__DELETE_USER],
@@ -148,7 +149,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_decide_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_USER_REQUEST],
@@ -177,7 +178,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_decide_assignment_already_decided(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_USER_REQUEST],
@@ -204,7 +205,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_decide_assignment_idempotency(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_USER_REQUEST],
@@ -229,7 +230,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_decide_assignment_no_role(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_USER_REQUEST],
@@ -254,7 +255,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_modify_assigned_role(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__UPDATE_USER],
@@ -280,7 +281,7 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["role"]["id"] == str(new_role.id)
 
     def test_delete_dataset_with_role_assignment(self, client: TestClient):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         dataset: Dataset = DatasetFactory()
         role: Role = RoleFactory(
             scope=Scope.DATASET, permissions=[Action.DATASET__DELETE]
@@ -306,7 +307,7 @@ class TestDatasetRoleAssignmentsRouter:
 
     def test_delete_last_owner_assignment(self, client: TestClient):
         dataset: Dataset = DatasetFactory()
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__DELETE_USER],
@@ -338,7 +339,7 @@ class TestDatasetRoleAssignmentsRouter:
         self, client: TestClient
     ):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__REQUEST_DATASET_ACCESS],
@@ -363,7 +364,7 @@ class TestDatasetRoleAssignmentsRouter:
         self, client: TestClient
     ):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__APPROVE_USER_REQUEST],
@@ -393,7 +394,7 @@ class TestDatasetRoleAssignmentsRouter:
         self, client: TestClient
     ):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__UPDATE_USER],
@@ -424,7 +425,7 @@ class TestDatasetRoleAssignmentsRouter:
         self, client: TestClient
     ):
         dataset: Dataset = DatasetFactory()
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.DATASET__DELETE_USER],

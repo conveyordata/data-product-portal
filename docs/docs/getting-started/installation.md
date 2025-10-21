@@ -62,9 +62,9 @@ Enable OIDC by supplying credentials via `values.yaml`. You’ll need:
 - A configured OIDC provider (e.g., [AWS Cognito](https://aws.amazon.com/cognito/))
 - Client ID and secret
 
-Linking with OIDC is recommended. If OIDC is not configured all users will be authenticated as the same user. 
-This user can be configured using the environment variable `DEFAULT_USERNAME`. 
-When not specified, the default user is *john.doe@pharma.com*. 
+Linking with OIDC is recommended. If OIDC is not configured all users will be authenticated as the same user.
+This user can be configured using the environment variable `DEFAULT_USERNAME`.
+When not specified, the default user is *john.doe@pharma.com*.
 
 #### API keys
 If you enable the `api_key` in the `values.yaml` and pass a `key` you define it is possible to connect to the API with this key. This key has full admin access. Use it wisely.

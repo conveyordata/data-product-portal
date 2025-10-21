@@ -6,6 +6,7 @@ from app.core.authz.actions import AuthorizationAction
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.schema import RoleAssignment
 from app.roles.schema import Role, Scope
+from app.settings import settings
 from app.users.schema import User
 
 ENDPOINT = "/api/role_assignments/global"
@@ -27,7 +28,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data[0]["id"] == str(assignment.id)
 
     def test_create_assignment(self, client: TestClient):
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
@@ -49,7 +50,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
     def test_create_assignment_admin(self, client: TestClient):
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
@@ -71,7 +72,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(admin.id)
 
     def test_delete_assignment(self, client: TestClient):
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__DELETE_USER],
@@ -96,7 +97,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert len(response.json()) == 1
 
     def test_decide_assignment(self, client: TestClient):
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
@@ -121,7 +122,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["decision"] == DecisionStatus.APPROVED
 
     def test_decide_assignment_already_decided(self, client: TestClient):
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
@@ -144,7 +145,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert "already decided" in response.json()["detail"]
 
     def test_decide_assignment_idempotency(self, client: TestClient):
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
@@ -165,7 +166,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert response.status_code == status.HTTP_200_OK
 
     def test_modify_assigned_role(self, client: TestClient):
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
@@ -189,7 +190,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(new_role.id)
 
     def test_modify_assigned_role_from_admin(self, client: TestClient):
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
@@ -213,7 +214,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(role.id)
 
     def test_modify_assigned_role_to_admin(self, client: TestClient):
-        me = UserFactory(external_id="sub")
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
@@ -236,7 +237,7 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["role"]["id"] == str(admin.id)
 
     def test_delete_last_admin_assignment(self, client: TestClient):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__DELETE_USER]
         )
