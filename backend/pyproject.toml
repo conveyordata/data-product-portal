@@ -17,7 +17,7 @@ gunicorn = "^23.0.0"
 uvicorn = "^0.37.0"
 pydantic = { version = "^2.12.3", extras = ['email'] }
 pydantic-settings = "^2.11.0"
-typer = "^0.19.2"
+typer = "^0.20.0"
 requests = "^2.32.5"
 httpx = "^0.28.1"
 alembic = "^1.17.0"
