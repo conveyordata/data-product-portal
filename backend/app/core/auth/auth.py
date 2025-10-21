@@ -91,26 +91,32 @@ else:
     def unvalidated_token(token: str = "") -> str:
         return token
 
-    def secured_call(token: str = "") -> JWTToken:
-        return JWTToken(sub="sub", token="token_value")
-
     def authorize_user(
-        token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
+        db: Session = Depends(get_db_session)
     ) -> User:
+        default_username = settings.DEFAULT_USERNAME
+        if '@' not in default_username:
+            raise Exception("Default username must be an email address")
         oidc_user = OIDCIdentity(
-            sub="sub",
-            name="John",
-            family_name="Doe",
-            email="john.doe@dataminded.com",
-            username="sub",
+            sub=default_username,
+            name=default_username.split(".")[0],
+            family_name=default_username.split("@")[0].split(".")[1],
+            email=default_username,
+            username=default_username,
         )
-        token = JWTToken(sub="sub", token="token_value")
+        token = generate_default_jwt_token()
         return update_db_user(oidc_user, token, db)
 
+
+    def generate_default_jwt_token(default_username = settings.DEFAULT_USERNAME):
+        token = JWTToken(sub=default_username, token="token_value")
+        return token
+
+
     def get_authenticated_user(
-        token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
+        db: Session = Depends(get_db_session)
     ) -> User:
-        token = JWTToken(sub="sub", token="token_value")
+        token = generate_default_jwt_token()
         user: Optional[User] = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)
         ).one_or_none()
@@ -119,6 +125,6 @@ else:
         return user
 
     def api_key_authenticated(
-        api_key=Depends(secured_api_key), jwt_token=Depends(unvalidated_token)
+        jwt_token=Depends(unvalidated_token)
     ):
         return secured_call(jwt_token)

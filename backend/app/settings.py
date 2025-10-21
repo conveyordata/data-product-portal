@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     OIDC_REDIRECT_URI: Optional[str] = None
     OIDC_AUDIENCE: Optional[str] = None
 
+    # Default username when oidc is disabled
+    DEFAULT_USERNAME: str = 'john.doe@pharma.com'
+
     # Conveyor
     CONVEYOR_API_KEY: Optional[str] = None
     CONVEYOR_SECRET: Optional[str] = None
