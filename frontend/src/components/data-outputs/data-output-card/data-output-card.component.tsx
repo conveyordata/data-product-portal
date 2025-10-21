@@ -152,7 +152,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                             okButtonProps={{ loading: isRemoving }}
                         >
                             <Button loading={isRemoving} disabled={!canRemove} type="text" size="small" danger>
-                                {t('Delete')}
+                                {t('Remove')}
                             </Button>
                         </Popconfirm>
                     </Flex>
@@ -194,7 +194,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                                                             handleRemoveDatasetLink(link.dataset.id, link.id)
                                                         }
                                                     >
-                                                        {t('Unlink')}
+                                                        {t('Remove')}
                                                     </Button>
                                                 </Flex>
                                             </List.Item>

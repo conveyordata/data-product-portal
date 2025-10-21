@@ -207,7 +207,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                             size="small"
                                             danger
                                         >
-                                            {t('Delete')}
+                                            {t('Remove')}
                                         </Button>
                                     </Popconfirm>
                                 </Flex>
@@ -271,7 +271,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                                                 handleRemoveDataOutputLink(link.data_output.id)
                                                             }
                                                         >
-                                                            {t('Delete')}
+                                                            {t('Remove')}
                                                         </Button>
                                                     </Flex>
                                                 </List.Item>
