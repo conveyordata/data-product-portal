@@ -19,13 +19,14 @@ from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.s3.schema import S3DataOutput
 from app.data_outputs.schema_request import DataOutputResultStringRequest
 from app.roles.schema import Scope
+from app.settings import settings
 
 ENDPOINT = "/api/data_outputs"
 
 
 @pytest.fixture
 def data_output_payload():
-    user = UserFactory(external_id="sub")
+    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     data_product = DataProductFactory()
     service = PlatformServiceFactory()
     tag = TagFactory()
@@ -139,7 +140,7 @@ class TestDataOutputsRouter:
         assert response.status_code == 404
 
     def test_update_data_output(self, client: TestClient):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -173,7 +174,7 @@ class TestDataOutputsRouter:
         assert response.status_code == 403
 
     def test_remove_data_output(self, client: TestClient):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -192,7 +193,7 @@ class TestDataOutputsRouter:
         assert response.status_code == 403
 
     def test_update_status(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -352,7 +353,7 @@ class TestDataOutputsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_data_output_status_update(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -372,7 +373,7 @@ class TestDataOutputsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_data_output_update(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -395,7 +396,7 @@ class TestDataOutputsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_data_output_deletion(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -412,7 +413,7 @@ class TestDataOutputsRouter:
         assert len(history) == 1
 
     def test_retain_deleted_data_output_name_in_history(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,

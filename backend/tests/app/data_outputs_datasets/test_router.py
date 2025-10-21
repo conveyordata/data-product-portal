@@ -14,6 +14,7 @@ from app.core.authz import Action
 from app.datasets.enums import DatasetAccessType
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Scope
+from app.settings import settings
 
 DATA_OUTPUTS_DATASETS_ENDPOINT = "/api/data_output_dataset_links"
 DATA_OUTPUTS_ENDPOINT = "/api/data_outputs"
@@ -23,7 +24,7 @@ class TestDataOutputsDatasetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
     def test_request_data_output_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
@@ -40,7 +41,7 @@ class TestDataOutputsDatasetsRouter:
         assert response.status_code == 200
 
     def test_request_data_output_link_on_dataset_with_diff_parent(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
@@ -57,7 +58,7 @@ class TestDataOutputsDatasetsRouter:
         assert response.status_code == 400
 
     def test_request_already_exists(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
@@ -84,7 +85,7 @@ class TestDataOutputsDatasetsRouter:
         assert response.status_code == 403
 
     def test_request_data_output_link_private_dataset(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
         ds = DatasetFactory(
@@ -101,7 +102,7 @@ class TestDataOutputsDatasetsRouter:
         assert response.status_code == 200
 
     def test_request_data_output_remove(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)
@@ -135,7 +136,7 @@ class TestDataOutputsDatasetsRouter:
         assert link.status_code == 200
 
     def test_approve_data_output_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -173,7 +174,7 @@ class TestDataOutputsDatasetsRouter:
         )
 
     def test_deny_data_output_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -210,7 +211,7 @@ class TestDataOutputsDatasetsRouter:
         )
 
     def test_remove_data_output_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -239,7 +240,7 @@ class TestDataOutputsDatasetsRouter:
         assert response.status_code == 403
 
     def test_delete_dataset_with_data_output_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(scope=Scope.DATASET, permissions=[Action.DATASET__DELETE])
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
@@ -258,7 +259,7 @@ class TestDataOutputsDatasetsRouter:
         assert response.json() == []
 
     def test_get_pending_actions(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
         role = RoleFactory(
@@ -283,7 +284,7 @@ class TestDataOutputsDatasetsRouter:
         assert response.json()[0]["status"] == "pending"
 
     def test_history_event_created_on_request_data_output_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK],
@@ -303,7 +304,7 @@ class TestDataOutputsDatasetsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_remove_data_output_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -319,7 +320,7 @@ class TestDataOutputsDatasetsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_approve_data_output_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -337,7 +338,7 @@ class TestDataOutputsDatasetsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_deny_data_output_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -354,7 +355,7 @@ class TestDataOutputsDatasetsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_unlink_data_output_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         data_output = DataOutputFactory(owner=data_product)
         ds = DatasetFactory(data_product=data_product)

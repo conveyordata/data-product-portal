@@ -5,6 +5,7 @@ from tests.factories import UserFactory
 
 from app.authorization.schema import AccessResponse
 from app.core.authz import Action, Authorization
+from app.settings import settings
 
 ENDPOINT = "/api/authz"
 
@@ -21,7 +22,7 @@ class TestAuthorizationRouter:
     def test_check_access_authorized(
         self, client: TestClient, authorizer: Authorization
     ):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role_id = uuid.uuid4()
         resource_id = uuid.uuid4()
         action = Action.GLOBAL__DELETE_USER

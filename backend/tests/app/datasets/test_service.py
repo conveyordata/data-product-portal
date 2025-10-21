@@ -16,17 +16,18 @@ from app.datasets.model import Dataset
 from app.datasets.service import DatasetService
 from app.roles import ADMIN_UUID
 from app.roles.schema import Prototype, Scope
+from app.settings import settings
 
 
 class TestDatasetsService:
     def test_private_dataset_not_visible(self):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         ds = self.get_dataset(ds)
         assert DatasetService(test_session).is_visible_to_user(ds, user) is False
 
     def test_get_private_dataset_by_owner(self):
-        owner = UserFactory(external_id="sub")
+        owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.DATASET, prototype=Prototype.OWNER)
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(
@@ -36,7 +37,7 @@ class TestDatasetsService:
         assert DatasetService(test_session).is_visible_to_user(ds, owner) is True
 
     def test_get_private_dataset_by_admin(self):
-        admin = UserFactory(external_id="sub")
+        admin = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(scope=Scope.GLOBAL, prototype=Prototype.ADMIN, id=ADMIN_UUID)
         GlobalRoleAssignmentFactory(role_id=role.id, user_id=admin.id)
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
@@ -44,7 +45,7 @@ class TestDatasetsService:
         assert DatasetService(test_session).is_visible_to_user(ds, admin) is True
 
     def test_get_private_dataset_by_member_of_consuming_data_product(self):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(access_type=DatasetAccessType.PRIVATE)
         dp = DataProductFactory()
         role = RoleFactory(scope=Scope.DATA_PRODUCT)

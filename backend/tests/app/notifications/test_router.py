@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from tests.factories import NotificationFactory, UserFactory
 
 from app.notifications.schema import Notification
+from app.settings import settings
 from app.users.schema import User
 
 ENDPOINT = "/api/notifications"
@@ -11,7 +12,7 @@ ENDPOINT = "/api/notifications"
 class TestNotificationsRouter:
 
     def test_get_notifications(self, client: TestClient):
-        user: User = UserFactory(external_id="sub")
+        user: User = UserFactory(external_id=settings.DEFAULT_USERNAME)
         notification: Notification = NotificationFactory(user=user)
 
         response = client.get(f"{ENDPOINT}")
@@ -21,7 +22,7 @@ class TestNotificationsRouter:
         assert data[0]["id"] == str(notification.id)
 
     def test_delete_notification(self, client: TestClient):
-        user: User = UserFactory(external_id="sub")
+        user: User = UserFactory(external_id=settings.DEFAULT_USERNAME)
         notification: Notification = NotificationFactory(user=user)
 
         response = client.get(f"{ENDPOINT}")
@@ -37,7 +38,7 @@ class TestNotificationsRouter:
         assert len(response.json()) == 0
 
     def test_delete_notification_other_user(self, client: TestClient):
-        _: User = UserFactory(external_id="sub")
+        _: User = UserFactory(external_id=settings.DEFAULT_USERNAME)
         notification: Notification = NotificationFactory()
 
         response = self.delete_notification(client, notification.id)
@@ -51,7 +52,7 @@ class TestNotificationsRouter:
         assert response.status_code == 200
 
     def test_delete_all_notifications(self, client: TestClient):
-        user: User = UserFactory(external_id="sub")
+        user: User = UserFactory(external_id=settings.DEFAULT_USERNAME)
         _: Notification = NotificationFactory(user=user)
 
         response = client.get(f"{ENDPOINT}")

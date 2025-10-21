@@ -25,6 +25,7 @@ from app.core.authz import Action
 from app.core.namespace.validation import NamespaceValidityType
 from app.roles.schema import Scope
 from app.roles.service import RoleService
+from app.settings import settings
 
 ENDPOINT = "/api/data_products"
 
@@ -53,7 +54,7 @@ class TestDataProductsRouter:
 
     def test_create_data_product(self, payload, client, session):
         RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
@@ -67,7 +68,7 @@ class TestDataProductsRouter:
         assert "id" in created_data_product.json()
 
     def test_create_data_product_no_owner_role(self, payload, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
@@ -81,7 +82,7 @@ class TestDataProductsRouter:
 
     def test_create_data_product_no_owners(self, session, payload, client):
         RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
@@ -98,7 +99,7 @@ class TestDataProductsRouter:
 
     def test_create_data_product_duplicate_namespace(self, session, payload, client):
         RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
@@ -117,7 +118,7 @@ class TestDataProductsRouter:
         self, session, payload, client
     ):
         RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
@@ -137,7 +138,7 @@ class TestDataProductsRouter:
         self, session, payload, client
     ):
         RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
@@ -169,7 +170,7 @@ class TestDataProductsRouter:
         assert response.json()["id"] == str(data_product.id)
 
     def test_get_conveyor_ide_url(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -185,7 +186,7 @@ class TestDataProductsRouter:
         assert response.status_code == 501
 
     def test_get_data_product_by_user_id(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
@@ -215,7 +216,7 @@ class TestDataProductsRouter:
         assert response.status_code == 403
 
     def test_update_data_product(self, payload, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -239,7 +240,7 @@ class TestDataProductsRouter:
         assert response.status_code == 403
 
     def test_update_data_product_about(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -259,7 +260,7 @@ class TestDataProductsRouter:
         assert response.status_code == 403
 
     def test_remove_data_product(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -281,7 +282,7 @@ class TestDataProductsRouter:
         assert response.status_code == 403
 
     def test_update_status(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -308,7 +309,7 @@ class TestDataProductsRouter:
         assert response.status_code == 403
 
     def test_update_usage(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -340,7 +341,7 @@ class TestDataProductsRouter:
         assert data_product.status_code == 403
 
     def test_data_product_set_custom_setting_wrong_scope(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -364,7 +365,7 @@ class TestDataProductsRouter:
         assert response.status_code == 403
 
     def test_dataset_set_custom_setting(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -411,7 +412,7 @@ class TestDataProductsRouter:
 
     def test_get_aws_role(self, client):
         env = EnvironmentFactory(name="production")
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -430,7 +431,7 @@ class TestDataProductsRouter:
 
     def test_get_signin_url_not_implemented(self, client):
         EnvironmentFactory(name="production")
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -451,7 +452,7 @@ class TestDataProductsRouter:
     def test_get_databricks_url(self, client):
         env = EnvironmentFactory(name="production")
         platform = PlatformFactory(name="Databricks")
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -479,7 +480,7 @@ class TestDataProductsRouter:
     def test_get_snowflake_url(self, client):
         env = EnvironmentFactory(name="production")
         platform = PlatformFactory(name="Snowflake")
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -598,7 +599,7 @@ class TestDataProductsRouter:
     def test_update_data_product_duplicate_namespace(self, payload, client: TestClient):
         namespace = "namespace"
         DataProductFactory(namespace=namespace)
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -619,7 +620,7 @@ class TestDataProductsRouter:
         self, payload, client: TestClient, session
     ):
         RoleService(db=session).initialize_prototype_roles()
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_DATAPRODUCT],
@@ -640,7 +641,7 @@ class TestDataProductsRouter:
     def test_history_event_created_on_data_product_update(
         self, payload, client: TestClient
     ):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -661,7 +662,7 @@ class TestDataProductsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_data_product_about_update(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -679,7 +680,7 @@ class TestDataProductsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_data_product_status_update(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -700,7 +701,7 @@ class TestDataProductsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_data_product_deletion(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -718,7 +719,7 @@ class TestDataProductsRouter:
         assert len(history) == 1
 
     def test_retain_deleted_data_product_name_in_history(self, client: TestClient):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,

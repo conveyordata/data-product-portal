@@ -16,6 +16,7 @@ from app.core.authz import Action
 from app.datasets.enums import DatasetAccessType
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Scope
+from app.settings import settings
 
 DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"
 DATA_PRODUCTS_ENDPOINT = "/api/data_products"
@@ -25,7 +26,7 @@ class TestDataProductsDatasetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
     def test_request_data_product_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
@@ -44,7 +45,7 @@ class TestDataProductsDatasetsRouter:
         assert response.status_code == 200
 
     def test_request_already_exists(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
@@ -76,7 +77,7 @@ class TestDataProductsDatasetsRouter:
         assert response.status_code == 403
 
     def test_request_data_product_link_private_dataset(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
@@ -97,7 +98,7 @@ class TestDataProductsDatasetsRouter:
         assert response.status_code == 200
 
     def test_request_data_product_remove(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
@@ -132,7 +133,7 @@ class TestDataProductsDatasetsRouter:
         assert link.status_code == 200
 
     def test_approve_data_product_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -170,7 +171,7 @@ class TestDataProductsDatasetsRouter:
         )
 
     def test_deny_data_product_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -207,7 +208,7 @@ class TestDataProductsDatasetsRouter:
         )
 
     def test_remove_data_product_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -228,7 +229,7 @@ class TestDataProductsDatasetsRouter:
         assert response.status_code == 200
 
     def test_request_dataset_link_with_invalid_dataset_id(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -243,7 +244,7 @@ class TestDataProductsDatasetsRouter:
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_delete_dataset_with_product_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(scope=Scope.DATASET, permissions=[Action.DATASET__DELETE])
         DatasetRoleAssignmentFactory(
@@ -264,7 +265,7 @@ class TestDataProductsDatasetsRouter:
         assert response.json() == []
 
     def test_get_pending_actions(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
@@ -294,7 +295,7 @@ class TestDataProductsDatasetsRouter:
         assert response.json()[0]["status"] == "pending"
 
     def test_get_pending_actions_public(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
@@ -318,7 +319,7 @@ class TestDataProductsDatasetsRouter:
         assert response.json() == []
 
     def test_history_event_created_on_link_request(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
@@ -339,7 +340,7 @@ class TestDataProductsDatasetsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_remove_link(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -355,7 +356,7 @@ class TestDataProductsDatasetsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_approval(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -373,7 +374,7 @@ class TestDataProductsDatasetsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_denial(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -390,7 +391,7 @@ class TestDataProductsDatasetsRouter:
         assert len(history) == 1
 
     def test_history_event_created_on_unlink_request(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[

@@ -7,6 +7,7 @@ from tests.factories.user import UserFactory
 
 from app.core.authz import Action
 from app.roles.schema import Scope
+from app.settings import settings
 
 ENDPOINT = "/api/events"
 
@@ -20,7 +21,7 @@ class TestEventsRouter:
         assert response.json() is None
 
     def test_latest_event_timestamp(self, client):
-        user = UserFactory(external_id="sub")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,

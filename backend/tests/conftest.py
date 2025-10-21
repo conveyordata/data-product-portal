@@ -14,6 +14,7 @@ from app.core.authz.authorization import Authorization
 from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.main import app
+from app.settings import settings
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
@@ -115,7 +116,7 @@ def clear_db(session: scoped_session[Session]) -> None:
 @pytest.fixture
 def admin() -> UserFactory:
     role = RoleFactory.admin()
-    user = UserFactory(external_id="sub")
+    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
     return user
 
