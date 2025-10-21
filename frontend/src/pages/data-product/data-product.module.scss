@@ -49,18 +49,6 @@
     }
 }
 
-.ownersSection {
-    position: relative;
-    flex: 1;
-}
-
-.sidebarToggle {
-    position: absolute;
-    top: -12px;
-    right: -20px;
-    z-index: 10;
-}
-
 .sidebar {
     flex: 0.3;
     min-width: globals.$min-sidebar-width;

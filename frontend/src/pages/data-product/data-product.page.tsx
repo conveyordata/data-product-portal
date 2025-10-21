@@ -1,4 +1,4 @@
-import Icon, { LeftOutlined, RightOutlined, SettingOutlined } from '@ant-design/icons';
+import Icon, { EditOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Flex, Space, Typography } from 'antd';
 import clsx from 'clsx';
 import { useEffect, useMemo, useState } from 'react';
@@ -81,15 +81,22 @@ export function DataProduct() {
                             {dataProduct?.name}
                         </Typography.Title>
                     </Space>
-                    {canEdit && (
-                        <Space className={styles.editIcon}>
+                    <Space className={styles.editIcon}>
+                        {canEdit && (
                             <CircleIconButton
-                                icon={<SettingOutlined />}
+                                icon={<EditOutlined />}
                                 tooltip={t('Edit data product')}
                                 onClick={navigateToEditPage}
                             />
-                        </Space>
-                    )}
+                        )}
+                        {!sidebarCollapsed && (
+                            <CircleIconButton
+                                icon={<RightOutlined />}
+                                tooltip={t('Hide sidebar')}
+                                onClick={() => setSidebarCollapsed(true)}
+                            />
+                        )}
+                    </Space>
                 </Flex>
                 {/* Main content */}
                 <Flex className={styles.mainContent}>
@@ -117,16 +124,7 @@ export function DataProduct() {
                 {!sidebarCollapsed ? (
                     <>
                         <DataProductActions dataProductId={dataProductId} />
-                        <div className={styles.ownersSection}>
-                            <div className={styles.sidebarToggle}>
-                                <CircleIconButton
-                                    icon={<RightOutlined />}
-                                    tooltip={t('Hide sidebar')}
-                                    onClick={() => setSidebarCollapsed(true)}
-                                />
-                            </div>
-                            <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
-                        </div>
+                        <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
                     </>
                 ) : (
                     <div className={styles.collapsedSidebar}>
