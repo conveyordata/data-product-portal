@@ -93,6 +93,7 @@
 
 .badge {
     margin-right: globals.$spacing-s;
+    margin-left: 16px;
 }
 
 .linkedAssetsSection {
@@ -100,7 +101,7 @@
 }
 
 .expandButton {
-    padding: 4px 8px;
+    padding: globals.$spacing-m;
     height: auto;
     font-size: 13px;
     color: rgba(0, 0, 0, 0.65);

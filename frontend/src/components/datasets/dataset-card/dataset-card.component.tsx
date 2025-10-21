@@ -3,6 +3,8 @@ import { Badge, Button, Card, Flex, List, Popconfirm, Typography } from 'antd';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useModal } from '@/hooks/use-modal';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import {
@@ -166,50 +168,65 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                 onMouseDown={handleMouseDown}
             >
                 <Flex vertical gap={12}>
-                    <Flex justify="space-between" align="flex-start">
-                        <div className={styles.titleSection}>
-                            <Link to={createDatasetIdPath(dataset.id)}>
-                                <Typography.Title level={5} className={styles.title}>
-                                    {dataset.name}
-                                </Typography.Title>
-                            </Link>
-                        </div>
-                        <Flex gap={4}>
-                            <Button
-                                onClick={handleOpen}
-                                loading={isRemoving}
-                                disabled={!canLink}
-                                type="link"
-                                size="small"
-                            >
-                                {t('Link Technical Assets')}
-                            </Button>
-                            <Popconfirm
-                                title={t('Remove')}
-                                description={t(
-                                    'Are you sure you want to delete the dataset? This can have impact on downstream dependencies',
-                                )}
-                                onConfirm={handleRemoveDataset}
-                                placement="topRight"
-                                okText={t('Confirm')}
-                                cancelText={t('Cancel')}
-                                okButtonProps={{ loading: isRemoving }}
-                            >
-                                <Button loading={isRemoving} disabled={!canRemove} type="text" size="small" danger>
-                                    {t('Delete')}
-                                </Button>
-                            </Popconfirm>
+                    <Flex gap={12} align="center" justify="space-between">
+                        <CustomSvgIconLoader iconComponent={datasetBorderIcon} />
+                        <Flex vertical style={{ flex: 1 }}>
+                            <Flex justify="space-between" align="flex-start">
+                                <div className={styles.titleSection}>
+                                    <Link to={createDatasetIdPath(dataset.id)}>
+                                        <Typography.Title level={5} className={styles.title}>
+                                            {dataset.name}
+                                        </Typography.Title>
+                                    </Link>
+                                </div>
+                                <Flex gap={4}>
+                                    <Button
+                                        onClick={handleOpen}
+                                        loading={isRemoving}
+                                        disabled={!canLink}
+                                        type="link"
+                                        size="small"
+                                    >
+                                        {t('Link Technical Assets')}
+                                    </Button>
+                                    <Popconfirm
+                                        title={t('Remove')}
+                                        description={t(
+                                            'Are you sure you want to delete the dataset? This can have impact on downstream dependencies',
+                                        )}
+                                        onConfirm={handleRemoveDataset}
+                                        placement="topRight"
+                                        okText={t('Confirm')}
+                                        cancelText={t('Cancel')}
+                                        okButtonProps={{ loading: isRemoving }}
+                                    >
+                                        <Button
+                                            loading={isRemoving}
+                                            disabled={!canRemove}
+                                            type="text"
+                                            size="small"
+                                            danger
+                                        >
+                                            {t('Delete')}
+                                        </Button>
+                                    </Popconfirm>
+                                </Flex>
+                            </Flex>
+
+                            <div className={styles.descriptionSection}>
+                                <Typography.Text type="secondary" className={styles.description}>
+                                    {dataset.description}
+                                </Typography.Text>
+                            </div>
                         </Flex>
                     </Flex>
 
-                    <div className={styles.descriptionSection}>
-                        <Typography.Text type="secondary" className={styles.description}>
-                            {dataset.description}
-                        </Typography.Text>
-                    </div>
-
                     <Flex vertical gap={8}>
-                        <Badge status={getBadgeStatus(dataset.status)} text={getStatusLabel(t, dataset.status)} />
+                        <Badge
+                            className={styles.badge}
+                            status={getBadgeStatus(dataset.status)}
+                            text={getStatusLabel(t, dataset.status)}
+                        />
 
                         {dataset.data_output_links && dataset.data_output_links.length > 0 && (
                             <div className={styles.linkedAssetsSection}>

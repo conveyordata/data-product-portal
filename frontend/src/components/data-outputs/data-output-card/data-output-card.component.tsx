@@ -5,7 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-import { useRemoveDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice.ts';
+import {
+    useGetDataOutputByIdQuery,
+    useRemoveDataOutputMutation,
+} from '@/store/features/data-outputs/data-outputs-api-slice.ts';
 import { useRemoveDataOutputDatasetLinkMutation } from '@/store/features/data-outputs-datasets/data-outputs-datasets-api-slice.ts';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
@@ -31,6 +34,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
         resource: dataProductId,
         action: AuthorizationAction.DATA_PRODUCT__DELETE_DATA_OUTPUT,
     });
+    const { data: data_output } = useGetDataOutputByIdQuery(dataOutput.id);
 
     const [removeDataOutput, { isLoading: isRemoving }] = useRemoveDataOutputMutation();
     const [unlinkDataset] = useRemoveDataOutputDatasetLinkMutation();
@@ -123,14 +127,14 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                 </Flex>
                 <Flex vertical className={styles.mainContent}>
                     <Flex justify="space-between" align="flex-start">
-                        <Flex gap={12} align="flex-start">
+                        <Flex gap={12} align="center">
                             <CustomSvgIconLoader
                                 iconComponent={getDataOutputIcon(dataOutput.configuration.configuration_type)}
                             />
                             <div className={styles.content}>
                                 <Link to={createDataOutputIdPath(dataOutput.id, dataOutput.owner_id)}>
                                     <Typography.Title level={5} className={styles.title}>
-                                        {dataOutput.result_string || ''}
+                                        {data_output?.result_string || ''}
                                     </Typography.Title>
                                     <Typography.Text type="secondary" className={styles.description}>
                                         {dataOutput.name}
