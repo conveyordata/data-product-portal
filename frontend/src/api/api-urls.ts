@@ -32,6 +32,7 @@ export enum ApiUrl {
     DataProductDatabricksWorkspaceUrl = '/api/data_products/:dataProductId/databricks_workspace_url',
     DataProductSnowflakeUrl = '/api/data_products/:dataProductId/snowflake_url',
     DataProductDataset = '/api/data_products/:dataProductId/dataset/:datasetId',
+    DataProductLinkDatasets = '/api/data_products/:dataProductId/link_datasets',
     DataProductAbout = '/api/data_products/:dataProductId/about',
     DataProductHistory = '/api/data_products/:dataProductId/history',
     DataProductGraph = '/api/data_products/:dataProductId/graph',

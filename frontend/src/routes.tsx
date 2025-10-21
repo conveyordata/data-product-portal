@@ -5,6 +5,7 @@ import PublicLayout from '@/components/layout/public/public.layout.tsx';
 import RootLayout from '@/components/layout/root/root.layout.tsx';
 import { AuditLogs } from '@/pages/audit-logs/audit-logs.page.tsx';
 import { Logout } from '@/pages/auth/logout/logout-page.tsx';
+import { Cart } from '@/pages/cart/cart.page.tsx';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
 import { DataProductCreate } from '@/pages/data-product-create/data-product-create.page.tsx';
 import { DataProductEdit } from '@/pages/data-product-edit/data-product-edit.page.tsx';
@@ -16,7 +17,6 @@ import { ExplorerPage } from '@/pages/explorer/explorer.page.tsx';
 import { Home } from '@/pages/home/home.page.tsx';
 import { Marketplace } from '@/pages/marketplace/marketplace.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
-
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
 import { DataOutput } from './pages/data-output/data-output.page.tsx';
 import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
@@ -72,6 +72,15 @@ const router = createBrowserRouter([
                             {
                                 path: ApplicationPaths.DataProductEdit,
                                 element: <DataProductEdit />,
+                            },
+                        ],
+                    },
+                    {
+                        path: ApplicationPaths.MarketplaceCart,
+                        children: [
+                            {
+                                element: <Cart />,
+                                index: true,
                             },
                         ],
                     },

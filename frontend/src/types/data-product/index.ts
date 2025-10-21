@@ -14,8 +14,8 @@ export type {
     DataProductGetDatabricksWorkspaceUrlResponse,
 } from './data-product-databricks-workspace-url.contract.ts';
 export type {
-    DataProductDatasetAccessRequest,
-    DataProductDatasetAccessResponse,
+    DataProductDatasetsAccessRequest,
+    DataProductDatasetsAccessResponse,
 } from './data-product-dataset-access.contract.ts';
 export type {
     DataProductDatasetRemoveRequest,

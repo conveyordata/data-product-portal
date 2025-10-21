@@ -117,7 +117,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
-    const [requestDatasetAccessForDataOutput] = useRequestDatasetAccessForDataOutputMutation();
+    const [requestDatasetsAccessForDataOutput] = useRequestDatasetAccessForDataOutputMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
     const [deleteDataset, { isLoading: isArchiving }] = useRemoveDatasetMutation();
     const [fetchNamespace, { data: namespaceSuggestion }] = useLazyGetDatasetNamespaceSuggestionQuery();
@@ -187,10 +187,10 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 dispatchMessage({ content: t('Output port created successfully'), type: 'success' });
                 // If dataProductId was provided, navigate back to the data product page
                 if (dataOutputId && dataProductId) {
-                    await requestDatasetAccessForDataOutput({
+                    await requestDatasetsAccessForDataOutput({
                         dataOutputId: dataOutputId,
                         datasetId: response.id,
-                    }).unwrap();
+                    });
                     navigate(createDataOutputIdPath(dataOutputId, dataProductId));
                 } else {
                     if (dataProductId) {
