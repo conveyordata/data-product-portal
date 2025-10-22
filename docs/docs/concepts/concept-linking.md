@@ -16,33 +16,41 @@ config:
   layout: elk
 ---
 flowchart TD
- subgraph op1["Redshift Output Port"]
+ subgraph op1["Output Port: Realtime Equipment Metrics"]
         ta1(["Redshift Table X"])
         ta2(["Redshift Table Y"])
   end
- subgraph op2["S3 Output Port"]
+ subgraph op2["Output Port: Daily Aggregated Metrics"]
         ta3(["S3 export"])
   end
- subgraph dp1["Data Product A"]
+ subgraph op3["Output Port: Maintenance schedule"]
+        ta4(["Iceberg Table X"])
+  end
+ subgraph op4["Output Port: Maintenance alerts"]
+        ta5(["Iceberg Table Y"])
+  end
+ subgraph dp1["Data Product: Equipment Metrics"]
         op1
         op2
   end
- subgraph dp2["Data Product B"]
-        ip1["Input Port: Redshift"]
-        ip2["Input Port: S3"]
+ subgraph dp2["Data Product: Maintenance Planning"]
+        ip1["Input Port: Realtime Equipment Metrics"]
+        op3
+        op4
   end
-    op1 -- Data Agreement 1 --> ip1
-    op2 -- Data Agreement 2 --> ip2
-
+    op1 -- Data Agreement --> ip1
+    ip1 -.-> op3
+    ip1 -.-> op4
 ```
 
 ## 🔁 Example Walkthrough
 
-1. **Data Product A** produces three technical assets: two Redshift tables and an S3 export.
-2. These technical assets are grouped into two **Output Ports**: one port providing access to the two Redshift tables and another port providing access to the S3 export.
-3. **Data Product B** wants access to both Output Ports. A separate request is made for each Output Port.
-4. Data Product A can separately evaluate and approve these requests. When approved, these requests are recorded in the Data Agreement.
-5. Now, Data Product B can use the data exposed by Data Product A as source for its own data processing.
+1. The **Equipment Metrics Data Product** produces three technical assets: two Redshift tables and an S3 export.
+2. These technical assets are grouped into two **Output Ports**: one port providing access to the Realtime Equipment Metrics and another port providing access to the Daily Aggregated Metrics.
+3. The **Maintenance Planning Data Product** wants access to the Realtime Equipment Metrics Output Port. A request is made specifically to this Output Port.
+4. The **Equipment Metrics Data Product** can evaluate and approve this request in isolation. When approved, this request is recorded in the Data Agreement linked to the Input Port.
+5. Now, the **Maintenance Planning Data Product** can use the data exposed by the **Equipment Metrics Data Product** as source for its own data processing.
+6. The **Maintenance Planning Data Product** exposes two Output Ports of its own: **Maintenance Alerts** and **Maintenance Schedule**.
 
 ## 🎯 Benefits
 
