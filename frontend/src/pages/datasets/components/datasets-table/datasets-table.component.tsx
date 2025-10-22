@@ -1,8 +1,8 @@
 import {
     BarChartOutlined,
-    NumberOutlined,
     DatabaseOutlined,
     EyeOutlined,
+    NumberOutlined,
     ShoppingCartOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
@@ -104,6 +104,7 @@ export function DatasetsTable() {
                 style={{
                     display: 'flex',
                     flexWrap: 'wrap',
+                    margin: '-12px', // Compensate for the card margin
                 }}
             >
                 {filteredDatasets.map((dataset) => (
@@ -113,28 +114,27 @@ export function DatasetsTable() {
                         style={{
                             flex: '1 1 360',
                             marginLeft: 0,
-                            margin: 8,
-                            minWidth: 360,
-                            maxWidth: 360,
+                            margin: 12,
+                            width: 360,
                             boxShadow: '0 2px 8px #f0f1f2',
                         }}
                     >
-                        <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                            <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }}>
-                                <div>
-                                    <Typography.Title level={5} style={{ marginBottom: 0 }}>
-                                        {dataset.name}
-                                    </Typography.Title>
-                                    <Typography.Text>
+                        <Space direction="vertical" style={{ width: '100%' }} size="small">
+                            <div>
+                                <Typography.Title level={5} style={{ marginBottom: 0 }}>
+                                    {dataset.name}
+                                </Typography.Title>
+                                <div style={{ height: '40px' }}>
+                                    <Typography.Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
                                         {dataset.description || 'No description available.'}
-                                    </Typography.Text>
-                                    <div style={{ marginTop: 12 }}>
-                                        {dataset.tags?.map((tag, index) => (
-                                            <Tag key={index}>{tag.value}</Tag>
-                                        ))}
-                                    </div>
+                                    </Typography.Paragraph>
                                 </div>
-                            </Space>
+                                <div style={{ marginTop: 6, height: '22px' }}>
+                                    {dataset.tags?.map((tag) => (
+                                        <Tag key={tag.value}>{tag.value}</Tag>
+                                    ))}
+                                </div>
+                            </div>
 
                             <div
                                 style={{
@@ -146,36 +146,40 @@ export function DatasetsTable() {
                                 <div>
                                     <BarChartOutlined /> <Typography.Text type="secondary">Domain</Typography.Text>
                                     <br />
-                                    <Typography.Text strong>{dataset.domain.name}</Typography.Text>
+                                    <Typography.Text>{dataset.domain.name}</Typography.Text>
                                 </div>
                                 <div>
-                                    <TeamOutlined /> <Typography.Text type="secondary">Data product</Typography.Text>
+                                    <EyeOutlined /> <Typography.Text type="secondary">Status</Typography.Text>
                                     <br />
-                                    <Typography.Text strong>{dataset.data_product_name}</Typography.Text>
+                                    <Typography.Text>{dataset.status}</Typography.Text>
                                 </div>
                                 <div>
                                     <DatabaseOutlined /> <Typography.Text type="secondary">Access Type</Typography.Text>
                                     <br />
-                                    <Typography.Text strong>{dataset.access_type}</Typography.Text>
+                                    <Typography.Text>{dataset.access_type}</Typography.Text>
                                 </div>
-                                <div>
-                                    <EyeOutlined />{' '}
-                                    <Typography.Text type="secondary">Status</Typography.Text>
-                                    <br />
-                                    <Typography.Text strong>{dataset.status}</Typography.Text>
-                                </div>
-
                                 <div>
                                     <NumberOutlined />{' '}
                                     <Typography.Text type="secondary">Technical Assets</Typography.Text>
                                     <br />
-                                    <Typography.Text strong>{dataset.data_output_links.length}</Typography.Text>
+                                    <Typography.Text>{dataset.data_output_links.length}</Typography.Text>
                                 </div>
 
+                                <div style={{ height: '66px' }}>
+                                    <TeamOutlined /> <Typography.Text type="secondary">Data product</Typography.Text>
+                                    <br />
+                                    <Typography.Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
+                                        {dataset.data_product_name}
+                                    </Typography.Paragraph>
+                                </div>
                                 <div>
                                     <BarChartOutlined /> <Typography.Text type="secondary">Usage</Typography.Text>
                                     <br />
-                                    <Typography.Text strong>{dataset.data_product_count == 1? (t('Used by 1 data product')):(t('Used by {{count}} products', {'count': dataset.data_product_count}))}</Typography.Text>
+                                    <Typography.Text>
+                                        {dataset.data_product_count == 1
+                                            ? t('1 data product')
+                                            : t('{{count}} data products', { count: dataset.data_product_count })}
+                                    </Typography.Text>
                                 </div>
                             </div>
 
@@ -196,7 +200,7 @@ export function DatasetsTable() {
 
             <Pagination
                 current={0}
-                pageSize={10}
+                pageSize={12}
                 total={filteredDatasets.length}
                 onChange={handlePageChange}
                 size="small"
