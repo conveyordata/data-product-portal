@@ -13,7 +13,6 @@ import { useNavigate } from 'react-router';
 
 import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
-import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
 import { createDatasetIdPath } from '@/types/navigation.ts';
@@ -39,20 +38,31 @@ export function DatasetsTable() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [selectedDatasetIds, setSelectedDatasetIds] = useState<string[]>([]);
-
+    const pageSize = 2;
+    const [currentPage, setCurrentPage] = useState(1);
     const { data: datasets = [] } = useGetAllDatasetsQuery();
 
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredDatasets = useMemo(() => {
         let filtered = filterDatasets(datasets, searchTerm);
-        filtered = filterDatasetsByRoles(filtered, selectedDatasetIds);
         return filtered;
     }, [datasets, searchTerm, selectedDatasetIds]);
 
-    const { pagination, handlePaginationChange } = useTablePagination(filteredDatasets);
+    const paginatedDatasets = useMemo(() => {
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        return filteredDatasets.slice(startIndex, endIndex);
+    }, [filteredDatasets, currentPage]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+
     const handleSearchChange = (value: string) => {
         setSearchTerm(value);
+        setCurrentPage(1); // Reset to first page on search
     };
 
     const CAPTURE_SEARCH_EVENT_DELAY = 750;
@@ -69,14 +79,6 @@ export function DatasetsTable() {
 
         return () => clearTimeout(timeoutId); // clear if searchTerm gets updated beforehand
     }, [searchTerm]);
-
-    const handlePageChange = (page: number, pageSize: number) => {
-        handlePaginationChange({
-            ...pagination,
-            current: page,
-            pageSize,
-        });
-    };
 
     function navigateToDataset(datasetId: string) {
         navigate(createDatasetIdPath(datasetId));
@@ -102,12 +104,13 @@ export function DatasetsTable() {
             <Flex
                 wrap="wrap"
                 style={{
+                    marginTop: '6px',
                     display: 'flex',
                     flexWrap: 'wrap',
                     margin: '-12px', // Compensate for the card margin
                 }}
             >
-                {filteredDatasets.map((dataset) => (
+                {paginatedDatasets.map((dataset) => (
                     <Card
                         key={dataset.id}
                         styles={{ body: { padding: 12 } }}
@@ -197,14 +200,21 @@ export function DatasetsTable() {
                     </Card>
                 ))}
             </Flex>
-
-            <Pagination
-                current={0}
-                pageSize={12}
-                total={filteredDatasets.length}
-                onChange={handlePageChange}
-                size="small"
-            />
+            {filteredDatasets.length > pageSize && (
+                <div style={{
+                    marginTop: 24,
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                }}>
+                    <Pagination
+                        current={currentPage}
+                        pageSize={pageSize}
+                        total={filteredDatasets.length}
+                        onChange={handlePageChange}
+                        showSizeChanger={false} // Disable page size changer
+                    />
+                </div>
+            )}
         </div>
     );
 }
