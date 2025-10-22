@@ -1,9 +1,8 @@
-import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
+import { ShoppingCartOutlined } from '@ant-design/icons';
+import { Badge, Button, Popover, Space, type TableColumnsType, Tag, Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
-
 import { DatasetAccessIcon } from '@/components/datasets/dataset-access-icon/dataset-access-icon';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import type { DataProductContract } from '@/types/data-product';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 import type { DatasetAccess, DatasetsGetContract } from '@/types/dataset';
 import type { DatasetStatus } from '@/types/dataset/dataset.contract';
@@ -117,6 +116,17 @@ export const getDatasetTableColumns = ({ t, datasets }: Props): TableColumnsType
             },
             sorter: sorter.numberSorter((ds) => ds.data_product_count),
             width: '15%',
+        },
+        {
+            title: t('Actions'),
+            render: () => (
+                <Space size={0}>
+                    <Tooltip title={t('Add to cart')}>
+                        <Button icon={<ShoppingCartOutlined />} type="default" />
+                    </Tooltip>
+                </Space>
+            ),
+            width: '5%',
         },
     ];
 };
