@@ -1,18 +1,23 @@
-import { Flex, Form, Input, Pagination, Table, Typography } from 'antd';
+import {
+    ArrowRightOutlined,
+    BarChartOutlined,
+    CalendarOutlined,
+    DatabaseOutlined,
+    ShoppingCartOutlined,
+    StarFilled,
+    TeamOutlined,
+} from '@ant-design/icons';
+import { Button, Card, Flex, Form, Input, Pagination, Space, Tag, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import { RoleFilter } from '@/components/filters/role-filter.component';
 import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import { getDatasetTableColumns } from '@/pages/datasets/components/datasets-table/datasets-table-columns.tsx';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
 import { createDatasetIdPath } from '@/types/navigation.ts';
-import type { SearchForm } from '@/types/shared';
-import styles from './datasets-table.module.scss';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -35,12 +40,10 @@ export function DatasetsTable() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [selectedDatasetIds, setSelectedDatasetIds] = useState<string[]>([]);
-    const [selectedRole, setSelectedRole] = useState<string | undefined>(undefined);
 
-    const { data: datasets = [], isFetching } = useGetAllDatasetsQuery();
+    const { data: datasets = [] } = useGetAllDatasetsQuery();
 
-    const [searchForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchForm);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const filteredDatasets = useMemo(() => {
         let filtered = filterDatasets(datasets, searchTerm);
@@ -49,8 +52,9 @@ export function DatasetsTable() {
     }, [datasets, searchTerm, selectedDatasetIds]);
 
     const { pagination, handlePaginationChange } = useTablePagination(filteredDatasets);
-
-    const columns = useMemo(() => getDatasetTableColumns({ t, datasets: filteredDatasets }), [t, filteredDatasets]);
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
+    };
 
     const CAPTURE_SEARCH_EVENT_DELAY = 750;
 
@@ -75,63 +79,131 @@ export function DatasetsTable() {
         });
     };
 
-    const handleRoleChange = (selected: { productIds: string[]; role: string }) => {
-        setSelectedDatasetIds(selected.productIds);
-        setSelectedRole(selected.role);
-    };
-
     function navigateToDataset(datasetId: string) {
         navigate(createDatasetIdPath(datasetId));
     }
+    const handleAddToBasket = (id: string) => {
+        console.log('Add to basket clicked for dataset with id:', id);
+    };
 
     return (
-        <Flex vertical className={styles.tableContainer}>
-            <Flex className={styles.searchContainer}>
+        <div>
+            <Flex align={'center'} style={{ display: 'flex', gap: 16 }}>
                 <Typography.Title level={3}>{t('Marketplace')}</Typography.Title>
-                <Form<SearchForm> form={searchForm} className={styles.searchForm}>
-                    <Form.Item<SearchForm> name={'search'} initialValue={''} className={styles.formItem}>
-                        <Input.Search placeholder={t('Search datasets by name')} allowClear />
-                    </Form.Item>
+                <Form style={{ flex: 1 }}>
+                    <Input.Search
+                        style={{ height: '40px' }}
+                        placeholder={t('Search datasets by name')}
+                        value={searchTerm}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        allowClear
+                    />
                 </Form>
             </Flex>
-            <Flex vertical className={styles.tableFilters}>
-                <Flex align="flex-end" justify="space-between" className={styles.tableBar}>
-                    <RoleFilter mode={'datasets'} selectedRole={selectedRole} onRoleChange={handleRoleChange} />
-                    <Pagination
-                        current={pagination.current}
-                        pageSize={pagination.pageSize}
-                        total={filteredDatasets.length}
-                        onChange={handlePageChange}
-                        size="small"
-                        showTotal={(total, range) =>
-                            t('Showing {{range0}}-{{range1}} of {{total}} datasets', {
-                                range0: range[0],
-                                range1: range[1],
-                                total: total,
-                            })
-                        }
-                    />
-                </Flex>
-                <Table<DatasetsGetContract[0]>
-                    onRow={(record) => {
-                        return {
-                            onClick: () => navigateToDataset(record.id),
-                        };
-                    }}
-                    className={styles.table}
-                    columns={columns}
-                    dataSource={filteredDatasets}
-                    pagination={{
-                        ...pagination,
-                        position: [],
-                    }}
-                    rowKey={(record) => record.id}
-                    loading={isFetching}
-                    rowHoverable
-                    rowClassName={styles.row}
-                    size={'small'}
-                />
+            <Flex
+                wrap="wrap"
+                style={{
+                    marginTop: 12,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'flex-start',
+                }}
+            >
+                {filteredDatasets.map((dataset) => (
+                    <Card
+                        key={dataset.id}
+                        styles={{ body: { padding: 16 } }}
+                        style={{
+                            minWidth: 420,
+                            maxWidth: 480,
+                            flex: '1 1 420px',
+                            borderRadius: 12,
+                            marginBottom: 12,
+                            boxShadow: '0 2px 8px #f0f1f2',
+                        }}
+                    >
+                        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                            <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }}>
+                                <div>
+                                    <Typography.Title level={5} style={{ marginBottom: 0 }}>
+                                        {dataset.name}
+                                    </Typography.Title>
+                                    <Typography.Text>
+                                        {dataset.description || 'No description available.'}
+                                    </Typography.Text>
+                                    <div style={{ marginTop: 12 }}>
+                                        <Tag>Transactions</Tag>
+                                        <Tag>Payments</Tag>
+                                        <Tag>Customer Data</Tag>
+                                        <Tag>+1</Tag>
+                                    </div>
+                                </div>
+                            </Space>
+
+                            <div
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr 1fr',
+                                    gap: 8,
+                                    marginTop: 4,
+                                }}
+                            >
+                                <div>
+                                    <DatabaseOutlined /> <Typography.Text type="secondary">Data Type</Typography.Text>
+                                    <br />
+                                    <Typography.Text strong>Transactional</Typography.Text>
+                                </div>
+                                <div>
+                                    <CalendarOutlined />{' '}
+                                    <Typography.Text type="secondary">Last Updated</Typography.Text>
+                                    <br />
+                                    <Typography.Text strong>2 hours ago</Typography.Text>
+                                </div>
+                                <div>
+                                    <TeamOutlined /> <Typography.Text type="secondary">Owner</Typography.Text>
+                                    <br />
+                                    <Typography.Text strong>Finance Team</Typography.Text>
+                                </div>
+                                <div>
+                                    <DatabaseOutlined />{' '}
+                                    <Typography.Text type="secondary">Managed Assets</Typography.Text>
+                                    <br />
+                                    <Typography.Text strong>18</Typography.Text>
+                                </div>
+                                <div>
+                                    <BarChartOutlined /> <Typography.Text type="secondary">Domain</Typography.Text>
+                                    <br />
+                                    <Typography.Text strong>Sales & Revenue</Typography.Text>
+                                </div>
+                                <div>
+                                    <BarChartOutlined /> <Typography.Text type="secondary">Usage</Typography.Text>
+                                    <br />
+                                    <Typography.Text strong>1247 monthly queries</Typography.Text>
+                                </div>
+                            </div>
+
+                            <div style={{ borderTop: '2px solid #f0f0f0' }} />
+
+                            <Space style={{ float: 'right' }}>
+                                <Button icon={<ShoppingCartOutlined />} onClick={() => handleAddToBasket(dataset.id)}>
+                                    Add to Cart
+                                </Button>
+                                <Button type="primary" onClick={() => navigateToDataset(dataset.id)}>
+                                    View Details
+                                </Button>
+                            </Space>
+                        </Space>
+                    </Card>
+                ))}
             </Flex>
-        </Flex>
+
+            <Pagination
+                current={0}
+                pageSize={10}
+                total={filteredDatasets.length}
+                onChange={handlePageChange}
+                size="small"
+            />
+        </div>
     );
 }
