@@ -29,13 +29,9 @@
 }
 
 .container {
-    flex: 0 0 50%;
     padding: globals.$spacing-m;
     min-height: 400px;
     max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
 }
 
 .header {
