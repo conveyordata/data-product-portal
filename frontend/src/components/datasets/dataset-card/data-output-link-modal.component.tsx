@@ -96,8 +96,7 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
 
             setSelectedOutputs(new Set());
             onClose();
-        } catch (error) {
-            console.error('Failed to link data outputs:', error);
+        } catch (_error) {
             dispatchMessage({
                 content: t('Failed to link data outputs'),
                 type: 'error',
@@ -127,13 +126,11 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
             ]}
         >
             <Flex vertical>
-                <div>
-                    <Searchbar
-                        form={searchForm}
-                        placeholder={t('Search technical assets')}
-                        formItemProps={{ initialValue: '' }}
-                    />
-                </div>
+                <Searchbar
+                    form={searchForm}
+                    placeholder={t('Search technical assets')}
+                    formItemProps={{ initialValue: '' }}
+                />
 
                 {filteredDataOutputs.length > 0 && (
                     <Flex justify="space-between" align="center" className={styles.container}>
@@ -146,13 +143,15 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
                     </Flex>
                 )}
 
-                <div className={styles.listContainer}>
+                <Flex className={styles.listContainer}>
                     <List
+                        style={{ width: '100%' }}
                         dataSource={filteredDataOutputs}
                         pagination={{
                             ...pagination,
                             size: 'small',
                             className: styles.pagination,
+                            position: 'bottom',
                             showTotal: (total: number, range: [number, number]) =>
                                 t('Showing {{range0}}-{{range1}} of {{total}} technical assets', {
                                     range0: range[0],
@@ -183,7 +182,7 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
                             </List.Item>
                         )}
                     />
-                </div>
+                </Flex>
             </Flex>
         </Modal>
     );
