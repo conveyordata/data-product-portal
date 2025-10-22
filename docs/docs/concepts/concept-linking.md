@@ -14,6 +14,9 @@ Here’s how **Data Products**, **Technical Assets**, **Output Ports**, and **In
 ---
 config:
   layout: elk
+  flowchart:
+    subGraphTitleMargin:
+      bottom: 25
 ---
 flowchart TD
  subgraph op1["Output Port: Realtime Equipment Metrics"]
