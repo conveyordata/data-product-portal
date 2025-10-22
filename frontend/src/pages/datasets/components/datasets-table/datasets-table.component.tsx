@@ -1,10 +1,9 @@
 import {
-    ArrowRightOutlined,
     BarChartOutlined,
-    CalendarOutlined,
+    NumberOutlined,
     DatabaseOutlined,
+    EyeOutlined,
     ShoppingCartOutlined,
-    StarFilled,
     TeamOutlined,
 } from '@ant-design/icons';
 import { Button, Card, Flex, Form, Input, Pagination, Space, Tag, Typography } from 'antd';
@@ -113,6 +112,7 @@ export function DatasetsTable() {
                         styles={{ body: { padding: 12 } }}
                         style={{
                             flex: '1 1 360',
+                            marginLeft: 0,
                             margin: 8,
                             minWidth: 360,
                             maxWidth: 360,
@@ -129,10 +129,9 @@ export function DatasetsTable() {
                                         {dataset.description || 'No description available.'}
                                     </Typography.Text>
                                     <div style={{ marginTop: 12 }}>
-                                        <Tag>Transactions</Tag>
-                                        <Tag>Payments</Tag>
-                                        <Tag>Customer Data</Tag>
-                                        <Tag>+1</Tag>
+                                        {dataset.tags?.map((tag, index) => (
+                                            <Tag key={index}>{tag.value}</Tag>
+                                        ))}
                                     </div>
                                 </div>
                             </Space>
@@ -142,40 +141,41 @@ export function DatasetsTable() {
                                     display: 'grid',
                                     gridTemplateColumns: '1fr 1fr',
                                     gap: 8,
-                                    marginTop: 4,
                                 }}
                             >
                                 <div>
-                                    <DatabaseOutlined /> <Typography.Text type="secondary">Data Type</Typography.Text>
-                                    <br />
-                                    <Typography.Text strong>Transactional</Typography.Text>
-                                </div>
-                                <div>
-                                    <CalendarOutlined />{' '}
-                                    <Typography.Text type="secondary">Last Updated</Typography.Text>
-                                    <br />
-                                    <Typography.Text strong>2 hours ago</Typography.Text>
-                                </div>
-                                <div>
-                                    <TeamOutlined /> <Typography.Text type="secondary">Owner</Typography.Text>
-                                    <br />
-                                    <Typography.Text strong>Finance Team</Typography.Text>
-                                </div>
-                                <div>
-                                    <DatabaseOutlined />{' '}
-                                    <Typography.Text type="secondary">Managed Assets</Typography.Text>
-                                    <br />
-                                    <Typography.Text strong>18</Typography.Text>
-                                </div>
-                                <div>
                                     <BarChartOutlined /> <Typography.Text type="secondary">Domain</Typography.Text>
                                     <br />
-                                    <Typography.Text strong>Sales & Revenue</Typography.Text>
+                                    <Typography.Text strong>{dataset.domain.name}</Typography.Text>
                                 </div>
+                                <div>
+                                    <TeamOutlined /> <Typography.Text type="secondary">Data product</Typography.Text>
+                                    <br />
+                                    <Typography.Text strong>{dataset.data_product_name}</Typography.Text>
+                                </div>
+                                <div>
+                                    <DatabaseOutlined /> <Typography.Text type="secondary">Access Type</Typography.Text>
+                                    <br />
+                                    <Typography.Text strong>{dataset.access_type}</Typography.Text>
+                                </div>
+                                <div>
+                                    <EyeOutlined />{' '}
+                                    <Typography.Text type="secondary">Status</Typography.Text>
+                                    <br />
+                                    <Typography.Text strong>{dataset.status}</Typography.Text>
+                                </div>
+
+                                <div>
+                                    <NumberOutlined />{' '}
+                                    <Typography.Text type="secondary">Technical Assets</Typography.Text>
+                                    <br />
+                                    <Typography.Text strong>{dataset.data_output_links.length}</Typography.Text>
+                                </div>
+
                                 <div>
                                     <BarChartOutlined /> <Typography.Text type="secondary">Usage</Typography.Text>
                                     <br />
-                                    <Typography.Text strong>1247 monthly queries</Typography.Text>
+                                    <Typography.Text strong>{dataset.data_product_count == 1? (t('Used by 1 data product')):(t('Used by {{count}} products', {'count': dataset.data_product_count}))}</Typography.Text>
                                 </div>
                             </div>
 
