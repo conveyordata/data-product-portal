@@ -72,22 +72,12 @@
     font-weight: 600;
 }
 
-.titleSection {
-    flex: 1;
-    min-width: 0;
-}
-
 .description {
     font-size: 14px;
     line-height: 1.4;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    width: 100%;
-}
-
-.descriptionSection {
     width: 100%;
 }
 
@@ -115,6 +105,7 @@
 .linkedAssetsList {
     margin-top: 8px;
     border: 1px solid #f0f0f0;
+    width: 100%;
     border-radius: 6px;
     background-color: #fafafa;
 }

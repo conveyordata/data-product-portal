@@ -56,8 +56,11 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                 content: t('Dataset {{name}} has been successfully removed', { name: dataset.name }),
                 type: 'success',
             });
-        } catch (error) {
-            console.error('Failed to remove dataset', error);
+        } catch (_error) {
+            dispatchMessage({
+                content: t('Failed to remove dataset'),
+                type: 'error',
+            });
         }
     }, [removeDataset, dataset, t]);
 
@@ -70,8 +73,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                     content: t('Data output unlinked successfully'),
                     type: 'success',
                 });
-            } catch (error) {
-                console.error('Failed to unlink data output', error);
+            } catch (_error) {
                 dispatchMessage({
                     content: t('Failed to unlink data output'),
                     type: 'error',
@@ -133,8 +135,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                 // TODO make this dependable on access rights
                 await approveLink({ id: result.id, data_output_id: dragData.id, dataset_id: dataset.id }).unwrap();
             }
-        } catch (error) {
-            console.error('Failed to link data output to dataset:', error);
+        } catch (_error) {
             dispatchMessage({
                 content: t('Failed to link data output to dataset'),
                 type: 'error',
@@ -172,13 +173,11 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                         <CustomSvgIconLoader iconComponent={datasetBorderIcon} />
                         <Flex vertical style={{ flex: 1 }}>
                             <Flex justify="space-between" align="flex-start">
-                                <div className={styles.titleSection}>
-                                    <Link to={createDatasetIdPath(dataset.id)}>
-                                        <Typography.Title level={5} className={styles.title}>
-                                            {dataset.name}
-                                        </Typography.Title>
-                                    </Link>
-                                </div>
+                                <Link to={createDatasetIdPath(dataset.id)}>
+                                    <Typography.Title level={5} className={styles.title}>
+                                        {dataset.name}
+                                    </Typography.Title>
+                                </Link>
                                 <Flex gap={4}>
                                     <Button
                                         onClick={handleOpen}
@@ -212,12 +211,9 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                     </Popconfirm>
                                 </Flex>
                             </Flex>
-
-                            <div className={styles.descriptionSection}>
-                                <Typography.Text type="secondary" className={styles.description}>
-                                    {dataset.description}
-                                </Typography.Text>
-                            </div>
+                            <Typography.Text type="secondary" className={styles.description}>
+                                {dataset.description}
+                            </Typography.Text>
                         </Flex>
                     </Flex>
 
@@ -229,7 +225,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                         />
 
                         {dataset.data_output_links && dataset.data_output_links.length > 0 && (
-                            <div className={styles.linkedAssetsSection}>
+                            <Flex vertical align="flex-start" className={styles.linkedAssetsSection}>
                                 <Button
                                     type="text"
                                     size="small"
@@ -243,8 +239,9 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                 </Button>
 
                                 {expanded && (
-                                    <div className={styles.linkedAssetsList}>
+                                    <Flex className={styles.linkedAssetsList}>
                                         <List
+                                            style={{ width: '100%' }}
                                             size="small"
                                             dataSource={dataset.data_output_links}
                                             renderItem={(link) => (
@@ -277,9 +274,9 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                                 </List.Item>
                                             )}
                                         />
-                                    </div>
+                                    </Flex>
                                 )}
-                            </div>
+                            </Flex>
                         )}
                     </Flex>
                 </Flex>
