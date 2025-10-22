@@ -53,11 +53,6 @@
     color: globals.$color-text;
 }
 
-.content {
-    flex: 1;
-    min-width: 0;
-}
-
 .title {
     margin: 0 !important;
     font-size: 16px;
@@ -101,12 +96,12 @@
     border: 1px solid #f0f0f0;
     border-radius: globals.$border-radius;
     background-color: #fafafa;
+    width: 100%
 }
 
 .linkedDatasetItem {
     padding: globals.$spacing-xs globals.$spacing-s !important;
     border-bottom: 1px solid #f0f0f0;
-
     &:last-child {
         border-bottom: none;
     }

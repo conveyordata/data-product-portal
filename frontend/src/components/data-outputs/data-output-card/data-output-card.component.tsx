@@ -46,8 +46,11 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                 content: t('Data Output {{name}} has been successfully removed', { name: dataOutput.name }),
                 type: 'success',
             });
-        } catch (error) {
-            console.error('Failed to remove data output', error);
+        } catch (_error) {
+            dispatchMessage({
+                content: t('Failed to remove data output'),
+                type: 'error',
+            });
         }
     }, [removeDataOutput, dataOutput.id, dataOutput.name, t]);
 
@@ -59,8 +62,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                     content: t('Dataset unlinked successfully'),
                     type: 'success',
                 });
-            } catch (error) {
-                console.error('Failed to unlink dataset', error);
+            } catch (_error) {
                 dispatchMessage({
                     content: t('Failed to unlink dataset'),
                     type: 'error',
@@ -131,7 +133,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                             <CustomSvgIconLoader
                                 iconComponent={getDataOutputIcon(dataOutput.configuration.configuration_type)}
                             />
-                            <div className={styles.content}>
+                            <Flex>
                                 <Link to={createDataOutputIdPath(dataOutput.id, dataOutput.owner_id)}>
                                     <Typography.Title level={5} className={styles.title}>
                                         {data_output?.result_string || ''}
@@ -140,7 +142,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                                         {dataOutput.name}
                                     </Typography.Text>
                                 </Link>
-                            </div>
+                            </Flex>
                         </Flex>
                         <Popconfirm
                             title={t('Remove Technical Asset')}
@@ -158,7 +160,7 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                     </Flex>
 
                     {dataOutput.dataset_links && dataOutput.dataset_links.length > 0 && (
-                        <div className={styles.linkedDatasetsSection}>
+                        <Flex vertical align="flex-start">
                             <Button
                                 type="text"
                                 size="small"
@@ -170,8 +172,9 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                             </Button>
 
                             {expanded && (
-                                <div className={styles.linkedDatasetsList}>
+                                <Flex align="flex-end" justify="space-between" className={styles.linkedDatasetsList}>
                                     <List
+                                        style={{ width: '100%' }}
                                         size="small"
                                         dataSource={dataOutput.dataset_links}
                                         renderItem={(link) => (
@@ -200,9 +203,9 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                                             </List.Item>
                                         )}
                                     />
-                                </div>
+                                </Flex>
                             )}
-                        </div>
+                        </Flex>
                     )}
                 </Flex>
             </Flex>
