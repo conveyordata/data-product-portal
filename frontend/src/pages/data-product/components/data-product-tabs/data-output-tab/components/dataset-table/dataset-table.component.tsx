@@ -23,17 +23,17 @@ export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDat
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
-    const { data: access } = useCheckAccessQuery(
+    const { data: access_create_dataset } = useCheckAccessQuery(
         {
             resource: dataProductId,
             action: AuthorizationAction.GLOBAL__CREATE_DATASET,
         },
         { skip: !dataProductId },
     );
-    const { data: access2 } = useCheckAccessQuery(
+    const { data: can_link_data_output } = useCheckAccessQuery(
         {
             resource: dataProductId,
-            action: AuthorizationAction.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+            action: AuthorizationAction.DATA_PRODUCT__REQUEST_DATA_OUTPUT_LINK,
         },
         { skip: !dataProductId },
     );
@@ -50,7 +50,8 @@ export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDat
 
     if (!dataProduct) return null;
 
-    const canCreateDataset = (access?.allowed && access2?.allowed) || false;
+    // TODO To be seen if these are the right ACCESS checks we want here or if we need to create new ones.
+    const canCreateDataset = (access_create_dataset?.allowed && can_link_data_output?.allowed) || false;
 
     return (
         <Flex vertical className={`${styles.container} ${isDragActive ? styles.dragActive : ''}`}>

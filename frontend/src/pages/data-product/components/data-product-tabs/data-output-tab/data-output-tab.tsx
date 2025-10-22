@@ -16,7 +16,6 @@ export function DataOutputTab({ dataProductId }: Props) {
 
     const handleDragStart = (dataOutputId: string) => {
         setIsDragging(true);
-        console.log(dataOutputId);
         setDraggedDataOutput(dataOutputId);
     };
 
