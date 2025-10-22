@@ -103,7 +103,6 @@ export function DatasetsTable() {
             <Flex
                 wrap="wrap"
                 style={{
-                    marginTop: 12,
                     display: 'flex',
                     flexWrap: 'wrap',
                 }}
@@ -113,12 +112,10 @@ export function DatasetsTable() {
                         key={dataset.id}
                         styles={{ body: { padding: 12 } }}
                         style={{
-                            margin: 6,
-                            minWidth: 420,
-                            maxWidth: 480,
-                            flex: '1 1 420px',
-                            borderRadius: 12,
-                            marginBottom: 12,
+                            flex: '1 1 360',
+                            margin: 8,
+                            minWidth: 360,
+                            maxWidth: 360,
                             boxShadow: '0 2px 8px #f0f1f2',
                         }}
                     >
