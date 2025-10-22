@@ -19,7 +19,7 @@
         "@ant-design/v5-patch-for-react-19": "^1.0.3",
         "@dagrejs/dagre": "^1.1.5",
         "@fontsource/inter": "^5.2.8",
-        "@reduxjs/toolkit": "^2.9.1",
+        "@reduxjs/toolkit": "^2.9.2",
         "@tiptap/extension-bubble-menu": "^3.7.2",
         "@tiptap/extension-document": "^3.7.2",
         "@tiptap/extension-hard-break": "^3.7.2",
