@@ -3,7 +3,6 @@
 .data-product-container {
     @extend .container;
     gap: globals.$column-gap-xl;
-    position: relative;
 
     &:has(.sidebarCollapsed) {
         gap: 0;
@@ -41,7 +40,6 @@
         align-items: flex-start;
     }
 
-    flex: 1;
     transition: all 0.3s ease;
 
     &.contentExpanded {
@@ -58,7 +56,6 @@
     transition: all 0.3s ease;
 
     &.sidebarCollapsed {
-        flex: 0;
         min-width: 60px;
         width: 60px;
         overflow: visible;
@@ -66,36 +63,19 @@
 }
 
 .collapsedSidebar {
-    display: flex;
-    flex-direction: column;
     align-items: center;
     width: 100%;
     height: 100%;
 }
 
 .spacer {
-    height: calc(#{globals.$column-gap-xl} + var(--data-product-actions-height, 200px));
+    // height: calc(#{globals.$column-gap-xl} + var(--data-product-actions-height, 200px));
+    height: 200px
 }
 
 .expandButton {
     margin-bottom: 12px;
     align-self: center;
-}
-
-.avatarList {
-    display: flex;
-    flex-direction: column;
-    gap: globals.$spacing-s;
-    align-items: center;
-    width: 100%;
-}
-
-.avatarWrapper {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .main-content {

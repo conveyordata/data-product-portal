@@ -127,17 +127,17 @@ export function DataProduct() {
                         <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
                     </>
                 ) : (
-                    <div className={styles.collapsedSidebar}>
+                    <Flex vertical className={styles.collapsedSidebar}>
                         <div className={styles.spacer} />
-                        <div className={styles.expandButton}>
+                        <Flex className={styles.expandButton}>
                             <CircleIconButton
                                 icon={<LeftOutlined />}
                                 tooltip={t('Show sidebar')}
                                 onClick={() => setSidebarCollapsed(false)}
                             />
-                        </div>
+                        </Flex>
                         <UserAccessOverview users={dataProductOwners} title="" showAvatarsOnly={true} />
-                    </div>
+                    </Flex>
                 )}
             </Flex>
         </Flex>
