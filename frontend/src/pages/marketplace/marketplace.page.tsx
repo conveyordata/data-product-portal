@@ -24,31 +24,18 @@ function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
     return datasets.filter((dataset) => dataset.name.toLowerCase().includes(searchTerm.toLowerCase()));
 }
 
-function filterDatasetsByRoles(datasets: DatasetsGetContract, selectedDatasetIds: string[]) {
-    if (!selectedDatasetIds.length) {
-        return datasets;
-    }
-
-    return datasets.filter((dataset) => {
-        return selectedDatasetIds.includes(dataset.id);
-    });
-}
-
-export function DatasetsTable() {
+export function Marketplace() {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [selectedDatasetIds, setSelectedDatasetIds] = useState<string[]>([]);
-    const pageSize = 2;
+    const pageSize = 12;
     const [currentPage, setCurrentPage] = useState(1);
     const { data: datasets = [] } = useGetAllDatasetsQuery();
-
+    const CAPTURE_SEARCH_EVENT_DELAY = 750;
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredDatasets = useMemo(() => {
-        let filtered = filterDatasets(datasets, searchTerm);
-        return filtered;
-    }, [datasets, searchTerm, selectedDatasetIds]);
-
+        return filterDatasets(datasets, searchTerm);
+    }, [datasets, searchTerm]);
     const paginatedDatasets = useMemo(() => {
         const startIndex = (currentPage - 1) * pageSize;
         const endIndex = startIndex + pageSize;
@@ -59,13 +46,10 @@ export function DatasetsTable() {
         setCurrentPage(page);
     };
 
-
     const handleSearchChange = (value: string) => {
         setSearchTerm(value);
         setCurrentPage(1); // Reset to first page on search
     };
-
-    const CAPTURE_SEARCH_EVENT_DELAY = 750;
 
     useEffect(() => {
         if (searchTerm === undefined || searchTerm === '') return;
@@ -83,6 +67,7 @@ export function DatasetsTable() {
     function navigateToDataset(datasetId: string) {
         navigate(createDatasetIdPath(datasetId));
     }
+
     const handleAddToBasket = (id: string) => {
         console.log('Add to basket clicked for dataset with id:', id);
     };
@@ -179,7 +164,7 @@ export function DatasetsTable() {
                                     <BarChartOutlined /> <Typography.Text type="secondary">Usage</Typography.Text>
                                     <br />
                                     <Typography.Text>
-                                        {dataset.data_product_count == 1
+                                        {dataset.data_product_count === 1
                                             ? t('1 data product')
                                             : t('{{count}} data products', { count: dataset.data_product_count })}
                                     </Typography.Text>
@@ -201,11 +186,13 @@ export function DatasetsTable() {
                 ))}
             </Flex>
             {filteredDatasets.length > pageSize && (
-                <div style={{
-                    marginTop: 24,
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                }}>
+                <div
+                    style={{
+                        marginTop: 24,
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                    }}
+                >
                     <Pagination
                         current={currentPage}
                         pageSize={pageSize}
