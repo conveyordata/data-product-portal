@@ -29,10 +29,10 @@ export function UserAccessOverview({ users = [], title = '', showAvatarsOnly = f
 
     if (showAvatarsOnly) {
         return (
-            <div className={styles.avatarsOnly}>
+            <Flex className={styles.avatarsOnly} vertical>
                 {sorted.map((user) => (
                     <Tooltip key={user.id} title={`${user.first_name} ${user.last_name}`}>
-                        <div className={styles.avatarWrapper}>
+                        <Flex>
                             <UserAvatar
                                 name={`${user.first_name} ${user.last_name}`}
                                 email={user.email}
@@ -40,10 +40,10 @@ export function UserAccessOverview({ users = [], title = '', showAvatarsOnly = f
                                 size="small"
                                 hideText={true}
                             />
-                        </div>
+                        </Flex>
                     </Tooltip>
                 ))}
-            </div>
+            </Flex>
         );
     }
 

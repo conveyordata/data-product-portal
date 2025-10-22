@@ -15,15 +15,7 @@
 }
 
 .avatarsOnly {
-    display: flex;
-    flex-direction: column;
     gap: globals.$spacing-m;
     align-items: center;
     width: 100%;
-}
-
-.avatarWrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
