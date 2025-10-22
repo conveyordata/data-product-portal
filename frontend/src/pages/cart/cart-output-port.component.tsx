@@ -1,5 +1,5 @@
 import { DeleteOutlined } from '@ant-design/icons';
-import { Card, Descriptions, Flex, Tag, Typography } from 'antd';
+import { Button, Card, Descriptions, Flex, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
 
@@ -23,7 +23,7 @@ export default function CartOutputPort({
             <Flex justify="space-between" align="start">
                 <Descriptions
                     size={'small'}
-                    column={{ xl: 1, xxl: 3 }}
+                    column={{ xl: 1, xxl: 5 }}
                     colon
                     items={[
                         {
@@ -36,6 +36,7 @@ export default function CartOutputPort({
                             key: '1',
                             label: <Typography.Text strong>Data product</Typography.Text>,
                             children: dataProductName,
+                            span: 3,
                         },
                         //TODO refactor common code with DataProductDescription
                         {
@@ -56,7 +57,7 @@ export default function CartOutputPort({
                         },
                     ]}
                 />
-                <DeleteOutlined style={{ marginLeft: 'auto' }} />
+                <Button type={'text'} icon={<DeleteOutlined />} danger style={{ marginLeft: 'auto' }} />
             </Flex>
         </Card>
     );

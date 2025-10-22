@@ -7,9 +7,10 @@ const draftLifecycle = {
 };
 export const cartData = [
     {
-        outputPortName: 'Output port A',
-        dataProductName: 'Data product A',
-        description: 'Description of data product A',
+        outputPortName: 'Demand Forecast Data',
+        dataProductName: 'AI Model for Histology Images',
+        // description: 'Description of data product A',
+        description: 'Historical data for demand forecasting',
         domain: 'Clinical',
         dataProductLifecycle: draftLifecycle,
     },
@@ -21,7 +22,7 @@ export const cartData = [
         dataProductLifecycle: draftLifecycle,
     },
     {
-        outputPortName: 'Output port A',
+        outputPortName: 'Histology RnD Data',
         dataProductName: 'Data product B',
         description: 'Description of data product B',
         domain: 'Manufacturing',
