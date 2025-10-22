@@ -106,14 +106,14 @@ export function DatasetsTable() {
                     marginTop: 12,
                     display: 'flex',
                     flexWrap: 'wrap',
-                    justifyContent: 'flex-start',
                 }}
             >
                 {filteredDatasets.map((dataset) => (
                     <Card
                         key={dataset.id}
-                        styles={{ body: { padding: 16 } }}
+                        styles={{ body: { padding: 12 } }}
                         style={{
+                            margin: 6,
                             minWidth: 420,
                             maxWidth: 480,
                             flex: '1 1 420px',
