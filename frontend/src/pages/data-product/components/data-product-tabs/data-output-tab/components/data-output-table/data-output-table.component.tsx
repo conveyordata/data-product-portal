@@ -78,7 +78,7 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
                 form={searchForm}
             />
 
-            <div className={styles.cardsGrid}>
+            <Flex vertical className={styles.cardsGrid}>
                 {filteredDataOutputs.map((dataOutput) => (
                     <DataOutputCard
                         key={dataOutput.id}
@@ -90,15 +90,15 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
                 ))}
 
                 {filteredDataOutputs.length === 0 && (
-                    <div className={styles.emptyState}>
+                    <Flex className={styles.emptyState}>
                         <Typography.Text type="secondary">
                             {searchTerm
                                 ? t('No technical assets found matching your search')
                                 : t('No technical assets found')}
                         </Typography.Text>
-                    </div>
+                    </Flex>
                 )}
-            </div>
+            </Flex>
 
             {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </Flex>

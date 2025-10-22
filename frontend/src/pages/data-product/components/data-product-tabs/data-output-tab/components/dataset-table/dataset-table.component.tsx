@@ -69,7 +69,7 @@ export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDat
                 form={searchForm}
             />
 
-            <div className={styles.cardsGrid}>
+            <Flex vertical className={styles.cardsGrid}>
                 {filteredDatasets.map((dataset) => (
                     <DatasetCard
                         key={dataset.id}
@@ -80,13 +80,13 @@ export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDat
                 ))}
 
                 {filteredDatasets.length === 0 && (
-                    <div className={styles.emptyState}>
+                    <Flex className={styles.emptyState}>
                         <Typography.Text type="secondary">
                             {searchTerm ? t('No datasets found matching your search') : t('No datasets found')}
                         </Typography.Text>
-                    </div>
+                    </Flex>
                 )}
-            </div>
+            </Flex>
         </Flex>
     );
 }

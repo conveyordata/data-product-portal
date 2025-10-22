@@ -48,15 +48,12 @@
 }
 
 .cardsGrid {
-    display: flex;
-    flex-direction: column;
     gap: globals.$spacing-m;
     width: 100%;
     overflow-y: auto;
-    flex: 1;
 }
 
 .emptyState {
-    text-align: center;
+    justify-content: center;
     padding: globals.$spacing-xl;
 }
