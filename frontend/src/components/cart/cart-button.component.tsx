@@ -1,14 +1,15 @@
-import { ShoppingCartOutlined } from '@ant-design/icons';
+import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Badge, Button, Descriptions, Flex, List, Popover, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import styles from '@/components/layout/navbar/cli-download/cli-download-button.module.scss';
-import { cartData } from '@/store/test-data.tsx';
+import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 const ShoppingCartItems = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const { data: datasets, isFetching } = useGetAllDatasetsQuery();
 
     return (
         <List
@@ -28,20 +29,28 @@ const ShoppingCartItems = () => {
                 </Flex>
             }
             bordered
-            dataSource={cartData}
+            loading={isFetching}
+            dataSource={datasets}
             renderItem={(item) => (
                 <List.Item>
-                    <Descriptions
-                        title={item.outputPortName}
-                        column={1}
-                        items={[
-                            {
-                                key: 0,
-                                label: <Typography.Text strong>Data product</Typography.Text>,
-                                children: item.dataProductName,
-                            },
-                        ]}
-                    />
+                    <Flex justify="space-between" align="start">
+                        <Descriptions
+                            title={item.name}
+                            column={1}
+                            items={[
+                                {
+                                    key: 0,
+                                    label: (
+                                        <Typography.Text ellipsis={{}} strong>
+                                            Data product
+                                        </Typography.Text>
+                                    ),
+                                    children: item.data_product_name,
+                                },
+                            ]}
+                        />
+                        <Button type={'text'} icon={<DeleteOutlined />} danger style={{ marginLeft: 'auto' }} />
+                    </Flex>
                 </List.Item>
             )}
         />
@@ -49,9 +58,10 @@ const ShoppingCartItems = () => {
 };
 
 export const CartButton = () => {
+    const { data: datasets } = useGetAllDatasetsQuery();
     return (
         <Popover content={<ShoppingCartItems />} trigger={'hover'} placement="bottom">
-            <Badge count={cartData.length}>
+            <Badge count={datasets?.length}>
                 <Button shape={'circle'} className={styles.iconButton} icon={<ShoppingCartOutlined />} />
             </Badge>
         </Popover>

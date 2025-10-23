@@ -3,27 +3,18 @@ import { Button, Card, Col, Divider, Flex, Form, Row, Select, Space, Typography,
 import TextArea from 'antd/es/input/TextArea';
 import { useTranslation } from 'react-i18next';
 import CartOutputPort from '@/pages/cart/cart-output-port.component.tsx';
-import { cartData } from '@/store/test-data.tsx';
+import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 
 export function Cart() {
     const { t } = useTranslation();
     const { token } = theme.useToken();
-    console.log(token.colorPrimary);
+    const { data: datasets, isFetching } = useGetAllDatasetsQuery();
     return (
         <Row gutter={16}>
             <Col span={14}>
                 {/*<Flex gap="small">*/}
                 <Space direction="vertical" size="small">
-                    {cartData.map((d) => (
-                        <CartOutputPort
-                            key={d.outputPortName}
-                            outputPortName={d.outputPortName}
-                            dataProductName={d.dataProductName}
-                            description={d.description}
-                            domain={d.domain}
-                            dataProductLifecycle={d.dataProductLifecycle}
-                        />
-                    ))}
+                    {!isFetching && datasets?.map((d) => <CartOutputPort key={d.id} dataset={d} />)}
                 </Space>
             </Col>
             <Col span={10}>
