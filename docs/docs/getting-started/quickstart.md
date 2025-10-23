@@ -18,6 +18,12 @@ Before you begin, ensure you have the following installed:
 
 ---
 
+## 🧑‍🎓 Learn the basic concepts
+
+Read through the [following pages](/docs/category/concepts) to understand the Portal concepts.
+
+---
+
 ## 🛠️ Clone the Repository
 
 ```bash
