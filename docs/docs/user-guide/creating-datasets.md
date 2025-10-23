@@ -10,7 +10,7 @@ title: Creating Datasets
 A **Dataset** is a collection of data outputs grouped together for sharing or use by other products.
 Datasets grant **read access** to the data outputs they contain.
 These are governed and approved by dataset owners to ensure proper access control.
-For more information have a look at the [Dataset](../concepts/datasets) concept.
+For more information have a look at the [Dataset](../concepts/output-ports) concept.
 
 ### How to Create a Dataset
 

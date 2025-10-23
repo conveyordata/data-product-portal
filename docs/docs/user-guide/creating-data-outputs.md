@@ -9,7 +9,7 @@ title: Creating Data Outputs
 
 A **Data Output** is a technical endpoint, such as an S3 bucket, a database table, or an API endpoint, where data is stored, shared, or accessed.
 Data outputs are created and managed within the context of a data product.
-For more information have a look at the [Data Output](../concepts/data-outputs) concept.
+For more information have a look at the [Data Output](../concepts/technical-assets) concept.
 
 Data Outputs are linked to and owned by a single **Data Product**.
 
