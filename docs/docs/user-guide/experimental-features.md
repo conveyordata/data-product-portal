@@ -1,15 +1,11 @@
 ---
 sidebar_position: 7
-title: Experimental Features
+title: Using Portal's MCP server
 ---
 
-# Experimental Features
+# Using the Portal's MCP server
 
-This section documents features that are still under active development and may change in the future.
-
-## MCP Server
-
-As of version 0.3.5 the backend exposes some MCP tools.
+As of version 0.3.5 the backend exposes several MCP tools.
 The **MCP server** is an experimental way to interact programmatically with the Data Product Portal.
 It allows you to:
 

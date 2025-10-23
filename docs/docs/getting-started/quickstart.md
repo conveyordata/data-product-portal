@@ -18,6 +18,12 @@ Before you begin, ensure you have the following installed:
 
 ---
 
+## 🧑‍🎓 Learn the basic concepts
+
+Read through the [following pages](/docs/category/concepts) to understand the Portal concepts.
+
+---
+
 ## 🛠️ Clone the Repository
 
 ```bash
@@ -80,14 +86,11 @@ If you'd like to test integrations (e.g., *OIDC*, *Conveyor*, *AWS*), you must i
 
 ## 🙋 Need Help?
 
-Check the [Troubleshooting guide](../user-guide/troubleshooting.md)
-Or open an [issue on GitHub](https://github.com/conveyordata/data-product-portal/issues)
+Open an [issue on GitHub](https://github.com/conveyordata/data-product-portal/issues)
 
 ---
 
 ## 🧱 Next Steps
 
-- Learn about the [Concepts](../concepts/data-products)
-- Customize your [Configuration](./configuration)
 - Start [Creating Data Products](../user-guide/creating-products)
-```
+- Install Portal in a production-like environment using the [following guide](../developer-guide/installation.md)
