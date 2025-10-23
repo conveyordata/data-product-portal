@@ -3,10 +3,10 @@ import {
     DatabaseOutlined,
     EyeOutlined,
     NumberOutlined,
-    ShoppingCartOutlined,
     TeamOutlined,
+    ShareAltOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Flex, Form, Input, Pagination, Space, Tag, Typography } from 'antd';
+import {Button, Card, Descriptions, Divider, Flex, Form, Input, Pagination, Space, Tag, Typography, DescriptionsProps} from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router';
 import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import type { DatasetsGetContract } from '@/types/dataset';
+import type {DatasetsGetContract} from '@/types/dataset';
 import { createDatasetIdPath } from '@/types/navigation.ts';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
@@ -64,13 +64,49 @@ export function Marketplace() {
         return () => clearTimeout(timeoutId); // clear if searchTerm gets updated beforehand
     }, [searchTerm]);
 
-    function navigateToDataset(datasetId: string) {
-        navigate(createDatasetIdPath(datasetId));
-    }
+    const cardMargin = 12;
 
-    const handleAddToBasket = (id: string) => {
-        console.log('Add to basket clicked for dataset with id:', id);
-    };
+    function createCardItems(dataset: any) {
+        const items : DescriptionsProps['items'] = [
+            {
+                key: '1',
+                label: <Space><ShareAltOutlined /> Domain</Space>,
+                children: dataset.domain.name,
+            },
+            {
+                key: '2',
+                label: <Space><EyeOutlined /> Status</Space>,
+                children: dataset.status,
+            },
+            {
+                key: '3',
+                label: <Space><DatabaseOutlined /> Access type</Space>,
+                children: dataset.access_type,
+            },
+            {
+                key: '4',
+                label: <Space><NumberOutlined /> Technical Asset</Space>,
+                span: 2,
+                children: dataset.data_output_links.length,
+            },
+            {
+                key: '5',
+                label: <Space><TeamOutlined />Data Product</Space>,
+                children: <Typography.Paragraph style={{height: '44px'}} // To keep 2 rows for the data product height
+                                                ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
+                    {dataset.data_product_name}
+                </Typography.Paragraph>,
+            },
+            {
+                key: '5',
+                label: <Space><BarChartOutlined />Usage</Space>,
+                children: (dataset.data_product_count === 1
+                        ? t('1 data product')
+                        : t('{{count}} data products', { count: dataset.data_product_count })),
+            },
+        ];
+        return items;
+    }
 
     return (
         <div>
@@ -92,7 +128,7 @@ export function Marketplace() {
                     marginTop: '6px',
                     display: 'flex',
                     flexWrap: 'wrap',
-                    margin: '-12px', // Compensate for the card margin
+                    margin: -cardMargin, // Compensate for the card margin
                 }}
             >
                 {paginatedDatasets.map((dataset) => (
@@ -102,7 +138,7 @@ export function Marketplace() {
                         style={{
                             flex: '1 1 360',
                             marginLeft: 0,
-                            margin: 12,
+                            margin: cardMargin,
                             width: 360,
                             boxShadow: '0 2px 8px #f0f1f2',
                         }}
@@ -124,60 +160,15 @@ export function Marketplace() {
                                 </div>
                             </div>
 
-                            <div
-                                style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: '1fr 1fr',
-                                    gap: 8,
-                                }}
-                            >
-                                <div>
-                                    <BarChartOutlined /> <Typography.Text type="secondary">Domain</Typography.Text>
-                                    <br />
-                                    <Typography.Text>{dataset.domain.name}</Typography.Text>
-                                </div>
-                                <div>
-                                    <EyeOutlined /> <Typography.Text type="secondary">Status</Typography.Text>
-                                    <br />
-                                    <Typography.Text>{dataset.status}</Typography.Text>
-                                </div>
-                                <div>
-                                    <DatabaseOutlined /> <Typography.Text type="secondary">Access Type</Typography.Text>
-                                    <br />
-                                    <Typography.Text>{dataset.access_type}</Typography.Text>
-                                </div>
-                                <div>
-                                    <NumberOutlined />{' '}
-                                    <Typography.Text type="secondary">Technical Assets</Typography.Text>
-                                    <br />
-                                    <Typography.Text>{dataset.data_output_links.length}</Typography.Text>
-                                </div>
+                            <Descriptions layout="vertical" size={"small"} colon={false} column={2} items={createCardItems(dataset)}></Descriptions>
 
-                                <div style={{ height: '66px' }}>
-                                    <TeamOutlined /> <Typography.Text type="secondary">Data product</Typography.Text>
-                                    <br />
-                                    <Typography.Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-                                        {dataset.data_product_name}
-                                    </Typography.Paragraph>
-                                </div>
-                                <div>
-                                    <BarChartOutlined /> <Typography.Text type="secondary">Usage</Typography.Text>
-                                    <br />
-                                    <Typography.Text>
-                                        {dataset.data_product_count === 1
-                                            ? t('1 data product')
-                                            : t('{{count}} data products', { count: dataset.data_product_count })}
-                                    </Typography.Text>
-                                </div>
-                            </div>
-
-                            <div style={{ borderTop: '2px solid #f0f0f0' }} />
+                            <Divider style={{borderColor: '#f0f0f0'}} size='small'/>
 
                             <Space style={{ float: 'right' }}>
-                                <Button icon={<ShoppingCartOutlined />} onClick={() => handleAddToBasket(dataset.id)}>
+                                {/*<Button icon={<ShoppingCartOutlined />} onClick={() => handleAddToBasket(dataset.id)}>
                                     Add to Cart
-                                </Button>
-                                <Button type="primary" onClick={() => navigateToDataset(dataset.id)}>
+                                </Button>*/}
+                                <Button type="primary" onClick={() => navigate(createDatasetIdPath(dataset.id))}>
                                     View Details
                                 </Button>
                             </Space>
