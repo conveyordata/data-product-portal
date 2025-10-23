@@ -15,7 +15,7 @@ function HomepageHeader() {
           {siteConfig.title}
         </h1>
         <p className={styles.heroSubtitle}>
-          Scale your data product initiatives with self-service, governance by design, and a full view of your data landscape.
+          Turn data into first-class products that everyone in your organisation can own and understand.
         </p>
         <div className={styles.buttons}>
           <Link
