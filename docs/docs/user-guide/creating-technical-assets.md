@@ -3,17 +3,13 @@ sidebar_position: 3
 title: Creating Data Outputs
 ---
 
-# Creating Data Outputs
+# Creating a technical asset
 
-## What is a Data Output?
-
-A **Data Output** is a technical endpoint, such as an S3 bucket, a database table, or an API endpoint, where data is stored, shared, or accessed.
-Data outputs are created and managed within the context of a data product.
-For more information have a look at the [Data Output](../concepts/data-outputs) concept.
+If you do not know what a technical asset is, take a look at the [Technical asset concept](../concepts/technical-assets.md).
 
 Data Outputs are linked to and owned by a single **Data Product**.
 
-## How to add a Data Output to a Data Product
+## How to add a technical asset to a Data Product
 
 1. **Go to the Data Product that will expose the Data Output**: Data Outputs are linked to a single **Data Product**.
 2. **Go to the Data Outputs Tab**: Once your data product is created, navigate to the **Data Outputs** tab within the product’s page.

@@ -3,16 +3,11 @@ sidebar_position: 4
 title: Creating Datasets
 ---
 
-# Creating Datasets
+# Creating an output port
 
-### What is a Dataset?
+If you do not know what an output port is take a look at the [Output port concept](../concepts/output-ports.md).
 
-A **Dataset** is a collection of data outputs grouped together for sharing or use by other products.
-Datasets grant **read access** to the data outputs they contain.
-These are governed and approved by dataset owners to ensure proper access control.
-For more information have a look at the [Dataset](../concepts/datasets) concept.
-
-### How to Create a Dataset
+### How to Create an Output port
 
 1. **Navigate to the Datasets Section**: Go to the **Marketplace** page via the sidebar.
 2. **Click 'Create Dataset'**: Provide a name for the dataset as well as a domain, owners, a status and a description.
