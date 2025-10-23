@@ -1,10 +1,11 @@
 ---
-sidebar_position: 3
+sidebar_position: 1
 title: Authentication
 description: Authentication flows explained
 ---
 
 # Authentication
+
 You can find diagrams explaining the different authentication flows used in the Data Product Portal below.
 This is useful background information if you would like to implement wrappers around Data Product Portal functionality.
 
@@ -85,4 +86,4 @@ Cognito->>Backend: return access token
 
 To find out more about how to integrate the Data Product Portal with OIDC, visit [this blogpost](https://medium.com/conveyordata/data-product-portal-integrations-1-oidc-8d1dcdc0896e)
 
-To find out more about the details of the Device Flow, visit [this blogpost](https://medium.com/datamindedbe/demystifying-device-flow-ae15854bac24) instead.
+To understand better the details of the Device code Flow, take a look at the following [blogpost](https://medium.com/datamindedbe/demystifying-device-flow-ae15854bac24) instead.

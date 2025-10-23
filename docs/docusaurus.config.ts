@@ -118,7 +118,7 @@ const config: Config = {
           title: 'Docs',
           items: [
             { label: 'Getting Started', to: '/docs/getting-started/quickstart' },
-            { label: 'User Guide', to: '/docs/user-guide/overview' },
+            { label: 'User Guides', to: '/docs/category/user-guide' },
           ],
         },
         {
@@ -131,7 +131,6 @@ const config: Config = {
           title: 'More',
           items: [
             { label: 'Release notes', to: '/docs/release-notes' },
-            { label: 'Roadmap', to: '/docs/roadmap' },
           ],
         },
       ],

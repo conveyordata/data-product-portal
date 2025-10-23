@@ -15,12 +15,12 @@ function HomepageHeader() {
           {siteConfig.title}
         </h1>
         <p className={styles.heroSubtitle}>
-          Scale your data product initiatives with self-service, governance by design, and a full view of your data landscape.
+          Turn data into first-class products that everyone in your organisation can own and understand.
         </p>
         <div className={styles.buttons}>
           <Link
             className={styles.cta}
-            to="/docs/user-guide/overview">
+            to="/docs/getting-started/quickstart">
             Get Started
           </Link>
         </div>
@@ -32,34 +32,29 @@ function HomepageHeader() {
 function FeaturesSection() {
   const features = [
     {
-      title: 'Self-Service by Design',
+      title: 'Built for Scale',
       description:
-        'Empower teams to launch and manage data products independently, reducing dependency on central teams.',
+        'Empower teams to manage and share data products autonomously, reducing dependency on central teams.',
     },
     {
       title: 'Governance Built In',
       description:
-        'Ensure compliance and approval workflows are followed automatically with governance embedded in every step.',
+        'Ensure compliance and approval workflows are followed automatically to guarantee data governance.',
     },
     {
       title: 'Platform-Agnostic',
       description:
-        'Supports AWS, Azure, Databricks, and more. Integrates easily into your existing stack.',
+        'Supports AWS, Azure, Databricks, Conveyor, and more. Can easily be extended to fit into your existing stack.',
     },
     {
       title: '360° Visibility',
       description:
-        'Track the lifecycle of all data products, users, datasets, and outputs in one unified view.',
+        'Track the lifecycle of all data products, users, output ports, and technical assets in one UI.',
     },
     {
-      title: 'Seamless Integrations',
+      title: 'Quick Installation',
       description:
-        'Out-of-the-box integrations with Conveyor, Kubernetes, Helm, OIDC, and popular data platforms.',
-    },
-    {
-      title: 'Built for Scale',
-      description:
-        'From a single team to an entire organization, scale your data operations without chaos.',
+        'Run it locally using docker-compose up or install it using the existing Helm chart.',
     },
   ];
 
