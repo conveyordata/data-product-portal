@@ -2,10 +2,10 @@
 title: Contributing Guide
 description: How to contribute to the Data Product Portal project
 slug: contributing
-sidebar_position: 2
+sidebar_position: 3
 ---
 
-# Welcome to the Data Product Portal Contributing Guide
+# Contributing
 
 Thank you for investing your time in contributing to our project!
 

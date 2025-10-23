@@ -2,10 +2,10 @@
 id: integrations
 title: Data Platform Integrations
 sidebar_label: Integrations
-sidebar_position: 5
+sidebar_position: 4
 ---
 
-# Data Product Portal Sample Implementations
+# Integrate portal in your landscape
 
 The Data Product Portal helps you organize the process of building data products at scale in a self-service manner.
 
