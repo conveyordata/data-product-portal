@@ -52,7 +52,7 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Run image
+      - name: Set up poetry
         uses: abatilo/actions-poetry@65c61eae400c65c9510a584af85138c1ae19bbc0 # v3.0.2
         with:
           poetry-version: "2.1.4"
@@ -72,6 +72,11 @@ jobs:
         working-directory: ./backend
         run: poetry install --with test
 
+      - name: Ensure open api spec is up to date
+        run: |
+          cp backend/.test.env backend/.env
+          ./scripts/check_openapi_spec.sh
+
       - name: Run the automated tests
         working-directory: ./backend
         id: run-test
@@ -80,7 +85,6 @@ jobs:
       - name: Ensure 100% coverage for router files
         working-directory: ./scripts
         run: ./check_coverage.sh
-
 
   lint-golang:
     name: Run Go linters
