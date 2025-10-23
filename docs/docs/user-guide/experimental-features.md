@@ -1,6 +1,6 @@
 ---
 sidebar_position: 7
-title: Experimental Features
+title: Using Portal's MCP server
 ---
 
 # Using the Portal's MCP server
