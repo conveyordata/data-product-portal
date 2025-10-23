@@ -10,7 +10,7 @@ import styles from './user-access-overview.module.scss';
 const { useToken } = theme;
 
 type Props = {
-    users: UserContract[] | undefined;
+    users?: UserContract[];
     title?: ReactNode;
     showAvatarsOnly?: boolean;
 };
