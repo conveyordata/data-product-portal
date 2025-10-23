@@ -13,7 +13,6 @@ import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-s
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type { SearchForm } from '@/types/shared';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
-import styles from './data-output-link-modal.module.scss';
 
 type Props = {
     isOpen: boolean;
@@ -133,7 +132,7 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
                 />
 
                 {filteredDataOutputs.length > 0 && (
-                    <Flex justify="space-between" align="center" className={styles.container}>
+                    <Flex justify="space-between" align="center">
                         <Typography.Text type="secondary">
                             {t('{{count}} available technical assets', { count: filteredDataOutputs.length })}
                         </Typography.Text>
@@ -143,14 +142,13 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
                     </Flex>
                 )}
 
-                <Flex className={styles.listContainer}>
+                <Flex>
                     <List
                         style={{ width: '100%' }}
                         dataSource={filteredDataOutputs}
                         pagination={{
                             ...pagination,
                             size: 'small',
-                            className: styles.pagination,
                             position: 'bottom',
                             showTotal: (total: number, range: [number, number]) =>
                                 t('Showing {{range0}}-{{range1}} of {{total}} technical assets', {
@@ -162,10 +160,9 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
                         }}
                         locale={{ emptyText: t('No technical assets available') }}
                         renderItem={(output) => (
-                            <List.Item className={styles.listItem}>
+                            <List.Item>
                                 <Flex align="center" gap={12} style={{ width: '100%' }}>
                                     <Checkbox
-                                        className={styles.checkbox}
                                         checked={selectedOutputs.has(output.id)}
                                         onChange={() => handleOutputToggle(output.id)}
                                     />
@@ -174,9 +171,7 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
                                     />
                                     <Flex vertical style={{ flex: 1 }}>
                                         <Typography.Text strong>{output.result_string}</Typography.Text>
-                                        <Typography.Text type="secondary" className={styles.description}>
-                                            {output.name}
-                                        </Typography.Text>
+                                        <Typography.Text type="secondary">{output.name}</Typography.Text>
                                     </Flex>
                                 </Flex>
                             </List.Item>

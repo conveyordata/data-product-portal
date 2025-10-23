@@ -1,5 +1,5 @@
 import { DownOutlined, HolderOutlined, RightOutlined } from '@ant-design/icons';
-import { Badge, Button, Card, Flex, List, Popconfirm, Typography } from 'antd';
+import { Badge, Button, Card, Flex, List, Popconfirm, Tooltip, Typography } from 'antd';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -131,10 +131,14 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
                             />
                             <Flex>
                                 <Link to={createDataOutputIdPath(dataOutput.id, dataOutput.owner_id)}>
-                                    <Typography.Title level={5} className={styles.title}>
+                                    <Typography.Title
+                                        level={5}
+                                        ellipsis={{ tooltip: true, rows: 2 }}
+                                        style={{ margin: 0 }}
+                                    >
                                         {dataOutput.result_string || ''}
                                     </Typography.Title>
-                                    <Typography.Text type="secondary" className={styles.description}>
+                                    <Typography.Text ellipsis={{ tooltip: true }} type="secondary">
                                         {dataOutput.name}
                                     </Typography.Text>
                                 </Link>
