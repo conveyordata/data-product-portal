@@ -169,7 +169,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                 <Flex vertical gap="small">
                     <Flex gap="small" align="center" justify="space-between">
                         <CustomSvgIconLoader iconComponent={datasetBorderIcon} />
-                        <Flex vertical>
+                        <Flex vertical style={{ flex: 1, minWidth: 0 }}>
                             <Flex justify="space-between" align="flex-start">
                                 <Link to={createDatasetIdPath(dataset.id)}>
                                     <Typography.Title level={5}>{dataset.name}</Typography.Title>
@@ -207,13 +207,9 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                     </Popconfirm>
                                 </Flex>
                             </Flex>
-                            <Typography.Paragraph
-                                type="secondary"
-                                ellipsis={{ tooltip: true, rows: 1 }}
-                                style={{ width: '100%' }}
-                            >
+                            <Typography.Text type="secondary" ellipsis={{ tooltip: true }}>
                                 {dataset.description}
-                            </Typography.Paragraph>
+                            </Typography.Text>
                         </Flex>
                     </Flex>
 
@@ -233,17 +229,12 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                     }),
                                     children: (
                                         <List
-                                            style={{ width: '100%' }}
                                             size="small"
                                             dataSource={dataset.data_output_links}
                                             renderItem={(link) => (
                                                 <List.Item>
-                                                    <Flex
-                                                        justify="space-between"
-                                                        align="center"
-                                                        style={{ width: '100%' }}
-                                                    >
-                                                        <Flex align="center" gap={8}>
+                                                    <Flex justify="space-between" style={{ width: '100%' }}>
+                                                        <Flex align="center" gap="small">
                                                             <Badge
                                                                 status={getDecisionStatusBadgeStatus(link.status)}
                                                                 size="small"
