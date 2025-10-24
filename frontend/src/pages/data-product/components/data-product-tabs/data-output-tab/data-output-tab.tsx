@@ -11,26 +11,22 @@ type Props = {
 export function DataOutputTab({ dataProductId }: Props) {
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
 
-    const [isDragging, setIsDragging] = useState(false);
     const [draggedDataOutput, setDraggedDataOutput] = useState<string | null>(null);
 
     const handleDragStart = (dataOutputId: string) => {
-        setIsDragging(true);
         setDraggedDataOutput(dataOutputId);
     };
 
     const handleDragEnd = () => {
-        setIsDragging(false);
         setDraggedDataOutput(null);
     };
 
     return (
-        <Row>
+        <Row gutter={24}>
             <Col span={12}>
                 <DatasetTable
                     datasets={dataProduct?.datasets ?? []}
                     dataProductId={dataProductId}
-                    isDragActive={isDragging}
                     draggedDataOutputId={draggedDataOutput}
                 />
             </Col>

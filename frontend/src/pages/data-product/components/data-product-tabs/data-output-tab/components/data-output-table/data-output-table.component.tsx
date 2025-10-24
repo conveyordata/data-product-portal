@@ -1,5 +1,5 @@
 import { Button, Flex, Form, Typography } from 'antd';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DataOutputCard } from '@/components/data-outputs/data-output-card/data-output-card.component.tsx';
 import { Searchbar } from '@/components/form';
@@ -23,7 +23,6 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
     const { isVisible, handleOpen, handleClose } = useModal();
-    const [isDragging, setIsDragging] = useState(false);
     const { data: access } = useCheckAccessQuery(
         {
             resource: dataProductId,
@@ -49,56 +48,56 @@ export function DataOutputTable({ dataProductId, dataOutputs, onDragStart, onDra
     const canCreateDataOutput = access?.allowed || false;
 
     const handleDragStart = (dataOutputId: string) => {
-        setIsDragging(true);
         onDragStart?.(dataOutputId);
     };
 
     const handleDragEnd = () => {
-        setIsDragging(false);
         onDragEnd?.();
     };
 
     return (
-        <Flex vertical className={`${styles.container} ${isDragging ? styles.dragging : ''}`}>
-            <Flex justify="space-between" align="center" className={styles.header}>
-                <Typography.Title level={4}>{t('Technical Assets')}</Typography.Title>
-                <Button
-                    disabled={!canCreateDataOutput}
-                    type="primary"
-                    loading={isLoadingDataProduct}
-                    onClick={handleOpen}
-                >
-                    {t('Add Technical Asset')}
-                </Button>
+        <Flex vertical gap={filteredDataOutputs.length === 0 ? 'large' : 'small'}>
+            <Flex vertical gap="middle">
+                <Flex justify="space-between" align="center">
+                    <Typography.Title level={4} style={{ margin: 0 }}>
+                        {t('Technical Assets')}
+                    </Typography.Title>
+                    <Button
+                        disabled={!canCreateDataOutput}
+                        type="primary"
+                        loading={isLoadingDataProduct}
+                        onClick={handleOpen}
+                    >
+                        {t('Add Technical Asset')}
+                    </Button>
+                </Flex>
+
+                <Searchbar
+                    placeholder={t('Search technical assets by name or namespace')}
+                    formItemProps={{ initialValue: '', className: styles.searchBar }}
+                    form={searchForm}
+                />
             </Flex>
 
-            <Searchbar
-                placeholder={t('Search technical assets by name or namespace')}
-                formItemProps={{ initialValue: '', className: styles.searchBar }}
-                form={searchForm}
-            />
+            {filteredDataOutputs.map((dataOutput) => (
+                <DataOutputCard
+                    key={dataOutput.id}
+                    dataOutput={dataOutput}
+                    dataProductId={dataProductId}
+                    onDragStart={() => handleDragStart(dataOutput.id)}
+                    onDragEnd={handleDragEnd}
+                />
+            ))}
 
-            <Flex vertical className={styles.cardsGrid}>
-                {filteredDataOutputs.map((dataOutput) => (
-                    <DataOutputCard
-                        key={dataOutput.id}
-                        dataOutput={dataOutput}
-                        dataProductId={dataProductId}
-                        onDragStart={() => handleDragStart(dataOutput.id)}
-                        onDragEnd={handleDragEnd}
-                    />
-                ))}
-
-                {filteredDataOutputs.length === 0 && (
-                    <Flex className={styles.emptyState}>
-                        <Typography.Text type="secondary">
-                            {searchTerm
-                                ? t('No technical assets found matching your search')
-                                : t('No technical assets found')}
-                        </Typography.Text>
-                    </Flex>
-                )}
-            </Flex>
+            {filteredDataOutputs.length === 0 && (
+                <Flex justify={'center'}>
+                    <Typography.Text type="secondary">
+                        {searchTerm
+                            ? t('No technical assets found matching your search')
+                            : t('No technical assets found')}
+                    </Typography.Text>
+                </Flex>
+            )}
 
             {isVisible && <AddDataOutputPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </Flex>

@@ -15,11 +15,10 @@ import styles from './dataset-table.module.scss';
 type Props = {
     dataProductId: string;
     datasets: DatasetsGetContract;
-    isDragActive?: boolean;
     draggedDataOutputId?: string | null;
 };
 
-export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDataOutputId }: Props) {
+export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
@@ -54,40 +53,37 @@ export function DatasetTable({ dataProductId, datasets, isDragActive, draggedDat
     const canCreateDataset = (access_create_dataset?.allowed && can_link_data_output?.allowed) || false;
 
     return (
-        <Flex vertical className={`${styles.container} ${isDragActive ? styles.dragActive : ''}`}>
-            <Flex justify="space-between" align="center" className={styles.header}>
-                <Typography.Title level={4}>{t('Output Ports')}</Typography.Title>
-                <Link to={`${ApplicationPaths.DatasetNew}?dataProductId=${dataProductId}`}>
-                    <Button disabled={!canCreateDataset} type="primary" loading={isLoadingDataProduct}>
-                        {t('Add Output Port')}
-                    </Button>
-                </Link>
+        <Flex vertical gap={filteredDatasets.length === 0 ? 'large' : 'small'}>
+            <Flex vertical gap="middle">
+                <Flex justify="space-between" align="center">
+                    <Typography.Title level={4} style={{ margin: 0 }}>
+                        {t('Output Ports')}
+                    </Typography.Title>
+                    <Link to={`${ApplicationPaths.DatasetNew}?dataProductId=${dataProductId}`}>
+                        <Button disabled={!canCreateDataset} type="primary" loading={isLoadingDataProduct}>
+                            {t('Add Output Port')}
+                        </Button>
+                    </Link>
+                </Flex>
+
+                <Searchbar
+                    placeholder={t('Search output ports by name or description')}
+                    formItemProps={{ initialValue: '', className: styles.searchBar }}
+                    form={searchForm}
+                />
             </Flex>
 
-            <Searchbar
-                placeholder={t('Search output ports by name or description')}
-                formItemProps={{ initialValue: '', className: styles.searchBar }}
-                form={searchForm}
-            />
+            {filteredDatasets.map((dataset) => (
+                <DatasetCard key={dataset.id} datasetId={dataset.id} draggedDataOutputId={draggedDataOutputId} />
+            ))}
 
-            <Flex vertical className={styles.cardsGrid}>
-                {filteredDatasets.map((dataset) => (
-                    <DatasetCard
-                        key={dataset.id}
-                        datasetId={dataset.id}
-                        isDragActive={isDragActive}
-                        draggedDataOutputId={draggedDataOutputId}
-                    />
-                ))}
-
-                {filteredDatasets.length === 0 && (
-                    <Flex className={styles.emptyState}>
-                        <Typography.Text type="secondary">
-                            {searchTerm ? t('No datasets found matching your search') : t('No datasets found')}
-                        </Typography.Text>
-                    </Flex>
-                )}
-            </Flex>
+            {filteredDatasets.length === 0 && (
+                <Flex justify={'center'}>
+                    <Typography.Text type="secondary">
+                        {searchTerm ? t('No datasets found matching your search') : t('No datasets found')}
+                    </Typography.Text>
+                </Flex>
+            )}
         </Flex>
     );
 }

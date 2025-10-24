@@ -21,11 +21,10 @@ import styles from './dataset-card.module.scss';
 
 type Props = {
     datasetId: string;
-    isDragActive?: boolean;
     draggedDataOutputId?: string | null;
 };
 
-export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Props) {
+export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
     const { t } = useTranslation();
     const [dragOver, setDragOver] = useState(false);
     const [invalidDrop, setInvalidDrop] = useState(false);
@@ -160,7 +159,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
     return (
         <>
             <Card
-                className={`${styles.card} ${isDragActive ? styles.dropZone : ''} ${dragOver ? styles.dragOver : ''} ${invalidDrop ? styles.invalidDrop : ''}`}
+                className={`${styles.card}  ${dragOver ? styles.dragOver : ''} ${invalidDrop ? styles.invalidDrop : ''}`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}

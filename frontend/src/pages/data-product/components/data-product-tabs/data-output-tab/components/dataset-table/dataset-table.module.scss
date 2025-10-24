@@ -1,27 +1,5 @@
 @use '@/styles/globals';
 
-.container {
-    padding: globals.$spacing-m;
-    min-height: 400px;
-    max-height: 80vh;
-}
-
-.header {
-    margin-bottom: globals.$spacing-l;
-    align-items: flex-start;
-}
-
 .searchBar {
     margin-bottom: globals.$spacing-m !important;
-}
-
-.cardsGrid {
-    gap: globals.$spacing-m;
-    width: 100%;
-    overflow-y: auto;
-}
-
-.emptyState {
-    justify-content: center;
-    padding: globals.$spacing-xl;
 }
