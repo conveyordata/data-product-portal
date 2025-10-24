@@ -45,7 +45,7 @@ const getIsRestrictedDataset = (dataset: DatasetsGetContract[0]) => {
 };
 
 const getActionButtonText = (accessType: DatasetAccess, t: TFunction) => {
-    return accessType === DatasetAccess.Public ? t('Add Dataset') : t('Request Access');
+    return accessType === DatasetAccess.Public ? t('Add Output port') : t('Request Access');
 };
 
 export function AddDatasetPopup({ onClose, isOpen, dataProductId }: Props) {
@@ -70,8 +70,8 @@ export function AddDatasetPopup({ onClose, isOpen, dataProductId }: Props) {
                 await requestDatasetAccessForDataProduct({ dataProductId: dataProductId, datasetId }).unwrap();
 
                 const content = isRestrictedDataset
-                    ? t('Dataset access has been requested')
-                    : t('Dataset has been added');
+                    ? t('Output port access has been requested')
+                    : t('Output port has been added');
                 dispatchMessage({ content, type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to request access to the data product'), type: 'error' });
@@ -84,13 +84,13 @@ export function AddDatasetPopup({ onClose, isOpen, dataProductId }: Props) {
             onClose={onClose}
             isOpen={isOpen}
             searchForm={searchForm}
-            title={t('Add Dataset')}
-            searchPlaceholder={t('Search datasets by name')}
+            title={t('Add Output port')}
+            searchPlaceholder={t('Search output ports by name')}
         >
             <List
                 loading={isFetchingDatasets || isRequestingAccess}
                 size={'large'}
-                locale={{ emptyText: t('No datasets found') }}
+                locale={{ emptyText: t('No output ports found') }}
                 rowKey={({ id }) => id}
                 dataSource={filteredDatasets}
                 renderItem={(item) => {

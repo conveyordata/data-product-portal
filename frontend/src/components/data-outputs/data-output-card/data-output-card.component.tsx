@@ -53,12 +53,12 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
             try {
                 await unlinkDataset({ dataOutputId: dataOutput.id, datasetId, datasetLinkId }).unwrap();
                 dispatchMessage({
-                    content: t('Dataset unlinked successfully'),
+                    content: t('Output port unlinked successfully'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to unlink dataset'),
+                    content: t('Failed to unlink output port'),
                     type: 'error',
                 });
             }

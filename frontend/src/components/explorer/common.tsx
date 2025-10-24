@@ -25,7 +25,7 @@ function LinkToDatasetNode({ id }: { id: string }) {
     const { t } = useTranslation();
     return (
         <Link to={createDatasetIdPath(id, DatasetTabKeys.Explorer)} className={styles.link}>
-            <Button type="default">{t('View dataset')}</Button>
+            <Button type="default">{t('View output port')}</Button>
         </Link>
     );
 }

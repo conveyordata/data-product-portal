@@ -34,12 +34,12 @@ export const usePendingActionHandlers = () => {
             try {
                 await approveDataProductLink(request).unwrap();
                 dispatchMessage({
-                    content: t('Dataset request has been successfully approved'),
+                    content: t('Output port request has been successfully approved'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to approve data product dataset link'),
+                    content: t('Failed to approve data product output port link'),
                     type: 'error',
                 });
             }
@@ -52,12 +52,12 @@ export const usePendingActionHandlers = () => {
             try {
                 await rejectDataProductLink(request).unwrap();
                 dispatchMessage({
-                    content: t('Dataset access request has been successfully rejected'),
+                    content: t('Output port access request has been successfully rejected'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to reject data product dataset link'),
+                    content: t('Failed to reject data product output port link'),
                     type: 'error',
                 });
             }
@@ -70,12 +70,12 @@ export const usePendingActionHandlers = () => {
             try {
                 await approveDataOutputLink(request).unwrap();
                 dispatchMessage({
-                    content: t('Dataset request has been successfully approved'),
+                    content: t('Output port request has been successfully approved'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to approve technical asset dataset link'),
+                    content: t('Failed to approve technical asset output port link'),
                     type: 'error',
                 });
             }
@@ -88,12 +88,12 @@ export const usePendingActionHandlers = () => {
             try {
                 await rejectDataOutputLink(request).unwrap();
                 dispatchMessage({
-                    content: t('Dataset access request has been successfully rejected'),
+                    content: t('Output port access request has been successfully rejected'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to reject technical asset dataset link'),
+                    content: t('Failed to reject technical asset output port link'),
                     type: 'error',
                 });
             }

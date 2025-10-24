@@ -34,7 +34,7 @@ export function DatasetActionButton({ dataset, dataOutputId, dataProductId, stat
             try {
                 await removeDatasetFromDataOutput({ datasetId, dataOutputId: dataOutputId }).unwrap();
                 dispatchMessage({
-                    content: t('Dataset {{name}} has been removed from technical asset', { name }),
+                    content: t('Output port {{name}} has been removed from technical asset', { name }),
                     type: 'success',
                 });
             } catch (error) {
@@ -49,7 +49,7 @@ export function DatasetActionButton({ dataset, dataOutputId, dataProductId, stat
             try {
                 await removeDatasetFromDataOutput({ datasetId, dataOutputId }).unwrap();
                 dispatchMessage({
-                    content: t('Request to link dataset {{name}} has been cancelled', { name }),
+                    content: t('Request to link output port {{name}} has been cancelled', { name }),
                     type: 'success',
                 });
             } catch (error) {
@@ -60,7 +60,7 @@ export function DatasetActionButton({ dataset, dataOutputId, dataProductId, stat
     );
 
     const buttonText = status === DecisionStatus.Pending ? t('Cancel') : t('Remove');
-    const popupTitle = status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Dataset');
+    const popupTitle = status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Output port');
     const popupDescription =
         status === DecisionStatus.Pending
             ? t('Are you sure you want to cancel the request to link {{name}} to the technical asset?', {

@@ -122,7 +122,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
                     });
                 }}
             >
-                {t('Datasets')}
+                {t('Output ports')}
             </Tag.CheckableTag>
             <Tag.CheckableTag
                 checked={sidebarFilters.dataOutputsEnabled}

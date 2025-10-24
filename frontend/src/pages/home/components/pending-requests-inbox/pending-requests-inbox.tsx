@@ -60,7 +60,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         {action.dataset.name}
                     </Link>{' '}
-                    {t('dataset.')}
+                    {t('output port.')}
                 </Typography.Text>
             );
             tag = (
@@ -70,7 +70,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                     }}
                     strong
                 >
-                    {t('{{name}} Dataset', { name: action.dataset.name })}
+                    {t('{{name}} Output port', { name: action.dataset.name })}
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
@@ -106,7 +106,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         {action.dataset.name}
                     </Link>{' '}
-                    {t('dataset.')}
+                    {t('output port.')}
                 </Typography.Text>
             );
             tag = (
@@ -116,7 +116,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                     }}
                     strong
                 >
-                    {t('{{name}} Dataset', { name: action.dataset.name })}
+                    {t('{{name}} Output port', { name: action.dataset.name })}
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);

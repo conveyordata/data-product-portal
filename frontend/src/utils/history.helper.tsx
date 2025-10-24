@@ -9,7 +9,7 @@ import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } 
 export function getTypeDisplayName(t: TFunction, type: EventReferenceEntity | undefined): string {
     switch (type) {
         case EventReferenceEntity.Dataset:
-            return t('Dataset');
+            return t('Output port');
         case EventReferenceEntity.DataProduct:
             return t('Data Product');
         case EventReferenceEntity.DataOutput:

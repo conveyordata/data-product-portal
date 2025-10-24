@@ -104,7 +104,7 @@ export const getDataProductTableColumns = ({
             title: t('Consumes'),
             dataIndex: 'dataset_count',
             render: (datasetCount: number) => {
-                return <TableCellItem text={t('{{count}} datasets', { count: datasetCount })} />;
+                return <TableCellItem text={t('{{count}} output ports', { count: datasetCount })} />;
             },
             sorter: sorter.numberSorter((dp) => dp.dataset_count),
         },

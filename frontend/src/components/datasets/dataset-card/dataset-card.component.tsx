@@ -50,12 +50,12 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
         try {
             await removeDataset(dataset.id).unwrap();
             dispatchMessage({
-                content: t('Dataset {{name}} has been successfully removed', { name: dataset.name }),
+                content: t('Output port {{name}} has been successfully removed', { name: dataset.name }),
                 type: 'success',
             });
         } catch (_error) {
             dispatchMessage({
-                content: t('Failed to remove dataset'),
+                content: t('Failed to remove output port'),
                 type: 'error',
             });
         }
@@ -118,7 +118,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
 
                 if (isAlreadyLinked) {
                     dispatchMessage({
-                        content: t('Technical asset {{name}} is already linked to this dataset', {
+                        content: t('Technical asset {{name}} is already linked to this output port', {
                             name: dragData.name,
                         }),
                         type: 'warning',
@@ -128,7 +128,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
 
                 const result = await linkDataset({ dataOutputId: dragData.id, datasetId: dataset.id }).unwrap();
                 dispatchMessage({
-                    content: t('Technical asset {{name}} linked to dataset successfully', { name: dragData.name }),
+                    content: t('Technical asset {{name}} linked to output port successfully', { name: dragData.name }),
                     type: 'success',
                 });
                 // TODO make this dependable on access rights
@@ -136,7 +136,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
             }
         } catch (_error) {
             dispatchMessage({
-                content: t('Failed to link technical asset to dataset'),
+                content: t('Failed to link technical asset to output port'),
                 type: 'error',
             });
         }
