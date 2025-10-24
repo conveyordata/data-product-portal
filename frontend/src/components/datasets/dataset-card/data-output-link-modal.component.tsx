@@ -15,14 +15,13 @@ import type { SearchForm } from '@/types/shared';
 import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 
 type Props = {
-    isOpen: boolean;
     onClose: () => void;
     datasetId: string;
     datasetName: string;
     existingLinks: Array<{ data_output: { id: string; name: string } }>;
 };
 
-export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, existingLinks }: Props) {
+export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingLinks }: Props) {
     const { t } = useTranslation();
     const [selectedOutputs, setSelectedOutputs] = useState<Set<string>>(new Set());
 
@@ -106,7 +105,7 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
     return (
         <Modal
             title={t('Link technical assets to {{name}}', { name: datasetName })}
-            open={isOpen}
+            open
             onCancel={onClose}
             width={600}
             footer={[
@@ -124,61 +123,56 @@ export function DataOutputLinkModal({ isOpen, onClose, datasetId, datasetName, e
                 </Button>,
             ]}
         >
-            <Flex vertical>
-                <Searchbar
-                    form={searchForm}
-                    placeholder={t('Search technical assets')}
-                    formItemProps={{ initialValue: '' }}
-                />
+            <Searchbar
+                form={searchForm}
+                placeholder={t('Search technical assets')}
+                formItemProps={{ initialValue: '' }}
+            />
 
-                {filteredDataOutputs.length > 0 && (
-                    <Flex justify="space-between" align="center">
-                        <Typography.Text type="secondary">
-                            {t('{{count}} available technical assets', { count: filteredDataOutputs.length })}
-                        </Typography.Text>
-                        <Button type="link" onClick={handleSelectAll}>
-                            {selectedOutputs.size === filteredDataOutputs.length ? t('Deselect All') : t('Select All')}
-                        </Button>
-                    </Flex>
-                )}
-
-                <Flex>
-                    <List
-                        style={{ width: '100%' }}
-                        dataSource={filteredDataOutputs}
-                        pagination={{
-                            ...pagination,
-                            size: 'small',
-                            position: 'bottom',
-                            showTotal: (total: number, range: [number, number]) =>
-                                t('Showing {{range0}}-{{range1}} of {{total}} technical assets', {
-                                    range0: range[0],
-                                    range1: range[1],
-                                    total: total,
-                                }),
-                            onChange: handleCurrentPageChange,
-                        }}
-                        locale={{ emptyText: t('No technical assets available') }}
-                        renderItem={(output) => (
-                            <List.Item>
-                                <Flex align="center" gap={12} style={{ width: '100%' }}>
-                                    <Checkbox
-                                        checked={selectedOutputs.has(output.id)}
-                                        onChange={() => handleOutputToggle(output.id)}
-                                    />
-                                    <CustomSvgIconLoader
-                                        iconComponent={getDataOutputIcon(output.configuration.configuration_type)}
-                                    />
-                                    <Flex vertical style={{ flex: 1 }}>
-                                        <Typography.Text strong>{output.result_string}</Typography.Text>
-                                        <Typography.Text type="secondary">{output.name}</Typography.Text>
-                                    </Flex>
-                                </Flex>
-                            </List.Item>
-                        )}
-                    />
+            {filteredDataOutputs.length > 0 && (
+                <Flex justify="space-between" align="center">
+                    <Typography.Text type="secondary">
+                        {t('{{count}} available technical assets', { count: filteredDataOutputs.length })}
+                    </Typography.Text>
+                    <Button type="link" onClick={handleSelectAll}>
+                        {selectedOutputs.size === filteredDataOutputs.length ? t('Deselect All') : t('Select All')}
+                    </Button>
                 </Flex>
-            </Flex>
+            )}
+            <List
+                style={{ width: '100%' }}
+                dataSource={filteredDataOutputs}
+                pagination={{
+                    ...pagination,
+                    size: 'small',
+                    position: 'bottom',
+                    showTotal: (total: number, range: [number, number]) =>
+                        t('Showing {{range0}}-{{range1}} of {{total}} technical assets', {
+                            range0: range[0],
+                            range1: range[1],
+                            total: total,
+                        }),
+                    onChange: handleCurrentPageChange,
+                }}
+                locale={{ emptyText: t('No technical assets available') }}
+                renderItem={(output) => (
+                    <List.Item>
+                        <Flex align="center" gap={12} style={{ width: '100%' }}>
+                            <Checkbox
+                                checked={selectedOutputs.has(output.id)}
+                                onChange={() => handleOutputToggle(output.id)}
+                            />
+                            <CustomSvgIconLoader
+                                iconComponent={getDataOutputIcon(output.configuration.configuration_type)}
+                            />
+                            <Flex vertical style={{ flex: 1 }}>
+                                <Typography.Text strong>{output.result_string}</Typography.Text>
+                                <Typography.Text type="secondary">{output.name}</Typography.Text>
+                            </Flex>
+                        </Flex>
+                    </List.Item>
+                )}
+            />
         </Modal>
     );
 }
