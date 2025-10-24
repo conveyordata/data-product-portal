@@ -3,15 +3,10 @@
 .data-product-container {
     @extend .container;
     gap: globals.$column-gap-xl;
-
-    &:has(.sidebarCollapsed) {
-        gap: 0;
-    }
 }
 
-.header-container {
-    width: 100%;
-    justify-content: space-between;
+.sidebarCollapsed {
+  gap: 0;
 }
 
 .edit-icon {
@@ -41,30 +36,20 @@
     }
 
     transition: all 0.3s ease;
-
-    &.contentExpanded {
-        margin-right: 60px; // Space for collapsed sidebar
-    }
 }
 
 .sidebar {
-    flex: 0.3;
+    flex: 1;
     min-width: globals.$min-sidebar-width;
-    gap: globals.$column-gap-xl;
     justify-content: flex-start;
     align-items: flex-start;
     transition: all 0.3s ease;
 
     &.sidebarCollapsed {
-        min-width: 60px;
-        width: 60px;
+        min-width: 0;
+        width: 0;
         overflow: visible;
     }
-}
-
-.collapsedSidebar {
-    justify-content: center;
-    height: 100%;
 }
 
 .main-content {

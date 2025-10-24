@@ -167,9 +167,11 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                 onMouseDown={handleMouseDown}
             >
                 <Flex vertical gap="small">
-                    <Flex gap="small" align="center" justify="space-between">
+                    <Flex gap="small" align="center">
                         <CustomSvgIconLoader iconComponent={datasetBorderIcon} />
-                        <Flex vertical style={{ flex: 1, minWidth: 0 }}>
+                        <Flex vertical flex={1} style={{ minWidth: 0 }}>
+                            {' '}
+                            {/*Min width is needed to ensure the elipsis of description*/}
                             <Flex justify="space-between" align="flex-start">
                                 <Link to={createDatasetIdPath(dataset.id)}>
                                     <Typography.Title level={5}>{dataset.name}</Typography.Title>

@@ -69,9 +69,9 @@ export function DataProduct() {
     }
 
     return (
-        <Flex className={styles.dataProductContainer}>
-            <Flex vertical className={clsx(styles.content, { [styles.contentExpanded]: sidebarCollapsed })}>
-                <Flex className={styles.headerContainer}>
+        <Flex className={clsx(styles.dataProductContainer, { [styles.sidebarCollapsed]: sidebarCollapsed })}>
+            <Flex vertical className={styles.content}>
+                <Flex justify={'space-between'}>
                     <Space className={styles.header}>
                         <Icon
                             component={dataProductTypeIcon}
@@ -118,18 +118,16 @@ export function DataProduct() {
             </Flex>
 
             {/* Sidebar */}
-            <Flex vertical className={clsx(styles.sidebar, { [styles.sidebarCollapsed]: sidebarCollapsed })}>
+            <div className={clsx(styles.sidebar, { [styles.sidebarCollapsed]: sidebarCollapsed })}>
                 {!sidebarCollapsed ? (
-                    <>
+                    <Flex vertical>
                         <DataProductActions dataProductId={dataProductId} />
                         <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
-                    </>
-                ) : (
-                    <Flex vertical className={styles.collapsedSidebar}>
-                        <UserAccessOverview users={dataProductOwners} title="" showAvatarsOnly={true} />
                     </Flex>
+                ) : (
+                    <div style={{ background: 'red' }} /> //Div is needed to make transition work
                 )}
-            </Flex>
+            </div>
         </Flex>
     );
 }
