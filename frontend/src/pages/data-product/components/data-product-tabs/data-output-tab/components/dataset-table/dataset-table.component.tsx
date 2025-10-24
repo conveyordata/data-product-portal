@@ -80,7 +80,7 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
             {filteredDatasets.length === 0 && (
                 <Flex justify={'center'}>
                     <Typography.Text type="secondary">
-                        {searchTerm ? t('No datasets found matching your search') : t('No datasets found')}
+                        {searchTerm ? t('No output ports found matching your search') : t('No output ports found')}
                     </Typography.Text>
                 </Flex>
             )}

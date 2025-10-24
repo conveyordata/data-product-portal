@@ -38,16 +38,16 @@ export function DatabricksDataOutputForm({ form, identifiers = [], namespace, so
             form={form}
             platform={DataPlatforms.Databricks}
             resultLabel={t('Resulting catalog and schema')}
-            resultTooltip={t('The schema on Databricks you can access through this data output')}
+            resultTooltip={t('The schema on Databricks you can access through this technical asset')}
         >
             <ConfigurationFormItem
                 name={'catalog'}
                 label={t('Catalog')}
-                tooltip={t('The name of the Databricks catalog to link the data output to')}
+                tooltip={t('The name of the Databricks catalog to link the technical asset to')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the Databricks catalog for this data output'),
+                        message: t('Please input the name of the Databricks catalog for this technical asset'),
                     },
                 ]}
                 normalize={(value: string | string[]) => {
@@ -66,7 +66,7 @@ export function DatabricksDataOutputForm({ form, identifiers = [], namespace, so
             <ConfigurationFormItem
                 name={'schema'}
                 label={t('Schema')}
-                tooltip={t('The schema to link the data output to')}
+                tooltip={t('The schema to link the technical asset to')}
             >
                 <Input />
             </ConfigurationFormItem>
@@ -78,11 +78,11 @@ export function DatabricksDataOutputForm({ form, identifiers = [], namespace, so
                 name={'table'}
                 hidden={entireSchema}
                 label={t('Table')}
-                tooltip={t('The table that your data output can access')}
+                tooltip={t('The table that your technical asset can access')}
                 rules={[
                     {
                         required: !entireSchema,
-                        message: t('Please input the table this data output can access'),
+                        message: t('Please input the table this technical asset can access'),
                     },
                 ]}
             >

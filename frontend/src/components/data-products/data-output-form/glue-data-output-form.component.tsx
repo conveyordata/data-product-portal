@@ -38,16 +38,16 @@ export function GlueDataOutputForm({ form, identifiers = [], namespace, sourceAl
             form={form}
             platform={DataPlatforms.Glue}
             resultLabel={t('Resulting database and schema')}
-            resultTooltip={t('The database and schema on Glue you can access through this data output')}
+            resultTooltip={t('The database and schema on Glue you can access through this technical asset')}
         >
             <ConfigurationFormItem
                 name={'database'}
                 label={t('Database')}
-                tooltip={t('The name of the Glue database to link the data output to')}
+                tooltip={t('The name of the Glue database to link the technical asset to')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the Glue database for this data output'),
+                        message: t('Please input the name of the Glue database for this technical asset'),
                     },
                 ]}
                 normalize={(value: string | string[]) => {
@@ -66,7 +66,7 @@ export function GlueDataOutputForm({ form, identifiers = [], namespace, sourceAl
             <ConfigurationFormItem
                 name={'database_suffix'}
                 label={t('Database suffix')}
-                tooltip={t('The suffix of the Glue database to link the data output to')}
+                tooltip={t('The suffix of the Glue database to link the technical asset to')}
             >
                 <Input />
             </ConfigurationFormItem>
@@ -78,11 +78,11 @@ export function GlueDataOutputForm({ form, identifiers = [], namespace, sourceAl
                 name={'table'}
                 hidden={entireSchema}
                 label={t('Table')}
-                tooltip={t('The table that your data output can access')}
+                tooltip={t('The table that your technical asset can access')}
                 rules={[
                     {
                         required: !entireSchema,
-                        message: t('Please input the table this data output can access'),
+                        message: t('Please input the table this technical asset can access'),
                     },
                 ]}
             >

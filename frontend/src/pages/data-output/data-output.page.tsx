@@ -73,7 +73,7 @@ export function DataOutput() {
                         <Space className={styles.editIcon}>
                             <CircleIconButton
                                 icon={<SettingOutlined />}
-                                tooltip={t('Edit data output')}
+                                tooltip={t('Edit technical asset')}
                                 onClick={navigateToEditPage}
                             />
                         </Space>
@@ -99,7 +99,7 @@ export function DataOutput() {
             <Flex vertical className={styles.sidebar}>
                 <DataOutputActions dataProductId={dataProductId} dataOutputId={dataOutputId} />
                 {/*  Data product owners overview */}
-                <UserAccessOverview users={dataOutputOwners} title={t('Data Output Owners')} />
+                <UserAccessOverview users={dataOutputOwners} title={t('Technical Asset Owners')} />
             </Flex>
         </Flex>
     );

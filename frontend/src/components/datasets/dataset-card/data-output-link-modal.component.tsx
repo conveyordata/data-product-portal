@@ -88,7 +88,7 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
             await Promise.all(linkPromises);
 
             dispatchMessage({
-                content: t('{{count}} data outputs linked successfully', { count: selectedOutputs.size }),
+                content: t('{{count}} technical assets linked successfully', { count: selectedOutputs.size }),
                 type: 'success',
             });
 
@@ -96,7 +96,7 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
             onClose();
         } catch (_error) {
             dispatchMessage({
-                content: t('Failed to link data outputs'),
+                content: t('Failed to link technical assets'),
                 type: 'error',
             });
         }

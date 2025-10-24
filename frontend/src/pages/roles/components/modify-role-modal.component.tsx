@@ -25,7 +25,7 @@ export function ModifyRoleModal({ role, isOpen, onClose }: Props) {
             case 'data_product':
                 return t('Update {{ name }} data product role', { name: role.name });
             case 'dataset':
-                return t('Update {{ name }} dataset role', { name: role.name });
+                return t('Update {{ name }} output port role', { name: role.name });
         }
     }, [role, t]);
 

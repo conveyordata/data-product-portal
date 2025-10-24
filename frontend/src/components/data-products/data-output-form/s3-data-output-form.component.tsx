@@ -30,7 +30,7 @@ export function S3DataOutputForm({ form, namespace, identifiers = [], sourceAlig
             form={form}
             platform={DataPlatforms.S3}
             resultLabel={t('Resulting path')}
-            resultTooltip={t('The path on S3 you can access through this data output')}
+            resultTooltip={t('The path on S3 you can access through this technical asset')}
         >
             <ConfigurationFormItem
                 name={'bucket'}
@@ -38,7 +38,7 @@ export function S3DataOutputForm({ form, namespace, identifiers = [], sourceAlig
                 rules={[
                     {
                         required: true,
-                        message: t('The name of the S3 bucket to link the data output to'),
+                        message: t('The name of the S3 bucket to link the technical asset to'),
                     },
                 ]}
             >
@@ -54,7 +54,7 @@ export function S3DataOutputForm({ form, namespace, identifiers = [], sourceAlig
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the path of this data output'),
+                        message: t('Please input the path of this technical asset'),
                     },
                     {
                         pattern: /^[a-zA-Z0-9._/-]+$/,

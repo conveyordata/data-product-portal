@@ -58,7 +58,7 @@ export function DatasetTab({ dataOutputId }: Props) {
         <>
             <Flex vertical className={`${styles.container} ${filteredDatasets.length === 0 && styles.paginationGap}`}>
                 <Searchbar
-                    placeholder={t('Search datasets by name')}
+                    placeholder={t('Search output ports by name')}
                     formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
                     form={searchForm}
                     actionButton={
@@ -68,7 +68,7 @@ export function DatasetTab({ dataOutputId }: Props) {
                             className={styles.formButton}
                             onClick={handleOpen}
                         >
-                            {t('Add Dataset')}
+                            {t('Add Output port')}
                         </Button>
                     }
                 />

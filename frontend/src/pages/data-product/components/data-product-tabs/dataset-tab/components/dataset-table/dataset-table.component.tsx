@@ -48,7 +48,7 @@ export function DatasetTable({ dataProductId, datasets }: Props) {
                     position: ['topRight'],
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} datasets', {
+                        t('Showing {{range0}}-{{range1}} of {{total}} output ports', {
                             range0: range[0],
                             range1: range[1],
                             total: total,

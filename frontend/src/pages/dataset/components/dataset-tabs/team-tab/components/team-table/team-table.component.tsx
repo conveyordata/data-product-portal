@@ -60,7 +60,7 @@ export function TeamTable({ datasetId, datasetUsers }: Props) {
                 if (!dataset) return;
 
                 await deleteRoleAssignment({ role_assignment_id: id, dataset_id: dataset.id }).unwrap();
-                dispatchMessage({ content: t('User access to dataset has been removed'), type: 'success' });
+                dispatchMessage({ content: t('User access to output port has been removed'), type: 'success' });
             } catch (_error) {
                 dispatchMessage({ content: t('Failed to remove user access'), type: 'error' });
             }

@@ -55,9 +55,9 @@ const createText = (t: TFunction, scope: DataProductSettingScope, mode: Mode): S
             };
         }
         return {
-            title: t('Create New Dataset Setting'),
-            successMessage: t('Dataset setting created successfully'),
-            errorMessage: t('Failed to create dataset setting'),
+            title: t('Create New Output port Setting'),
+            successMessage: t('Output port setting created successfully'),
+            errorMessage: t('Failed to create output port setting'),
             submitButtonText: t('Create'),
         };
     }
@@ -70,9 +70,9 @@ const createText = (t: TFunction, scope: DataProductSettingScope, mode: Mode): S
         };
     }
     return {
-        title: t('Update Dataset Setting'),
-        successMessage: t('Dataset setting updated successfully'),
-        errorMessage: t('Failed to update dataset setting'),
+        title: t('Update Output port Setting'),
+        successMessage: t('Output port setting updated successfully'),
+        errorMessage: t('Failed to update output port setting'),
         submitButtonText: t('Update'),
     };
 };

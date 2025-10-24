@@ -68,7 +68,7 @@ export function Dataset() {
                     {canEdit && (
                         <CircleIconButton
                             icon={<EditOutlined />}
-                            tooltip={t('Edit dataset')}
+                            tooltip={t('Edit output port')}
                             onClick={navigateToDatasetEditPage}
                         />
                     )}
@@ -97,7 +97,7 @@ export function Dataset() {
             <Flex vertical className={styles.sidebar}>
                 <DatasetActions datasetId={datasetId} />
                 {/*  Dataset owners overview */}
-                <UserAccessOverview users={datasetOwners} title={t('Dataset Owners')} />
+                <UserAccessOverview users={datasetOwners} title={t('Output port Owners')} />
             </Flex>
         </Flex>
     );

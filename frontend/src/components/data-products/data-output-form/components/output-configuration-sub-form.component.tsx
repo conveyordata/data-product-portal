@@ -21,7 +21,7 @@ export function ConfigurationSubForm({ form, platform, resultLabel, resultToolti
     const configurationType = DataPlatformDataOutputConfigurationMap.get(platform)?.toString();
 
     if (!configurationType) {
-        const errorMessage = 'Data output not configured correctly';
+        const errorMessage = 'Technical asset not configured correctly';
         dispatchMessage({ content: errorMessage, type: 'error' });
     }
 

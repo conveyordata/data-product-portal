@@ -72,7 +72,7 @@ const getAccessTypeOptions = (t: TFunction) => {
     return [
         {
             label: (
-                <Tooltip title={t('Public datasets are visible to everyone and are free to use by anyone')}>
+                <Tooltip title={t('Public output ports are visible to everyone and are free to use by anyone')}>
                     {getDatasetAccessTypeLabel(t, DatasetAccess.Public)}
                 </Tooltip>
             ),
@@ -80,7 +80,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         },
         {
             label: (
-                <Tooltip title={t('Restricted datasets are visible to everyone but require permission to use')}>
+                <Tooltip title={t('Restricted output ports are visible to everyone but require permission to use')}>
                     {getDatasetAccessTypeLabel(t, DatasetAccess.Restricted)}
                 </Tooltip>
             ),
@@ -88,7 +88,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         },
         {
             label: (
-                <Tooltip title={t('Private datasets are only visible to owners and users with access')}>
+                <Tooltip title={t('Private output ports are only visible to owners and users with access')}>
                     {getDatasetAccessTypeLabel(t, DatasetAccess.Private)}
                 </Tooltip>
             ),
@@ -170,7 +170,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                     access_type: values.access_type,
                 };
                 const response = await createDataset(request).unwrap();
-                dispatchMessage({ content: t('Dataset created successfully'), type: 'success' });
+                dispatchMessage({ content: t('Output port created successfully'), type: 'success' });
 
                 // If dataProductId was provided, navigate back to the data product page
                 if (dataOutputId && dataProductId) {
@@ -188,7 +188,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                 }
             } else if (mode === 'edit' && datasetId) {
                 if (!canEdit) {
-                    dispatchMessage({ content: t('You are not allowed to edit this dataset'), type: 'error' });
+                    dispatchMessage({ content: t('You are not allowed to edit this output port'), type: 'error' });
                     return;
                 }
 
@@ -204,14 +204,15 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                 };
 
                 const response = await updateDataset({ dataset: request, id: datasetId }).unwrap();
-                dispatchMessage({ content: t('Dataset updated successfully'), type: 'success' });
+                dispatchMessage({ content: t('Output port updated successfully'), type: 'success' });
 
                 navigate(createDatasetIdPath(response.id));
             }
 
             form.resetFields();
         } catch (_e) {
-            const errorMessage = mode === 'edit' ? t('Failed to update dataset') : t('Failed to create dataset');
+            const errorMessage =
+                mode === 'edit' ? t('Failed to update output port') : t('Failed to create output port');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
@@ -235,11 +236,11 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
         if (canDelete && currentDataset) {
             try {
                 await deleteDataset(currentDataset?.id).unwrap();
-                dispatchMessage({ content: t('Dataset deleted successfully'), type: 'success' });
+                dispatchMessage({ content: t('Output port deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Datasets);
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to delete dataset, please try again later'),
+                    content: t('Failed to delete output port, please try again later'),
                     type: 'error',
                 });
             }
@@ -308,11 +309,11 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
             <Form.Item<DatasetCreateFormSchema>
                 name={'name'}
                 label={t('Name')}
-                tooltip={t('The name of your dataset')}
+                tooltip={t('The name of your output port')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the dataset'),
+                        message: t('Please input the name of the output port'),
                     },
                 ]}
             >
@@ -320,7 +321,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
             </Form.Item>
             <NamespaceFormItem
                 form={form}
-                tooltip={t('The namespace of the dataset')}
+                tooltip={t('The namespace of the output port')}
                 max_length={namespaceLengthLimits?.max_length}
                 editToggleDisabled={mode === 'edit'}
                 canEditNamespace={canEditNamespace}
@@ -331,11 +332,11 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
             <Form.Item<DatasetCreateFormSchema>
                 name={'owners'}
                 label={t('Owners')}
-                tooltip={t('The owners of the dataset')}
+                tooltip={t('The owners of the output port')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select at least one owner for the dataset'),
+                        message: t('Please select at least one owner for the output port'),
                     },
                 ]}
             >
@@ -355,7 +356,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the data product to which this dataset belongs'),
+                        message: t('Please select the data product to which this output port belongs'),
                     },
                 ]}
             >
@@ -374,7 +375,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the domain of the dataset'),
+                        message: t('Please select the domain of the output port'),
                     },
                 ]}
             >
@@ -392,7 +393,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the status of the dataset'),
+                        message: t('Please select the status of the output port'),
                     },
                 ]}
             >
@@ -407,11 +408,11 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
             <Form.Item<DatasetCreateFormSchema>
                 name={'access_type'}
                 label={t('Access Type')}
-                tooltip={t('The access type of the dataset')}
+                tooltip={t('The access type of the output port')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the access type of the dataset'),
+                        message: t('Please select the access type of the output port'),
                     },
                 ]}
             >
@@ -420,7 +421,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
             <Form.Item<DatasetCreateFormSchema> name={'tag_ids'} label={t('Tags')}>
                 <Select
                     tokenSeparators={[',']}
-                    placeholder={t('Select dataset tags')}
+                    placeholder={t('Select output port tags')}
                     mode={'multiple'}
                     options={tagSelectOptions}
                     filterOption={selectFilterOptionByLabel}
@@ -429,11 +430,11 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
             <Form.Item<DatasetCreateFormSchema>
                 name={'description'}
                 label={t('Description')}
-                tooltip={t('A description for the dataset')}
+                tooltip={t('A description for the output port')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input a description of the dataset'),
+                        message: t('Please input a description of the output port'),
                     },
                     {
                         max: MAX_DESCRIPTION_INPUT_LENGTH,
@@ -448,7 +449,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                     {mode !== 'create' && (
                         <Col>
                             <Popconfirm
-                                title={t('Are you sure you want to delete this dataset?')}
+                                title={t('Are you sure you want to delete this output port?')}
                                 onConfirm={handleDeleteDataset}
                                 okText={t('Yes')}
                                 cancelText={t('No')}

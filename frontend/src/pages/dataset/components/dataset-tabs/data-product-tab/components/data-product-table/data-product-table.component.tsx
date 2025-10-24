@@ -62,12 +62,12 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
             try {
                 await removeDatasetFromDataProduct({ datasetId, dataProductId, datasetLinkId }).unwrap();
                 dispatchMessage({
-                    content: t('Dataset {{name}} has been removed from data product', { name }),
+                    content: t('Output port {{name}} has been removed from data product', { name }),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to remove dataset from data product'),
+                    content: t('Failed to remove output port from data product'),
                     type: 'error',
                 });
             }

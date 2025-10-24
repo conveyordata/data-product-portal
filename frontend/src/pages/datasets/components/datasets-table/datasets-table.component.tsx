@@ -90,7 +90,7 @@ export function DatasetsTable() {
                 <Typography.Title level={3}>{t('Marketplace')}</Typography.Title>
                 <Form<SearchForm> form={searchForm} className={styles.searchForm}>
                     <Form.Item<SearchForm> name={'search'} initialValue={''} className={styles.formItem}>
-                        <Input.Search placeholder={t('Search datasets by name')} allowClear />
+                        <Input.Search placeholder={t('Search output ports by name')} allowClear />
                     </Form.Item>
                 </Form>
             </Flex>
@@ -104,7 +104,7 @@ export function DatasetsTable() {
                         onChange={handlePageChange}
                         size="small"
                         showTotal={(total, range) =>
-                            t('Showing {{range0}}-{{range1}} of {{total}} datasets', {
+                            t('Showing {{range0}}-{{range1}} of {{total}} output ports', {
                                 range0: range[0],
                                 range1: range[1],
                                 total: total,

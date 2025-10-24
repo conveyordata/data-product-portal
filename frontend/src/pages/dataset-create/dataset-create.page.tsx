@@ -14,7 +14,7 @@ export function DatasetCreate() {
 
     return (
         <Flex vertical className={styles.container}>
-            <Typography.Title level={3}>{t('New Dataset')}</Typography.Title>
+            <Typography.Title level={3}>{t('New Output port')}</Typography.Title>
             <Space direction={'vertical'} size={'large'} className={styles.container}>
                 <DatasetForm
                     mode={'create'}

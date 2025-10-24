@@ -45,7 +45,7 @@ export function DataProductDatasetLinkPopup({
                         type={'primary'}
                         disabled={!canCreateDataset}
                     >
-                        {t('Create Dataset')}
+                        {t('Create Output port')}
                     </Button>
                 </Link>
             </Flex>

@@ -38,16 +38,16 @@ export function RedshiftDataOutputForm({ form, identifiers = [], namespace, sour
             form={form}
             platform={DataPlatforms.Redshift}
             resultLabel={t('Resulting database and schema')}
-            resultTooltip={t('The schema on Redshift you can access through this data output')}
+            resultTooltip={t('The schema on Redshift you can access through this technical asset')}
         >
             <ConfigurationFormItem
                 name={'database'}
                 label={t('Schema')}
-                tooltip={t('The name of the Redshift schema to link the data output to')}
+                tooltip={t('The name of the Redshift schema to link the technical asset to')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please input the name of the Redshift schema for this data output'),
+                        message: t('Please input the name of the Redshift schema for this technical asset'),
                     },
                 ]}
                 normalize={(value: string | string[]) => {
@@ -66,7 +66,7 @@ export function RedshiftDataOutputForm({ form, identifiers = [], namespace, sour
             <ConfigurationFormItem
                 name={'schema'}
                 label={t('Schema suffix')}
-                tooltip={t('The suffix of the Redshift schema to link the data output to')}
+                tooltip={t('The suffix of the Redshift schema to link the technical asset to')}
             >
                 <Input />
             </ConfigurationFormItem>
@@ -78,11 +78,11 @@ export function RedshiftDataOutputForm({ form, identifiers = [], namespace, sour
                 name={'table'}
                 hidden={entireSchema}
                 label={t('Table')}
-                tooltip={t('The table that your data output can access')}
+                tooltip={t('The table that your technical asset can access')}
                 rules={[
                     {
                         required: !entireSchema,
-                        message: t('Please input the table this data output can access'),
+                        message: t('Please input the table this technical asset can access'),
                     },
                 ]}
             >

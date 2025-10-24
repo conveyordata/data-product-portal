@@ -37,12 +37,12 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
         try {
             await removeDataOutput(dataOutput.id).unwrap();
             dispatchMessage({
-                content: t('Data Output {{name}} has been successfully removed', { name: dataOutput.name }),
+                content: t('Technical Asset {{name}} has been successfully removed', { name: dataOutput.name }),
                 type: 'success',
             });
         } catch (_error) {
             dispatchMessage({
-                content: t('Failed to remove data output'),
+                content: t('Failed to remove technical asset'),
                 type: 'error',
             });
         }
@@ -53,12 +53,12 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
             try {
                 await unlinkDataset({ dataOutputId: dataOutput.id, datasetId, datasetLinkId }).unwrap();
                 dispatchMessage({
-                    content: t('Dataset unlinked successfully'),
+                    content: t('Output port unlinked successfully'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to unlink dataset'),
+                    content: t('Failed to unlink output port'),
                     type: 'error',
                 });
             }
