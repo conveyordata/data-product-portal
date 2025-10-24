@@ -63,18 +63,8 @@
 }
 
 .collapsedSidebar {
-    align-items: center;
-    width: 100%;
+    justify-content: center;
     height: 100%;
-}
-
-.spacer {
-    height: 200px
-}
-
-.expandButton {
-    margin-bottom: 12px;
-    align-self: center;
 }
 
 .main-content {

@@ -89,13 +89,11 @@ export function DataProduct() {
                                 onClick={navigateToEditPage}
                             />
                         )}
-                        {!sidebarCollapsed && (
-                            <CircleIconButton
-                                icon={<RightOutlined />}
-                                tooltip={t('Hide sidebar')}
-                                onClick={() => setSidebarCollapsed(true)}
-                            />
-                        )}
+                        <CircleIconButton
+                            icon={sidebarCollapsed ? <LeftOutlined /> : <RightOutlined />}
+                            tooltip={sidebarCollapsed ? t('Show sidebar') : t('Hide sidebar')}
+                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        />
                     </Space>
                 </Flex>
                 {/* Main content */}
@@ -128,14 +126,6 @@ export function DataProduct() {
                     </>
                 ) : (
                     <Flex vertical className={styles.collapsedSidebar}>
-                        <div className={styles.spacer} />
-                        <Flex className={styles.expandButton}>
-                            <CircleIconButton
-                                icon={<LeftOutlined />}
-                                tooltip={t('Show sidebar')}
-                                onClick={() => setSidebarCollapsed(false)}
-                            />
-                        </Flex>
                         <UserAccessOverview users={dataProductOwners} title="" showAvatarsOnly={true} />
                     </Flex>
                 )}
