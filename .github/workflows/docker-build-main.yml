@@ -95,9 +95,10 @@ jobs:
           echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
   deploy-on-portal-dev:
+    name: Deploy to portal dev
     runs-on: ubuntu-latest
     permissions:
-      id-token: read
+      id-token: write
       contents: read
     needs: ["backend","frontend"]
     steps:
