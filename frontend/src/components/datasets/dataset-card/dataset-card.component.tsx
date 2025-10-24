@@ -190,7 +190,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                                     <Popconfirm
                                         title={t('Remove')}
                                         description={t(
-                                            'Are you sure you want to delete the dataset? This can have impact on downstream dependencies',
+                                            'Are you sure you want to delete the output port? This can have impact on downstream dependencies',
                                         )}
                                         onConfirm={handleRemoveDataset}
                                         placement="topRight"
