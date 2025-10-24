@@ -1,4 +1,4 @@
-import { SettingOutlined } from '@ant-design/icons';
+import { EditOutlined } from '@ant-design/icons';
 import { Flex, Typography } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -67,7 +67,7 @@ export function Dataset() {
                     </Flex>
                     {canEdit && (
                         <CircleIconButton
-                            icon={<SettingOutlined />}
+                            icon={<EditOutlined />}
                             tooltip={t('Edit dataset')}
                             onClick={navigateToDatasetEditPage}
                         />
