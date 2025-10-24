@@ -7,23 +7,20 @@ type Props = {
     email: string;
     color: string;
     size?: 'small' | 'default' | 'large';
-    hideText?: boolean;
 };
 
-export function UserAvatar({ name, email, color, size = 'default', hideText = false }: Props) {
+export function UserAvatar({ name, email, color, size = 'default' }: Props) {
     return (
         <Flex align="center" className={styles.userAvatarContainer}>
             <Avatar size={size} className={styles.avatar} style={{ backgroundColor: color }}>
                 {name.charAt(0)}
             </Avatar>
-            {!hideText && (
-                <Flex vertical>
-                    <Typography.Text strong>{name}</Typography.Text>
-                    <Typography.Text type="secondary" className={styles.email}>
-                        {email}
-                    </Typography.Text>
-                </Flex>
-            )}
+            <Flex vertical>
+                <Typography.Text strong>{name}</Typography.Text>
+                <Typography.Text type="secondary" className={styles.email}>
+                    {email}
+                </Typography.Text>
+            </Flex>
         </Flex>
     );
 }
