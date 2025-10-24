@@ -1,5 +1,4 @@
-import { DownOutlined, RightOutlined } from '@ant-design/icons';
-import { Badge, Button, Card, Flex, List, Popconfirm, Typography } from 'antd';
+import { Badge, Button, Card, Collapse, Flex, List, Popconfirm, Typography } from 'antd';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -30,7 +29,6 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
     const { t } = useTranslation();
     const [dragOver, setDragOver] = useState(false);
     const [invalidDrop, setInvalidDrop] = useState(false);
-    const [expanded, setExpanded] = useState(false);
     const { isVisible, handleOpen, handleClose } = useModal();
 
     const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId);
@@ -168,17 +166,15 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                 onDrop={handleDrop}
                 onMouseDown={handleMouseDown}
             >
-                <Flex vertical gap={12}>
-                    <Flex gap={12} align="center" justify="space-between">
+                <Flex vertical gap="small">
+                    <Flex gap="small" align="center" justify="space-between">
                         <CustomSvgIconLoader iconComponent={datasetBorderIcon} />
-                        <Flex vertical style={{ flex: 1 }}>
+                        <Flex vertical>
                             <Flex justify="space-between" align="flex-start">
                                 <Link to={createDatasetIdPath(dataset.id)}>
-                                    <Typography.Title level={5} className={styles.title}>
-                                        {dataset.name}
-                                    </Typography.Title>
+                                    <Typography.Title level={5}>{dataset.name}</Typography.Title>
                                 </Link>
-                                <Flex gap={4}>
+                                <Flex gap="small">
                                     <Button
                                         onClick={handleOpen}
                                         loading={isRemoving}
@@ -211,41 +207,37 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                     </Popconfirm>
                                 </Flex>
                             </Flex>
-                            <Typography.Text type="secondary" className={styles.description}>
+                            <Typography.Paragraph
+                                type="secondary"
+                                ellipsis={{ tooltip: true, rows: 1 }}
+                                style={{ width: '100%' }}
+                            >
                                 {dataset.description}
-                            </Typography.Text>
+                            </Typography.Paragraph>
                         </Flex>
                     </Flex>
 
-                    <Flex vertical gap={8}>
-                        <Badge
-                            className={styles.badge}
-                            status={getBadgeStatus(dataset.status)}
-                            text={getStatusLabel(t, dataset.status)}
-                        />
-
-                        {dataset.data_output_links && dataset.data_output_links.length > 0 && (
-                            <Flex vertical align="flex-start" className={styles.linkedAssetsSection}>
-                                <Button
-                                    type="text"
-                                    size="small"
-                                    onClick={() => setExpanded(!expanded)}
-                                    className={styles.expandButton}
-                                    icon={expanded ? <DownOutlined /> : <RightOutlined />}
-                                >
-                                    {t('{{count}} linked technical assets', {
+                    <Badge
+                        className={styles.badge}
+                        status={getBadgeStatus(dataset.status)}
+                        text={getStatusLabel(t, dataset.status)}
+                    />
+                    {dataset.data_output_links && dataset.data_output_links.length > 0 && (
+                        <Collapse
+                            size={'small'}
+                            items={[
+                                {
+                                    key: 0,
+                                    label: t('{{count}} linked technical assets', {
                                         count: dataset.data_output_links.length,
-                                    })}
-                                </Button>
-
-                                {expanded && (
-                                    <Flex className={styles.linkedAssetsList}>
+                                    }),
+                                    children: (
                                         <List
                                             style={{ width: '100%' }}
                                             size="small"
                                             dataSource={dataset.data_output_links}
                                             renderItem={(link) => (
-                                                <List.Item className={styles.linkedAssetItem}>
+                                                <List.Item>
                                                     <Flex
                                                         justify="space-between"
                                                         align="center"
@@ -256,9 +248,7 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                                                 status={getDecisionStatusBadgeStatus(link.status)}
                                                                 size="small"
                                                             />
-                                                            <Typography.Text className={styles.assetName}>
-                                                                {link.data_output.name}
-                                                            </Typography.Text>
+                                                            <Typography.Text>{link.data_output.name}</Typography.Text>
                                                         </Flex>
                                                         <Button
                                                             type="text"
@@ -274,17 +264,16 @@ export function DatasetCard({ datasetId, isDragActive, draggedDataOutputId }: Pr
                                                 </List.Item>
                                             )}
                                         />
-                                    </Flex>
-                                )}
-                            </Flex>
-                        )}
-                    </Flex>
+                                    ),
+                                },
+                            ]}
+                        />
+                    )}
                 </Flex>
             </Card>
 
             {isVisible && (
                 <DataOutputLinkModal
-                    isOpen={isVisible}
                     onClose={handleClose}
                     datasetId={datasetId}
                     datasetName={dataset.name}

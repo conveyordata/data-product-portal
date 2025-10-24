@@ -66,60 +66,6 @@
     }
 }
 
-.title {
-    margin: 0 !important;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.description {
-    font-size: 14px;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    width: 100%;
-}
-
 .badge {
-    margin-right: globals.$spacing-s;
     margin-left: 16px;
-}
-
-.linkedAssetsSection {
-    margin-top: 8px;
-}
-
-.expandButton {
-    padding: globals.$spacing-m;
-    height: auto;
-    font-size: 13px;
-    color: rgba(0, 0, 0, 0.65);
-
-    &:hover {
-        color: globals.$primary-color;
-        background-color: rgba(0, 0, 0, 0.04);
-    }
-}
-
-.linkedAssetsList {
-    margin-top: 8px;
-    border: 1px solid #f0f0f0;
-    width: 100%;
-    border-radius: 6px;
-    background-color: #fafafa;
-}
-
-.linkedAssetItem {
-    padding: 8px 12px !important;
-    border-bottom: 1px solid #f0f0f0;
-
-    &:last-child {
-        border-bottom: none;
-    }
-}
-
-.assetName {
-    font-size: 13px;
-    font-weight: 500;
 }
