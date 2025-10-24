@@ -12,10 +12,9 @@ const { useToken } = theme;
 type Props = {
     users?: UserContract[];
     title?: ReactNode;
-    showAvatarsOnly?: boolean;
 };
 
-export function UserAccessOverview({ users = [], title = '', showAvatarsOnly = false }: Props) {
+export function UserAccessOverview({ users = [], title }: Props) {
     const { token } = useToken();
 
     const sorted = useMemo(() => {
@@ -26,26 +25,6 @@ export function UserAccessOverview({ users = [], title = '', showAvatarsOnly = f
         );
         return [...users].sort(compareFn);
     }, [users]);
-
-    if (showAvatarsOnly) {
-        return (
-            <Flex className={styles.avatarsOnly} vertical>
-                {sorted.map((user) => (
-                    <Tooltip key={user.id} title={`${user.first_name} ${user.last_name}`}>
-                        <Flex>
-                            <UserAvatar
-                                name={`${user.first_name} ${user.last_name}`}
-                                email={user.email}
-                                color={token.colorPrimary}
-                                size="small"
-                                hideText={true}
-                            />
-                        </Flex>
-                    </Tooltip>
-                ))}
-            </Flex>
-        );
-    }
 
     return (
         <Flex vertical className={styles.container}>
