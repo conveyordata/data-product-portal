@@ -5,9 +5,8 @@
     gap: globals.$column-gap-xl;
 }
 
-.header-container {
-    width: 100%;
-    justify-content: space-between;
+.sidebarCollapsed {
+  gap: 0;
 }
 
 .edit-icon {
@@ -29,21 +28,28 @@
 
 .content {
     @extend .container;
-
     .overview {
         flex: 1;
         gap: globals.$column-gap-regular;
         justify-content: flex-start;
         align-items: flex-start;
     }
+
+    transition: all 0.3s ease;
 }
 
 .sidebar {
-    flex: 0.3;
+    flex: 1;
     min-width: globals.$min-sidebar-width;
-    gap: globals.$column-gap-xl;
     justify-content: flex-start;
     align-items: flex-start;
+    transition: all 0.3s ease;
+
+    &.sidebarCollapsed {
+        min-width: 0;
+        width: 0;
+        overflow: visible;
+    }
 }
 
 .main-content {

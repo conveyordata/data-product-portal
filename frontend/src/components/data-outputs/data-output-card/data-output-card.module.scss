@@ -1,0 +1,32 @@
+@use '@/styles/globals';
+
+//This styling is for drag&drop functionality
+.card {
+    cursor: grab;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+        cursor: grabbing;
+    }
+
+    &.dragging {
+        opacity: 0.6;
+        cursor: grabbing;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    &[draggable="true"] {
+        // Hide scrollbars during drag
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+    }
+}

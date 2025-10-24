@@ -1,0 +1,68 @@
+@use '@/styles/globals';
+
+//This is all for drag and drop
+.card {
+    transition: all 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    // Prevent dragging on interactive elements
+    button,
+    a,
+    .ant-btn,
+    [role="button"] {
+        -webkit-user-drag: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+        pointer-events: auto;
+    }
+
+    &.dropZone {
+        border: 2px dashed transparent;
+        background-color: rgba(24, 144, 255, 0.02);
+    }
+
+    &.dragOver {
+        border: 2px dashed #1890ff !important;
+        background-color: rgba(24, 144, 255, 0.1);
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+
+        // Remove transform to prevent overflow issues
+        &::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 2px dashed #1890ff;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+    }
+
+    &.invalidDrop {
+        border: 2px dashed #ff4d4f !important;
+        background-color: rgba(255, 77, 79, 0.1);
+        cursor: not-allowed;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 2px dashed #ff4d4f;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+    }
+}
+
+.badge {
+    margin-left: 16px;
+}

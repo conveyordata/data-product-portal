@@ -1,7 +1,7 @@
-import Icon, { SettingOutlined } from '@ant-design/icons';
+import Icon, { EditOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Flex, Space, Typography } from 'antd';
 import clsx from 'clsx';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 
@@ -26,6 +26,7 @@ export function DataProduct() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { dataProductId = '' } = useParams();
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     const { data: dataProduct, isLoading } = useGetDataProductByIdQuery(dataProductId, { skip: !dataProductId });
     const { data: edit_access } = useCheckAccessQuery(
@@ -68,9 +69,9 @@ export function DataProduct() {
     }
 
     return (
-        <Flex className={styles.dataProductContainer}>
+        <Flex className={clsx(styles.dataProductContainer, { [styles.sidebarCollapsed]: sidebarCollapsed })}>
             <Flex vertical className={styles.content}>
-                <Flex className={styles.headerContainer}>
+                <Flex justify={'space-between'}>
                     <Space className={styles.header}>
                         <Icon
                             component={dataProductTypeIcon}
@@ -80,15 +81,20 @@ export function DataProduct() {
                             {dataProduct?.name}
                         </Typography.Title>
                     </Space>
-                    {canEdit && (
-                        <Space className={styles.editIcon}>
+                    <Space className={styles.editIcon}>
+                        {canEdit && (
                             <CircleIconButton
-                                icon={<SettingOutlined />}
+                                icon={<EditOutlined />}
                                 tooltip={t('Edit data product')}
                                 onClick={navigateToEditPage}
                             />
-                        </Space>
-                    )}
+                        )}
+                        <CircleIconButton
+                            icon={sidebarCollapsed ? <LeftOutlined /> : <RightOutlined />}
+                            tooltip={sidebarCollapsed ? t('Show sidebar') : t('Hide sidebar')}
+                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        />
+                    </Space>
                 </Flex>
                 {/* Main content */}
                 <Flex className={styles.mainContent}>
@@ -110,12 +116,18 @@ export function DataProduct() {
                     </Flex>
                 </Flex>
             </Flex>
+
             {/* Sidebar */}
-            <Flex vertical className={styles.sidebar}>
-                <DataProductActions dataProductId={dataProductId} />
-                {/*  Data product owners overview */}
-                <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
-            </Flex>
+            <div className={clsx(styles.sidebar, { [styles.sidebarCollapsed]: sidebarCollapsed })}>
+                {!sidebarCollapsed ? (
+                    <Flex vertical>
+                        <DataProductActions dataProductId={dataProductId} />
+                        <UserAccessOverview users={dataProductOwners} title={t('Data Product Owners')} />
+                    </Flex>
+                ) : (
+                    <div style={{ background: 'red' }} /> //Div is needed to make transition work
+                )}
+            </div>
         </Flex>
     );
 }

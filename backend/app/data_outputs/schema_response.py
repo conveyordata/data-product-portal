@@ -80,5 +80,5 @@ class DataOutputGet(BaseDataOutputGet):
     tags: list[Tag]
 
 
-class DataOutputsGet(BaseDataOutputGet):
+class DataOutputsGet(DataOutputGet):
     pass
