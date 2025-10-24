@@ -75,7 +75,7 @@ export const usePendingActionHandlers = () => {
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to approve data output dataset link'),
+                    content: t('Failed to approve technical asset dataset link'),
                     type: 'error',
                 });
             }
@@ -93,7 +93,7 @@ export const usePendingActionHandlers = () => {
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to reject data output dataset link'),
+                    content: t('Failed to reject technical asset dataset link'),
                     type: 'error',
                 });
             }

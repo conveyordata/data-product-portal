@@ -59,7 +59,7 @@ export function SettingsTabs() {
                 icon: <Icon component={datasetOutlineIcon} />,
             },
             {
-                label: t('Data Output'),
+                label: t('Technical Asset'),
                 key: TabKeys.DataOutput,
                 children: <DataOutputTab />,
                 icon: <Icon component={dataOutputOutlineIcon} />,

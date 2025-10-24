@@ -37,12 +37,12 @@ export function DataOutputCard({ dataOutput, dataProductId, onDragStart, onDragE
         try {
             await removeDataOutput(dataOutput.id).unwrap();
             dispatchMessage({
-                content: t('Data Output {{name}} has been successfully removed', { name: dataOutput.name }),
+                content: t('Technical Asset {{name}} has been successfully removed', { name: dataOutput.name }),
                 type: 'success',
             });
         } catch (_error) {
             dispatchMessage({
-                content: t('Failed to remove data output'),
+                content: t('Failed to remove technical asset'),
                 type: 'error',
             });
         }

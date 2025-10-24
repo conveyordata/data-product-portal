@@ -44,7 +44,7 @@ export function DataOutputTab({ datasetId }: Props) {
                 className={`${styles.container} ${filteredDataOutputs.length === 0 && styles.paginationGap}`}
             >
                 <Searchbar
-                    placeholder={t('Search data outputs by name')}
+                    placeholder={t('Search technical assets by name')}
                     formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
                     form={searchForm}
                 />

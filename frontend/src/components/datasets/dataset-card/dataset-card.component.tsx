@@ -67,12 +67,12 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
             try {
                 await unlinkDataset({ dataOutputId, datasetId: dataset.id }).unwrap();
                 dispatchMessage({
-                    content: t('Data output unlinked successfully'),
+                    content: t('Technical asset unlinked successfully'),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to unlink data output'),
+                    content: t('Failed to unlink technical asset'),
                     type: 'error',
                 });
             }
@@ -82,7 +82,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
 
     const handleDragOver = (event: React.DragEvent) => {
         event.preventDefault();
-        // Check if the dragged data output is already linked to this dataset
+        // Check if the dragged technical asset is already linked to this dataset
         if (draggedDataOutputId && dataset) {
             const isAlreadyLinked = dataset.data_output_links?.some(
                 (link) => link.data_output.id === draggedDataOutputId,
@@ -118,7 +118,9 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
 
                 if (isAlreadyLinked) {
                     dispatchMessage({
-                        content: t('Data output {{name}} is already linked to this dataset', { name: dragData.name }),
+                        content: t('Technical asset {{name}} is already linked to this dataset', {
+                            name: dragData.name,
+                        }),
                         type: 'warning',
                     });
                     return;
@@ -126,7 +128,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
 
                 const result = await linkDataset({ dataOutputId: dragData.id, datasetId: dataset.id }).unwrap();
                 dispatchMessage({
-                    content: t('Data output {{name}} linked to dataset successfully', { name: dragData.name }),
+                    content: t('Technical asset {{name}} linked to dataset successfully', { name: dragData.name }),
                     type: 'success',
                 });
                 // TODO make this dependable on access rights
@@ -134,7 +136,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
             }
         } catch (_error) {
             dispatchMessage({
-                content: t('Failed to link data output to dataset'),
+                content: t('Failed to link technical asset to dataset'),
                 type: 'error',
             });
         }

@@ -73,7 +73,7 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
                 dispatchMessage({ content, type: 'success' });
                 onClose();
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to link dataset to data output'), type: 'error' });
+                dispatchMessage({ content: t('Failed to link dataset to technical asset'), type: 'error' });
             }
         },
         [requestDatasetAccessForDataOutput, dataOutputId, t, onClose],

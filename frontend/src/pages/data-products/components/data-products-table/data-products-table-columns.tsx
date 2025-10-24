@@ -112,7 +112,7 @@ export const getDataProductTableColumns = ({
             title: t('Produces'),
             dataIndex: 'data_outputs_count',
             render: (dataOutputCount: number) => {
-                return <TableCellItem text={t('{{count}} data outputs', { count: dataOutputCount })} />;
+                return <TableCellItem text={t('{{count}} technical assets', { count: dataOutputCount })} />;
             },
         },
     ];

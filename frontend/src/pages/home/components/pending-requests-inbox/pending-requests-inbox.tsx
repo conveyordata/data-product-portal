@@ -94,7 +94,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
             description = (
                 <Typography.Text strong>
                     {t('Request for')} <strong className={styles.bolder}>{t('the creation of a link')}</strong>{' '}
-                    {t('coming from the data output')}{' '}
+                    {t('coming from the technical asset')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         <strong>{action.data_output.name}</strong>
                     </Link>
@@ -102,7 +102,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
             );
             message = (
                 <Typography.Text>
-                    {t('Accepting will create a link from the data output to the')}{' '}
+                    {t('Accepting will create a link from the technical asset to the')}{' '}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         {action.dataset.name}
                     </Link>{' '}

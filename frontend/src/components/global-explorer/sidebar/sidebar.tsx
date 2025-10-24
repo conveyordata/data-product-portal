@@ -73,7 +73,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
             Domains: nodes.filter((node) => node.type === CustomNodeTypes.DomainNode),
             'Data Products': nodes.filter((node) => node.type === CustomNodeTypes.DataProductNode),
             Datasets: nodes.filter((node) => node.type === CustomNodeTypes.DatasetNode),
-            'Data Outputs': nodes.filter((node) => node.type === CustomNodeTypes.DataOutputNode),
+            'Technical Assets': nodes.filter((node) => node.type === CustomNodeTypes.DataOutputNode),
         };
 
         // Sort each group by name
@@ -134,7 +134,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, setNode
                     });
                 }}
             >
-                {t('Data Outputs')}
+                {t('Technical Assets')}
             </Tag.CheckableTag>
             <Select
                 className={styles.select}

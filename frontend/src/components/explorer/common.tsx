@@ -34,7 +34,7 @@ function LinkToDataOutputNode({ id, product_id }: { id: string; product_id: stri
     const { t } = useTranslation();
     return (
         <Link to={createDataOutputIdPath(id, product_id, DataOutputTabKeys.Explorer)} className={styles.link}>
-            <Button type="default">{t('View data output')}</Button>
+            <Button type="default">{t('View technical asset')}</Button>
         </Link>
     );
 }

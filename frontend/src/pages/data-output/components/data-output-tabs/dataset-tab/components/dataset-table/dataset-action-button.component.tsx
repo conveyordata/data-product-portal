@@ -34,11 +34,11 @@ export function DatasetActionButton({ dataset, dataOutputId, dataProductId, stat
             try {
                 await removeDatasetFromDataOutput({ datasetId, dataOutputId: dataOutputId }).unwrap();
                 dispatchMessage({
-                    content: t('Dataset {{name}} has been removed from data output', { name }),
+                    content: t('Dataset {{name}} has been removed from technical asset', { name }),
                     type: 'success',
                 });
             } catch (error) {
-                console.error('Failed to remove dataset from data output', error);
+                console.error('Failed to remove dataset from technical asset', error);
             }
         },
         [dataOutputId, removeDatasetFromDataOutput, t],
@@ -63,10 +63,10 @@ export function DatasetActionButton({ dataset, dataOutputId, dataProductId, stat
     const popupTitle = status === DecisionStatus.Pending ? t('Cancel Request') : t('Unlink Dataset');
     const popupDescription =
         status === DecisionStatus.Pending
-            ? t('Are you sure you want to cancel the request to link {{name}} to the data output?', {
+            ? t('Are you sure you want to cancel the request to link {{name}} to the technical asset?', {
                   name: dataset.name,
               })
-            : t('Are you sure you want to remove {{name}} from the data output?', {
+            : t('Are you sure you want to remove {{name}} from the technical asset?', {
                   name: dataset.name,
               });
     const onConfirm =
