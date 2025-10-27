@@ -69,11 +69,11 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
             try {
                 await requestDatasetAccessForDataOutput({ dataOutputId: dataOutputId, datasetId }).unwrap();
 
-                const content = t('Dataset link has been requested');
+                const content = t('Output port link has been requested');
                 dispatchMessage({ content, type: 'success' });
                 onClose();
             } catch (_error) {
-                dispatchMessage({ content: t('Failed to link dataset to data output'), type: 'error' });
+                dispatchMessage({ content: t('Failed to link output port to technical asset'), type: 'error' });
             }
         },
         [requestDatasetAccessForDataOutput, dataOutputId, t, onClose],
@@ -91,14 +91,14 @@ export function AddDatasetPopup({ onClose, isOpen, dataOutputId }: Props) {
             dataProductId={dataOutput?.owner.id || ''}
             dataOutputId={dataOutputId}
             searchForm={searchForm}
-            title={t('Link Dataset')}
+            title={t('Link Output port')}
             canCreateDataset={canCreateDataset?.allowed || false}
-            searchPlaceholder={t('Search datasets by name')}
+            searchPlaceholder={t('Search output ports by name')}
         >
             <List
                 loading={isFetchingDatasets || isRequestingAccess}
                 size={'large'}
-                locale={{ emptyText: t('No datasets found') }}
+                locale={{ emptyText: t('No output ports found') }}
                 rowKey={({ id }) => id}
                 dataSource={filteredDatasets}
                 renderItem={(item) => {

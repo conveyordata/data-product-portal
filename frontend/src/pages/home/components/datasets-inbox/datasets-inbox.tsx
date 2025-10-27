@@ -64,7 +64,7 @@ export function DatasetsInbox({ userId }: Props) {
 
     const owned: DatasetInboxTab = useMemo(
         () => ({
-            label: t('Your Datasets'),
+            label: t('Your Output ports'),
             key: InboxTabKeys.Owned,
             children: (
                 <DatasetList
@@ -85,7 +85,7 @@ export function DatasetsInbox({ userId }: Props) {
     return (
         <div className={styles.section}>
             <div className={styles.sectionTitle}>
-                <Typography.Title level={3}>{t('Datasets')}</Typography.Title>
+                <Typography.Title level={3}>{t('Output ports')}</Typography.Title>
                 <Link to={ApplicationPaths.Datasets}>
                     <Button className={styles.formButton}>{t('See All')}</Button>
                 </Link>

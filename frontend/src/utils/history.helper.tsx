@@ -9,11 +9,11 @@ import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } 
 export function getTypeDisplayName(t: TFunction, type: EventReferenceEntity | undefined): string {
     switch (type) {
         case EventReferenceEntity.Dataset:
-            return t('Dataset');
+            return t('Output port');
         case EventReferenceEntity.DataProduct:
             return t('Data Product');
         case EventReferenceEntity.DataOutput:
-            return t('Data Output');
+            return t('Technical Asset');
         case EventReferenceEntity.User:
             return t('User');
         default:
@@ -91,19 +91,19 @@ export function getEventTypeDisplayName(
                 <Trans
                     t={t}
                     i18nKey="EventDataOutputCreated"
-                    defaults="Data output created: now linked with the <element>{{entity}}</element> {{entity_type}}"
+                    defaults="Technical asset created: now linked with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
                 />
             );
         case EventType.DATA_OUTPUT_UPDATED:
-            return <Trans t={t} i18nKey="EventDataOutputUpdated" defaults="Data output updated" />;
+            return <Trans t={t} i18nKey="EventDataOutputUpdated" defaults="Technical asset updated" />;
         case EventType.DATA_OUTPUT_REMOVED:
             return (
                 <Trans
                     t={t}
                     i18nKey="EventDataOutputRemoved"
-                    defaults="Data output removed: link removed with the <element>{{entity}}</element> {{entity_type}}"
+                    defaults="Technical asset removed: link removed with the <element>{{entity}}</element> {{entity_type}}"
                     values={{ entity, entity_type }}
                     components={{ element }}
                 />

@@ -53,7 +53,7 @@ export function DataOutputTabs({ dataOutputId, isLoading }: Props) {
     const tabs: Tab[] = useMemo(() => {
         return [
             {
-                label: t('Datasets'),
+                label: t('Output ports'),
                 key: TabKeys.Datasets,
                 icon: <Icon component={datasetOutlineIcon} />,
                 children: <DatasetTab dataOutputId={dataOutputId} />,

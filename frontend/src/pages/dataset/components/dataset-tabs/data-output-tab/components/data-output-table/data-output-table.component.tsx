@@ -60,12 +60,12 @@ export function DataOutputTable({ datasetId, dataOutputs, isLoading }: Props) {
             try {
                 await removeDatasetFromDataOutput({ datasetId, dataOutputId, datasetLinkId }).unwrap();
                 dispatchMessage({
-                    content: t('Dataset {{name}} has been removed from data output', { name }),
+                    content: t('Output port {{name}} has been removed from technical asset', { name }),
                     type: 'success',
                 });
             } catch (_error) {
                 dispatchMessage({
-                    content: t('Failed to remove dataset from data output'),
+                    content: t('Failed to remove output port from technical asset'),
                     type: 'error',
                 });
             }
@@ -109,7 +109,7 @@ export function DataOutputTable({ datasetId, dataOutputs, isLoading }: Props) {
                     position: ['topRight'],
                     size: 'small',
                     showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} data outputs', {
+                        t('Showing {{range0}}-{{range1}} of {{total}} technical assets', {
                             range0: range[0],
                             range1: range[1],
                             total: total,

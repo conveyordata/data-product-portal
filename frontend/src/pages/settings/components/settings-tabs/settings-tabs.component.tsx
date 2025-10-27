@@ -53,13 +53,13 @@ export function SettingsTabs() {
                 icon: <Icon component={dataProductOutlineIcon} />,
             },
             {
-                label: t('Dataset'),
+                label: t('Output port'),
                 key: TabKeys.DataSet,
                 children: <DatasetTab />,
                 icon: <Icon component={datasetOutlineIcon} />,
             },
             {
-                label: t('Data Output'),
+                label: t('Technical Asset'),
                 key: TabKeys.DataOutput,
                 children: <DataOutputTab />,
                 icon: <Icon component={dataOutputOutlineIcon} />,
