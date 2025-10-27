@@ -41,7 +41,7 @@ cachetools = "^6.2.1"
 greenlet = "^3.2.4"
 h11 = "^0.16.0"
 fastmcp = "2.12.5"
-posthog = "^6.7.9"
+posthog = "^6.7.10"
 authlib = "1.6.5"
 
 [tool.poetry.group.test]
