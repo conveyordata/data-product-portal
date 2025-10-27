@@ -9,7 +9,7 @@
 
 # Data Product Portal
 
-[![Product Name Screen Shot][product-screenshot]](https://raw.githubusercontent.com/conveyordata/data-product-portal/main/images/screenshot.png)
+[![Product screenshot][product-screenshot]](https://raw.githubusercontent.com/conveyordata/data-product-portal/main/images/homepage.png)
 
 ## Introduction
 
