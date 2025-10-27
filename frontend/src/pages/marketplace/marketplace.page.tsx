@@ -46,14 +46,15 @@ export function Marketplace() {
     const CAPTURE_SEARCH_EVENT_DELAY = 750;
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredDatasets = useMemo(() => {
+    const filteredOutputPorts = useMemo(() => {
         return filterDatasets(datasets, searchTerm);
     }, [datasets, searchTerm]);
-    const paginatedDatasets = useMemo(() => {
+
+    const paginatedOutputPorts = useMemo(() => {
         const startIndex = (currentPage - 1) * pageSize;
         const endIndex = startIndex + pageSize;
-        return filteredDatasets.slice(startIndex, endIndex);
-    }, [filteredDatasets, currentPage]);
+        return filteredOutputPorts.slice(startIndex, endIndex);
+    }, [filteredOutputPorts, currentPage]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -155,7 +156,7 @@ export function Marketplace() {
                 <Form style={{ flex: 1 }}>
                     <Input.Search
                         style={{ height: '40px' }}
-                        placeholder={t('Search datasets by name')}
+                        placeholder={t('Search output ports by name')}
                         value={searchTerm}
                         onChange={(e) => handleSearchChange(e.target.value)}
                         allowClear
@@ -163,7 +164,7 @@ export function Marketplace() {
                 </Form>
             </Flex>
             <Flex wrap="wrap" className={styles.marketplacePageContainer}>
-                {paginatedDatasets.map((dataset) => (
+                {paginatedOutputPorts.map((dataset) => (
                     <Card
                         key={dataset.id}
                         styles={{ body: { padding: 12 } }}
@@ -205,7 +206,7 @@ export function Marketplace() {
                     </Card>
                 ))}
             </Flex>
-            {filteredDatasets.length > pageSize && (
+            {filteredOutputPorts.length > pageSize && (
                 <Flex
                     key="pagination-container"
                     justify={'flex-end'}
@@ -216,7 +217,7 @@ export function Marketplace() {
                     <Pagination
                         current={currentPage}
                         pageSize={pageSize}
-                        total={filteredDatasets.length}
+                        total={filteredOutputPorts.length}
                         onChange={handlePageChange}
                         showSizeChanger={false} // Disable page size changer
                     />
