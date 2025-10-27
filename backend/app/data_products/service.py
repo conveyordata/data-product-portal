@@ -288,8 +288,11 @@ class DataProductService:
                 .selectinload(DataProductModel.dataset_links)
             ],
         )
-        data_product = ensure_data_product_exists(
-            id, self.db, options=[selectinload(DataProductModel.dataset_links)]
+        data_product = self.db.get(
+            DataProductModel,
+            id,
+            options=[selectinload(DataProductModel.dataset_links)],
+            populate_existing=True,
         )
 
         if dataset.id in [

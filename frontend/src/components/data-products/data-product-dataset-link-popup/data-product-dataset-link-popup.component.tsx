@@ -1,10 +1,7 @@
-import { Button, Flex, type FormInstance } from 'antd';
+import { Flex, type FormInstance } from 'antd';
 import type { ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 import { Searchbar } from '@/components/form';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
-import { ApplicationPaths } from '@/types/navigation';
 import styles from './data-product-dataset-link-popup.module.scss';
 
 type Props = {
@@ -14,9 +11,6 @@ type Props = {
     title: ReactNode;
     searchPlaceholder?: string;
     children: ReactNode;
-    canCreateDataset: boolean;
-    dataProductId: string;
-    dataOutputId: string;
 };
 
 export function DataProductDatasetLinkPopup({
@@ -26,11 +20,7 @@ export function DataProductDatasetLinkPopup({
     title,
     searchPlaceholder,
     children,
-    canCreateDataset,
-    dataProductId,
-    dataOutputId,
 }: Props) {
-    const { t } = useTranslation();
     return (
         <FormModal title={title} onClose={onClose} isOpen={isOpen} footer={(_, { CancelBtn }) => <CancelBtn />}>
             <Flex>
@@ -39,15 +29,6 @@ export function DataProductDatasetLinkPopup({
                     formItemProps={{ initialValue: '', style: { width: '100%' } }}
                     placeholder={searchPlaceholder}
                 />
-                <Link to={`${ApplicationPaths.DatasetNew}?dataProductId=${dataProductId}&dataOutputId=${dataOutputId}`}>
-                    <Button
-                        className={`${styles.formButton} ${styles.button}`}
-                        type={'primary'}
-                        disabled={!canCreateDataset}
-                    >
-                        {t('Create Output port')}
-                    </Button>
-                </Link>
             </Flex>
             <div className={styles.list}>{children}</div>
         </FormModal>

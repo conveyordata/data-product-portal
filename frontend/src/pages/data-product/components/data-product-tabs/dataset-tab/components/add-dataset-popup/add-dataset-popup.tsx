@@ -45,7 +45,7 @@ const getIsRestrictedDataset = (dataset: DatasetsGetContract[0]) => {
 };
 
 const getActionButtonText = (accessType: DatasetAccess, t: TFunction) => {
-    return accessType === DatasetAccess.Public ? t('Add Output port') : t('Request Access');
+    return accessType === DatasetAccess.Public ? t('Link Output Port') : t('Request Access');
 };
 
 export function AddDatasetPopup({ onClose, isOpen, dataProductId }: Props) {
@@ -84,7 +84,7 @@ export function AddDatasetPopup({ onClose, isOpen, dataProductId }: Props) {
             onClose={onClose}
             isOpen={isOpen}
             searchForm={searchForm}
-            title={t('Add Output port')}
+            title={t('Link Output Port')}
             searchPlaceholder={t('Search output ports by name')}
         >
             <List

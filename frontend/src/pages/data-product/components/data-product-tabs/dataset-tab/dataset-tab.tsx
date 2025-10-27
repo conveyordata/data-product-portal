@@ -63,7 +63,7 @@ export function DatasetTab({ dataProductId }: Props) {
                             className={styles.formButton}
                             onClick={handleOpen}
                         >
-                            {t('Add Output port')}
+                            {t('Link Output Port')}
                         </Button>
                     }
                 />
