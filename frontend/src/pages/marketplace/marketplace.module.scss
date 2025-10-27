@@ -1,0 +1,12 @@
+@use '@/styles/globals';
+
+.marketplace-page-container {
+    @extend .container;
+    display: 'flex';
+    flexWrap: 'wrap';
+    margin: -(globals.$spacing-m);
+}
+.marketplace-card-container {
+    margin: globals.$spacing-m;
+    width: 360px;
+}

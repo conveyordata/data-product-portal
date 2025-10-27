@@ -26,9 +26,9 @@ import { useNavigate } from 'react-router';
 import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import type { DatasetContract, DatasetsGetContract } from '@/types/dataset';
+import type { DatasetsGetContract } from '@/types/dataset';
 import { createDatasetIdPath } from '@/types/navigation.ts';
-import type { TagContract } from '@/types/tag';
+import styles from './marketplace.module.scss';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -77,16 +77,7 @@ export function Marketplace() {
         return () => clearTimeout(timeoutId); // clear if searchTerm gets updated beforehand
     }, [searchTerm]);
 
-    const cardMargin = 12;
-
-    function createCardDetails(
-        dataset: Omit<DatasetContract, 'data_product_links' | 'owners' | 'tags'> & {
-            data_product_count: number;
-            tags: Omit<TagContract, 'id'>[];
-            rolled_up_tags: Omit<TagContract, 'id'>[];
-            data_product_name: string;
-        },
-    ) {
+    function createCardDetails(dataset: DatasetsGetContract) {
         const items: DescriptionsProps['items'] = [
             {
                 key: '1',
@@ -173,29 +164,16 @@ export function Marketplace() {
                     />
                 </Form>
             </Flex>
-            <Flex
-                wrap="wrap"
-                style={{
-                    marginTop: '6px',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    margin: -cardMargin, // Compensate for the card margin
-                }}
-            >
+            <Flex wrap="wrap" className={styles.marketplacePageContainer}>
                 {paginatedDatasets.map((dataset) => (
                     <Card
                         key={dataset.id}
                         styles={{ body: { padding: 12 } }}
-                        style={{
-                            marginLeft: 0,
-                            margin: cardMargin,
-                            width: 360,
-                            boxShadow: '0 2px 8px #f0f1f2',
-                        }}
+                        className={styles.marketplaceCardContainer}
                         actions={[
                             <Button
-                                key="view-details"
-                                style={{ float: 'right' }}
+                                key="details"
+                                style={{ float: 'right', marginRight: '12px' }}
                                 type="primary"
                                 onClick={() => navigate(createDatasetIdPath(dataset.id))}
                             >
@@ -230,11 +208,11 @@ export function Marketplace() {
                 ))}
             </Flex>
             {filteredDatasets.length > pageSize && (
-                <div
+                <Flex
+                    key="pagination-container"
+                    justify={'flex-end'}
                     style={{
-                        marginTop: 24,
-                        display: 'flex',
-                        justifyContent: 'flex-end',
+                        marginTop: 12,
                     }}
                 >
                     <Pagination
@@ -244,7 +222,7 @@ export function Marketplace() {
                         onChange={handlePageChange}
                         showSizeChanger={false} // Disable page size changer
                     />
-                </div>
+                </Flex>
             )}
         </div>
     );
