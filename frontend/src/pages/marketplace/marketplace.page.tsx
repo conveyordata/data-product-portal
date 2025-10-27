@@ -11,7 +11,6 @@ import {
     Card,
     Descriptions,
     type DescriptionsProps,
-    Divider,
     Flex,
     Form,
     Input,
@@ -188,12 +187,21 @@ export function Marketplace() {
                         key={dataset.id}
                         styles={{ body: { padding: 12 } }}
                         style={{
-                            flex: '1 1 360',
                             marginLeft: 0,
                             margin: cardMargin,
                             width: 360,
                             boxShadow: '0 2px 8px #f0f1f2',
                         }}
+                        actions={[
+                            <Button
+                                key="view-details"
+                                style={{ float: 'right' }}
+                                type="primary"
+                                onClick={() => navigate(createDatasetIdPath(dataset.id))}
+                            >
+                                View Details
+                            </Button>,
+                        ]}
                     >
                         <Space direction="vertical" style={{ width: '100%' }} size="small">
                             <Typography.Title level={5} style={{ marginBottom: 0 }}>
@@ -217,16 +225,6 @@ export function Marketplace() {
                                 column={2}
                                 items={createCardDetails(dataset)}
                             />
-                        </Space>
-
-                        <Divider style={{ borderColor: '#f0f0f0' }} size="small" />
-                        <Space style={{ float: 'right' }}>
-                            {/*<Button icon={<ShoppingCartOutlined />} onClick={() => handleAddToBasket(dataset.id)}>
-                                Add to Cart
-                            </Button>*/}
-                            <Button type="primary" onClick={() => navigate(createDatasetIdPath(dataset.id))}>
-                                View Details
-                            </Button>
                         </Space>
                     </Card>
                 ))}
