@@ -94,16 +94,18 @@ export function Marketplace() {
                 key: '2',
                 label: (
                     <Space>
-                        <EyeOutlined /> {t('Status')}
+                        <EyeOutlined />
+                        {t('Status')}
                     </Space>
                 ),
-                children: dataset.status,
+                children: <Tag color={dataset.lifecycle.color}>{dataset.lifecycle.name}</Tag>,
             },
             {
                 key: '3',
                 label: (
                     <Space>
-                        <DatabaseOutlined /> {t('Access type')}
+                        <DatabaseOutlined />
+                        {t('Access type')}
                     </Space>
                 ),
                 children: dataset.access_type,
@@ -112,7 +114,8 @@ export function Marketplace() {
                 key: '4',
                 label: (
                     <Space>
-                        <NumberOutlined /> {t('Technical Asset')}
+                        <NumberOutlined />
+                        {t('Technical Assets')}
                     </Space>
                 ),
                 span: 2,
@@ -191,7 +194,9 @@ export function Marketplace() {
                             </div>
                             <div style={{ height: '22px' }}>
                                 {dataset.tags?.map((tag) => (
-                                    <Tag key={tag.value}>{tag.value}</Tag>
+                                    <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.value}>
+                                        {tag.value}
+                                    </Tag>
                                 ))}
                             </div>
 
