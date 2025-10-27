@@ -77,13 +77,14 @@ export function Marketplace() {
         return () => clearTimeout(timeoutId); // clear if searchTerm gets updated beforehand
     }, [searchTerm]);
 
-    function createCardDetails(dataset: DatasetsGetContract) {
+    function createCardDetails(dataset: DatasetsGetContract[0]) {
         const items: DescriptionsProps['items'] = [
             {
                 key: '1',
                 label: (
                     <Space>
-                        <ShareAltOutlined /> Domain
+                        <ShareAltOutlined />
+                        {t('Domain')}
                     </Space>
                 ),
                 children: dataset.domain.name,
@@ -92,7 +93,7 @@ export function Marketplace() {
                 key: '2',
                 label: (
                     <Space>
-                        <EyeOutlined /> Status
+                        <EyeOutlined /> {t('Lifecycle')}
                     </Space>
                 ),
                 children: dataset.status,
@@ -101,7 +102,7 @@ export function Marketplace() {
                 key: '3',
                 label: (
                     <Space>
-                        <DatabaseOutlined /> Access type
+                        <DatabaseOutlined /> {t('Access type')}
                     </Space>
                 ),
                 children: dataset.access_type,
@@ -110,7 +111,7 @@ export function Marketplace() {
                 key: '4',
                 label: (
                     <Space>
-                        <NumberOutlined /> Technical Asset
+                        <NumberOutlined /> {t('Technical Asset')}
                     </Space>
                 ),
                 span: 2,
@@ -141,10 +142,7 @@ export function Marketplace() {
                         Usage
                     </Space>
                 ),
-                children:
-                    dataset.data_product_count === 1
-                        ? t('1 data product')
-                        : t('{{count}} data products', { count: dataset.data_product_count }),
+                children: t('{{count}} data products', { count: dataset.data_product_count }),
             },
         ];
         return items;
@@ -152,7 +150,7 @@ export function Marketplace() {
 
     return (
         <div>
-            <Flex align={'center'} style={{ display: 'flex', gap: 16 }}>
+            <Flex align={'center'} className={styles.marketplacePageHeader}>
                 <Typography.Title level={3}>{t('Marketplace')}</Typography.Title>
                 <Form style={{ flex: 1 }}>
                     <Input.Search
