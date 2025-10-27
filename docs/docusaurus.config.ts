@@ -91,6 +91,21 @@ const config: Config = {
         },
       } satisfies Preset.Options,
     ],
+      [
+        'redocusaurus',
+        {
+          specs: [
+            {
+              id: 'api',
+              spec: 'static/openapi.json',
+              route: '/docs/api/',
+            },
+          ],
+          theme: {
+            primaryColor: '#543EDC',
+          },
+        },
+      ]
   ],
 
   themeConfig: {
@@ -104,6 +119,7 @@ const config: Config = {
       },
       items: [
         {to: '/docs/intro', label: 'Docs', position: 'left'},
+        {to: '/docs/api', label: 'API spec', position: 'left'},
         {
           href: 'https://github.com/conveyordata/data-product-portal',
           label: 'GitHub',
