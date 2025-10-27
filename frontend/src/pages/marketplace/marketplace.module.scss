@@ -3,7 +3,6 @@
 .marketplace-page-container {
     @extend .container;
     display: 'flex';
-    flexWrap: 'wrap';
     margin: -(globals.$spacing-m);
 }
 .marketplace-card-container {
