@@ -4,10 +4,8 @@ name: Release
 
 on:
   push:
-    #tags:
-    #  - '*'
-    branches:
-      - rework-docs-naming
+    tags:
+      - '*'
 
 permissions:
   id-token: write
@@ -31,8 +29,17 @@ jobs:
         uses: unfor19/install-aws-cli-action@v1
         with:
           arch: amd64
+      - name: Setup Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version-file: docs/package.json
+          cache: 'npm'
+          cache-dependency-path: docs/package-lock.json
+      - name: Install npm dependencies
+        working-directory: docs
+        run: npm ci --ignore-scripts --legacy-peer-deps
       - name: Release portal docs
         working-directory: docs
         run: |
           npm run build
-          echo aws s3 cp build/ s3://data-product-portal-user-docs-tfhgye/ --recursive
+          aws s3 cp build/ s3://data-product-portal-user-docs-tfhgye/ --recursive
