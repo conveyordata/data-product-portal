@@ -12,10 +12,10 @@ import { DataProducts } from '@/pages/data-products/data-products.page.tsx';
 import { Dataset } from '@/pages/dataset/dataset.page.tsx';
 import { DatasetCreate } from '@/pages/dataset-create/dataset-create.page.tsx';
 import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
-import { Datasets } from '@/pages/datasets/datasets.page.tsx';
 import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
 import { ExplorerPage } from '@/pages/explorer/explorer.page.tsx';
 import { Home } from '@/pages/home/home.page.tsx';
+import { Marketplace } from '@/pages/marketplace/marketplace.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
 
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
@@ -80,7 +80,7 @@ const router = createBrowserRouter([
                         path: ApplicationPaths.Datasets,
                         children: [
                             {
-                                element: <Datasets />,
+                                element: <Marketplace />,
                                 index: true,
                             },
                             {

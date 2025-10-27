@@ -95,12 +95,16 @@ jobs:
           echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
   deploy-on-portal-dev:
+    name: Deploy to portal dev
     runs-on: ubuntu-latest
     permissions:
-      id-token: read
+      id-token: write
       contents: read
     needs: ["backend","frontend"]
     steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          fetch-depth: 0
       - name: Dispatch to demo-portal-infrastructure
         run: |
           repo_owner="datamindedbe"
@@ -113,5 +117,5 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.DEMO_INFRASTRUCTURE_PAT }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/$repo_owner/$repo_name/dispatches \
-            -d "{\"event_type\": \"$event_type\", \"client_payload\": {\"tag\": \"$version\", \"env\": \"demo_dev\", \"integration\": true}}"
+            "https://api.github.com/repos/${repo_owner}/${repo_name}/dispatches" \
+            -d "{\"event_type\": \"${event_type}\", \"client_payload\": {\"tag\": \"${version}\", \"env\": \"demo_dev\", \"integration\": true}}"
