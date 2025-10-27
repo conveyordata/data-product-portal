@@ -94,7 +94,7 @@ export function Marketplace() {
                 key: '2',
                 label: (
                     <Space>
-                        <EyeOutlined /> {t('Lifecycle')}
+                        <EyeOutlined /> {t('Status')}
                     </Space>
                 ),
                 children: dataset.status,
@@ -123,7 +123,7 @@ export function Marketplace() {
                 label: (
                     <Space>
                         <TeamOutlined />
-                        Data Product
+                        {t('Data Product')}
                     </Space>
                 ),
                 children: (
@@ -140,7 +140,7 @@ export function Marketplace() {
                 label: (
                     <Space>
                         <BarChartOutlined />
-                        Usage
+                        {t('Usage')}
                     </Space>
                 ),
                 children: t('{{count}} data products', { count: dataset.data_product_count }),
