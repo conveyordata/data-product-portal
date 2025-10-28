@@ -81,7 +81,7 @@ export function Marketplace() {
     function createCardDetails(dataset: DatasetsGetContract[0]) {
         const items: DescriptionsProps['items'] = [
             {
-                key: '1',
+                key: 'domain',
                 label: (
                     <Space>
                         <ShareAltOutlined />
@@ -91,7 +91,7 @@ export function Marketplace() {
                 children: dataset.domain.name,
             },
             {
-                key: '2',
+                key: 'status',
                 label: (
                     <Space>
                         <EyeOutlined />
@@ -101,7 +101,7 @@ export function Marketplace() {
                 children: <Tag color={dataset.lifecycle.color}>{dataset.lifecycle.name}</Tag>,
             },
             {
-                key: '3',
+                key: 'access type',
                 label: (
                     <Space>
                         <DatabaseOutlined />
@@ -111,7 +111,7 @@ export function Marketplace() {
                 children: dataset.access_type,
             },
             {
-                key: '4',
+                key: 'technical assets',
                 label: (
                     <Space>
                         <NumberOutlined />
@@ -122,7 +122,7 @@ export function Marketplace() {
                 children: dataset.data_output_links.length,
             },
             {
-                key: '5',
+                key: 'data product',
                 label: (
                     <Space>
                         <TeamOutlined />
@@ -139,7 +139,7 @@ export function Marketplace() {
                 ),
             },
             {
-                key: '5',
+                key: 'usage',
                 label: (
                     <Space>
                         <BarChartOutlined />
@@ -154,7 +154,7 @@ export function Marketplace() {
 
     return (
         <div>
-            <Flex align={'center'} className={styles.marketplacePageHeader}>
+            <Flex align={'center'} gap={'small'}>
                 <Typography.Title level={3}>{t('Marketplace')}</Typography.Title>
                 <Form style={{ flex: 1 }}>
                     <Input.Search
@@ -179,7 +179,7 @@ export function Marketplace() {
                                 type="primary"
                                 onClick={() => navigate(createDatasetIdPath(dataset.id))}
                             >
-                                View Details
+                                {t('View Details')}
                             </Button>,
                         ]}
                     >
