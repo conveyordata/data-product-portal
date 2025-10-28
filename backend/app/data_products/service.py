@@ -279,6 +279,10 @@ class DataProductService:
         *,
         actor: User,
     ) -> DataProductDatasetModel:
+        """
+        Links an output port to a data product to be used as input port.
+        """
+
         dataset = ensure_dataset_exists(
             dataset_id,
             self.db,
@@ -303,6 +307,11 @@ class DataProductService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Dataset {dataset_id} already exists in data product {id}",
+            )
+        if dataset.data_product_id == data_product.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot link own dataset to data product",
             )
 
         if not DatasetService(self.db).is_visible_to_user(dataset, actor):

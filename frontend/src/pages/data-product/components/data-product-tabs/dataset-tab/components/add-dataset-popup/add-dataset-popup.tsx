@@ -26,10 +26,16 @@ type Props = {
     dataProductId: string;
 };
 
-const filterOutAlreadyAddedDatasets = (datasets: DatasetsGetContract, dataProductDatasets: DatasetLink[]) => {
+const filterOutAlreadyAddedDatasetsAndOwnDatasets = (
+    datasets: DatasetsGetContract,
+    dataProductDatasets: DatasetLink[],
+    dataProductId: string,
+) => {
     return (
         datasets.filter(
-            (dataset) => !dataProductDatasets?.some((datasetLink) => datasetLink.dataset_id === dataset.id),
+            (dataset) =>
+                !dataProductDatasets?.some((datasetLink) => datasetLink.dataset_id === dataset.id) &&
+                dataset.data_product_id !== dataProductId,
         ) ?? []
     );
 };
@@ -60,9 +66,9 @@ export function AddDatasetPopup({ onClose, isOpen, dataProductId }: Props) {
     const filteredDatasets = useMemo(() => {
         const datasetLinks = dataProduct?.dataset_links ?? [];
 
-        const unlinkedDatasets = filterOutAlreadyAddedDatasets(allDatasets, datasetLinks);
+        const unlinkedDatasets = filterOutAlreadyAddedDatasetsAndOwnDatasets(allDatasets, datasetLinks, dataProductId);
         return searchTerm ? handleDatasetListFilter(unlinkedDatasets, searchTerm) : unlinkedDatasets;
-    }, [dataProduct?.dataset_links, allDatasets, searchTerm]);
+    }, [dataProduct?.dataset_links, allDatasets, searchTerm, dataProductId]);
 
     const handleRequestAccessToDataset = useCallback(
         async (datasetId: string, isRestrictedDataset?: boolean) => {
