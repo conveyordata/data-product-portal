@@ -9,7 +9,7 @@
 
 # Data Product Portal
 
-[![Product Name Screen Shot][product-screenshot]](https://raw.githubusercontent.com/conveyordata/data-product-portal/main/images/screenshot.png)
+[![Product screenshot][product-screenshot]](https://raw.githubusercontent.com/conveyordata/data-product-portal/main/images/homepage.png)
 
 ## Introduction
 
@@ -44,7 +44,8 @@ by offering self-service capabilities.
 ## Concepts
 
 The Data Product Portal guides product teams through the data product life cycle, considering all governance aspects
-required by modern organizations. It introduces several key concepts:
+required by modern organizations. The full details of the concepts can be found in the [portal documentation](https://docs.dataproductportal.com/docs/category/concepts),
+but here is a brief overview of the main concepts:
 
 ### Data Products
 
@@ -60,16 +61,16 @@ their roles. They perform various actions such as interacting with data, releasi
 Users can work on multiple data products but must choose which one they are working on at any given time, ensuring data
 is used in the right context.
 
-### Datasets
+### Output Ports
 
-Datasets group one or more data outputs and are the level at which read data access is granted to a data product.
-Dataset owners, typically business-related individuals, approve access to specific data products. Access is granted to
+Output ports group one or more technical assets and are the level at which read data access is granted to a data product.
+Output ports owners, typically business-related individuals, approve access to specific data products. Access is granted to
 data products rather than users, guaranteeing that data is used only for the approved scope.
 
-### Data Outputs
+### Technical Assets
 
-Data outputs are outputs of a data product, such as files, tables, or topics. They are associated with a data product
-that has full read and write permissions. Data outputs are never directly shared unless they are part of a dataset,
+Technical assets are the physical outputs of a data product, such as files, tables, or topics. They are associated with a data product
+that has full read and write permissions. Technical assets are never directly shared unless they are part of a dataset,
 allowing safe development until they are ready for organizational sharing.
 
 ## Benefits
@@ -91,11 +92,12 @@ central team. 
 - **Comprehensive Overview:** Combines data catalogs, data platforms and data governance aspects into a single 360
 overview of all ongoing data initiatives.
 
-## Data Tracking Transparancy
-
-This project has the possibility to track the actions of users using Data Product Portal with as goal to improve the UI and design. It also helps with error tracking and efficient debugging. The tracking is off by default and kept to a minimum. Check [frontend/README.md](frontend/README.md) for more info.
-
 # Additional resources
+
+## Portal Documentation
+
+The portal documentation can be found [online](https://docs.dataproductportal.com/) or the [docs](docs/docs/intro.md) folder.
+It contains more detailed information about concepts, how-to guides, installation instructions, user guides, and more.
 
 ## General Blogposts
 
@@ -218,6 +220,12 @@ Check our [Contributing Guidelines](CONTRIBUTING.md).
 
 Distributed under the APACHE 2.0 License Copyright 2024 Dataminded. See [LICENSE](LICENSE.md) for more information.
 
+# Data Tracking Transparancy
+
+This project has the possibility to track the actions of users using Data Product Portal in order to improve the UI and design.
+It also helps with error tracking and efficient debugging.
+The tracking is off by default and kept to a minimum. Check [frontend/README.md](frontend/README.md) for more details.
+
 # Contact
 
 **Email**: [info@dataminded.com](mailto:info@dataminded.com) \
@@ -252,7 +260,7 @@ Project Link: [https://github.com/conveyordata/data-product-portal](https://gith
 
 [license-url]: https://github.com/conveyordata/data-product-portal/blob/master/LICENSE.md
 
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: images/homepage.png
 
 [nightly-docker-shield]: https://img.shields.io/github/actions/workflow/status/conveyordata/data-product-portal/nightly-build.yml?label=Nightly%20Docker%20Compose&style=for-the-badge
 
