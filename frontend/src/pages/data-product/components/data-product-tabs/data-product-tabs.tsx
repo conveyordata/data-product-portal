@@ -6,8 +6,9 @@ import Icon, {
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
-import { Badge, Flex, Tabs } from 'antd';
-import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from 'react';
+import type { TourProps } from 'antd';
+import { Badge, Button, Flex, Tabs, Tour, Typography } from 'antd';
+import { type ReactElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 
@@ -37,12 +38,18 @@ type Props = {
 type Tab = {
     label: string | ReactElement;
     key: TabKeys;
+    ref?: React.RefObject<null>;
     icon?: ReactNode;
     children: ReactNode;
 };
 
 export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
+    const ref1 = useRef(null);
+    const ref2 = useRef(null);
+    const ref3 = useRef(null);
+    const ref4 = useRef(null);
+
     const location = useLocation();
     const navigate = useNavigate();
     const { data: dataProductHistoryData, isLoading: isFetchingDataProductHistory } = useGetDataProductHistoryQuery(
@@ -67,7 +74,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const tabs: Tab[] = useMemo(() => {
         return [
             {
-                label: t('About'),
+                label: <Typography.Text ref={ref1}>{t('About')}</Typography.Text>,
                 key: TabKeys.About,
                 icon: <InfoCircleOutlined />,
                 children: <AboutTab dataProductId={dataProductId} />,
@@ -84,13 +91,13 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 children: <UsageTab dataProductId={dataProductId} />,
             },
             {
-                label: t('Input Ports'),
+                label: <Typography.Text ref={ref2}>{t('Input Ports')}</Typography.Text>,
                 key: TabKeys.Datasets,
                 icon: <Icon component={datasetOutlineIcon} />,
                 children: <DatasetTab dataProductId={dataProductId} />,
             },
             {
-                label: t('Output Ports'),
+                label: <Typography.Text ref={ref3}>{t('Output Ports')}</Typography.Text>,
                 key: TabKeys.DataOutputs,
                 icon: <Icon component={dataOutputOutlineIcon} />,
                 children: <DataOutputTab dataProductId={dataProductId} />,
@@ -102,7 +109,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 children: <Explorer id={dataProductId} type={'dataproduct'} />,
             },
             {
-                label: t('Team'),
+                label: <Typography.Text ref={ref4}>{t('Team')}</Typography.Text>,
                 key: TabKeys.Team,
                 icon: <TeamOutlined />,
                 children: <TeamTab dataProductId={dataProductId} />,
@@ -129,6 +136,41 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
         ];
     }, [dataProductId, t, dataProductHistoryData, isFetchingDataProductHistory]);
 
+    const [open, setOpen] = useState<boolean>(false);
+
+    const steps: TourProps['steps'] = [
+        {
+            title: 'Provide About',
+            description:
+                'The About page of your data product functions as a wiki page. Any relevant information about the data product can be documented here for easy reference by team members and stakeholders.',
+            cover: (
+                <img
+                    draggable={false}
+                    alt="tour.png"
+                    src="https://user-images.githubusercontent.com/5378891/197385811-55df8480-7ff4-44bd-9d43-a7dade598d70.png"
+                />
+            ),
+            target: () => ref1.current,
+        },
+        {
+            title: 'Register an Input Port',
+            description:
+                'Define the input port for your data product. If you have not yet requested them at creation time you can request read access to additional input ports here.',
+            target: () => ref2.current,
+        },
+        {
+            title: 'Register an Output Port',
+            description:
+                'Define the output ports for your data product and populate them with technical assets by dragging and dropping.',
+            target: () => ref3.current,
+        },
+        {
+            title: 'Set up your team',
+            description: 'Assign roles and permissions to team members to manage access and collaboration effectively.',
+            target: () => ref4.current,
+        },
+    ];
+
     if (isLoading) {
         return <LoadingSpinner />;
     }
@@ -138,21 +180,45 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
     };
 
     return (
-        <Tabs
-            activeKey={activeTab}
-            items={tabs.map(({ key, label, icon, children }) => {
-                return {
-                    label,
-                    key,
-                    children,
-                    icon,
-                    disabled: !dataProductId,
-                    className: styles.tabPane,
-                };
-            })}
-            size={'middle'}
-            rootClassName={styles.tabContainer}
-            onChange={onTabChange}
-        />
+        <>
+            <Button onClick={() => setOpen(true)}>Start Tour</Button>
+            <Tabs
+                activeKey={activeTab}
+                items={tabs.map(({ key, label, icon, children }) => {
+                    return {
+                        label,
+                        key,
+                        children,
+                        icon,
+                        disabled: !dataProductId,
+                        className: styles.tabPane,
+                    };
+                })}
+                size={'middle'}
+                rootClassName={styles.tabContainer}
+                onChange={onTabChange}
+            />
+            <Tour
+                open={open}
+                onChange={(current) =>
+                    setActiveTab(
+                        current === 0
+                            ? TabKeys.About
+                            : current === 1
+                              ? TabKeys.Datasets
+                              : current === 2
+                                ? TabKeys.DataOutputs
+                                : current === 3
+                                  ? TabKeys.Team
+                                  : TabKeys.Settings,
+                    )
+                }
+                onClose={() => {
+                    setOpen(false);
+                    setActiveTab(TabKeys.About);
+                }}
+                steps={steps}
+            />
+        </>
     );
 }
