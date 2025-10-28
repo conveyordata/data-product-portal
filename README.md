@@ -9,7 +9,7 @@
 
 # Data Product Portal
 
-[![Product screenshot][product-screenshot]](https://raw.githubusercontent.com/conveyordata/data-product-portal/rework-docs-naming/images/homepage.png)
+[![Product screenshot][product-screenshot]](https://raw.githubusercontent.com/conveyordata/data-product-portal/main/images/homepage.png)
 
 ## Introduction
 
