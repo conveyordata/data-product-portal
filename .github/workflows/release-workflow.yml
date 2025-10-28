@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Release workflow
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - '*'
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
@@ -139,3 +140,64 @@ jobs:
           echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
           echo "image_tag=$IMAGE_TAG"
           echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+  cli:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    needs: [ "prep-version" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version-file: cli/go.mod
+          cache-dependency-path: cli/go.sum
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --clean
+          workdir: cli
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload assets
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: Data product portal CLI
+          path: dist/*
+  release-docs:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::553817834567:role/github-actions-docs
+          role-session-name: GithubActions
+          aws-region: eu-west-1
+      - name: Install AWS CLI v2
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          arch: amd64
+      - name: Setup Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903
+        with:
+          node-version-file: docs/package.json
+          cache: 'npm'
+          cache-dependency-path: docs/package-lock.json
+      - name: Install npm dependencies
+        working-directory: docs
+        run: npm ci --ignore-scripts --legacy-peer-deps
+      - name: Release portal docs
+        working-directory: docs
+        run: |
+          npm run build
+          aws s3 cp build/ s3://data-product-portal-user-docs-tfhgye/ --recursive
