@@ -1,12 +1,7 @@
 @use '@/styles/globals';
 
-.marketplace-page-header {
-    gap: globals.$column-gap-regular;
-}
 
 .marketplace-page-container {
-    @extend .container;
-    display: 'flex';
     margin: -(globals.$spacing-m);
 }
 .marketplace-card-container {
