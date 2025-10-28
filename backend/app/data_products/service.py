@@ -279,6 +279,10 @@ class DataProductService:
         *,
         actor: User,
     ) -> DataProductDatasetModel:
+        """
+        Links an output port to a data product to be used as input port.
+        """
+
         dataset = ensure_dataset_exists(
             dataset_id,
             self.db,
