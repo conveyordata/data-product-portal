@@ -62,9 +62,11 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const openTour = !currentUser?.has_seen_tour && access?.allowed;
 
     useEffect(() => {
-        posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_STARTED, {
-            data_product_id: dataProductId,
-        });
+        if (openTour) {
+            posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_STARTED, {
+                data_product_id: dataProductId,
+            });
+        }
         setOpen(openTour || false);
     }, [openTour]);
     const [setSeenTour] = useSeenTourMutation();
