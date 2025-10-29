@@ -322,7 +322,6 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             requiredMark={'optional'}
             disabled={isLoading || !canSubmit}
             initialValues={initialValues}
-            className={mode === 'create' ? styles.form : ''}
         >
             <Form.Item<DatasetCreateFormSchema>
                 name={'name'}
@@ -503,7 +502,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                                     loading={isCreating || isUpdating}
                                     disabled={isLoading || !canSubmit}
                                 >
-                                    {mode === 'edit' ? t('Save') : t('Create')}
+                                    {t('Save')}
                                 </Button>
                             </Space>
                         </Col>

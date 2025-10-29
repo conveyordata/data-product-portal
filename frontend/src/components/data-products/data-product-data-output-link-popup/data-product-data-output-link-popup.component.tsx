@@ -5,21 +5,15 @@ import { useTranslation } from 'react-i18next';
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import styles from './data-product-data-output-link-popup.module.scss';
 
-type Props<T = Record<string, unknown>> = {
+type Props = {
     onClose: () => void;
     isOpen: boolean;
     title: ReactNode;
     children: ReactNode;
-    formRef: RefObject<FormInstance<T> | null>;
+    formRef: RefObject<FormInstance | null>;
 };
 
-export function DataProductDataOutputLinkPopup<T = Record<string, unknown>>({
-    onClose,
-    isOpen,
-    title,
-    formRef,
-    children,
-}: Props<T>) {
+export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef, children }: Props) {
     const { t } = useTranslation();
 
     return (
