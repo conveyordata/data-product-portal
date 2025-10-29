@@ -1,6 +1,8 @@
 import pytest
 from tests.factories import UserFactory
 
+from app.settings import settings
+
 ENDPOINT = "/api/users"
 
 
@@ -59,6 +61,17 @@ class TestUsersRouter:
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()) == 2
+
+    def test_post_has_seen_tour(self, client):
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+        response = client.get(f"{ENDPOINT}")
+        assert len(response.json()) == 1
+        assert response.json()[0]["has_seen_tour"] is False
+        response = client.post(f"{ENDPOINT}/seen_tour")
+        response = client.get(f"{ENDPOINT}")
+        assert len(response.json()) == 1
+        assert response.json()[0]["has_seen_tour"] is True
+        assert response.status_code == 200
 
     @pytest.mark.usefixtures("admin")
     def test_post_user_default_admin(self, client):
