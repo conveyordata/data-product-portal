@@ -11,7 +11,6 @@ export enum ApplicationPaths {
     DataProductEdit = '/data-products/:dataProductId/edit',
     Datasets = '/datasets',
     Dataset = '/datasets/:datasetId',
-    DatasetNew = '/datasets/new',
     DatasetEdit = '/datasets/:datasetId/edit',
     DataOutput = '/data-products/:dataProductId/:dataOutputId',
     DataOutputNew = '/data-outputs/new',

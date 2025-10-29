@@ -116,11 +116,6 @@ export const Breadcrumbs = () => {
                         ),
                     });
                     break;
-                case ApplicationPaths.DatasetNew:
-                    Object.assign(breadcrumbItem, {
-                        title: <Space classNames={{ item: styles.breadcrumbItem }}>{t('New Output port')}</Space>,
-                    });
-                    break;
                 case ApplicationPaths.AuditLogs:
                     Object.assign(breadcrumbItem, {
                         title: (

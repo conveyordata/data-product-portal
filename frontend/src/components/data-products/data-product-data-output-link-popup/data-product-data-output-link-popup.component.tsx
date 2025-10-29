@@ -3,19 +3,23 @@ import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
-import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
-
 import styles from './data-product-data-output-link-popup.module.scss';
 
-type Props = {
+type Props<T = Record<string, unknown>> = {
     onClose: () => void;
     isOpen: boolean;
     title: ReactNode;
     children: ReactNode;
-    formRef: RefObject<FormInstance<DataOutputCreateFormSchema & DataOutputConfiguration> | null>;
+    formRef: RefObject<FormInstance<T> | null>;
 };
 
-export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef, children }: Props) {
+export function DataProductDataOutputLinkPopup<T = Record<string, unknown>>({
+    onClose,
+    isOpen,
+    title,
+    formRef,
+    children,
+}: Props<T>) {
     const { t } = useTranslation();
 
     return (

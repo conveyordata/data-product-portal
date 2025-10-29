@@ -1,15 +1,15 @@
 import { Button, Flex, Form, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 import { DatasetCard } from '@/components/datasets/dataset-card/dataset-card.component';
 import { Searchbar } from '@/components/form';
+import { useModal } from '@/hooks/use-modal';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
-import { ApplicationPaths } from '@/types/navigation.ts';
 import type { SearchForm } from '@/types/shared';
+import { AddOutputPortPopup } from '../add-output-port-popup/add-output-port-popup';
 import styles from './dataset-table.module.scss';
 
 type Props = {
@@ -20,6 +20,7 @@ type Props = {
 
 export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: Props) {
     const { t } = useTranslation();
+    const { isVisible, handleOpen, handleClose } = useModal();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(dataProductId);
 
     const { data: access_create_dataset } = useCheckAccessQuery(
@@ -59,11 +60,14 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
                     <Typography.Title level={4} style={{ margin: 0 }}>
                         {t('Output Ports')}
                     </Typography.Title>
-                    <Link to={`${ApplicationPaths.DatasetNew}?dataProductId=${dataProductId}`}>
-                        <Button disabled={!canCreateDataset} type="primary" loading={isLoadingDataProduct}>
-                            {t('Add Output Port')}
-                        </Button>
-                    </Link>
+                    <Button
+                        onClick={handleOpen}
+                        disabled={!canCreateDataset}
+                        type="primary"
+                        loading={isLoadingDataProduct}
+                    >
+                        {t('Add Output Port')}
+                    </Button>
                 </Flex>
 
                 <Searchbar
@@ -84,6 +88,7 @@ export function DatasetTable({ dataProductId, datasets, draggedDataOutputId }: P
                     </Typography.Text>
                 </Flex>
             )}
+            {isVisible && <AddOutputPortPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </Flex>
     );
 }

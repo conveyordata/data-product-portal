@@ -3,6 +3,7 @@ import {
     type CheckboxOptionType,
     Col,
     Form,
+    type FormInstance,
     type FormProps,
     Input,
     Popconfirm,
@@ -25,7 +26,10 @@ import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
-import { useGetAllDataProductsQuery } from '@/store/features/data-products/data-products-api-slice';
+import {
+    useGetAllDataProductsQuery,
+    useGetDataProductByIdQuery,
+} from '@/store/features/data-products/data-products-api-slice';
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
@@ -62,6 +66,8 @@ type Props = {
     datasetId?: string;
     dataProductId?: string;
     dataOutputId?: string;
+    modalCallbackOnSubmit: () => void;
+    formRef?: React.Ref<FormInstance<DatasetCreateFormSchema>>;
 };
 
 const { TextArea } = Input;
@@ -97,12 +103,15 @@ const getAccessTypeOptions = (t: TFunction) => {
     ];
 };
 
-export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Props) {
+export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, dataProductId, dataOutputId }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
     const { data: currentDataset, isFetching: isFetchingInitialValues } = useGetDatasetByIdQuery(datasetId || '', {
         skip: mode === 'create' || !datasetId,
+    });
+    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductByIdQuery(dataProductId || '', {
+        skip: mode === 'edit' || !dataProductId,
     });
     const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
     const { data: dataProducts = [], isFetching: isFetchingDataProducts } = useGetAllDataProductsQuery();
@@ -143,7 +152,14 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
     const canDelete = mode === 'edit' && (delete_access?.allowed ?? false);
     const canSubmit = canCreate || canEdit;
 
-    const isLoading = isCreating || isUpdating || isCreating || isUpdating || isFetchingInitialValues || isFetchingTags;
+    const isLoading =
+        isCreating ||
+        isUpdating ||
+        isCreating ||
+        isUpdating ||
+        isFetchingDataProduct ||
+        isFetchingInitialValues ||
+        isFetchingTags;
 
     const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
     const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
@@ -170,6 +186,8 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                     access_type: values.access_type,
                 };
                 const response = await createDataset(request).unwrap();
+
+                modalCallbackOnSubmit();
                 dispatchMessage({ content: t('Output port created successfully'), type: 'success' });
 
                 // If dataProductId was provided, navigate back to the data product page
@@ -208,7 +226,6 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
 
                 navigate(createDatasetIdPath(response.id));
             }
-
             form.resetFields();
         } catch (_e) {
             const errorMessage =
@@ -287,7 +304,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
         description: currentDataset?.description,
         access_type: mode === 'create' ? DatasetAccess.Public : currentDataset?.access_type,
         lifecycle_id: currentDataset?.lifecycle.id,
-        domain_id: currentDataset?.domain.id,
+        domain_id: dataProduct ? dataProduct?.domain.id : currentDataset?.domain.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
         owners: ownerIds,
     };
@@ -295,6 +312,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
     return (
         <Form<DatasetCreateFormSchema>
             form={form}
+            ref={formRef}
             labelWrap
             labelCol={FORM_GRID_WRAPPER_COLS}
             wrapperCol={FORM_GRID_WRAPPER_COLS}
@@ -361,7 +379,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                 ]}
             >
                 <Select
-                    disabled={mode !== 'create' || !!dataProductId}
+                    disabled={true}
                     loading={isFetchingDataProducts}
                     options={dataProductSelectOptions}
                     filterOption={selectFilterOptionByLabelAndValue}
@@ -381,6 +399,7 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
             >
                 <Select
                     loading={isFetchingDomains}
+                    disabled={true}
                     options={domainSelectOptions}
                     filterOption={selectFilterOptionByLabelAndValue}
                     allowClear
@@ -444,9 +463,9 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
             >
                 <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            <Form.Item>
-                <Row>
-                    {mode !== 'create' && (
+            {mode !== 'create' && (
+                <Form.Item>
+                    <Row>
                         <Col>
                             <Popconfirm
                                 title={t('Are you sure you want to delete this output port?')}
@@ -465,32 +484,32 @@ export function DatasetForm({ mode, datasetId, dataProductId, dataOutputId }: Pr
                                 </Button>
                             </Popconfirm>
                         </Col>
-                    )}
-                    <Col flex="auto" />
-                    <Col>
-                        <Space>
-                            <Button
-                                className={styles.formButton}
-                                type="default"
-                                onClick={onCancel}
-                                loading={isCreating || isUpdating}
-                                disabled={isLoading}
-                            >
-                                {t('Cancel')}
-                            </Button>
-                            <Button
-                                className={styles.formButton}
-                                type="primary"
-                                htmlType={'submit'}
-                                loading={isCreating || isUpdating}
-                                disabled={isLoading || !canSubmit}
-                            >
-                                {mode === 'edit' ? t('Save') : t('Create')}
-                            </Button>
-                        </Space>
-                    </Col>
-                </Row>
-            </Form.Item>
+                        <Col flex="auto" />
+                        <Col>
+                            <Space>
+                                <Button
+                                    className={styles.formButton}
+                                    type="default"
+                                    onClick={onCancel}
+                                    loading={isCreating || isUpdating}
+                                    disabled={isLoading}
+                                >
+                                    {t('Cancel')}
+                                </Button>
+                                <Button
+                                    className={styles.formButton}
+                                    type="primary"
+                                    htmlType={'submit'}
+                                    loading={isCreating || isUpdating}
+                                    disabled={isLoading || !canSubmit}
+                                >
+                                    {mode === 'edit' ? t('Save') : t('Create')}
+                                </Button>
+                            </Space>
+                        </Col>
+                    </Row>
+                </Form.Item>
+            )}
         </Form>
     );
 }
