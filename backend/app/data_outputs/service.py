@@ -32,6 +32,7 @@ from app.data_products.service import DataProductService
 from app.database.database import ensure_exists
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
+from app.datasets.service import DatasetService
 from app.graph.graph import Graph
 from app.platform_services.model import PlatformService
 from app.role_assignments.enums import DecisionStatus
@@ -111,7 +112,7 @@ class DataOutputService:
         return model
 
     def remove_data_output(self, id: UUID) -> DataOutputModel:
-        data_output = self.db.get(DataOutputModel, id)
+        data_output: DataOutputModel | None = self.db.get(DataOutputModel, id)
         if not data_output:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -121,7 +122,13 @@ class DataOutputService:
         result = copy.deepcopy(data_output)
         self.db.delete(data_output)
         self.db.commit()
+        self.update_search_vector_associated_datasets(result)
         return result
+
+    def update_search_vector_associated_datasets(self, result: DataOutputModel):
+        dataset_service = DatasetService(self.db)
+        for dataset_link in result.dataset_links:
+            dataset_service.recalculate_search_vector_for(dataset_link.dataset_id)
 
     def update_data_output_status(
         self, id: UUID, data_output: DataOutputStatusUpdate, *, actor: User
@@ -129,6 +136,7 @@ class DataOutputService:
         current_data_output = self.ensure_data_output_exists(id)
         current_data_output.status = data_output.status
         self.db.commit()
+        self.update_search_vector_associated_datasets(current_data_output)
 
     def link_dataset_to_data_output(
         self,
@@ -169,6 +177,7 @@ class DataOutputService:
         )
         data_output.dataset_links.append(dataset_link)
         self.db.commit()
+        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
         return dataset_link
 
     def unlink_dataset_from_data_output(
@@ -195,6 +204,7 @@ class DataOutputService:
 
         data_output.dataset_links.remove(data_output_dataset)
         self.db.commit()
+        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
         return data_output
 
     def update_data_output(

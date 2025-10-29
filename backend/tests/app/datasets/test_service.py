@@ -1,6 +1,8 @@
+import pytest
 from sqlalchemy.orm import selectinload
 from tests import test_session
 from tests.factories import (
+    DataOutputFactory,
     DataProductDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -11,6 +13,8 @@ from tests.factories import (
     UserFactory,
 )
 
+from app.data_outputs.model import DataOutput
+from app.data_outputs.service import DataOutputService
 from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset
 from app.datasets.service import DatasetService
@@ -55,6 +59,85 @@ class TestDatasetsService:
         DataProductDatasetAssociationFactory(data_product=dp, dataset=ds)
         ds = self.get_dataset(ds)
         assert DatasetService(test_session).is_visible_to_user(ds, user) is True
+
+    def test_create_search_vector_dataset(self):
+        ds = DatasetFactory()
+
+        updated_rows = DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
+        assert updated_rows == 1
+
+    def test_create_search_vector_all_datasets(self):
+        DatasetFactory()
+        DatasetFactory()
+
+        updated_rows = DatasetService(test_session).recalculate_search_vector_datasets()
+
+        assert updated_rows == 2
+
+    def test_search_dataset_existing_matching_description(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(description="Clinical dataset patient information")
+        DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
+        results = DatasetService(test_session).search_datasets("patient", user)
+
+        assert len(results) == 1
+        assert results[0].id == ds.id
+        assert results[0].description == ds.description
+        assert results[0].rank == pytest.approx(0.6079271)
+
+    def test_search_dataset_existing_matching_name(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(name="Clinical dataset patient information")
+        DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
+        results = DatasetService(test_session).search_datasets("patient", user)
+
+        assert len(results) == 1
+        assert results[0].id == ds.id
+        assert results[0].description == ds.description
+        assert results[0].rank == pytest.approx(0.6079271)
+
+    def test_search_dataset_existing_matching_data_output(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        do, ds = self.create_datasets_with_data_output(
+            data_output_name="Patient data", dataset_name="clinical test data"
+        )
+        DataOutputService(test_session).link_dataset_to_data_output(
+            id=do.id, dataset_id=ds.id, actor=user
+        )
+        DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
+        results = DatasetService(test_session).search_datasets("patient", user)
+
+        assert len(results) == 1
+        assert results[0].id == ds.id
+        assert results[0].description == ds.description
+        assert results[0].rank == pytest.approx(0.24317084)
+
+    def test_search_dataset_unexisting_word(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(description="Clinical dataset for patient information")
+        DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
+        results = DatasetService(test_session).search_datasets("CRM details", user)
+
+        assert len(results) == 0
+
+    def create_datasets_with_data_output(
+        self, data_output_name, dataset_name
+    ) -> tuple[DataOutputFactory, DatasetFactory]:
+        data_product = DataProductFactory()
+        do = DataOutputFactory(name=data_output_name, owner=data_product)
+        ds = DatasetFactory(name=dataset_name, data_product=data_product)
+        test_session.get(
+            DataOutput,
+            do.id,
+            options=[selectinload(DataOutput.dataset_links)],
+            populate_existing=True,
+        )
+        return do, ds
 
     @staticmethod
     def get_dataset(dataset: Dataset) -> Dataset:
