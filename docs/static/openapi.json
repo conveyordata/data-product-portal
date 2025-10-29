@@ -5520,6 +5520,47 @@
         }
       }
     },
+    "/api/users/seen_tour": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Mark Tour As Seen",
+        "operationId": "mark_tour_as_seen_api_users_seen_tour_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/roles/{scope}": {
       "get": {
         "tags": [
@@ -13026,6 +13067,10 @@
           "last_name": {
             "type": "string",
             "title": "Last Name"
+          },
+          "has_seen_tour": {
+            "type": "boolean",
+            "title": "Has Seen Tour"
           }
         },
         "type": "object",
@@ -13034,7 +13079,8 @@
           "email",
           "external_id",
           "first_name",
-          "last_name"
+          "last_name",
+          "has_seen_tour"
         ],
         "title": "User"
       },
@@ -13091,6 +13137,10 @@
             "type": "string",
             "title": "Last Name"
           },
+          "has_seen_tour": {
+            "type": "boolean",
+            "title": "Has Seen Tour"
+          },
           "global_role": {
             "anyOf": [
               {
@@ -13109,6 +13159,7 @@
           "external_id",
           "first_name",
           "last_name",
+          "has_seen_tour",
           "global_role"
         ],
         "title": "UsersGet"
@@ -13137,6 +13188,10 @@
             "type": "string",
             "title": "Last Name"
           },
+          "has_seen_tour": {
+            "type": "boolean",
+            "title": "Has Seen Tour"
+          },
           "global_role": {
             "anyOf": [
               {
@@ -13155,6 +13210,7 @@
           "external_id",
           "first_name",
           "last_name",
+          "has_seen_tour",
           "global_role"
         ],
         "title": "UsersGet"
