@@ -29,10 +29,16 @@ export const usersApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: userTa
             }),
             invalidatesTags: [{ type: TagTypes.User, id: STATIC_TAG_ID.LIST }],
         }),
+        seenTour: builder.mutation<void, void>({
+            query: () => ({
+                url: ApiUrl.UserSeenTour,
+                method: 'POST',
+            }),
+        }),
     }),
     overrideExisting: false,
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetAllUsersQuery, useCreateUserMutation } = usersApiSlice;
+export const { useGetAllUsersQuery, useCreateUserMutation, useSeenTourMutation } = usersApiSlice;

@@ -7,11 +7,11 @@ import Icon, {
     TeamOutlined,
 } from '@ant-design/icons';
 import type { TourProps } from 'antd';
-import { Badge, Button, Flex, Tabs, Tour, Typography } from 'antd';
+import { Badge, Flex, Tabs, Tour, Typography } from 'antd';
 import { type ReactElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router';
-
 import dataOutputOutlineIcon from '@/assets/icons/data-output-outline-icon.svg?react';
 import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer';
@@ -24,7 +24,11 @@ import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { DatasetTab } from '@/pages/data-product/components/data-product-tabs/dataset-tab/dataset-tab.tsx';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import { useGetDataProductHistoryQuery } from '@/store/features/data-products/data-products-api-slice';
+import { useSeenTourMutation } from '@/store/features/users/users-api-slice';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
 import { UsageTab } from '../../../../components/tabs/usage-tab/usage-tab';
 import styles from './data-product-tabs.module.scss';
@@ -45,11 +49,25 @@ type Tab = {
 
 export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
+    const currentUser = useSelector(selectCurrentUser);
     const ref1 = useRef(null);
     const ref2 = useRef(null);
     const ref3 = useRef(null);
     const ref4 = useRef(null);
+    const { data: access } = useCheckAccessQuery({
+        action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
+        resource: dataProductId,
+    });
+    const [open, setOpen] = useState<boolean>(false);
+    const openTour = !currentUser?.has_seen_tour && access?.allowed;
 
+    useEffect(() => {
+        posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_STARTED, {
+            data_product_id: dataProductId,
+        });
+        setOpen(openTour || false);
+    }, [openTour]);
+    const [setSeenTour] = useSeenTourMutation();
     const location = useLocation();
     const navigate = useNavigate();
     const { data: dataProductHistoryData, isLoading: isFetchingDataProductHistory } = useGetDataProductHistoryQuery(
@@ -136,8 +154,6 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
         ];
     }, [dataProductId, t, dataProductHistoryData, isFetchingDataProductHistory]);
 
-    const [open, setOpen] = useState<boolean>(false);
-
     const steps: TourProps['steps'] = [
         {
             title: 'Provide About',
@@ -181,7 +197,6 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
 
     return (
         <>
-            <Button onClick={() => setOpen(true)}>Start Tour</Button>
             <Tabs
                 activeKey={activeTab}
                 items={tabs.map(({ key, label, icon, children }) => {
@@ -219,6 +234,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                     posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_CLOSED, {
                         current_step: current,
                     });
+                    setSeenTour();
                 }}
                 onFinish={() => {
                     posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_FINISHED);

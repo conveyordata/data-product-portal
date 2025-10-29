@@ -36,3 +36,8 @@ class UserService:
         self.db.add(user)
         self.db.commit()
         return {"id": user.id}
+
+    def mark_tour_as_seen(self, user_id: UUID) -> None:
+        user = ensure_user_exists(user_id, self.db)
+        user.has_seen_tour = True
+        self.db.commit()
