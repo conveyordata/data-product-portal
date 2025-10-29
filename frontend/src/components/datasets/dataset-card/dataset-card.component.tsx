@@ -48,7 +48,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
     const handleRemoveDataset = useCallback(async () => {
         if (!dataset) return;
         try {
-            await removeDataset(dataset).unwrap();
+            await removeDataset(dataset);
             dispatchMessage({
                 content: t('Output port {{name}} has been successfully removed', { name: dataset.name }),
                 type: 'success',
