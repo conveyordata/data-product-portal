@@ -52,8 +52,6 @@ export function DataProductTab({ datasetId }: Props) {
 
                 <DataProductTable datasetId={datasetId} dataProducts={filteredDataProducts} isLoading={isLoading} />
             </Flex>
-            {/* Todo - Allow to initiate data-product-dataset-link action from the dataset (for restricted datasets) */}
-            {/*{isVisible && <AddDataProductPopup onClose={handleClose} isOpen={isVisible} datasetId={datasetId} />}*/}
         </>
     );
 }
