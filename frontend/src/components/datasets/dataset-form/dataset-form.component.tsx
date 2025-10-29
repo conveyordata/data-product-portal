@@ -189,7 +189,6 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
 
                 modalCallbackOnSubmit();
                 dispatchMessage({ content: t('Output port created successfully'), type: 'success' });
-
                 // If dataProductId was provided, navigate back to the data product page
                 if (dataOutputId && dataProductId) {
                     await requestDatasetAccessForDataOutput({
@@ -252,7 +251,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const handleDeleteDataset = async () => {
         if (canDelete && currentDataset) {
             try {
-                await deleteDataset(currentDataset?.id).unwrap();
+                await deleteDataset(currentDataset).unwrap();
                 dispatchMessage({ content: t('Output port deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Datasets);
             } catch (_error) {
@@ -323,6 +322,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             requiredMark={'optional'}
             disabled={isLoading || !canSubmit}
             initialValues={initialValues}
+            className={mode === 'create' ? styles.form : ''}
         >
             <Form.Item<DatasetCreateFormSchema>
                 name={'name'}
