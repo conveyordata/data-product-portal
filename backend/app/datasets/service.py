@@ -3,7 +3,7 @@ from typing import Iterable, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, desc, func, select, text
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 
 from app.core.authz import Authorization
@@ -34,7 +34,7 @@ from app.datasets.schema_request import (
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.datasets.schema_response import DatasetGet, DatasetsGet
+from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -46,6 +46,21 @@ from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User as UserModel
 from app.users.schema import User
+
+
+def get_dataset_load_options():
+    return [
+        selectinload(DatasetModel.data_product_links)
+        .selectinload(DataProductDatasetAssociationModel.data_product)
+        .raiseload("*"),
+        selectinload(DatasetModel.data_output_links)
+        .selectinload(DataOutputDatasetAssociationModel.data_output)
+        .options(
+            joinedload(DataOutput.configuration),
+            joinedload(DataOutput.owner),
+            raiseload("*"),
+        ),
+    ]
 
 
 class DatasetService:
@@ -90,7 +105,124 @@ class DatasetService:
 
         return dataset
 
+    def search_datasets(self, query: str, user: UserModel) -> Sequence[DatasetsSearch]:
+        load_options = get_dataset_load_options()
+        stmt = (
+            select(
+                DatasetModel,
+                func.ts_rank(
+                    DatasetModel.search_vector,
+                    func.websearch_to_tsquery("english", query),
+                ).label("rank"),
+            )
+            .options(*load_options)
+            .where(
+                DatasetModel.search_vector.op("@@")(
+                    func.websearch_to_tsquery("english", query)
+                )
+            )
+            .order_by(desc("rank"))
+        )
+        results = self.db.execute(stmt).unique().all()
+        filtered_datasets = []
+        for row in results:
+            dataset = row[0]
+            rank = row[1]
+            if self.is_visible_to_user(dataset, user):
+                dataset.rank = rank
+                filtered_datasets.append(dataset)
+        return filtered_datasets
+
+    def recalculate_search_vector_for(self, dataset_id: UUID) -> int:
+        sql = text(
+            """
+WITH data_outputs_vectors AS (
+    SELECT dod.dataset_id,
+        (
+            setweight(
+                    to_tsvector(
+                            'english',
+                            string_agg(
+                                    coalesce(data_outputs.name, '') ||
+                                    ' ' ||
+                                    coalesce(data_outputs.description, ''),
+                                    ' ')
+                    ),
+                    'B'
+            )
+        ) AS search_vector
+    FROM data_outputs
+             JOIN data_outputs_datasets dod on dod.data_output_id = data_outputs.id
+    WHERE dod.dataset_id = :dataset_id
+    GROUP BY dod.dataset_id),
+dataset_search_vectors AS (
+    SELECT datasets.id,
+        (
+            setweight(
+                    to_tsvector('english', coalesce(datasets.name, '')),
+                    'A') ||
+            setweight(
+                    to_tsvector('english', coalesce(datasets.description, '')),
+                    'A') ||
+            coalesce(dov.search_vector, to_tsvector('english', ''))
+        ) AS new_search_vector
+    FROM datasets
+    LEFT JOIN data_outputs_vectors dov ON dov.dataset_id = datasets.id
+    WHERE datasets.id = :dataset_id)
+UPDATE datasets ds
+SET search_vector = csv.new_search_vector FROM dataset_search_vectors csv
+WHERE ds.id = csv.id;
+"""
+        )
+        result = self.db.execute(sql, {"dataset_id": dataset_id})
+        self.db.commit()
+        return result.rowcount
+
+    def recalculate_search_vector_datasets(self) -> int:
+        sql = text(
+            """
+WITH data_outputs_vectors AS (
+    SELECT dod.dataset_id,
+        (
+           setweight(
+                   to_tsvector(
+                           'english',
+                           string_agg(
+                                   coalesce(data_outputs.name, '') ||
+                                   ' ' ||
+                                   coalesce(data_outputs.description, ''),
+                                   ' ')
+                   ),
+                   'B'
+           )
+        ) AS search_vector
+    FROM data_outputs
+    JOIN data_outputs_datasets dod on dod.data_output_id = data_outputs.id
+    GROUP BY dod.dataset_id),
+dataset_search_vectors AS (
+    SELECT datasets.id,
+        (
+            setweight(
+                    to_tsvector('english', coalesce(datasets.name, '')),
+                    'A') ||
+            setweight(
+                    to_tsvector('english', coalesce(datasets.description, '')),
+                    'B') ||
+            coalesce(dov.search_vector, to_tsvector('english', ''))
+        ) AS new_search_vector
+    FROM datasets
+    LEFT JOIN data_outputs_vectors dov ON dov.dataset_id = datasets.id)
+UPDATE datasets ds
+SET search_vector = csv.new_search_vector FROM dataset_search_vectors csv
+WHERE ds.id = csv.id;
+"""
+        )
+        result = self.db.execute(sql)
+        self.db.commit()
+        return result.rowcount
+
     def get_datasets(self, user: UserModel) -> Sequence[DatasetsGet]:
+        load_options = get_dataset_load_options()
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
@@ -100,18 +232,7 @@ class DatasetService:
             dataset
             for dataset in self.db.scalars(
                 select(DatasetModel)
-                .options(
-                    selectinload(DatasetModel.data_product_links)
-                    .selectinload(DataProductDatasetAssociationModel.data_product)
-                    .raiseload("*"),
-                    selectinload(DatasetModel.data_output_links)
-                    .selectinload(DataOutputDatasetAssociationModel.data_output)
-                    .options(
-                        joinedload(DataOutput.configuration),
-                        joinedload(DataOutput.owner),
-                        raiseload("*"),
-                    ),
-                )
+                .options(*load_options)
                 .order_by(asc(DatasetModel.name))
             )
             .unique()
@@ -171,6 +292,7 @@ class DatasetService:
 
         self.db.add(model)
         self.db.commit()
+        self.recalculate_search_vector_for(model.id)
         return model
 
     def remove_dataset(self, id: UUID) -> DatasetModel:
@@ -211,6 +333,7 @@ class DatasetService:
                 setattr(current_dataset, k, v) if v else None
 
         self.db.commit()
+        self.recalculate_search_vector_for(id)
         return {"id": current_dataset.id}
 
     def update_dataset_about(

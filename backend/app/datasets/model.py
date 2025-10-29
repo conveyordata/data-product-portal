@@ -2,6 +2,7 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
@@ -33,6 +34,7 @@ class Dataset(Base, BaseORM):
     access_type = Column(Enum(DatasetAccessType), default=DatasetAccessType.PUBLIC)
     status: DatasetStatus = Column(Enum(DatasetStatus), default=DatasetStatus.ACTIVE)
     usage = Column(String, nullable=True)
+    search_vector = Column(postgresql.TSVECTOR)
 
     # Foreign keys
     lifecycle_id: Mapped[UUID] = mapped_column(

@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -22,7 +22,7 @@ from app.datasets.schema_request import (
     DatasetUpdate,
     DatasetUsageUpdate,
 )
-from app.datasets.schema_response import DatasetGet, DatasetsGet
+from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
 from app.datasets.service import DatasetService
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -50,6 +50,15 @@ def get_datasets(
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsGet]:
     return DatasetService(db).get_datasets(user)
+
+
+@router.get("/search")
+def search_datasets(
+    query: str = Query(min_length=3),
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> Sequence[DatasetsSearch]:
+    return DatasetService(db).search_datasets(query=query, user=user)
 
 
 @router.get("/namespace_suggestion")
