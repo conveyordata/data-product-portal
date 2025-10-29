@@ -213,9 +213,15 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                                   : TabKeys.Settings,
                     )
                 }
-                onClose={() => {
+                onClose={(current) => {
                     setOpen(false);
                     setActiveTab(TabKeys.About);
+                    posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_CLOSED, {
+                        current_step: current,
+                    });
+                }}
+                onFinish={() => {
+                    posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_FINISHED);
                 }}
                 steps={steps}
             />
