@@ -110,7 +110,7 @@ class DatasetService:
         stmt = (
             select(
                 DatasetModel,
-                func.ts_rank(
+                func.ts_rank_cd(
                     DatasetModel.search_vector,
                     func.websearch_to_tsquery("english", query),
                 ).label("rank"),

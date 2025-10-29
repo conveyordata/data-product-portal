@@ -85,7 +85,7 @@ class TestDatasetsService:
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
-        assert results[0].rank == pytest.approx(0.6079271)
+        assert results[0].rank == pytest.approx(1.0)
 
     def test_search_dataset_existing_matching_name(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -97,7 +97,7 @@ class TestDatasetsService:
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
-        assert results[0].rank == pytest.approx(0.6079271)
+        assert results[0].rank == pytest.approx(1.0)
 
     def test_search_dataset_existing_matching_data_output(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -114,7 +114,7 @@ class TestDatasetsService:
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
-        assert results[0].rank == pytest.approx(0.24317084)
+        assert results[0].rank == pytest.approx(0.4)
 
     def test_search_dataset_unexisting_word(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
