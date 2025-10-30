@@ -46,14 +46,15 @@ type Tab = {
     icon?: ReactNode;
     children: ReactNode;
 };
+const { Paragraph, Link } = Typography;
 
 export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
     const currentUser = useSelector(selectCurrentUser);
-    const ref1 = useRef(null);
-    const ref2 = useRef(null);
-    const ref3 = useRef(null);
-    const ref4 = useRef(null);
+    const aboutRef = useRef(null);
+    const inputPortRef = useRef(null);
+    const outputPortRef = useRef(null);
+    const teamRef = useRef(null);
     const { data: access } = useCheckAccessQuery({
         action: AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
         resource: dataProductId,
@@ -94,7 +95,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const tabs: Tab[] = useMemo(() => {
         return [
             {
-                label: <Typography.Text ref={ref1}>{t('About')}</Typography.Text>,
+                label: <Typography.Text ref={aboutRef}>{t('About')}</Typography.Text>,
                 key: TabKeys.About,
                 icon: <InfoCircleOutlined />,
                 children: <AboutTab dataProductId={dataProductId} />,
@@ -111,13 +112,13 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 children: <UsageTab dataProductId={dataProductId} />,
             },
             {
-                label: <Typography.Text ref={ref2}>{t('Input Ports')}</Typography.Text>,
+                label: <Typography.Text ref={inputPortRef}>{t('Input Ports')}</Typography.Text>,
                 key: TabKeys.Datasets,
                 icon: <Icon component={datasetOutlineIcon} />,
                 children: <DatasetTab dataProductId={dataProductId} />,
             },
             {
-                label: <Typography.Text ref={ref3}>{t('Output Ports')}</Typography.Text>,
+                label: <Typography.Text ref={outputPortRef}>{t('Output Ports')}</Typography.Text>,
                 key: TabKeys.DataOutputs,
                 icon: <Icon component={dataOutputOutlineIcon} />,
                 children: <DataOutputTab dataProductId={dataProductId} />,
@@ -129,7 +130,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 children: <Explorer id={dataProductId} type={'dataproduct'} />,
             },
             {
-                label: <Typography.Text ref={ref4}>{t('Team')}</Typography.Text>,
+                label: <Typography.Text ref={teamRef}>{t('Team')}</Typography.Text>,
                 key: TabKeys.Team,
                 icon: <TeamOutlined />,
                 children: <TeamTab dataProductId={dataProductId} />,
@@ -156,38 +157,62 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
         ];
     }, [dataProductId, t, dataProductHistoryData, isFetchingDataProductHistory]);
 
-    const steps: TourProps['steps'] = [
+    const steps: TourProps['steps'] = useMemo(() => {
+        return [
         {
-            title: 'Provide About',
+            title: t('Provide About'),
             description:
-                'The About page of your data product functions as a wiki page. Any relevant information about the data product can be documented here for easy reference by team members and stakeholders.',
-            cover: (
-                <img
-                    draggable={false}
-                    alt="tour.png"
-                    src="https://user-images.githubusercontent.com/5378891/197385811-55df8480-7ff4-44bd-9d43-a7dade598d70.png"
-                />
-            ),
-            target: () => ref1.current,
+                t('The About page of your data product functions as a wiki page. Any relevant information about the data product can be documented here for easy reference by team members and stakeholders.'),
+            target: () => aboutRef.current,
         },
         {
-            title: 'Register an Input Port',
+            title: t('Register an Input Port'),
             description:
-                'Define the input port for your data product. If you have not yet requested them at creation time you can request read access to additional input ports here.',
-            target: () => ref2.current,
+                t('This tab lists the input ports for your data product. If you have not yet requested them at creation time you can request read access to additional input ports here.'),
+            target: () => inputPortRef.current,
         },
         {
-            title: 'Register an Output Port',
+            title: t('Register an Output Port'),
             description:
-                'Define the output ports for your data product and populate them with technical assets by dragging and dropping.',
-            target: () => ref3.current,
+                t('Define the output ports for your data product and populate them with technical assets by dragging and dropping. Output ports will automatically show up in the marketplace.'),
+            target: () => outputPortRef.current,
         },
         {
-            title: 'Set up your team',
-            description: 'Assign roles and permissions to team members to manage access and collaboration effectively.',
-            target: () => ref4.current,
+            title: t('Set up your team'),
+            description: t('Assign roles and permissions to team members to manage access and collaboration effectively.'),
+            target: () => teamRef.current,
         },
-    ];
+        {
+            title: t("🎉 You have finished the tour! 🎉"),
+            description: <Typography><Typography.Paragraph>
+                {t('You are all set to start managing your data product!')}
+            </Typography.Paragraph>
+            <Paragraph>
+                {t('We have shown you the main features, but feel free to explore further on your own.')}
+            </Paragraph>
+                <Paragraph>
+                    {t('With what you have learned you can:')}
+                    <ul>
+                        <li>
+                            {t('Write a comprehensive about page.')}
+                        </li>
+                        <li>
+                            {t('Register input ports to bring data into your data product.')}
+                        </li>
+                        <li>
+                            {t('Define output ports to expose data from your data product.')}
+                        </li>
+                        <li>
+                            {t('Set up your team to manage access and collaboration.')}
+                        </li>
+                    </ul>
+                </Paragraph>
+                <Paragraph>
+                    {t('If there are some concepts you are unsure about, please refer to our ')} <Link target="_blank" rel="noopener noreferrer" href="https://docs.dataproductportal.com">{t('documentation')}</Link> {t(' or reach out to support.')}
+                </Paragraph>
+            </Typography>
+        }
+    ];}, [t]);
 
     if (isLoading) {
         return <LoadingSpinner />;
@@ -219,7 +244,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 open={open}
                 onChange={(current) =>
                     setActiveTab(
-                        current === 0
+                        current === 0 || current === 4
                             ? TabKeys.About
                             : current === 1
                               ? TabKeys.Datasets
