@@ -69,7 +69,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
             });
         }
         setOpen(openTour || false);
-    }, [openTour]);
+    }, [openTour, dataProductId]);
     const [setSeenTour] = useSeenTourMutation();
     const location = useLocation();
     const navigate = useNavigate();
@@ -159,60 +159,65 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
 
     const steps: TourProps['steps'] = useMemo(() => {
         return [
-        {
-            title: t('Provide About'),
-            description:
-                t('The About page of your data product functions as a wiki page. Any relevant information about the data product can be documented here for easy reference by team members and stakeholders.'),
-            target: () => aboutRef.current,
-        },
-        {
-            title: t('Register an Input Port'),
-            description:
-                t('This tab lists the input ports for your data product. If you have not yet requested them at creation time you can request read access to additional input ports here.'),
-            target: () => inputPortRef.current,
-        },
-        {
-            title: t('Register an Output Port'),
-            description:
-                t('Define the output ports for your data product and populate them with technical assets by dragging and dropping. Output ports will automatically show up in the marketplace.'),
-            target: () => outputPortRef.current,
-        },
-        {
-            title: t('Set up your team'),
-            description: t('Assign roles and permissions to team members to manage access and collaboration effectively.'),
-            target: () => teamRef.current,
-        },
-        {
-            title: t("🎉 You have finished the tour! 🎉"),
-            description: <Typography><Typography.Paragraph>
-                {t('You are all set to start managing your data product!')}
-            </Typography.Paragraph>
-            <Paragraph>
-                {t('We have shown you the main features, but feel free to explore further on your own.')}
-            </Paragraph>
-                <Paragraph>
-                    {t('With what you have learned you can:')}
-                    <ul>
-                        <li>
-                            {t('Write a comprehensive about page.')}
-                        </li>
-                        <li>
-                            {t('Register input ports to bring data into your data product.')}
-                        </li>
-                        <li>
-                            {t('Define output ports to expose data from your data product.')}
-                        </li>
-                        <li>
-                            {t('Set up your team to manage access and collaboration.')}
-                        </li>
-                    </ul>
-                </Paragraph>
-                <Paragraph>
-                    {t('If there are some concepts you are unsure about, please refer to our ')} <Link target="_blank" rel="noopener noreferrer" href="https://docs.dataproductportal.com">{t('documentation')}</Link> {t(' or reach out to support.')}
-                </Paragraph>
-            </Typography>
-        }
-    ];}, [t]);
+            {
+                title: t('Provide About'),
+                description: t(
+                    'The About page of your data product functions as a wiki page. Any relevant information about the data product can be documented here for easy reference by team members and stakeholders.',
+                ),
+                target: () => aboutRef.current,
+            },
+            {
+                title: t('Register an Input Port'),
+                description: t(
+                    'This tab lists the input ports for your data product. If you have not yet requested them at creation time you can request read access to additional input ports here.',
+                ),
+                target: () => inputPortRef.current,
+            },
+            {
+                title: t('Register an Output Port'),
+                description: t(
+                    'Define the output ports for your data product and populate them with technical assets by dragging and dropping. Output ports will automatically show up in the marketplace.',
+                ),
+                target: () => outputPortRef.current,
+            },
+            {
+                title: t('Set up your team'),
+                description: t(
+                    'Assign roles and permissions to team members to manage access and collaboration effectively.',
+                ),
+                target: () => teamRef.current,
+            },
+            {
+                title: t('🎉 You have finished the tour! 🎉'),
+                description: (
+                    <Typography>
+                        <Typography.Paragraph>
+                            {t('You are all set to start managing your data product!')}
+                        </Typography.Paragraph>
+                        <Paragraph>
+                            {t('We have shown you the main features, but feel free to explore further on your own.')}
+                        </Paragraph>
+                        <Paragraph>
+                            {t('With what you have learned you can:')}
+                            <ul>
+                                <li>{t('Write a comprehensive about page.')}</li>
+                                <li>{t('Register input ports to bring data into your data product.')}</li>
+                                <li>{t('Define output ports to expose data from your data product.')}</li>
+                                <li>{t('Set up your team to manage access and collaboration.')}</li>
+                            </ul>
+                        </Paragraph>
+                        <Paragraph>
+                            {t('If there are some concepts you are unsure about, please refer to our ')}{' '}
+                            <Link target="_blank" rel="noopener noreferrer" href="https://docs.dataproductportal.com">
+                                {t('documentation')}
+                            </Link>{' '}
+                            {t(' or reach out to support.')}
+                        </Paragraph>
+                    </Typography>
+                ),
+            },
+        ];
+    }, [t]);
 
     if (isLoading) {
         return <LoadingSpinner />;
