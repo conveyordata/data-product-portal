@@ -113,8 +113,6 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductByIdQuery(dataProductId || '', {
         skip: mode === 'edit' || !dataProductId,
     });
-    const { data: domains = [], isFetching: isFetchingDomains } = useGetAllDomainsQuery();
-    const { data: dataProducts = [], isFetching: isFetchingDataProducts } = useGetAllDataProductsQuery();
     const { data: lifecycles = [], isFetching: isFetchingLifecycles } = useGetAllDataProductLifecyclesQuery();
     const { data: users = [], isFetching: isFetchingUsers } = useGetAllUsersQuery();
     const { data: availableTags, isFetching: isFetchingTags } = useGetAllTagsQuery();
@@ -162,9 +160,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         isFetchingTags;
 
     const accessTypeOptions: CheckboxOptionType<DatasetAccess>[] = useMemo(() => getAccessTypeOptions(t), [t]);
-    const domainSelectOptions = domains.map((domain) => ({ label: domain.name, value: domain.id }));
 
-    const dataProductSelectOptions = dataProducts.map((dp) => ({ label: dp.name, value: dp.id }));
     const userSelectOptions = users.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
         value: owner.id,
@@ -173,15 +169,15 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
 
     const onFinish: FormProps<DatasetCreateFormSchema>['onFinish'] = async (values) => {
         try {
-            if (mode === 'create') {
+            if (mode === 'create' && dataProduct) {
                 const request: DatasetCreateRequest = {
                     name: values.name,
                     namespace: values.namespace,
-                    data_product_id: values.data_product_id,
+                    data_product_id: dataProduct.id,
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
-                    domain_id: values.domain_id,
+                    domain_id: dataProduct.domain.id,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
@@ -203,7 +199,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                         navigate(createDatasetIdPath(response.id));
                     }
                 }
-            } else if (mode === 'edit' && datasetId) {
+            } else if (mode === 'edit' && datasetId && currentDataset) {
                 if (!canEdit) {
                     dispatchMessage({ content: t('You are not allowed to edit this output port'), type: 'error' });
                     return;
@@ -213,9 +209,9 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                     name: values.name,
                     namespace: values.namespace,
                     description: values.description,
-                    data_product_id: values.data_product_id,
+                    data_product_id: currentDataset.data_product_id,
                     tag_ids: values.tag_ids,
-                    domain_id: values.domain_id,
+                    domain_id: currentDataset.domain.id,
                     lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                 };
@@ -299,11 +295,9 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
     const initialValues = {
         name: currentDataset?.name,
         namespace: currentDataset?.namespace,
-        data_product_id: dataProductId || currentDataset?.data_product_id,
         description: currentDataset?.description,
         access_type: mode === 'create' ? DatasetAccess.Public : currentDataset?.access_type,
         lifecycle_id: currentDataset?.lifecycle.id,
-        domain_id: dataProduct ? dataProduct?.domain.id : currentDataset?.domain.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
         owners: ownerIds,
     };
@@ -346,65 +340,28 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 validationRequired={mode === 'create'}
                 validateNamespace={validateNamespaceCallback}
             />
-            <Form.Item<DatasetCreateFormSchema>
-                name={'owners'}
-                label={t('Owners')}
-                tooltip={t('The owners of the output port')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please select at least one owner for the output port'),
-                    },
-                ]}
-            >
-                <Select
-                    loading={isFetchingUsers}
-                    mode={'multiple'}
-                    options={userSelectOptions}
-                    filterOption={selectFilterOptionByLabelAndValue}
-                    disabled={mode !== 'create'}
-                    tokenSeparators={[',']}
-                    allowClear
-                />
-            </Form.Item>
-            <Form.Item<DatasetCreateFormSchema>
-                name={'data_product_id'}
-                label={t('Data Product Parent')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please select the data product to which this output port belongs'),
-                    },
-                ]}
-            >
-                <Select
-                    disabled={true}
-                    loading={isFetchingDataProducts}
-                    options={dataProductSelectOptions}
-                    filterOption={selectFilterOptionByLabelAndValue}
-                    allowClear
-                    showSearch
-                />
-            </Form.Item>
-            <Form.Item<DatasetCreateFormSchema>
-                name={'domain_id'}
-                label={t('Domain')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please select the domain of the output port'),
-                    },
-                ]}
-            >
-                <Select
-                    loading={isFetchingDomains}
-                    disabled={true}
-                    options={domainSelectOptions}
-                    filterOption={selectFilterOptionByLabelAndValue}
-                    allowClear
-                    showSearch
-                />
-            </Form.Item>
+            {mode === 'create' && (
+                <Form.Item<DatasetCreateFormSchema>
+                    name={'owners'}
+                    label={t('Owners')}
+                    tooltip={t('The owners of the output port')}
+                    rules={[
+                        {
+                            required: true,
+                            message: t('Please select at least one owner for the output port'),
+                        },
+                    ]}
+                >
+                    <Select
+                        loading={isFetchingUsers}
+                        mode={'multiple'}
+                        options={userSelectOptions}
+                        filterOption={selectFilterOptionByLabelAndValue}
+                        tokenSeparators={[',']}
+                        allowClear
+                    />
+                </Form.Item>
+            )}
             <Form.Item<DatasetCreateFormSchema>
                 name={'lifecycle_id'}
                 label={t('Status')}
