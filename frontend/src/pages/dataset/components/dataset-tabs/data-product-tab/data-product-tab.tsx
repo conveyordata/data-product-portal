@@ -39,19 +39,14 @@ export function DataProductTab({ datasetId }: Props) {
     }, [datasetDataProducts, searchTerm]);
 
     return (
-        <>
-            <Flex
-                vertical
-                className={`${styles.container} ${filteredDataProducts.length === 0 && styles.paginationGap}`}
-            >
-                <Searchbar
-                    placeholder={t('Search data products by name')}
-                    formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
-                    form={searchForm}
-                />
+        <Flex vertical className={`${styles.container} ${filteredDataProducts.length === 0 && styles.paginationGap}`}>
+            <Searchbar
+                placeholder={t('Search data products by name')}
+                formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
+                form={searchForm}
+            />
 
-                <DataProductTable datasetId={datasetId} dataProducts={filteredDataProducts} isLoading={isLoading} />
-            </Flex>
-        </>
+            <DataProductTable datasetId={datasetId} dataProducts={filteredDataProducts} isLoading={isLoading} />
+        </Flex>
     );
 }

@@ -14,6 +14,7 @@ import { DatasetActions } from '@/pages/dataset/components/dataset-actions/datas
 import { DatasetDescription } from '@/pages/dataset/components/dataset-description/dataset-description';
 import { DatasetTabs } from '@/pages/dataset/components/dataset-tabs/dataset-tabs';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation';
@@ -21,7 +22,6 @@ import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
 import { useGetDatasetOwners } from '@/utils/dataset-user-role.helper';
 import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper';
 import { getDynamicRoutePath } from '@/utils/routes.helper';
-
 import styles from './dataset.module.scss';
 
 export function Dataset() {
@@ -30,6 +30,10 @@ export function Dataset() {
     const { datasetId = '' } = useParams();
 
     const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
+    const { data: data_product, isLoading: isLoadingDataProduct } = useGetDataProductByIdQuery(
+        dataset?.data_product_id || '',
+        { skip: !dataset?.data_product_id },
+    );
     const { data: edit_access } = useCheckAccessQuery(
         {
             resource: datasetId,
@@ -52,9 +56,9 @@ export function Dataset() {
         });
     }, [datasetId]);
 
-    if (isLoading) return <LoadingSpinner />;
+    if (isLoading || isLoadingDataProduct) return <LoadingSpinner />;
 
-    if (!dataset) return null;
+    if (!dataset || !data_product) return null;
 
     return (
         <Flex className={styles.datasetContainer}>
@@ -79,6 +83,7 @@ export function Dataset() {
                     <Flex vertical className={styles.datasetOverview}>
                         <DatasetDescription
                             lifecycle={dataset.lifecycle}
+                            data_product={data_product}
                             description={dataset.description}
                             domain={dataset.domain.name}
                             namespace={dataset.namespace}

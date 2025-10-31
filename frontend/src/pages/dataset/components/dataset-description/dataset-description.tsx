@@ -1,21 +1,31 @@
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-
+import { Link } from 'react-router';
+import type { DataProductContract } from '@/types/data-product';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { createDataProductIdPath } from '@/types/navigation';
 import type { TagModel } from '@/types/tag';
-
 import styles from './dataset-description.module.scss';
 
 type Props = {
     lifecycle: DataProductLifeCycleContract;
     accessType?: string;
     description: string;
+    data_product: DataProductContract;
     domain: string;
     tags: TagModel[];
     namespace: string;
 };
 
-export function DatasetDescription({ lifecycle, accessType, description, domain, tags, namespace }: Props) {
+export function DatasetDescription({
+    lifecycle,
+    accessType,
+    description,
+    data_product,
+    domain,
+    tags,
+    namespace,
+}: Props) {
     const { t } = useTranslation();
 
     return (
@@ -28,6 +38,12 @@ export function DatasetDescription({ lifecycle, accessType, description, domain,
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Namespace')}</Typography.Text>
                     <Typography.Text>{namespace}</Typography.Text>
+                </Flex>
+                <Flex className={styles.statusBadge}>
+                    <Typography.Text strong>{t('Data Product')}</Typography.Text>
+                    <Link to={createDataProductIdPath(data_product.id)}>
+                        <Typography.Text>{data_product.name}</Typography.Text>
+                    </Link>
                 </Flex>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Domain')}</Typography.Text>
