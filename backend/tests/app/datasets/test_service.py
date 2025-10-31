@@ -61,13 +61,23 @@ class TestDatasetsService:
         assert DatasetService(test_session).is_visible_to_user(ds, user) is True
 
     def test_create_search_vector_dataset(self):
+        settings.SEARCH_INDEXING_DISABLED = False
         ds = DatasetFactory()
 
         updated_rows = DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
         assert updated_rows == 1
 
+    def test_create_search_vector_indexing_disabled(self):
+        settings.SEARCH_INDEXING_DISABLED = True
+        ds = DatasetFactory()
+
+        updated_rows = DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
+        assert updated_rows == 0
+
     def test_create_search_vector_all_datasets(self):
+        settings.SEARCH_INDEXING_DISABLED = False
         DatasetFactory()
         DatasetFactory()
 
@@ -75,28 +85,39 @@ class TestDatasetsService:
 
         assert updated_rows == 2
 
+    def test_create_search_vector_all_datasets_indexing_disabled(self):
+        settings.SEARCH_INDEXING_DISABLED = True
+        DatasetFactory()
+        DatasetFactory()
+
+        updated_rows = DatasetService(test_session).recalculate_search_vector_datasets()
+
+        assert updated_rows == 0
+
     def test_search_dataset_matching_description(self):
+        settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(
             name="dataset name", description="Clinical dataset patient information"
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
-        results = DatasetService(test_session).search_datasets("patient", user)
+        results = DatasetService(test_session).search_datasets("patient", 10, user)
 
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
-        assert results[0].rank == pytest.approx(0.4)
+        assert results[0].rank == pytest.approx(0.2857143)
 
     def test_search_dataset_matching_name(self):
+        settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(
             name="Clinical dataset patient information", description="description"
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
-        results = DatasetService(test_session).search_datasets("patient", user)
+        results = DatasetService(test_session).search_datasets("patient", 10, user)
 
         assert len(results) == 1
         assert results[0].id == ds.id
@@ -104,11 +125,12 @@ class TestDatasetsService:
         assert results[0].rank == pytest.approx(0.5)
 
     def test_search_dataset_matching_name_and_description(self):
+        settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(name="Clinical dataset", description="clinical studies")
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
-        results = DatasetService(test_session).search_datasets("clinical", user)
+        results = DatasetService(test_session).search_datasets("clinical", 10, user)
 
         assert len(results) == 1
         assert results[0].id == ds.id
@@ -116,6 +138,7 @@ class TestDatasetsService:
         assert results[0].rank == pytest.approx(0.5833333)
 
     def test_search_dataset_matching_data_output_name(self):
+        settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         do, ds = self.create_datasets_with_data_output(
             data_output_name="Patient data", dataset_name="dataset name"
@@ -125,7 +148,7 @@ class TestDatasetsService:
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
-        results = DatasetService(test_session).search_datasets("patient", user)
+        results = DatasetService(test_session).search_datasets("patient", 10, user)
 
         assert len(results) == 1
         assert results[0].id == ds.id
@@ -133,6 +156,7 @@ class TestDatasetsService:
         assert results[0].rank == pytest.approx(0.5)
 
     def test_search_dataset_matching_data_output_description(self):
+        settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         do, ds = self.create_datasets_with_data_output(
             data_output_name="data output",
@@ -144,7 +168,7 @@ class TestDatasetsService:
         )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
-        results = DatasetService(test_session).search_datasets("patient", user)
+        results = DatasetService(test_session).search_datasets("patient", 10, user)
 
         assert len(results) == 1
         assert results[0].id == ds.id
@@ -152,11 +176,12 @@ class TestDatasetsService:
         assert results[0].rank == pytest.approx(0.2857143)
 
     def test_search_dataset_unexisting_word(self):
+        settings.SEARCH_INDEXING_DISABLED = False
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory(description="Clinical dataset for patient information")
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
-        results = DatasetService(test_session).search_datasets("CRM details", user)
+        results = DatasetService(test_session).search_datasets("CRM details", 10, user)
 
         assert len(results) == 0
 
