@@ -36,15 +36,13 @@ WITH data_outputs_vectors AS (
     SELECT
        dod.dataset_id,
        (
-         setweight(
-           to_tsvector(
-             'english',
-             string_agg(coalesce(data_outputs.name, '') || ' ' ||
-                        coalesce(data_outputs.description, ''), ' ')
-           ),
-           'B'
-         )
-       ) AS search_vector
+            setweight(to_tsvector('english',
+                      string_agg(coalesce(data_outputs.name, ''), ' ')),
+                      'A') ||
+            setweight(to_tsvector('english',
+                      string_agg(coalesce(data_outputs.description, ''), ' ')),
+                      'B')
+        ) AS search_vector
     FROM data_outputs
     JOIN data_outputs_datasets dod on dod.data_output_id = data_outputs.id
     GROUP BY dod.dataset_id

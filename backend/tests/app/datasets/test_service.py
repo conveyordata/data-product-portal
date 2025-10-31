@@ -75,9 +75,11 @@ class TestDatasetsService:
 
         assert updated_rows == 2
 
-    def test_search_dataset_existing_matching_description(self):
+    def test_search_dataset_matching_description(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory(description="Clinical dataset patient information")
+        ds = DatasetFactory(
+            name="dataset name", description="Clinical dataset patient information"
+        )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
         results = DatasetService(test_session).search_datasets("patient", user)
@@ -85,11 +87,13 @@ class TestDatasetsService:
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
-        assert results[0].rank == pytest.approx(1.0)
+        assert results[0].rank == pytest.approx(0.4)
 
-    def test_search_dataset_existing_matching_name(self):
+    def test_search_dataset_matching_name(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory(name="Clinical dataset patient information")
+        ds = DatasetFactory(
+            name="Clinical dataset patient information", description="description"
+        )
         DatasetService(test_session).recalculate_search_vector_for(ds.id)
 
         results = DatasetService(test_session).search_datasets("patient", user)
@@ -97,12 +101,24 @@ class TestDatasetsService:
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
-        assert results[0].rank == pytest.approx(1.0)
+        assert results[0].rank == pytest.approx(0.5)
 
-    def test_search_dataset_existing_matching_data_output(self):
+    def test_search_dataset_matching_name_and_description(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = DatasetFactory(name="Clinical dataset", description="clinical studies")
+        DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
+        results = DatasetService(test_session).search_datasets("clinical", user)
+
+        assert len(results) == 1
+        assert results[0].id == ds.id
+        assert results[0].description == ds.description
+        assert results[0].rank == pytest.approx(0.5833333)
+
+    def test_search_dataset_matching_data_output_name(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         do, ds = self.create_datasets_with_data_output(
-            data_output_name="Patient data", dataset_name="clinical test data"
+            data_output_name="Patient data", dataset_name="dataset name"
         )
         DataOutputService(test_session).link_dataset_to_data_output(
             id=do.id, dataset_id=ds.id, actor=user
@@ -114,7 +130,26 @@ class TestDatasetsService:
         assert len(results) == 1
         assert results[0].id == ds.id
         assert results[0].description == ds.description
-        assert results[0].rank == pytest.approx(0.4)
+        assert results[0].rank == pytest.approx(0.5)
+
+    def test_search_dataset_matching_data_output_description(self):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        do, ds = self.create_datasets_with_data_output(
+            data_output_name="data output",
+            dataset_name="dataset",
+            data_output_description="patient info",
+        )
+        DataOutputService(test_session).link_dataset_to_data_output(
+            id=do.id, dataset_id=ds.id, actor=user
+        )
+        DatasetService(test_session).recalculate_search_vector_for(ds.id)
+
+        results = DatasetService(test_session).search_datasets("patient", user)
+
+        assert len(results) == 1
+        assert results[0].id == ds.id
+        assert results[0].description == ds.description
+        assert results[0].rank == pytest.approx(0.2857143)
 
     def test_search_dataset_unexisting_word(self):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -126,10 +161,14 @@ class TestDatasetsService:
         assert len(results) == 0
 
     def create_datasets_with_data_output(
-        self, data_output_name, dataset_name
+        self, data_output_name, dataset_name, data_output_description=""
     ) -> tuple[DataOutputFactory, DatasetFactory]:
         data_product = DataProductFactory()
-        do = DataOutputFactory(name=data_output_name, owner=data_product)
+        do = DataOutputFactory(
+            name=data_output_name,
+            owner=data_product,
+            description=data_output_description,
+        )
         ds = DatasetFactory(name=dataset_name, data_product=data_product)
         test_session.get(
             DataOutput,
