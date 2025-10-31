@@ -10,7 +10,6 @@ import { DataProductCreate } from '@/pages/data-product-create/data-product-crea
 import { DataProductEdit } from '@/pages/data-product-edit/data-product-edit.page.tsx';
 import { DataProducts } from '@/pages/data-products/data-products.page.tsx';
 import { Dataset } from '@/pages/dataset/dataset.page.tsx';
-import { DatasetCreate } from '@/pages/dataset-create/dataset-create.page.tsx';
 import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
 import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
 import { ExplorerPage } from '@/pages/explorer/explorer.page.tsx';
@@ -86,10 +85,6 @@ const router = createBrowserRouter([
                             {
                                 path: ApplicationPaths.Dataset,
                                 element: <Dataset />,
-                            },
-                            {
-                                path: ApplicationPaths.DatasetNew,
-                                element: <DatasetCreate />,
                             },
                             {
                                 path: ApplicationPaths.DatasetEdit,
