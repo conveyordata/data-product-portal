@@ -169,7 +169,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
             {
                 title: t('Register an Input Port'),
                 description: t(
-                    'This tab lists the input ports for your data product. If you have not yet requested them at creation time you can request read access to additional input ports here.',
+                    'This tab lists the input ports for your data product. You can request access to additional input ports here.',
                 ),
                 target: () => inputPortRef.current,
             },
