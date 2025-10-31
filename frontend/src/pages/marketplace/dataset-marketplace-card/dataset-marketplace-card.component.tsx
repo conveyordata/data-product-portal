@@ -6,13 +6,10 @@ import {
     ShareAltOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Descriptions, type DescriptionsProps, List, Space, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Descriptions, type DescriptionsProps, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
-import { DatasetCard } from '@/components/datasets/dataset-card/dataset-card.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
-import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
-import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
 import { createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 import { DatasetCardTooltip } from './dataset-card-tooltip.component';
