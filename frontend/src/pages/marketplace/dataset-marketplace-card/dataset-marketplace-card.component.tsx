@@ -9,25 +9,24 @@ import {
 import { Button, Card, Descriptions, type DescriptionsProps, List, Space, Tag, Tooltip, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
+import { DatasetCard } from '@/components/datasets/dataset-card/dataset-card.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import { useGetDatasetByIdQuery } from '@/store/features/datasets/datasets-api-slice.ts';
-import type { DatasetContract } from '@/types/dataset';
+import type { DatasetsGetContract } from '@/types/dataset';
 import { createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
+import { DatasetCardTooltip } from './dataset-card-tooltip.component';
 import styles from './dataset-marketplace-card.module.scss';
 
 type Props = {
-    datasetId: string;
+    dataset: DatasetsGetContract[0];
 };
 
-export function DatasetMarketplaceCard({ datasetId }: Props) {
+export function DatasetMarketplaceCard({ dataset }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { data: dataset, isLoading } = useGetDatasetByIdQuery(datasetId, { skip: !datasetId });
-    const { data: data_product } = useGetDataProductByIdQuery(dataset?.data_product_id || '', {
-        skip: !dataset?.data_product_id,
-    });
-    function createCardDetails(dataset: DatasetContract) {
+
+    function createCardDetails(dataset: DatasetsGetContract[0]) {
         const items: DescriptionsProps['items'] = [
             {
                 key: 'domain',
@@ -84,7 +83,7 @@ export function DatasetMarketplaceCard({ datasetId }: Props) {
                         ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}
                     >
                         <Link to={createDataProductIdPath(dataset.data_product_id)} className={styles.link}>
-                            {data_product?.name}
+                            {dataset.data_product_name}
                         </Link>
                     </Typography.Paragraph>
                 ),
@@ -97,34 +96,12 @@ export function DatasetMarketplaceCard({ datasetId }: Props) {
                         {t('Usage')}
                     </Space>
                 ),
-                children: (
-                    <Tooltip
-                        placement="bottom"
-                        color="white"
-                        title={
-                            <List
-                                dataSource={dataset.data_product_links}
-                                renderItem={(dataProduct) => (
-                                    <List.Item style={{ margin: 0 }}>
-                                        <Link
-                                            to={createDataProductIdPath(dataProduct.data_product_id)}
-                                            className={styles.link}
-                                        >
-                                            {dataProduct.data_product.name}
-                                        </Link>
-                                    </List.Item>
-                                )}
-                            />
-                        }
-                    >
-                        {t('{{count}} data products', { count: dataset.data_product_links.length })}
-                    </Tooltip>
-                ),
+                children: <DatasetCardTooltip dataset_id={dataset.id} />,
             },
         ];
         return items;
     }
-    if (!dataset || isLoading) return <LoadingSpinner />;
+    if (!dataset) return <LoadingSpinner />;
     return (
         <Card
             key={dataset.id}

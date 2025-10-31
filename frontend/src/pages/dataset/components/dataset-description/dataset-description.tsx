@@ -1,7 +1,9 @@
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import type { DataProductContract } from '@/types/data-product';
 import type { DataProductLifeCycleContract } from '@/types/data-product-lifecycle';
+import { createDataProductIdPath } from '@/types/navigation';
 import type { TagModel } from '@/types/tag';
 import styles from './dataset-description.module.scss';
 
@@ -39,7 +41,9 @@ export function DatasetDescription({
                 </Flex>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Data Product')}</Typography.Text>
-                    <Typography.Text>{data_product.name}</Typography.Text>
+                    <Link to={createDataProductIdPath(data_product.id)}>
+                        <Typography.Text>{data_product.name}</Typography.Text>
+                    </Link>
                 </Flex>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Domain')}</Typography.Text>

@@ -72,7 +72,7 @@ export function Marketplace() {
             </Flex>
             <Flex wrap="wrap" className={styles.marketplacePageContainer}>
                 {paginatedOutputPorts.map((dataset) => (
-                    <DatasetMarketplaceCard key={dataset.id} datasetId={dataset.id} />
+                    <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />
                 ))}
             </Flex>
             {filteredOutputPorts.length > pageSize && (
