@@ -160,6 +160,12 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const steps: TourProps['steps'] = useMemo(() => {
         return [
             {
+                title: t('Your first data product!'),
+                description: t(
+                    'Congratulations on creating your first data product! This tour will introduce you to the key features that will help you manage and improve your data product effectively.',
+                ),
+            },
+            {
                 title: t('Provide About'),
                 description: t(
                     'The About page of your data product functions as a wiki page. Any relevant information about the data product can be documented here for easy reference by team members and stakeholders.',
@@ -249,13 +255,13 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                 open={open}
                 onChange={(current) =>
                     setActiveTab(
-                        current === 0 || current === 4
+                        current === 0 || current === 1 || current === 5
                             ? TabKeys.About
-                            : current === 1
+                            : current === 2
                               ? TabKeys.Datasets
-                              : current === 2
+                              : current === 3
                                 ? TabKeys.DataOutputs
-                                : current === 3
+                                : current === 4
                                   ? TabKeys.Team
                                   : TabKeys.Settings,
                     )
