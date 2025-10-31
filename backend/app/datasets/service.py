@@ -3,7 +3,7 @@ from typing import Iterable, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, desc, func, select, text
+from sqlalchemy import asc, desc, func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 
 from app.core.authz import Authorization
@@ -35,6 +35,10 @@ from app.datasets.schema_request import (
     DatasetUsageUpdate,
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
+from app.datasets.search_dataset import (
+    recalculate_search_vector_datasets_statement,
+    recalculate_search_vector_statement,
+)
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -105,7 +109,9 @@ class DatasetService:
 
         return dataset
 
-    def search_datasets(self, query: str, user: UserModel) -> Sequence[DatasetsSearch]:
+    def search_datasets(
+        self, query: str, limit: int, user: UserModel
+    ) -> Sequence[DatasetsSearch]:
         load_options = get_dataset_load_options()
         stmt = (
             select(
@@ -113,6 +119,7 @@ class DatasetService:
                 func.ts_rank_cd(
                     DatasetModel.search_vector,
                     func.websearch_to_tsquery("english", query),
+                    32,  # 32 normalizes all results between 0-1
                 ).label("rank"),
             )
             .options(*load_options)
@@ -124,8 +131,10 @@ class DatasetService:
             .order_by(desc("rank"))
         )
         results = self.db.execute(stmt).unique().all()
-        filtered_datasets = []
+        filtered_datasets: list[DatasetsSearch] = []
         for row in results:
+            if len(filtered_datasets) >= limit:
+                return filtered_datasets
             dataset = row[0]
             rank = row[1]
             if self.is_visible_to_user(dataset, user):
@@ -134,89 +143,13 @@ class DatasetService:
         return filtered_datasets
 
     def recalculate_search_vector_for(self, dataset_id: UUID) -> int:
-        sql = text(
-            """
-WITH data_outputs_vectors AS (
-    SELECT dod.dataset_id,
-        (
-            setweight(
-                    to_tsvector(
-                            'english',
-                            string_agg(
-                                    coalesce(data_outputs.name, '') ||
-                                    ' ' ||
-                                    coalesce(data_outputs.description, ''),
-                                    ' ')
-                    ),
-                    'B'
-            )
-        ) AS search_vector
-    FROM data_outputs
-             JOIN data_outputs_datasets dod on dod.data_output_id = data_outputs.id
-    WHERE dod.dataset_id = :dataset_id
-    GROUP BY dod.dataset_id),
-dataset_search_vectors AS (
-    SELECT datasets.id,
-        (
-            setweight(
-                    to_tsvector('english', coalesce(datasets.name, '')),
-                    'A') ||
-            setweight(
-                    to_tsvector('english', coalesce(datasets.description, '')),
-                    'A') ||
-            coalesce(dov.search_vector, to_tsvector('english', ''))
-        ) AS new_search_vector
-    FROM datasets
-    LEFT JOIN data_outputs_vectors dov ON dov.dataset_id = datasets.id
-    WHERE datasets.id = :dataset_id)
-UPDATE datasets ds
-SET search_vector = csv.new_search_vector FROM dataset_search_vectors csv
-WHERE ds.id = csv.id;
-"""
-        )
+        sql = recalculate_search_vector_statement(dataset_id)
         result = self.db.execute(sql, {"dataset_id": dataset_id})
         self.db.commit()
         return result.rowcount
 
     def recalculate_search_vector_datasets(self) -> int:
-        sql = text(
-            """
-WITH data_outputs_vectors AS (
-    SELECT dod.dataset_id,
-        (
-           setweight(
-                   to_tsvector(
-                           'english',
-                           string_agg(
-                                   coalesce(data_outputs.name, '') ||
-                                   ' ' ||
-                                   coalesce(data_outputs.description, ''),
-                                   ' ')
-                   ),
-                   'B'
-           )
-        ) AS search_vector
-    FROM data_outputs
-    JOIN data_outputs_datasets dod on dod.data_output_id = data_outputs.id
-    GROUP BY dod.dataset_id),
-dataset_search_vectors AS (
-    SELECT datasets.id,
-        (
-            setweight(
-                    to_tsvector('english', coalesce(datasets.name, '')),
-                    'A') ||
-            setweight(
-                    to_tsvector('english', coalesce(datasets.description, '')),
-                    'B') ||
-            coalesce(dov.search_vector, to_tsvector('english', ''))
-        ) AS new_search_vector
-    FROM datasets
-    LEFT JOIN data_outputs_vectors dov ON dov.dataset_id = datasets.id)
-UPDATE datasets ds
-SET search_vector = csv.new_search_vector FROM dataset_search_vectors csv
-WHERE ds.id = csv.id;
-"""
-        )
+        sql = recalculate_search_vector_datasets_statement()
         result = self.db.execute(sql)
         self.db.commit()
         return result.rowcount

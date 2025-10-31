@@ -55,10 +55,11 @@ def get_datasets(
 @router.get("/search")
 def search_datasets(
     query: str = Query(min_length=3),
+    limit: int = Query(default=100, ge=1, le=100),
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> Sequence[DatasetsSearch]:
-    return DatasetService(db).search_datasets(query=query, user=user)
+    return DatasetService(db).search_datasets(query=query, limit=limit, user=user)
 
 
 @router.get("/namespace_suggestion")
