@@ -7,6 +7,7 @@ from sqlalchemy import asc, desc, func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 
 from app.core.authz import Authorization
+from app.core.logging import logger
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
     NamespaceSuggestion,
@@ -36,8 +37,8 @@ from app.datasets.schema_request import (
 )
 from app.datasets.schema_response import DatasetGet, DatasetsGet, DatasetsSearch
 from app.datasets.search_dataset import (
+    recalculate_search_vector_dataset_statement,
     recalculate_search_vector_datasets_statement,
-    recalculate_search_vector_statement,
 )
 from app.graph.edge import Edge
 from app.graph.graph import Graph
@@ -46,6 +47,7 @@ from app.role_assignments.dataset.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
 from app.role_assignments.enums import DecisionStatus
+from app.settings import settings
 from app.tags.model import Tag as TagModel
 from app.tags.model import ensure_tag_exists
 from app.users.model import User as UserModel
@@ -143,12 +145,18 @@ class DatasetService:
         return filtered_datasets
 
     def recalculate_search_vector_for(self, dataset_id: UUID) -> int:
-        sql = recalculate_search_vector_statement(dataset_id)
+        if settings.SEARCH_INDEXING_DISABLED:
+            logger.debug("Search indexing is disabled, skipping recalculation")
+            return 0
+        sql = recalculate_search_vector_dataset_statement(dataset_id)
         result = self.db.execute(sql, {"dataset_id": dataset_id})
         self.db.commit()
         return result.rowcount
 
     def recalculate_search_vector_datasets(self) -> int:
+        if settings.SEARCH_INDEXING_DISABLED:
+            logger.debug("Search indexing is disabled, skipping recalculation")
+            return 0
         sql = recalculate_search_vector_datasets_statement()
         result = self.db.execute(sql)
         self.db.commit()

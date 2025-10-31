@@ -2,8 +2,14 @@ from uuid import UUID
 
 from sqlalchemy import TextClause, text
 
+from app.core.logging import logger
+
 
 def recalculate_search_vector_statement(dataset_id: UUID | None = None) -> TextClause:
+    logger.debug(
+        "Recalculating search vector for"
+        + f"{str(dataset_id) if dataset_id else 'all datasets'}"
+    )
     return text(
         """
 WITH data_outputs_vectors AS (
