@@ -16,6 +16,7 @@ import type {
     NamespaceSuggestionResponse,
     NamespaceValidationResponse,
 } from '@/types/namespace/namespace';
+import {DatasetsSearchContract} from "@/types/dataset/datasets-search.contract.ts";
 
 export const datasetTags: string[] = [TagTypes.Dataset, TagTypes.UserDatasets, TagTypes.DataProduct, TagTypes.History];
 
@@ -32,6 +33,20 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                           { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
                           ...result.map(({ id }) => ({ type: TagTypes.Dataset as const, id })),
                       ]
+                    : [{ type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST }],
+        }),
+        searchDatasets: builder.query<DatasetsSearchContract, void>({
+            query: (query) => ({
+                url: ApiUrl.DatasetSearch,
+                params: query,
+                method: 'GET',
+            }),
+            providesTags: (result = []) =>
+                result
+                    ? [
+                        { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
+                        ...result.map(({ id }) => ({ type: TagTypes.Dataset as const, id })),
+                    ]
                     : [{ type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST }],
         }),
         getUserDatasets: builder.query<DatasetsGetContract, string>({
@@ -157,6 +172,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
 });
 
 export const {
+    useSearchDatasetsQuery,
     useGetAllDatasetsQuery,
     useGetDatasetByIdQuery,
     useCreateDatasetMutation,
