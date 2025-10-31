@@ -21,13 +21,13 @@ import {
 } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
-import { createDatasetIdPath } from '@/types/navigation.ts';
+import { createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 import styles from './marketplace.module.scss';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
@@ -134,7 +134,9 @@ export function Marketplace() {
                         style={{ height: '44px' }} // To keep 2 rows for the data product height
                         ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}
                     >
-                        {dataset.data_product_name}
+                        <Link to={createDataProductIdPath(dataset.data_product_id)} className={styles.link}>
+                            {dataset.data_product_name}
+                        </Link>
                     </Typography.Paragraph>
                 ),
             },
