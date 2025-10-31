@@ -1779,6 +1779,7 @@
         ],
         "summary": "Link Dataset To Data Product",
         "operationId": "link_dataset_to_data_product_api_data_products__id__dataset__dataset_id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -1903,6 +1904,89 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Dataset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Dataset not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data_products/{id}/link_datasets": {
+      "post": {
+        "tags": [
+          "data_products"
+        ],
+        "summary": "Link Datasets To Data Product",
+        "operationId": "link_datasets_to_data_product_api_data_products__id__link_datasets_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkDatasetsToDataProduct"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkDatasetsToDataProductPost"
+                }
               }
             }
           },
@@ -12092,6 +12176,40 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "LinkDatasetsToDataProduct": {
+        "properties": {
+          "dataset_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Dataset Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset_ids"
+        ],
+        "title": "LinkDatasetsToDataProduct"
+      },
+      "LinkDatasetsToDataProductPost": {
+        "properties": {
+          "dataset_links": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Dataset Links"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset_links"
+        ],
+        "title": "LinkDatasetsToDataProductPost"
       },
       "NamespaceLengthLimits": {
         "properties": {

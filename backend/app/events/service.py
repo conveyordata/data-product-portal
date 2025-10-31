@@ -117,10 +117,16 @@ class EventService:
         self.db = db
 
     def create_event(self, event: CreateEvent) -> UUID:
-        event = EventModel(**event.parse_pydantic_schema())
-        self.db.add(event)
+        return self.create_events([event])[0]
+
+    def create_events(self, events: list[CreateEvent]) -> list[UUID]:
+        created_events = []
+        for event in events:
+            event = EventModel(**event.parse_pydantic_schema())
+            self.db.add(event)
+            created_events.append(event)
         self.db.flush()
-        return event.id
+        return [event.id for event in created_events]
 
     def get_history(self, id: UUID, type: EventReferenceEntity) -> Sequence[EventModel]:
         return self.db.scalars(

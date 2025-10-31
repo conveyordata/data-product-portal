@@ -56,3 +56,7 @@ class DataProductsGet(BaseDataProductGet):
     user_count: int
     dataset_count: int
     data_outputs_count: int
+
+
+class LinkDatasetsToDataProductPost(ORMModel):
+    dataset_links: list[UUID]

@@ -1,6 +1,6 @@
 services:
   postgresql:
-    image: bitnami/postgresql:16.6.0
+    image: postgres:17.6
     container_name: data-product-portal-postgresql-test
     ports:
       - "5433:5432"

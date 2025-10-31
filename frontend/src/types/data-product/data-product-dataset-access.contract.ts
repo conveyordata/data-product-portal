@@ -1,6 +1,6 @@
-export interface DataProductDatasetAccessRequest {
+export interface DataProductDatasetsAccessRequest {
     dataProductId: string;
-    datasetId: string;
+    datasetIds: string[];
 }
 
-export type DataProductDatasetAccessResponse = object;
+export type DataProductDatasetsAccessResponse = object;

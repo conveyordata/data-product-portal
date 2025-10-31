@@ -132,7 +132,11 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                     type: 'success',
                 });
                 // TODO make this dependable on access rights
-                await approveLink({ id: result.id, data_output_id: dragData.id, dataset_id: dataset.id }).unwrap();
+                await approveLink({
+                    id: result.id,
+                    data_output_id: dragData.id,
+                    dataset_id: dataset.id,
+                });
             }
         } catch (_error) {
             dispatchMessage({

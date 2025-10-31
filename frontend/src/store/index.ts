@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import authSlice from '@/store/features/auth/auth-slice.ts';
+import cartSlice from '@/store/features/cart/cart-slice.ts';
 import feedbackSlice from '@/store/features/feedback/feedback-slice.ts';
 import { isDevMode } from '@/utils/env-mode.helper.ts';
 
@@ -11,6 +12,7 @@ const store = configureStore({
     reducer: {
         feedback: feedbackSlice,
         auth: authSlice,
+        cart: cartSlice,
         [baseApiSlice.reducerPath]: baseApiSlice.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApiSlice.middleware),
