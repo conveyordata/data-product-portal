@@ -25,4 +25,8 @@ export enum PosthogEvents {
     DATA_PRODUCTS_PLATFORM_ACCESS = 'data_products_platform_access',
     CREATE_DATA_PRODUCT_STARTED = 'create_data_product_started',
     CREATE_DATA_PRODUCT_COMPLETED = 'create_data_product_completed',
+
+    DATA_PRODUCT_TOUR_STARTED = 'data_product_tour_started',
+    DATA_PRODUCT_TOUR_FINISHED = 'data_product_tour_finished',
+    DATA_PRODUCT_TOUR_CLOSED = 'data_product_tour_closed',
 }
