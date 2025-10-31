@@ -1,11 +1,11 @@
 import { Flex, Form, Input, Pagination, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DatasetMarketplaceCard } from '@/components/datasets/dataset-marketplace-card/dataset-marketplace-card.component';
 import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
+import { DatasetMarketplaceCard } from './dataset-marketplace-card/dataset-marketplace-card.component';
 import styles from './marketplace.module.scss';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {

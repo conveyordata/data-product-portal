@@ -1,0 +1,6 @@
+@use '@/styles/globals';
+
+.marketplace-card-container {
+    margin: globals.$spacing-m;
+    width: 360px;
+}
