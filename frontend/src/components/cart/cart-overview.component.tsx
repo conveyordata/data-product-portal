@@ -29,7 +29,7 @@ function CartOverviewItem({ dataset, overlapping, selectedDataProductId }: CartO
             return t('The selected data product already has access, or an access request open for this output port');
         }
         return null;
-    }, [selectedDataProductId, dataset.data_product_id, overlapping]);
+    }, [selectedDataProductId, dataset.data_product_id, overlapping, t]);
 
     const renderOwners = () => {
         if (!dataProductOwners || dataProductOwners.length === 0) return null;

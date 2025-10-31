@@ -89,7 +89,7 @@ export function Cart() {
 
             navigate(createDataProductIdPath(selectedDataProductId, DataProductTabKeys.Datasets));
         }
-    }, [requestingAccessSuccess, selectedDataProductId]);
+    }, [requestingAccessSuccess, selectedDataProductId, t, navigate, dispatch]);
 
     const submitFormIssues = useMemo(() => {
         const submitFormIssues = [];
@@ -117,7 +117,7 @@ export function Cart() {
         }
 
         return submitFormIssues;
-    }, [overlappingDatasetIds, selectedProductDatasetsInCart]);
+    }, [overlappingDatasetIds, selectedProductDatasetsInCart, t]);
     return (
         <Row gutter={16}>
             <Col span={10}>

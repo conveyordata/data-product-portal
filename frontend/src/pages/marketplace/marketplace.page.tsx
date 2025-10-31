@@ -1,13 +1,12 @@
 import { Flex, Form, Input, Pagination, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDebounce } from 'use-debounce';
 import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
-import {useGetAllDatasetsQuery, useSearchDatasetsQuery} from '@/store/features/datasets/datasets-api-slice.ts';
-import type { DatasetsGetContract } from '@/types/dataset';
+import { useGetAllDatasetsQuery, useSearchDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { DatasetMarketplaceCard } from './dataset-marketplace-card/dataset-marketplace-card.component';
 import styles from './marketplace.module.scss';
-import {useDebounce} from "use-debounce";
 
 export function Marketplace() {
     const { t } = useTranslation();
@@ -22,22 +21,16 @@ export function Marketplace() {
         {
             query: debouncedSearchTerm,
         },
-        { skip: !shouldExecuteSearch() },
+        { skip: debouncedSearchTerm?.length < 3 },
     );
 
-    function shouldExecuteSearch() {
-        return debouncedSearchTerm?.length > 3;
-    }
-
-    const finalDatasetResults = shouldExecuteSearch()
-        ? datasetSearchResult
-        : datasets;
+    const finalDatasetResults = debouncedSearchTerm?.length >= 3 ? datasetSearchResult : datasets;
 
     const paginatedOutputPorts = useMemo(() => {
         const startIndex = (currentPage - 1) * pageSize;
         const endIndex = startIndex + pageSize;
         return finalDatasetResults.slice(startIndex, endIndex);
-    }, [finalDatasetResults, datasets, currentPage]);
+    }, [finalDatasetResults, currentPage]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -49,7 +42,7 @@ export function Marketplace() {
     };
 
     useEffect(() => {
-        if (!shouldExecuteSearch()) return;
+        if (debouncedSearchTerm?.length < 3) return;
 
         posthog.capture(PosthogEvents.MARKETPLACE_SEARCHED_DATASET, {
             search_term: debouncedSearchTerm,

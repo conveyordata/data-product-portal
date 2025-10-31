@@ -9,6 +9,7 @@ import type {
     DatasetUpdateResponse,
 } from '@/types/dataset';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
+import type { DatasetsSearchContract } from '@/types/dataset/datasets-search.contract.ts';
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import type {
@@ -16,7 +17,6 @@ import type {
     NamespaceSuggestionResponse,
     NamespaceValidationResponse,
 } from '@/types/namespace/namespace';
-import {DatasetsSearchContract} from "@/types/dataset/datasets-search.contract.ts";
 
 export const datasetTags: string[] = [TagTypes.Dataset, TagTypes.UserDatasets, TagTypes.DataProduct, TagTypes.History];
 
@@ -44,9 +44,9 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
             providesTags: (result = []) =>
                 result
                     ? [
-                        { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
-                        ...result.map(({ id }) => ({ type: TagTypes.Dataset as const, id })),
-                    ]
+                          { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
+                          ...result.map(({ id }) => ({ type: TagTypes.Dataset as const, id })),
+                      ]
                     : [{ type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST }],
         }),
         getUserDatasets: builder.query<DatasetsGetContract, string>({
