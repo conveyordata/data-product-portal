@@ -93,7 +93,9 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Usage')}
                     </Space>
                 ),
-                children: <DatasetCardTooltip dataset_id={dataset.id} />,
+                children: (
+                    <DatasetCardTooltip dataset_id={dataset.id} number_of_data_products={dataset.data_product_count} />
+                ),
             },
         ];
         return items;
