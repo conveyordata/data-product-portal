@@ -245,7 +245,6 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             requiredMark={'optional'}
             labelWrap
             disabled={isLoading}
-            className={styles.form}
         >
             <Form.Item<DataOutputCreateFormSchema>
                 name={'name'}
