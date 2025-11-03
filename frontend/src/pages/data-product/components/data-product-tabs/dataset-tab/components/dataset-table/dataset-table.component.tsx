@@ -1,4 +1,4 @@
-import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
+import { Table, type TableColumnsType, type TableProps } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -35,29 +35,27 @@ export function DatasetTable({ dataProductId, datasets }: Props) {
     if (!dataProduct) return null;
 
     return (
-        <Flex className={styles.datasetListContainer}>
-            <Table<DatasetLink>
-                loading={isLoadingDataProduct}
-                className={styles.datasetListTable}
-                columns={columns}
-                dataSource={datasets}
-                rowKey={({ id }) => id}
-                onChange={onChange}
-                pagination={{
-                    ...pagination,
-                    position: ['topRight'],
-                    size: 'small',
-                    showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} output ports', {
-                            range0: range[0],
-                            range1: range[1],
-                            total: total,
-                        }),
-                    className: styles.pagination,
-                }}
-                rowClassName={styles.tableRow}
-                size={'small'}
-            />
-        </Flex>
+        <Table<DatasetLink>
+            loading={isLoadingDataProduct}
+            className={styles.datasetListTable}
+            columns={columns}
+            dataSource={datasets}
+            rowKey={({ id }) => id}
+            onChange={onChange}
+            pagination={{
+                ...pagination,
+                position: ['topRight'],
+                size: 'small',
+                showTotal: (total, range) =>
+                    t('Showing {{range0}}-{{range1}} of {{total}} output ports', {
+                        range0: range[0],
+                        range1: range[1],
+                        total: total,
+                    }),
+                className: styles.pagination,
+            }}
+            rowClassName={styles.tableRow}
+            size={'small'}
+        />
     );
 }

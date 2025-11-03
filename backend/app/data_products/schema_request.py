@@ -36,3 +36,4 @@ class DataProductUsageUpdate(ORMModel):
 
 class LinkDatasetsToDataProduct(ORMModel):
     dataset_ids: list[UUID]
+    justification: str

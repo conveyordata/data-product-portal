@@ -276,6 +276,7 @@ class DataProductService:
         self,
         id: UUID,
         dataset_id: UUID,
+        justification: str,
         *,
         actor: User,
     ) -> DataProductDatasetModel:
@@ -329,6 +330,7 @@ class DataProductService:
         dataset_link = DataProductDatasetModel(
             dataset_id=dataset_id,
             status=approval_status,
+            justification=justification,
             requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
         )
@@ -339,13 +341,16 @@ class DataProductService:
         self,
         id: UUID,
         dataset_ids: list[UUID],
+        justification: str,
         *,
         actor: User,
     ) -> list[DataProductDatasetModel]:
         dataset_links = []
         for dataset_id in dataset_ids:
             dataset_links.append(
-                self.link_dataset_to_data_product(id, dataset_id, actor=actor)
+                self.link_dataset_to_data_product(
+                    id, dataset_id, justification, actor=actor
+                )
             )
         self.db.commit()
         return dataset_links

@@ -6,6 +6,7 @@ import type { DecisionStatus } from '../roles';
 
 export type DataProductDatasetContract = {
     id: string;
+    justification: string;
     data_product_id: string;
     dataset_id: string;
     dataset: DatasetContract;

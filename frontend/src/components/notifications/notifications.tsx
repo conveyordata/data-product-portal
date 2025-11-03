@@ -160,7 +160,7 @@ export function Notifications() {
                     }
                     classNames={{ body: styles.notificationBody }}
                     trigger="hover"
-                    placement="bottomRight"
+                    placement="bottom"
                 >
                     <Button shape={'circle'} className={styles.iconButton} icon={<BellOutlined />} />
                 </Popover>

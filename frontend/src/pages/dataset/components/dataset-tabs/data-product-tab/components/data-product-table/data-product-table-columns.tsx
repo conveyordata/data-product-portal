@@ -1,6 +1,6 @@
 import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
-
+import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
@@ -11,8 +11,6 @@ import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
-
-import styles from './data-product-table.module.scss';
 
 type Props = {
     t: TFunction;
@@ -62,21 +60,27 @@ export const getDatasetDataProductsColumns = ({
                             <Badge
                                 status={getDecisionStatusBadgeStatus(status)}
                                 text={getDecisionStatusLabel(t, status)}
-                                className={styles.noSelect}
                             />
                         }
                     />
                 );
             },
-            width: '100%',
+            width: '25%',
             ...new FilterSettings(dataProductLinks, (dpl) => getDecisionStatusLabel(t, dpl.status)),
             sorter: sorter.stringSorter((dpl) => dpl.data_product.name),
             defaultSortOrder: 'ascend',
         },
         {
+            title: t('Business justification'),
+            dataIndex: 'justification',
+            render: (_, { justification }) => <Justification justification={justification} />,
+        },
+        {
             title: t('Actions'),
             key: 'action',
             hidden: !canApprove && !canRevoke,
+            fixed: 'right',
+            width: 1,
             render: (_, { id, data_product, status, dataset_id, data_product_id }) => {
                 if (status === DecisionStatus.Pending) {
                     return (

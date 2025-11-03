@@ -13,6 +13,7 @@ class DataProductDatasetAssociationFactory(factory.alchemy.SQLAlchemyModelFactor
         model = DataProductDatasetAssociation
 
     id = factory.Faker("uuid4")
+    justification = factory.Faker("text", max_nb_chars=20)
     status = DecisionStatus.APPROVED
     data_product = factory.SubFactory(DataProductFactory)
     dataset = factory.SubFactory(DatasetFactory)

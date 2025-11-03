@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next';
 import { type ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-
+import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import posthog from '@/config/posthog-config';
@@ -55,13 +55,16 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                 </Typography.Text>
             );
             message = (
-                <Typography.Text>
-                    {t('Accepting will grant the data product read access on the')}{' '}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        {action.dataset.name}
-                    </Link>{' '}
-                    {t('output port.')}
-                </Typography.Text>
+                <Flex vertical>
+                    <Justification justification={action.justification} />
+                    <Typography.Text>
+                        {t('Accepting will grant the data product read access on the')}{' '}
+                        <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
+                            {action.dataset.name}
+                        </Link>{' '}
+                        {t('output port.')}
+                    </Typography.Text>
+                </Flex>
             );
             tag = (
                 <Typography.Text
@@ -367,18 +370,16 @@ export function PendingRequestsInbox() {
                 </Col>
             </Flex>
 
-            <Flex vertical>
-                <PendingRequestsList
-                    pendingActionItems={slicedPendingActionItems}
-                    pagination={pagination}
-                    onAccept={(item) => {
-                        handleAccept(item);
-                    }}
-                    onReject={(item) => {
-                        handleDeny(item);
-                    }}
-                />
-            </Flex>
+            <PendingRequestsList
+                pendingActionItems={slicedPendingActionItems}
+                pagination={pagination}
+                onAccept={(item) => {
+                    handleAccept(item);
+                }}
+                onReject={(item) => {
+                    handleDeny(item);
+                }}
+            />
         </div>
     );
 }

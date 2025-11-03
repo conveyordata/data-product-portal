@@ -1,5 +1,6 @@
 import { BellOutlined, CheckCircleOutlined, MessageOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Divider, Flex, Form, type FormProps, Row, Select, Typography, theme } from 'antd';
+import TextArea from 'antd/es/input/TextArea';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -53,10 +54,17 @@ export function Cart() {
 
     type CartFormData = {
         dataProductId?: string;
-        // justification?: string;
+        justification?: string;
     };
     const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
-        requestDatasetAccessForDataProduct({ datasetIds: cartDatasetIds, dataProductId: values.dataProductId! });
+        if (!values.justification || !values.dataProductId) {
+            return;
+        }
+        requestDatasetAccessForDataProduct({
+            datasetIds: cartDatasetIds,
+            dataProductId: values.dataProductId!,
+            justification: values.justification!,
+        });
     };
     const onValuesChange: FormProps<CartFormData>['onValuesChange'] = (_, values: CartFormData) => {
         localStorage.setItem(cartFormDataStorageKey, JSON.stringify(values));
@@ -102,7 +110,7 @@ export function Cart() {
 
             navigate(createDataProductIdPath(selectedDataProductId!, DataProductTabKeys.Datasets));
         }
-    }, [requestingAccessSuccess, selectedDataProductId]);
+    }, [requestingAccessSuccess, selectedDataProductId, dispatch, navigate, t]);
 
     const submitFormIssues = useMemo(() => {
         const submitFormIssues = [];
@@ -130,7 +138,7 @@ export function Cart() {
         }
 
         return submitFormIssues;
-    }, [overlappingDatasetIds, selectedProductDatasetsInCart]);
+    }, [overlappingDatasetIds, selectedProductDatasetsInCart, t]);
     return (
         <Row gutter={16}>
             <Col span={10}>
@@ -186,18 +194,18 @@ export function Cart() {
                                 style={{ marginBottom: 16 }}
                             />
                         )}
-                        {/*<Form.Item<FieldType>*/}
-                        {/*    name="justification"*/}
-                        {/*    label={'Business justification'}*/}
-                        {/*    rules={[*/}
-                        {/*        {*/}
-                        {/*            required: true,*/}
-                        {/*            message: t('Please explain why you need access to these output ports'),*/}
-                        {/*        },*/}
-                        {/*    ]}*/}
-                        {/*>*/}
-                        {/*    <TextArea rows={4} placeholder="Explain why you need access to these output ports" />*/}
-                        {/*</Form.Item>*/}
+                        <Form.Item<FieldType>
+                            name="justification"
+                            label={'Business justification'}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: t('Please explain why you need access to these output ports'),
+                                },
+                            ]}
+                        >
+                            <TextArea rows={4} placeholder="Explain why you need access to these output ports" />
+                        </Form.Item>
                         <Form.Item label={null}>
                             <Flex gap={'small'}>
                                 <Link to={ApplicationPaths.Datasets} style={{ width: '100%' }}>

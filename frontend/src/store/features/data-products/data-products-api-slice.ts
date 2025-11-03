@@ -170,11 +170,12 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
             DataProductDatasetsAccessResponse,
             DataProductDatasetsAccessRequest
         >({
-            query: ({ dataProductId, datasetIds }) => ({
+            query: ({ dataProductId, datasetIds, justification }) => ({
                 url: buildUrl(ApiUrl.DataProductLinkDatasets, { dataProductId }),
                 method: 'POST',
                 data: {
                     dataset_ids: datasetIds,
+                    justification,
                 },
             }),
             invalidatesTags: (_, _error, arg) => [
