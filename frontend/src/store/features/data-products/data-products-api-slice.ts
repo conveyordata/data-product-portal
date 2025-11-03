@@ -6,10 +6,10 @@ import type {
     DataProductContract,
     DataProductCreate,
     DataProductCreateResponse,
-    DataProductDatasetAccessRequest,
-    DataProductDatasetAccessResponse,
     DataProductDatasetRemoveRequest,
     DataProductDatasetRemoveResponse,
+    DataProductDatasetsAccessRequest,
+    DataProductDatasetsAccessResponse,
     DataProductGetConveyorUrlRequest,
     DataProductGetConveyorUrlResponse,
     DataProductGetDatabricksWorkspaceUrlRequest,
@@ -166,20 +166,23 @@ export const dataProductsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes:
                 params: { environment },
             }),
         }),
-        requestDatasetAccessForDataProduct: builder.mutation<
-            DataProductDatasetAccessResponse,
-            DataProductDatasetAccessRequest
+        requestDatasetsAccessForDataProduct: builder.mutation<
+            DataProductDatasetsAccessResponse,
+            DataProductDatasetsAccessRequest
         >({
-            query: ({ dataProductId, datasetId }) => ({
-                url: buildUrl(ApiUrl.DataProductDataset, { dataProductId, datasetId }),
+            query: ({ dataProductId, datasetIds }) => ({
+                url: buildUrl(ApiUrl.DataProductLinkDatasets, { dataProductId }),
                 method: 'POST',
+                data: {
+                    dataset_ids: datasetIds,
+                },
             }),
             invalidatesTags: (_, _error, arg) => [
                 { type: TagTypes.DataProduct as const, id: arg.dataProductId },
                 { type: TagTypes.UserDataProducts as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.Dataset as const, id: arg.datasetId },
+                ...arg.datasetIds.map((id) => ({ type: TagTypes.Dataset as const, id })),
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
-                { type: TagTypes.History as const, id: arg.datasetId },
+                ...arg.datasetIds.map((id) => ({ type: TagTypes.History as const, id })),
                 { type: TagTypes.History as const, id: arg.dataProductId },
             ],
         }),
@@ -273,7 +276,7 @@ export const {
     useGetDataProductConveyorIDEUrlMutation,
     useRemoveDataProductMutation,
     useRemoveDatasetFromDataProductMutation,
-    useRequestDatasetAccessForDataProductMutation,
+    useRequestDatasetsAccessForDataProductMutation,
     useUpdateDataProductAboutMutation,
     useGetUserDataProductsQuery,
     useGetDataProductDataOutputsQuery,

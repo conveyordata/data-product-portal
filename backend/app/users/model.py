@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Column, String
+from sqlalchemy import UUID, Boolean, Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
@@ -31,6 +31,8 @@ class User(Base, BaseORM):
     events: Mapped[list["Event"]] = relationship(
         "Event", back_populates="actor", foreign_keys="Event.actor_id", lazy="raise"
     )
+
+    has_seen_tour = Column(Boolean, default=False, nullable=False)
 
     notifications: Mapped[list["Notification"]] = relationship(
         "Notification",

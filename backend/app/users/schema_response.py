@@ -13,6 +13,7 @@ class BaseUserGet(ORMModel):
     external_id: str
     first_name: str
     last_name: str
+    has_seen_tour: bool
 
 
 class UserGet(BaseUserGet):

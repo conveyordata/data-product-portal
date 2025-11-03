@@ -1779,6 +1779,7 @@
         ],
         "summary": "Link Dataset To Data Product",
         "operationId": "link_dataset_to_data_product_api_data_products__id__dataset__dataset_id__post",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id",
@@ -1903,6 +1904,89 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Dataset not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Dataset not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data_products/{id}/link_datasets": {
+      "post": {
+        "tags": [
+          "data_products"
+        ],
+        "summary": "Link Datasets To Data Product",
+        "operationId": "link_datasets_to_data_product_api_data_products__id__link_datasets_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkDatasetsToDataProduct"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkDatasetsToDataProductPost"
+                }
               }
             }
           },
@@ -5504,6 +5588,47 @@
                 "example": {
                   "detail": "User email not found"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/seen_tour": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Mark Tour As Seen",
+        "operationId": "mark_tour_as_seen_api_users_seen_tour_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -10863,6 +10988,40 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "LinkDatasetsToDataProduct": {
+        "properties": {
+          "dataset_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Dataset Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset_ids"
+        ],
+        "title": "LinkDatasetsToDataProduct"
+      },
+      "LinkDatasetsToDataProductPost": {
+        "properties": {
+          "dataset_links": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Dataset Links"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset_links"
+        ],
+        "title": "LinkDatasetsToDataProductPost"
+      },
       "NamespaceLengthLimits": {
         "properties": {
           "max_length": {
@@ -11585,6 +11744,10 @@
           "last_name": {
             "type": "string",
             "title": "Last Name"
+          },
+          "has_seen_tour": {
+            "type": "boolean",
+            "title": "Has Seen Tour"
           }
         },
         "type": "object",
@@ -11593,7 +11756,8 @@
           "email",
           "external_id",
           "first_name",
-          "last_name"
+          "last_name",
+          "has_seen_tour"
         ],
         "title": "User"
       },
@@ -11650,6 +11814,10 @@
             "type": "string",
             "title": "Last Name"
           },
+          "has_seen_tour": {
+            "type": "boolean",
+            "title": "Has Seen Tour"
+          },
           "global_role": {
             "anyOf": [
               {
@@ -11668,6 +11836,7 @@
           "external_id",
           "first_name",
           "last_name",
+          "has_seen_tour",
           "global_role"
         ],
         "title": "UsersGet"

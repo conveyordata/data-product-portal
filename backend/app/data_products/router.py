@@ -25,8 +25,13 @@ from app.data_products.schema_request import (
     DataProductStatusUpdate,
     DataProductUpdate,
     DataProductUsageUpdate,
+    LinkDatasetsToDataProduct,
 )
-from app.data_products.schema_response import DataProductGet, DataProductsGet
+from app.data_products.schema_response import (
+    DataProductGet,
+    DataProductsGet,
+    LinkDatasetsToDataProductPost,
+)
 from app.data_products.service import DataProductService
 from app.data_products_datasets.model import DataProductDatasetAssociation
 from app.database.database import get_db_session
@@ -437,6 +442,7 @@ def update_data_product_usage(
             )
         ),
     ],
+    deprecated=True,
 )
 def link_dataset_to_data_product(
     id: UUID,
@@ -445,52 +451,102 @@ def link_dataset_to_data_product(
     authenticated_user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db_session),
 ) -> dict[str, UUID]:
-    dataset_link = DataProductService(db).link_dataset_to_data_product(
-        id, dataset_id, actor=authenticated_user
+    response = link_datasets_to_data_product(
+        id,
+        LinkDatasetsToDataProduct(dataset_ids=[dataset_id]),
+        background_tasks,
+        authenticated_user,
+        db,
     )
+    return {"id": response.dataset_links[0]}
 
-    event_id = EventService(db).create_event(
-        CreateEvent(
-            name=(
-                EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
-                if dataset_link.status == DecisionStatus.PENDING
-                else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
-            ),
-            subject_id=dataset_link.data_product_id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
-            target_id=dataset_link.dataset_id,
-            target_type=EventReferenceEntity.DATASET,
-            actor_id=authenticated_user.id,
+
+@router.post(
+    "/{id}/link_datasets",
+    responses={
+        400: {
+            "description": "Dataset not found",
+            "content": {
+                "application/json": {"example": {"detail": "Dataset not found"}}
+            },
+        },
+        404: {
+            "description": "Data Product not found",
+            "content": {
+                "application/json": {"example": {"detail": "Data Product id not found"}}
+            },
+        },
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                DataProductResolver,
+            )
         ),
+    ],
+)
+def link_datasets_to_data_product(
+    id: UUID,
+    link_datasets: LinkDatasetsToDataProduct,
+    background_tasks: BackgroundTasks,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> LinkDatasetsToDataProductPost:
+    dataset_links = DataProductService(db).link_datasets_to_data_product(
+        id, link_datasets.dataset_ids, actor=authenticated_user
     )
-    if dataset_link.status == DecisionStatus.APPROVED:
-        NotificationService(db).create_data_product_notifications(
-            data_product_id=dataset_link.data_product_id, event_id=event_id
-        )
 
-    _send_dataset_link_emails(dataset_link, background_tasks, authenticated_user, db)
+    event_ids = EventService(db).create_events(
+        [
+            CreateEvent(
+                name=(
+                    EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
+                    if dataset_link.status == DecisionStatus.PENDING
+                    else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
+                ),
+                subject_id=dataset_link.data_product_id,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                target_id=dataset_link.dataset_id,
+                target_type=EventReferenceEntity.DATASET,
+                actor_id=authenticated_user.id,
+            )
+            for dataset_link in dataset_links
+        ]
+    )
+    for dataset_link, event_id in zip(dataset_links, event_ids):
+        if dataset_link.status == DecisionStatus.APPROVED:
+            NotificationService(db).create_data_product_notifications(
+                data_product_id=dataset_link.data_product_id, event_id=event_id
+            )
+
+    _send_dataset_link_emails(dataset_links, background_tasks, authenticated_user, db)
     RefreshInfrastructureLambda().trigger()
-    return {"id": dataset_link.id}
+    return LinkDatasetsToDataProductPost(
+        dataset_links=[dataset_link.id for dataset_link in dataset_links]
+    )
 
 
 def _send_dataset_link_emails(
-    dataset_link: DataProductDatasetAssociation,
+    dataset_links: list[DataProductDatasetAssociation],
     background_tasks: BackgroundTasks,
     actor: User,
     db: Session,
 ) -> None:
-    if dataset_link.dataset.access_type != DatasetAccessType.PUBLIC:
-        approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
-            dataset_link.dataset_id, Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST
-        )
-        background_tasks.add_task(
-            email.send_dataset_link_email(
-                dataset_link.data_product,
-                dataset_link.dataset,
-                requester=deepcopy(actor),
-                approvers=[deepcopy(approver) for approver in approvers],
+    for dataset_link in dataset_links:
+        if dataset_link.dataset.access_type != DatasetAccessType.PUBLIC:
+            approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
+                dataset_link.dataset_id,
+                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
             )
-        )
+            background_tasks.add_task(
+                email.send_dataset_link_email(
+                    dataset_link.data_product,
+                    dataset_link.dataset,
+                    requester=deepcopy(actor),
+                    approvers=[deepcopy(approver) for approver in approvers],
+                )
+            )
 
 
 @router.delete(

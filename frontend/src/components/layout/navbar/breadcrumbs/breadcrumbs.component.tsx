@@ -3,6 +3,7 @@ import {
     HomeOutlined,
     SettingOutlined,
     ShopOutlined,
+    ShoppingCartOutlined,
     TeamOutlined,
     UnorderedListOutlined,
 } from '@ant-design/icons';
@@ -107,6 +108,7 @@ export const Breadcrumbs = () => {
                     });
                     break;
                 case ApplicationPaths.Datasets:
+                case ApplicationPaths.Marketplace:
                     Object.assign(breadcrumbItem, {
                         title: (
                             <Space classNames={{ item: styles.breadcrumbItem }}>
@@ -116,9 +118,14 @@ export const Breadcrumbs = () => {
                         ),
                     });
                     break;
-                case ApplicationPaths.DatasetNew:
+                case ApplicationPaths.MarketplaceCart:
                     Object.assign(breadcrumbItem, {
-                        title: <Space classNames={{ item: styles.breadcrumbItem }}>{t('New Output port')}</Space>,
+                        title: (
+                            <Space classNames={{ item: styles.breadcrumbItem }}>
+                                <ShoppingCartOutlined />
+                                {t('Cart')}
+                            </Space>
+                        ),
                     });
                     break;
                 case ApplicationPaths.AuditLogs:

@@ -333,8 +333,22 @@ class DataProductService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_product.dataset_links.append(dataset_link)
-        self.db.commit()
         return dataset_link
+
+    def link_datasets_to_data_product(
+        self,
+        id: UUID,
+        dataset_ids: list[UUID],
+        *,
+        actor: User,
+    ) -> list[DataProductDatasetModel]:
+        dataset_links = []
+        for dataset_id in dataset_ids:
+            dataset_links.append(
+                self.link_dataset_to_data_product(id, dataset_id, actor=actor)
+            )
+        self.db.commit()
+        return dataset_links
 
     def unlink_dataset_from_data_product(
         self,

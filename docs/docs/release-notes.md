@@ -4,6 +4,15 @@ sidebar_position: 200
 
 # Release Notes
 
+## Unreleased
+
+### features
+- **[Shopping experience]**: We have added a new shopping experience, which allows you to add output ports to your cart,
+  and request access to multiple output ports at once.
+
+### deprecations:
+- **[API]**: Deprecated `/api/data_products/{id}/dataset/{dataset_id}` POST endpoint, use `/api/data_products/{id}/link_datasets` instead.
+
 ## 0.3.6
 
 ### features

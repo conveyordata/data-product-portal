@@ -32,3 +32,7 @@ class DataProductStatusUpdate(ORMModel):
 
 class DataProductUsageUpdate(ORMModel):
     usage: str
+
+
+class LinkDatasetsToDataProduct(ORMModel):
+    dataset_ids: list[UUID]

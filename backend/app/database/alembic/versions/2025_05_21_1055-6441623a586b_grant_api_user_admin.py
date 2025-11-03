@@ -35,9 +35,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     session = Session(bind=op.get_bind())
-    api_bot = session.scalar(
-        sa.select(User).filter_by(email="systemaccount@noreply.com")
-    )
+    api_bot = session.execute(
+        sa.select(User.id, User.email).filter_by(email="systemaccount@noreply.com")
+    ).first()
 
     if api_bot:
         # Check if the user already has the role
@@ -69,9 +69,9 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     session = Session(bind=op.get_bind())
-    api_bot = session.scalar(
-        sa.select(User).filter_by(email="systemaccount@noreply.com")
-    )
+    api_bot = session.execute(
+        sa.select(User.id, User.email).filter_by(email="systemaccount@noreply.com")
+    ).first()
 
     if api_bot:
         # Check if the user has the admin role assignment

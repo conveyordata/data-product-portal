@@ -6,8 +6,6 @@ import { DataOutputForm } from '@/components/data-products/data-output-form/data
 import { DataProductDataOutputLinkPopup } from '@/components/data-products/data-product-data-output-link-popup/data-product-data-output-link-popup.component';
 import type { DataOutputConfiguration, DataOutputCreateFormSchema } from '@/types/data-output';
 
-// import styles from './add-data-output-popup.module.scss';
-
 type Props = {
     onClose: () => void;
     isOpen: boolean;

@@ -48,7 +48,7 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
     const handleRemoveDataset = useCallback(async () => {
         if (!dataset) return;
         try {
-            await removeDataset(dataset.id).unwrap();
+            await removeDataset(dataset);
             dispatchMessage({
                 content: t('Output port {{name}} has been successfully removed', { name: dataset.name }),
                 type: 'success',
@@ -132,7 +132,11 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                     type: 'success',
                 });
                 // TODO make this dependable on access rights
-                await approveLink({ id: result.id, data_output_id: dragData.id, dataset_id: dataset.id }).unwrap();
+                await approveLink({
+                    id: result.id,
+                    data_output_id: dragData.id,
+                    dataset_id: dataset.id,
+                });
             }
         } catch (_error) {
             dispatchMessage({

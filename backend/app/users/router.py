@@ -4,9 +4,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
+from app.users.schema import User
 from app.users.schema_request import UserCreate
 from app.users.schema_response import UsersGet
 from app.users.service import UserService
@@ -55,3 +57,11 @@ def create_user(
     user: UserCreate, db: Session = Depends(get_db_session)
 ) -> dict[str, UUID]:
     return UserService(db).create_user(user)
+
+
+@router.post("/seen_tour")
+def mark_tour_as_seen(
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> None:
+    UserService(db).mark_tour_as_seen(user.id)

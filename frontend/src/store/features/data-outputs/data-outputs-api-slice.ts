@@ -3,12 +3,14 @@ import type {
     DataOutputContract,
     DataOutputCreate,
     DataOutputCreateResponse,
-    DataOutputDatasetAccessRequest,
-    DataOutputDatasetAccessResponse,
     DataOutputDatasetRemoveRequest,
     DataOutputDatasetRemoveResponse,
     DataOutputResultStringRequest,
 } from '@/types/data-output';
+import type {
+    DataOutputDatasetAccessRequest,
+    DataOutputDatasetAccessResponse,
+} from '@/types/data-output/data-output-dataset-access.contract.ts';
 import type { DataOutputsGetContract } from '@/types/data-output/data-output-get.contract';
 import type {
     DataOutputUpdateRequest,
@@ -17,7 +19,6 @@ import type {
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
 import type { NamespaceLengthLimitsResponse, NamespaceSuggestionResponse } from '@/types/namespace/namespace';
-
 import { baseApiSlice } from '../api/base-api-slice';
 import { STATIC_TAG_ID, TagTypes } from '../api/tag-types';
 import { datasetsApiSlice } from '../datasets/datasets-api-slice';

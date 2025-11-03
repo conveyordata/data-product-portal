@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -43,6 +45,51 @@ class TestDataProductsDatasetsRouter:
             client, data_product.id, ds.id
         )
         assert response.status_code == 200
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_request_data_product_link_deprecated_method(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = DatasetFactory()
+
+        response = client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product.id}/dataset/{str(ds.id)}",
+        )
+        assert response.status_code == 200
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 1
+
+    def test_request_data_product_multiple_link(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds1 = DatasetFactory()
+        ds2 = DatasetFactory()
+
+        response = self.request_data_product_datasets_link(
+            client, data_product.id, [ds1.id, ds2.id]
+        )
+        assert response.status_code == 200
+        history = self.get_data_product_history(client, data_product.id).json()
+        assert len(history) == 2
 
     def test_request_already_exists(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -318,27 +365,6 @@ class TestDataProductsDatasetsRouter:
         response = client.get(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
         assert response.json() == []
 
-    def test_history_event_created_on_link_request(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS],
-        )
-        data_product = DataProductFactory()
-        DataProductRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-        ds = DatasetFactory()
-
-        response = self.request_data_product_dataset_link(
-            client, data_product.id, ds.id
-        )
-        assert response.status_code == 200
-        history = self.get_data_product_history(client, data_product.id).json()
-        assert len(history) == 1
-
     def test_history_event_created_on_remove_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = DatasetFactory()
@@ -422,10 +448,25 @@ class TestDataProductsDatasetsRouter:
 
     @staticmethod
     def request_data_product_dataset_link(
-        client: TestClient, data_product_id, dataset_id
+        client: TestClient,
+        data_product_id: UUID,
+        dataset_id: UUID,
+    ) -> Response:
+        return TestDataProductsDatasetsRouter.request_data_product_datasets_link(
+            client, data_product_id, [dataset_id]
+        )
+
+    @staticmethod
+    def request_data_product_datasets_link(
+        client: TestClient,
+        data_product_id: UUID,
+        dataset_ids: list[UUID],
     ) -> Response:
         return client.post(
-            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/dataset/{dataset_id}"
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/link_datasets",
+            json={
+                "dataset_ids": [str(dataset_id) for dataset_id in dataset_ids],
+            },
         )
 
     @staticmethod
