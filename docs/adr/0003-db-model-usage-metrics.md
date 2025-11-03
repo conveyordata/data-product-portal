@@ -1,4 +1,4 @@
-# Charting Library
+# Database Model for Output Port Usage Metrics
 
 ## Context and Problem Statement
 To power the new usage charts, we must ingest and store analytics data from systems (e.g. Snowflake) into our application's PostgreSQL database. The data needs to support multiple, distinct features:
