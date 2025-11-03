@@ -1,9 +1,5 @@
-import { ExperimentOutlined } from '@ant-design/icons';
-import { Button, Col, Row } from 'antd';
-import { useTranslation } from 'react-i18next';
+import { Col, Row } from 'antd';
 import { useSelector } from 'react-redux';
-import posthog from '@/config/posthog-config';
-import { PosthogEvents } from '@/constants/posthog.constants';
 import { DataProductsInbox } from '@/pages/home/components/data-products-inbox/data-products-inbox.tsx';
 import { DatasetsInbox } from '@/pages/home/components/datasets-inbox/datasets-inbox.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
@@ -15,32 +11,11 @@ const COL_SPAN = 12;
 
 export function Home() {
     const currentUser = useSelector(selectCurrentUser);
-    const { t } = useTranslation();
     if (!currentUser) return null;
 
     return (
         <div className={styles.container}>
             <PendingRequestsInbox />
-
-            <div className={styles.mcpServerSection}>
-                <Button
-                    type="primary"
-                    size="large"
-                    icon={<ExperimentOutlined />}
-                    className={styles.mcpServerButton}
-                    onClick={() => {
-                        posthog.capture(PosthogEvents.HOMEPAGE_MCP_CLICKED);
-                        window.open(
-                            'https://docs.dataproductportal.com/docs/user-guide/experimental-features',
-                            '_blank',
-                            'noopener,noreferrer',
-                        );
-                    }}
-                >
-                    {t('Talk to your data!')}
-                </Button>
-            </div>
-
             <div className={styles.contentSecondary}>
                 <Row gutter={ROW_GUTTER}>
                     <Col span={COL_SPAN}>
