@@ -1,15 +1,23 @@
 import {
     BarChartOutlined,
+    CheckOutlined,
     DatabaseOutlined,
     EyeOutlined,
     NumberOutlined,
+    PlusOutlined,
     ShareAltOutlined,
+    ShoppingCartOutlined,
     TeamOutlined,
+    UnorderedListOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Descriptions, type DescriptionsProps, Space, Tag, Typography } from 'antd';
+import { Button, Card, Descriptions, type DescriptionsProps, Space, Tag, Tooltip, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router';
+import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { useAppDispatch } from '@/store';
+import { addDatasetToCart, removeDatasetFromCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
 import { createDataProductIdPath, createDatasetIdPath } from '@/types/navigation.ts';
 import { DatasetCardTooltip } from './dataset-card-tooltip.component';
@@ -21,7 +29,16 @@ type Props = {
 
 export function DatasetMarketplaceCard({ dataset }: Props) {
     const { t } = useTranslation();
-    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const cartDatasetIds = useSelector(selectCartDatasetIds);
+
+    const toggleCart = (datasetId: string) => {
+        if (cartDatasetIds.includes(datasetId)) {
+            dispatch(removeDatasetFromCart({ datasetId }));
+        } else {
+            dispatch(addDatasetToCart({ datasetId }));
+        }
+    };
 
     function createCardDetails(dataset: DatasetsGetContract[0]) {
         const items: DescriptionsProps['items'] = [
@@ -107,14 +124,45 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
             styles={{ body: { padding: 12 } }}
             className={styles.marketplaceCardContainer}
             actions={[
-                <Button
+                <Tooltip key="details" title={t('View details')}>
+                    <Link to={createDatasetIdPath(dataset.id)}>
+                        <Button type="text" icon={<UnorderedListOutlined />} />
+                    </Link>
+                </Tooltip>,
+                <Tooltip
                     key="details"
-                    style={{ float: 'right', marginRight: '12px' }}
-                    type="primary"
-                    onClick={() => navigate(createDatasetIdPath(dataset.id))}
+                    title={cartDatasetIds.includes(dataset.id) ? t('Remove from cart') : t('Add to cart')}
                 >
-                    {t('View Details')}
-                </Button>,
+                    <Button
+                        key="add to cart"
+                        type={'text'}
+                        size={'middle'}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            toggleCart(dataset.id);
+                        }}
+                    >
+                        {cartDatasetIds.includes(dataset.id) ? (
+                            <>
+                                <CustomSvgIconLoader
+                                    size={'x-small'}
+                                    iconComponent={ShoppingCartOutlined}
+                                    color={'success'}
+                                />
+                                <CustomSvgIconLoader size={'x-small'} iconComponent={CheckOutlined} color={'success'} />
+                            </>
+                        ) : (
+                            <>
+                                <CustomSvgIconLoader
+                                    size={'x-small'}
+                                    iconComponent={ShoppingCartOutlined}
+                                    color={'primary'}
+                                />
+                                <CustomSvgIconLoader size={'x-small'} iconComponent={PlusOutlined} color={'primary'} />
+                            </>
+                        )}
+                    </Button>
+                </Tooltip>,
             ]}
         >
             <Space direction="vertical" style={{ width: '100%' }} size="small">

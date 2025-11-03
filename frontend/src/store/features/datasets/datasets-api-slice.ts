@@ -59,23 +59,25 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
             providesTags: (_, __, id) => [{ type: TagTypes.History as const, id: id }],
         }),
         createDataset: builder.mutation<DatasetCreateResponse, DatasetCreateRequest>({
-            query: (dataset) => ({
+            query: ({ data_product_id, ...dataset }) => ({
                 url: ApiUrl.Datasets,
                 method: 'POST',
-                data: dataset,
+                data: { data_product_id, ...dataset },
             }),
-            invalidatesTags: [
+            invalidatesTags: (_, __, { data_product_id }) => [
                 { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const, id: data_product_id },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),
-        removeDataset: builder.mutation<void, string>({
-            query: (id) => ({
-                url: buildUrl(ApiUrl.DatasetGet, { datasetId: id }),
+        removeDataset: builder.mutation<void, DatasetContract>({
+            query: (dataset) => ({
+                url: buildUrl(ApiUrl.DatasetGet, { datasetId: dataset.id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: (_, _error) => [
+            invalidatesTags: (_, _error, { data_product_id }) => [
                 { type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.DataProduct as const, id: data_product_id },
                 { type: TagTypes.UserDatasets as const, id: STATIC_TAG_ID.LIST },
             ],
         }),

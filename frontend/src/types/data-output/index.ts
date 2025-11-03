@@ -12,8 +12,8 @@ export type {
     DataOutputCreateResponse,
 } from './data-output-create.contract.ts';
 export type {
-    DataOutputDatasetAccessRequest,
-    DataOutputDatasetAccessResponse,
+    DataOutputDatasetsAccessRequest,
+    DataOutputDatasetsAccessResponse,
 } from './data-output-dataset-access.contract.ts';
 export type {
     DataOutputDatasetRemoveRequest,

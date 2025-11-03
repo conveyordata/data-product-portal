@@ -29,7 +29,7 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
     const searchTerm = Form.useWatch('search', searchForm);
     const { data: dataset } = useGetDatasetByIdQuery(datasetId);
 
-    const [linkDataset, { isLoading: isLinking }] = useRequestDatasetAccessForDataOutputMutation();
+    const [linkDatasets, { isLoading: isLinking }] = useRequestDatasetAccessForDataOutputMutation();
     const [approveLink] = useApproveDataOutputLinkMutation();
 
     const dataProductId = dataset?.data_product_id || '';
@@ -80,8 +80,12 @@ export function DataOutputLinkModal({ onClose, datasetId, datasetName, existingL
     const handleSubmit = async () => {
         try {
             const linkPromises = Array.from(selectedOutputs).map(async (outputId) => {
-                const result = await linkDataset({ dataOutputId: outputId, datasetId }).unwrap();
-                await approveLink({ id: result.id, data_output_id: outputId, dataset_id: datasetId }).unwrap();
+                const result = await linkDatasets({ dataOutputId: outputId, datasetId }).unwrap();
+                await approveLink({
+                    id: result.id,
+                    data_output_id: outputId,
+                    dataset_id: datasetId,
+                }).unwrap();
                 return result;
             });
 

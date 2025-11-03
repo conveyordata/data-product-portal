@@ -5,12 +5,11 @@ import { useAuth } from 'react-oidc-context';
 import { useSelector } from 'react-redux';
 
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
-import headerStyles from '@/components/layout/navbar/navbar.module.scss';
+import { CartButton } from '@/components/cart/cart-button.component.tsx';
 import { Notifications } from '@/components/notifications/notifications';
 import { AppConfig } from '@/config/app-config.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useIsAdminQuery } from '@/store/features/authorization/authorization-api-slice.ts';
-
 import { DownloadCLIButton } from '../cli-download/cli-download-button.component';
 import styles from './user-menu.module.scss';
 
@@ -47,14 +46,11 @@ export function UserMenu() {
     };
 
     return (
-        <Flex className={styles.userMenuContainer}>
-            <Flex>
-                <Notifications />
-            </Flex>
-            <Flex>
-                <DownloadCLIButton />
-            </Flex>
-            <Flex className={styles.avatarWrapper}>
+        <Flex gap={'middle'} align={'center'}>
+            <Notifications />
+            <CartButton />
+            <DownloadCLIButton />
+            <Flex align={'center'} gap={'small'}>
                 <Badge
                     count={isAdmin ? t('admin') : 0}
                     showZero={false}
@@ -71,14 +67,12 @@ export function UserMenu() {
                     {user?.first_name || usernameFallback} {user?.last_name || usernameFallback}
                 </Typography.Text>
             </Flex>
-            <Flex className={headerStyles.headerActionsWrapper}>
-                <CircleIconButton
-                    icon={<LogoutOutlined rotate={270} />}
-                    tooltip={t('Logout')}
-                    onClick={handleLogout}
-                    buttonProps={{ disabled: isAuthDisabled }}
-                />
-            </Flex>
+            <CircleIconButton
+                icon={<LogoutOutlined rotate={270} />}
+                tooltip={t('Logout')}
+                onClick={handleLogout}
+                buttonProps={{ disabled: isAuthDisabled }}
+            />
         </Flex>
     );
 }
