@@ -23,14 +23,13 @@ import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import styles from './pending-requests-inbox.module.scss';
 import { type PendingActionItem, PendingRequestsList } from './pending-requests-list';
 import { type CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
+import { UserContract } from '@/types/users';
 
 const createPendingItem = (action: PendingAction, t: TFunction, color: string): PendingActionItem | null => {
     let link: string;
     let description: ReactElement;
     let navigatePath: string;
-    let date: string;
-    let author: string;
-    let initials: string;
+    let actor: UserContract;
     let message: ReactElement;
     let tag: ReactElement;
     let type: PendingActionTypes;
@@ -40,17 +39,15 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
     function getInitials(firstName: string, lastName: string) {
         return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
     }
-
     switch (action.pending_action_type) {
         case PendingActionTypes.DataProductDataset:
             icon = <DatasetOutlined />;
             link = createDataProductIdPath(action.data_product_id);
             description = (
-                <Typography.Text strong>
-                    {t('Request for')} <strong className={styles.bolder}>{t('read access')}</strong>{' '}
-                    {t('from the data product')}{' '}
+                <Typography.Text>
+                    {t('Request for read access from the data product ')}
                     <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        <strong>{action.data_product.name}</strong>
+                        {action.data_product.name}
                     </Link>
                 </Typography.Text>
             );
@@ -58,11 +55,11 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                 <Flex vertical>
                     <Justification justification={action.justification} />
                     <Typography.Text>
-                        {t('Accepting will grant the data product read access on the')}{' '}
+                        {t('Accepting will grant the data product read access on the ')}
                         <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                             {action.dataset.name}
-                        </Link>{' '}
-                        {t('output port.')}
+                        </Link>
+                        {t(' output port.')}
                     </Typography.Text>
                 </Flex>
             );
@@ -77,9 +74,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
-            date = action.requested_on;
-            author = `${action.requested_by.first_name} ${action.requested_by.last_name}`;
-            initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
+            actor = action.requested_by;
             type = PendingActionTypes.DataProductDataset as PendingActionTypes.DataProductDataset;
             request = {
                 type: PendingActionTypes.DataProductDataset as PendingActionTypes.DataProductDataset,
@@ -96,20 +91,19 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
             link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
             description = (
                 <Typography.Text strong>
-                    {t('Request for')} <strong className={styles.bolder}>{t('the creation of a link')}</strong>{' '}
-                    {t('coming from the technical asset')}{' '}
+                    {t('Request for the creation of a link coming from the technical asset ')}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        <strong>{action.data_output.name}</strong>
+                        {action.data_output.name}
                     </Link>
                 </Typography.Text>
             );
             message = (
                 <Typography.Text>
-                    {t('Accepting will create a link from the technical asset to the')}{' '}
+                    {t('Accepting will create a link from the technical asset to the ')}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
                         {action.dataset.name}
-                    </Link>{' '}
-                    {t('output port.')}
+                    </Link>
+                    {t(' output port.')}
                 </Typography.Text>
             );
             tag = (
@@ -123,9 +117,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                 </Typography.Text>
             );
             navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
-            date = action.requested_on;
-            author = `${action.requested_by.first_name} ${action.requested_by.last_name}`;
-            initials = getInitials(action.requested_by.first_name, action.requested_by.last_name);
+            actor = action.requested_by;
             type = PendingActionTypes.DataOutputDataset as PendingActionTypes.DataOutputDataset;
             request = {
                 type: PendingActionTypes.DataOutputDataset as PendingActionTypes.DataOutputDataset,
@@ -142,25 +134,23 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
             link = createDataProductIdPath(action.data_product.id);
             description = (
                 <Typography.Text strong>
-                    {t('Request for ')} <strong className={styles.bolder}>{t('team membership')}</strong> {t('from')}{' '}
+                    {t('Request for team membership from ')}
                     <Link onClick={(e) => e.stopPropagation()} to={'/'}>
-                        <strong>
                             {action.user.first_name} {action.user.last_name}
-                        </strong>
                     </Link>
                 </Typography.Text>
             );
             message = (
                 <Typography.Text>
-                    {t('Accepting will grant the user the role of {{role}} in the', {
+                    {t('Accepting will grant the user the role of {{role}} in the' , {
                         role: action.role.name,
                         firstName: action.user.first_name,
                         lastName: action.user.last_name,
-                    })}{' '}
+                    })}
                     <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.data_product.id)}>
                         {action.data_product.name}
-                    </Link>{' '}
-                    {t('data product.')}
+                    </Link>
+                    {t(' data product.')}
                 </Typography.Text>
             );
             tag = (
@@ -174,9 +164,7 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                 </Typography.Text>
             );
             navigatePath = createDataProductIdPath(action.data_product.id, DataProductTabKeys.Team);
-            date = action.requested_on ?? '';
-            author = `${action.user.first_name} ${action.user.last_name}`;
-            initials = getInitials(action.user.first_name, action.user.last_name);
+            actor = action.user;
             type = PendingActionTypes.DataProductRoleAssignment as PendingActionTypes.DataProductRoleAssignment;
             request = {
                 type: PendingActionTypes.DataProductRoleAssignment as PendingActionTypes.DataProductRoleAssignment,
@@ -192,9 +180,9 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
         key: type + action.id,
         description: description,
         navigatePath: navigatePath,
-        date: date,
-        author: author,
-        initials: initials,
+        date: action.requested_on ?? '',
+        author: `${actor.first_name} ${actor.last_name}`,
+        initials: getInitials(actor.first_name, actor.last_name),
         message: message,
         color: color,
         tag: tag,

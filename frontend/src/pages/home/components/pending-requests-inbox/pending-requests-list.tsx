@@ -44,10 +44,6 @@ export const PendingRequestsList = ({
         return <EmptyList description={t('No requests available.')} />;
     }
 
-    const handleItemClick = (navigatePath: string) => {
-        navigate(navigatePath);
-    };
-
     return (
         <List
             dataSource={pendingActionItems}
@@ -64,7 +60,7 @@ export const PendingRequestsList = ({
                     <List.Item
                         className={styles.listItem}
                         key={item.key}
-                        onClick={() => handleItemClick(item.navigatePath)}
+                        onClick={() => navigate(item.navigatePath)}
                         actions={[
                             <Button
                                 key={'accept'}
