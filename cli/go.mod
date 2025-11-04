@@ -11,7 +11,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/oapi-codegen/oapi-codegen/v2 v2.5.0
+	github.com/oapi-codegen/oapi-codegen/v2 v2.5.1
 	github.com/oapi-codegen/runtime v1.1.2
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
