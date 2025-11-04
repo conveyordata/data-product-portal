@@ -40,7 +40,9 @@ export const CartButton = () => {
                                     {t('Clear cart')}
                                 </Button>
                                 <Link to={ApplicationPaths.MarketplaceCart}>
-                                    <Button type="primary">{t('Checkout')}</Button>
+                                    <Button type="primary" disabled={cartDatasets.length === 0}>
+                                        {t('Checkout')}
+                                    </Button>
                                 </Link>
                             </Flex>
                         }
