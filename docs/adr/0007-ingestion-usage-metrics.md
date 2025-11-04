@@ -20,25 +20,27 @@ The ingestion mechanism must be simple for producers, who will need to run two d
 
 ## Decision Outcome
 
-**Chosen option:** *Option 2: Fluent Python SDK (Simple API Wrapper)*. This strikes the best possible balance.
+**Chosen option:** *Option 2: Fluent Python SDK (Simple API Wrapper)*. While we would love to go for option 3, we think option 2 is the most realistic atm. We can take some pieces (interface) from option 3.
 
 * It provides a Good DX for producers by abstracting all API complexity (auth, retries, payload formatting) into a single client.push_usage_stats(...) method.
 
 * It maintains a Clear Separation of Concerns. The producer is responsible for data generation (running the SQL in their own environment), and our SDK is responsible for data transmission.
 
-* It avoids the massive complexity, dependency-hell, and security/responsibility-creep of the Advanced SDK (Option 3)
+* It avoids the complexity of Option 3.
 
 ### Confirmation
 Description how this will be reflected in the appliction.
 
 The SDK will provide a single method. This method will call the API endpoint defined in ADR-0006. Our API backend will be responsible for transactionally committing both payloads. This provides the best guarantee of data consistency.
 
+Ideally we are able to generate a client completly from the OpenAPI spec and add a usage layer on top. 
+
 ```python
 # Producer's script (e.g., in Airflow)
 from data_portal_sdk import DataPortalClient
-from my_snowflake_connector import get_daily_query_stats, get_daily_asset_stats
+from my_snowflake_connector import get_daily_stats
 
-# 1. Producer runs the two aggregation queries
+# 1. Producer runs the aggregation queries (implementing the SDK interface)
 daily_stats = get_daily_stats(id="...")
 
 # 2. Producer uses the simple SDK to push both payloads at once
@@ -67,6 +69,6 @@ client.push_usage_stats(
 ### Option 2: Advanced SDK
 
 * **Good, because** Best DX (in theory): Producers just configure the SDK. We can enforce the correct query logic.
-* **Bad, because** High SDK Complexity: We now own and maintain a complex client with snowflake-connector-python as a dependency.
+* **Bad, because** SDK Complexity: We now own and maintain a complex client with snowflake-connector-python as a dependency.
 * **Bad, because** Dependency/Security Risk: We must manage the Snowflake driver version and may have to handle producer credentials.
 * **Bad, because** Blurs Responsibility: We become responsible if their queries fail.
