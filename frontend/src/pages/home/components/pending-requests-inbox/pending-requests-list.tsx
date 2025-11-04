@@ -55,13 +55,15 @@ export const PendingRequestsList = ({
                 ...pagination,
                 className: styles.antListPagination,
             }}
+            itemLayout="vertical"
+            size="large"
             split={false}
             renderItem={(item) => {
                 const formattedDate = item.date ? formatDate(item.date) : '';
                 return (
                     <List.Item
-                        key={item.key}
                         className={styles.listItem}
+                        key={item.key}
                         onClick={() => handleItemClick(item.navigatePath)}
                         actions={[
                             <Button
@@ -87,29 +89,27 @@ export const PendingRequestsList = ({
                                 {t('Reject')}
                             </Button>,
                         ]}
+                        extra={
+                            <Flex gap="small">
+                                <Typography.Text type="secondary">{item.icon}</Typography.Text>
+                                <Typography.Text>{item.tag}</Typography.Text>
+                            </Flex>
+                        }
                     >
-                        <Flex vertical className={styles.itemCard} gap={'small'}>
-                            <Flex align="center">
-                                <Avatar style={{ backgroundColor: item.color }} className={styles.avatar} size="large">
+                        <List.Item.Meta
+                            avatar={
+                                <Avatar style={{ backgroundColor: item.color }}>
                                     {item.initials || <UserOutlined />}
                                 </Avatar>
-                                <Flex vertical flex={1}>
-                                    <Flex justify="space-between">
-                                        <Typography.Text>{item.description}</Typography.Text>
-                                        <Flex>
-                                            <Flex gap="small">
-                                                <Typography.Text type="secondary">{item.icon}</Typography.Text>
-                                                <Typography.Text>{item.tag}</Typography.Text>
-                                            </Flex>
-                                        </Flex>
-                                    </Flex>
-                                    <Typography.Text type="secondary">
-                                        by {item.author}, {formattedDate}
-                                    </Typography.Text>
-                                </Flex>
-                            </Flex>
-                            <Typography.Text>{item.message}</Typography.Text>
-                        </Flex>
+                            }
+                            title={item.description}
+                            description={
+                                <>
+                                    {t('by')} {item.author}, {formattedDate}
+                                </>
+                            }
+                        />
+                        {item.message}
                     </List.Item>
                 );
             }}
