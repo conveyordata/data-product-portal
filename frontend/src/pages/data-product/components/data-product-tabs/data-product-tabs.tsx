@@ -274,9 +274,8 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
                     });
                     await setSeenTour();
                 }}
-                onFinish={async () => {
+                onFinish={() => {
                     posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_FINISHED);
-                    await setSeenTour();
                 }}
                 steps={steps}
             />
