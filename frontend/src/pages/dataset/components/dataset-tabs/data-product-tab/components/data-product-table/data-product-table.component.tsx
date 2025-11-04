@@ -1,4 +1,4 @@
-import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
+import { Table, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -100,29 +100,25 @@ export function DataProductTable({ datasetId, dataProducts, isLoading }: Props) 
     ]);
 
     return (
-        <Flex className={styles.datasetListContainer}>
-            <Table<DataProductLink>
-                loading={isLoading}
-                className={styles.datasetListTable}
-                columns={columns}
-                dataSource={dataProducts}
-                rowKey={({ id }) => id}
-                onChange={onChange}
-                pagination={{
-                    ...pagination,
-                    position: ['topRight'],
-                    size: 'small',
-                    showTotal: (total, range) =>
-                        t('Showing {{range0}}-{{range1}} of {{total}} data products', {
-                            range0: range[0],
-                            range1: range[1],
-                            total: total,
-                        }),
-                    className: styles.pagination,
-                }}
-                rowClassName={styles.tableRow}
-                size={'small'}
-            />
-        </Flex>
+        <Table<DataProductLink>
+            loading={isLoading}
+            columns={columns}
+            dataSource={dataProducts}
+            rowKey={({ id }) => id}
+            onChange={onChange}
+            pagination={{
+                ...pagination,
+                position: ['topRight'],
+                size: 'small',
+                showTotal: (total, range) =>
+                    t('Showing {{range0}}-{{range1}} of {{total}} data products', {
+                        range0: range[0],
+                        range1: range[1],
+                        total: total,
+                    }),
+                className: styles.pagination,
+            }}
+            size={'small'}
+        />
     );
 }

@@ -11,6 +11,7 @@ from app.users.schema import User
 
 class BaseDataProductDatasetAssociationGet(ORMModel):
     id: UUID
+    justification: str
     data_product_id: UUID
     dataset_id: UUID
     status: DecisionStatus

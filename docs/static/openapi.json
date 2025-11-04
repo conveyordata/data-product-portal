@@ -8761,6 +8761,10 @@
             "format": "uuid",
             "title": "Id"
           },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
           "data_product_id": {
             "type": "string",
             "format": "uuid",
@@ -8818,6 +8822,7 @@
         "type": "object",
         "required": [
           "id",
+          "justification",
           "data_product_id",
           "dataset_id",
           "status",
@@ -9099,6 +9104,10 @@
             "format": "uuid",
             "title": "Id"
           },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
           "data_product_id": {
             "type": "string",
             "format": "uuid",
@@ -9119,6 +9128,7 @@
         "type": "object",
         "required": [
           "id",
+          "justification",
           "data_product_id",
           "dataset_id",
           "status",
@@ -10213,6 +10223,10 @@
             "format": "uuid",
             "title": "Id"
           },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
           "data_product_id": {
             "type": "string",
             "format": "uuid",
@@ -10233,6 +10247,7 @@
         "type": "object",
         "required": [
           "id",
+          "justification",
           "data_product_id",
           "dataset_id",
           "status",
@@ -10997,11 +11012,16 @@
             },
             "type": "array",
             "title": "Dataset Ids"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
           }
         },
         "type": "object",
         "required": [
-          "dataset_ids"
+          "dataset_ids",
+          "justification"
         ],
         "title": "LinkDatasetsToDataProduct"
       },

@@ -51,72 +51,66 @@ export const PendingRequestsList = ({
     return (
         <List
             dataSource={pendingActionItems}
-            className={styles.antList}
             pagination={{
                 ...pagination,
                 className: styles.antListPagination,
             }}
+            split={false}
             renderItem={(item) => {
                 const formattedDate = item.date ? formatDate(item.date) : '';
                 return (
-                    <>
-                        <List.Item
-                            key={item.key}
-                            className={styles.listItem}
-                            onClick={() => handleItemClick(item.navigatePath)}
-                        >
-                            <Flex vertical className={styles.itemCard} gap={8}>
-                                <Flex align="center">
-                                    <Avatar
-                                        style={{ backgroundColor: item.color }}
-                                        className={styles.avatar}
-                                        size="large"
-                                    >
-                                        {item.initials || <UserOutlined />}
-                                    </Avatar>
-                                    <Flex vertical className={styles.width}>
-                                        <Flex justify="space-between">
-                                            <Typography.Text>{item.description}</Typography.Text>
-                                            <Flex>
-                                                <Flex gap="small">
-                                                    <Typography.Text type="secondary">{item.icon}</Typography.Text>
-                                                    <Typography.Text>{item.tag}</Typography.Text>
-                                                </Flex>
-
-                                                <Flex align="center" justify="space-evenly" className={styles.buttons}>
-                                                    <Button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onAccept(item.request);
-                                                        }}
-                                                        type="link"
-                                                        className={styles.resolveButton}
-                                                    >
-                                                        {t('Accept')}
-                                                    </Button>
-                                                    <Button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onReject(item.request);
-                                                        }}
-                                                        type="link"
-                                                        className={styles.resolveButton}
-                                                    >
-                                                        {t('Reject')}
-                                                    </Button>
-                                                </Flex>
+                    <List.Item
+                        key={item.key}
+                        className={styles.listItem}
+                        onClick={() => handleItemClick(item.navigatePath)}
+                        actions={[
+                            <Button
+                                key={'accept'}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onAccept(item.request);
+                                }}
+                                type="link"
+                                size={'small'}
+                            >
+                                {t('Accept')}
+                            </Button>,
+                            <Button
+                                key={'reject'}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onReject(item.request);
+                                }}
+                                type="link"
+                                size={'small'}
+                            >
+                                {t('Reject')}
+                            </Button>,
+                        ]}
+                    >
+                        <Flex vertical className={styles.itemCard} gap={'small'}>
+                            <Flex align="center">
+                                <Avatar style={{ backgroundColor: item.color }} className={styles.avatar} size="large">
+                                    {item.initials || <UserOutlined />}
+                                </Avatar>
+                                <Flex vertical flex={1}>
+                                    <Flex justify="space-between">
+                                        <Typography.Text>{item.description}</Typography.Text>
+                                        <Flex>
+                                            <Flex gap="small">
+                                                <Typography.Text type="secondary">{item.icon}</Typography.Text>
+                                                <Typography.Text>{item.tag}</Typography.Text>
                                             </Flex>
                                         </Flex>
-                                        <Typography.Text type="secondary">
-                                            by {item.author}, {formattedDate}
-                                        </Typography.Text>
                                     </Flex>
+                                    <Typography.Text type="secondary">
+                                        by {item.author}, {formattedDate}
+                                    </Typography.Text>
                                 </Flex>
-                                <Typography.Text className={styles.message}>{item.message}</Typography.Text>
                             </Flex>
-                        </List.Item>
-                        <div />
-                    </>
+                            <Typography.Text>{item.message}</Typography.Text>
+                        </Flex>
+                    </List.Item>
                 );
             }}
         />

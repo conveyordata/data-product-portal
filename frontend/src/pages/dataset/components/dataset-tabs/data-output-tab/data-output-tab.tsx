@@ -38,19 +38,14 @@ export function DataOutputTab({ datasetId }: Props) {
     }, [datasetDataOutputs, searchTerm]);
 
     return (
-        <>
-            <Flex
-                vertical
-                className={`${styles.container} ${filteredDataOutputs.length === 0 && styles.paginationGap}`}
-            >
-                <Searchbar
-                    placeholder={t('Search technical assets by name')}
-                    formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
-                    form={searchForm}
-                />
+        <Flex vertical className={`${styles.container} ${filteredDataOutputs.length === 0 && styles.paginationGap}`}>
+            <Searchbar
+                placeholder={t('Search technical assets by name')}
+                formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
+                form={searchForm}
+            />
 
-                <DataOutputTable dataOutputs={filteredDataOutputs} isLoading={isLoading} datasetId={datasetId} />
-            </Flex>
-        </>
+            <DataOutputTable dataOutputs={filteredDataOutputs} isLoading={isLoading} datasetId={datasetId} />
+        </Flex>
     );
 }

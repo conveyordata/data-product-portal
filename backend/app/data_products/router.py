@@ -453,7 +453,10 @@ def link_dataset_to_data_product(
 ) -> dict[str, UUID]:
     response = link_datasets_to_data_product(
         id,
-        LinkDatasetsToDataProduct(dataset_ids=[dataset_id]),
+        LinkDatasetsToDataProduct(
+            dataset_ids=[dataset_id],
+            justification="No justification provided. (deprecated endpoint used)",
+        ),
         background_tasks,
         authenticated_user,
         db,
@@ -494,7 +497,10 @@ def link_datasets_to_data_product(
     db: Session = Depends(get_db_session),
 ) -> LinkDatasetsToDataProductPost:
     dataset_links = DataProductService(db).link_datasets_to_data_product(
-        id, link_datasets.dataset_ids, actor=authenticated_user
+        id,
+        link_datasets.dataset_ids,
+        link_datasets.justification,
+        actor=authenticated_user,
     )
 
     event_ids = EventService(db).create_events(

@@ -1,6 +1,14 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
+from sqlalchemy import (
+    UUID,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
@@ -20,6 +28,7 @@ class DataProductDatasetAssociation(Base, BaseORM):
     __tablename__ = "data_products_datasets"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    justification = Column(String)
     status: Mapped[DecisionStatus] = mapped_column(
         Enum(DecisionStatus),
         default=DecisionStatus.PENDING,
