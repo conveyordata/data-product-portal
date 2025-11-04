@@ -55,7 +55,7 @@ Granularity: One row per (date, product, consumer, domain).
 Schema:
 * date (DATE, PK)
 * output_port_id (UUID, PK, FK)
-* consumer_id (UUID, PK, FK)
+* consumer_id (UUID, PK, FK) - link to other data product
 * query_count (INT)
 
 #### Table 2: tech_asset_stats_daily
@@ -66,7 +66,7 @@ Schema:
 * date (DATE, PK)
 * output_port_id (UUID, PK, FK)
 * tech_asset_id (UUID, PK, FK)
-* consumer_id (UUID, PK, FK)
+* consumer_id (UUID, PK, FK) - link to other data product
 * query_count (INT)
 
 ## Pros and Cons of the Options
