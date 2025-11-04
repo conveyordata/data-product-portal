@@ -30,7 +30,7 @@ Use ts_rank_cd for scoring, as it considers term proximity (cover density).
 Alternatives like ts_rank lack this normalization, and a custom ranking function would be overkill at this stage.
 
 ### Fields included
-Index only title and description fields of the output port and technical assets.
+Index only title and description fields of the output port, domain, and technical assets.
 These contain the most relevant data; excluding product and tag info keeps indexing simpler.
 
 ### Query transformation
