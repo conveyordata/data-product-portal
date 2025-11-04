@@ -16,7 +16,7 @@ The "Curated Queries" feature allows data producers to manually define a list of
 
 ## Decision Outcome
 
-**Chosen option:** *Option 1: New output_port_curated_queries Table*. This is the most robust and maintainable solution allowing more explicit schema management. The complexity of write operations for the JSONB model makes it unsuitable for data that is managed via item-specific CRUD operations.
+**Chosen option:** *Option 1: New output_port_curated_queries Table*. This is the most robust and maintainable solution allowing more explicit schema management and consistent with other features.
 
 ### Confirmation
 
@@ -42,4 +42,4 @@ Schema:
 ### Option 2: JSONB Column in outputport Table
 
 * **Good, because** No JOINs: All data is co-located in one row.
-* **Bad, because** Complex Writes: PUT (update) and DELETE (remove) are extremely difficult. The application must read the entire JSON array, modify it, and write the entire array back, which is inefficient and creates a risk of race conditions.
+* **Bad, because** Requires more schema management and serialization logic in the backend.

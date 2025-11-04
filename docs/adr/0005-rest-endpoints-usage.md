@@ -43,19 +43,13 @@ We need a comprehensive set of API endpoints for the usage feature. This include
 
 #### Producer-Facing Endpoints (Metadata Management)
 
-1. Create new curated query
-    * `POST /api/datasets/{id}/usage/curated-queries`
-    * Payload: `{"title": "string", "description": "string", "query_text": "string", sort_order: "integer"}`
-    * Response (201): The newly created query object with `curated_query_id`.
+As we want to support sorting operations and don't expect too many curated queries, we provide as single atomic operation. 
 
-1. Update an existing curated query
-    * `PUT /api/datasets/{id}/usage/curated-queries/{curated_query_id}`
-    * Payload: `{"title": "string", "description": "string", "query_text": "string", sort_order: "integer"}`
+1. Create new curated query
+    * `PUT /api/datasets/{id}/usage/curated-queries`
+    * Payload: `{"curated_queries: [{"title": "string", "description": "string", "query_text": "string"}, ... ]}`
     * Response (200): The updated query object.
 
-1. Delete an existing curated query
-    * `DELETE /api/datasets/{id}/usage/curated-queries/{curated_query_id}`
-    * Response (204): No Content.
 
 #### Ingestion Endpoint (Bulk Ingestion)
 
