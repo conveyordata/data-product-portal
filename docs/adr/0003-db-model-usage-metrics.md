@@ -38,11 +38,14 @@ SELECT order_id, customer, product, pice FROM P1.orders INNER JOIN OP1.customers
 ```
 
 This would result in the following stats: 
+* Consumer (C1, OP1) query count: 1
+* Consumer (C2, OP1) query count: 1
+* Asset (orders) query count: 2
+* Asset (customers) query count: 1
 
-Consumer (C1, OP1) query count: 1
-Consumer (C2, OP1) query count: 1
-Asset (orders) query count: 2
-Asset (customers) query count: 1
+To summarise:
+* Asset query counts cannot be used to calculate consumer query counts as this would lead to incorrect aggregations
+* We want to be able to delete assets and their stats without impacting hystorical consumer query counts
 
 #### Table 1: outpur_port_query_stats_daily
 
