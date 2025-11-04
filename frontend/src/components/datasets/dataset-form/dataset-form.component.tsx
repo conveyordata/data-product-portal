@@ -26,10 +26,7 @@ import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
-import {
-    useGetAllDataProductsQuery,
-    useGetDataProductByIdQuery,
-} from '@/store/features/data-products/data-products-api-slice';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
@@ -39,7 +36,6 @@ import {
     useRemoveDatasetMutation,
     useUpdateDatasetMutation,
 } from '@/store/features/datasets/datasets-api-slice.ts';
-import { useGetAllDomainsQuery } from '@/store/features/domains/domains-api-slice';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { useGetAllTagsQuery } from '@/store/features/tags/tags-api-slice';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
@@ -307,8 +303,8 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             form={form}
             ref={formRef}
             labelWrap
-            labelCol={FORM_GRID_WRAPPER_COLS}
-            wrapperCol={FORM_GRID_WRAPPER_COLS}
+            labelCol={mode === 'edit' ? FORM_GRID_WRAPPER_COLS : undefined}
+            wrapperCol={mode === 'edit' ? FORM_GRID_WRAPPER_COLS : undefined}
             layout="vertical"
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
