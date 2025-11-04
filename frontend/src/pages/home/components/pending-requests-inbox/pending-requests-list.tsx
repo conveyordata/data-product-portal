@@ -5,11 +5,11 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
+import posthog from '@/config/posthog-config';
+import { PosthogEvents } from '@/constants/posthog.constants';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
 import type { ActionResolveRequest, PendingActionTypes } from '@/types/pending-actions/pending-actions';
 import { formatDate } from '@/utils/date.helper.ts';
-import posthog from '@/config/posthog-config';
-import { PosthogEvents } from '@/constants/posthog.constants';
 
 export type PendingActionItem = {
     key: string;
@@ -33,10 +33,7 @@ type PendingRequestsListProps = {
     pagination: PaginationConfig;
 };
 
-export const PendingRequestsList = ({
-    pendingActionItems,
-    pagination,
-}: PendingRequestsListProps) => {
+export const PendingRequestsList = ({ pendingActionItems, pagination }: PendingRequestsListProps) => {
     const { t } = useTranslation();
 
     const navigate = useNavigate();

@@ -13,22 +13,25 @@ import { useTablePagination } from '@/hooks/use-table-pagination';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
+import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
+import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
 import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
 import {
     type ActionResolveRequest,
     type PendingAction,
     PendingActionTypes,
 } from '@/types/pending-actions/pending-actions';
+import type { DataProductRoleRequest } from '@/types/roles';
 import type { UserContract } from '@/types/users';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import styles from './pending-requests-inbox.module.scss';
 import { type PendingActionItem, PendingRequestsList } from './pending-requests-list';
 import { type CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
-import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
-import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import { DataProductRoleRequest } from '@/types/roles';
 
-const createPendingItem = (action: PendingAction, t: TFunction, color: string,
+const createPendingItem = (
+    action: PendingAction,
+    t: TFunction,
+    color: string,
     handleAcceptDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void,
     handleRejectDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void,
     handleAcceptDataOutputDatasetLink: (request: DataOutputDatasetLinkRequest) => void,
@@ -63,16 +66,18 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string,
                     </Link>
                 </Typography.Text>
             );
-            handleAccept = () => handleAcceptDataProductDatasetLink({
-                id: action.id,
-                data_product_id: action.data_product_id,
-                dataset_id: action.dataset_id,
-            });
-            handleDeny = () => handleRejectDataProductDatasetLink({
-                id: action.id,
-                data_product_id: action.data_product_id,
-                dataset_id: action.dataset_id,
-            });
+            handleAccept = () =>
+                handleAcceptDataProductDatasetLink({
+                    id: action.id,
+                    data_product_id: action.data_product_id,
+                    dataset_id: action.dataset_id,
+                });
+            handleDeny = () =>
+                handleRejectDataProductDatasetLink({
+                    id: action.id,
+                    data_product_id: action.data_product_id,
+                    dataset_id: action.dataset_id,
+                });
             message = (
                 <Flex vertical>
                     <Justification justification={action.justification} />
@@ -119,16 +124,18 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string,
                     </Link>
                 </Typography.Text>
             );
-            handleAccept = () => handleAcceptDataOutputDatasetLink({
-                id: action.id,
-                data_output_id: action.data_output_id,
-                dataset_id: action.dataset_id,
-            });
-            handleDeny = () => handleRejectDataOutputDatasetLink({
-                id: action.id,
-                data_output_id: action.data_output_id,
-                dataset_id: action.dataset_id,
-            });
+            handleAccept = () =>
+                handleAcceptDataOutputDatasetLink({
+                    id: action.id,
+                    data_output_id: action.data_output_id,
+                    dataset_id: action.dataset_id,
+                });
+            handleDeny = () =>
+                handleRejectDataOutputDatasetLink({
+                    id: action.id,
+                    data_output_id: action.data_output_id,
+                    dataset_id: action.dataset_id,
+                });
             message = (
                 <Typography.Text>
                     {t('Accepting will create a link from the technical asset to the ')}
@@ -172,14 +179,16 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string,
                     </Link>
                 </Typography.Text>
             );
-            handleAccept = () => handleGrantAccessToDataProduct({
-                assignment_id: action.id,
-                data_product_id: action.data_product.id,
-            });
-            handleDeny = () => handleDenyAccessToDataProduct({
-                assignment_id: action.id,
-                data_product_id: action.data_product.id,
-            });
+            handleAccept = () =>
+                handleGrantAccessToDataProduct({
+                    assignment_id: action.id,
+                    data_product_id: action.data_product.id,
+                });
+            handleDeny = () =>
+                handleDenyAccessToDataProduct({
+                    assignment_id: action.id,
+                    data_product_id: action.data_product.id,
+                });
             message = (
                 <Typography.Text>
                     {t('Accepting will grant the user the role of {{role}} in the', {
@@ -279,7 +288,18 @@ export function PendingRequestsInbox() {
                 }
                 return new Date(a.date).getTime() - new Date(b.date).getTime();
             });
-    }, [pendingActions, t, dataProductColor, datasetColor, handleAcceptDataProductDatasetLink, handleRejectDataProductDatasetLink, handleAcceptDataOutputDatasetLink, handleRejectDataOutputDatasetLink, handleGrantAccessToDataProduct, handleDenyAccessToDataProduct]);
+    }, [
+        pendingActions,
+        t,
+        dataProductColor,
+        datasetColor,
+        handleAcceptDataProductDatasetLink,
+        handleRejectDataProductDatasetLink,
+        handleAcceptDataOutputDatasetLink,
+        handleRejectDataOutputDatasetLink,
+        handleGrantAccessToDataProduct,
+        handleDenyAccessToDataProduct,
+    ]);
 
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination([]);
 
@@ -348,7 +368,7 @@ export function PendingRequestsInbox() {
 
     return (
         <div className={styles.requestsInbox}>
-            <Flex align="flex-end" justify="space-between" >
+            <Flex align="flex-end" justify="space-between">
                 <Typography.Title level={3}>
                     {t('Pending Requests')}
                     <Badge count={slicedPendingActionItems.length} color="gray" className={styles.requestsInfo} />
@@ -375,10 +395,7 @@ export function PendingRequestsInbox() {
                 </Col>
             </Flex>
 
-            <PendingRequestsList
-                pendingActionItems={slicedPendingActionItems}
-                pagination={pagination}
-            />
+            <PendingRequestsList pendingActionItems={slicedPendingActionItems} pagination={pagination} />
         </div>
     );
 }
