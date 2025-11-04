@@ -8,6 +8,8 @@ import { EmptyList } from '@/components/empty/empty-list/empty-list.component';
 import styles from '@/pages/home/components/pending-requests-inbox/pending-requests-inbox.module.scss';
 import type { ActionResolveRequest, PendingActionTypes } from '@/types/pending-actions/pending-actions';
 import { formatDate } from '@/utils/date.helper.ts';
+import posthog from '@/config/posthog-config';
+import { PosthogEvents } from '@/constants/posthog.constants';
 
 export type PendingActionItem = {
     key: string;
@@ -19,22 +21,21 @@ export type PendingActionItem = {
     message: ReactNode;
     color: string;
     tag: ReactNode;
+    type: PendingActionTypes;
     request: ActionResolveRequest;
     icon: ReactNode;
-    type: PendingActionTypes;
+    handleAccept: () => void;
+    handleDeny: () => void;
 };
 
 type PendingRequestsListProps = {
     pendingActionItems: PendingActionItem[];
     pagination: PaginationConfig;
-    onAccept: (request: ActionResolveRequest) => void;
-    onReject: (request: ActionResolveRequest) => void;
 };
+
 export const PendingRequestsList = ({
     pendingActionItems,
     pagination,
-    onAccept,
-    onReject,
 }: PendingRequestsListProps) => {
     const { t } = useTranslation();
 
@@ -66,7 +67,8 @@ export const PendingRequestsList = ({
                                 key={'accept'}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onAccept(item.request);
+                                    posthog.capture(PosthogEvents.REQUESTS_ACCEPT);
+                                    item.handleAccept();
                                 }}
                                 type="link"
                                 size={'small'}
@@ -77,7 +79,8 @@ export const PendingRequestsList = ({
                                 key={'reject'}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onReject(item.request);
+                                    posthog.capture(PosthogEvents.REQUESTS_REJECT);
+                                    item.handleDeny();
                                 }}
                                 type="link"
                                 size={'small'}

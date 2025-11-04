@@ -19,13 +19,23 @@ import {
     type PendingAction,
     PendingActionTypes,
 } from '@/types/pending-actions/pending-actions';
+import type { UserContract } from '@/types/users';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import styles from './pending-requests-inbox.module.scss';
 import { type PendingActionItem, PendingRequestsList } from './pending-requests-list';
 import { type CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
-import { UserContract } from '@/types/users';
+import { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
+import { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
+import { DataProductRoleRequest } from '@/types/roles';
 
-const createPendingItem = (action: PendingAction, t: TFunction, color: string): PendingActionItem | null => {
+const createPendingItem = (action: PendingAction, t: TFunction, color: string,
+    handleAcceptDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void,
+    handleRejectDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void,
+    handleAcceptDataOutputDatasetLink: (request: DataOutputDatasetLinkRequest) => void,
+    handleRejectDataOutputDatasetLink: (request: DataOutputDatasetLinkRequest) => void,
+    handleGrantAccessToDataProduct: (request: DataProductRoleRequest) => void,
+    handleDenyAccessToDataProduct: (request: DataProductRoleRequest) => void,
+): PendingActionItem | null => {
     let link: string;
     let description: ReactElement;
     let navigatePath: string;
@@ -34,6 +44,8 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
     let tag: ReactElement;
     let type: PendingActionTypes;
     let request: ActionResolveRequest;
+    let handleAccept: () => void;
+    let handleDeny: () => void;
     let icon: ReactElement;
 
     function getInitials(firstName: string, lastName: string) {
@@ -51,6 +63,16 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                     </Link>
                 </Typography.Text>
             );
+            handleAccept = () => handleAcceptDataProductDatasetLink({
+                id: action.id,
+                data_product_id: action.data_product_id,
+                dataset_id: action.dataset_id,
+            });
+            handleDeny = () => handleRejectDataProductDatasetLink({
+                id: action.id,
+                data_product_id: action.data_product_id,
+                dataset_id: action.dataset_id,
+            });
             message = (
                 <Flex vertical>
                     <Justification justification={action.justification} />
@@ -97,6 +119,16 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                     </Link>
                 </Typography.Text>
             );
+            handleAccept = () => handleAcceptDataOutputDatasetLink({
+                id: action.id,
+                data_output_id: action.data_output_id,
+                dataset_id: action.dataset_id,
+            });
+            handleDeny = () => handleRejectDataOutputDatasetLink({
+                id: action.id,
+                data_output_id: action.data_output_id,
+                dataset_id: action.dataset_id,
+            });
             message = (
                 <Typography.Text>
                     {t('Accepting will create a link from the technical asset to the ')}
@@ -136,13 +168,21 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
                 <Typography.Text strong>
                     {t('Request for team membership from ')}
                     <Link onClick={(e) => e.stopPropagation()} to={'/'}>
-                            {action.user.first_name} {action.user.last_name}
+                        {action.user.first_name} {action.user.last_name}
                     </Link>
                 </Typography.Text>
             );
+            handleAccept = () => handleGrantAccessToDataProduct({
+                assignment_id: action.id,
+                data_product_id: action.data_product.id,
+            });
+            handleDeny = () => handleDenyAccessToDataProduct({
+                assignment_id: action.id,
+                data_product_id: action.data_product.id,
+            });
             message = (
                 <Typography.Text>
-                    {t('Accepting will grant the user the role of {{role}} in the' , {
+                    {t('Accepting will grant the user the role of {{role}} in the', {
                         role: action.role.name,
                         firstName: action.user.first_name,
                         lastName: action.user.last_name,
@@ -189,6 +229,8 @@ const createPendingItem = (action: PendingAction, t: TFunction, color: string): 
         type: action.pending_action_type,
         request: request,
         icon: icon,
+        handleAccept: handleAccept,
+        handleDeny: handleDeny,
     };
 };
 
@@ -220,6 +262,12 @@ export function PendingRequestsInbox() {
                     action.pending_action_type === PendingActionTypes.DataProductDataset
                     ? datasetColor
                     : dataProductColor,
+                handleAcceptDataProductDatasetLink,
+                handleRejectDataProductDatasetLink,
+                handleAcceptDataOutputDatasetLink,
+                handleRejectDataOutputDatasetLink,
+                handleGrantAccessToDataProduct,
+                handleDenyAccessToDataProduct,
             ),
         );
 
@@ -231,7 +279,7 @@ export function PendingRequestsInbox() {
                 }
                 return new Date(a.date).getTime() - new Date(b.date).getTime();
             });
-    }, [pendingActions, t, dataProductColor, datasetColor]);
+    }, [pendingActions, t, dataProductColor, datasetColor, handleAcceptDataProductDatasetLink, handleRejectDataProductDatasetLink, handleAcceptDataOutputDatasetLink, handleRejectDataOutputDatasetLink, handleGrantAccessToDataProduct, handleDenyAccessToDataProduct]);
 
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination([]);
 
@@ -278,37 +326,6 @@ export function PendingRequestsInbox() {
         setSelectedTypes(typesSet);
     };
 
-    const handleAccept = (request: ActionResolveRequest) => {
-        posthog.capture(PosthogEvents.REQUESTS_ACCEPT);
-
-        switch (request.type) {
-            case PendingActionTypes.DataProductDataset:
-                handleAcceptDataProductDatasetLink(request.request);
-                break;
-            case PendingActionTypes.DataOutputDataset:
-                handleAcceptDataOutputDatasetLink(request.request);
-                break;
-            case PendingActionTypes.DataProductRoleAssignment:
-                handleGrantAccessToDataProduct(request.request);
-                break;
-        }
-    };
-    const handleDeny = (request: ActionResolveRequest) => {
-        posthog.capture(PosthogEvents.REQUESTS_REJECT);
-
-        switch (request.type) {
-            case PendingActionTypes.DataProductDataset:
-                handleRejectDataProductDatasetLink(request.request);
-                break;
-            case PendingActionTypes.DataOutputDataset:
-                handleRejectDataOutputDatasetLink(request.request);
-                break;
-            case PendingActionTypes.DataProductRoleAssignment:
-                handleDenyAccessToDataProduct(request.request);
-                break;
-        }
-    };
-
     if (pendingItems.length === 0 && !isFetching) {
         return (
             <div className={styles.requestsInbox}>
@@ -331,11 +348,11 @@ export function PendingRequestsInbox() {
 
     return (
         <div className={styles.requestsInbox}>
-            <Flex align="flex-end" justify="space-between">
+            <Flex align="flex-end" justify="space-between" >
                 <Typography.Title level={3}>
                     {t('Pending Requests')}
                     <Badge count={slicedPendingActionItems.length} color="gray" className={styles.requestsInfo} />
-                </Typography.Title>{' '}
+                </Typography.Title>
             </Flex>
             <Flex align="center" justify="space-between">
                 <Col span={24}>
@@ -361,12 +378,6 @@ export function PendingRequestsInbox() {
             <PendingRequestsList
                 pendingActionItems={slicedPendingActionItems}
                 pagination={pagination}
-                onAccept={(item) => {
-                    handleAccept(item);
-                }}
-                onReject={(item) => {
-                    handleDeny(item);
-                }}
             />
         </div>
     );
