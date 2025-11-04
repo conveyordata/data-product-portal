@@ -78,7 +78,7 @@ export function Cart() {
     const selectedDataProductId = Form.useWatch('dataProductId', form);
 
     const { data: selectedDataProduct, refetch: refetchSelectedDataProduct } = useGetDataProductByIdQuery(
-        selectedDataProductId || '',
+        selectedDataProductId ?? '',
         {
             skip: !selectedDataProductId,
         },
