@@ -39,7 +39,7 @@ export function Cart() {
 
     const currentUser = useSelector(selectCurrentUser);
     const { data: userDataProducts, isFetching: isFetchingUserDataProducts } = useGetUserDataProductsQuery(
-        currentUser!.id,
+        currentUser?.id || '',
         {
             skip: currentUser === null,
         },
@@ -50,7 +50,7 @@ export function Cart() {
         if (savedData) {
             form.setFieldsValue(JSON.parse(savedData));
         }
-    }, []);
+    }, [form]);
 
     type CartFormData = {
         dataProductId?: string;
@@ -62,8 +62,8 @@ export function Cart() {
         }
         requestDatasetAccessForDataProduct({
             datasetIds: cartDatasetIds,
-            dataProductId: values.dataProductId!,
-            justification: values.justification!,
+            dataProductId: values.dataProductId,
+            justification: values.justification,
         });
     };
     const onValuesChange: FormProps<CartFormData>['onValuesChange'] = (_, values: CartFormData) => {
@@ -78,7 +78,7 @@ export function Cart() {
     const selectedDataProductId = Form.useWatch('dataProductId', form);
 
     const { data: selectedDataProduct, refetch: refetchSelectedDataProduct } = useGetDataProductByIdQuery(
-        selectedDataProductId!,
+        selectedDataProductId || '',
         {
             skip: !selectedDataProductId,
         },
@@ -103,12 +103,12 @@ export function Cart() {
     }, [selectedDataProduct?.datasets, cartDatasetIds]);
 
     useEffect(() => {
-        if (requestingAccessSuccess) {
+        if (requestingAccessSuccess && selectedDataProductId) {
             dispatch(clearCart());
             localStorage.removeItem(cartFormDataStorageKey);
             dispatchMessage({ content: t('Your requests have successfully been created.'), type: 'success' });
 
-            navigate(createDataProductIdPath(selectedDataProductId!, DataProductTabKeys.Datasets));
+            navigate(createDataProductIdPath(selectedDataProductId, DataProductTabKeys.Datasets));
         }
     }, [requestingAccessSuccess, selectedDataProductId, dispatch, navigate, t]);
 
