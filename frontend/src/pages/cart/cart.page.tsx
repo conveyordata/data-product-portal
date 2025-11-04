@@ -18,6 +18,8 @@ import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-s
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 
+const cartFormDataStorageKey = 'cart-form-data';
+
 export function Cart() {
     const { t } = useTranslation();
     const { token } = theme.useToken();
@@ -41,12 +43,23 @@ export function Cart() {
             skip: currentUser === null,
         },
     );
-    type FieldType = {
+    const [form] = Form.useForm<CartFormData>();
+    useEffect(() => {
+        const savedData = localStorage.getItem(cartFormDataStorageKey);
+        if (savedData) {
+            form.setFieldsValue(JSON.parse(savedData));
+        }
+    }, []);
+
+    type CartFormData = {
         dataProductId?: string;
         // justification?: string;
     };
-    const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
+    const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
         requestDatasetAccessForDataProduct({ datasetIds: cartDatasetIds, dataProductId: values.dataProductId! });
+    };
+    const onValuesChange: FormProps<CartFormData>['onValuesChange'] = (_, values: CartFormData) => {
+        localStorage.setItem(cartFormDataStorageKey, JSON.stringify(values));
     };
     const dataProductOptions = userDataProducts?.map((dataProduct) => {
         return {
@@ -54,11 +67,10 @@ export function Cart() {
             label: dataProduct?.name,
         };
     });
-    const [form] = Form.useForm();
     const selectedDataProductId = Form.useWatch('dataProductId', form);
 
     const { data: selectedDataProduct, refetch: refetchSelectedDataProduct } = useGetDataProductByIdQuery(
-        selectedDataProductId,
+        selectedDataProductId!,
         {
             skip: !selectedDataProductId,
         },
@@ -85,9 +97,10 @@ export function Cart() {
     useEffect(() => {
         if (requestingAccessSuccess) {
             dispatch(clearCart());
+            localStorage.removeItem(cartFormDataStorageKey);
             dispatchMessage({ content: t('Your requests have successfully been created.'), type: 'success' });
 
-            navigate(createDataProductIdPath(selectedDataProductId, DataProductTabKeys.Datasets));
+            navigate(createDataProductIdPath(selectedDataProductId!, DataProductTabKeys.Datasets));
         }
     }, [requestingAccessSuccess, selectedDataProductId]);
 
@@ -137,8 +150,13 @@ export function Cart() {
             </Col>
             <Col span={14}>
                 <Card title={<Typography.Title level={3}>{t('Data checkout')}</Typography.Title>}>
-                    <Form layout={'vertical'} onFinish={onFinish} form={form}>
-                        <Form.Item<FieldType>
+                    <Form<CartFormData>
+                        layout={'vertical'}
+                        onFinish={onFinish}
+                        form={form}
+                        onValuesChange={onValuesChange}
+                    >
+                        <Form.Item<CartFormData>
                             name="dataProductId"
                             label={t('Data product')}
                             rules={[{ required: true, message: t('Please select a data product') }]}
