@@ -11,7 +11,7 @@ A core scenario is: A single query (e.g., query_id: 'xyz') can join multiple ass
 
 ## Decision Drivers
 
-* Query Performance: The API endpoints must return data quickly. 
+* Query Performance: The API endpoints must return data quickly.
 * Storage Efficiency: We must avoid storing raw query logs.
 * Metric Accuracy: The model must disambiguate between query counts (for time-series) and asset touch counts (for popularity).
 * Flexibility: The model must support future granularities (daily, monthly) and longer time ranges.
@@ -37,7 +37,7 @@ SELECT order_id, customer_id, product_id, pice FROM OP1.orders;
 SELECT order_id, customer, product, pice FROM P1.orders INNER JOIN OP1.customers ON OP1.orders.customer_id = OP1.customers.id;
 ```
 
-This would result in the following stats: 
+This would result in the following stats:
 * Consumer (C1, OP1) query count: 1
 * Consumer (C2, OP1) query count: 1
 * Asset (orders) query count: 2

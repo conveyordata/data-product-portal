@@ -16,7 +16,7 @@ We need a comprehensive set of API endpoints for the usage feature. This include
 ## Considered Options
 
 * **Option 1: One Monolithic Endpoint** Create a single endpoint `/api/datasets/{id}/usage` that handles everything.
-* **Option 2: Separate Endpoints per Use Case** Create distinct endpoints for consumers (GET), producers (PUT/POST/DEL), and the ingestion pipeline.  
+* **Option 2: Separate Endpoints per Use Case** Create distinct endpoints for consumers (GET), producers (PUT/POST/DEL), and the ingestion pipeline.
 
 ## Decision Outcome
 
@@ -43,7 +43,7 @@ We need a comprehensive set of API endpoints for the usage feature. This include
 
 #### Producer-Facing Endpoints (Metadata Management)
 
-As we want to support sorting operations and don't expect too many curated queries, we provide as single atomic operation. 
+As we want to support sorting operations and don't expect too many curated queries, we provide as single atomic operation.
 
 1. Create new curated query
     * `PUT /api/datasets/{id}/usage/curated-queries`
@@ -77,7 +77,7 @@ Push daily stats
 }
 ```
 * Success Response (202 Accepted): The data has been accepted for batch processing.
-* Limits: Requires payload size limit on this. We can solve splitting in the SDK (ADR-0007). 
+* Limits: Requires payload size limit on this. We can solve splitting in the SDK (ADR-0007).
 
 ## Pros and Cons of the Options
 
