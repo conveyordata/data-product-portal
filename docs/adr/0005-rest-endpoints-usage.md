@@ -20,7 +20,7 @@ We need a comprehensive set of API endpoints for the usage feature. This include
 
 ## Decision Outcome
 
-**Chosen option:** *Option X: Separate Endpoints per Use Case*. Clean and more maintainable.
+**Chosen option:** *Option 2: Separate Endpoints per Use Case*. Clean and more maintainable.
 
 ### Confirmation
 
