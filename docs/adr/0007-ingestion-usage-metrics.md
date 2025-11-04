@@ -1,7 +1,7 @@
 # Ingestion of Output Port Usage Metrics
 
 ## Context and Problem Statement
-We must get daily aggregated usage data from producers (like Snowflake) into our application. 
+We must get daily aggregated usage data from producers (like Snowflake) into our application.
 
 The ingestion mechanism must be simple for producers, who will need to run two different aggregation queries on their raw query logs and push the results to us.
 
@@ -20,7 +20,7 @@ The ingestion mechanism must be simple for producers, who will need to run two d
 
 ## Decision Outcome
 
-**Chosen option:** *Option 2: Fluent Python SDK (Simple API Wrapper)*. While we would love to go for option 3, we think option 2 is the most realistic atm. We can take some pieces (interface) from option 3.
+**Chosen option:** *Option 2: Fluent Python SDK (Simple API Wrapper)*. While we would love to go for option 3, we think option 2 is the most realistic atm. We can already take some pieces (e.g. the interface) from option 3.
 
 * It provides a Good DX for producers by abstracting all API complexity (auth, retries, payload formatting) into a single client.push_usage_stats(...) method.
 
@@ -33,7 +33,7 @@ Description how this will be reflected in the appliction.
 
 The SDK will provide a single method. This method will call the API endpoint defined in ADR-0006. Our API backend will be responsible for transactionally committing both payloads. This provides the best guarantee of data consistency.
 
-Ideally we are able to generate a client completly from the OpenAPI spec and add a usage layer on top. 
+Ideally we are able to generate a client completly from the OpenAPI spec and add a usage layer on top.
 
 ```python
 # Producer's script (e.g., in Airflow)
