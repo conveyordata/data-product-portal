@@ -27,6 +27,23 @@ A core scenario is: A single query (e.g., query_id: 'xyz') can join multiple ass
 
 ### Confirmation
 
+As a single query can join multiple assets (tables), we propose to split the stats into 2 different tables, one for the output port stats and one for the asset stats. Here is an example:
+
+```
+-- Query from consumer C1 on output port OP1
+SELECT order_id, customer_id, product_id, pice FROM OP1.orders;
+
+-- Query from consumer C2 on output port OP1
+SELECT order_id, customer, product, pice FROM P1.orders INNER JOIN OP1.customers ON OP1.orders.customer_id = OP1.customers.id;
+```
+
+This would result in the following stats: 
+
+Consumer (C1, OP1) query count: 1
+Consumer (C2, OP1) query count: 1
+Asset (orders) query count: 2
+Asset (customers) query count: 1
+
 #### Table 1: outpur_port_query_stats_daily
 
 Purpose: To power the "Queries over time" and "Query distribution per consumer" charts.
