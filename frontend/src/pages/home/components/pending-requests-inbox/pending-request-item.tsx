@@ -1,5 +1,6 @@
 import { UserOutlined } from '@ant-design/icons';
 import { Avatar, Button, Flex, List, Typography, theme } from 'antd';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
@@ -86,17 +87,12 @@ export function PendingItem({ pendingAction }: Props) {
         }
     };
 
-    const getContent = () => {
-        const isDatasetType =
-            pendingAction.pending_action_type === PendingActionTypes.DataOutputDataset ||
-            pendingAction.pending_action_type === PendingActionTypes.DataProductDataset;
-        const color = isDatasetType ? datasetColor : dataProductColor;
-
+    const content = useMemo(() => {
         switch (pendingAction.pending_action_type) {
             case PendingActionTypes.DataProductDataset:
                 return {
                     icon: <DatasetOutlined />,
-                    color,
+                    color: datasetColor,
                     description: (
                         <Typography.Text>
                             {t('Request for read access from the data product ')}
@@ -130,7 +126,7 @@ export function PendingItem({ pendingAction }: Props) {
             case PendingActionTypes.DataOutputDataset:
                 return {
                     icon: <DatasetOutlined />,
-                    color,
+                    color: datasetColor,
                     description: (
                         <Typography.Text strong>
                             {t('Request for the creation of a link coming from the technical asset ')}
@@ -164,7 +160,7 @@ export function PendingItem({ pendingAction }: Props) {
             case PendingActionTypes.DataProductRoleAssignment:
                 return {
                     icon: <DataProductOutlined />,
-                    color,
+                    color: dataProductColor,
                     description: (
                         <Typography.Text strong>
                             {t('Request for team membership from ')}
@@ -189,9 +185,8 @@ export function PendingItem({ pendingAction }: Props) {
                     navigatePath: createDataProductIdPath(pendingAction.data_product.id, DataProductTabKeys.Team),
                 };
         }
-    };
+    }, [pendingAction, dataProductColor, datasetColor, t, navigate]);
 
-    const content = getContent();
     if (!content) return null;
 
     const getInitials = (firstName: string, lastName: string) =>
