@@ -6,7 +6,6 @@ import { PosthogEvents } from '@/constants/posthog.constants';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
 import { DatasetMarketplaceCard } from './dataset-marketplace-card/dataset-marketplace-card.component';
-import styles from './marketplace.module.scss';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -58,19 +57,17 @@ export function Marketplace() {
 
     return (
         <div>
-            <Flex align={'center'} gap={'small'}>
-                <Typography.Title level={3}>{t('Marketplace')}</Typography.Title>
-                <Form style={{ flex: 1 }}>
-                    <Input.Search
-                        style={{ height: '40px' }}
-                        placeholder={t('Search output ports by name')}
-                        value={searchTerm}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                        allowClear
-                    />
-                </Form>
-            </Flex>
-            <Flex wrap="wrap" className={styles.marketplacePageContainer}>
+            <Typography.Title level={3}>{t('Marketplace')}</Typography.Title>
+            <Form style={{ flex: 1 }}>
+                <Input.Search
+                    style={{ height: '40px' }}
+                    placeholder={t('Search output ports by name')}
+                    value={searchTerm}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    allowClear
+                />
+            </Form>
+            <Flex wrap="wrap" gap={'small'}>
                 {paginatedOutputPorts.map((dataset) => (
                     <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />
                 ))}
