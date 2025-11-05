@@ -262,7 +262,7 @@ export function PendingRequestsInbox() {
         handleDenyAccessToDataProduct,
     } = usePendingActionHandlers();
 
-    const pendingItems = useMemo(() => {
+    const slicedPendingActionItems = useMemo(() => {
         const items = pendingActions?.map((action) =>
             createPendingItem(
                 action,
@@ -280,7 +280,7 @@ export function PendingRequestsInbox() {
             ),
         );
 
-        return (items ?? [])
+        const allItems = (items ?? [])
             .filter((item) => item !== null)
             .sort((a, b) => {
                 if (!a?.date || !b?.date) {
@@ -288,6 +288,8 @@ export function PendingRequestsInbox() {
                 }
                 return new Date(a.date).getTime() - new Date(b.date).getTime();
             });
+
+        return selectedTypes.size === 0 ? allItems : allItems.filter((item) => selectedTypes.has(item.type));
     }, [
         pendingActions,
         t,
@@ -299,6 +301,7 @@ export function PendingRequestsInbox() {
         handleRejectDataOutputDatasetLink,
         handleGrantAccessToDataProduct,
         handleDenyAccessToDataProduct,
+        selectedTypes,
     ]);
 
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination([]);
@@ -309,17 +312,6 @@ export function PendingRequestsInbox() {
             pageSize,
         });
     };
-
-    const slicedPendingActionItems = useMemo(() => {
-        return (
-            selectedTypes.size === 0 ? pendingItems : pendingItems.filter((item) => selectedTypes.has(item.type))
-        ).sort((a, b) => {
-            if (!a?.date || !b?.date) {
-                return 0;
-            }
-            return new Date(a.date).getTime() - new Date(b.date).getTime();
-        });
-    }, [pendingItems, selectedTypes]);
 
     useEffect(() => {
         resetPagination();
@@ -346,7 +338,7 @@ export function PendingRequestsInbox() {
         setSelectedTypes(typesSet);
     };
 
-    if (pendingItems.length === 0 && !isFetching) {
+    if (pendingActions?.length === 0 && !isFetching) {
         return (
             <div className={styles.requestsInbox}>
                 <Typography.Title level={1} className={styles.welcomeContent}>
