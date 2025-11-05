@@ -1,6 +1,7 @@
-import { Flex, Form, Input, Pagination, Typography } from 'antd';
+import { Flex, Pagination } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import SearchPage from '@/components/search-page/search-page.component.tsx';
 import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
@@ -57,19 +58,11 @@ export function Marketplace() {
     }, [searchTerm]);
 
     return (
-        <div>
-            <Flex align={'center'} gap={'small'}>
-                <Typography.Title level={3}>{t('Marketplace')}</Typography.Title>
-                <Form style={{ flex: 1 }}>
-                    <Input.Search
-                        style={{ height: '40px' }}
-                        placeholder={t('Search output ports by name')}
-                        value={searchTerm}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                        allowClear
-                    />
-                </Form>
-            </Flex>
+        <SearchPage
+            title={t('Marketplace')}
+            searchPlaceholder={t('Search output ports by name')}
+            onSearch={handleSearchChange}
+        >
             <Flex wrap="wrap" className={styles.marketplacePageContainer}>
                 {paginatedOutputPorts.map((dataset) => (
                     <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />
@@ -89,9 +82,16 @@ export function Marketplace() {
                         total={filteredOutputPorts.length}
                         onChange={handlePageChange}
                         showSizeChanger={false} // Disable page size changer
+                        showTotal={(total, range) =>
+                            t('Showing {{range0}}-{{range1}} of {{total}} output ports', {
+                                range0: range[0],
+                                range1: range[1],
+                                total: total,
+                            })
+                        }
                     />
                 </Flex>
             )}
-        </div>
+        </SearchPage>
     );
 }

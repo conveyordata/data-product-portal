@@ -1,24 +1,22 @@
-import { Flex, Form, Input, Pagination, Table, Typography } from 'antd';
-import { useCallback, useMemo } from 'react';
+import { Table } from 'antd';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { useTablePagination } from '@/hooks/use-table-pagination';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import SearchPage from '@/components/search-page/search-page.component.tsx';
+import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
+import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import {
     useCreateGlobalRoleAssignmentMutation,
     useDecideGlobalRoleAssignmentMutation,
     useDeleteGlobalRoleAssignmentMutation,
     useUpdateGlobalRoleAssignmentMutation,
-} from '@/store/features/role-assignments/global-roles-api-slice';
-import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice';
-import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice';
-import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { type GlobalRoleAssignmentContract, Scope } from '@/types/roles/role.contract';
-import type { SearchForm } from '@/types/shared';
-import type { UsersGetContract } from '@/types/users/user.contract';
+} from '@/store/features/role-assignments/global-roles-api-slice.ts';
+import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
+import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import { type GlobalRoleAssignmentContract, Scope } from '@/types/roles/role.contract.ts';
+import type { UsersGetContract } from '@/types/users/user.contract.ts';
 import styles from './people-table.module.scss';
-import { getPeopleTableColumns } from './people-table-columns';
+import { getPeopleTableColumns } from './people-table-columns.tsx';
 
 function filterUsers(users: UsersGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -31,17 +29,15 @@ function filterUsers(users: UsersGetContract, searchTerm?: string) {
     );
 }
 
-export function PeopleTable() {
+export function PeoplePage() {
     const { t } = useTranslation();
     const { data: users = [], isFetching } = useGetAllUsersQuery();
     const { data: roles = [] } = useGetRolesQuery(Scope.GLOBAL);
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
     const canAssignGlobalRole = access?.allowed ?? false;
+    const [searchTerm, setSearchTerm] = useState('');
 
-    const [searchForm] = Form.useForm<SearchForm>();
-    const searchTerm = Form.useWatch('search', searchForm);
     const filteredUsers = useMemo(() => filterUsers(users, searchTerm), [users, searchTerm]);
-    const { pagination, handlePaginationChange } = useTablePagination(filteredUsers);
     const [createGlobalRoleAssignment] = useCreateGlobalRoleAssignmentMutation();
     const [updateGlobalRoleAssignment] = useUpdateGlobalRoleAssignmentMutation();
     const [decideGlobalRoleAssignment] = useDecideGlobalRoleAssignmentMutation();
@@ -131,57 +127,25 @@ export function PeopleTable() {
         [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole],
     );
 
-    const handlePageChange = (page: number, pageSize: number) => {
-        handlePaginationChange({
-            ...pagination,
-            current: page,
-            pageSize,
-        });
-    };
-
     return (
-        <Flex vertical className={styles.tableContainer}>
-            <Flex className={styles.searchContainer}>
-                <Typography.Title level={3}>{t('People')}</Typography.Title>
-                <Form<SearchForm> form={searchForm} className={styles.searchForm}>
-                    <Form.Item<SearchForm> name={'search'} initialValue={''} className={styles.formItem}>
-                        <Input.Search placeholder={t('Search people by name')} allowClear />
-                    </Form.Item>
-                </Form>
-            </Flex>
-            <Flex vertical className={styles.tableFilters}>
-                <Flex align="flex-end" justify="flex-end" className={styles.tableBar}>
-                    <Pagination
-                        current={pagination.current}
-                        pageSize={pagination.pageSize}
-                        total={users.length}
-                        onChange={handlePageChange}
-                        size="small"
-                        showTotal={(total, range) =>
-                            t('Showing {{range0}}-{{range1}} of {{count}} people', {
-                                range0: range[0],
-                                range1: range[1],
-                                count: total,
-                            })
-                        }
-                    />
-                </Flex>
-
-                <Table<UsersGetContract[0]>
-                    className={styles.table}
-                    columns={columns}
-                    dataSource={filteredUsers}
-                    pagination={{
-                        ...pagination,
-                        position: [],
-                    }}
-                    rowKey={(record) => record.id}
-                    loading={isFetching}
-                    rowHoverable
-                    rowClassName={styles.row}
-                    size={'small'}
-                />
-            </Flex>
-        </Flex>
+        <SearchPage title={t('People')} onSearch={setSearchTerm} searchPlaceholder={t('Search people by name')}>
+            <Table<UsersGetContract[0]>
+                columns={columns}
+                dataSource={filteredUsers}
+                pagination={{
+                    showTotal: (total, range) =>
+                        t('Showing {{range0}}-{{range1}} of {{count}} people', {
+                            range0: range[0],
+                            range1: range[1],
+                            count: total,
+                        }),
+                }}
+                rowKey={(record) => record.id}
+                loading={isFetching}
+                rowHoverable
+                rowClassName={styles.row}
+                size={'small'}
+            />
+        </SearchPage>
     );
 }
