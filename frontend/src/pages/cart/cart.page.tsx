@@ -5,7 +5,7 @@ import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
-import { CartOverview } from '@/components/cart/cart-overview.component.tsx';
+import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
@@ -146,13 +146,6 @@ export function Cart() {
                     loading={fetchingDatasets}
                     cartDatasets={cartDatasets}
                     overlappingDatasetIds={overlappingDatasetIds}
-                    footer={
-                        <Flex justify={'flex-end'}>
-                            {t('{{count}} output ports', {
-                                count: cartDatasets?.length || 0,
-                            })}
-                        </Flex>
-                    }
                     selectedDataProductId={selectedDataProductId}
                 />
             </Col>
@@ -194,7 +187,7 @@ export function Cart() {
                                 style={{ marginBottom: 16 }}
                             />
                         )}
-                        <Form.Item<FieldType>
+                        <Form.Item<CartFormData>
                             name="justification"
                             label={'Business justification'}
                             rules={[
