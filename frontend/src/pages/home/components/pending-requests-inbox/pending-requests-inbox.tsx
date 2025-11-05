@@ -1,308 +1,30 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
-import { Badge, Col, Empty, Flex, Pagination, Typography, theme } from 'antd';
-import type { TFunction } from 'i18next';
-import { type ReactElement, useEffect, useMemo, useState } from 'react';
+import { Badge, Col, Empty, Flex, Pagination, Typography } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
-import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
-import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import posthog from '@/config/posthog-config';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
-import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
-import type { DataOutputDatasetLinkRequest } from '@/types/data-output-dataset';
-import type { DataProductDatasetLinkRequest } from '@/types/data-product-dataset';
-import { createDataOutputIdPath, createDataProductIdPath, createDatasetIdPath } from '@/types/navigation';
-import {
-    type ActionResolveRequest,
-    type PendingAction,
-    PendingActionTypes,
-} from '@/types/pending-actions/pending-actions';
-import type { DataProductRoleRequest } from '@/types/roles';
-import type { UserContract } from '@/types/users';
-import { usePendingActionHandlers } from '@/utils/pending-request.helper';
+import { PendingActionTypes } from '@/types/pending-actions/pending-actions';
 import styles from './pending-requests-inbox.module.scss';
-import { type PendingActionItem, PendingRequestsList } from './pending-requests-list';
+import { PendingRequestsList } from './pending-requests-list';
 import { type CustomPendingRequestsTabKey, SelectableTabs } from './pending-requests-menu-tabs';
-
-const createPendingItem = (
-    action: PendingAction,
-    t: TFunction,
-    color: string,
-    handleAcceptDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void,
-    handleRejectDataProductDatasetLink: (request: DataProductDatasetLinkRequest) => void,
-    handleAcceptDataOutputDatasetLink: (request: DataOutputDatasetLinkRequest) => void,
-    handleRejectDataOutputDatasetLink: (request: DataOutputDatasetLinkRequest) => void,
-    handleGrantAccessToDataProduct: (request: DataProductRoleRequest) => void,
-    handleDenyAccessToDataProduct: (request: DataProductRoleRequest) => void,
-): PendingActionItem | null => {
-    let link: string;
-    let description: ReactElement;
-    let navigatePath: string;
-    let actor: UserContract;
-    let message: ReactElement;
-    let tag: ReactElement;
-    let type: PendingActionTypes;
-    let request: ActionResolveRequest;
-    let handleAccept: () => void;
-    let handleDeny: () => void;
-    let icon: ReactElement;
-
-    function getInitials(firstName: string, lastName: string) {
-        return (firstName?.charAt(0) || '') + (lastName ? lastName.charAt(0) : '');
-    }
-    switch (action.pending_action_type) {
-        case PendingActionTypes.DataProductDataset:
-            icon = <DatasetOutlined />;
-            link = createDataProductIdPath(action.data_product_id);
-            description = (
-                <Typography.Text>
-                    {t('Request for read access from the data product ')}
-                    <Link onClick={(e) => e.stopPropagation()} to={link}>
-                        {action.data_product.name}
-                    </Link>
-                </Typography.Text>
-            );
-            handleAccept = () =>
-                handleAcceptDataProductDatasetLink({
-                    id: action.id,
-                    data_product_id: action.data_product_id,
-                    dataset_id: action.dataset_id,
-                });
-            handleDeny = () =>
-                handleRejectDataProductDatasetLink({
-                    id: action.id,
-                    data_product_id: action.data_product_id,
-                    dataset_id: action.dataset_id,
-                });
-            message = (
-                <Flex vertical>
-                    <Justification justification={action.justification} />
-                    <Typography.Text>
-                        {t('Accepting will grant the data product read access on the ')}
-                        <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                            {action.dataset.name}
-                        </Link>
-                        {t(' output port.')}
-                    </Typography.Text>
-                </Flex>
-            );
-            tag = (
-                <Typography.Text
-                    style={{
-                        color: color,
-                    }}
-                    strong
-                >
-                    {t('{{name}} Output port', { name: action.dataset.name })}
-                </Typography.Text>
-            );
-            navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataProduct);
-            actor = action.requested_by;
-            type = PendingActionTypes.DataProductDataset as PendingActionTypes.DataProductDataset;
-            request = {
-                type: PendingActionTypes.DataProductDataset as PendingActionTypes.DataProductDataset,
-                request: {
-                    id: action.id,
-                    data_product_id: action.data_product_id,
-                    dataset_id: action.dataset_id,
-                },
-            };
-            break;
-
-        case PendingActionTypes.DataOutputDataset:
-            icon = <DatasetOutlined color="" />;
-            link = createDataOutputIdPath(action.data_output_id, action.data_output.owner_id);
-            description = (
-                <Typography.Text strong>
-                    {t('Request for the creation of a link coming from the technical asset ')}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        {action.data_output.name}
-                    </Link>
-                </Typography.Text>
-            );
-            handleAccept = () =>
-                handleAcceptDataOutputDatasetLink({
-                    id: action.id,
-                    data_output_id: action.data_output_id,
-                    dataset_id: action.dataset_id,
-                });
-            handleDeny = () =>
-                handleRejectDataOutputDatasetLink({
-                    id: action.id,
-                    data_output_id: action.data_output_id,
-                    dataset_id: action.dataset_id,
-                });
-            message = (
-                <Typography.Text>
-                    {t('Accepting will create a link from the technical asset to the ')}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.dataset_id)}>
-                        {action.dataset.name}
-                    </Link>
-                    {t(' output port.')}
-                </Typography.Text>
-            );
-            tag = (
-                <Typography.Text
-                    style={{
-                        color: color,
-                    }}
-                    strong
-                >
-                    {t('{{name}} Output port', { name: action.dataset.name })}
-                </Typography.Text>
-            );
-            navigatePath = createDatasetIdPath(action.dataset_id, DatasetTabKeys.DataOutput);
-            actor = action.requested_by;
-            type = PendingActionTypes.DataOutputDataset as PendingActionTypes.DataOutputDataset;
-            request = {
-                type: PendingActionTypes.DataOutputDataset as PendingActionTypes.DataOutputDataset,
-                request: {
-                    id: action.id,
-                    data_output_id: action.data_output_id,
-                    dataset_id: action.dataset_id,
-                },
-            };
-            break;
-
-        case PendingActionTypes.DataProductRoleAssignment:
-            icon = <DataProductOutlined />;
-            link = createDataProductIdPath(action.data_product.id);
-            description = (
-                <Typography.Text strong>
-                    {t('Request for team membership from ')}
-                    <Link onClick={(e) => e.stopPropagation()} to={'/'}>
-                        {action.user.first_name} {action.user.last_name}
-                    </Link>
-                </Typography.Text>
-            );
-            handleAccept = () =>
-                handleGrantAccessToDataProduct({
-                    assignment_id: action.id,
-                    data_product_id: action.data_product.id,
-                });
-            handleDeny = () =>
-                handleDenyAccessToDataProduct({
-                    assignment_id: action.id,
-                    data_product_id: action.data_product.id,
-                });
-            message = (
-                <Typography.Text>
-                    {t('Accepting will grant the user the role of {{role}} in the', {
-                        role: action.role.name,
-                        firstName: action.user.first_name,
-                        lastName: action.user.last_name,
-                    })}
-                    <Link onClick={(e) => e.stopPropagation()} to={createDatasetIdPath(action.data_product.id)}>
-                        {action.data_product.name}
-                    </Link>
-                    {t(' data product.')}
-                </Typography.Text>
-            );
-            tag = (
-                <Typography.Text
-                    style={{
-                        color: color,
-                    }}
-                    strong
-                >
-                    {t('{{name}} Data Product', { name: action.data_product.name })}
-                </Typography.Text>
-            );
-            navigatePath = createDataProductIdPath(action.data_product.id, DataProductTabKeys.Team);
-            actor = action.user;
-            type = PendingActionTypes.DataProductRoleAssignment as PendingActionTypes.DataProductRoleAssignment;
-            request = {
-                type: PendingActionTypes.DataProductRoleAssignment as PendingActionTypes.DataProductRoleAssignment,
-                request: { assignment_id: action.id, data_product_id: action.data_product.id },
-            };
-            break;
-
-        default:
-            return null;
-    }
-
-    return {
-        key: type + action.id,
-        description: description,
-        navigatePath: navigatePath,
-        date: action.requested_on ?? '',
-        author: `${actor.first_name} ${actor.last_name}`,
-        initials: getInitials(actor.first_name, actor.last_name),
-        message: message,
-        color: color,
-        tag: tag,
-        type: action.pending_action_type,
-        request: request,
-        icon: icon,
-        handleAccept: handleAccept,
-        handleDeny: handleDeny,
-    };
-};
 
 export function PendingRequestsInbox() {
     const { t } = useTranslation();
-    const {
-        token: { colorPrimary: dataProductColor, colorPrimaryActive: datasetColor },
-    } = theme.useToken();
     const [activeTab, setActiveTab] = useState<CustomPendingRequestsTabKey>('all');
     const [selectedTypes, setSelectedTypes] = useState<Set<PendingActionTypes>>(new Set());
 
     const { data: pendingActions, isFetching } = useGetPendingActionsQuery();
 
-    const {
-        handleAcceptDataProductDatasetLink,
-        handleRejectDataProductDatasetLink,
-        handleAcceptDataOutputDatasetLink,
-        handleRejectDataOutputDatasetLink,
-        handleGrantAccessToDataProduct,
-        handleDenyAccessToDataProduct,
-    } = usePendingActionHandlers();
-
-    const slicedPendingActionItems = useMemo(() => {
-        const items = pendingActions?.map((action) =>
-            createPendingItem(
-                action,
-                t,
-                action.pending_action_type === PendingActionTypes.DataOutputDataset ||
-                    action.pending_action_type === PendingActionTypes.DataProductDataset
-                    ? datasetColor
-                    : dataProductColor,
-                handleAcceptDataProductDatasetLink,
-                handleRejectDataProductDatasetLink,
-                handleAcceptDataOutputDatasetLink,
-                handleRejectDataOutputDatasetLink,
-                handleGrantAccessToDataProduct,
-                handleDenyAccessToDataProduct,
-            ),
-        );
-
-        const allItems = (items ?? [])
-            .filter((item) => item !== null)
-            .sort((a, b) => {
-                if (!a?.date || !b?.date) {
-                    return 0;
-                }
-                return new Date(a.date).getTime() - new Date(b.date).getTime();
-            });
-
-        return selectedTypes.size === 0 ? allItems : allItems.filter((item) => selectedTypes.has(item.type));
-    }, [
-        pendingActions,
-        t,
-        dataProductColor,
-        datasetColor,
-        handleAcceptDataProductDatasetLink,
-        handleRejectDataProductDatasetLink,
-        handleAcceptDataOutputDatasetLink,
-        handleRejectDataOutputDatasetLink,
-        handleGrantAccessToDataProduct,
-        handleDenyAccessToDataProduct,
-        selectedTypes,
-    ]);
+    const filteredPendingActions = useMemo(() => {
+        if (!pendingActions) return [];
+        return selectedTypes.size === 0
+            ? pendingActions
+            : pendingActions.filter((item) => selectedTypes.has(item.pending_action_type));
+    }, [pendingActions, selectedTypes]);
 
     const { pagination, handlePaginationChange, resetPagination } = useTablePagination([]);
 
@@ -363,7 +85,7 @@ export function PendingRequestsInbox() {
             <Flex align="flex-end" justify="space-between">
                 <Typography.Title level={3}>
                     {t('Pending Requests')}
-                    <Badge count={slicedPendingActionItems.length} color="gray" className={styles.requestsInfo} />
+                    <Badge count={filteredPendingActions.length} color="gray" className={styles.requestsInfo} />
                 </Typography.Title>
             </Flex>
             <Flex align="center" justify="space-between">
@@ -372,7 +94,7 @@ export function PendingRequestsInbox() {
                     <Pagination
                         current={pagination.current}
                         pageSize={pagination.pageSize}
-                        total={slicedPendingActionItems.length}
+                        total={filteredPendingActions.length}
                         onChange={handlePageChange}
                         size="small"
                         className={styles.pagination}
@@ -387,7 +109,7 @@ export function PendingRequestsInbox() {
                 </Col>
             </Flex>
 
-            <PendingRequestsList pendingActionItems={slicedPendingActionItems} pagination={pagination} />
+            <PendingRequestsList pendingActions={filteredPendingActions} pagination={pagination} />
         </div>
     );
 }
