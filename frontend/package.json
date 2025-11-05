@@ -8,11 +8,12 @@
         "build": "vite build",
         "build:prd": "vite build --mode production",
         "copy-config": "cp config.local.js public/config.js",
-        "check": "biome check",
-        "check:fix": "biome check --write",
+        "check": "biome check && npm run typecheck && npm run validate-translations",
+        "check:fix": "biome check --write && npm run typecheck && npm run validate-translations",
         "start": "npm run copy-config && npm run build && vite preview",
         "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js",
-        "typecheck": "tsc --strict"
+        "validate-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js --fail-on-update",
+        "typecheck": "tsc --strict --noEmit"
     },
     "dependencies": {
         "@ant-design/colors": "^8.0.0",
