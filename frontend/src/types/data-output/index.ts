@@ -12,10 +12,6 @@ export type {
     DataOutputCreateResponse,
 } from './data-output-create.contract.ts';
 export type {
-    DataOutputDatasetsAccessRequest,
-    DataOutputDatasetsAccessResponse,
-} from './data-output-dataset-access.contract.ts';
-export type {
     DataOutputDatasetRemoveRequest,
     DataOutputDatasetRemoveResponse,
 } from './data-output-dataset-remove.contract.ts';
@@ -27,10 +23,6 @@ export type { GlueDataOutput, GlueDataOutputContract } from './glue-data-output.
 export type { RedshiftDataOutput, RedshiftDataOutputContract } from './redshift-data-output.contract.ts';
 export type { S3DataOutput, S3DataOutputContract } from './s3-data-output.contract.ts';
 export type { SnowflakeDataOutput, SnowflakeDataOutputContract } from './snowflake-data-output.contract.ts';
-
-export interface DataOutputConfigurationContract {
-    config: GlueDataOutput | S3DataOutput | DatabricksDataOutput | SnowflakeDataOutput | RedshiftDataOutput;
-}
 
 export type DataOutputConfiguration =
     | S3DataOutput

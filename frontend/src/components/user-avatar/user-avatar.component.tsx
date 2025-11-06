@@ -5,7 +5,7 @@ import styles from './user-avatar.module.scss';
 type Props = {
     name: string;
     email: string;
-    color: string;
+    color?: string;
     size?: 'small' | 'default' | 'large';
 };
 

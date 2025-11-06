@@ -62,7 +62,7 @@ type Props = {
     datasetId?: string;
     dataProductId?: string;
     dataOutputId?: string;
-    modalCallbackOnSubmit: () => void;
+    modalCallbackOnSubmit?: () => void;
     formRef?: React.Ref<FormInstance<DatasetCreateFormSchema>>;
 };
 
@@ -179,7 +179,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 };
                 const response = await createDataset(request).unwrap();
 
-                modalCallbackOnSubmit();
+                modalCallbackOnSubmit?.();
                 dispatchMessage({ content: t('Output port created successfully'), type: 'success' });
                 // If dataProductId was provided, navigate back to the data product page
                 if (dataOutputId && dataProductId) {

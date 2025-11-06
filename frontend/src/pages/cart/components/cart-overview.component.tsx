@@ -1,6 +1,5 @@
 import { DeleteOutlined, WarningOutlined } from '@ant-design/icons';
 import { Button, Card, Descriptions, Flex, List, Space, Tag, Tooltip, Typography } from 'antd';
-import type * as React from 'react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -100,7 +99,6 @@ function CartOverviewItem({ dataset, overlapping, selectedDataProductId }: CartO
 }
 
 type CartOverviewProps = {
-    footer?: React.ReactNode;
     cartDatasets?: DatasetsGetContractSingle[];
     overlappingDatasetIds?: string[];
     loading?: boolean;
@@ -108,7 +106,6 @@ type CartOverviewProps = {
 };
 
 export const CartOverview = ({
-    footer,
     cartDatasets,
     loading,
     overlappingDatasetIds,
@@ -123,7 +120,13 @@ export const CartOverview = ({
     return (
         <Card title={<Typography.Title level={3}>Checkout summary</Typography.Title>}>
             <List
-                footer={footer}
+                footer={
+                    <Flex justify={'flex-end'}>
+                        {t('{{count}} output ports', {
+                            count: cartDatasets?.length || 0,
+                        })}
+                    </Flex>
+                }
                 style={{ width: '100%' }}
                 loading={loading}
                 dataSource={cartDatasets}
