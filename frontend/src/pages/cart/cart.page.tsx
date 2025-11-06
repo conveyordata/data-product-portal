@@ -6,6 +6,8 @@ import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
+import posthog from '@/config/posthog-config.ts';
+import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { useAppDispatch } from '@/store';
@@ -69,6 +71,9 @@ function Cart() {
         if (!values.justification || !values.dataProductId) {
             return;
         }
+        posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED, {
+            cartSize: cartDatasetIds.length,
+        });
         requestDatasetAccessForDataProduct({
             datasetIds: cartDatasetIds,
             dataProductId: values.dataProductId,
@@ -88,6 +93,7 @@ function Cart() {
     const selectedDataProductId = Form.useWatch('dataProductId', form);
 
     const createNewDataProduct = () => {
+        posthog.capture(PosthogEvents.CART_CREATE_DATA_PRODUCT);
         navigate({
             pathname: ApplicationPaths.DataProductNew,
             search: new URLSearchParams({ fromMarketplace: 'true' }).toString(),

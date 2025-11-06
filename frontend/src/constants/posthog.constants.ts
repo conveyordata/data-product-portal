@@ -28,4 +28,7 @@ export enum PosthogEvents {
     DATA_PRODUCT_TOUR_STARTED = 'data_product_tour_started',
     DATA_PRODUCT_TOUR_FINISHED = 'data_product_tour_finished',
     DATA_PRODUCT_TOUR_CLOSED = 'data_product_tour_closed',
+
+    CART_CHECKOUT_COMPLETED = 'cart_checkout_completed',
+    CART_CREATE_DATA_PRODUCT = 'cart_create_data_product',
 }
