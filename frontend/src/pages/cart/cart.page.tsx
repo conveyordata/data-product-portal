@@ -1,6 +1,7 @@
-import { BellOutlined, CheckCircleOutlined, MessageOutlined } from '@ant-design/icons';
+import { BellOutlined, CheckCircleOutlined, MessageOutlined, PlusOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Divider, Flex, Form, type FormProps, Row, Select, Typography, theme } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
+import { parseAsString, useQueryState } from 'nuqs';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -21,11 +22,13 @@ import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts
 
 const cartFormDataStorageKey = 'cart-form-data';
 
-export function Cart() {
+function Cart() {
     const { t } = useTranslation();
     const { token } = theme.useToken();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
+    const [createdProductId] = useQueryState('createdProductId', parseAsString.withDefault(''));
+
     const { data: datasets, isFetching: fetchingDatasets } = useGetAllDatasetsQuery();
     const [requestDatasetAccessForDataProduct, { isSuccess: requestingAccessSuccess, isLoading: isRequestingAccess }] =
         useRequestDatasetsAccessForDataProductMutation();
@@ -45,17 +48,23 @@ export function Cart() {
         },
     );
     const [form] = Form.useForm<CartFormData>();
-    useEffect(() => {
-        const savedData = localStorage.getItem(cartFormDataStorageKey);
-        if (savedData) {
-            form.setFieldsValue(JSON.parse(savedData));
-        }
-    }, []);
 
     type CartFormData = {
         dataProductId?: string;
         justification?: string;
     };
+    const initialValues: CartFormData = useMemo(() => {
+        let data: CartFormData = {};
+        const savedData = localStorage.getItem(cartFormDataStorageKey);
+        if (savedData) {
+            data = JSON.parse(savedData) as CartFormData;
+        }
+        if (createdProductId !== '') {
+            data.dataProductId = createdProductId;
+        }
+        return data;
+    }, [createdProductId]);
+
     const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
         if (!values.justification || !values.dataProductId) {
             return;
@@ -69,13 +78,21 @@ export function Cart() {
     const onValuesChange: FormProps<CartFormData>['onValuesChange'] = (_, values: CartFormData) => {
         localStorage.setItem(cartFormDataStorageKey, JSON.stringify(values));
     };
-    const dataProductOptions = userDataProducts?.map((dataProduct) => {
-        return {
-            value: dataProduct?.id,
-            label: dataProduct?.name,
-        };
-    });
+    const dataProductOptions =
+        userDataProducts?.map((dataProduct) => {
+            return {
+                value: dataProduct?.id,
+                label: dataProduct?.name,
+            };
+        }) ?? [];
     const selectedDataProductId = Form.useWatch('dataProductId', form);
+
+    const createNewDataProduct = () => {
+        navigate({
+            pathname: ApplicationPaths.DataProductNew,
+            search: new URLSearchParams({ fromMarketplace: 'true' }).toString(),
+        });
+    };
 
     const { data: selectedDataProduct, refetch: refetchSelectedDataProduct } = useGetDataProductByIdQuery(
         selectedDataProductId!,
@@ -156,6 +173,7 @@ export function Cart() {
                         onFinish={onFinish}
                         form={form}
                         onValuesChange={onValuesChange}
+                        initialValues={initialValues}
                     >
                         <Form.Item<CartFormData>
                             name="dataProductId"
@@ -170,6 +188,20 @@ export function Cart() {
                                 filterOption={(input, option) =>
                                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                                 }
+                                popupRender={(menu) => (
+                                    <>
+                                        <Button
+                                            type="text"
+                                            icon={<PlusOutlined />}
+                                            style={{ width: '100%' }}
+                                            onClick={createNewDataProduct}
+                                        >
+                                            {t('Create new data product')}
+                                        </Button>
+                                        <Divider style={{ margin: '8px 0' }} />
+                                        {menu}
+                                    </>
+                                )}
                             />
                         </Form.Item>
                         {submitFormIssues.length > 0 && (
@@ -238,3 +270,5 @@ export function Cart() {
         </Row>
     );
 }
+
+export default Cart;
