@@ -185,7 +185,7 @@ export function PendingItem({ pendingAction }: Props) {
                     navigatePath: createDataProductIdPath(pendingAction.data_product.id, DataProductTabKeys.Team),
                 };
         }
-    }, [pendingAction, dataProductColor, datasetColor, t, navigate]);
+    }, [pendingAction, dataProductColor, datasetColor, t]);
 
     if (!content) return null;
 

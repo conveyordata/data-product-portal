@@ -42,7 +42,7 @@ function Cart() {
 
     const currentUser = useSelector(selectCurrentUser);
     const { data: userDataProducts, isFetching: isFetchingUserDataProducts } = useGetUserDataProductsQuery(
-        currentUser!.id,
+        currentUser?.id ?? '',
         {
             skip: currentUser === null,
         },
@@ -71,8 +71,8 @@ function Cart() {
         }
         requestDatasetAccessForDataProduct({
             datasetIds: cartDatasetIds,
-            dataProductId: values.dataProductId!,
-            justification: values.justification!,
+            dataProductId: values.dataProductId,
+            justification: values.justification,
         });
     };
     const onValuesChange: FormProps<CartFormData>['onValuesChange'] = (_, values: CartFormData) => {
@@ -95,7 +95,7 @@ function Cart() {
     };
 
     const { data: selectedDataProduct, refetch: refetchSelectedDataProduct } = useGetDataProductByIdQuery(
-        selectedDataProductId!,
+        selectedDataProductId ?? '',
         {
             skip: !selectedDataProductId,
         },
@@ -120,12 +120,12 @@ function Cart() {
     }, [selectedDataProduct?.datasets, cartDatasetIds]);
 
     useEffect(() => {
-        if (requestingAccessSuccess) {
+        if (requestingAccessSuccess && selectedDataProductId) {
             dispatch(clearCart());
             localStorage.removeItem(cartFormDataStorageKey);
             dispatchMessage({ content: t('Your requests have successfully been created.'), type: 'success' });
 
-            navigate(createDataProductIdPath(selectedDataProductId!, DataProductTabKeys.Datasets));
+            navigate(createDataProductIdPath(selectedDataProductId, DataProductTabKeys.Datasets));
         }
     }, [requestingAccessSuccess, selectedDataProductId, dispatch, navigate, t]);
 

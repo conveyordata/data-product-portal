@@ -179,7 +179,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 };
                 const response = await createDataset(request).unwrap();
 
-                modalCallbackOnSubmit && modalCallbackOnSubmit();
+                modalCallbackOnSubmit?.();
                 dispatchMessage({ content: t('Output port created successfully'), type: 'success' });
                 // If dataProductId was provided, navigate back to the data product page
                 if (dataOutputId && dataProductId) {
