@@ -1,10 +1,8 @@
-import type { TableProps } from 'antd';
-import { Button, Flex, Space, Table, Typography } from 'antd';
+import { Button, Flex, Table, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal.tsx';
-import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
     useGetAllDataProductSettingsQuery,
     useRemoveDataProductSettingMutation,
@@ -25,15 +23,10 @@ export function DataProductSettingsTable({ scope }: Props) {
     const filteredSettings = useMemo(() => {
         return dataProductSettings.filter((setting) => setting.scope === scope);
     }, [dataProductSettings, scope]);
-    const { pagination, handlePaginationChange } = useTablePagination(filteredSettings);
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductSettingContract | undefined>(undefined);
     const [onRemoveDataProductSetting] = useRemoveDataProductSettingMutation();
-
-    const onChange: TableProps<DataProductSettingContract>['onChange'] = (pagination) => {
-        handlePaginationChange(pagination);
-    };
 
     const handleAdd = () => {
         setMode('create');
@@ -73,28 +66,21 @@ export function DataProductSettingsTable({ scope }: Props) {
     );
 
     return (
-        <Flex vertical className={styles.tableContainer}>
-            <Flex className={styles.searchContainer}>
+        <Flex vertical gap={'large'}>
+            <Flex justify={'space-between'} align={'center'}>
                 <Typography.Title level={3}>{t('Custom Settings')}</Typography.Title>
-                <Space>
-                    <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
-                        {t('Add Custom Setting')}
-                    </Button>
-                </Space>
+                <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
+                    {t('Add Custom Setting')}
+                </Button>
             </Flex>
-            <Flex vertical className={styles.tableFilters}>
-                <Table<DataProductSettingContract>
-                    dataSource={filteredSettings}
-                    columns={columns}
-                    onChange={onChange}
-                    pagination={pagination}
-                    rowKey={(record) => record.id}
-                    loading={isFetching}
-                    rowHoverable
-                    rowClassName={() => 'editable-row'}
-                    size={'small'}
-                />
-            </Flex>
+            <Table<DataProductSettingContract>
+                dataSource={filteredSettings}
+                columns={columns}
+                rowKey={(record) => record.id}
+                loading={isFetching}
+                rowHoverable
+                size={'small'}
+            />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateSettingModal scope={scope} onClose={onClose} isOpen={isVisible} mode={mode} initial={initial} />
             )}
