@@ -1208,6 +1208,7 @@ description = "Low-level, pure Python DBus protocol wrapper."
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
+markers = "sys_platform == \"linux\""
 files = [
     {file = "jeepney-0.9.0-py3-none-any.whl", hash = "sha256:97e5714520c16fc0a45695e5365a2e11b81ea79bba796e26f9f1d178cb182683"},
     {file = "jeepney-0.9.0.tar.gz", hash = "sha256:cf0e9e845622b81e4a28df94c40345400256ec608d0e55bb8a3feaa9163f5732"},
@@ -1640,14 +1641,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "6.8.0"
+version = "6.9.0"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "posthog-6.8.0-py3-none-any.whl", hash = "sha256:b30b3cb06234d9177cecabe6f3e04e34e1e15fe7b60428771a67be57920a6308"},
-    {file = "posthog-6.8.0.tar.gz", hash = "sha256:40bc3bffe4818d37de63a4f4f13d2e90a78efe14f0d808c962f0ffebc3b15256"},
+    {file = "posthog-6.9.0-py3-none-any.whl", hash = "sha256:ab9d1dad78b68b17e4bc239716c1b964b723abe3851f69927a1d4f798bb1f9c7"},
+    {file = "posthog-6.9.0.tar.gz", hash = "sha256:e4e79f2af7e2e976d1931c3f7a539de7d1a909c8a4a44a16f5af4346c5e18f89"},
 ]
 
 [package.dependencies]
@@ -2532,6 +2533,7 @@ description = "Python bindings to FreeDesktop.org Secret Service API"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
+markers = "sys_platform == \"linux\""
 files = [
     {file = "secretstorage-3.4.0-py3-none-any.whl", hash = "sha256:0e3b6265c2c63509fb7415717607e4b2c9ab767b7f344a57473b779ca13bd02e"},
     {file = "secretstorage-3.4.0.tar.gz", hash = "sha256:c46e216d6815aff8a8a18706a2fbfd8d53fcbb0dce99301881687a1b0289ef7c"},
@@ -2944,4 +2946,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "e6cacc1da237e195acaa14bbce27595461608c5ae718bbf3faf1c87d3fb29d63"
+content-hash = "ed73b89702567021707b2024eaad33dea93c587718f6e1f509278b1ea9e023e9"
