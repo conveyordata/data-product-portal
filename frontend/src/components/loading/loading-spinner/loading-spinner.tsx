@@ -11,8 +11,8 @@ type Props = {
 
 export function LoadingSpinner({ children, size = 'large', spinProps }: Props) {
     return (
-        <Flex className={styles.loadingContainer}>
-            <Spin size={size} className={styles.loading} {...spinProps}>
+        <Flex className={styles.loadingContainer} justify={'center'} align={'center'}>
+            <Spin size={size} {...spinProps}>
                 {children || null}
             </Spin>
         </Flex>

@@ -1,5 +1,6 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
@@ -22,6 +23,12 @@ export default defineConfig(() => {
                     icon: true,
                 },
                 include: '**/*.svg?react',
+            }),
+            visualizer({
+                template: 'treemap',
+                gzipSize: true,
+                brotliSize: true,
+                filename: 'dependencies.html',
             }),
         ],
         server: {

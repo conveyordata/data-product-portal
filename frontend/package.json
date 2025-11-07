@@ -13,7 +13,8 @@
         "start": "npm run copy-config && npm run build && vite preview",
         "extract-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js",
         "validate-translations": "i18next 'src/**/*.{ts,tsx}' --config i18next-parser.config.js --fail-on-update",
-        "typecheck": "tsc --strict --noEmit"
+        "typecheck": "tsc --strict --noEmit",
+        "dep-viz": "npm run build && npx open-cli dependencies.html"
     },
     "dependencies": {
         "@ant-design/colors": "^8.0.0",
@@ -70,7 +71,8 @@
         "sass": "^1.93.3",
         "typescript": "^5.9.3",
         "vite": "^7.2.1",
-        "vite-plugin-svgr": "^4.5.0"
+        "vite-plugin-svgr": "^4.5.0",
+        "rollup-plugin-visualizer": "^6.0.5"
     },
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-musl": "^4.52.5"
