@@ -7,7 +7,6 @@ import { PosthogEvents } from '@/constants/posthog.constants';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
 import { DatasetMarketplaceCard } from './dataset-marketplace-card/dataset-marketplace-card.component';
-import styles from './marketplace.module.scss';
 
 function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
     if (!searchTerm) {
@@ -63,7 +62,7 @@ export function Marketplace() {
             searchPlaceholder={t('Search output ports by name')}
             onSearch={handleSearchChange}
         >
-            <Flex wrap="wrap" className={styles.marketplacePageContainer}>
+            <Flex wrap="wrap" gap={'small'}>
                 {paginatedOutputPorts.map((dataset) => (
                     <DatasetMarketplaceCard key={dataset.id} dataset={dataset} />
                 ))}

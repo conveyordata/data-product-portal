@@ -166,14 +166,14 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
             ]}
         >
             <Space direction="vertical" style={{ width: '100%' }} size="small">
-                <Typography.Title level={5} style={{ marginBottom: 0 }}>
-                    {dataset.name}
-                </Typography.Title>
-                <div style={{ height: '40px' }}>
-                    <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }}>
-                        {dataset.description || 'No description available.'}
-                    </Typography.Paragraph>
-                </div>
+                <Link to={createDatasetIdPath(dataset.id)}>
+                    <Typography.Title level={5} style={{ marginBottom: 0 }}>
+                        {dataset.name}
+                    </Typography.Title>
+                </Link>
+                <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }} style={{ height: '40px', marginBottom: 0 }}>
+                    {dataset.description || 'No description available.'}
+                </Typography.Paragraph>
                 <div style={{ height: '22px' }}>
                     {dataset.tags?.map((tag) => (
                         <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.value}>
