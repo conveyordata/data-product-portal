@@ -3,7 +3,7 @@ import './i18n.ts';
 import '@ant-design/v5-patch-for-react-19';
 
 import { PostHogProvider } from 'posthog-js/react';
-import React, { Suspense } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
 import { AuthProvider } from 'react-oidc-context';
@@ -29,11 +29,9 @@ ReactDOM.createRoot(root).render(
             <AuthProvider {...oidcAuthProviderProps}>
                 <Provider store={store}>
                     <I18nextProvider i18n={i18n}>
-                        <Suspense fallback={''}>
-                            <MessageListener />
-                            <NotificationListener />
-                            <App />
-                        </Suspense>
+                        <MessageListener />
+                        <NotificationListener />
+                        <App />
                     </I18nextProvider>
                 </Provider>
             </AuthProvider>
