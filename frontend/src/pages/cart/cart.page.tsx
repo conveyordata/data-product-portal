@@ -1,5 +1,19 @@
 import { BellOutlined, CheckCircleOutlined, MessageOutlined, PlusOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Divider, Flex, Form, type FormProps, Row, Select, Typography, theme } from 'antd';
+import {
+    Alert,
+    Button,
+    Card,
+    Col,
+    Divider,
+    Flex,
+    Form,
+    type FormProps,
+    Row,
+    Select,
+    Skeleton,
+    Typography,
+    theme,
+} from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useEffect, useMemo } from 'react';
@@ -55,8 +69,11 @@ function Cart() {
         dataProductId?: string;
         justification?: string;
     };
-    const initialValues: CartFormData = useMemo(() => {
+    const initialValues: CartFormData | undefined = useMemo(() => {
         let data: CartFormData = {};
+        if (userDataProducts === undefined) {
+            return;
+        }
         const savedData = localStorage.getItem(cartFormDataStorageKey);
         if (savedData) {
             data = JSON.parse(savedData) as CartFormData;
@@ -64,8 +81,11 @@ function Cart() {
         if (createdProductId !== '') {
             data.dataProductId = createdProductId;
         }
+        if (data.dataProductId && !userDataProducts.map((dataProduct) => dataProduct.id).includes(data.dataProductId)) {
+            data.dataProductId = undefined;
+        }
         return data;
-    }, [createdProductId]);
+    }, [createdProductId, userDataProducts]);
 
     const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
         if (!values.justification || !values.dataProductId) {
@@ -103,7 +123,7 @@ function Cart() {
     const { data: selectedDataProduct, refetch: refetchSelectedDataProduct } = useGetDataProductByIdQuery(
         selectedDataProductId ?? '',
         {
-            skip: !selectedDataProductId,
+            skip: !selectedDataProductId || isFetchingUserDataProducts || userDataProducts === undefined,
         },
     );
     useEffect(() => {
@@ -162,6 +182,7 @@ function Cart() {
 
         return submitFormIssues;
     }, [overlappingDatasetIds, selectedProductDatasetsInCart, t]);
+
     return (
         <Row gutter={16}>
             <Col span={10}>
@@ -174,88 +195,92 @@ function Cart() {
             </Col>
             <Col span={14}>
                 <Card title={<Typography.Title level={3}>{t('Data checkout')}</Typography.Title>}>
-                    <Form<CartFormData>
-                        layout={'vertical'}
-                        onFinish={onFinish}
-                        form={form}
-                        onValuesChange={onValuesChange}
-                        initialValues={initialValues}
-                    >
-                        <Form.Item<CartFormData>
-                            name="dataProductId"
-                            label={t('Data product')}
-                            rules={[{ required: true, message: t('Please select a data product') }]}
+                    {initialValues === undefined ? (
+                        <Skeleton />
+                    ) : (
+                        <Form<CartFormData>
+                            layout={'vertical'}
+                            onFinish={onFinish}
+                            form={form}
+                            onValuesChange={onValuesChange}
+                            initialValues={initialValues}
                         >
-                            <Select
-                                showSearch
-                                placeholder={t('Select a data product')}
-                                options={dataProductOptions}
-                                loading={isFetchingUserDataProducts}
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                popupRender={(menu) => (
-                                    <>
-                                        <Button
-                                            type="text"
-                                            icon={<PlusOutlined />}
-                                            style={{ width: '100%' }}
-                                            onClick={createNewDataProduct}
-                                        >
-                                            {t('Create new data product')}
+                            <Form.Item<CartFormData>
+                                name="dataProductId"
+                                label={t('Data product')}
+                                rules={[{ required: true, message: t('Please select a data product') }]}
+                            >
+                                <Select
+                                    showSearch
+                                    placeholder={t('Select a data product')}
+                                    options={dataProductOptions}
+                                    loading={isFetchingUserDataProducts}
+                                    filterOption={(input, option) =>
+                                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                    }
+                                    popupRender={(menu) => (
+                                        <>
+                                            <Button
+                                                type="text"
+                                                icon={<PlusOutlined />}
+                                                style={{ width: '100%' }}
+                                                onClick={createNewDataProduct}
+                                            >
+                                                {t('Create new data product')}
+                                            </Button>
+                                            <Divider style={{ margin: '8px 0' }} />
+                                            {menu}
+                                        </>
+                                    )}
+                                />
+                            </Form.Item>
+                            {submitFormIssues.length > 0 && (
+                                <Alert
+                                    message={t('Cannot submit request')}
+                                    description={
+                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
+                                            {submitFormIssues.map((reason) => (
+                                                <li key={reason.key}>{reason.value}</li>
+                                            ))}
+                                        </ul>
+                                    }
+                                    type="warning"
+                                    showIcon
+                                    style={{ marginBottom: 16 }}
+                                />
+                            )}
+                            <Form.Item<CartFormData>
+                                name="justification"
+                                label={'Business justification'}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t('Please explain why you need access to these output ports'),
+                                    },
+                                ]}
+                            >
+                                <TextArea rows={4} placeholder="Explain why you need access to these output ports" />
+                            </Form.Item>
+                            <Form.Item label={null}>
+                                <Flex gap={'small'}>
+                                    <Link to={ApplicationPaths.Datasets} style={{ width: '100%' }}>
+                                        <Button type="default" style={{ width: '100%' }}>
+                                            {t('Continue browsing')}
                                         </Button>
-                                        <Divider style={{ margin: '8px 0' }} />
-                                        {menu}
-                                    </>
-                                )}
-                            />
-                        </Form.Item>
-                        {submitFormIssues.length > 0 && (
-                            <Alert
-                                message={t('Cannot submit request')}
-                                description={
-                                    <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                        {submitFormIssues.map((reason) => (
-                                            <li key={reason.key}>{reason.value}</li>
-                                        ))}
-                                    </ul>
-                                }
-                                type="warning"
-                                showIcon
-                                style={{ marginBottom: 16 }}
-                            />
-                        )}
-                        <Form.Item<CartFormData>
-                            name="justification"
-                            label={'Business justification'}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t('Please explain why you need access to these output ports'),
-                                },
-                            ]}
-                        >
-                            <TextArea rows={4} placeholder="Explain why you need access to these output ports" />
-                        </Form.Item>
-                        <Form.Item label={null}>
-                            <Flex gap={'small'}>
-                                <Link to={ApplicationPaths.Datasets} style={{ width: '100%' }}>
-                                    <Button type="default" style={{ width: '100%' }}>
-                                        {t('Continue browsing')}
+                                    </Link>
+                                    <Button
+                                        type="primary"
+                                        htmlType="submit"
+                                        style={{ width: '100%' }}
+                                        loading={isRequestingAccess}
+                                        disabled={fetchingDatasets || submitFormIssues.length > 0}
+                                    >
+                                        {t('Submit access requests')}
                                     </Button>
-                                </Link>
-                                <Button
-                                    type="primary"
-                                    htmlType="submit"
-                                    style={{ width: '100%' }}
-                                    loading={isRequestingAccess}
-                                    disabled={fetchingDatasets || submitFormIssues.length > 0}
-                                >
-                                    {t('Submit access requests')}
-                                </Button>
-                            </Flex>
-                        </Form.Item>
-                    </Form>
+                                </Flex>
+                            </Form.Item>
+                        </Form>
+                    )}
                     <Divider />
                     <Flex vertical>
                         <Typography.Text>
