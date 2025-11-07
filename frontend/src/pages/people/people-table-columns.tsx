@@ -1,10 +1,10 @@
 import { Select, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import { type GlobalRoleAssignmentContract, Prototype, type RoleContract } from '@/types/roles/role.contract';
-import type { UserContract, UsersGetContract } from '@/types/users/user.contract';
-import { FilterSettings } from '@/utils/table-filter.helper';
-import { Sorter } from '@/utils/table-sorter.helper';
+import { type GlobalRoleAssignmentContract, Prototype, type RoleContract } from '@/types/roles/role.contract.ts';
+import type { UserContract, UsersGetContract } from '@/types/users/user.contract.ts';
+import { FilterSettings } from '@/utils/table-filter.helper.ts';
+import { Sorter } from '@/utils/table-sorter.helper.ts';
 import styles from './people-table.module.scss';
 
 type SelectorProps = {

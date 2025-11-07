@@ -109,7 +109,6 @@ export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps
         <Radio.Group
             value={selectedRole ? 'role' : 'all'}
             onChange={handleRadioChange}
-            className={styles.radioGroup}
             optionType="button"
             buttonStyle="solid"
             size={'middle'}
@@ -139,7 +138,7 @@ export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps
                         {selectedRoleLabel && (
                             <>
                                 {' > '}
-                                <span className={styles.selectedRoleLabel}>{selectedRoleLabel}</span>
+                                <span>{selectedRoleLabel}</span>
                             </>
                         )}
                         <DownOutlined />

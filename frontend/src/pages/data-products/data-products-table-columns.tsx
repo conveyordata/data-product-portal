@@ -9,8 +9,8 @@ import type { DataProductTypeContract } from '@/types/data-product-type';
 import type { DomainContract } from '@/types/domain';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
-import { FilterSettings } from '@/utils/table-filter.helper';
-import { Sorter } from '@/utils/table-sorter.helper';
+import { FilterSettings } from '@/utils/table-filter.helper.ts';
+import { Sorter } from '@/utils/table-sorter.helper.ts';
 
 import styles from './data-products-table.module.scss';
 
