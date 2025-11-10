@@ -111,6 +111,7 @@ jobs:
           repo_name="demo-portal-infrastructure"
           event_type="apply-portal-release"
           version="$(git rev-parse --short=7 HEAD)"
+          chart="$(git describe --tags --abbrev=0 | cut -c2-)"
 
           curl -L \
             -X POST \
@@ -118,4 +119,4 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.DEMO_INFRASTRUCTURE_PAT }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${repo_owner}/${repo_name}/dispatches" \
-            -d "{\"event_type\": \"${event_type}\", \"client_payload\": {\"tag\": \"${version}\", \"env\": \"demo_dev\", \"integration\": true}}"
+            -d "{\"event_type\": \"${event_type}\", \"client_payload\": {\"tag\": \"${version}\", \"chart_version\": \"${chart}\", \"env\": \"demo_dev\", \"integration\": true}}"
