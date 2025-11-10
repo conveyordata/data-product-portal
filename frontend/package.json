@@ -75,7 +75,7 @@
         "rollup-plugin-visualizer": "^6.0.5"
     },
     "optionalDependencies": {
-        "@rollup/rollup-linux-x64-musl": "^4.52.5"
+        "@rollup/rollup-linux-x64-musl": "^4.53.1"
     },
     "volta": {
         "node": "20.12.2"
