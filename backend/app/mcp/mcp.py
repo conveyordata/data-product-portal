@@ -96,7 +96,7 @@ def get_auth_provider() -> Optional[OAuthProxy]:
             client_secret=get_oidc().client_secret,
             # Your FastMCP server's public URL
             base_url=settings.HOST,
-            redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
+            # redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
         )
         # return AWSCognitoProvider(
         #     user_pool_id="eu-west-1_MKmZKLFCb",   # Your AWS Cognito user pool ID
