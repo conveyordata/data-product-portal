@@ -2,7 +2,11 @@ from typing import Any, Dict, Optional
 from uuid import UUID
 
 from fastmcp import Context, FastMCP
-from fastmcp.server.auth import BearerAuthProvider
+from fastmcp.server.auth import OAuthProxy
+from fastmcp.server.auth.oidc_proxy import OIDCProxy
+
+# from fastmcp.server.auth.providers.aws import AWSCognitoProvider
+# from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import AccessToken, get_access_token
 from sqlalchemy.orm import configure_mappers
 
@@ -57,11 +61,51 @@ def initialize_models():
 initialize_models()  # TODO Figure out if this is still needed
 
 
-def get_auth_provider() -> Optional[BearerAuthProvider]:
+def get_auth_provider() -> Optional[OAuthProxy]:
     if settings.OIDC_ENABLED:
-        return BearerAuthProvider(
-            issuer=get_oidc().authority, jwks_uri=get_oidc().jwks_uri
+        # Configure token verification for your provider
+        # See the Token Verification guide for provider-specific setups
+        # token_verifier = JWTVerifier(
+        #     jwks_uri=get_oidc().jwks_uri,
+        #     # issuer=get_oidc().authority,
+        # )
+
+        # # Create the OAuth proxy
+        # return OAuthProxy(
+        #     # Provider's OAuth endpoints (from their documentation)
+        #     upstream_authorization_endpoint=get_oidc().authorization_endpoint,
+        #     upstream_token_endpoint=get_oidc().token_endpoint,
+
+        #     # Your registered app credentials
+        #     upstream_client_id=get_oidc().client_id,
+        #     upstream_client_secret=get_oidc().client_secret,
+
+        #     # Token validation (see Token Verification guide)
+        #     token_verifier=token_verifier,
+
+        #     # Your FastMCP server's public URL
+        #     base_url=settings.HOST,
+
+        #     # Optional: customize the callback path (default is "/auth/callback")
+        #     redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
+        # )
+        return OIDCProxy(
+            config_url=get_oidc().configuration_url,
+            # Your registered app credentials
+            client_id=get_oidc().client_id,
+            client_secret=get_oidc().client_secret,
+            # Your FastMCP server's public URL
+            base_url=settings.HOST,
+            redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
         )
+        # return AWSCognitoProvider(
+        #     user_pool_id="eu-west-1_MKmZKLFCb",   # Your AWS Cognito user pool ID
+        #     aws_region="eu-west-1",
+        #     client_id=get_oidc().client_id,          # Your app client ID
+        #     client_secret=get_oidc().client_secret,  # Your app client Secret
+        #     base_url=settings.HOST,        # Must match your callback URL
+        #     redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
+        # )
     return None
 
 
@@ -89,8 +133,9 @@ def get_mcp_authenticated_user(token: str):
 async def get_current_user(ctx: Context) -> dict[str, Any]:
     """Get current user data from the MCP. You can use this to
     get information about the authenticated user."""
-    access_token: AccessToken = get_access_token()
-    return get_mcp_authenticated_user(token=access_token.token)
+    token = get_access_token()
+    print(token)
+    return get_mcp_authenticated_user(token=token.token)
 
 
 @mcp.tool
