@@ -7,8 +7,7 @@ from fastmcp.server.auth.providers.aws import AWSCognitoProvider
 
 # from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import AccessToken, get_access_token
-
-# from key_value.aio.stores.memory import MemoryStore
+from key_value.aio.stores.memory import MemoryStore
 from sqlalchemy.orm import configure_mappers
 
 from app.core.auth.auth import get_authenticated_user
@@ -105,6 +104,7 @@ def get_auth_provider() -> Optional[OAuthProxy]:
             client_id=get_oidc().client_id,  # Your app client ID
             client_secret=get_oidc().client_secret,  # Your app client Secret
             base_url=settings.HOST,  # Must match your callback URL
+            client_storage=MemoryStore(),
             # redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
         )
     return None
