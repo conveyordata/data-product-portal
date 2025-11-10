@@ -7,7 +7,7 @@
       "name": "Stijn Janssens",
       "email": "stijn.janssens@dataminded.com"
     },
-    "version": "0.4.0"
+    "version": "0.4.1"
   },
   "paths": {
     "/api/authz/access/{action}": {
