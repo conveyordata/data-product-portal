@@ -1,11 +1,11 @@
 import { UserOutlined } from '@ant-design/icons';
+import { usePostHog } from '@posthog/react';
 import { Avatar, Button, Flex, List, Typography, theme } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { DataProductOutlined, DatasetOutlined } from '@/components/icons';
-import posthog from '@/config/posthog-config';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
@@ -20,12 +20,13 @@ type Props = {
 };
 
 export function PendingItem({ pendingAction }: Props) {
-    const navigate = useNavigate();
     const { t } = useTranslation();
+    const posthog = usePostHog();
     const {
         token: { colorPrimary: dataProductColor, colorPrimaryActive: datasetColor },
     } = theme.useToken();
 
+    const navigate = useNavigate();
     const {
         handleAcceptDataProductDatasetLink,
         handleRejectDataProductDatasetLink,
@@ -35,25 +36,25 @@ export function PendingItem({ pendingAction }: Props) {
         handleDenyAccessToDataProduct,
     } = usePendingActionHandlers();
 
-    const handleAccept = () => {
+    const handleAccept = async () => {
         posthog.capture(PosthogEvents.REQUESTS_ACCEPT);
         switch (pendingAction.pending_action_type) {
             case PendingActionTypes.DataProductDataset:
-                handleAcceptDataProductDatasetLink({
+                await handleAcceptDataProductDatasetLink({
                     id: pendingAction.id,
                     data_product_id: pendingAction.data_product_id,
                     dataset_id: pendingAction.dataset_id,
                 });
                 break;
             case PendingActionTypes.DataOutputDataset:
-                handleAcceptDataOutputDatasetLink({
+                await handleAcceptDataOutputDatasetLink({
                     id: pendingAction.id,
                     data_output_id: pendingAction.data_output_id,
                     dataset_id: pendingAction.dataset_id,
                 });
                 break;
             case PendingActionTypes.DataProductRoleAssignment:
-                handleGrantAccessToDataProduct({
+                await handleGrantAccessToDataProduct({
                     assignment_id: pendingAction.id,
                     data_product_id: pendingAction.data_product.id,
                 });
@@ -61,25 +62,25 @@ export function PendingItem({ pendingAction }: Props) {
         }
     };
 
-    const handleDeny = () => {
+    const handleDeny = async () => {
         posthog.capture(PosthogEvents.REQUESTS_REJECT);
         switch (pendingAction.pending_action_type) {
             case PendingActionTypes.DataProductDataset:
-                handleRejectDataProductDatasetLink({
+                await handleRejectDataProductDatasetLink({
                     id: pendingAction.id,
                     data_product_id: pendingAction.data_product_id,
                     dataset_id: pendingAction.dataset_id,
                 });
                 break;
             case PendingActionTypes.DataOutputDataset:
-                handleRejectDataOutputDatasetLink({
+                await handleRejectDataOutputDatasetLink({
                     id: pendingAction.id,
                     data_output_id: pendingAction.data_output_id,
                     dataset_id: pendingAction.dataset_id,
                 });
                 break;
             case PendingActionTypes.DataProductRoleAssignment:
-                handleDenyAccessToDataProduct({
+                await handleDenyAccessToDataProduct({
                     assignment_id: pendingAction.id,
                     data_product_id: pendingAction.data_product.id,
                 });

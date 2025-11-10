@@ -1,3 +1,4 @@
+import { usePostHog } from '@posthog/react';
 import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space } from 'antd';
 import { parseAsBoolean, useQueryState } from 'nuqs';
 import { useCallback, useEffect, useState } from 'react';
@@ -6,7 +7,6 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
-import posthog from '@/config/posthog-config';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
@@ -44,6 +44,7 @@ type Props = {
 
 export function DataProductForm({ mode, dataProductId }: Props) {
     const { t } = useTranslation();
+    const posthog = usePostHog();
     const navigate = useNavigate();
     const currentUser = useSelector(selectCurrentUser);
     const [fromMarketplace] = useQueryState('fromMarketplace', parseAsBoolean.withDefault(false));
@@ -123,7 +124,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 };
                 const response = await createDataProduct(request).unwrap();
                 dispatchMessage({ content: t('Data product created successfully'), type: 'success' });
-
                 posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_COMPLETED);
 
                 if (fromMarketplace) {

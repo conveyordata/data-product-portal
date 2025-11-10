@@ -1,8 +1,8 @@
+import { usePostHog } from '@posthog/react';
 import { Flex, Pagination } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
-import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useGetAllDatasetsQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import type { DatasetsGetContract } from '@/types/dataset';
@@ -17,6 +17,7 @@ function filterDatasets(datasets: DatasetsGetContract, searchTerm?: string) {
 
 export function Marketplace() {
     const { t } = useTranslation();
+    const posthog = usePostHog();
 
     const pageSize = 12;
     const [currentPage, setCurrentPage] = useState(1);
@@ -53,8 +54,9 @@ export function Marketplace() {
             });
         }, CAPTURE_SEARCH_EVENT_DELAY);
 
-        return () => clearTimeout(timeoutId); // clear if searchTerm gets updated beforehand
-    }, [searchTerm]);
+        // clear if searchTerm gets updated beforehand
+        return () => clearTimeout(timeoutId);
+    }, [posthog, searchTerm]);
 
     return (
         <SearchPage
