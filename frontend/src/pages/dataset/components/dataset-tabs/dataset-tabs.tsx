@@ -6,6 +6,7 @@ import {
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
+import { usePostHog } from '@posthog/react';
 import { Badge, Flex, Tabs } from 'antd';
 import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +17,6 @@ import { HistoryTab } from '@/components/history/history-tab.tsx';
 import { DataOutputOutlined, DataProductOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
-import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
@@ -42,6 +42,7 @@ type Props = {
 
 export function DatasetTabs({ datasetId, isLoading }: Props) {
     const { t } = useTranslation();
+    const posthog = usePostHog();
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -55,7 +56,7 @@ export function DatasetTabs({ datasetId, isLoading }: Props) {
         posthog.capture(PosthogEvents.MARKETPLACE_DATASET_TAB_CLICKED, {
             tab_name: activeTab,
         });
-    }, [activeTab]);
+    }, [activeTab, posthog]);
 
     useEffect(() => {
         const hash = location.hash.slice(1);

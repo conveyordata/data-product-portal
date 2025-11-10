@@ -1,10 +1,10 @@
+import { usePostHog } from '@posthog/react';
 import { Button, type GetProps, type Input, Table } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
 import SearchPage from '@/components/search-page/search-page.component.tsx';
-import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { getDataProductTableColumns } from '@/pages/data-products/data-products-table-columns.tsx';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
@@ -35,6 +35,7 @@ function filterDataProductsByRoles(dataProducts: DataProductsGetContract, select
 
 export function DataProductsTable() {
     const { t } = useTranslation();
+    const posthog = usePostHog();
     const navigate = useNavigate();
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
     const [selectedRole, setSelectedRole] = useState<string | undefined>(undefined);

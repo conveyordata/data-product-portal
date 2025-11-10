@@ -1,11 +1,10 @@
 import { PartitionOutlined, TeamOutlined } from '@ant-design/icons';
+import { usePostHog } from '@posthog/react';
 import { Button, Tabs, Typography } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { filterOutNonMatchingItems, sortLastVisitedOwnedItems } from '@/pages/home/helpers/last-visited-item-helper.ts';
 import {
@@ -35,6 +34,7 @@ type InboxTab = {
 
 export function DataProductsInbox({ userId }: Props) {
     const { t } = useTranslation();
+    const posthog = usePostHog();
     const { data: dataProducts, isFetching } = useGetAllDataProductsQuery();
     const { data: userDataProducts, isFetching: isFetchingUserDataProducts } = useGetUserDataProductsQuery(userId);
 

@@ -1,10 +1,9 @@
+import { usePostHog } from '@posthog/react';
 import { Flex } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
-import posthog from '@/config/posthog-config';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { DataProductRequestAccessButton } from '@/pages/data-product/components/data-product-request-access-button/data-product-request-access-button.tsx';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
@@ -31,6 +30,8 @@ type Props = {
 
 export function DataProductActions({ dataProductId }: Props) {
     const { t } = useTranslation();
+    const posthog = usePostHog();
+
     const user = useSelector(selectCurrentUser);
     const { data: dataProduct } = useGetDataProductByIdQuery(dataProductId);
     const { data: availablePlatforms, isLoading: isLoadingPlatforms } = useGetAllPlatformsQuery();
