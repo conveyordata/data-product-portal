@@ -76,7 +76,7 @@
         "vite-plugin-svgr": "^4.5.0"
     },
     "optionalDependencies": {
-        "@rollup/rollup-linux-x64-musl": "^4.53.1"
+        "@rollup/rollup-linux-x64-musl": "^4.53.2"
     },
     "volta": {
         "node": "20.12.2"
