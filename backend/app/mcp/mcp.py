@@ -2,17 +2,12 @@ from typing import Any, Dict, Optional
 from uuid import UUID
 
 from fastmcp import Context, FastMCP
-from fastmcp.server.auth import OAuthProxy
-
-# from fastmcp.server.auth.providers.aws import AWSCognitoProvider
-# from fastmcp.server.auth.providers.debug import DebugTokenVerifier
 from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import AccessToken, get_access_token
 from sqlalchemy.orm import configure_mappers
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
-from app.core.logging import logger
 
 # Import Pydantic schemas - corrected paths
 from app.data_outputs.schema_response import DataOutputGet, DataOutputsGet
@@ -62,64 +57,9 @@ def initialize_models():
 initialize_models()  # TODO Figure out if this is still needed
 
 
-class Debug(JWTVerifier):
-    async def verify_token(self, token):
-        logger.info("Verifying token: %s", str(token))
-        try:
-            logger.info(await super().verify_token(token))
-        except Exception as e:
-            logger.error(f"Token verification failed: {e}")
-            return False
-        return await super().verify_token(token)
-
-
-def get_auth_provider() -> Optional[OAuthProxy]:
+def get_auth_provider() -> Optional[JWTVerifier]:
     if settings.OIDC_ENABLED:
-        # return DebugTokenVerifier(validate=lambda token: token.startswith("valid-"))
-        return Debug(issuer=get_oidc().authority, jwks_uri=get_oidc().jwks_uri)
-        # # Configure token verification for your provider
-        # # See the Token Verification guide for provider-specific setups
-        # token_verifier = JWTVerifier(
-        #     jwks_uri=get_oidc().jwks_uri,
-        #     issuer=get_oidc().authority,
-        # )
-
-        # # # # Create the OAuth proxy
-        # return OAuthProxy(
-        #     # Provider's OAuth endpoints (from their documentation)
-        #     upstream_authorization_endpoint=get_oidc().authorization_endpoint,
-        #     upstream_token_endpoint=get_oidc().token_endpoint,
-        #     # Your registered app credentials
-        #     upstream_client_id=get_oidc().client_id,
-        #     upstream_client_secret=get_oidc().client_secret,
-        #     # Token validation (see Token Verification guide)
-        #     token_verifier=token_verifier,
-        #     # Your FastMCP server's public URL
-        #     base_url=settings.HOST,
-        #     # Optional: customize the callback path (default is "/auth/callback")
-        #     redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
-        #     client_storage=MemoryStore(),
-        # )
-        # # return OIDCProxy(
-        # #     config_url=get_oidc().configuration_url,
-        # #     # Your registered app credentials
-        # #     client_id=get_oidc().client_id,
-        # #     client_secret=get_oidc().client_secret,
-        # #     # Your FastMCP server's public URL
-        # #     base_url=settings.HOST,
-        # #     client_storage=MemoryStore(),
-        # #     redirect_path="/",
-        # #     # redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
-        # # )
-        # return AWSCognitoProvider(
-        #     user_pool_id="eu-west-1_MKmZKLFCb",  # Your AWS Cognito user pool ID
-        #     aws_region="eu-west-1",
-        #     client_id=get_oidc().client_id,  # Your app client ID
-        #     client_secret=get_oidc().client_secret,  # Your app client Secret
-        #     base_url=settings.HOST,  # Must match your callback URL
-        #     # client_storage=MemoryStore(),
-        #     redirect_path='/',
-        # )
+        return JWTVerifier(issuer=get_oidc().authority, jwks_uri=get_oidc().jwks_uri)
     return None
 
 
