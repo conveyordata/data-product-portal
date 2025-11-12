@@ -46,6 +46,11 @@ const router = createBrowserRouter([
                 element: <RootLayout />,
                 children: [
                     {
+                        path: ApplicationPaths.AuthCallback,
+                        element: <div>Auth Callback Page</div>,
+                        index: true,
+                    },
+                    {
                         path: ApplicationPaths.Home,
                         element: <Home />,
                         index: true,
