@@ -89,14 +89,14 @@ function Cart() {
     }, [createdProductId, userDataProducts]);
 
     const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
-        if (!values.justification || !values.dataProductId) {
+        if (!values.justification || !values.dataProductId || cartDatasets === undefined || cartDatasets.length === 0) {
             return;
         }
         posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED, {
-            cartSize: cartDatasetIds.length,
+            cartSize: cartDatasets?.length,
         });
         requestDatasetAccessForDataProduct({
-            datasetIds: cartDatasetIds,
+            datasetIds: cartDatasets?.map((dataset) => dataset.id),
             dataProductId: values.dataProductId,
             justification: values.justification,
         });
@@ -274,7 +274,12 @@ function Cart() {
                                         htmlType="submit"
                                         style={{ width: '100%' }}
                                         loading={isRequestingAccess}
-                                        disabled={fetchingDatasets || submitFormIssues.length > 0}
+                                        disabled={
+                                            fetchingDatasets ||
+                                            submitFormIssues.length > 0 ||
+                                            cartDatasets === undefined ||
+                                            cartDatasets?.length === 0
+                                        }
                                     >
                                         {t('Submit access requests')}
                                     </Button>
