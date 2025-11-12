@@ -63,9 +63,14 @@ initialize_models()  # TODO Figure out if this is still needed
 
 
 class Debug(JWTVerifier):
-    def verify_token(self, token):
+    async def verify_token(self, token):
         logger.info("Verifying token: %s", str(token))
-        return super().verify_token(token)
+        try:
+            logger.info(await super().verify_token(token))
+        except Exception as e:
+            logger.error(f"Token verification failed: {e}")
+            return False
+        return await super().verify_token(token)
 
 
 def get_auth_provider() -> Optional[OAuthProxy]:
