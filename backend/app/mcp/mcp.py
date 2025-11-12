@@ -2,11 +2,8 @@ from typing import Any, Dict, Optional
 from uuid import UUID
 
 from fastmcp import Context, FastMCP
-
-# from fastmcp.server.auth import OAuthProxy
-from fastmcp.server.auth.oidc_proxy import OIDCProxy
-
-# from fastmcp.server.auth.providers.jwt import JWTVerifier
+from fastmcp.server.auth import OAuthProxy
+from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import AccessToken, get_access_token
 from key_value.aio.stores.memory import MemoryStore
 from sqlalchemy.orm import configure_mappers
@@ -50,6 +47,9 @@ from app.role_assignments.global_.service import (
 )
 from app.settings import settings
 
+# from fastmcp.server.auth.oidc_proxy import OIDCProxy
+
+
 # from fastmcp.server.auth.providers.aws import AWSCognitoProvider
 
 
@@ -67,43 +67,43 @@ def initialize_models():
 initialize_models()  # TODO Figure out if this is still needed
 
 
-def get_auth_provider() -> Optional[OIDCProxy]:
+def get_auth_provider() -> Optional[OAuthProxy]:
     if settings.OIDC_ENABLED:
         # Configure token verification for your provider
         # See the Token Verification guide for provider-specific setups
-        # token_verifier = JWTVerifier(
-        #     jwks_uri=get_oidc().jwks_uri,
-        #     # issuer=get_oidc().authority,
-        # )
+        token_verifier = JWTVerifier(
+            jwks_uri=get_oidc().jwks_uri,
+            # issuer=get_oidc().authority,
+        )
 
         # # Create the OAuth proxy
-        # return OAuthProxy(
-        #     # Provider's OAuth endpoints (from their documentation)
-        #     upstream_authorization_endpoint=get_oidc().authorization_endpoint,
-        #     upstream_token_endpoint=get_oidc().token_endpoint,
-        #     # Your registered app credentials
-        #     upstream_client_id=get_oidc().client_id,
-        #     upstream_client_secret=get_oidc().client_secret,
-        #     # Token validation (see Token Verification guide)
-        #     token_verifier=token_verifier,
-        #     # Your FastMCP server's public URL
-        #     base_url=settings.HOST,
-        #     # Optional: customize the callback path (default is "/auth/callback")
-        #     redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
-        #     client_storage=MemoryStore(),
-        # )
-        return OIDCProxy(
-            config_url=get_oidc().configuration_url,
+        return OAuthProxy(
+            # Provider's OAuth endpoints (from their documentation)
+            upstream_authorization_endpoint=get_oidc().authorization_endpoint,
+            upstream_token_endpoint=get_oidc().token_endpoint,
             # Your registered app credentials
-            client_id=get_oidc().client_id,
-            client_secret=get_oidc().client_secret,
+            upstream_client_id=get_oidc().client_id,
+            upstream_client_secret=get_oidc().client_secret,
+            # Token validation (see Token Verification guide)
+            token_verifier=token_verifier,
             # Your FastMCP server's public URL
             base_url=settings.HOST,
+            # Optional: customize the callback path (default is "/auth/callback")
+            redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
             client_storage=MemoryStore(),
-            redirect_path="/",
-            # redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
         )
-        # return AWSCognitoProvider(
+        # return OIDCProxy(
+        #     config_url=get_oidc().configuration_url,
+        #     # Your registered app credentials
+        #     client_id=get_oidc().client_id,
+        #     client_secret=get_oidc().client_secret,
+        #     # Your FastMCP server's public URL
+        #     base_url=settings.HOST,
+        #     client_storage=MemoryStore(),
+        #     redirect_path="/",
+        #     # redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
+        # )
+        # # return AWSCognitoProvider(
         #     user_pool_id="eu-west-1_MKmZKLFCb",  # Your AWS Cognito user pool ID
         #     aws_region="eu-west-1",
         #     client_id=get_oidc().client_id,  # Your app client ID
