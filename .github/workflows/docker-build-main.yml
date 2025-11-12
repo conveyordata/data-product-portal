@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - 'fix/mcp-server'
 
 permissions:
   contents: read

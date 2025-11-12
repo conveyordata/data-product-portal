@@ -88,7 +88,6 @@ async def get_current_user(ctx: Context) -> dict[str, Any]:
     """Get current user data from the MCP. You can use this to
     get information about the authenticated user."""
     token = get_access_token()
-    print(token)
     return get_mcp_authenticated_user(token=token.token)
 
 
