@@ -100,6 +100,7 @@ def get_auth_provider() -> Optional[OIDCProxy]:
             # Your FastMCP server's public URL
             base_url=settings.HOST,
             client_storage=MemoryStore(),
+            redirect_path="/",
             # redirect_path=get_oidc().redirect_uri.lstrip(settings.HOST),
         )
         # return AWSCognitoProvider(
