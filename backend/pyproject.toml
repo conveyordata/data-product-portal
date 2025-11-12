@@ -16,7 +16,7 @@ fastapi = "0.121.1"
 gunicorn = "^23.0.0"
 uvicorn = "^0.38.0"
 pydantic = { version = "^2.12.4", extras = ['email'] }
-pydantic-settings = "^2.11.0"
+pydantic-settings = "^2.12.0"
 typer = "^0.20.0"
 requests = "^2.32.5"
 httpx = "^0.28.1"
