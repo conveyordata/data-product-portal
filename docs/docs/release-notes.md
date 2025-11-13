@@ -13,6 +13,30 @@ sidebar_position: 200
 ### deprecations:
 - **[API]**: Deprecated `/api/data_products/{id}/dataset/{dataset_id}` POST endpoint, use `/api/data_products/{id}/link_datasets` instead.
 
+## 0.4.0
+
+### features
+
+- **[Output Ports]**: Breaking change: Output ports are now tightly coupled to exactly one Data Product.
+- **[Technical Assets]**: Added drag and drop flow.
+- **[Marketplace]**: Reworked marketplace UX.
+
+### bugfixes
+
+- **[UX]**: Various UX bugs, pagination, ...
+
+## 0.3.7
+
+### features
+
+- **[Products]**: Added filtering on roles.
+- **[Docs]**: Proper URL.
+
+### bugfixes
+
+- **[History]**: Deletes caused not found errors in frontend.
+- **[Backend]**: Fix detached instance errors, also fixes mails.
+
 ## 0.3.6
 
 ### features
