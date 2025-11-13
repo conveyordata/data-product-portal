@@ -217,7 +217,10 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                             <Typography.Paragraph
                                 style={{ marginBottom: 0 }}
                                 type="secondary"
-                                ellipsis={{ expandable: 'collapsible' }}
+                                ellipsis={{
+                                    expandable: 'collapsible',
+                                    symbol: (expanded: boolean) => (expanded ? t('less') : t('more')),
+                                }}
                             >
                                 {dataset.description}
                             </Typography.Paragraph>

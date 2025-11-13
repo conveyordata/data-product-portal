@@ -134,6 +134,7 @@
     "Failed to link technical asset to output port": "Failed to link technical asset to output port",
     "Link Technical Assets": "Link Technical Assets",
     "Are you sure you want to delete the output port? This can have impact on downstream dependencies": "Are you sure you want to delete the output port? This can have impact on downstream dependencies",
+    "less": "less",
     "{{count}} linked technical assets_one": "{{count}} linked technical asset",
     "{{count}} linked technical assets_other": "{{count}} linked technical assets",
     "Public output ports are visible to everyone and are free to use by anyone": "Public output ports are visible to everyone and are free to use by anyone",
