@@ -15,6 +15,9 @@ sidebar_position: 200
 
 ## 0.4.0
 
+- Rename data outputs to technical assets
+- Rename datasets to output ports
+
 ### features
 
 - **[Output Ports]**: Breaking change: Output ports are now tightly coupled to exactly one Data Product.
