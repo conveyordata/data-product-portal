@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 from uuid import UUID
 
 from fastmcp import Context, FastMCP
-from fastmcp.server.auth import BearerAuthProvider
+from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import AccessToken, get_access_token
 from sqlalchemy.orm import configure_mappers
 
@@ -57,11 +57,9 @@ def initialize_models():
 initialize_models()  # TODO Figure out if this is still needed
 
 
-def get_auth_provider() -> Optional[BearerAuthProvider]:
+def get_auth_provider() -> Optional[JWTVerifier]:
     if settings.OIDC_ENABLED:
-        return BearerAuthProvider(
-            issuer=get_oidc().authority, jwks_uri=get_oidc().jwks_uri
-        )
+        return JWTVerifier(issuer=get_oidc().authority, jwks_uri=get_oidc().jwks_uri)
     return None
 
 
@@ -89,8 +87,8 @@ def get_mcp_authenticated_user(token: str):
 async def get_current_user(ctx: Context) -> dict[str, Any]:
     """Get current user data from the MCP. You can use this to
     get information about the authenticated user."""
-    access_token: AccessToken = get_access_token()
-    return get_mcp_authenticated_user(token=access_token.token)
+    token = get_access_token()
+    return get_mcp_authenticated_user(token=token.token)
 
 
 @mcp.tool

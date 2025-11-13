@@ -21,7 +21,6 @@ class LoggingMiddleware(Middleware):
         """Called for all MCP messages."""
         entry = self._build_log_entry(context)
         user_id = await self._get_user_id()
-
         self._log_to_posthog(user_id, entry)
 
         return await call_next(context)
