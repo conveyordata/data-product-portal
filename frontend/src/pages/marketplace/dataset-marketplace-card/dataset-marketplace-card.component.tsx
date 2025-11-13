@@ -171,7 +171,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {dataset.name}
                     </Typography.Title>
                 </Link>
-                <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }} style={{ height: '40px', marginBottom: 0 }}>
+                <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }} style={{ height: '44px', marginBottom: 0 }}>
                     {dataset.description || 'No description available.'}
                 </Typography.Paragraph>
                 <div style={{ height: '22px' }}>

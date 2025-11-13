@@ -214,9 +214,13 @@ export function DatasetCard({ datasetId, draggedDataOutputId }: Props) {
                                     </Popconfirm>
                                 </Flex>
                             </Flex>
-                            <Typography.Text type="secondary" ellipsis={{ tooltip: true }}>
+                            <Typography.Paragraph
+                                style={{ marginBottom: 0 }}
+                                type="secondary"
+                                ellipsis={{ expandable: 'collapsible' }}
+                            >
                                 {dataset.description}
-                            </Typography.Text>
+                            </Typography.Paragraph>
                         </Flex>
                     </Flex>
 
