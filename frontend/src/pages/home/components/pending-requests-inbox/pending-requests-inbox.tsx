@@ -1,9 +1,9 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
+import { usePostHog } from '@posthog/react';
 import { Badge, Col, Empty, Flex, Pagination, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
-import posthog from '@/config/posthog-config';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useGetPendingActionsQuery } from '@/store/features/pending-actions/pending-actions-api-slice';
@@ -14,6 +14,7 @@ import { type CustomPendingRequestsTabKey, SelectableTabs } from './pending-requ
 
 export function PendingRequestsInbox() {
     const { t } = useTranslation();
+    const posthog = usePostHog();
     const [activeTab, setActiveTab] = useState<CustomPendingRequestsTabKey>('all');
     const [selectedTypes, setSelectedTypes] = useState<Set<PendingActionTypes>>(new Set());
 

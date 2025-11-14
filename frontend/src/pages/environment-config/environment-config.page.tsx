@@ -1,5 +1,4 @@
-import { Flex, Typography } from 'antd';
-import { Input } from 'antd/lib';
+import { Flex, Input, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 

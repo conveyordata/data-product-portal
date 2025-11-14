@@ -1,10 +1,9 @@
 import { DownOutlined } from '@ant-design/icons';
-import { Button, Dropdown, type MenuProps, Radio } from 'antd';
-import type { RadioChangeEvent } from 'antd/lib';
+import { usePostHog } from '@posthog/react';
+import { Button, Dropdown, type MenuProps, Radio, type RadioChangeEvent } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import posthog from '@/config/posthog-config';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useGetDataProductRoleAssignmentsQuery } from '@/store/features/role-assignments/data-product-roles-api-slice';
@@ -20,6 +19,8 @@ interface RoleFilterProps {
 
 export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps) {
     const { t } = useTranslation();
+    const posthog = usePostHog();
+
     const currentUser = useSelector(selectCurrentUser);
     const { data: userDatasetRoles = [] } = useGetDatasetRoleAssignmentsQuery(
         { user_id: currentUser?.id || '' },
@@ -77,15 +78,16 @@ export function RoleFilter({ selectedRole, onRoleChange, mode }: RoleFilterProps
     };
 
     const handleRoleFilterChange = (roleId: string) => {
-        const selectedRoleData = uniqueUserRoles.find((role) => role.value === roleId);
-        const productIds = selectedRoleData ? selectedRoleData.productIds : [];
-        onRoleChange({ productIds: productIds, role: selectedRoleData?.value || '' });
         const event =
             mode === 'data_products' ? PosthogEvents.DATA_PRODUCTS_FILTER_USED : PosthogEvents.MARKETPLACE_FILTER_USED;
         posthog.capture(event, {
             filter_type: 'roles',
             filter_value: roleId,
         });
+
+        const selectedRoleData = uniqueUserRoles.find((role) => role.value === roleId);
+        const productIds = selectedRoleData ? selectedRoleData.productIds : [];
+        onRoleChange({ productIds: productIds, role: selectedRoleData?.value || '' });
     };
 
     const handleRadioChange = (e: RadioChangeEvent) => {

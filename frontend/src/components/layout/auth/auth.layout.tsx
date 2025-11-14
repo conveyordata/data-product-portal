@@ -1,3 +1,4 @@
+import { usePostHog } from '@posthog/react';
 import { sha256 } from 'js-sha256';
 import { useCallback, useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
@@ -5,19 +6,20 @@ import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { AppConfig } from '@/config/app-config.ts';
-import posthog from '@/config/posthog-config';
 import { useAppDispatch } from '@/store';
 import { useAuthorizeMutation } from '@/store/features/auth/auth-api-slice.ts';
 import { selectAuthState, setCredentials } from '@/store/features/auth/auth-slice.ts';
 
+const isOidcEnabled = AppConfig.isOidcEnabled();
 const oidcCognitoParams = AppConfig.getOidcCognitoLogoutParams();
 
 export const AuthLayout = () => {
-    const [authorizeUser] = useAuthorizeMutation();
+    const posthog = usePostHog();
     const navigate = useNavigate();
     const location = useLocation();
-    const isOidcEnabled = AppConfig.isOidcEnabled();
     const dispatch = useAppDispatch();
+
+    const [authorizeUser] = useAuthorizeMutation();
     const { isAuthenticated, isLoading, signinRedirect, events, activeNavigator, signoutRedirect, signinSilent } =
         useAuth();
     const { isLoading: isSettingUserCredentialsInStore, user } = useSelector(selectAuthState);
@@ -55,7 +57,7 @@ export const AuthLayout = () => {
                 });
             }
         }
-    }, [handleAuthorizeUser, isAuthenticated, isLoading, isOidcEnabled, navigate, redirectToSignIn]);
+    }, [handleAuthorizeUser, isAuthenticated, isLoading, navigate, redirectToSignIn]);
 
     useEffect(() => {
         if (!isOidcEnabled && !user) {
@@ -63,7 +65,7 @@ export const AuthLayout = () => {
                 navigate({ search: '' });
             });
         }
-    }, [handleAuthorizeUser, isOidcEnabled, navigate, user]);
+    }, [handleAuthorizeUser, navigate, user]);
 
     useEffect(() => {
         // This gets called when the user is authenticated
@@ -104,7 +106,7 @@ export const AuthLayout = () => {
             // user not logged in properly
             posthog.reset();
         }
-    }, [user]);
+    }, [user, posthog]);
 
     if (activeNavigator) {
         switch (activeNavigator) {

@@ -4,7 +4,7 @@ go 1.25.3
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.39.6
-	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.57.11
+	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.57.13
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.18.0
 	github.com/getkin/kin-openapi v0.133.0

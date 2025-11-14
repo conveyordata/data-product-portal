@@ -1,4 +1,5 @@
 import { BellOutlined, CheckCircleOutlined, MessageOutlined, PlusOutlined } from '@ant-design/icons';
+import { usePostHog } from '@posthog/react';
 import {
     Alert,
     Button,
@@ -20,7 +21,6 @@ import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
-import posthog from '@/config/posthog-config.ts';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
@@ -41,6 +41,7 @@ const cartFormDataStorageKey = 'cart-form-data';
 function Cart() {
     const { t } = useTranslation();
     const { token } = theme.useToken();
+    const posthog = usePostHog();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [createdProductId] = useQueryState('createdProductId', parseAsString.withDefault(''));
@@ -88,14 +89,14 @@ function Cart() {
     }, [createdProductId, userDataProducts]);
 
     const onFinish: FormProps<CartFormData>['onFinish'] = (values) => {
-        if (!values.justification || !values.dataProductId) {
+        if (!values.justification || !values.dataProductId || cartDatasets === undefined || cartDatasets.length === 0) {
             return;
         }
         posthog.capture(PosthogEvents.CART_CHECKOUT_COMPLETED, {
-            cartSize: cartDatasetIds.length,
+            cartSize: cartDatasets?.length,
         });
         requestDatasetAccessForDataProduct({
-            datasetIds: cartDatasetIds,
+            datasetIds: cartDatasets?.map((dataset) => dataset.id),
             dataProductId: values.dataProductId,
             justification: values.justification,
         });
@@ -273,7 +274,12 @@ function Cart() {
                                         htmlType="submit"
                                         style={{ width: '100%' }}
                                         loading={isRequestingAccess}
-                                        disabled={fetchingDatasets || submitFormIssues.length > 0}
+                                        disabled={
+                                            fetchingDatasets ||
+                                            submitFormIssues.length > 0 ||
+                                            cartDatasets === undefined ||
+                                            cartDatasets?.length === 0
+                                        }
                                     >
                                         {t('Submit access requests')}
                                     </Button>
