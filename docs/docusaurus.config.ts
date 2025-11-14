@@ -33,6 +33,16 @@ const config: Config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
+  plugins: [
+    [
+      "posthog-docusaurus",
+      {
+        apiKey: "phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc", // gitleaks:allow
+        appUrl: "https://eu.i.posthog.com", // optional, defaults to "https://us.i.posthog.com"
+        enableInDevelopment: false, // optional
+      },
+    ],
+  ],
   markdown: {
     mermaid: true,
     hooks: {
