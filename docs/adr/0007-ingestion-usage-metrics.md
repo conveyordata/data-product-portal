@@ -66,7 +66,7 @@ client.push_usage_stats(
 * **Good, because** Low SDK Maintenance: The SDK is just an HTTP wrapper.
 * **Medium, because** Producers still have to write/run the SQL.
 
-### Option 2: Advanced SDK
+### Option 3: Advanced SDK
 
 * **Good, because** Best DX (in theory): Producers just configure the SDK. We can enforce the correct query logic.
 * **Bad, because** SDK Complexity: We now own and maintain a complex client with snowflake-connector-python as a dependency.
