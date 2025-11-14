@@ -6,11 +6,18 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.4.1
+
 ### features
 - **[Shopping experience]**: We have added a new shopping experience, which allows you to add output ports to your cart,
-  and request access to multiple output ports at once.
+  and request access to multiple output ports at once. We also added the required field, business justification to the
+  access requests. This will help the reviewer of your access request understand why access is needed.
+- **[Product Tour]**: Shows a small tutorial upon creation of your first data product.
 
-### deprecations:
+### bugfixes
+- **[MCP]**: Fixed OAuth issues with MCP server.
+
+### deprecations
 - **[API]**: Deprecated `/api/data_products/{id}/dataset/{dataset_id}` POST endpoint, use `/api/data_products/{id}/link_datasets` instead.
 
 ## 0.4.0
