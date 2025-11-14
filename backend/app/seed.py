@@ -1,15 +1,26 @@
+import os
+
+from jinja2 import Template
 from sqlalchemy.orm import Session
 
 from app.authorization.service import AuthorizationService
 from app.database.database import get_db_session
 
 
-def seed_db(path: str):
+def seed_db(path: str, **template_vars):
     db: Session = next(get_db_session())
+
+    # Read the file content
+    with open(path, "r") as file:
+        file_content = file.read()
+
+    # Render the template with provided variables and environment variables
+    template = Template(file_content)
+    rendered_content = template.render(**template_vars, **os.environ)
 
     raw_connection = db.get_bind().raw_connection()
     raw_cursor = raw_connection.cursor()
-    raw_cursor.execute(open(path).read())
+    raw_cursor.execute(rendered_content)
 
     raw_connection.commit()
     AuthorizationService(db).reload_enforcer()

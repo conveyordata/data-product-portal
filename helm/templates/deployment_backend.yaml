@@ -73,6 +73,9 @@ spec:
                 name: {{ include "data-product-portal.fullname" . }}
             - secretRef:
                 name: {{ include "data-product-portal.fullname" . }}
+            - configMapRef:
+                name: portal-seed-config
+                optional: True
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
