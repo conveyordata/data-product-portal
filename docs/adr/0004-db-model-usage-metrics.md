@@ -47,7 +47,7 @@ To summarise:
 * Asset query counts cannot be used to calculate consumer query counts as this would lead to incorrect aggregations
 * We want to be able to delete assets and their stats without impacting hystorical consumer query counts
 
-#### Table 1: outpur_port_query_stats_daily
+#### Table 1: output_port_query_stats_daily
 
 Purpose: To power the "Queries over time" and "Query distribution per consumer" charts.
 Granularity: One row per (date, product, consumer, domain).
