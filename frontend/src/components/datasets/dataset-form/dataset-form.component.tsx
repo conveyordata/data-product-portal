@@ -53,6 +53,7 @@ import {
     createDatasetIdPath,
 } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import styles from './dataset-form.module.scss';
@@ -281,8 +282,9 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         (namespace: string) => validateNamespace(namespace).unwrap(),
         [validateNamespace],
     );
-
-    const ownerIds = useGetDatasetOwnerIds(currentDataset?.id);
+    const datasetOwners = useGetDatasetOwnerIds(currentDataset?.id);
+    const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
+    const ownerIds = mode === 'edit' ? datasetOwners : dataProductOwners;
 
     if (mode === 'edit' && (!currentDataset || ownerIds === undefined)) {
         return <Skeleton active />;
