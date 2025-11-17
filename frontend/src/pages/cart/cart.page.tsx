@@ -36,7 +36,7 @@ export function Cart() {
 
     const currentUser = useSelector(selectCurrentUser);
     const { data: userDataProducts, isFetching: isFetchingUserDataProducts } = useGetUserDataProductsQuery(
-        currentUser!.id,
+        currentUser?.id,
         {
             skip: currentUser === null,
         },
