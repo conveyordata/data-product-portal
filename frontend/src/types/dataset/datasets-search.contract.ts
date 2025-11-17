@@ -1,10 +1,5 @@
-import type { DatasetContract } from '@/types/dataset';
-import type { TagContract } from '@/types/tag';
+import {DatasetsGetContractSingle} from "@/types/dataset/datasets-get.contract.ts";
 
-export type DatasetsSearchContract = (Omit<DatasetContract, 'data_product_links' | 'owners' | 'tags'> & {
-    data_product_count: number;
-    tags: Omit<TagContract, 'id'>[];
-    rolled_up_tags: Omit<TagContract, 'id'>[];
-    data_product_name: string;
+export type DatasetsSearchContract = (DatasetsGetContractSingle & {
     rank: number;
 })[];

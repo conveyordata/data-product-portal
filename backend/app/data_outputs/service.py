@@ -112,12 +112,7 @@ class DataOutputService:
         return model
 
     def remove_data_output(self, id: UUID) -> DataOutputModel:
-        data_output: DataOutputModel | None = self.db.get(DataOutputModel, id)
-        if not data_output:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Data Output {id} not found",
-            )
+        data_output: DataOutputModel = self.ensure_data_output_exists(id)
 
         result = copy.deepcopy(data_output)
         self.db.delete(data_output)
