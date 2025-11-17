@@ -112,13 +112,22 @@ class DataOutputService:
         return model
 
     def remove_data_output(self, id: UUID) -> DataOutputModel:
-        data_output: DataOutputModel = self.ensure_data_output_exists(id)
+        data_output = self.get_data_output_with_links(id)
 
         result = copy.deepcopy(data_output)
         self.db.delete(data_output)
         self.db.commit()
         self.update_search_vector_associated_datasets(result)
         return result
+
+    def get_data_output_with_links(self, id: UUID) -> DataOutputModel:
+        data_output: DataOutputModel | None = self.get_data_output(id)
+        if not data_output:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Required data output with {id} does not exist",
+            )
+        return data_output
 
     def update_search_vector_associated_datasets(self, result: DataOutputModel):
         dataset_service = DatasetService(self.db)
@@ -128,7 +137,7 @@ class DataOutputService:
     def update_data_output_status(
         self, id: UUID, data_output: DataOutputStatusUpdate, *, actor: User
     ) -> None:
-        current_data_output = self.ensure_data_output_exists(id)
+        current_data_output = self.get_data_output_with_links(id)
         current_data_output.status = data_output.status
         self.db.commit()
         self.update_search_vector_associated_datasets(current_data_output)
