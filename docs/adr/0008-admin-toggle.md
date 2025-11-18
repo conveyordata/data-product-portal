@@ -50,4 +50,4 @@ RBAC changes are therefor minimal.
 
 * **Good, because** RBAC requires almost no changes.
 * **Bad, because** organisations need to track admin audits.
-* **Bad, because** organisations need to support the sharing of a single admin account.
+* **Bad, because** same person would need multiple users to differentiate, changing experience requires log out and relogin.
