@@ -14,6 +14,7 @@ from app.users.schema import User
 class CreateRoleAssignment(BaseModel):
     user_id: UUID
     role_id: Union[UUID, Literal["admin"]]
+    expiry: Optional[str] = None
 
 
 class DecideRoleAssignment(BaseModel):
@@ -27,6 +28,7 @@ class ModifyRoleAssignment(BaseModel):
 class RoleAssignmentRequest(BaseModel):
     user_id: UUID
     role_id: UUID
+    expiry: Optional[datetime] = None
 
 
 class RoleAssignmentResponse(ORMModel):
@@ -34,6 +36,7 @@ class RoleAssignmentResponse(ORMModel):
     user: User
     role: Role
     decision: DecisionStatus
+    expiry: Optional[datetime]
     requested_on: Optional[datetime]
     requested_by: Optional[User]
     decided_on: Optional[datetime]

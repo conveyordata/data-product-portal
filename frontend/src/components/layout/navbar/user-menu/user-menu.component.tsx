@@ -1,9 +1,11 @@
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Flex, Typography, theme } from 'antd';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from 'react-oidc-context';
 import { useSelector } from 'react-redux';
 
+import { AdminButton } from '@/components/buttons/admin-button.tsx';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { CartButton } from '@/components/cart/cart-button.component.tsx';
 import { Notifications } from '@/components/notifications/notifications';
@@ -26,7 +28,42 @@ export function UserMenu() {
     } = theme.useToken();
     const userInitials = user?.first_name?.charAt(0) + (user?.last_name ? user.last_name.charAt(0) : '');
 
-    const { data: isAdmin } = useIsAdminQuery();
+    const [timeRemaining, setTimeRemaining] = useState<string>('');
+
+    const { data: isAdmin, refetch: refetchIsAdmin } = useIsAdminQuery();
+
+    useEffect(() => {
+        if (!isAdmin?.is_admin || !isAdmin?.time) {
+            setTimeRemaining('');
+            return;
+        }
+
+        const updateTimeRemaining = () => {
+            const expiry = new Date(isAdmin.time + 'Z').getTime(); // UTC → epoch ms
+            const now = Date.now();
+            const diff = expiry - now;
+
+            if (diff <= 0) {
+                setTimeRemaining('expired');
+                refetchIsAdmin(); // Refetch to update admin status
+                return;
+            }
+
+            const minutes = Math.floor(diff / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            if (minutes < 1) {
+                setTimeRemaining(`${seconds}s`);
+            } else {
+                setTimeRemaining(`${minutes}m`);
+            }
+        };
+
+        updateTimeRemaining();
+        const interval = setInterval(updateTimeRemaining, 1000);
+
+        return () => clearInterval(interval);
+    }, [isAdmin, refetchIsAdmin]);
 
     const handleLogout = async () => {
         if (isAuthDisabled) {
@@ -50,9 +87,10 @@ export function UserMenu() {
             <Notifications />
             <CartButton />
             <DownloadCLIButton />
+            <AdminButton onAdminAction={refetchIsAdmin} />
             <Flex align={'center'} gap={'small'}>
                 <Badge
-                    count={isAdmin ? t('admin') : 0}
+                    count={isAdmin?.is_admin ? t('admin for ') + timeRemaining || t('admin') : 0}
                     showZero={false}
                     color={colorPrimary}
                     style={{ fontSize: 10 }}

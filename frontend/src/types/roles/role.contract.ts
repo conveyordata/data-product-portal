@@ -87,4 +87,5 @@ export interface GlobalRoleAssignmentContract {
 export interface GlobalRoleAssignmentCreateContract {
     user_id: string;
     role_id: string;
+    expiry?: string;
 }

@@ -42,6 +42,7 @@ export const globalRoleAssignmentsApiSlice = baseApiSlice
                     data: {
                         role_id: request.role_id,
                         user_id: request.user_id,
+                        expiry: request.expiry,
                     },
                 }),
                 invalidatesTags: (result, _error, { user_id }) => [
