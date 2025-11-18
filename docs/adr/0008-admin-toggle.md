@@ -22,7 +22,7 @@ Elevated privileges need to be enabled prior to using them. By default everyone 
 - Add a timestamp how long it is valid and at each RBAC check we can see if it is still valid and remove it otherwise.
 
 * **Option 2: Outside Portal**
-We can advise companies to reserve a special user for this. In case they need superuser access to fix something in portal, they use this separate account to login to portal, apply the changes and log back out.
+We can advise companies to reserve a special user for this or to provide a non-admin and admin user for the same person. In case they need superuser access to fix something in portal, they use this separate account to login to portal, apply the changes and log back out.
 
 ## Decision Outcome
 
