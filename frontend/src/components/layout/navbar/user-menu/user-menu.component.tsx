@@ -30,7 +30,7 @@ export function UserMenu() {
 
     const [timeRemaining, setTimeRemaining] = useState<string>('');
 
-    const { data: isAdmin, refetch: refetchIsAdmin } = useIsAdminQuery();
+    const { data: isAdmin } = useIsAdminQuery();
 
     useEffect(() => {
         if (!isAdmin?.is_admin || !isAdmin?.time) {
@@ -39,13 +39,13 @@ export function UserMenu() {
         }
 
         const updateTimeRemaining = () => {
-            const expiry = new Date(isAdmin.time + 'Z').getTime(); // UTC → epoch ms
+            const expiry = new Date(`${isAdmin.time}Z`).getTime(); // UTC → epoch ms
             const now = Date.now();
             const diff = expiry - now;
 
             if (diff <= 0) {
                 setTimeRemaining('expired');
-                refetchIsAdmin(); // Refetch to update admin status
+                window.location.reload(); // Refetch to update admin status
                 return;
             }
 
@@ -63,7 +63,7 @@ export function UserMenu() {
         const interval = setInterval(updateTimeRemaining, 1000);
 
         return () => clearInterval(interval);
-    }, [isAdmin, refetchIsAdmin]);
+    }, [isAdmin]);
 
     const handleLogout = async () => {
         if (isAuthDisabled) {
@@ -87,10 +87,10 @@ export function UserMenu() {
             <Notifications />
             <CartButton />
             <DownloadCLIButton />
-            <AdminButton onAdminAction={refetchIsAdmin} />
+            <AdminButton onAdminAction={() => window.location.reload()} isAdmin={isAdmin?.is_admin} />
             <Flex align={'center'} gap={'small'}>
                 <Badge
-                    count={isAdmin?.is_admin ? t('admin for ') + timeRemaining || t('admin') : 0}
+                    count={isAdmin?.is_admin ? (timeRemaining ? t('admin for ') + timeRemaining : t('admin')) : 0}
                     showZero={false}
                     color={colorPrimary}
                     style={{ fontSize: 10 }}

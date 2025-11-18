@@ -1,4 +1,4 @@
-import { CrownOutlined } from '@ant-design/icons';
+import { CrownOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import { Button, Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -15,9 +15,10 @@ import styles from './admin-button.module.scss';
 
 type Props = {
     onAdminAction?: () => void;
+    isAdmin?: boolean;
 };
 
-export function AdminButton({ onAdminAction }: Props) {
+export function AdminButton({ onAdminAction, isAdmin }: Props) {
     const { t } = useTranslation();
     const [createGlobalRoleAssignment] = useCreateGlobalRoleAssignmentMutation();
     const [decideGlobalRoleAssignment] = useDecideGlobalRoleAssignmentMutation();
@@ -41,6 +42,9 @@ export function AdminButton({ onAdminAction }: Props) {
         if (globalRoleAssignments && globalRoleAssignments.length > 0) {
             // Revoke admin access
             await deleteGlobalRoleAssignment({ role_assignment_id: globalRoleAssignments[0].id });
+
+            onAdminAction?.();
+            return;
         }
         const expiry = new Date();
         expiry.setMinutes(expiry.getMinutes() + 1); // expire 1 minute from now
@@ -50,15 +54,20 @@ export function AdminButton({ onAdminAction }: Props) {
             expiry: expiry.toISOString(),
         }).unwrap();
         await decideGlobalRoleAssignment({ role_assignment_id: result.id, decision_status: 'approved' });
+
         onAdminAction?.();
     };
 
     return (
-        <Popover content={t('Gain temporary admin privileges')} trigger={'hover'} placement="bottom">
+        <Popover
+            content={isAdmin ? t('Remove admin privileges') : t('Gain temporary admin privileges')}
+            trigger={'hover'}
+            placement="bottom"
+        >
             <Button
                 shape={'circle'}
                 className={styles.iconButton}
-                icon={<CrownOutlined />}
+                icon={isAdmin ? <UserSwitchOutlined /> : <CrownOutlined />}
                 onClick={handleAdminAction}
             />
         </Popover>

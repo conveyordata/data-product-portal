@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -7,4 +9,4 @@ class AccessResponse(BaseModel):
 
 class IsAdminResponse(BaseModel):
     is_admin: bool
-    time: str
+    time: Optional[str] = None

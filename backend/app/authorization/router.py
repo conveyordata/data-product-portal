@@ -90,5 +90,5 @@ def is_admin(
                 delete_assignment(admin.id, db=db)
     return IsAdminResponse(
         is_admin=authorizer.has_admin_role(user_id=user.id),
-        time=admin.expiry.isoformat() if admin and admin.expiry else "N/A",
+        time=admin.expiry.isoformat() if admin and admin.expiry else None,
     )
