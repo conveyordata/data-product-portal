@@ -25,3 +25,8 @@
         border-radius: unset;
     }
 }
+
+.admin-layout-container {
+    // Admin has a big large red border around the content area
+    border: 4px solid globals.$error-color;
+}

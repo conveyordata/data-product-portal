@@ -6,6 +6,7 @@ import { Outlet, useLocation } from 'react-router';
 import { Navbar } from '@/components/layout/navbar/navbar.component.tsx';
 import { Sidebar } from '@/components/layout/sidebar/sidebar.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
+import { useIsAdminQuery } from '@/store/features/authorization/authorization-api-slice';
 import { ApplicationPaths } from '@/types/navigation.ts';
 import styles from './root.module.scss';
 
@@ -49,9 +50,15 @@ export default function RootLayout() {
 
         if (changed_event) posthog.capture(changed_event);
     }, [pathname, posthog]);
+    const { data: isAdmin } = useIsAdminQuery();
 
     return (
-        <Layout className={styles.layoutWrapper} hasSider>
+        <Layout
+            className={
+                isAdmin?.is_admin ? `${styles.adminLayoutContainer} ${styles.layoutWrapper}` : styles.layoutWrapper
+            }
+            hasSider
+        >
             <Sidebar />
             <Layout>
                 <Navbar />
