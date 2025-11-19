@@ -26,8 +26,14 @@ def upgrade() -> None:
             "can_become_admin", sa.Boolean(), nullable=False, server_default=sa.false()
         ),
     )
+    op.add_column(
+        "users",
+        sa.Column("admin_expiry", sa.DateTime(timezone=False), nullable=True),
+        if_not_exists=True,
+    )
 
 
 def downgrade() -> None:
     # Remove can_become_admin column from user table
     op.drop_column("users", "can_become_admin")
+    op.drop_column("users", "admin_expiry")
