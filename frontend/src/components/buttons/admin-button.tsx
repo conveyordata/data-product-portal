@@ -39,7 +39,7 @@ export function AdminButton({ onAdminAction, isAdmin }: Props) {
             return;
         }
         const expiry = new Date();
-        expiry.setMinutes(expiry.getMinutes() + 1); // expire 1 minute from now
+        expiry.setMinutes(expiry.getMinutes() + 10); // expire 10 minutes from now
         await becomeAdmin({
             user_id: currentUser.id,
             expiry: expiry.toISOString(),
