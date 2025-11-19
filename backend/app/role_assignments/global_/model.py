@@ -28,7 +28,6 @@ class GlobalRoleAssignment(Base, BaseORM):
     )
 
     requested_on = Column(DateTime(timezone=False), server_default=utcnow())
-    expiry = Column(DateTime(timezone=False), nullable=True)
     requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     requested_by: Mapped["User"] = relationship(foreign_keys=[requested_by_id])
     decided_on = Column(DateTime(timezone=False))

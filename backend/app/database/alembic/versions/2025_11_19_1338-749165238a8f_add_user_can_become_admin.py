@@ -1,7 +1,7 @@
 """Add user can become admin
 
 Revision ID: 749165238a8f
-Revises: cf15a6561acf
+Revises: 0f590c0c9b20
 Create Date: 2025-11-19 13:38:28.574326
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "749165238a8f"
-down_revision: Union[str, None] = "cf15a6561acf"
+down_revision: Union[str, None] = "0f590c0c9b20"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
