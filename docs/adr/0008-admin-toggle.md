@@ -37,6 +37,8 @@ While they are admin they are still audited as the same user. Perhaps it should 
 The admin role will be granted temporarily to the user.
 RBAC changes are therefor minimal.
 
+Future improvement: Add a default role to the global roles that allows for platform configuration. A Platform Admin role that can be permanently assigned, but that does not have blanket permissions like this admin role.
+
 ## Pros and Cons of the Options
 
 ### Option 1: Within Portal
