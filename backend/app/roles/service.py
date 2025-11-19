@@ -96,20 +96,6 @@ class RoleService:
             self.db.add(model)
             self.db.commit()
 
-        if self.find_prototype(Scope.GLOBAL, Prototype.PRE_ADMIN) is None:
-            modified = True
-            self.create_role(
-                CreateRole(
-                    name="Pre Admin",
-                    scope=Scope.GLOBAL,
-                    description="This is the role that allows user to elevate themself to admin privileges",  # noqa: E501
-                    permissions=[
-                        Action.GLOBAL__ELEVATE_TO_ADMIN,
-                    ],
-                ),
-                prototype=Prototype.PRE_ADMIN,
-            )
-
         if self.find_prototype(Scope.GLOBAL, Prototype.EVERYONE) is None:
             modified = True
             self.create_role(

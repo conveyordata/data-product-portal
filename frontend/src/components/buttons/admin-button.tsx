@@ -3,13 +3,11 @@ import { Button, Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
-import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
     useBecomeAdminMutation,
     useDeleteGlobalRoleAssignmentMutation,
     useGetGlobalRoleAssignmentsQuery,
 } from '@/store/features/role-assignments/global-roles-api-slice';
-import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import styles from './admin-button.module.scss';
 
 type Props = {
@@ -28,11 +26,7 @@ export function AdminButton({ onAdminAction, isAdmin }: Props) {
     const [deleteGlobalRoleAssignment] = useDeleteGlobalRoleAssignmentMutation();
     const currentUser = useSelector(selectCurrentUser);
 
-    const { data: become_admin_access } = useCheckAccessQuery({
-        action: AuthorizationAction.GLOBAL__ELEVATE_TO_ADMIN,
-    });
-
-    const canBecomeAdmin = become_admin_access?.allowed ?? false;
+    const canBecomeAdmin = currentUser?.can_become_admin ?? false;
 
     if (!currentUser || !canBecomeAdmin) return null;
 

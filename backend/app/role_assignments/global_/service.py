@@ -3,7 +3,7 @@ from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.database import ensure_exists
@@ -16,9 +16,7 @@ from app.role_assignments.global_.schema import (
 )
 from app.roles.model import Role as RoleModel
 from app.roles.schema import Prototype, Scope
-from app.users.model import User as UserModel
 from app.users.schema import User
-from app.users.service import SYSTEM_ACCOUNT
 
 
 class RoleAssignmentService:
@@ -61,7 +59,7 @@ class RoleAssignmentService:
 
     def delete_assignment(self, id_: UUID) -> RoleAssignment:
         assignment = self.get_assignment(id_)
-        self._guard_against_illegal_admin_removal(assignment)
+        # self._guard_against_illegal_admin_removal(assignment)
 
         self.db.delete(assignment)
         self.db.commit()
@@ -71,7 +69,7 @@ class RoleAssignmentService:
         self, request: UpdateRoleAssignment, *, actor: User
     ) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
-        self._guard_against_illegal_admin_removal(assignment)
+        # self._guard_against_illegal_admin_removal(assignment)
 
         if (role_id := request.role_id) is not None:
             self.ensure_is_global_scope(role_id)
@@ -102,25 +100,27 @@ class RoleAssignmentService:
                 "Admin role assignments must have an expiry date",
             )
 
-    def _guard_against_illegal_admin_removal(self, assignment: RoleAssignment) -> None:
-        if (
-            assignment.role is not None
-            and assignment.role.prototype == Prototype.PRE_ADMIN
-            and assignment.decision == DecisionStatus.APPROVED
-            and self._count_admins() <= 1
-        ):
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                "At least one user needs to have rights to elevate to admin",
-            )
+    # def _guard_against_illegal_admin_
+    # removal(self, assignment: RoleAssignment) -> None:
+    #     # TODO Check that at least 1 user has the become admin thingy
+    #     pass
+    #     # if (
+    #     #     assignment.role is not None
+    #     #     and assignment.role.prototype == Prototype.PRE_ADMIN
+    #     #     and assignment.decision == DecisionStatus.APPROVED
+    #     #     and self._count_admins() <= 1
+    #     # ):
+    #     #     raise HTTPException(
+    #     #         status.HTTP_403_FORBIDDEN,
+    #     #         "At least one user need to have elevate to admin",
+    #     #     )
 
-    def _count_admins(self) -> int:
-        query = (
-            select(func.count())
-            .select_from(GlobalRoleAssignment)
-            .join(GlobalRoleAssignment.user)
-            .where(UserModel.email != SYSTEM_ACCOUNT)
-            .join(GlobalRoleAssignment.role)
-            .where(RoleModel.prototype == Prototype.PRE_ADMIN)
-        )
-        return self.db.scalar(query)
+    # def _count_admins(self) -> int:
+    #     query = (
+    #         select(func.count())
+    #         .select_from(GlobalRoleAssignment)
+    #         .join(GlobalRoleAssignment.user)
+    #         .where(UserModel.email != SYSTEM_ACCOUNT)
+    #         .join(GlobalRoleAssignment.role)
+    #     )
+    #     return self.db.scalar(query)

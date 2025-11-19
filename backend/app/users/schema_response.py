@@ -14,6 +14,7 @@ class BaseUserGet(ORMModel):
     first_name: str
     last_name: str
     has_seen_tour: bool
+    can_become_admin: bool
 
 
 class UserGet(BaseUserGet):

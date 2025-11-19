@@ -135,7 +135,7 @@ export function RolesTable({ scope }: RolesTableProps) {
             }
 
             let checkbox: ReactElement;
-            if (role.prototype === Prototype.ADMIN || role.prototype === Prototype.PRE_ADMIN) {
+            if (role.prototype === Prototype.ADMIN) {
                 // Admin permissions cannot be changed
                 checkbox = <Checkbox checked={true} disabled />;
             } else {

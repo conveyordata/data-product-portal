@@ -18,7 +18,6 @@ class Prototype(IntEnum):
     EVERYONE = 1
     OWNER = 2
     ADMIN = 3
-    PRE_ADMIN = 4
 
 
 class CreateRole(ORMModel):

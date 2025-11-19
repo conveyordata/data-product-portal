@@ -33,6 +33,7 @@ class User(Base, BaseORM):
     )
 
     has_seen_tour = Column(Boolean, default=False, nullable=False)
+    can_become_admin = Column(Boolean, default=False, nullable=False)
 
     notifications: Mapped[list["Notification"]] = relationship(
         "Notification",

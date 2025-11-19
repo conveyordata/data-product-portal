@@ -21,6 +21,7 @@ from app.role_assignments.global_.schema import (
 )
 from app.role_assignments.global_.service import RoleAssignmentService
 from app.roles import ADMIN_UUID
+from app.users.model import ensure_user_exists
 from app.users.schema import User
 
 router = APIRouter(prefix="/global")
@@ -37,19 +38,20 @@ def list_assignments(
 
 @router.post(
     "/become_admin",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.GLOBAL__ELEVATE_TO_ADMIN, resolver=EmptyResolver
-            )
-        )
-    ],
 )
 def become_admin(
     request: BecomeAdmin,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> RoleAssignmentResponse:
+    # TODO Check this in a resolver?
+    user = ensure_user_exists(user.id, db)
+    if not user.can_become_admin:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            detail="User is not allowed to elevate to admin",
+        )
+
     service = RoleAssignmentService(db)
     existing_admins = service.list_assignments(
         user_id=user.id,
