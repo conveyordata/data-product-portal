@@ -5,8 +5,7 @@ import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import {
     useBecomeAdminMutation,
-    useDeleteGlobalRoleAssignmentMutation,
-    useGetGlobalRoleAssignmentsQuery,
+    useRevokeAdminMutation,
 } from '@/store/features/role-assignments/global-roles-api-slice';
 import styles from './admin-button.module.scss';
 
@@ -18,12 +17,7 @@ type Props = {
 export function AdminButton({ onAdminAction, isAdmin }: Props) {
     const { t } = useTranslation();
     const [becomeAdmin] = useBecomeAdminMutation();
-    const { data: globalRoleAssignments } = useGetGlobalRoleAssignmentsQuery({
-        user_id: useSelector(selectCurrentUser)?.id || '',
-        role_id: '00000000-0000-0000-0000-000000000000',
-        decision: 'approved',
-    });
-    const [deleteGlobalRoleAssignment] = useDeleteGlobalRoleAssignmentMutation();
+    const [revokeAdmin] = useRevokeAdminMutation();
     const currentUser = useSelector(selectCurrentUser);
 
     const canBecomeAdmin = currentUser?.can_become_admin ?? false;
@@ -31,9 +25,9 @@ export function AdminButton({ onAdminAction, isAdmin }: Props) {
     if (!currentUser || !canBecomeAdmin) return null;
 
     const handleAdminAction = async () => {
-        if (globalRoleAssignments && globalRoleAssignments.length > 0) {
+        if (isAdmin) {
             // Revoke admin access
-            await deleteGlobalRoleAssignment({ role_assignment_id: globalRoleAssignments[0].id });
+            await revokeAdmin({ user_id: currentUser.id }).unwrap();
 
             onAdminAction?.();
             return;

@@ -17,12 +17,18 @@ class UserService:
         self.db = db
 
     def get_users(self) -> Sequence[UsersGet]:
-        return self.db.scalars(
+        users = self.db.scalars(
             select(UserModel)
             .outerjoin(UserModel.global_role)
             .where(UserModel.email != SYSTEM_ACCOUNT)
             .order_by(asc(UserModel.last_name), asc(UserModel.first_name))
         ).all()
+        # for user in users:
+        #     print(user)
+        #     if (user.global_role):
+        #         print(user.first_name, user.last_name)
+        #         print(user.global_role.role.name)
+        return users
 
     def remove_user(self, id: UUID) -> None:
         user = ensure_user_exists(id, self.db)

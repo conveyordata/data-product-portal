@@ -9,7 +9,6 @@ from app.authorization.schema import AccessResponse, IsAdminResponse
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.database.database import get_db_session
-from app.role_assignments.global_.router import delete_assignment, list_assignments
 from app.roles import ADMIN_UUID
 from app.users.schema import User
 
@@ -49,16 +48,9 @@ def check_access(
     authorizer = Authorization()
 
     # Check if user has admin creds and if they are still valid
-    admin = list_assignments(
-        db=db,
-        user_id=user.id,
-        role_id=ADMIN_UUID,
-    )
-    if len(admin) > 0:
-        admin = admin[0]
-        if admin.expiry is not None:
-            if admin.expiry <= datetime.now(tz=timezone.utc).replace(tzinfo=None):
-                delete_assignment(admin.id, db=db)
+    if user.admin_expiry:
+        if user.admin_expiry <= datetime.now(tz=timezone.utc).replace(tzinfo=None):
+            authorizer.revoke_global_role(user_id=user.id, role_id=ADMIN_UUID)
 
     result = authorizer.has_access(sub=sub, dom=dom, obj=obj, act=action)
     return AccessResponse(allowed=result)
@@ -78,17 +70,10 @@ def is_admin(
     db: Session = Depends(get_db_session),
 ) -> IsAdminResponse:
     authorizer = Authorization()
-    admin = list_assignments(
-        db=db,
-        user_id=user.id,
-        role_id=ADMIN_UUID,
-    )
-    if len(admin) > 0:
-        admin = admin[0]
-        if admin.expiry is not None:
-            if admin.expiry <= datetime.now(tz=timezone.utc).replace(tzinfo=None):
-                delete_assignment(admin.id, db=db)
+    if user.admin_expiry:
+        if user.admin_expiry <= datetime.now(tz=timezone.utc).replace(tzinfo=None):
+            authorizer.revoke_admin_role(user_id=user.id)
     return IsAdminResponse(
         is_admin=authorizer.has_admin_role(user_id=user.id),
-        time=admin.expiry.isoformat() if admin and admin.expiry else None,
+        time=user.admin_expiry.isoformat() if user.admin_expiry else None,
     )

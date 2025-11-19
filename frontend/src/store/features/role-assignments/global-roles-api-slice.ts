@@ -47,6 +47,17 @@ export const globalRoleAssignmentsApiSlice = baseApiSlice
                     { type: TagTypes.User, id: user_id },
                 ],
             }),
+            revokeAdmin: builder.mutation<void, { user_id: string }>({
+                query: () => ({
+                    url: ApiUrl.RoleAssignmentsRevokeAdmin,
+                    method: 'POST',
+                }),
+                invalidatesTags: (_, _error, { user_id }) => [
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.GlobalAssignments, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.User, id: user_id },
+                ],
+            }),
             createGlobalRoleAssignment: builder.mutation<
                 GlobalRoleAssignmentContract,
                 GlobalRoleAssignmentCreateContract
@@ -145,5 +156,6 @@ export const {
     useDeleteGlobalRoleAssignmentMutation,
     useCreateGlobalRoleAssignmentMutation,
     useBecomeAdminMutation,
+    useRevokeAdminMutation,
     useDecideGlobalRoleAssignmentMutation,
 } = globalRoleAssignmentsApiSlice;

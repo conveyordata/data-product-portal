@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Literal, Optional, Sequence, Union, cast
 from uuid import UUID
 
@@ -43,7 +44,7 @@ def become_admin(
     request: BecomeAdmin,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
-) -> RoleAssignmentResponse:
+) -> bool:
     # TODO Check this in a resolver?
     user = ensure_user_exists(user.id, db)
     if not user.can_become_admin:
@@ -51,30 +52,29 @@ def become_admin(
             status.HTTP_403_FORBIDDEN,
             detail="User is not allowed to elevate to admin",
         )
+    user.admin_expiry = request.expiry
+    authorizer = Authorization()
+    return authorizer.assign_admin_role(user_id=str(user.id))
 
-    service = RoleAssignmentService(db)
-    existing_admins = service.list_assignments(
-        user_id=user.id,
-        role_id=ADMIN_UUID,
-        decision=DecisionStatus.APPROVED,
-    )
-    if existing_admins:
-        return existing_admins[0]
 
-    assignment = service.create_assignment(
-        RoleAssignmentRequest(
-            user_id=user.id,
-            role_id=ADMIN_UUID,
-            expiry=request.expiry,
-        ),
-        actor=user,
+@router.post(
+    "/revoke_admin",
+)
+def revoke_admin(
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> bool:
+    # TODO Check this in a resolver?
+    user = ensure_user_exists(user.id, db)
+    authorizer = Authorization()
+
+    if user.admin_expiry:
+        if user.admin_expiry >= datetime.now(tz=timezone.utc).replace(tzinfo=None):
+            return authorizer.revoke_admin_role(user_id=user.id)
+    raise HTTPException(
+        status.HTTP_400_BAD_REQUEST,
+        detail="User is not currently an admin",
     )
-    assignment = service.update_assignment(
-        UpdateRoleAssignment(id=assignment.id, decision=DecisionStatus.APPROVED),
-        actor=user,
-    )
-    GlobalAuthAssignment(assignment).add()
-    return assignment
 
 
 @router.post(

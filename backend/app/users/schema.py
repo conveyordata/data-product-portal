@@ -1,3 +1,5 @@
+from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 from pydantic import EmailStr
@@ -13,3 +15,4 @@ class User(ORMModel):
     last_name: str
     has_seen_tour: bool
     can_become_admin: bool
+    admin_expiry: Optional[datetime] = None
