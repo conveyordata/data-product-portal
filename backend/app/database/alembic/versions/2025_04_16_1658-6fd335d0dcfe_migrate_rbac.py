@@ -21,14 +21,13 @@ from app.core.authz import Action, Authorization
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.dataset.model import DatasetRoleAssignment
 from app.role_assignments.enums import DecisionStatus
-from app.role_assignments.global_.model import GlobalRoleAssignment
 from app.roles.model import Role as RoleModel
 from app.roles.schema import CreateRole, Prototype, Scope
 from app.roles.service import RoleService
 
 # revision identifiers, used by Alembic.
 revision: str = "6fd335d0dcfe"
-down_revision: Union[str, None] = "b3a391db07dd"
+down_revision: Union[str, None] = "cf15a6561aff"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -36,6 +35,30 @@ dataset_table = sa.Table(
     "datasets",
     sa.MetaData(),
     sa.Column("id", PGUUID(as_uuid=True), primary_key=True),
+)
+
+global_role_assignment = sa.Table(
+    "role_assignments_global",
+    sa.MetaData(),
+    sa.Column("id", PGUUID(as_uuid=True), primary_key=True),
+    sa.Column(
+        "user_id", PGUUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=False
+    ),
+    sa.Column(
+        "role_id", PGUUID(as_uuid=True), sa.ForeignKey("roles.id"), nullable=False
+    ),
+    sa.Column("decision", sa.String, nullable=False),
+    sa.Column("requested_on", sa.DateTime, nullable=False),
+    sa.Column(
+        "requested_by_id",
+        PGUUID(as_uuid=True),
+        sa.ForeignKey("users.id"),
+        nullable=True,
+    ),
+    sa.Column("decided_on", sa.DateTime, nullable=True),
+    sa.Column(
+        "decided_by_id", PGUUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=True
+    ),
 )
 
 data_product_membership = sa.Table(
@@ -193,14 +216,12 @@ class RoleMigrationService:
         users = self.db.execute(sa.sql.text("""select * from users""")).all()
         for user in users:
             if user.is_admin:
-                self.db.add(
-                    GlobalRoleAssignment(
-                        user_id=user.id,
-                        role_id=admin_role.id,
-                        decision=DecisionStatus.APPROVED,
-                        requested_on=user.updated_on,
-                        decided_on=user.updated_on,
-                    )
+                global_role_assignment.insert().values(
+                    user_id=user.id,
+                    role_id=admin_role.id,
+                    decision=DecisionStatus.APPROVED,
+                    requested_on=user.updated_on,
+                    decided_on=user.updated_on,
                 )
         self.db.commit()
 
@@ -211,7 +232,6 @@ def upgrade() -> None:
     metadata.reflect(bind=session.bind)
 
     data_product_membership = metadata.tables["data_product_memberships"]
-
     service = RoleMigrationService(
         db=session, data_product_membership=data_product_membership
     )
@@ -223,5 +243,5 @@ def downgrade() -> None:
     session = Session(bind=op.get_bind())
     session.execute(sa.delete(DataProductRoleAssignment))
     session.execute(sa.delete(DatasetRoleAssignment))
-    session.execute(sa.delete(GlobalRoleAssignment))
+    session.execute(sa.delete(global_role_assignment))
     session.commit()

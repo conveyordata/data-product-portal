@@ -46,7 +46,7 @@ export const getPeopleTableColumns = ({
         value: role.prototype === Prototype.EVERYONE ? '' : role.id,
     }));
 
-    const numberOfAdmins = data.filter((user) => user.global_role?.role.prototype === Prototype.ADMIN).length;
+    const numberOfAdmins = data.filter((user) => user.global_role?.role.prototype === Prototype.PRE_ADMIN).length;
     const lockAdmins = numberOfAdmins <= 1;
 
     return [

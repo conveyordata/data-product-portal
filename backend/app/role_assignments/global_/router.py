@@ -11,6 +11,7 @@ from app.database.database import get_db_session
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.auth import GlobalAuthAssignment
 from app.role_assignments.global_.schema import (
+    BecomeAdmin,
     CreateRoleAssignment,
     DecideRoleAssignment,
     ModifyRoleAssignment,
@@ -32,6 +33,46 @@ def list_assignments(
     db: Session = Depends(get_db_session),
 ) -> Sequence[RoleAssignmentResponse]:
     return RoleAssignmentService(db).list_assignments(user_id=user_id, role_id=role_id)
+
+
+@router.post(
+    "/become_admin",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__ELEVATE_TO_ADMIN, resolver=EmptyResolver
+            )
+        )
+    ],
+)
+def become_admin(
+    request: BecomeAdmin,
+    db: Session = Depends(get_db_session),
+    user: User = Depends(get_authenticated_user),
+) -> RoleAssignmentResponse:
+    service = RoleAssignmentService(db)
+    existing_admins = service.list_assignments(
+        user_id=user.id,
+        role_id=ADMIN_UUID,
+        decision=DecisionStatus.APPROVED,
+    )
+    if existing_admins:
+        return existing_admins[0]
+
+    assignment = service.create_assignment(
+        RoleAssignmentRequest(
+            user_id=user.id,
+            role_id=ADMIN_UUID,
+            expiry=request.expiry,
+        ),
+        actor=user,
+    )
+    assignment = service.update_assignment(
+        UpdateRoleAssignment(id=assignment.id, decision=DecisionStatus.APPROVED),
+        actor=user,
+    )
+    GlobalAuthAssignment(assignment).add()
+    return assignment
 
 
 @router.post(

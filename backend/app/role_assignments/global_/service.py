@@ -49,6 +49,7 @@ class RoleAssignmentService:
         self, request: RoleAssignmentRequest, *, actor: User
     ) -> RoleAssignment:
         self.ensure_is_global_scope(request.role_id)
+        self.ensure_admin_has_expiry(request.role_id, request.expiry)
         role_assignment = GlobalRoleAssignment(
             **request.model_dump(),
             requested_on=datetime.now(),
@@ -91,16 +92,26 @@ class RoleAssignmentService:
                 detail="Role not found for this scope",
             )
 
+    def ensure_admin_has_expiry(
+        self, role_id: UUID, expiry: Optional[datetime]
+    ) -> None:
+        role = self.db.get(RoleModel, role_id)
+        if role and role.prototype == Prototype.ADMIN and expiry is None:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Admin role assignments must have an expiry date",
+            )
+
     def _guard_against_illegal_admin_removal(self, assignment: RoleAssignment) -> None:
         if (
             assignment.role is not None
-            and assignment.role.prototype == Prototype.ADMIN
+            and assignment.role.prototype == Prototype.PRE_ADMIN
             and assignment.decision == DecisionStatus.APPROVED
             and self._count_admins() <= 1
         ):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
-                "At least one user needs to have admin rights",
+                "At least one user needs to have rights to elevate to admin",
             )
 
     def _count_admins(self) -> int:
@@ -110,6 +121,6 @@ class RoleAssignmentService:
             .join(GlobalRoleAssignment.user)
             .where(UserModel.email != SYSTEM_ACCOUNT)
             .join(GlobalRoleAssignment.role)
-            .where(RoleModel.prototype == Prototype.ADMIN)
+            .where(RoleModel.prototype == Prototype.PRE_ADMIN)
         )
         return self.db.scalar(query)

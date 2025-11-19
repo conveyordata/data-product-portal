@@ -32,6 +32,21 @@ export const globalRoleAssignmentsApiSlice = baseApiSlice
                     return [...individual, { type: TagTypes.GlobalAssignments, id: STATIC_TAG_ID.LIST }];
                 },
             }),
+            becomeAdmin: builder.mutation<GlobalRoleAssignmentContract, { user_id: string; expiry: string }>({
+                query: (request) => ({
+                    url: ApiUrl.RoleAssignmentsBecomeAdmin,
+                    method: 'POST',
+                    data: {
+                        expiry: request.expiry,
+                    },
+                }),
+                invalidatesTags: (result, _error, { user_id }) => [
+                    { type: TagTypes.Role, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.GlobalAssignments, id: STATIC_TAG_ID.LIST },
+                    { type: TagTypes.GlobalAssignments, id: result?.id },
+                    { type: TagTypes.User, id: user_id },
+                ],
+            }),
             createGlobalRoleAssignment: builder.mutation<
                 GlobalRoleAssignmentContract,
                 GlobalRoleAssignmentCreateContract
@@ -129,5 +144,6 @@ export const {
     useUpdateGlobalRoleAssignmentMutation,
     useDeleteGlobalRoleAssignmentMutation,
     useCreateGlobalRoleAssignmentMutation,
+    useBecomeAdminMutation,
     useDecideGlobalRoleAssignmentMutation,
 } = globalRoleAssignmentsApiSlice;

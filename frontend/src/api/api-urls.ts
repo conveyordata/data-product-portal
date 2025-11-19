@@ -59,6 +59,7 @@ export enum ApiUrl {
     RoleAssignmentsGlobal = '/api/role_assignments/global',
     RoleAssignmentsGlobalDelete = '/api/role_assignments/global/:assignmentId',
     RoleAssignmentsGlobalRequest = '/api/role_assignments/global/request',
+    RoleAssignmentsBecomeAdmin = '/api/role_assignments/global/become_admin',
     RoleAssignmentsGlobalDecide = '/api/role_assignments/global/:assignmentId/decide',
     RoleAssignmentsGlobalUpdate = '/api/role_assignments/global/:assignmentId/role',
     Tags = '/api/tags',

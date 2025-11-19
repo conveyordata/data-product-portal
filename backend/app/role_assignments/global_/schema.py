@@ -17,6 +17,10 @@ class CreateRoleAssignment(BaseModel):
     expiry: Optional[str] = None
 
 
+class BecomeAdmin(BaseModel):
+    expiry: str
+
+
 class DecideRoleAssignment(BaseModel):
     decision: DecisionStatus
 

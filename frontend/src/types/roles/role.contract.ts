@@ -8,6 +8,7 @@ export const Prototype = {
     EVERYONE: 1,
     OWNER: 2,
     ADMIN: 3,
+    PRE_ADMIN: 4,
 } as const;
 
 export type Prototype = (typeof Prototype)[keyof typeof Prototype];

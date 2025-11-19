@@ -5,8 +5,7 @@ import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice';
 import {
-    useCreateGlobalRoleAssignmentMutation,
-    useDecideGlobalRoleAssignmentMutation,
+    useBecomeAdminMutation,
     useDeleteGlobalRoleAssignmentMutation,
     useGetGlobalRoleAssignmentsQuery,
 } from '@/store/features/role-assignments/global-roles-api-slice';
@@ -20,8 +19,7 @@ type Props = {
 
 export function AdminButton({ onAdminAction, isAdmin }: Props) {
     const { t } = useTranslation();
-    const [createGlobalRoleAssignment] = useCreateGlobalRoleAssignmentMutation();
-    const [decideGlobalRoleAssignment] = useDecideGlobalRoleAssignmentMutation();
+    const [becomeAdmin] = useBecomeAdminMutation();
     const { data: globalRoleAssignments } = useGetGlobalRoleAssignmentsQuery({
         user_id: useSelector(selectCurrentUser)?.id || '',
         role_id: '00000000-0000-0000-0000-000000000000',
@@ -31,7 +29,7 @@ export function AdminButton({ onAdminAction, isAdmin }: Props) {
     const currentUser = useSelector(selectCurrentUser);
 
     const { data: become_admin_access } = useCheckAccessQuery({
-        action: AuthorizationAction.GLOBAL__CREATE_USER,
+        action: AuthorizationAction.GLOBAL__ELEVATE_TO_ADMIN,
     });
 
     const canBecomeAdmin = become_admin_access?.allowed ?? false;
@@ -48,13 +46,10 @@ export function AdminButton({ onAdminAction, isAdmin }: Props) {
         }
         const expiry = new Date();
         expiry.setMinutes(expiry.getMinutes() + 1); // expire 1 minute from now
-        const result = await createGlobalRoleAssignment({
-            role_id: '00000000-0000-0000-0000-000000000000',
+        await becomeAdmin({
             user_id: currentUser.id,
             expiry: expiry.toISOString(),
         }).unwrap();
-        await decideGlobalRoleAssignment({ role_assignment_id: result.id, decision_status: 'approved' });
-
         onAdminAction?.();
     };
 

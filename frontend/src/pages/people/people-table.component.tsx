@@ -13,7 +13,7 @@ import {
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
 import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { type GlobalRoleAssignmentContract, Scope } from '@/types/roles/role.contract.ts';
+import { type GlobalRoleAssignmentContract, Prototype, Scope } from '@/types/roles/role.contract.ts';
 import type { UsersGetContract } from '@/types/users/user.contract.ts';
 import styles from './people-table.module.scss';
 import { getPeopleTableColumns } from './people-table-columns.tsx';
@@ -121,7 +121,7 @@ export function PeoplePage() {
                 t,
                 users: filteredUsers,
                 canAssignRole: canAssignGlobalRole,
-                allRoles: roles,
+                allRoles: roles.filter((role) => role.prototype !== Prototype.ADMIN),
                 onChange: onChangeGlobalRole,
             }),
         [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole],
