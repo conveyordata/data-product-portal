@@ -5,7 +5,6 @@ from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactor
 from app.core.authz.actions import AuthorizationAction
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.schema import RoleAssignment
-from app.roles import ADMIN_UUID
 from app.roles.schema import Role, Scope
 from app.settings import settings
 from app.users.schema import User
@@ -52,6 +51,7 @@ class TestGlobalRoleAssignmentsRouter:
 
     def test_create_assignment_admin(self, client: TestClient):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        RoleFactory.admin()
         authz_role = RoleFactory(
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
@@ -62,7 +62,7 @@ class TestGlobalRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "user_id": str(user.id),
-                "role_id": ADMIN_UUID,
+                "role_id": "admin",
             },
         )
         # Create admin assignment is no longer allowed
