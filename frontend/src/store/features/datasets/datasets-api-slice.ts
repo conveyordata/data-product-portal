@@ -35,7 +35,7 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                       ]
                     : [{ type: TagTypes.Dataset as const, id: STATIC_TAG_ID.LIST }],
         }),
-        searchDatasets: builder.query<DatasetsSearchContract, void>({
+        searchDatasets: builder.query<DatasetsSearchContract, { query: string }>({
             query: (query) => ({
                 url: ApiUrl.DatasetSearch,
                 params: query,

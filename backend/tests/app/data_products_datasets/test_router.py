@@ -340,6 +340,7 @@ class TestDataProductsDatasetsRouter:
         response = client.get(f"{DATA_PRODUCTS_DATASETS_ENDPOINT}/actions")
         assert response.json()[0]["data_product_id"] == str(data_product.id)
         assert response.json()[0]["status"] == "pending"
+        assert response.json()[0]["justification"] == "This is my birth right!"
 
     def test_get_pending_actions_public(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -451,9 +452,13 @@ class TestDataProductsDatasetsRouter:
         client: TestClient,
         data_product_id: UUID,
         dataset_id: UUID,
+        justification: str = "This is my birth right!",
     ) -> Response:
         return TestDataProductsDatasetsRouter.request_data_product_datasets_link(
-            client, data_product_id, [dataset_id]
+            client,
+            data_product_id,
+            [dataset_id],
+            justification,
         )
 
     @staticmethod
@@ -461,11 +466,13 @@ class TestDataProductsDatasetsRouter:
         client: TestClient,
         data_product_id: UUID,
         dataset_ids: list[UUID],
+        justification: str = "This is my birth right!",
     ) -> Response:
         return client.post(
             f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/link_datasets",
             json={
                 "dataset_ids": [str(dataset_id) for dataset_id in dataset_ids],
+                "justification": justification,
             },
         )
 

@@ -63,9 +63,9 @@ repos:
       name: add-helm-version
       entry: ./add_helm_version.sh
       language: script
-    - id: local-biome-check
-      name: biome check
-      entry: bash -c "cd frontend && npx biome check --write --files-ignore-unknown=true --no-errors-on-unmatched"
+    - id: local-fe-check
+      name: fe check
+      entry: bash -c "cd frontend && npm run check:fix"
       language: system
       types: [text]
       files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css|svelte|vue|astro|graphql|gql)$"

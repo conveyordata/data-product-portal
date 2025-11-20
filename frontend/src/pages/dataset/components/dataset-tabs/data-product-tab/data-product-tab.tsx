@@ -45,7 +45,6 @@ export function DataProductTab({ datasetId }: Props) {
                 formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
                 form={searchForm}
             />
-
             <DataProductTable datasetId={datasetId} dataProducts={filteredDataProducts} isLoading={isLoading} />
         </Flex>
     );

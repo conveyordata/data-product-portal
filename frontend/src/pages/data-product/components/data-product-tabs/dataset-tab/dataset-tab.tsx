@@ -47,22 +47,20 @@ export function DatasetTab({ dataProductId }: Props) {
     const canCreateDataset = access?.allowed || false;
 
     return (
-        <>
-            <Flex vertical className={`${styles.container} ${filteredDatasets.length === 0 && styles.paginationGap}`}>
-                <Searchbar
-                    placeholder={t('Search existing input output ports by name')}
-                    formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
-                    form={searchForm}
-                    actionButton={
-                        <Link to={ApplicationPaths.Datasets}>
-                            <Button disabled={!canCreateDataset} type={'primary'} className={styles.formButton}>
-                                {t('Shop for new output ports')}
-                            </Button>
-                        </Link>
-                    }
-                />
-                <DatasetTable dataProductId={dataProductId} datasets={filteredDatasets} />
-            </Flex>
-        </>
+        <Flex vertical className={`${filteredDatasets.length === 0 && styles.paginationGap}`}>
+            <Searchbar
+                placeholder={t('Search existing input output ports by name')}
+                formItemProps={{ initialValue: '', className: styles.marginBottomLarge }}
+                form={searchForm}
+                actionButton={
+                    <Link to={ApplicationPaths.Datasets}>
+                        <Button disabled={!canCreateDataset} type={'primary'}>
+                            {t('Shop for new output ports')}
+                        </Button>
+                    </Link>
+                }
+            />
+            <DatasetTable dataProductId={dataProductId} datasets={filteredDatasets} />
+        </Flex>
     );
 }

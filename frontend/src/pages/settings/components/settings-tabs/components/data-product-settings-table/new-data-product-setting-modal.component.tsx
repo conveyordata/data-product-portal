@@ -235,13 +235,7 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
                 </Button>,
             ]}
         >
-            <Form
-                className={styles.form}
-                form={form}
-                layout="vertical"
-                onFinish={handleFinish}
-                initialValues={initialValues}
-            >
+            <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={initialValues}>
                 <Form.Item
                     name="name"
                     label={t('Name')}

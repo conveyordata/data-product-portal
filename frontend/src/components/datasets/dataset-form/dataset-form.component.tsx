@@ -26,10 +26,7 @@ import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useRequestDatasetAccessForDataOutputMutation } from '@/store/features/data-outputs/data-outputs-api-slice';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
-import {
-    useGetAllDataProductsQuery,
-    useGetDataProductByIdQuery,
-} from '@/store/features/data-products/data-products-api-slice';
+import { useGetDataProductByIdQuery } from '@/store/features/data-products/data-products-api-slice';
 import {
     useCreateDatasetMutation,
     useGetDatasetByIdQuery,
@@ -56,6 +53,7 @@ import {
     createDatasetIdPath,
 } from '@/types/navigation.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import styles from './dataset-form.module.scss';
@@ -65,7 +63,7 @@ type Props = {
     datasetId?: string;
     dataProductId?: string;
     dataOutputId?: string;
-    modalCallbackOnSubmit: () => void;
+    modalCallbackOnSubmit?: () => void;
     formRef?: React.Ref<FormInstance<DatasetCreateFormSchema>>;
 };
 
@@ -182,7 +180,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 };
                 const response = await createDataset(request).unwrap();
 
-                modalCallbackOnSubmit();
+                modalCallbackOnSubmit?.();
                 dispatchMessage({ content: t('Output port created successfully'), type: 'success' });
                 // If dataProductId was provided, navigate back to the data product page
                 if (dataOutputId && dataProductId) {
@@ -284,8 +282,9 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
         (namespace: string) => validateNamespace(namespace).unwrap(),
         [validateNamespace],
     );
-
-    const ownerIds = useGetDatasetOwnerIds(currentDataset?.id);
+    const datasetOwners = useGetDatasetOwnerIds(currentDataset?.id);
+    const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
+    const ownerIds = mode === 'edit' ? datasetOwners : dataProductOwners;
 
     if (mode === 'edit' && (!currentDataset || ownerIds === undefined)) {
         return <Skeleton active />;
@@ -306,8 +305,8 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             form={form}
             ref={formRef}
             labelWrap
-            labelCol={FORM_GRID_WRAPPER_COLS}
-            wrapperCol={FORM_GRID_WRAPPER_COLS}
+            labelCol={mode === 'edit' ? FORM_GRID_WRAPPER_COLS : undefined}
+            wrapperCol={mode === 'edit' ? FORM_GRID_WRAPPER_COLS : undefined}
             layout="vertical"
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}

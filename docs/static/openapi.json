@@ -7,7 +7,7 @@
       "name": "Stijn Janssens",
       "email": "stijn.janssens@dataminded.com"
     },
-    "version": "0.4.0"
+    "version": "0.4.1"
   },
   "paths": {
     "/api/authz/access/{action}": {
@@ -173,7 +173,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/DatasetsGet-Output"
+                    "$ref": "#/components/schemas/DatasetsGet"
                   },
                   "title": "Response Get Datasets Api Datasets Get"
                 }
@@ -651,7 +651,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/DatasetsGet-Output"
+                    "$ref": "#/components/schemas/DatasetsGet"
                   },
                   "title": "Response Get User Datasets Api Datasets User  User Id  Get"
                 }
@@ -698,7 +698,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EventGet-Output"
+                    "$ref": "#/components/schemas/EventGet"
                   },
                   "title": "Response Get Event History Api Datasets  Id  History Get"
                 }
@@ -1059,7 +1059,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/DataProductsGet-Output"
+                    "$ref": "#/components/schemas/DataProductsGet"
                   },
                   "title": "Response Get Data Products Api Data Products Get"
                 }
@@ -1270,7 +1270,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/DataProductsGet-Output"
+                    "$ref": "#/components/schemas/DataProductsGet"
                   },
                   "title": "Response Get User Data Products Api Data Products User  User Id  Get"
                 }
@@ -1495,7 +1495,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EventGet-Output"
+                    "$ref": "#/components/schemas/EventGet"
                   },
                   "title": "Response Get Event History Api Data Products  Id  History Get"
                 }
@@ -3596,7 +3596,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/DataProductDatasetPendingAction-Output"
+                    "$ref": "#/components/schemas/DataProductDatasetPendingAction"
                   },
                   "title": "Response Get User Pending Actions Api Data Product Dataset Links Actions Get"
                 }
@@ -3796,7 +3796,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/DataOutputDatasetPendingAction-Output"
+                    "$ref": "#/components/schemas/DataOutputDatasetPendingAction"
                   },
                   "title": "Response Get User Pending Actions Api Data Output Dataset Links Actions Get"
                 }
@@ -3830,7 +3830,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/DataOutputsGet-Output"
+                    "$ref": "#/components/schemas/DataOutputsGet"
                   },
                   "type": "array",
                   "title": "Response Get Data Outputs Api Data Outputs Get"
@@ -4151,7 +4151,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EventGet-Output"
+                    "$ref": "#/components/schemas/EventGet"
                   },
                   "title": "Response Get Event History Api Data Outputs  Id  History Get"
                 }
@@ -4860,7 +4860,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration-Output"
+                    "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration"
                   },
                   "title": "Response Get Environment Configs Api Envs  Id  Configs Get"
                 }
@@ -4915,7 +4915,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration-Output"
+                  "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration"
                 }
               }
             }
@@ -4988,7 +4988,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration-Output"
+                  "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration"
                 }
               }
             }
@@ -5043,7 +5043,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration-Output"
+                    "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration"
                   },
                   "title": "Response Get Environment Platform Service Config For All Envs Api Envs Platforms  Platform Id  Services  Service Id  Config Get"
                 }
@@ -5543,7 +5543,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UsersGet-Output"
+                    "$ref": "#/components/schemas/UsersGet"
                   },
                   "title": "Response Get Users Api Users Get"
                 }
@@ -5981,7 +5981,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse-Output"
+                    "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
                   },
                   "title": "Response List Assignments Api Role Assignments Global Get"
                 }
@@ -6034,7 +6034,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse-Output"
+                  "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
                 }
               }
             }
@@ -6148,7 +6148,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse-Output"
+                  "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
                 }
               }
             }
@@ -6211,7 +6211,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse-Output"
+                  "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
                 }
               }
             }
@@ -7205,7 +7205,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/NotificationGet-Output"
+                    "$ref": "#/components/schemas/NotificationGet"
                   },
                   "title": "Response Get User Notifications Api Notifications Get"
                 }
@@ -7346,13 +7346,13 @@
                   "items": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/DataProductDatasetPendingAction-Output"
+                        "$ref": "#/components/schemas/DataProductDatasetPendingAction"
                       },
                       {
-                        "$ref": "#/components/schemas/DataOutputDatasetPendingAction-Output"
+                        "$ref": "#/components/schemas/DataOutputDatasetPendingAction"
                       },
                       {
-                        "$ref": "#/components/schemas/DataProductRoleAssignmentPendingAction-Output"
+                        "$ref": "#/components/schemas/DataProductRoleAssignmentPendingAction"
                       }
                     ]
                   },
@@ -7914,7 +7914,7 @@
         "title": "AuthorizationAction",
         "description": "The integer values for the authorization actions are stored directly in the DB.\nThis means you can change the name of the actions, but not their integer values.\nThe values for the actions are spaced on purpose, to make it easier to extend.\nThis has no technical benefit, but it makes it easier to read for developers."
       },
-      "BaseDataOutputDatasetAssociationGet-Input": {
+      "BaseDataOutputDatasetAssociationGet": {
         "properties": {
           "id": {
             "type": "string",
@@ -7967,103 +7967,7 @@
             "$ref": "#/components/schemas/Dataset"
           },
           "data_output": {
-            "$ref": "#/components/schemas/app__data_outputs_datasets__schema_response__DataOutput-Input"
-          },
-          "requested_by": {
-            "$ref": "#/components/schemas/User"
-          },
-          "denied_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "approved_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "dataset_id",
-          "data_output_id",
-          "status",
-          "requested_on",
-          "denied_on",
-          "approved_on",
-          "dataset",
-          "data_output",
-          "requested_by",
-          "denied_by",
-          "approved_by"
-        ],
-        "title": "BaseDataOutputDatasetAssociationGet"
-      },
-      "BaseDataOutputDatasetAssociationGet-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "dataset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Dataset Id"
-          },
-          "data_output_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Output Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Requested On"
-          },
-          "denied_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Denied On"
-          },
-          "approved_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Approved On"
-          },
-          "dataset": {
-            "$ref": "#/components/schemas/Dataset"
-          },
-          "data_output": {
-            "$ref": "#/components/schemas/app__data_outputs_datasets__schema_response__DataOutput-Output"
+            "$ref": "#/components/schemas/app__data_outputs_datasets__schema_response__DataOutput"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -8220,7 +8124,7 @@
         ],
         "title": "DataOutputCreate"
       },
-      "DataOutputDatasetPendingAction-Input": {
+      "DataOutputDatasetPendingAction": {
         "properties": {
           "id": {
             "type": "string",
@@ -8273,109 +8177,7 @@
             "$ref": "#/components/schemas/Dataset"
           },
           "data_output": {
-            "$ref": "#/components/schemas/app__data_outputs_datasets__schema_response__DataOutput-Input"
-          },
-          "requested_by": {
-            "$ref": "#/components/schemas/User"
-          },
-          "denied_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "approved_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "pending_action_type": {
-            "type": "string",
-            "const": "DataOutputDataset",
-            "title": "Pending Action Type",
-            "default": "DataOutputDataset"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "dataset_id",
-          "data_output_id",
-          "status",
-          "requested_on",
-          "denied_on",
-          "approved_on",
-          "dataset",
-          "data_output",
-          "requested_by",
-          "denied_by",
-          "approved_by"
-        ],
-        "title": "DataOutputDatasetPendingAction"
-      },
-      "DataOutputDatasetPendingAction-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "dataset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Dataset Id"
-          },
-          "data_output_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Output Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Requested On"
-          },
-          "denied_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Denied On"
-          },
-          "approved_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Approved On"
-          },
-          "dataset": {
-            "$ref": "#/components/schemas/Dataset"
-          },
-          "data_output": {
-            "$ref": "#/components/schemas/app__data_outputs_datasets__schema_response__DataOutput-Output"
+            "$ref": "#/components/schemas/app__data_outputs_datasets__schema_response__DataOutput"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -8492,11 +8294,11 @@
             }
           },
           "owner": {
-            "$ref": "#/components/schemas/DataProduct-Output"
+            "$ref": "#/components/schemas/DataProduct"
           },
           "dataset_links": {
             "items": {
-              "$ref": "#/components/schemas/DatasetLink-Output"
+              "$ref": "#/components/schemas/DatasetLink"
             },
             "type": "array",
             "title": "Dataset Links"
@@ -8541,7 +8343,7 @@
         ],
         "title": "DataOutputGet"
       },
-      "DataOutputLink-Input": {
+      "DataOutputLink": {
         "properties": {
           "id": {
             "type": "string",
@@ -8562,7 +8364,7 @@
             "$ref": "#/components/schemas/DecisionStatus"
           },
           "data_output": {
-            "$ref": "#/components/schemas/app__datasets__schema_response__DataOutput-Input"
+            "$ref": "#/components/schemas/app__datasets__schema_response__DataOutput"
           }
         },
         "type": "object",
@@ -8575,41 +8377,7 @@
         ],
         "title": "DataOutputLink"
       },
-      "DataOutputLink-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "dataset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Dataset Id"
-          },
-          "data_output_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Output Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "data_output": {
-            "$ref": "#/components/schemas/app__datasets__schema_response__DataOutput-Output"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "dataset_id",
-          "data_output_id",
-          "status",
-          "data_output"
-        ],
-        "title": "DataOutputLink"
-      },
-      "DataOutputLinks-Input": {
+      "DataOutputLinks": {
         "properties": {
           "id": {
             "type": "string",
@@ -8677,117 +8445,11 @@
             }
           },
           "owner": {
-            "$ref": "#/components/schemas/DataProduct-Input"
-          },
-          "service": {
-            "$ref": "#/components/schemas/PlatformService"
-          },
-          "environment_configurations": {
-            "items": {
-              "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration-Input"
-            },
-            "type": "array",
-            "title": "Environment Configurations"
+            "$ref": "#/components/schemas/DataProduct"
           },
           "dataset_links": {
             "items": {
-              "$ref": "#/components/schemas/BaseDataOutputDatasetAssociationGet-Input"
-            },
-            "type": "array",
-            "title": "Dataset Links"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "description",
-          "namespace",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "status",
-          "configuration",
-          "owner",
-          "service",
-          "environment_configurations",
-          "dataset_links"
-        ],
-        "title": "DataOutputLinks"
-      },
-      "DataOutputLinks-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DataOutputStatus"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
-              }
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct-Output"
-          },
-          "dataset_links": {
-            "items": {
-              "$ref": "#/components/schemas/BaseDataOutputDatasetAssociationGet-Output"
+              "$ref": "#/components/schemas/BaseDataOutputDatasetAssociationGet"
             },
             "type": "array",
             "title": "Dataset Links"
@@ -8923,7 +8585,7 @@
         ],
         "title": "DataOutputUpdate"
       },
-      "DataOutputsGet-Input": {
+      "DataOutputsGet": {
         "properties": {
           "id": {
             "type": "string",
@@ -8991,125 +8653,11 @@
             }
           },
           "owner": {
-            "$ref": "#/components/schemas/DataProduct-Input"
-          },
-          "service": {
-            "$ref": "#/components/schemas/PlatformService"
-          },
-          "environment_configurations": {
-            "items": {
-              "$ref": "#/components/schemas/EnvironmentPlatformServiceConfiguration-Input"
-            },
-            "type": "array",
-            "title": "Environment Configurations"
+            "$ref": "#/components/schemas/DataProduct"
           },
           "dataset_links": {
             "items": {
-              "$ref": "#/components/schemas/DatasetLink-Input"
-            },
-            "type": "array",
-            "title": "Dataset Links"
-          },
-          "tags": {
-            "items": {
-              "$ref": "#/components/schemas/Tag"
-            },
-            "type": "array",
-            "title": "Tags"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "description",
-          "namespace",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "status",
-          "configuration",
-          "owner",
-          "service",
-          "environment_configurations",
-          "dataset_links",
-          "tags"
-        ],
-        "title": "DataOutputsGet"
-      },
-      "DataOutputsGet-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DataOutputStatus"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
-              }
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct-Output"
-          },
-          "dataset_links": {
-            "items": {
-              "$ref": "#/components/schemas/DatasetLink-Output"
+              "$ref": "#/components/schemas/DatasetLink"
             },
             "type": "array",
             "title": "Dataset Links"
@@ -9154,44 +8702,7 @@
         ],
         "title": "DataOutputsGet"
       },
-      "DataProduct-Input": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
-          },
-          "type": {
-            "$ref": "#/components/schemas/DataProductType"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "status",
-          "type"
-        ],
-        "title": "DataProduct"
-      },
-      "DataProduct-Output": {
+      "DataProduct": {
         "properties": {
           "id": {
             "type": "string",
@@ -9312,12 +8823,16 @@
         ],
         "title": "DataProductCreate"
       },
-      "DataProductDatasetPendingAction-Input": {
+      "DataProductDatasetPendingAction": {
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
             "title": "Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
           },
           "data_product_id": {
             "type": "string",
@@ -9341,7 +8856,7 @@
             "$ref": "#/components/schemas/Dataset"
           },
           "data_product": {
-            "$ref": "#/components/schemas/DataProduct-Input"
+            "$ref": "#/components/schemas/DataProduct"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -9376,82 +8891,7 @@
         "type": "object",
         "required": [
           "id",
-          "data_product_id",
-          "dataset_id",
-          "status",
-          "requested_on",
-          "dataset",
-          "data_product",
-          "requested_by",
-          "denied_by",
-          "approved_by"
-        ],
-        "title": "DataProductDatasetPendingAction"
-      },
-      "DataProductDatasetPendingAction-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "dataset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Dataset Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Requested On"
-          },
-          "dataset": {
-            "$ref": "#/components/schemas/Dataset"
-          },
-          "data_product": {
-            "$ref": "#/components/schemas/DataProduct-Output"
-          },
-          "requested_by": {
-            "$ref": "#/components/schemas/User"
-          },
-          "denied_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "approved_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "pending_action_type": {
-            "type": "string",
-            "const": "DataProductDataset",
-            "title": "Pending Action Type",
-            "default": "DataProductDataset"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
+          "justification",
           "data_product_id",
           "dataset_id",
           "status",
@@ -9522,7 +8962,7 @@
           },
           "data_product_settings": {
             "items": {
-              "$ref": "#/components/schemas/DataProductSettingValue-Output"
+              "$ref": "#/components/schemas/DataProductSettingValue"
             },
             "type": "array",
             "title": "Data Product Settings"
@@ -9540,14 +8980,14 @@
           },
           "dataset_links": {
             "items": {
-              "$ref": "#/components/schemas/DatasetLinks-Output"
+              "$ref": "#/components/schemas/DatasetLinks"
             },
             "type": "array",
             "title": "Dataset Links"
           },
           "data_outputs": {
             "items": {
-              "$ref": "#/components/schemas/DataOutputLinks-Output"
+              "$ref": "#/components/schemas/DataOutputLinks"
             },
             "type": "array",
             "title": "Data Outputs"
@@ -9726,12 +9166,16 @@
         ],
         "title": "DataProductLifeCyclesGet"
       },
-      "DataProductLink-Input": {
+      "DataProductLink": {
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
             "title": "Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
           },
           "data_product_id": {
             "type": "string",
@@ -9747,12 +9191,13 @@
             "$ref": "#/components/schemas/DecisionStatus"
           },
           "data_product": {
-            "$ref": "#/components/schemas/DataProduct-Input"
+            "$ref": "#/components/schemas/DataProduct"
           }
         },
         "type": "object",
         "required": [
           "id",
+          "justification",
           "data_product_id",
           "dataset_id",
           "status",
@@ -9760,41 +9205,7 @@
         ],
         "title": "DataProductLink"
       },
-      "DataProductLink-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "dataset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Dataset Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "data_product": {
-            "$ref": "#/components/schemas/DataProduct-Output"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "data_product_id",
-          "dataset_id",
-          "status",
-          "data_product"
-        ],
-        "title": "DataProductLink"
-      },
-      "DataProductRoleAssignmentPendingAction-Input": {
+      "DataProductRoleAssignmentPendingAction": {
         "properties": {
           "id": {
             "type": "string",
@@ -9802,98 +9213,7 @@
             "title": "Id"
           },
           "data_product": {
-            "$ref": "#/components/schemas/DataProduct-Input"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "pending_action_type": {
-            "type": "string",
-            "const": "DataProductRoleAssignment",
-            "title": "Pending Action Type",
-            "default": "DataProductRoleAssignment"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "data_product",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by"
-        ],
-        "title": "DataProductRoleAssignmentPendingAction"
-      },
-      "DataProductRoleAssignmentPendingAction-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "data_product": {
-            "$ref": "#/components/schemas/DataProduct-Output"
+            "$ref": "#/components/schemas/DataProduct"
           },
           "user": {
             "$ref": "#/components/schemas/User"
@@ -10137,60 +9457,7 @@
         ],
         "title": "DataProductSettingUpdate"
       },
-      "DataProductSettingValue-Input": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "data_product_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data Product Id"
-          },
-          "dataset_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Dataset Id"
-          },
-          "data_product_setting_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Setting Id"
-          },
-          "value": {
-            "type": "string",
-            "title": "Value"
-          },
-          "data_product_setting": {
-            "$ref": "#/components/schemas/DataProductSetting"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "data_product_setting_id",
-          "value",
-          "data_product_setting"
-        ],
-        "title": "DataProductSettingValue"
-      },
-      "DataProductSettingValue-Output": {
+      "DataProductSettingValue": {
         "properties": {
           "id": {
             "type": "string",
@@ -10386,7 +9653,7 @@
           },
           "data_products": {
             "items": {
-              "$ref": "#/components/schemas/DataProduct-Output"
+              "$ref": "#/components/schemas/DataProduct"
             },
             "type": "array",
             "title": "Data Products"
@@ -10531,7 +9798,7 @@
         ],
         "title": "DataProductUsageUpdate"
       },
-      "DataProductsGet-Input": {
+      "DataProductsGet": {
         "properties": {
           "id": {
             "type": "string",
@@ -10589,102 +9856,7 @@
           },
           "data_product_settings": {
             "items": {
-              "$ref": "#/components/schemas/DataProductSettingValue-Input"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
-          "user_count": {
-            "type": "integer",
-            "title": "User Count"
-          },
-          "dataset_count": {
-            "type": "integer",
-            "title": "Dataset Count"
-          },
-          "data_outputs_count": {
-            "type": "integer",
-            "title": "Data Outputs Count"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "description",
-          "namespace",
-          "status",
-          "tags",
-          "usage",
-          "domain",
-          "type",
-          "lifecycle",
-          "data_product_settings",
-          "user_count",
-          "dataset_count",
-          "data_outputs_count"
-        ],
-        "title": "DataProductsGet"
-      },
-      "DataProductsGet-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DataProductStatus"
-          },
-          "tags": {
-            "items": {
-              "$ref": "#/components/schemas/Tag"
-            },
-            "type": "array",
-            "title": "Tags"
-          },
-          "usage": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Usage"
-          },
-          "domain": {
-            "$ref": "#/components/schemas/Domain"
-          },
-          "type": {
-            "$ref": "#/components/schemas/DataProductType"
-          },
-          "lifecycle": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataProductLifeCycle"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductSettingValue-Output"
+              "$ref": "#/components/schemas/DataProductSettingValue"
             },
             "type": "array",
             "title": "Data Product Settings"
@@ -11019,14 +10191,14 @@
           },
           "data_product_settings": {
             "items": {
-              "$ref": "#/components/schemas/DataProductSettingValue-Output"
+              "$ref": "#/components/schemas/DataProductSettingValue"
             },
             "type": "array",
             "title": "Data Product Settings"
           },
           "data_output_links": {
             "items": {
-              "$ref": "#/components/schemas/DataOutputLink-Output"
+              "$ref": "#/components/schemas/DataOutputLink"
             },
             "type": "array",
             "title": "Data Output Links"
@@ -11044,7 +10216,7 @@
           },
           "data_product_links": {
             "items": {
-              "$ref": "#/components/schemas/DataProductLink-Output"
+              "$ref": "#/components/schemas/DataProductLink"
             },
             "type": "array",
             "title": "Data Product Links"
@@ -11079,7 +10251,7 @@
         ],
         "title": "DatasetGet"
       },
-      "DatasetLink-Input": {
+      "DatasetLink": {
         "properties": {
           "id": {
             "type": "string",
@@ -11113,46 +10285,16 @@
         ],
         "title": "DatasetLink"
       },
-      "DatasetLink-Output": {
+      "DatasetLinks": {
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
             "title": "Id"
           },
-          "dataset_id": {
+          "justification": {
             "type": "string",
-            "format": "uuid",
-            "title": "Dataset Id"
-          },
-          "data_output_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Output Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "dataset": {
-            "$ref": "#/components/schemas/Dataset"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "dataset_id",
-          "data_output_id",
-          "status",
-          "dataset"
-        ],
-        "title": "DatasetLink"
-      },
-      "DatasetLinks-Input": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
+            "title": "Justification"
           },
           "data_product_id": {
             "type": "string",
@@ -11174,40 +10316,7 @@
         "type": "object",
         "required": [
           "id",
-          "data_product_id",
-          "dataset_id",
-          "status",
-          "dataset"
-        ],
-        "title": "DatasetLinks"
-      },
-      "DatasetLinks-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "dataset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Dataset Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "dataset": {
-            "$ref": "#/components/schemas/Dataset"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
+          "justification",
           "data_product_id",
           "dataset_id",
           "status",
@@ -11314,7 +10423,7 @@
         ],
         "title": "DatasetUsageUpdate"
       },
-      "DatasetsGet-Input": {
+      "DatasetsGet": {
         "properties": {
           "id": {
             "type": "string",
@@ -11377,118 +10486,14 @@
           },
           "data_product_settings": {
             "items": {
-              "$ref": "#/components/schemas/DataProductSettingValue-Input"
+              "$ref": "#/components/schemas/DataProductSettingValue"
             },
             "type": "array",
             "title": "Data Product Settings"
           },
           "data_output_links": {
             "items": {
-              "$ref": "#/components/schemas/DataOutputLink-Input"
-            },
-            "type": "array",
-            "title": "Data Output Links"
-          },
-          "data_product_count": {
-            "type": "integer",
-            "title": "Data Product Count"
-          },
-          "data_product_name": {
-            "type": "string",
-            "title": "Data Product Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "namespace",
-          "name",
-          "description",
-          "status",
-          "usage",
-          "access_type",
-          "data_product_id",
-          "tags",
-          "domain",
-          "lifecycle",
-          "data_product_settings",
-          "data_output_links",
-          "data_product_count",
-          "data_product_name"
-        ],
-        "title": "DatasetsGet"
-      },
-      "DatasetsGet-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DatasetStatus"
-          },
-          "usage": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Usage"
-          },
-          "access_type": {
-            "$ref": "#/components/schemas/DatasetAccessType"
-          },
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "tags": {
-            "items": {
-              "$ref": "#/components/schemas/Tag"
-            },
-            "type": "array",
-            "title": "Tags"
-          },
-          "domain": {
-            "$ref": "#/components/schemas/Domain"
-          },
-          "lifecycle": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataProductLifeCycle"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "data_product_settings": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductSettingValue-Output"
-            },
-            "type": "array",
-            "title": "Data Product Settings"
-          },
-          "data_output_links": {
-            "items": {
-              "$ref": "#/components/schemas/DataOutputLink-Output"
+              "$ref": "#/components/schemas/DataOutputLink"
             },
             "type": "array",
             "title": "Data Output Links"
@@ -11808,7 +10813,7 @@
           },
           "data_products": {
             "items": {
-              "$ref": "#/components/schemas/DataProduct-Output"
+              "$ref": "#/components/schemas/DataProduct"
             },
             "type": "array",
             "title": "Data Products"
@@ -12013,7 +11018,7 @@
         ],
         "title": "EnvironmentPlatformConfiguration"
       },
-      "EnvironmentPlatformServiceConfiguration-Input": {
+      "EnvironmentPlatformServiceConfiguration": {
         "properties": {
           "config": {
             "items": {
@@ -12063,57 +11068,7 @@
         ],
         "title": "EnvironmentPlatformServiceConfiguration"
       },
-      "EnvironmentPlatformServiceConfiguration-Output": {
-        "properties": {
-          "config": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/AWSS3Config"
-                },
-                {
-                  "$ref": "#/components/schemas/AWSGlueConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/DatabricksConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/SnowflakeConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/RedshiftConfig"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Config"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "platform": {
-            "$ref": "#/components/schemas/Platform"
-          },
-          "environment": {
-            "$ref": "#/components/schemas/Environment"
-          },
-          "service": {
-            "$ref": "#/components/schemas/PlatformService"
-          }
-        },
-        "type": "object",
-        "required": [
-          "config",
-          "id",
-          "platform",
-          "environment",
-          "service"
-        ],
-        "title": "EnvironmentPlatformServiceConfiguration"
-      },
-      "EventGet-Input": {
+      "EventGet": {
         "properties": {
           "id": {
             "type": "string",
@@ -12192,136 +11147,7 @@
           "data_product": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DataProduct-Input"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "user": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "dataset": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Dataset"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "data_output": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/app__data_outputs__schema__DataOutput"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "subject_id",
-          "subject_type",
-          "actor_id",
-          "created_on",
-          "actor"
-        ],
-        "title": "EventGet"
-      },
-      "EventGet-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "subject_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Subject Id"
-          },
-          "target_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Target Id"
-          },
-          "subject_type": {
-            "$ref": "#/components/schemas/EventReferenceEntity"
-          },
-          "target_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EventReferenceEntity"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "actor_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Actor Id"
-          },
-          "created_on": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created On"
-          },
-          "deleted_subject_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Subject Identifier"
-          },
-          "deleted_target_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deleted Target Identifier"
-          },
-          "actor": {
-            "$ref": "#/components/schemas/User"
-          },
-          "data_product": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataProduct-Output"
+                "$ref": "#/components/schemas/DataProduct"
               },
               {
                 "type": "null"
@@ -12437,7 +11263,7 @@
           },
           "nodes": {
             "items": {
-              "$ref": "#/components/schemas/Node-Output"
+              "$ref": "#/components/schemas/Node"
             },
             "type": "array",
             "uniqueItems": true,
@@ -12473,11 +11299,16 @@
             },
             "type": "array",
             "title": "Dataset Ids"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
           }
         },
         "type": "object",
         "required": [
-          "dataset_ids"
+          "dataset_ids",
+          "justification"
         ],
         "title": "LinkDatasetsToDataProduct"
       },
@@ -12546,7 +11377,7 @@
         ],
         "title": "NamespaceValidityType"
       },
-      "Node-Input": {
+      "Node": {
         "properties": {
           "id": {
             "anyOf": [
@@ -12561,7 +11392,7 @@
             "title": "Id"
           },
           "data": {
-            "$ref": "#/components/schemas/NodeData-Input"
+            "$ref": "#/components/schemas/NodeData"
           },
           "type": {
             "$ref": "#/components/schemas/NodeType"
@@ -12580,41 +11411,7 @@
         ],
         "title": "Node"
       },
-      "Node-Output": {
-        "properties": {
-          "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "string",
-                "format": "uuid"
-              }
-            ],
-            "title": "Id"
-          },
-          "data": {
-            "$ref": "#/components/schemas/NodeData-Output"
-          },
-          "type": {
-            "$ref": "#/components/schemas/NodeType"
-          },
-          "isMain": {
-            "type": "boolean",
-            "title": "Ismain",
-            "default": false
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "data",
-          "type"
-        ],
-        "title": "Node"
-      },
-      "NodeData-Input": {
+      "NodeData": {
         "properties": {
           "id": {
             "anyOf": [
@@ -12701,120 +11498,10 @@
                 "items": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/app__role_assignments__data_product__schema__RoleAssignment-Input"
+                      "$ref": "#/components/schemas/app__role_assignments__data_product__schema__RoleAssignment"
                     },
                     {
-                      "$ref": "#/components/schemas/app__role_assignments__dataset__schema__RoleAssignment-Input"
-                    }
-                  ]
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assignments"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name"
-        ],
-        "title": "NodeData"
-      },
-      "NodeData-Output": {
-        "properties": {
-          "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "string",
-                "format": "uuid"
-              }
-            ],
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "link_to_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Link To Id"
-          },
-          "icon_key": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Icon Key"
-          },
-          "domain": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Domain"
-          },
-          "domain_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Domain Id"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "assignments": {
-            "anyOf": [
-              {
-                "items": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/app__role_assignments__data_product__schema__RoleAssignment-Output"
-                    },
-                    {
-                      "$ref": "#/components/schemas/app__role_assignments__dataset__schema__RoleAssignment-Output"
+                      "$ref": "#/components/schemas/app__role_assignments__dataset__schema__RoleAssignment"
                     }
                   ]
                 },
@@ -12844,7 +11531,7 @@
         ],
         "title": "NodeType"
       },
-      "NotificationGet-Input": {
+      "NotificationGet": {
         "properties": {
           "id": {
             "type": "string",
@@ -12862,41 +11549,7 @@
             "title": "User Id"
           },
           "event": {
-            "$ref": "#/components/schemas/EventGet-Input"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "event_id",
-          "user_id",
-          "event",
-          "user"
-        ],
-        "title": "NotificationGet"
-      },
-      "NotificationGet-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "event_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Event Id"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "event": {
-            "$ref": "#/components/schemas/EventGet-Output"
+            "$ref": "#/components/schemas/EventGet"
           },
           "user": {
             "$ref": "#/components/schemas/User"
@@ -13115,80 +11768,6 @@
           "prototype"
         ],
         "title": "Role"
-      },
-      "RoleAssignmentResponse-Input": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "$ref": "#/components/schemas/Role"
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by"
-        ],
-        "title": "RoleAssignmentResponse"
       },
       "S3DataOutput": {
         "properties": {
@@ -13518,7 +12097,7 @@
         ],
         "title": "UserCreate"
       },
-      "UsersGet-Input": {
+      "UsersGet": {
         "properties": {
           "id": {
             "type": "string",
@@ -13549,58 +12128,7 @@
           "global_role": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/RoleAssignmentResponse-Input"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "email",
-          "external_id",
-          "first_name",
-          "last_name",
-          "has_seen_tour",
-          "global_role"
-        ],
-        "title": "UsersGet"
-      },
-      "UsersGet-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "external_id": {
-            "type": "string",
-            "title": "External Id"
-          },
-          "first_name": {
-            "type": "string",
-            "title": "First Name"
-          },
-          "last_name": {
-            "type": "string",
-            "title": "Last Name"
-          },
-          "has_seen_tour": {
-            "type": "boolean",
-            "title": "Has Seen Tour"
-          },
-          "global_role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse-Output"
+                "$ref": "#/components/schemas/app__role_assignments__global___schema__RoleAssignmentResponse"
               },
               {
                 "type": "null"
@@ -13747,7 +12275,7 @@
         ],
         "title": "DataOutput"
       },
-      "app__data_outputs_datasets__schema_response__DataOutput-Input": {
+      "app__data_outputs_datasets__schema_response__DataOutput": {
         "properties": {
           "id": {
             "type": "string",
@@ -13826,7 +12354,7 @@
             }
           },
           "owner": {
-            "$ref": "#/components/schemas/DataProduct-Input"
+            "$ref": "#/components/schemas/DataProduct"
           }
         },
         "type": "object",
@@ -13845,7 +12373,7 @@
         ],
         "title": "DataOutput"
       },
-      "app__data_outputs_datasets__schema_response__DataOutput-Output": {
+      "app__datasets__schema_response__DataOutput": {
         "properties": {
           "id": {
             "type": "string",
@@ -13924,203 +12452,7 @@
             }
           },
           "owner": {
-            "$ref": "#/components/schemas/DataProduct-Output"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "status",
-          "sourceAligned",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "configuration",
-          "owner"
-        ],
-        "title": "DataOutput"
-      },
-      "app__datasets__schema_response__DataOutput-Input": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DataOutputStatus"
-          },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
-              }
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct-Input"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "namespace",
-          "description",
-          "status",
-          "sourceAligned",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "configuration",
-          "owner"
-        ],
-        "title": "DataOutput"
-      },
-      "app__datasets__schema_response__DataOutput-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DataOutputStatus"
-          },
-          "sourceAligned": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sourcealigned"
-          },
-          "owner_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Owner Id"
-          },
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
-          "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3DataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/GlueDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeDataOutput"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftDataOutput"
-              }
-            ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "DatabricksDataOutput": "#/components/schemas/DatabricksDataOutput",
-                "GlueDataOutput": "#/components/schemas/GlueDataOutput",
-                "RedshiftDataOutput": "#/components/schemas/RedshiftDataOutput",
-                "S3DataOutput": "#/components/schemas/S3DataOutput",
-                "SnowflakeDataOutput": "#/components/schemas/SnowflakeDataOutput"
-              }
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/DataProduct-Output"
+            "$ref": "#/components/schemas/DataProduct"
           }
         },
         "type": "object",
@@ -14173,7 +12505,7 @@
         ],
         "title": "ModifyRoleAssignment"
       },
-      "app__role_assignments__data_product__schema__RoleAssignment-Input": {
+      "app__role_assignments__data_product__schema__RoleAssignment": {
         "properties": {
           "id": {
             "type": "string",
@@ -14181,143 +12513,7 @@
             "title": "Id"
           },
           "data_product": {
-            "$ref": "#/components/schemas/DataProduct-Input"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role Id"
-          },
-          "requested_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested By Id"
-          },
-          "decided_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided By Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "data_product",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by",
-          "data_product_id",
-          "user_id",
-          "role_id",
-          "requested_by_id",
-          "decided_by_id"
-        ],
-        "title": "RoleAssignment"
-      },
-      "app__role_assignments__data_product__schema__RoleAssignment-Output": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "data_product": {
-            "$ref": "#/components/schemas/DataProduct-Output"
+            "$ref": "#/components/schemas/DataProduct"
           },
           "user": {
             "$ref": "#/components/schemas/User"
@@ -14453,7 +12649,7 @@
             "title": "Id"
           },
           "data_product": {
-            "$ref": "#/components/schemas/DataProduct-Output"
+            "$ref": "#/components/schemas/DataProduct"
           },
           "user": {
             "$ref": "#/components/schemas/User"
@@ -14576,143 +12772,7 @@
         ],
         "title": "ModifyRoleAssignment"
       },
-      "app__role_assignments__dataset__schema__RoleAssignment-Input": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "dataset": {
-            "$ref": "#/components/schemas/Dataset"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "role": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Role"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested On"
-          },
-          "requested_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "decided_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided On"
-          },
-          "decided_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "dataset_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Dataset Id"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "role_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role Id"
-          },
-          "requested_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested By Id"
-          },
-          "decided_by_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decided By Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "dataset",
-          "user",
-          "role",
-          "decision",
-          "requested_on",
-          "requested_by",
-          "decided_on",
-          "decided_by",
-          "dataset_id",
-          "user_id",
-          "role_id",
-          "requested_by_id",
-          "decided_by_id"
-        ],
-        "title": "RoleAssignment"
-      },
-      "app__role_assignments__dataset__schema__RoleAssignment-Output": {
+      "app__role_assignments__dataset__schema__RoleAssignment": {
         "properties": {
           "id": {
             "type": "string",
@@ -14983,7 +13043,7 @@
         ],
         "title": "ModifyRoleAssignment"
       },
-      "app__role_assignments__global___schema__RoleAssignmentResponse-Output": {
+      "app__role_assignments__global___schema__RoleAssignmentResponse": {
         "properties": {
           "id": {
             "type": "string",

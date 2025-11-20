@@ -38,6 +38,14 @@ These contain the most relevant data; excluding product and tag info keeps index
 Use websearch_to_tsquery for flexible multi-word queries at the cost of making query syntaxt more complex for users.
 plainto_tsquery is simpler but too restrictive as it does not allow users to specify whether they want OR/AND between their words.
 
+The rules of websearch_to_tsquery are:
+- unquoted text: text not inside quote marks will be converted to terms separated by & operators, as if processed by plainto_tsquery.
+- "quoted text": text inside quote marks will be converted to terms separated by <-> operators, as if processed by phraseto_tsquery.
+- OR: the word “or” will be converted to the | operator.
+- -: a dash will be converted to the ! operator.
+
+For the full details look at the [Postgres documentation](https://www.postgresql.org/docs/current/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES)
+
 ### Field weighting
 
 Apply two weights:

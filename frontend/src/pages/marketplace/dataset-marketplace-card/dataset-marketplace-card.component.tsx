@@ -94,7 +94,7 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                 children: (
                     <Typography.Paragraph
                         style={{ height: '44px' }} // To keep 2 rows for the data product height
-                        ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}
+                        ellipsis={{ rows: 2, tooltip: true }}
                     >
                         <Link to={createDataProductIdPath(dataset.data_product_id)} className={styles.link}>
                             {dataset.data_product_name}
@@ -110,12 +110,13 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
                         {t('Usage')}
                     </Space>
                 ),
-                children: <DatasetCardTooltip dataset_id={dataset.id} />,
+                children: (
+                    <DatasetCardTooltip dataset_id={dataset.id} number_of_data_products={dataset.data_product_count} />
+                ),
             },
         ];
         return items;
     }
-
     if (!dataset) return <LoadingSpinner />;
     return (
         <Card
@@ -165,14 +166,14 @@ export function DatasetMarketplaceCard({ dataset }: Props) {
             ]}
         >
             <Space direction="vertical" style={{ width: '100%' }} size="small">
-                <Typography.Title level={5} style={{ marginBottom: 0 }}>
-                    {dataset.name}
-                </Typography.Title>
-                <div style={{ height: '40px' }}>
-                    <Typography.Paragraph ellipsis={{ rows: 2, expandable: true, symbol: 'more' }}>
-                        {dataset.description || 'No description available.'}
-                    </Typography.Paragraph>
-                </div>
+                <Link to={createDatasetIdPath(dataset.id)}>
+                    <Typography.Title level={5} style={{ marginBottom: 0 }}>
+                        {dataset.name}
+                    </Typography.Title>
+                </Link>
+                <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }} style={{ height: '44px', marginBottom: 0 }}>
+                    {dataset.description || 'No description available.'}
+                </Typography.Paragraph>
                 <div style={{ height: '22px' }}>
                     {dataset.tags?.map((tag) => (
                         <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.value}>

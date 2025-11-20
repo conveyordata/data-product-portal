@@ -32,6 +32,15 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
+    # Create deprecated_tags_datasets table
+    op.create_table(
+        "deprecated_tags_datasets",
+        sa.Column("tag_id", sa.Uuid(), nullable=False),
+        sa.Column("dataset_id", sa.Uuid(), nullable=False),
+        sa.Column("deprecated_on", sa.DateTime(), nullable=False),
+        sa.PrimaryKeyConstraint("tag_id", "dataset_id"),
+    )
+
     # Create deprecated_data_products_datasets table
     op.create_table(
         "deprecated_data_products_datasets",
@@ -88,6 +97,16 @@ def upgrade() -> None:
         """
     )
 
+    # Move related records from tags_datasets to deprecated table
+    op.execute(
+        """
+        INSERT INTO deprecated_tags_datasets (tag_id, dataset_id, deprecated_on)
+        SELECT td.tag_id, td.dataset_id, NOW()
+        FROM tags_datasets td
+        WHERE td.dataset_id IN (SELECT id FROM deprecated_datasets)
+        """
+    )
+
     # Move related records from data_products_datasets to deprecated table
     op.execute(
         """
@@ -107,6 +126,14 @@ def upgrade() -> None:
         SELECT dod.data_output_id, dod.dataset_id, dod.requested_on, NOW()
         FROM data_outputs_datasets dod
         WHERE dod.dataset_id IN (SELECT id FROM deprecated_datasets)
+        """
+    )
+
+    # Remove related records from tags_datasets before deleting datasets
+    op.execute(
+        """
+        DELETE FROM tags_datasets
+        WHERE dataset_id IN (SELECT id FROM deprecated_datasets)
         """
     )
 
@@ -183,6 +210,15 @@ def downgrade() -> None:
         """
     )
 
+    # Restore tags_datasets relationships
+    op.execute(
+        """
+        INSERT INTO tags_datasets (tag_id, dataset_id)
+        SELECT tag_id, dataset_id
+        FROM deprecated_tags_datasets
+        """
+    )
+
     # Restore data_products_datasets relationships
     op.execute(
         """
@@ -207,4 +243,5 @@ def downgrade() -> None:
     # Drop deprecated tables
     op.drop_table("deprecated_data_outputs_datasets")
     op.drop_table("deprecated_data_products_datasets")
+    op.drop_table("deprecated_tags_datasets")
     op.drop_table("deprecated_datasets")

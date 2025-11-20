@@ -10,7 +10,6 @@ export enum PosthogEvents {
 
     HOMEPAGE_DATA_PRODUCTS_TAB_CLICKED = 'homepage_data_products_tab_clicked',
     HOMEPAGE_DATASETS_TAB_CLICKED = 'homepage_datasets_tab_clicked',
-    HOMEPAGE_MCP_CLICKED = 'homepage_mcp_clicked',
 
     REQUESTS_TAB_CLICKED = 'requests_tab_clicked',
     REQUESTS_ACCEPT = 'requests_accept',
@@ -29,4 +28,7 @@ export enum PosthogEvents {
     DATA_PRODUCT_TOUR_STARTED = 'data_product_tour_started',
     DATA_PRODUCT_TOUR_FINISHED = 'data_product_tour_finished',
     DATA_PRODUCT_TOUR_CLOSED = 'data_product_tour_closed',
+
+    CART_CHECKOUT_COMPLETED = 'cart_checkout_completed',
+    CART_CREATE_DATA_PRODUCT = 'cart_create_data_product',
 }

@@ -1,1 +1,6 @@
-Generic single-database configuration.
+# Database migrations
+
+To create a new migration run:
+```bash
+poetry run alembic revision -m "<message>"
+```

@@ -2,6 +2,7 @@ import { Badge, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import datasetBorderIcon from '@/assets/icons/dataset-border-icon.svg?react';
+import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title';
 import { DatasetTitle } from '@/components/datasets/dataset-title/dataset-title';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
@@ -13,8 +14,6 @@ import { DecisionStatus } from '@/types/roles';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
-
-import styles from './dataset-table.module.scss';
 
 type Props = {
     t: TFunction;
@@ -50,16 +49,20 @@ export const getDataProductDatasetsColumns = ({ t, datasetLinks }: Props): Table
                             <Badge
                                 status={getDecisionStatusBadgeStatus(status)}
                                 text={getDecisionStatusLabel(t, status)}
-                                className={styles.noSelect}
                             />
                         }
                     />
                 );
             },
-            width: '100%',
+            width: '25%',
             ...new FilterSettings(datasetLinks, (datasetLink) => getDecisionStatusLabel(t, datasetLink.status)),
             sorter: sorter.stringSorter((datasetLink) => datasetLink.dataset.name),
             defaultSortOrder: 'ascend',
+        },
+        {
+            title: t('Business justification'),
+            dataIndex: 'justification',
+            render: (_, { justification }) => <Justification justification={justification} />,
         },
         {
             title: t('Actions'),
@@ -67,6 +70,8 @@ export const getDataProductDatasetsColumns = ({ t, datasetLinks }: Props): Table
             render: (_, { dataset, data_product_id, status }) => {
                 return <DatasetActionButton dataset={dataset} dataProductId={data_product_id} status={status} />;
             },
+            fixed: 'right',
+            width: 1,
         },
     ];
 };

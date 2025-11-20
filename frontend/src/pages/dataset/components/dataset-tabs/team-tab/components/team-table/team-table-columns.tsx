@@ -49,16 +49,8 @@ export const getDatasetTeamColumns = ({
         {
             title: t('Name'),
             dataIndex: 'user.first_name',
-            render: (_, { user, decision: status }) => {
-                const isNotApproved = status !== DecisionStatus.Approved;
-                return (
-                    <UserAvatar
-                        name={`${user.first_name} ${user.last_name}`}
-                        email={user.email}
-                        linkProps={isNotApproved ? { type: 'secondary' } : undefined}
-                        textProps={isNotApproved ? { type: 'secondary' } : undefined}
-                    />
-                );
+            render: (_, { user }) => {
+                return <UserAvatar name={`${user.first_name} ${user.last_name}`} email={user.email} />;
             },
             width: '50%',
             sorter: sorter.cascadedSorter(

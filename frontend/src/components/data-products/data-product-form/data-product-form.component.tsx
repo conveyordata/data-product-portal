@@ -1,12 +1,15 @@
+import { usePostHog } from '@posthog/react';
 import { Button, Col, Form, type FormProps, Input, Popconfirm, Row, Select, Skeleton, Space } from 'antd';
+import { parseAsBoolean, useQueryState } from 'nuqs';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
 import { NamespaceFormItem } from '@/components/namespace/namespace-form-item';
-import posthog from '@/config/posthog-config';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
+import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/features/authorization/authorization-api-slice.ts';
 import { useGetAllDataProductLifecyclesQuery } from '@/store/features/data-product-lifecycles/data-product-lifecycles-api-slice';
 import { useGetAllDataProductTypesQuery } from '@/store/features/data-product-types/data-product-types-api-slice.ts';
@@ -41,7 +44,10 @@ type Props = {
 
 export function DataProductForm({ mode, dataProductId }: Props) {
     const { t } = useTranslation();
+    const posthog = usePostHog();
     const navigate = useNavigate();
+    const currentUser = useSelector(selectCurrentUser);
+    const [fromMarketplace] = useQueryState('fromMarketplace', parseAsBoolean.withDefault(false));
 
     const { data: currentDataProduct, isFetching: isFetchingInitialValues } = useGetDataProductByIdQuery(
         dataProductId || '',
@@ -99,6 +105,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const userSelectOptions = dataProductOwners.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
         value: owner.id,
+        disabled: owner.id === currentUser?.id,
     }));
     const tagSelectOptions = availableTags?.map((tag) => ({ label: tag.value, value: tag.id }));
 
@@ -117,10 +124,16 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 };
                 const response = await createDataProduct(request).unwrap();
                 dispatchMessage({ content: t('Data product created successfully'), type: 'success' });
-
                 posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_COMPLETED);
 
-                navigate(createDataProductIdPath(response.id));
+                if (fromMarketplace) {
+                    navigate({
+                        pathname: ApplicationPaths.MarketplaceCart,
+                        search: new URLSearchParams({ createdProductId: response.id }).toString(),
+                    });
+                } else {
+                    navigate(createDataProductIdPath(response.id));
+                }
             } else if (mode === 'edit' && dataProductId) {
                 if (!canEdit) {
                     dispatchMessage({ content: t('You are not allowed to edit this data product'), type: 'error' });
@@ -222,7 +235,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         lifecycle_id: currentDataProduct?.lifecycle.id,
         domain_id: currentDataProduct?.domain.id,
         tag_ids: currentDataProduct?.tags.map((tag) => tag.id),
-        owners: ownerIds,
+        owners: mode === 'edit' ? ownerIds : currentUser?.id ? [currentUser?.id] : [],
     };
 
     return (
@@ -280,7 +293,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     filterOption={selectFilterOptionByLabelAndValue}
                     disabled={mode !== 'create'}
                     tokenSeparators={[',']}
-                    allowClear
                 />
             </Form.Item>
             <Form.Item<DataProductCreateFormSchema>

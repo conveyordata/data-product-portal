@@ -15,6 +15,7 @@ from app.tags.schema import Tag
 
 
 class DataProductLink(DataProductDatasetAssociation):
+    justification: str
     data_product: DataProduct
 
 

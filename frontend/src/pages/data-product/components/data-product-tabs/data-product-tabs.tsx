@@ -6,6 +6,7 @@ import Icon, {
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
+import { usePostHog } from '@posthog/react';
 import type { TourProps } from 'antd';
 import { Badge, Flex, Tabs, Tour, Typography } from 'antd';
 import { type ReactElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
@@ -17,7 +18,7 @@ import datasetOutlineIcon from '@/assets/icons/dataset-outline-icon.svg?react';
 import { Explorer } from '@/components/explorer/explorer';
 import { HistoryTab } from '@/components/history/history-tab';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import posthog from '@/config/posthog-config';
+import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
 import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
@@ -30,7 +31,6 @@ import { useGetDataProductHistoryQuery } from '@/store/features/data-products/da
 import { useSeenTourMutation } from '@/store/features/users/users-api-slice';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
-import { UsageTab } from '../../../../components/tabs/usage-tab/usage-tab';
 import styles from './data-product-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 
@@ -50,6 +50,7 @@ const { Paragraph, Link } = Typography;
 
 export function DataProductTabs({ dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
+    const posthog = usePostHog();
     const currentUser = useSelector(selectCurrentUser);
     const aboutRef = useRef(null);
     const inputPortRef = useRef(null);
@@ -69,7 +70,8 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
             });
         }
         setOpen(openTour || false);
-    }, [openTour, dataProductId]);
+    }, [openTour, dataProductId, posthog]);
+
     const [setSeenTour] = useSeenTourMutation();
     const location = useLocation();
     const navigate = useNavigate();
@@ -83,7 +85,7 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
         posthog.capture(PosthogEvents.DATA_PRODUCTS_TAB_CLICKED, {
             tab_name: activeTab,
         });
-    }, [activeTab]);
+    }, [activeTab, posthog]);
 
     useEffect(() => {
         const hash = location.hash.slice(1);
@@ -253,31 +255,38 @@ export function DataProductTabs({ dataProductId, isLoading }: Props) {
             />
             <Tour
                 open={open}
-                onChange={(current) =>
-                    setActiveTab(
-                        current === 0 || current === 1 || current === 5
-                            ? TabKeys.About
-                            : current === 2
-                              ? TabKeys.Datasets
-                              : current === 3
-                                ? TabKeys.DataOutputs
-                                : current === 4
-                                  ? TabKeys.Team
-                                  : TabKeys.Settings,
-                    )
-                }
-                onClose={(current) => {
-                    setOpen(false);
-                    setActiveTab(TabKeys.About);
+                steps={steps}
+                onChange={(current) => {
+                    switch (current) {
+                        case 0:
+                        case 1:
+                        case 5:
+                            setActiveTab(TabKeys.About);
+                            break;
+                        case 2:
+                            setActiveTab(TabKeys.Datasets);
+                            break;
+                        case 3:
+                            setActiveTab(TabKeys.DataOutputs);
+                            break;
+                        case 4:
+                            setActiveTab(TabKeys.Team);
+                            break;
+                        default:
+                            setActiveTab(TabKeys.Settings);
+                    }
+                }}
+                onClose={async (current) => {
                     posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_CLOSED, {
                         current_step: current,
                     });
-                    setSeenTour();
+                    setOpen(false);
+                    setActiveTab(TabKeys.About);
+                    await setSeenTour();
                 }}
                 onFinish={() => {
                     posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_FINISHED);
                 }}
-                steps={steps}
             />
         </>
     );
