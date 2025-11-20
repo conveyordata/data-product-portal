@@ -49,6 +49,37 @@ class TestGlobalRoleAssignmentsRouter:
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
 
+    def test_become_admin(self, client: TestClient):
+        UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
+
+        response = client.post(
+            f"{ENDPOINT}/become_admin",
+            json={"expiry": "2024-12-31T23:59:59Z"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() is True
+
+    def test_revoke_admin(self, client: TestClient):
+        UserFactory(external_id=settings.DEFAULT_USERNAME, can_become_admin=True)
+
+        response = client.post(
+            f"{ENDPOINT}/revoke_admin",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() is False
+        response = client.post(
+            f"{ENDPOINT}/become_admin",
+            json={"expiry": "2024-12-31T23:59:59Z"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() is True
+
+        response = client.post(
+            f"{ENDPOINT}/revoke_admin",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() is True
+
     def test_create_assignment_admin(self, client: TestClient):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         RoleFactory.admin()
