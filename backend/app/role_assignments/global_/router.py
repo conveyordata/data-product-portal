@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from typing import Literal, Optional, Sequence, Union, cast
 from uuid import UUID
 
@@ -67,14 +66,7 @@ def revoke_admin(
     # TODO Check this in a resolver?
     user = ensure_user_exists(user.id, db)
     authorizer = Authorization()
-
-    if user.admin_expiry:
-        if user.admin_expiry >= datetime.now(tz=timezone.utc).replace(tzinfo=None):
-            return authorizer.revoke_admin_role(user_id=user.id)
-    raise HTTPException(
-        status.HTTP_400_BAD_REQUEST,
-        detail="User is not currently an admin",
-    )
+    return authorizer.revoke_admin_role(user_id=user.id)
 
 
 @router.post(

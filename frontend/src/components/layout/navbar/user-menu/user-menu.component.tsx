@@ -12,6 +12,7 @@ import { Notifications } from '@/components/notifications/notifications';
 import { AppConfig } from '@/config/app-config.ts';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice.ts';
 import { useIsAdminQuery } from '@/store/features/authorization/authorization-api-slice.ts';
+import { useRevokeAdminMutation } from '@/store/features/role-assignments/global-roles-api-slice';
 import { DownloadCLIButton } from '../cli-download/cli-download-button.component';
 import styles from './user-menu.module.scss';
 
@@ -27,7 +28,7 @@ export function UserMenu() {
         token: { colorErrorBorder, colorPrimary },
     } = theme.useToken();
     const userInitials = user?.first_name?.charAt(0) + (user?.last_name ? user.last_name.charAt(0) : '');
-
+    const [revokeAdmin] = useRevokeAdminMutation();
     const [timeRemaining, setTimeRemaining] = useState<string>('');
 
     const { data: isAdmin } = useIsAdminQuery();
@@ -38,13 +39,16 @@ export function UserMenu() {
             return;
         }
 
-        const updateTimeRemaining = () => {
+        const updateTimeRemaining = async () => {
             const expiry = new Date(`${isAdmin.time}Z`).getTime(); // UTC → epoch ms
             const now = Date.now();
             const diff = expiry - now;
 
             if (diff <= 0) {
                 setTimeRemaining('expired');
+                if (user) {
+                    await revokeAdmin({ user_id: user.id }).unwrap();
+                }
                 window.location.reload(); // Refetch to update admin status
                 return;
             }
@@ -63,7 +67,7 @@ export function UserMenu() {
         const interval = setInterval(updateTimeRemaining, 1000);
 
         return () => clearInterval(interval);
-    }, [isAdmin]);
+    }, [isAdmin, user, revokeAdmin]);
 
     const handleLogout = async () => {
         if (isAuthDisabled) {
