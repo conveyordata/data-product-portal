@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Annotated, Optional
 from uuid import UUID
 
@@ -37,3 +38,10 @@ class DataProductUsageUpdate(ORMModel):
 class LinkDatasetsToDataProduct(ORMModel):
     dataset_ids: list[UUID]
     justification: str
+
+
+class DataProductURLType(str, Enum):
+    SNOWFLAKE = "snowflake"
+    DATABRICKS = "databricks"
+    CONVEYOR = "conveyor"
+    SIGN_IN = "sign_in"

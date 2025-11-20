@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 
 from app.data_outputs.schema_response import BaseDataOutputGet
@@ -52,10 +52,14 @@ class DataProductGet(BaseDataProductGet):
     rolled_up_tags: set[Tag]
 
 
-class DataProductsGet(BaseDataProductGet):
+class DataProductsGetItem(BaseDataProductGet):
     user_count: int
     dataset_count: int
     data_outputs_count: int
+
+
+class DataProductsGet(ORMModel):
+    data_products: Sequence[DataProductsGetItem]
 
 
 class LinkDatasetsToDataProductPost(ORMModel):

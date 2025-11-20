@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 
 from pydantic import Field, computed_field
@@ -76,8 +76,13 @@ class DatasetLink(DataOutputDatasetAssociation):
 
 class DataOutputGet(BaseDataOutputGet):
     # Nested schemas
-    dataset_links: list[DatasetLink]
+    dataset_links: list[DatasetLink] = Field(deprecated="Use output_port_links instead")
+    output_port_links: list[DatasetLink] = Field(validation_alias="dataset_links")
     tags: list[Tag]
+
+
+class TechnicalAssetsGet(ORMModel):
+    technical_assets: Sequence[DataOutputGet]
 
 
 class DataOutputsGet(DataOutputGet):

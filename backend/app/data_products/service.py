@@ -1,7 +1,7 @@
 import copy
 import json
 from datetime import datetime
-from typing import Sequence
+from typing import Optional, Sequence
 from urllib import parse
 from uuid import UUID
 
@@ -38,7 +38,11 @@ from app.data_products.schema_request import (
     DataProductUpdate,
     DataProductUsageUpdate,
 )
-from app.data_products.schema_response import DataProductGet, DataProductsGet
+from app.data_products.schema_response import (
+    DataProductGet,
+    DataProductsGet,
+    DataProductsGetItem,
+)
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetModel,
 )
@@ -110,7 +114,9 @@ class DataProductService:
             data_product.lifecycle = default_lifecycle
         return data_product
 
-    def get_data_products(self) -> Sequence[DataProductsGet]:
+    def get_data_products(
+        self, user_id: Optional[UUID]
+    ) -> Sequence[DataProductsGetItem]:
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
                 DataProductLifeCycleModel.is_default
@@ -123,6 +129,12 @@ class DataProductService:
                     selectinload(DataProductModel.dataset_links).raiseload("*"),
                     selectinload(DataProductModel.assignments).raiseload("*"),
                     selectinload(DataProductModel.data_outputs).raiseload("*"),
+                )
+                .filter(
+                    not user_id
+                    or DataProductModel.assignments.any(
+                        user_id=user_id, decision=DecisionStatus.APPROVED
+                    )
                 )
                 .order_by(asc(DataProductModel.name))
             )
@@ -150,27 +162,6 @@ class DataProductService:
         return self.db.scalars(
             select(UserModel).filter(UserModel.id.in_(user_ids))
         ).all()
-
-    def get_user_data_products(self, user_id: UUID) -> Sequence[DataProductsGet]:
-        return (
-            self.db.scalars(
-                select(DataProductModel)
-                .options(
-                    selectinload(DataProductModel.dataset_links).raiseload("*"),
-                    selectinload(DataProductModel.assignments).raiseload("*"),
-                    selectinload(DataProductModel.datasets).raiseload("*"),
-                    selectinload(DataProductModel.data_outputs).raiseload("*"),
-                )
-                .filter(
-                    DataProductModel.assignments.any(
-                        user_id=user_id, decision=DecisionStatus.APPROVED
-                    )
-                )
-                .order_by(asc(DataProductModel.name))
-            )
-            .unique()
-            .all()
-        )
 
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
         return [ensure_tag_exists(tag_id, self.db) for tag_id in tag_ids]

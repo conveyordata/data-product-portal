@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Sequence
+from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -15,7 +15,7 @@ from app.core.namespace.validation import (
     NamespaceValidation,
 )
 from app.data_outputs.schema_request import DataOutputCreate
-from app.data_outputs.schema_response import DataOutputGet
+from app.data_outputs.schema_response import DataOutputGet, TechnicalAssetsGet
 from app.data_outputs.service import DataOutputService
 from app.data_product_settings.service import DataProductSettingService
 from app.data_products import email
@@ -24,12 +24,14 @@ from app.data_products.schema_request import (
     DataProductCreate,
     DataProductStatusUpdate,
     DataProductUpdate,
+    DataProductURLType,
     DataProductUsageUpdate,
     LinkDatasetsToDataProduct,
 )
 from app.data_products.schema_response import (
     DataProductGet,
     DataProductsGet,
+    DataProductsGetItem,
     LinkDatasetsToDataProductPost,
 )
 from app.data_products.service import DataProductService
@@ -38,7 +40,7 @@ from app.database.database import get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
-from app.events.schema_response import EventGet
+from app.events.schema_response import EventGet, EventsGet
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.notifications.service import NotificationService
@@ -56,50 +58,24 @@ from app.roles.schema import Prototype, Scope
 from app.roles.service import RoleService
 from app.users.schema import User
 
-router = APIRouter(prefix="/data_products", tags=["data_products"])
+router = APIRouter(tags=["data_products"])
 
 
-@router.get("")
-def get_data_products(
+# Use get_data_products, with user_id filter instead
+@router.get(
+    "/user/{user_id}",
+    deprecated=True,
+)
+def get_user_data_products(
+    user_id: UUID,
     db: Session = Depends(get_db_session),
 ) -> Sequence[DataProductsGet]:
-    return DataProductService(db).get_data_products()
-
-
-@router.get("/namespace_suggestion")
-def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
-    return DataProductService.data_product_namespace_suggestion(name)
-
-
-@router.get("/validate_namespace")
-def validate_data_product_namespace(
-    namespace: str, db: Session = Depends(get_db_session)
-) -> NamespaceValidation:
-    return DataProductService(db).validate_data_product_namespace(namespace)
-
-
-@router.get("/namespace_length_limits")
-def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
-    return DataProductService.data_product_namespace_length_limits()
-
-
-@router.get("/user/{user_id}")
-def get_user_data_products(
-    user_id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[DataProductsGet]:
-    return DataProductService(db).get_user_data_products(user_id)
+    return get_data_products(db, user_id=user_id)
 
 
 @router.get("/{id}")
 def get_data_product(id: UUID, db: Session = Depends(get_db_session)) -> DataProductGet:
     return DataProductService(db).get_data_product(id)
-
-
-@router.get("/{id}/history")
-def get_event_history(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[EventGet]:
-    return EventService(db).get_history(id, EventReferenceEntity.DATA_PRODUCT)
 
 
 @router.post(
@@ -269,58 +245,6 @@ def update_data_product(
     return result
 
 
-@router.post(
-    "/{id}/data_output",
-    responses={
-        200: {
-            "description": "DataOutput successfully created",
-            "content": {
-                "application/json": {
-                    "example": {"id": "random id of the new data_output"}
-                }
-            },
-        },
-    },
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__CREATE_DATA_OUTPUT,
-                DataProductResolver,
-            )
-        )
-    ],
-)
-def create_data_output(
-    id: UUID,
-    data_output: DataOutputCreate,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> dict[str, UUID]:
-    data_output = DataOutputService(db).create_data_output(id, data_output)
-    event_id = EventService(db).create_event(
-        CreateEvent(
-            name=EventType.DATA_OUTPUT_CREATED,
-            subject_id=data_output.id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
-            target_id=data_output.owner_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
-            actor_id=authenticated_user.id,
-        ),
-    )
-    NotificationService(db).create_data_product_notifications(
-        data_product_id=data_output.owner_id, event_id=event_id
-    )
-    RefreshInfrastructureLambda().trigger()
-    return {"id": data_output.id}
-
-
-@router.get("/{id}/data_output/validate_namespace")
-async def validate_data_output_namespace(
-    id: UUID, namespace: str, db: Session = Depends(get_db_session)
-) -> NamespaceValidation:
-    return DataProductService(db).validate_data_output_namespace(namespace, id)
-
-
 @router.put(
     "/{id}/about",
     responses={
@@ -418,60 +342,264 @@ def update_data_product_usage(
     )
 
 
-@router.post(
-    "/{id}/dataset/{dataset_id}",
-    responses={
-        400: {
-            "description": "Dataset not found",
-            "content": {
-                "application/json": {"example": {"detail": "Dataset not found"}}
-            },
-        },
-        404: {
-            "description": "Data Product not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Product id not found"}}
-            },
-        },
-    },
+def _send_dataset_link_emails(
+    dataset_links: list[DataProductDatasetAssociation],
+    background_tasks: BackgroundTasks,
+    actor: User,
+    db: Session,
+) -> None:
+    for dataset_link in dataset_links:
+        if dataset_link.dataset.access_type != DatasetAccessType.PUBLIC:
+            approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
+                dataset_link.dataset_id,
+                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            )
+            background_tasks.add_task(
+                email.send_dataset_link_email(
+                    dataset_link.data_product,
+                    dataset_link.dataset,
+                    requester=deepcopy(actor),
+                    approvers=[deepcopy(approver) for approver in approvers],
+                )
+            )
+
+
+@router.get(
+    "/{id}/role",
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
-                DataProductResolver,
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
             )
         ),
     ],
+)
+def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) -> str:
+    return DataProductService(db).get_data_product_role_arn(id, environment)
+
+
+@router.get("/{id}/graph")
+def get_graph_data(
+    id: UUID, db: Session = Depends(get_db_session), level: int = 3
+) -> Graph:
+    return DataProductService(db).get_graph_data(id, level)
+
+
+@router.post(
+    "/{id}/settings/{setting_id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_SETTINGS, DataProductResolver
+            )
+        ),
+    ],
+)
+def set_value_for_data_product(
+    id: UUID,
+    setting_id: UUID,
+    value: str,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    DataProductSettingService(db).set_value_for_product(setting_id, id, value)
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_SETTING_UPDATED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        )
+    )
+    RefreshInfrastructureLambda().trigger()
+
+
+_router = router
+router = APIRouter()
+
+old_data_product_route = "/data_products"
+data_product_route = "/v2/data_products"
+router.include_router(_router, prefix=old_data_product_route, deprecated=True)
+router.include_router(_router, prefix=data_product_route)
+
+
+@router.get(
+    f"{old_data_product_route}/namespace_suggestion",
+    tags=["data_products"],
     deprecated=True,
 )
-def link_dataset_to_data_product(
-    id: UUID,
-    dataset_id: UUID,
-    background_tasks: BackgroundTasks,
-    authenticated_user: User = Depends(get_authenticated_user),
-    db: Session = Depends(get_db_session),
-) -> dict[str, UUID]:
-    response = link_datasets_to_data_product(
-        id,
-        LinkDatasetsToDataProduct(
-            dataset_ids=[dataset_id],
-            justification="No justification provided. (deprecated endpoint used)",
+def get_data_product_namespace_suggestion(name: str) -> NamespaceSuggestion:
+    return DataProductService.data_product_namespace_suggestion(name)
+
+
+@router.get(
+    f"{old_data_product_route}/validate_namespace",
+    tags=["data_products"],
+    deprecated=True,
+)
+def validate_data_product_namespace(
+    namespace: str, db: Session = Depends(get_db_session)
+) -> NamespaceValidation:
+    return DataProductService(db).validate_data_product_namespace(namespace)
+
+
+@router.get(
+    f"{old_data_product_route}/namespace_length_limits",
+    tags=["data_products"],
+    deprecated=True,
+)
+def get_data_product_namespace_length_limits() -> NamespaceLengthLimits:
+    return DataProductService.data_product_namespace_length_limits()
+
+
+@router.get(
+    f"{old_data_product_route}/{{id}}/signin_url",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
         ),
-        background_tasks,
-        authenticated_user,
-        db,
+    ],
+    tags=["data_products"],
+    deprecated=True,
+)
+def get_signin_url(
+    id: UUID,
+    environment: str,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> str:
+    return get_data_product_url(
+        id,
+        environment,
+        url_type=DataProductURLType.SIGN_IN,
+        db=db,
+        authenticated_user=authenticated_user,
     )
-    return {"id": response.dataset_links[0]}
+
+
+@router.get(
+    f"{old_data_product_route}/{{id}}/conveyor_ide_url",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
+        ),
+    ],
+    tags=["data_products"],
+    deprecated=True,
+)
+def get_conveyor_ide_url(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> str:
+    return get_data_product_url(
+        id,
+        "random",
+        url_type=DataProductURLType.DATABRICKS,
+        db=db,
+        authenticated_user=authenticated_user,
+    )
+
+
+@router.get(
+    f"{old_data_product_route}/{{id}}/databricks_workspace_url",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
+        ),
+    ],
+    tags=["data_products"],
+    deprecated=True,
+)
+def get_databricks_workspace_url(
+    id: UUID,
+    environment: str,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> str:
+    return get_data_product_url(
+        id,
+        environment,
+        url_type=DataProductURLType.DATABRICKS,
+        db=db,
+        authenticated_user=authenticated_user,
+    )
+
+
+@router.get(
+    f"{data_product_route}/{{id}}/url",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
+        ),
+    ],
+    tags=["data_products"],
+)
+def get_data_product_url(
+    id: UUID,
+    environment: str,
+    url_type: DataProductURLType,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> str:
+
+    match url_type:
+        case DataProductURLType.DATABRICKS:
+            return DataProductService(db).get_databricks_workspace_url(id, environment)
+        case DataProductURLType.SNOWFLAKE:
+            return DataProductService(db).get_snowflake_url(id, environment)
+        case DataProductURLType.CONVEYOR:
+            # TODO no environment here
+            return DataProductService(db).get_conveyor_ide_url(id)
+        case DataProductURLType.SIGN_IN:
+            return DataProductService(db).generate_signin_url(
+                id, environment, actor=authenticated_user
+            )
+        case _:
+            raise HTTPException(status_code=400, detail="Invalid url_type provided")
+
+
+@router.get(
+    f"{old_data_product_route}/{{id}}/snowflake_url",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+            )
+        ),
+    ],
+    tags=["data_products"],
+    deprecated=True,
+)
+def get_snowflake_url(
+    id: UUID,
+    environment: str,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> str:
+    return get_data_product_url(
+        id,
+        environment,
+        url_type=DataProductURLType.SNOWFLAKE,
+        db=db,
+        authenticated_user=authenticated_user,
+    )
 
 
 @router.post(
-    "/{id}/link_datasets",
+    f"{data_product_route}/{{id}}/input_ports",
     responses={
         400: {
-            "description": "Dataset not found",
-            "content": {
-                "application/json": {"example": {"detail": "Dataset not found"}}
-            },
+            "description": "Port not found",
+            "content": {"application/json": {"example": {"detail": "Port not found"}}},
         },
         404: {
             "description": "Data Product not found",
@@ -488,8 +616,9 @@ def link_dataset_to_data_product(
             )
         ),
     ],
+    tags=["data_products"],
 )
-def link_datasets_to_data_product(
+def link_input_ports_to_data_product(
     id: UUID,
     link_datasets: LinkDatasetsToDataProduct,
     background_tasks: BackgroundTasks,
@@ -533,30 +662,8 @@ def link_datasets_to_data_product(
     )
 
 
-def _send_dataset_link_emails(
-    dataset_links: list[DataProductDatasetAssociation],
-    background_tasks: BackgroundTasks,
-    actor: User,
-    db: Session,
-) -> None:
-    for dataset_link in dataset_links:
-        if dataset_link.dataset.access_type != DatasetAccessType.PUBLIC:
-            approvers = DatasetRoleAssignmentService(db).users_with_authz_action(
-                dataset_link.dataset_id,
-                Action.DATASET__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
-            )
-            background_tasks.add_task(
-                email.send_dataset_link_email(
-                    dataset_link.data_product,
-                    dataset_link.dataset,
-                    requester=deepcopy(actor),
-                    approvers=[deepcopy(approver) for approver in approvers],
-                )
-            )
-
-
-@router.delete(
-    "/{id}/dataset/{dataset_id}",
+@router.post(
+    f"{old_data_product_route}/{{id}}/link_datasets",
     responses={
         400: {
             "description": "Dataset not found",
@@ -574,20 +681,60 @@ def _send_dataset_link_emails(
     dependencies=[
         Depends(
             Authorization.enforce(
+                Action.DATA_PRODUCT__REQUEST_DATASET_ACCESS,
+                DataProductResolver,
+            )
+        ),
+    ],
+    tags=["data_products"],
+    deprecated=True,
+)
+def link_datasets_to_data_product(
+    id: UUID,
+    link_datasets: LinkDatasetsToDataProduct,
+    background_tasks: BackgroundTasks,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> LinkDatasetsToDataProductPost:
+    return link_input_ports_to_data_product(
+        id, link_datasets, background_tasks, authenticated_user, db
+    )
+
+
+@router.delete(
+    f"{data_product_route}/{{id}}/input_ports/{{input_port_id}}",
+    responses={
+        400: {
+            "description": "Input port not found",
+            "content": {
+                "application/json": {"example": {"detail": "Input port not found"}}
+            },
+        },
+        404: {
+            "description": "Data Product not found",
+            "content": {
+                "application/json": {"example": {"detail": "Data Product id not found"}}
+            },
+        },
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
                 Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
                 DataProductResolver,
             )
         ),
     ],
+    tags=["data_products"],
 )
-def unlink_dataset_from_data_product(
+def unlink_input_port_from_data_product(
     id: UUID,
-    dataset_id: UUID,
+    input_port_id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     data_product_dataset = DataProductService(db).unlink_dataset_from_data_product(
-        id, dataset_id
+        id, input_port_id
     )
 
     event_id = EventService(db).create_event(
@@ -611,129 +758,183 @@ def unlink_dataset_from_data_product(
     RefreshInfrastructureLambda().trigger()
 
 
-@router.get(
-    "/{id}/role",
+@router.delete(
+    f"{old_data_product_route}/{{id}}/dataset/{{dataset_id}}",
+    responses={
+        400: {
+            "description": "Dataset not found",
+            "content": {
+                "application/json": {"example": {"detail": "Dataset not found"}}
+            },
+        },
+        404: {
+            "description": "Data Product not found",
+            "content": {
+                "application/json": {"example": {"detail": "Data Product id not found"}}
+            },
+        },
+    },
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
+                Action.DATA_PRODUCT__REVOKE_DATASET_ACCESS,
+                DataProductResolver,
             )
         ),
     ],
+    tags=["data_products"],
+    deprecated=True,
 )
-def get_role(id: UUID, environment: str, db: Session = Depends(get_db_session)) -> str:
-    return DataProductService(db).get_data_product_role_arn(id, environment)
-
-
-@router.get(
-    "/{id}/signin_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_signin_url(
+def unlink_dataset_from_data_product(
     id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> str:
-    return DataProductService(db).generate_signin_url(
-        id, environment, actor=authenticated_user
-    )
-
-
-@router.get(
-    "/{id}/conveyor_ide_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_conveyor_ide_url(id: UUID, db: Session = Depends(get_db_session)) -> str:
-    return DataProductService(db).get_conveyor_ide_url(id)
-
-
-@router.get(
-    "/{id}/databricks_workspace_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_databricks_workspace_url(
-    id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-) -> str:
-    return DataProductService(db).get_databricks_workspace_url(id, environment)
-
-
-@router.get(
-    "/{id}/snowflake_url",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__READ_INTEGRATIONS, DataProductResolver
-            )
-        ),
-    ],
-)
-def get_snowflake_url(
-    id: UUID,
-    environment: str,
-    db: Session = Depends(get_db_session),
-) -> str:
-    return DataProductService(db).get_snowflake_url(id, environment)
-
-
-@router.get("/{id}/data_outputs")
-def get_data_outputs(
-    id: UUID, db: Session = Depends(get_db_session)
-) -> Sequence[DataOutputGet]:
-    return DataProductService(db).get_data_outputs(id)
-
-
-@router.get("/{id}/graph")
-def get_graph_data(
-    id: UUID, db: Session = Depends(get_db_session), level: int = 3
-) -> Graph:
-    return DataProductService(db).get_graph_data(id, level)
-
-
-@router.post(
-    "/{id}/settings/{setting_id}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_SETTINGS, DataProductResolver
-            )
-        ),
-    ],
-)
-def set_value_for_data_product(
-    id: UUID,
-    setting_id: UUID,
-    value: str,
+    dataset_id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DataProductSettingService(db).set_value_for_product(setting_id, id, value)
-    EventService(db).create_event(
-        CreateEvent(
-            name=EventType.DATA_PRODUCT_SETTING_UPDATED,
-            subject_id=id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
-            actor_id=authenticated_user.id,
+    return unlink_input_port_from_data_product(id, dataset_id, db, authenticated_user)
+
+
+@router.get(
+    f"{data_product_route}/{{id}}/technical_assets",
+    tags=["data_products"],
+)
+def get_technical_assets(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+) -> TechnicalAssetsGet:
+    return DataProductService(db).get_data_outputs(id)
+
+
+@router.get(
+    f"{old_data_product_route}/{{id}}/data_outputs",
+    deprecated=True,
+    tags=["data_products"],
+)
+def get_data_outputs(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+) -> Sequence[DataOutputGet]:
+    return get_technical_assets(id, db)
+
+
+@router.post(
+    f"{data_product_route}/{{id}}/technical_assets",
+    responses={
+        200: {
+            "description": "Technical asset successfully created",
+            "content": {
+                "application/json": {
+                    "example": {"id": "random id of the new technical asset"}
+                }
+            },
+        },
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                DataProductResolver,
+            )
         )
+    ],
+    tags=["data_products"],
+)
+def create_technical_asset(
+    id: UUID,
+    technical_asset: DataOutputCreate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> dict[str, UUID]:
+    data_output = DataOutputService(db).create_data_output(id, technical_asset)
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_OUTPUT_CREATED,
+            subject_id=data_output.id,
+            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            target_id=data_output.owner_id,
+            target_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        ),
+    )
+    NotificationService(db).create_data_product_notifications(
+        data_product_id=data_output.owner_id, event_id=event_id
     )
     RefreshInfrastructureLambda().trigger()
+    return {"id": data_output.id}
+
+
+@router.post(
+    f"{old_data_product_route}/{{id}}/data_output",
+    responses={
+        200: {
+            "description": "DataOutput successfully created",
+            "content": {
+                "application/json": {
+                    "example": {"id": "random id of the new data_output"}
+                }
+            },
+        },
+    },
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__CREATE_DATA_OUTPUT,
+                DataProductResolver,
+            )
+        )
+    ],
+    deprecated=True,
+    tags=["data_products"],
+)
+def create_data_output(
+    id: UUID,
+    data_output: DataOutputCreate,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> dict[str, UUID]:
+    return create_technical_asset(id, data_output, db, authenticated_user)
+
+
+@router.get(
+    f"{old_data_product_route}/{{id}}/data_output/validate_namespace",
+    deprecated=True,
+    tags=["data_products"],
+)
+async def validate_data_output_namespace(
+    id: UUID, namespace: str, db: Session = Depends(get_db_session)
+) -> NamespaceValidation:
+    return DataProductService(db).validate_data_output_namespace(namespace, id)
+
+
+@router.get(old_data_product_route, deprecated=True, tags=["data_products"])
+def get_data_products(
+    db: Session = Depends(get_db_session),
+    user_id: Optional[UUID] = None,
+) -> Sequence[DataProductsGetItem]:
+    return DataProductService(db).get_data_products(user_id)
+
+
+@router.get(data_product_route, tags=["data_products"])
+def get_data_products(
+    db: Session = Depends(get_db_session),
+    user_id: Optional[UUID] = None,
+) -> DataProductsGet:
+    return DataProductsGet(
+        data_products=DataProductService(db).get_data_products(user_id)
+    )
+
+
+@router.get(
+    f"{old_data_product_route}/{{id}}/history", deprecated=True, tags=["data_products"]
+)
+def get_event_history(
+    id: UUID, db: Session = Depends(get_db_session)
+) -> Sequence[EventGet]:
+    return EventService(db).get_history(id, EventReferenceEntity.DATA_PRODUCT)
+
+
+@router.get(f"{data_product_route}/{{id}}/history", tags=["data_products"])
+def get_event_history(id: UUID, db: Session = Depends(get_db_session)) -> EventsGet:
+    return EventsGet(
+        events=EventService(db).get_history(id, EventReferenceEntity.DATA_PRODUCT)
+    )

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 
 from pydantic import NaiveDatetime
@@ -21,6 +21,10 @@ class BaseEventGet(ORMModel):
     target_type: Optional[EventReferenceEntity] = None
     actor_id: UUID
     created_on: NaiveDatetime
+
+
+class EventsGet(ORMModel):
+    events: Sequence[BaseEventGet]
 
 
 class EventGet(BaseEventGet):
