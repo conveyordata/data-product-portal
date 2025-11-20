@@ -1,0 +1,41 @@
+from uuid import UUID
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.database.database import get_db_session
+from app.datasets.query_stats_daily.schema_request import DatasetQueryStatsDailyUpdates
+from app.datasets.query_stats_daily.schema_response import (
+    DatasetQueryStatsDailyResponse,
+    DatasetQueryStatsDailyResponses,
+)
+from app.datasets.query_stats_daily.service import DatasetQueryStatsDailyService
+
+router = APIRouter(prefix="/{id}/query_stats", tags=["datasets"])
+
+
+@router.get("", response_model=DatasetQueryStatsDailyResponses)
+def get_query_stats(
+    id: UUID,
+    db: Session = Depends(get_db_session),
+) -> DatasetQueryStatsDailyResponses:
+    service = DatasetQueryStatsDailyService(db)
+    stats = service.get_query_stats_daily(dataset_id=id)
+    return DatasetQueryStatsDailyResponses(
+        dataset_query_stats_daily_responses=[
+            DatasetQueryStatsDailyResponse.model_validate(stat) for stat in stats
+        ]
+    )
+
+
+@router.patch("")
+def update_query_stats(
+    id: UUID,
+    input_data: DatasetQueryStatsDailyUpdates,
+    db: Session = Depends(get_db_session),
+) -> None:
+    # Implementation for updating query stats
+    service = DatasetQueryStatsDailyService(db)
+    service.update_query_stats_daily(
+        dataset_id=id, updates=input_data.dataset_query_stats_daily_updates
+    )
