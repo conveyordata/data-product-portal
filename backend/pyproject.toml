@@ -12,7 +12,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.13"
 python-dotenv = "^1.2.1"
-fastapi = "0.121.2"
+fastapi = "0.121.3"
 gunicorn = "^23.0.0"
 uvicorn = "^0.38.0"
 pydantic = { version = "^2.12.4", extras = ['email'] }
