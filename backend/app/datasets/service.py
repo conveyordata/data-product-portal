@@ -6,6 +6,11 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload
 
+from app.configuration.data_product_lifecycles.model import (
+    DataProductLifecycle as DataProductLifeCycleModel,
+)
+from app.configuration.tags.model import Tag as TagModel
+from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
 from app.core.namespace.validation import (
     NamespaceLengthLimits,
@@ -17,9 +22,6 @@ from app.core.namespace.validation import (
 from app.data_outputs.model import DataOutput
 from app.data_outputs_datasets.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
-)
-from app.data_product_lifecycles.model import (
-    DataProductLifecycle as DataProductLifeCycleModel,
 )
 from app.data_products_datasets.model import (
     DataProductDatasetAssociation as DataProductDatasetAssociationModel,
@@ -42,8 +44,6 @@ from app.role_assignments.dataset.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
 from app.role_assignments.enums import DecisionStatus
-from app.tags.model import Tag as TagModel
-from app.tags.model import ensure_tag_exists
 from app.users.model import User as UserModel
 from app.users.schema import User
 

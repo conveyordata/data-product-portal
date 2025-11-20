@@ -6,6 +6,8 @@ from fastmcp.server.auth.providers.jwt import JWTVerifier
 from fastmcp.server.dependencies import AccessToken, get_access_token
 from sqlalchemy.orm import configure_mappers
 
+from app.configuration.domains.schema_response import DomainGet
+from app.configuration.domains.service import DomainService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken, get_oidc
 
@@ -21,8 +23,6 @@ from app.data_products.service import DataProductService
 from app.database.database import get_db_session
 from app.datasets.schema_response import DatasetGet, DatasetsGet
 from app.datasets.service import DatasetService
-from app.domains.schema_response import DomainGet
-from app.domains.service import DomainService
 from app.role_assignments.data_product.schema import (
     RoleAssignmentResponse as DataProductRoleAssignmentResponse,
 )

@@ -13,8 +13,8 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects.postgresql import UUID
 
+from app.configuration.data_product_types.enums import DataProductIconKey
 from app.core.auth.device_flows.schema import DeviceFlowStatus
-from app.data_product_types.enums import DataProductIconKey
 from app.data_products.status import DataProductStatus
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus

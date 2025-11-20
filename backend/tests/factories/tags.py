@@ -1,6 +1,6 @@
 import factory
 
-from app.tags.model import Tag
+from app.configuration.tags.model import Tag
 
 
 class TagFactory(factory.alchemy.SQLAlchemyModelFactory):

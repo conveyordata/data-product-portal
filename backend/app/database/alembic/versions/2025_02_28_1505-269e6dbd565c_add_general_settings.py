@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy import orm
 
-from app.theme_settings.model import SETTINGS_ID, ThemeSettings
+from app.configuration.theme_settings.model import SETTINGS_ID, ThemeSettings
 
 # revision identifiers, used by Alembic.
 revision: str = "269e6dbd565c"
