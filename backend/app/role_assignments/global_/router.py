@@ -84,9 +84,7 @@ def create_assignment(
 ) -> RoleAssignmentResponse:
     role_id = _resolve_role_id(request.role_id)
     return RoleAssignmentService(db).create_assignment(
-        RoleAssignmentRequest(
-            user_id=request.user_id, role_id=role_id, expiry=request.expiry
-        ),
+        RoleAssignmentRequest(user_id=request.user_id, role_id=role_id),
         actor=user,
     )
 

@@ -47,7 +47,7 @@ class RoleAssignmentService:
         self, request: RoleAssignmentRequest, *, actor: User
     ) -> RoleAssignment:
         self.ensure_is_global_scope(request.role_id)
-        self.ensure_admin_has_expiry(request.role_id, request.expiry)
+        self.ensure_is_not_admin(request.role_id)
         role_assignment = GlobalRoleAssignment(
             **request.model_dump(),
             requested_on=datetime.now(),
@@ -59,7 +59,6 @@ class RoleAssignmentService:
 
     def delete_assignment(self, id_: UUID) -> RoleAssignment:
         assignment = self.get_assignment(id_)
-        # self._guard_against_illegal_admin_removal(assignment)
 
         self.db.delete(assignment)
         self.db.commit()
@@ -69,7 +68,6 @@ class RoleAssignmentService:
         self, request: UpdateRoleAssignment, *, actor: User
     ) -> RoleAssignment:
         assignment = self.get_assignment(request.id)
-        # self._guard_against_illegal_admin_removal(assignment)
 
         if (role_id := request.role_id) is not None:
             self.ensure_is_global_scope(role_id)
@@ -90,37 +88,10 @@ class RoleAssignmentService:
                 detail="Role not found for this scope",
             )
 
-    def ensure_admin_has_expiry(
-        self, role_id: UUID, expiry: Optional[datetime]
-    ) -> None:
+    def ensure_is_not_admin(self, role_id: UUID) -> None:
         role = self.db.get(RoleModel, role_id)
-        if role and role.prototype == Prototype.ADMIN and expiry is None:
+        if role and role.prototype == Prototype.ADMIN:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
-                "Admin role assignments must have an expiry date",
+                "Admin role assignments are no longer allowed",
             )
-
-    # def _guard_against_illegal_admin_
-    # removal(self, assignment: RoleAssignment) -> None:
-    #     # TODO Check that at least 1 user has the become admin thingy
-    #     pass
-    #     # if (
-    #     #     assignment.role is not None
-    #     #     and assignment.role.prototype == Prototype.PRE_ADMIN
-    #     #     and assignment.decision == DecisionStatus.APPROVED
-    #     #     and self._count_admins() <= 1
-    #     # ):
-    #     #     raise HTTPException(
-    #     #         status.HTTP_403_FORBIDDEN,
-    #     #         "At least one user need to have elevate to admin",
-    #     #     )
-
-    # def _count_admins(self) -> int:
-    #     query = (
-    #         select(func.count())
-    #         .select_from(GlobalRoleAssignment)
-    #         .join(GlobalRoleAssignment.user)
-    #         .where(UserModel.email != SYSTEM_ACCOUNT)
-    #         .join(GlobalRoleAssignment.role)
-    #     )
-    #     return self.db.scalar(query)

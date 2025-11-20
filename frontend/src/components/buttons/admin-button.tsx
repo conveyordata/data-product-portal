@@ -1,5 +1,5 @@
 import { CrownOutlined, UserSwitchOutlined } from '@ant-design/icons';
-import { Button, Popover } from 'antd';
+import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
@@ -7,14 +7,13 @@ import {
     useBecomeAdminMutation,
     useRevokeAdminMutation,
 } from '@/store/features/role-assignments/global-roles-api-slice';
-import styles from './admin-button.module.scss';
 
 type Props = {
     onAdminAction?: () => void;
     isAdmin?: boolean;
 };
 
-export function AdminButton({ onAdminAction, isAdmin }: Props) {
+export function AdminButton({ onAdminAction, isAdmin }: Props): Required<MenuProps>['items'][number] {
     const { t } = useTranslation();
     const [becomeAdmin] = useBecomeAdminMutation();
     const [revokeAdmin] = useRevokeAdminMutation();
@@ -41,18 +40,10 @@ export function AdminButton({ onAdminAction, isAdmin }: Props) {
         onAdminAction?.();
     };
 
-    return (
-        <Popover
-            content={isAdmin ? t('Remove admin privileges') : t('Gain temporary admin privileges')}
-            trigger={'hover'}
-            placement="bottom"
-        >
-            <Button
-                shape={'circle'}
-                className={styles.iconButton}
-                icon={isAdmin ? <UserSwitchOutlined /> : <CrownOutlined />}
-                onClick={handleAdminAction}
-            />
-        </Popover>
-    );
+    return {
+        key: 'BecomeAdmin',
+        icon: isAdmin ? <UserSwitchOutlined /> : <CrownOutlined />,
+        label: isAdmin ? t('Remove admin privileges') : t('Gain temporary admin privileges'),
+        onClick: handleAdminAction,
+    };
 }

@@ -67,7 +67,12 @@ def mark_tour_as_seen(
     UserService(db).mark_tour_as_seen(user.id)
 
 
-@router.post("/can_become_admin")
+@router.post(
+    "/can_become_admin",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_USER, EmptyResolver)),
+    ],
+)
 def can_become_admin(
     request: CanBecomeAdminUpdate,
     db: Session = Depends(get_db_session),

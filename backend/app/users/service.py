@@ -23,11 +23,6 @@ class UserService:
             .where(UserModel.email != SYSTEM_ACCOUNT)
             .order_by(asc(UserModel.last_name), asc(UserModel.first_name))
         ).all()
-        # for user in users:
-        #     print(user)
-        #     if (user.global_role):
-        #         print(user.first_name, user.last_name)
-        #         print(user.global_role.role.name)
         return users
 
     def remove_user(self, id: UUID) -> None:
@@ -49,7 +44,6 @@ class UserService:
         self.db.commit()
 
     def can_become_admin(self, request: CanBecomeAdminUpdate) -> None:
-        # TODO ensure at least 1 admin has this privilege
         if not request.can_become_admin:
             if (
                 len(

@@ -41,7 +41,6 @@ def check_access(
     obj = "*" if resource is None else str(resource)
 
     authorizer = Authorization()
-
     result = authorizer.has_access(sub=sub, dom=dom, obj=obj, act=action)
     return AccessResponse(allowed=result)
 

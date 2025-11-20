@@ -5,6 +5,7 @@ from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactor
 from app.core.authz.actions import AuthorizationAction
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.schema import RoleAssignment
+from app.roles import ADMIN_UUID
 from app.roles.schema import Role, Scope
 from app.settings import settings
 from app.users.schema import User
@@ -56,20 +57,16 @@ class TestGlobalRoleAssignmentsRouter:
         )
         GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
-        admin: Role = RoleFactory.admin()
 
         response = client.post(
             f"{ENDPOINT}",
             json={
                 "user_id": str(user.id),
-                "role_id": "admin",
+                "role_id": ADMIN_UUID,
             },
         )
-        assert response.status_code == status.HTTP_200_OK
-
-        data = response.json()
-        assert data["user"]["id"] == str(user.id)
-        assert data["role"]["id"] == str(admin.id)
+        # Create admin assignment is no longer allowed
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_delete_assignment(self, client: TestClient):
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -261,4 +258,4 @@ class TestGlobalRoleAssignmentsRouter:
         assert response.status_code == status.HTTP_200_OK
 
         response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_200_OK  # No longer an issue
