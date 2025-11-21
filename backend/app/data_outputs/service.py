@@ -117,8 +117,9 @@ class DataOutputService:
         result = copy.deepcopy(data_output)
         self.db.delete(data_output)
         self.db.commit()
-        self.update_search_vector_associated_datasets(result)
 
+        self.update_search_vector_associated_datasets(result)
+        self.db.commit()
         return result
 
     def get_data_output_with_links(self, id: UUID) -> DataOutputModel:
@@ -128,7 +129,6 @@ class DataOutputService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Required data output with {id} does not exist",
             )
-
         return data_output
 
     def update_search_vector_associated_datasets(self, result: DataOutputModel):
@@ -141,8 +141,8 @@ class DataOutputService:
     ) -> None:
         current_data_output = self.get_data_output_with_links(id)
         current_data_output.status = data_output.status
-        self.update_search_vector_associated_datasets(current_data_output)
         self.db.commit()
+        self.update_search_vector_associated_datasets(current_data_output)
 
     def link_dataset_to_data_output(
         self,
@@ -182,8 +182,8 @@ class DataOutputService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_output.dataset_links.append(dataset_link)
-        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
         self.db.commit()
+        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
         return dataset_link
 
     def unlink_dataset_from_data_output(
@@ -209,8 +209,8 @@ class DataOutputService:
             )
 
         data_output.dataset_links.remove(data_output_dataset)
-        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
         self.db.commit()
+        DatasetService(self.db).recalculate_search_vector_for(dataset_id)
         return data_output
 
     def update_data_output(
