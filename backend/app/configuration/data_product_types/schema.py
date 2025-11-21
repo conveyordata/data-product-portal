@@ -1,0 +1,11 @@
+from uuid import UUID
+
+from app.configuration.data_product_types.enums import DataProductIconKey
+from app.shared.schema import ORMModel
+
+
+class DataProductType(ORMModel):
+    id: UUID
+    name: str
+    description: str
+    icon_key: DataProductIconKey

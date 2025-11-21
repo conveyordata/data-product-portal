@@ -1,6 +1,6 @@
 import factory
 
-from app.theme_settings.model import SETTINGS_ID, ThemeSettings
+from app.configuration.theme_settings.model import SETTINGS_ID, ThemeSettings
 
 
 class ThemeSettingsFactory(factory.alchemy.SQLAlchemyModelFactory):

@@ -4,11 +4,11 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.configuration.domains.model import Domain
 from app.core.logging import logger
 from app.data_outputs.model import DataOutput
 from app.data_products.model import DataProduct
 from app.datasets.model import Dataset
-from app.domains.model import Domain
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType

@@ -3,8 +3,8 @@ from uuid import UUID
 
 from pydantic import field_validator
 
+from app.configuration.platforms.schema_response import Platform
 from app.platform_services.schema import PlatformService
-from app.platforms.schema import Platform
 from app.shared.schema import ORMModel
 
 

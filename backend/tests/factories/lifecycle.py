@@ -1,6 +1,6 @@
 import factory
 
-from app.data_product_lifecycles.model import DataProductLifecycle
+from app.configuration.data_product_lifecycles.model import DataProductLifecycle
 
 
 class LifecycleFactory(factory.alchemy.SQLAlchemyModelFactory):

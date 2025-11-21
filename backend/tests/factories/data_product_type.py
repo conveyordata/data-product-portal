@@ -1,7 +1,7 @@
 import factory
 
-from app.data_product_types.enums import DataProductIconKey
-from app.data_product_types.model import DataProductType
+from app.configuration.data_product_types.enums import DataProductIconKey
+from app.configuration.data_product_types.model import DataProductType
 
 
 class DataProductTypeFactory(factory.alchemy.SQLAlchemyModelFactory):

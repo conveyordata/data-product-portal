@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
@@ -17,7 +18,6 @@ from app.core.namespace.validation import (
 from app.data_outputs.schema_request import DataOutputCreate
 from app.data_outputs.schema_response import DataOutputGet
 from app.data_outputs.service import DataOutputService
-from app.data_product_settings.service import DataProductSettingService
 from app.data_products import email
 from app.data_products.schema_request import (
     DataProductAboutUpdate,

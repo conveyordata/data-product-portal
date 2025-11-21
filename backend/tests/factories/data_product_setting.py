@@ -1,6 +1,6 @@
 import factory
 
-from app.data_product_settings.model import DataProductSetting
+from app.configuration.data_product_settings.model import DataProductSetting
 
 
 class DataProductSettingFactory(factory.alchemy.SQLAlchemyModelFactory):

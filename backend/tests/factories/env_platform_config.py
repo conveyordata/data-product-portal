@@ -2,7 +2,7 @@ import json
 
 import factory
 
-from app.environment_platform_configurations.model import (
+from app.configuration.environments.platform_configurations.model import (
     EnvironmentPlatformConfiguration,
 )
 

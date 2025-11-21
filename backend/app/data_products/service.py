@@ -12,6 +12,16 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app.configuration.data_product_lifecycles.model import (
+    DataProductLifecycle as DataProductLifeCycleModel,
+)
+from app.configuration.environments.model import Environment as EnvironmentModel
+from app.configuration.environments.platform_configurations.model import (
+    EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
+)
+from app.configuration.platforms.model import Platform as PlatformModel
+from app.configuration.tags.model import Tag as TagModel
+from app.configuration.tags.model import ensure_tag_exists
 from app.core.auth.credentials import AWSCredentials
 from app.core.aws.boto3_clients import get_client
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
@@ -26,9 +36,6 @@ from app.core.namespace.validation import (
 from app.data_outputs.model import DataOutput as DataOutputModel
 from app.data_outputs.schema_response import DataOutputGet
 from app.data_outputs_datasets.model import DataOutputDatasetAssociation
-from app.data_product_lifecycles.model import (
-    DataProductLifecycle as DataProductLifeCycleModel,
-)
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.schema_request import (
@@ -46,19 +53,12 @@ from app.datasets.enums import DatasetAccessType
 from app.datasets.model import Dataset as DatasetModel
 from app.datasets.model import ensure_dataset_exists
 from app.datasets.service import DatasetService
-from app.environment_platform_configurations.model import (
-    EnvironmentPlatformConfiguration as EnvironmentPlatformConfigurationModel,
-)
-from app.environments.model import Environment as EnvironmentModel
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.platforms.model import Platform as PlatformModel
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype
 from app.settings import settings
-from app.tags.model import Tag as TagModel
-from app.tags.model import ensure_tag_exists
 from app.users.model import User as UserModel
 from app.users.schema import User
 

@@ -1,6 +1,6 @@
 import factory
 
-from app.domains.model import Domain
+from app.configuration.domains.model import Domain
 
 
 class DomainFactory(factory.alchemy.SQLAlchemyModelFactory):

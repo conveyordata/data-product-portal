@@ -1,4 +1,4 @@
-from app.platforms.schema import Platform
+from app.configuration.platforms.schema_response import Platform
 from app.shared.schema import IdNameSchema
 
 

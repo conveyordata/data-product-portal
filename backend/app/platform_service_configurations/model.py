@@ -9,8 +9,8 @@ from app.database.database import Base
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
+    from app.configuration.platforms.model import Platform
     from app.platform_services.model import PlatformService
-    from app.platforms.model import Platform
 
 
 class PlatformServiceConfiguration(Base, BaseORM):

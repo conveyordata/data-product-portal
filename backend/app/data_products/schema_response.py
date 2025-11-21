@@ -1,19 +1,19 @@
 from typing import Optional
 from uuid import UUID
 
+from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
+from app.configuration.data_product_settings.schema import DataProductSettingValue
+from app.configuration.data_product_types.schema import DataProductType
+from app.configuration.domains.schema import Domain
+from app.configuration.tags.schema import Tag
 from app.data_outputs.schema_response import BaseDataOutputGet
 from app.data_outputs_datasets.schema_response import (
     BaseDataOutputDatasetAssociationGet,
 )
-from app.data_product_lifecycles.schema import DataProductLifeCycle
-from app.data_product_settings.schema import DataProductSettingValue
-from app.data_product_types.schema import DataProductType
 from app.data_products.status import DataProductStatus
 from app.data_products_datasets.schema import DataProductDatasetAssociation
 from app.datasets.schema import Dataset
-from app.domains.schema import Domain
 from app.shared.schema import ORMModel
-from app.tags.schema import Tag
 
 
 class BaseDataProductGet(ORMModel):
