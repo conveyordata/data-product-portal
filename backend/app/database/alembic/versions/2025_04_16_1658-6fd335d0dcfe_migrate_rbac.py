@@ -106,7 +106,8 @@ class RoleMigrationService:
         owner_role = self.role_service.find_prototype(
             Scope.DATA_PRODUCT, Prototype.OWNER
         )
-        assert owner_role is not None
+        if owner_role is not None:
+            raise Exception("Unable to transfer product memberships: owner role exists")
 
         # Create the member role if it doesn't exist
         member_role = self.db.scalars(
@@ -170,7 +171,8 @@ class RoleMigrationService:
 
     def _transfer_dataset_memberships(self):
         owner_role = self.role_service.find_prototype(Scope.DATASET, Prototype.OWNER)
-        assert owner_role is not None
+        if owner_role is not None:
+            raise Exception("Unable to transfer dataset memberships: owner role exists")
 
         datasets = self.db.scalars(sa.select(dataset_table)).unique().all()
         for dataset in datasets:
@@ -189,7 +191,8 @@ class RoleMigrationService:
 
     def _transfer_global_memberships(self):
         admin_role = self.role_service.find_prototype(Scope.GLOBAL, Prototype.ADMIN)
-        assert admin_role is not None
+        if admin_role is not None:
+            raise ValueError("Unable to transfer global memberships: admin role exists")
 
         users = self.db.execute(sa.sql.text("""select * from users""")).all()
         for user in users:
