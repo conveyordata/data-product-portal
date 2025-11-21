@@ -18,6 +18,7 @@ from tests.factories import (
 from app.core.authz.actions import AuthorizationAction
 from app.core.namespace.validation import NamespaceValidityType
 from app.datasets.enums import DatasetAccessType
+from app.datasets.service import DatasetService
 from app.roles.schema import Prototype, Scope
 from app.roles.service import RoleService
 from app.settings import settings
@@ -163,6 +164,22 @@ class TestDatasetsRouter:
         data = response.json()
         assert len(data) == 1
         assert data[0]["id"] == str(ds_2.id)
+
+    def test_search_datasets(self, session, client):
+        RoleService(db=session).initialize_prototype_roles()
+        ds_1 = DatasetFactory(name="Customer Data")
+        ds_2 = DatasetFactory(name="Sales Data")
+        DatasetFactory(name="Internal Metrics")
+        service = DatasetService(db=session)
+        service.recalculate_search_vector_datasets()
+
+        response = client.get(f"{ENDPOINT}/search", params={"query": "Data"})
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 2
+        returned_ids = {item["id"] for item in data}
+        expected_ids = {str(ds_1.id), str(ds_2.id)}
+        assert returned_ids == expected_ids
 
     def test_update_dataset_no_role(self, client):
         ds = DatasetFactory()

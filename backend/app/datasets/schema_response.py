@@ -57,3 +57,7 @@ class DatasetGet(BaseDatasetGet):
 class DatasetsGet(BaseDatasetGet):
     data_product_count: int
     data_product_name: str
+
+
+class DatasetsSearch(DatasetsGet):
+    rank: float

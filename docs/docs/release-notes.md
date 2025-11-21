@@ -13,6 +13,7 @@ sidebar_position: 200
   and request access to multiple output ports at once. We also added the required field, business justification to the
   access requests. This will help the reviewer of your access request understand why access is needed.
 - **[Product Tour]**: Shows a small tutorial upon creation of your first data product.
+- **[Marketplace search]**: Support searching for data outputs using name and description as well as its technical assets.
 
 ### bugfixes
 - **[MCP]**: Fixed OAuth issues with MCP server.

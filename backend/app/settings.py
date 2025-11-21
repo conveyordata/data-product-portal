@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     POSTHOG_HOST: str = "https://eu.i.posthog.com"
     POSTHOG_ENABLED: bool = True
 
+    # Postgres FTS indexing
+    SEARCH_INDEXING_DISABLED: bool = False
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"
