@@ -30,7 +30,6 @@ class TestDatasetQueryStatsDailyService:
         service = DatasetQueryStatsDailyService(session)
         service.update_query_stats_daily(dataset.id, updates)
 
-        # Verify the record was created
         stats = (
             session.query(DatasetQueryStatsDaily)
             .filter_by(
@@ -74,12 +73,12 @@ class TestDatasetQueryStatsDailyService:
         updates = [
             DatasetQueryStatsDailyUpdate(
                 date=today.isoformat(),
-                consumer_data_product_id=consumer1.id,  # This one overlaps
+                consumer_data_product_id=consumer1.id,
                 query_count=100,
             ),
             DatasetQueryStatsDailyUpdate(
                 date=today.isoformat(),
-                consumer_data_product_id=consumer3.id,  # This one is new
+                consumer_data_product_id=consumer3.id,
                 query_count=200,
             ),
         ]

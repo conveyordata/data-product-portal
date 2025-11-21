@@ -15,13 +15,6 @@ class TestDatasetQueryStatsDailyRouter:
 
     def test_update_query_stats_daily_batch(self, client, session):
         """Test batch updating query stats."""
-        # user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        # role = RoleFactory(
-        #     scope=Scope.GLOBAL,
-        #     permissions=[AuthorizationAction.GLOBAL__UPDATE_QUERY_STATS],
-        # )
-        # GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
-
         dataset = DatasetFactory()
         consumer1 = DataProductFactory()
         consumer2 = DataProductFactory()
@@ -60,7 +53,6 @@ class TestDatasetQueryStatsDailyRouter:
         today = date.today()
         yesterday = today - timedelta(days=1)
 
-        # Create test data
         DatasetQueryStatsDailyFactory(
             date=today,
             dataset_id=dataset.id,
@@ -75,7 +67,6 @@ class TestDatasetQueryStatsDailyRouter:
         )
         session.commit()
 
-        # Get query stats
         response = client.get(f"{ENDPOINT}/{dataset.id}/query_stats")
 
         assert response.status_code == 200
@@ -85,7 +76,6 @@ class TestDatasetQueryStatsDailyRouter:
         stats = data["dataset_query_stats_daily_responses"]
         assert len(stats) == 2
 
-        # Verify the data structure
         for stat in stats:
             assert "date" in stat
             assert "consumer_data_product_id" in stat

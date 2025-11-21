@@ -26,22 +26,3 @@ class DatasetQueryStatsDaily(Base):
         .correlate_except(Base.metadata.tables["data_products"])
         .scalar_subquery()
     )
-
-    # __table_args__ = (
-    #     PrimaryKeyConstraint("date", "output_port_id", "consumer_id"),
-    #     Index("idx_output_port_query_stats_date", "date"),
-    #     Index("idx_output_port_query_stats_port", "output_port_id"),
-    #     Index("idx_output_port_query_stats_consumer", "consumer_id"),
-    # )
-
-    # data_product: Mapped["DataProduct"] = relationship(
-    #     back_populates="dataset_query_stats_daily", lazy="joined"
-    # )
-
-    # @property
-    # def data_product_name(self) -> str:
-    #     return self.data_product.name
-
-
-# def ensure_dataset_exists(dataset_id: UUID, db: Session, **kwargs) -> Dataset:
-#     return ensure_exists(dataset_id, db, Dataset, **kwargs)

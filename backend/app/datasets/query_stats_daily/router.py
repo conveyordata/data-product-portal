@@ -34,7 +34,6 @@ def update_query_stats(
     input_data: DatasetQueryStatsDailyUpdates,
     db: Session = Depends(get_db_session),
 ) -> None:
-    # Implementation for updating query stats
     service = DatasetQueryStatsDailyService(db)
     service.update_query_stats_daily(
         dataset_id=id, updates=input_data.dataset_query_stats_daily_updates
