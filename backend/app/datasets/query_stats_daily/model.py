@@ -18,8 +18,8 @@ class DatasetQueryStatsDaily(Base):
     )
     query_count: Mapped[int] = mapped_column(Integer, default=0)
 
-    # Computed field: data_product_name from join
-    data_product_name = column_property(
+    # Computed field: consumer_data_product_name from join
+    consumer_data_product_name = column_property(
         select(Column("name", String))
         .select_from(Base.metadata.tables["data_products"])
         .where(Base.metadata.tables["data_products"].c.id == consumer_data_product_id)

@@ -8,6 +8,7 @@ import type {
     DatasetUpdateRequest,
     DatasetUpdateResponse,
 } from '@/types/dataset';
+import type { DatasetQueryStatsDailyResponses } from '@/types/dataset/dataset-query-stats-daily.contract.ts';
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
@@ -152,6 +153,12 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 method: 'GET',
             }),
         }),
+        getDatasetQueryStatsDaily: builder.query<DatasetQueryStatsDailyResponses, string>({
+            query: (id) => ({
+                url: buildUrl(ApiUrl.DatasetQueryStats, { datasetId: id }),
+                method: 'GET',
+            }),
+        }),
     }),
     overrideExisting: false,
 });
@@ -169,4 +176,5 @@ export const {
     useLazyGetDatasetNamespaceSuggestionQuery,
     useLazyValidateDatasetNamespaceQuery,
     useGetDatasetNamespaceLengthLimitsQuery,
+    useGetDatasetQueryStatsDailyQuery,
 } = datasetsApiSlice;

@@ -439,8 +439,11 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
 
     -- Insert 4 example rows into dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count)
     INSERT INTO public.dataset_query_stats_daily (date, dataset_id, consumer_data_product_id, query_count) VALUES
+        ('2025-10-21', histology_rnd_dataset_id, rnd_program_pipeline_id, 5),
         ('2025-10-25', histology_rnd_dataset_id, rnd_program_pipeline_id, 15),
-        ('2025-10-26', histology_rnd_dataset_id, ai_model_histology_images_id, 20);
+        ('2025-10-26', histology_rnd_dataset_id, rnd_program_pipeline_id, 20),
+        ('2025-10-25', histology_rnd_dataset_id, ai_model_histology_images_id, 20),
+        ('2025-10-26', histology_rnd_dataset_id, ai_model_histology_images_id, 10);
 
 
 end $$;
