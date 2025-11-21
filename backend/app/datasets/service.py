@@ -158,6 +158,7 @@ class DatasetService:
             return 0
         sql = recalculate_search_vector_datasets_statement()
         result = self.db.execute(sql)
+        self.db.commit()
         return result.rowcount
 
     def get_datasets(self, user: UserModel) -> Sequence[DatasetsGet]:
