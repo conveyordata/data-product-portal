@@ -150,7 +150,6 @@ class DatasetService:
             return 0
         sql = recalculate_search_vector_dataset_statement(dataset_id)
         result = self.db.execute(sql, {"dataset_id": dataset_id})
-        self.db.commit()
         return result.rowcount
 
     def recalculate_search_vector_datasets(self) -> int:
@@ -159,7 +158,6 @@ class DatasetService:
             return 0
         sql = recalculate_search_vector_datasets_statement()
         result = self.db.execute(sql)
-        self.db.commit()
         return result.rowcount
 
     def get_datasets(self, user: UserModel) -> Sequence[DatasetsGet]:
@@ -232,8 +230,8 @@ class DatasetService:
         model = DatasetModel(**dataset_schema, tags=tags)
 
         self.db.add(model)
-        self.db.commit()
         self.recalculate_search_vector_for(model.id)
+        self.db.commit()
         return model
 
     def remove_dataset(self, id: UUID) -> DatasetModel:
@@ -273,8 +271,8 @@ class DatasetService:
             else:
                 setattr(current_dataset, k, v) if v else None
 
-        self.db.commit()
         self.recalculate_search_vector_for(id)
+        self.db.commit()
         return {"id": current_dataset.id}
 
     def update_dataset_about(
