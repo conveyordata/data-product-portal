@@ -79,6 +79,7 @@ export enum ApiUrl {
     DatasetNamespaceValidation = '/api/datasets/validate_namespace',
     DatasetNamespaceSuggestion = '/api/datasets/namespace_suggestion',
     DatasetNamespaceLimits = '/api/datasets/namespace_length_limits',
+    DatasetQueryStats = '/api/datasets/:datasetId/query_stats',
     Domains = '/api/domains',
     DomainsId = '/api/domains/:domainId',
     DomainsMigrate = '/api/domains/migrate/:fromId/:toId',

@@ -10,6 +10,7 @@ from app.data_product_settings.router import router as data_product_setting
 from app.data_product_types.router import router as data_product_type
 from app.data_products.router import router as data_product
 from app.data_products_datasets.router import router as data_product_dataset
+from app.datasets.query_stats_daily.router import router as dataset_query_stats_daily
 from app.datasets.router import router as dataset
 from app.domains.router import router as domain
 from app.environments.router import router as environment
@@ -51,3 +52,4 @@ router.include_router(graph)
 router.include_router(notification)
 router.include_router(pending_action)
 router.include_router(events)
+router.include_router(dataset_query_stats_daily)

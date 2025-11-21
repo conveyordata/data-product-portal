@@ -72,7 +72,7 @@ the [sample_data.sql](sample_data.sql) file and reference that one in the comman
 In order to run the project in development mode, after initializing the database, execute the command below.
 
 ```sh
-python -m app.local_startup
+poetry run python -m app.local_startup
 ```
 
 :tada:
