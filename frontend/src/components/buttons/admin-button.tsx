@@ -1,7 +1,9 @@
 import { CrownOutlined, UserSwitchOutlined } from '@ant-design/icons';
+import { usePostHog } from '@posthog/react';
 import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/features/auth/auth-slice';
 import {
     useBecomeAdminMutation,
@@ -15,6 +17,7 @@ type Props = {
 
 export function AdminButton({ onAdminAction, isAdmin }: Props): Required<MenuProps>['items'][number] {
     const { t } = useTranslation();
+    const posthog = usePostHog();
     const [becomeAdmin] = useBecomeAdminMutation();
     const [revokeAdmin] = useRevokeAdminMutation();
     const currentUser = useSelector(selectCurrentUser);
@@ -25,12 +28,14 @@ export function AdminButton({ onAdminAction, isAdmin }: Props): Required<MenuPro
 
     const handleAdminAction = async () => {
         if (isAdmin) {
+            posthog.capture(PosthogEvents.ADMIN_PRIVILEGES_REVOKED);
             // Revoke admin access
             await revokeAdmin({ user_id: currentUser.id }).unwrap();
 
             onAdminAction?.();
             return;
         }
+        posthog.capture(PosthogEvents.ADMIN_PRIVILEGES_GRANTED);
         const expiry = new Date();
         expiry.setMinutes(expiry.getMinutes() + 10); // expire 10 minutes from now
         await becomeAdmin({
