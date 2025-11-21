@@ -231,6 +231,7 @@ class DatasetService:
         model = DatasetModel(**dataset_schema, tags=tags)
 
         self.db.add(model)
+        self.db.flush()
         self.recalculate_search_vector_for(model.id)
         self.db.commit()
         return model
@@ -271,7 +272,7 @@ class DatasetService:
                 current_dataset.tags = new_tags
             else:
                 setattr(current_dataset, k, v) if v else None
-
+        self.db.flush()
         self.recalculate_search_vector_for(id)
         self.db.commit()
         return {"id": current_dataset.id}

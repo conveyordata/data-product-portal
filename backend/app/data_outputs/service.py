@@ -116,7 +116,7 @@ class DataOutputService:
 
         result = copy.deepcopy(data_output)
         self.db.delete(data_output)
-        self.db.commit()
+        self.db.flush()
 
         self.update_search_vector_associated_datasets(result)
         self.db.commit()
@@ -141,8 +141,10 @@ class DataOutputService:
     ) -> None:
         current_data_output = self.get_data_output_with_links(id)
         current_data_output.status = data_output.status
-        self.db.commit()
+        self.db.flush()
+
         self.update_search_vector_associated_datasets(current_data_output)
+        self.db.commit()
 
     def link_dataset_to_data_output(
         self,
@@ -182,8 +184,9 @@ class DataOutputService:
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_output.dataset_links.append(dataset_link)
-        self.db.commit()
+        self.db.flush()
         DatasetService(self.db).recalculate_search_vector_for(dataset_id)
+        self.db.commit()
         return dataset_link
 
     def unlink_dataset_from_data_output(
@@ -209,8 +212,9 @@ class DataOutputService:
             )
 
         data_output.dataset_links.remove(data_output_dataset)
-        self.db.commit()
+        self.db.flush()
         DatasetService(self.db).recalculate_search_vector_for(dataset_id)
+        self.db.commit()
         return data_output
 
     def update_data_output(
