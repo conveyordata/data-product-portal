@@ -1,5 +1,3 @@
-from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
-
 from app.core.authz import Authorization
 from app.role_assignments.enums import DecisionStatus
 from app.role_assignments.global_.auth import GlobalAuthAssignment
@@ -7,6 +5,7 @@ from app.role_assignments.global_.schema import RoleAssignment
 from app.roles import ADMIN_UUID
 from app.roles.schema import Role, Scope
 from app.users.schema import User
+from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
 
 
 class TestAuth:

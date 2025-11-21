@@ -1,9 +1,9 @@
 import factory
-from tests import test_session
 
 from app.core.authz.authorization import Authorization
 from app.role_assignments.data_product.model import DataProductRoleAssignment
 from app.role_assignments.enums import DecisionStatus
+from tests import test_session
 
 
 class DataProductRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):

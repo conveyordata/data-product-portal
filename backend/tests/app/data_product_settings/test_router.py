@@ -1,10 +1,10 @@
 from copy import deepcopy
 
 import pytest
-from tests.factories import DataProductSettingFactory
 
 from app.core.namespace.validation import NamespaceValidityType
 from app.data_product_settings.enums import DataProductSettingScope
+from tests.factories import DataProductSettingFactory
 
 ENDPOINT = "/api/data_product_settings"
 

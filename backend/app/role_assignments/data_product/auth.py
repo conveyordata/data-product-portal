@@ -8,7 +8,6 @@ from .schema import RoleAssignment
 
 @dataclass
 class DataProductAuthAssignment(ResourceAuthAssignment):
-
     def __init__(
         self, assignment: RoleAssignment, *, previous_role_id: Optional[UUID] = None
     ) -> None:

@@ -110,9 +110,8 @@ def get_datasets():
 
         datasets_export[dataset.get("namespace")] = {
             "data_outputs": [
-                f"{data_output_link.get("data_output")
-                   .get("owner").get("namespace")}/"
-                f"{data_output_link.get("data_output").get("namespace")}"
+                f"{data_output_link.get('data_output').get('owner').get('namespace')}/"
+                f"{data_output_link.get('data_output').get('namespace')}"
                 for data_output_link in dataset.get("data_output_links")
                 if data_output_link.get("status") == "approved"
             ],
@@ -143,12 +142,12 @@ def get_data_outputs():
         verify_response(platform_service)
 
         data_outputs_export[
-            f"{data_output_info.get("owner").get("namespace")}/"
-            f"{data_output_info.get("namespace")}"
+            f"{data_output_info.get('owner').get('namespace')}/"
+            f"{data_output_info.get('namespace')}"
         ] = {
-            platform_service.get("service")
-            .get("name")
-            .lower(): data_output_info.get("configuration"),
+            platform_service.get("service").get("name").lower(): data_output_info.get(
+                "configuration"
+            ),
             "owner": data_output_info.get("owner").get("namespace"),
             "name": data_output_info.get("namespace"),
         }

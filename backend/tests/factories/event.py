@@ -1,8 +1,8 @@
 import factory
-from tests.factories.user import UserFactory
 
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.model import Event
+from tests.factories.user import UserFactory
 
 
 class EventFactory(factory.alchemy.SQLAlchemyModelFactory):

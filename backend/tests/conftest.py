@@ -5,8 +5,6 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, scoped_session
 from starlette.routing import _DefaultLifespan
-from tests.factories.role import RoleFactory
-from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
@@ -15,6 +13,8 @@ from app.database.database import Base, get_db_session
 from app.datasets.enums import DatasetAccessType
 from app.main import app
 from app.settings import settings
+from tests.factories.role import RoleFactory
+from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
