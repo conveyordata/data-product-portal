@@ -33,15 +33,16 @@ class ResourceAuthAssignment(AuthAssignment):
         assignment: Union[DataProductRoleAssignment, DatasetRoleAssignment],
         previous_role_id: Optional[UUID],
     ) -> UUID:
-        assert assignment.decision is DecisionStatus.APPROVED, (
-            "Only approved decisions can be propagated to the enforcer"
-        )
-        assert assignment.role_id is not None, (
-            "Only decisions that define a role can be propagated to the enforcer"
-        )
-        assert assignment.role_id != previous_role_id, (
-            "Re-assigning the same role is a no-op and indicates a logic bug"
-        )
+        if assignment.decision is not DecisionStatus.APPROVED:
+            raise Exception("Only approved decisions can be propagated to the enforcer")
+        if assignment.role_id is None:
+            raise Exception(
+                "Only decisions that define a role can be propagated to the enforcer"
+            )
+        if assignment.role_id == previous_role_id:
+            raise Exception(
+                "Re-assigning the same role is a no-op and indicates a logic bug"
+            )
 
         return assignment.role_id
 
@@ -62,7 +63,8 @@ class ResourceAuthAssignment(AuthAssignment):
         )
 
     def swap(self) -> tuple[bool, bool]:
-        assert self.previous_role_id is not None
+        if self.previous_role_id is None:
+            raise ValueError("Cannot swap roles without a previous role")
 
         authorizer = Authorization()
         revoke = authorizer.revoke_resource_role(

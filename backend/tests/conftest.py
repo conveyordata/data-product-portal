@@ -1,3 +1,4 @@
+# ruff: noqa: S311, S105
 from typing import Any, Generator
 from unittest.mock import MagicMock
 
