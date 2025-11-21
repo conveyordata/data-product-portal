@@ -16,6 +16,10 @@ class CreateRoleAssignment(BaseModel):
     role_id: Union[UUID, Literal["admin"]]
 
 
+class BecomeAdmin(BaseModel):
+    expiry: str
+
+
 class DecideRoleAssignment(BaseModel):
     decision: DecisionStatus
 

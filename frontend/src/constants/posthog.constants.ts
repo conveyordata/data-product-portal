@@ -31,4 +31,7 @@ export enum PosthogEvents {
 
     CART_CHECKOUT_COMPLETED = 'cart_checkout_completed',
     CART_CREATE_DATA_PRODUCT = 'cart_create_data_product',
+
+    ADMIN_PRIVILEGES_GRANTED = 'admin_privileges_granted',
+    ADMIN_PRIVILEGES_REVOKED = 'admin_privileges_revoked',
 }

@@ -7,6 +7,7 @@ export interface UserContract {
     first_name: string;
     last_name: string;
     has_seen_tour: boolean;
+    can_become_admin: boolean;
 }
 
 export type UsersGetContract = Array<

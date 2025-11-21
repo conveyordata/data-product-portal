@@ -11,9 +11,9 @@ import {
     useUpdateGlobalRoleAssignmentMutation,
 } from '@/store/features/role-assignments/global-roles-api-slice.ts';
 import { useGetRolesQuery } from '@/store/features/roles/roles-api-slice.ts';
-import { useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
+import { useCanBecomeAdminMutation, useGetAllUsersQuery } from '@/store/features/users/users-api-slice.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
-import { type GlobalRoleAssignmentContract, Scope } from '@/types/roles/role.contract.ts';
+import { type GlobalRoleAssignmentContract, Prototype, Scope } from '@/types/roles/role.contract.ts';
 import type { UsersGetContract } from '@/types/users/user.contract.ts';
 import styles from './people-table.module.scss';
 import { getPeopleTableColumns } from './people-table-columns.tsx';
@@ -42,6 +42,7 @@ export function PeoplePage() {
     const [updateGlobalRoleAssignment] = useUpdateGlobalRoleAssignmentMutation();
     const [decideGlobalRoleAssignment] = useDecideGlobalRoleAssignmentMutation();
     const [deleteGlobalRoleAssignment] = useDeleteGlobalRoleAssignmentMutation();
+    const [canBecomeAdmin] = useCanBecomeAdminMutation();
 
     const onChangeGlobalRole = useCallback(
         (user_id: string, value: string, original: GlobalRoleAssignmentContract | null) => {
@@ -121,10 +122,13 @@ export function PeoplePage() {
                 t,
                 users: filteredUsers,
                 canAssignRole: canAssignGlobalRole,
-                allRoles: roles,
+                allRoles: roles.filter((role) => role.prototype !== Prototype.ADMIN),
                 onChange: onChangeGlobalRole,
+                changeCheckbox: async (user_id: string, can_become_admin: boolean) => {
+                    await canBecomeAdmin({ user_id, can_become_admin });
+                },
             }),
-        [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole],
+        [t, filteredUsers, roles, canAssignGlobalRole, onChangeGlobalRole, canBecomeAdmin],
     );
 
     return (

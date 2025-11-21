@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.authorization.schema import AccessResponse
+from app.authorization.schema import AccessResponse, IsAdminResponse
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.users.schema import User
@@ -56,6 +56,10 @@ def check_access(
 )
 def is_admin(
     user: User = Depends(get_authenticated_user),
-) -> bool:
+) -> IsAdminResponse:
     authorizer = Authorization()
-    return authorizer.has_admin_role(user_id=user.id)
+
+    return IsAdminResponse(
+        is_admin=authorizer.has_admin_role(user_id=user.id),
+        time=user.admin_expiry.isoformat() if user.admin_expiry else None,
+    )
