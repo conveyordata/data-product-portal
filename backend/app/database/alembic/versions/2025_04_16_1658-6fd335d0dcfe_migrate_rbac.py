@@ -149,7 +149,8 @@ class RoleMigrationService:
 
     @classmethod
     def map_decision(
-        cls, membership  #: DataProductMembership,
+        cls,
+        membership,  #: DataProductMembership,
     ) -> tuple[DecisionStatus, Optional[UUID], Optional[datetime]]:
         if membership.status == DataProductMembershipStatus.APPROVED:
             return (

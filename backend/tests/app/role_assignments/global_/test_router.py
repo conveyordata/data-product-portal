@@ -1,6 +1,5 @@
 from fastapi import status
 from fastapi.testclient import TestClient
-from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
 
 from app.core.authz.actions import AuthorizationAction
 from app.role_assignments.enums import DecisionStatus
@@ -8,12 +7,12 @@ from app.role_assignments.global_.schema import RoleAssignment
 from app.roles.schema import Role, Scope
 from app.settings import settings
 from app.users.schema import User
+from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
 
 ENDPOINT = "/api/role_assignments/global"
 
 
 class TestGlobalRoleAssignmentsRouter:
-
     def test_list_assignments(self, client: TestClient):
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)

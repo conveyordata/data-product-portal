@@ -18,7 +18,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-
     op.execute(
         "ALTER TYPE dataproductmembershipstatus "
         "RENAME VALUE 'PENDING_APPROVAL' TO 'PENDING';"
@@ -52,7 +51,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-
     op.execute(
         """
         CREATE TYPE dataproductmembershipstatus AS ENUM (

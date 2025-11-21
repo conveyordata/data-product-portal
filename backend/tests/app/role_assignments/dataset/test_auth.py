@@ -1,10 +1,3 @@
-from tests.factories import (
-    DatasetFactory,
-    DatasetRoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
-
 from app.core.authz import Authorization
 from app.datasets.model import Dataset
 from app.role_assignments.dataset.auth import DatasetAuthAssignment
@@ -12,6 +5,12 @@ from app.role_assignments.dataset.schema import RoleAssignment
 from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Role, Scope
 from app.users.schema import User
+from tests.factories import (
+    DatasetFactory,
+    DatasetRoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 
 class TestAuth:

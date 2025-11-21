@@ -2,6 +2,13 @@ import uuid
 from copy import deepcopy
 
 import pytest
+
+from app.core.authz.actions import AuthorizationAction
+from app.core.namespace.validation import NamespaceValidityType
+from app.datasets.enums import DatasetAccessType
+from app.roles.schema import Prototype, Scope
+from app.roles.service import RoleService
+from app.settings import settings
 from tests.factories import (
     DataProductDatasetAssociationFactory,
     DataProductFactory,
@@ -14,13 +21,6 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-
-from app.core.authz.actions import AuthorizationAction
-from app.core.namespace.validation import NamespaceValidityType
-from app.datasets.enums import DatasetAccessType
-from app.roles.schema import Prototype, Scope
-from app.roles.service import RoleService
-from app.settings import settings
 
 ENDPOINT = "/api/datasets"
 

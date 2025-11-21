@@ -491,11 +491,11 @@ class DataProductService:
         platform_config = self.get_env_platform_config(id, environment, "Databricks")
         data_product = self.db.get(DataProductModel, id)
         config = json.loads(platform_config)["workspace_urls"]
-        if not str(data_product.domain_id) in config:
+        if str(data_product.domain_id) not in config:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
-                    "Workspace not configured for" f"domain {data_product.domain.name}"
+                    f"Workspace not configured fordomain {data_product.domain.name}"
                 ),
             )
         return config[str(data_product.domain_id)]

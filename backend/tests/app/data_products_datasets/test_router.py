@@ -4,6 +4,12 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import Response
+
+from app.core.authz import Action
+from app.datasets.enums import DatasetAccessType
+from app.role_assignments.enums import DecisionStatus
+from app.roles.schema import Scope
+from app.settings import settings
 from tests.factories import (
     DataProductDatasetAssociationFactory,
     DataProductFactory,
@@ -13,12 +19,6 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
-
-from app.core.authz import Action
-from app.datasets.enums import DatasetAccessType
-from app.role_assignments.enums import DecisionStatus
-from app.roles.schema import Scope
-from app.settings import settings
 
 DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/data_product_dataset_links"
 DATA_PRODUCTS_ENDPOINT = "/api/data_products"

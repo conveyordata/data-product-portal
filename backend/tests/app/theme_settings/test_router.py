@@ -1,4 +1,5 @@
 import pytest
+
 from tests.factories import ThemeSettingsFactory
 
 ENDPOINT = "/api/theme_settings"

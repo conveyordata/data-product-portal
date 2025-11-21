@@ -23,7 +23,6 @@ ID: TypeAlias = Union[str, UUID]
 
 
 class Authorization(metaclass=Singleton):
-
     def __init__(self) -> None:
         self._enforcer: Enforcer = self._initialize()
         self._cache: Cache = LRUCache(maxsize=settings.AUTHORIZER_CACHE_SIZE)

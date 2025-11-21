@@ -6,7 +6,6 @@ from .schema import RoleAssignment
 
 
 class DatasetAuthAssignment(ResourceAuthAssignment):
-
     def __init__(
         self, assignment: RoleAssignment, *, previous_role_id: Optional[UUID] = None
     ):

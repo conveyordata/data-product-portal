@@ -1,7 +1,7 @@
 import pytest
-from tests.factories import UserFactory
 
 from app.settings import settings
+from tests.factories import UserFactory
 
 ENDPOINT = "/api/users"
 

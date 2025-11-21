@@ -15,9 +15,9 @@ from app.database.database import Base
 from app.role_assignments.enums import DecisionStatus
 
 if TYPE_CHECKING:
-    from app.users.model import User
-    from app.datasets.model import Dataset
     from app.data_products.model import DataProduct
+    from app.datasets.model import Dataset
+    from app.users.model import User
 
 import uuid
 

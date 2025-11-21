@@ -1,13 +1,6 @@
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from tests.factories import (
-    DataProductFactory,
-    DataProductRoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
-from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 from app.core.authz import Action
 from app.data_products.model import DataProduct
@@ -16,6 +9,13 @@ from app.role_assignments.enums import DecisionStatus
 from app.roles.schema import Prototype, Role, Scope
 from app.settings import settings
 from app.users.schema import User
+from tests.factories import (
+    DataProductFactory,
+    DataProductRoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
+from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 
 ENDPOINT = "/api/role_assignments/data_product"
 ENDPOINT_DATA_PRODUCT = "/api/data_products"
@@ -23,7 +23,6 @@ ENDPOINT_PENDING_ACTIONS = "/api/pending_actions"
 
 
 class TestDataProductRoleAssignmentsRouter:
-
     def test_list_assignments(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
         user: User = UserFactory()

@@ -4,6 +4,12 @@ from copy import deepcopy
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
+
+from app.core.authz import Action
+from app.core.namespace.validation import NamespaceValidityType
+from app.roles.schema import Scope
+from app.roles.service import RoleService
+from app.settings import settings
 from tests.factories import (
     DataOutputFactory,
     DataProductFactory,
@@ -20,12 +26,6 @@ from tests.factories import (
     TagFactory,
     UserFactory,
 )
-
-from app.core.authz import Action
-from app.core.namespace.validation import NamespaceValidityType
-from app.roles.schema import Scope
-from app.roles.service import RoleService
-from app.settings import settings
 
 ENDPOINT = "/api/data_products"
 
@@ -497,7 +497,7 @@ class TestDataProductsRouter:
             config=json.dumps({"login_url": "test_1.com"}),
         )
         response = client.get(
-            f"{ENDPOINT}/{data_product.id}/snowflake_url?" "environment=production"
+            f"{ENDPOINT}/{data_product.id}/snowflake_url?environment=production"
         )
         assert response.status_code == 200
         assert response.json() == "test_1.com"
