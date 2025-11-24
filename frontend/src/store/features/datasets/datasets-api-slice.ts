@@ -12,6 +12,7 @@ import type { DatasetQueryStatsDailyResponses } from '@/types/dataset/dataset-qu
 import type { DatasetsGetContract } from '@/types/dataset/datasets-get.contract.ts';
 import type { EventContract } from '@/types/events/event.contract';
 import type { GraphContract } from '@/types/graph/graph-contract';
+import type { QueryParams } from '@/types/http.ts';
 import type {
     NamespaceLengthLimitsResponse,
     NamespaceSuggestionResponse,
@@ -153,11 +154,31 @@ export const datasetsApiSlice = baseApiSlice.enhanceEndpoints({ addTagTypes: dat
                 method: 'GET',
             }),
         }),
-        getDatasetQueryStatsDaily: builder.query<DatasetQueryStatsDailyResponses, string>({
-            query: (id) => ({
-                url: buildUrl(ApiUrl.DatasetQueryStats, { datasetId: id }),
-                method: 'GET',
-            }),
+        getDatasetQueryStatsDaily: builder.query<
+            DatasetQueryStatsDailyResponses,
+            {
+                datasetId: string;
+                granularity?: 'day' | 'week' | 'month';
+                timeRange?: '1m' | '90d' | '1y';
+            }
+        >({
+            query: ({ datasetId, granularity, timeRange }) => {
+                const params: QueryParams = {};
+
+                if (granularity) {
+                    params.granularity = granularity;
+                }
+
+                if (timeRange) {
+                    params.time_range = timeRange;
+                }
+
+                return {
+                    url: buildUrl(ApiUrl.DatasetQueryStats, { datasetId }),
+                    method: 'GET',
+                    params,
+                };
+            },
         }),
     }),
     overrideExisting: false,

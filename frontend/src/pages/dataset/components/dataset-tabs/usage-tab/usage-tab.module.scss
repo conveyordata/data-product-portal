@@ -1,0 +1,32 @@
+@use '@/styles/globals';
+
+.container {
+    @extend .container;
+
+    display: flex;
+    flex-direction: column;
+    gap: globals.$spacing-l;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: globals.$spacing-m;
+}
+
+.filter-group {
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: globals.$spacing-xs;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: globals.$spacing-l;
+}
+
+.chart-card {
+    height: 100%;
+}

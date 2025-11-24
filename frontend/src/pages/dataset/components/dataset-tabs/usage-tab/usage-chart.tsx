@@ -3,11 +3,11 @@ import { Empty, Flex, Typography } from 'antd';
 import { addDays, format, isSameDay, isSameMonth, subMonths } from 'date-fns';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import type {
     DatasetQueryStatsDailyResponse,
     DatasetQueryStatsDailyResponses,
 } from '@/types/dataset/dataset-query-stats-daily.contract';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 
 type Props = {
     data: DatasetQueryStatsDailyResponses | undefined;
