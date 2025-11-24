@@ -1,7 +1,9 @@
 from typing import Optional
 
+from app.configuration.environments.platform_service_configurations.schema_response import (
+    ConfigType,
+)
 from app.data_output_configuration.data_output_types import DataOutputTypes
-from app.environment_platform_service_configurations.schema import ConfigType
 from app.shared.schema import ORMModel
 
 

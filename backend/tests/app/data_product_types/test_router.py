@@ -1,6 +1,6 @@
 import pytest
 
-from app.data_product_types.enums import DataProductIconKey
+from app.configuration.data_product_types.enums import DataProductIconKey
 from tests.factories import DataProductFactory, DataProductTypeFactory
 
 ENDPOINT = "/api/data_product_types"

@@ -5,18 +5,18 @@ from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.data_product_lifecycles.model import DataProductLifecycle
+from app.configuration.data_product_lifecycles.model import DataProductLifecycle
+from app.configuration.domains.model import Domain
+from app.configuration.tags.model import Tag, tag_dataset_table
 from app.database.database import Base, ensure_exists
 from app.datasets.enums import DatasetAccessType
 from app.datasets.status import DatasetStatus
-from app.domains.model import Domain
 from app.role_assignments.enums import DecisionStatus
 from app.shared.model import BaseORM
-from app.tags.model import Tag, tag_dataset_table
 
 if TYPE_CHECKING:
+    from app.configuration.data_product_settings.model import DataProductSettingValue
     from app.data_outputs_datasets.model import DataOutputDatasetAssociation
-    from app.data_product_settings.model import DataProductSettingValue
     from app.data_products.model import DataProduct
     from app.data_products_datasets.model import DataProductDatasetAssociation
     from app.role_assignments.dataset.model import DatasetRoleAssignment

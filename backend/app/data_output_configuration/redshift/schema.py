@@ -2,15 +2,15 @@ from typing import Literal, Optional, Self
 
 from pydantic import model_validator
 
+from app.configuration.environments.platform_service_configurations.schema_response import (
+    RedshiftConfig,
+)
 from app.data_output_configuration.base_schema import BaseDataOutputConfiguration
 from app.data_output_configuration.data_output_types import DataOutputTypes
 from app.data_output_configuration.redshift.model import (
     RedshiftDataOutput as RedshiftDataOutputModel,
 )
 from app.data_products.schema import DataProduct
-from app.environment_platform_service_configurations.schemas.redshift_schema import (
-    RedshiftConfig,
-)
 
 
 class RedshiftDataOutput(BaseDataOutputConfiguration):

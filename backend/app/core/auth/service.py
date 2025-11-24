@@ -1,10 +1,10 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.configuration.environments.service import EnvironmentService
 from app.core.auth.credentials import AWSCredentials
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.service import DataProductService
-from app.environments.service import EnvironmentService
 from app.users.schema import User
 
 

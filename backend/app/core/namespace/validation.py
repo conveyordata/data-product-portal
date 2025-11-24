@@ -6,9 +6,9 @@ from pydantic import BaseModel
 from sqlalchemy import UUID, and_, exists, select
 from sqlalchemy.orm import Session
 
+from app.configuration.data_product_settings.enums import DataProductSettingScope
+from app.configuration.data_product_settings.model import DataProductSetting
 from app.data_outputs.model import DataOutput
-from app.data_product_settings.enums import DataProductSettingScope
-from app.data_product_settings.model import DataProductSetting
 from app.database.database import Base
 from app.settings import settings
 
