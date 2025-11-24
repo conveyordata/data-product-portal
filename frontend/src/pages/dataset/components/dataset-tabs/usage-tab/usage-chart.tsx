@@ -1,6 +1,6 @@
 import { Area } from '@ant-design/charts';
-import { Empty, Spin } from 'antd';
-import { format, subMonths } from 'date-fns';
+import { Empty, Flex, Spin, Typography } from 'antd';
+import { addDays, format, isSameDay, isSameMonth, subMonths } from 'date-fns';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
@@ -43,29 +43,28 @@ function transformDataForChart(responses: DatasetQueryStatsDailyResponse[]): Cha
     // Create a list of all dates in the range formatted as 'MMM d' or 'd'
     const allDates: Array<{ date: string; timestamp: number }> = [];
     let currentDate = new Date(oneMonthAgo);
-    let lastMonth = -1;
+    let lastMonthDate: Date | null = null;
     while (currentDate <= now) {
-        const currentMonth = currentDate.getMonth();
-        const dateLabel = currentMonth !== lastMonth ? format(currentDate, 'MMM d') : format(currentDate, 'd');
-        lastMonth = currentMonth;
+        const dateLabel =
+            !lastMonthDate || !isSameMonth(currentDate, lastMonthDate)
+                ? format(currentDate, 'MMM d')
+                : format(currentDate, 'd');
+        lastMonthDate = currentDate;
 
         allDates.push({
             date: dateLabel,
             timestamp: currentDate.getTime(),
         });
-        currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000); // Add one day
+        currentDate = addDays(currentDate, 1);
     }
 
     // For each consumer and each date, add data point (with [] if missing)
     const filledData: ChartDataPoint[] = [];
     for (const consumer of consumers) {
         for (const dateInfo of allDates) {
-            const existingData = processedData.find((d) => {
-                // Match by timestamp (same day)
-                const dataDate = new Date(d.timestamp);
-                const targetDate = new Date(dateInfo.timestamp);
-                return dataDate.toDateString() === targetDate.toDateString() && d.consumer === consumer;
-            });
+            const existingData = processedData.find(
+                (d) => isSameDay(d.timestamp, dateInfo.timestamp) && d.consumer === consumer,
+            );
             filledData.push({
                 date: dateInfo.date,
                 timestamp: dateInfo.timestamp,
@@ -136,9 +135,9 @@ export function UsageChart({ data, isLoading }: Props) {
     };
 
     return (
-        <div style={{ padding: '24px' }}>
-            <h3>{t('Usage Statistics - Last Month')}</h3>
+        <Flex vertical>
+            <Typography.Title level={3}>{t('Usage Statistics - Last Month')}</Typography.Title>
             <Area {...config} />
-        </div>
+        </Flex>
     );
 }

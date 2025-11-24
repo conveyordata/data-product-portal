@@ -20,7 +20,6 @@ import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { DataOutputTab } from '@/pages/dataset/components/dataset-tabs/data-output-tab/data-output-tab';
 import { DataProductTab } from '@/pages/dataset/components/dataset-tabs/data-product-tab/data-product-tab';
 import { TabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
-// import { UsageTab } from '@/components/tabs/usage-tab/usage-tab.tsx';
 import { UsageTab } from '@/pages/dataset/components/dataset-tabs/usage-tab/usage-tab.tsx';
 import { useGetDatasetHistoryQuery } from '@/store/features/datasets/datasets-api-slice.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity.ts';
