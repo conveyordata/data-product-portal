@@ -12,7 +12,6 @@ ENDPOINT = "/api/datasets"
 
 
 class TestDatasetQueryStatsDailyRouter:
-
     def test_update_query_stats_daily_batch(self, client, session):
         """Test batch updating query stats."""
         dataset = DatasetFactory()
@@ -81,3 +80,29 @@ class TestDatasetQueryStatsDailyRouter:
             assert "consumer_data_product_id" in stat
             assert "query_count" in stat
             assert stat["query_count"] in [150, 250]
+
+    def test_delete_query_stat(self, client, session):
+        dataset = DatasetFactory()
+        consumer = DataProductFactory()
+        today = date.today()
+
+        DatasetQueryStatsDailyFactory(
+            date=today,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=200,
+        )
+        session.commit()
+
+        payload = {
+            "date": today.isoformat(),
+            "consumer_data_product_id": str(consumer.id),
+        }
+
+        response = client.request(
+            "DELETE", f"{ENDPOINT}/{dataset.id}/query_stats", json=payload
+        )
+
+        assert response.status_code == 200
+        stats = session.query(DatasetQueryStatsDaily).all()
+        assert stats == []

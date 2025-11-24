@@ -1,3 +1,4 @@
+from datetime import date as DateType
 from typing import Iterable
 from uuid import UUID
 
@@ -5,7 +6,10 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.datasets.query_stats_daily.model import DatasetQueryStatsDaily
-from app.datasets.query_stats_daily.schema_request import DatasetQueryStatsDailyUpdate
+from app.datasets.query_stats_daily.schema_request import (
+    DatasetQueryStatsDailyDelete,
+    DatasetQueryStatsDailyUpdate,
+)
 from app.datasets.query_stats_daily.schema_response import (
     DatasetQueryStatsDailyResponses,
 )
@@ -46,4 +50,21 @@ class DatasetQueryStatsDailyService:
             set_={"query_count": stmt.excluded.query_count},
         )
         self.db.execute(stmt)
+        self.db.commit()
+
+    def delete_query_stats_daily(
+        self, dataset_id: UUID, delete_request: DatasetQueryStatsDailyDelete
+    ) -> None:
+        target_date = DateType.fromisoformat(delete_request.date)
+
+        (
+            self.db.query(DatasetQueryStatsDaily)
+            .filter(
+                DatasetQueryStatsDaily.dataset_id == dataset_id,
+                DatasetQueryStatsDaily.consumer_data_product_id
+                == delete_request.consumer_data_product_id,
+                DatasetQueryStatsDaily.date == target_date,
+            )
+            .delete(synchronize_session=False)
+        )
         self.db.commit()

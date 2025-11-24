@@ -11,3 +11,8 @@ class DatasetQueryStatsDailyUpdate(ORMModel):
 
 class DatasetQueryStatsDailyUpdates(ORMModel):
     dataset_query_stats_daily_updates: list[DatasetQueryStatsDailyUpdate]
+
+
+class DatasetQueryStatsDailyDelete(ORMModel):
+    date: str
+    consumer_data_product_id: UUID

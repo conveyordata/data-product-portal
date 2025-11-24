@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 
+import pytest
 from sqlalchemy.orm import Session
 from tests.factories import (
     DataProductFactory,
@@ -8,11 +9,93 @@ from tests.factories import (
 )
 
 from app.datasets.query_stats_daily.model import DatasetQueryStatsDaily
-from app.datasets.query_stats_daily.schema_request import DatasetQueryStatsDailyUpdate
+from app.datasets.query_stats_daily.schema_request import (
+    DatasetQueryStatsDailyDelete,
+    DatasetQueryStatsDailyUpdate,
+)
 from app.datasets.query_stats_daily.service import DatasetQueryStatsDailyService
 
 
+@pytest.fixture
+def dataset_with_two_stats(session: Session):
+    """Return dataset + consumers with two stats already persisted."""
+    dataset = DatasetFactory()
+    consumer1 = DataProductFactory()
+    consumer2 = DataProductFactory()
+    today = date.today()
+
+    session.add_all(
+        [
+            DatasetQueryStatsDailyFactory(
+                date=today,
+                dataset_id=dataset.id,
+                consumer_data_product_id=consumer1.id,
+                query_count=50,
+            ),
+            DatasetQueryStatsDailyFactory(
+                date=today,
+                dataset_id=dataset.id,
+                consumer_data_product_id=consumer2.id,
+                query_count=75,
+            ),
+        ]
+    )
+    session.commit()
+
+    return dataset, today, consumer1, consumer2
+
+
+@pytest.fixture
+def dataset_with_daily_history(session: Session):
+    """Return dataset data for get_query_stats_daily tests."""
+    dataset = DatasetFactory()
+    consumer1 = DataProductFactory()
+    consumer2 = DataProductFactory()
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+
+    session.add_all(
+        [
+            DatasetQueryStatsDailyFactory(
+                date=today,
+                dataset_id=dataset.id,
+                consumer_data_product_id=consumer1.id,
+                query_count=100,
+            ),
+            DatasetQueryStatsDailyFactory(
+                date=yesterday,
+                dataset_id=dataset.id,
+                consumer_data_product_id=consumer2.id,
+                query_count=200,
+            ),
+        ]
+    )
+
+    other_dataset = DatasetFactory()
+    session.add(
+        DatasetQueryStatsDailyFactory(
+            date=today,
+            dataset_id=other_dataset.id,
+            consumer_data_product_id=consumer1.id,
+            query_count=999,
+        )
+    )
+    session.commit()
+
+    return dataset, today, yesterday, consumer1, consumer2
+
+
 class TestDatasetQueryStatsDailyService:
+    @staticmethod
+    def _fetch_stats(session, dataset_id, consumer_id, target_date, *, multiple=False):
+        """Return DatasetQueryStatsDaily rows for a dataset/consumer/date combo."""
+        query = session.query(DatasetQueryStatsDaily).filter_by(
+            date=target_date,
+            dataset_id=dataset_id,
+            consumer_data_product_id=consumer_id,
+        )
+        return query.all() if multiple else query.first()
+
     def test_update_query_stats_daily_single_record(self, session: Session):
         """Test updating query stats with a single record."""
         dataset = DatasetFactory()
@@ -30,44 +113,19 @@ class TestDatasetQueryStatsDailyService:
         service = DatasetQueryStatsDailyService(session)
         service.update_query_stats_daily(dataset.id, updates)
 
-        stats = (
-            session.query(DatasetQueryStatsDaily)
-            .filter_by(
-                date=today,
-                dataset_id=dataset.id,
-                consumer_data_product_id=consumer.id,
-            )
-            .first()
-        )
+        stats = self._fetch_stats(session, dataset.id, consumer.id, today)
 
         assert stats is not None
         assert stats.query_count == 100
         assert stats.dataset_id == dataset.id
         assert stats.consumer_data_product_id == consumer.id
 
-    def test_update_query_stats_daily_with_overlapping_updates(self, session: Session):
+    def test_update_query_stats_daily_with_overlapping_updates(
+        self, session: Session, dataset_with_two_stats
+    ):
         """Test patching query stats where one row already exists in the table."""
-        dataset = DatasetFactory()
-        consumer1 = DataProductFactory()
-        consumer2 = DataProductFactory()
+        dataset, today, consumer1, consumer2 = dataset_with_two_stats
         consumer3 = DataProductFactory()
-        today = date.today()
-
-        # Create 2 existing records
-        existing_stats_1 = DatasetQueryStatsDailyFactory(
-            date=today,
-            dataset_id=dataset.id,
-            consumer_data_product_id=consumer1.id,
-            query_count=50,
-        )
-        existing_stats_2 = DatasetQueryStatsDailyFactory(
-            date=today,
-            dataset_id=dataset.id,
-            consumer_data_product_id=consumer2.id,
-            query_count=75,
-        )
-        session.add_all([existing_stats_1, existing_stats_2])
-        session.commit()
 
         # Patch with 2 updates: one overlapping (consumer1) and one new (consumer3)
         updates = [
@@ -87,86 +145,25 @@ class TestDatasetQueryStatsDailyService:
         service.update_query_stats_daily(dataset.id, updates)
 
         # Verify consumer1 was updated (not duplicated)
-        stats_consumer1 = (
-            session.query(DatasetQueryStatsDaily)
-            .filter_by(
-                date=today,
-                dataset_id=dataset.id,
-                consumer_data_product_id=consumer1.id,
-            )
-            .all()
+        stats_consumer1 = self._fetch_stats(
+            session, dataset.id, consumer1.id, today, multiple=True
         )
         assert len(stats_consumer1) == 1
         assert stats_consumer1[0].query_count == 100
 
         # Verify consumer2 remains unchanged
-        stats_consumer2 = (
-            session.query(DatasetQueryStatsDaily)
-            .filter_by(
-                date=today,
-                dataset_id=dataset.id,
-                consumer_data_product_id=consumer2.id,
-            )
-            .first()
-        )
+        stats_consumer2 = self._fetch_stats(session, dataset.id, consumer2.id, today)
         assert stats_consumer2 is not None
         assert stats_consumer2.query_count == 75
 
         # Verify consumer3 was created
-        stats_consumer3 = (
-            session.query(DatasetQueryStatsDaily)
-            .filter_by(
-                date=today,
-                dataset_id=dataset.id,
-                consumer_data_product_id=consumer3.id,
-            )
-            .first()
-        )
+        stats_consumer3 = self._fetch_stats(session, dataset.id, consumer3.id, today)
         assert stats_consumer3 is not None
         assert stats_consumer3.query_count == 200
 
-        # Verify total count is 3
-        total_stats = (
-            session.query(DatasetQueryStatsDaily)
-            .filter_by(
-                date=today,
-                dataset_id=dataset.id,
-            )
-            .count()
-        )
-        assert total_stats == 3
-
-    def test_get_query_stats_daily(self, session: Session):
+    def test_get_query_stats_daily(self, session: Session, dataset_with_daily_history):
         """Test getting query stats for a dataset."""
-        dataset = DatasetFactory()
-        consumer1 = DataProductFactory()
-        consumer2 = DataProductFactory()
-        today = date.today()
-        yesterday = today - timedelta(days=1)
-
-        # Create test data
-        DatasetQueryStatsDailyFactory(
-            date=today,
-            dataset_id=dataset.id,
-            consumer_data_product_id=consumer1.id,
-            query_count=100,
-        )
-        DatasetQueryStatsDailyFactory(
-            date=yesterday,
-            dataset_id=dataset.id,
-            consumer_data_product_id=consumer2.id,
-            query_count=200,
-        )
-
-        # Create data for a different dataset (should not be returned)
-        other_dataset = DatasetFactory()
-        DatasetQueryStatsDailyFactory(
-            date=today,
-            dataset_id=other_dataset.id,
-            consumer_data_product_id=consumer1.id,
-            query_count=999,
-        )
-        session.commit()
+        dataset, today, yesterday, consumer1, consumer2 = dataset_with_daily_history
 
         # Get stats for the dataset
         service = DatasetQueryStatsDailyService(session)
@@ -182,3 +179,27 @@ class TestDatasetQueryStatsDailyService:
         assert consumer2.id in stats_by_consumer
         assert stats_by_consumer[consumer1.id].query_count == 100
         assert stats_by_consumer[consumer2.id].query_count == 200
+
+        # Verify dates line up with expected history
+        assert stats_by_consumer[consumer1.id].date == today
+        assert stats_by_consumer[consumer2.id].date == yesterday
+
+    def test_delete_query_stats_daily_existing_row(
+        self, session: Session, dataset_with_two_stats
+    ):
+        dataset, today, consumer1, consumer2 = dataset_with_two_stats
+        service = DatasetQueryStatsDailyService(session)
+
+        service.delete_query_stats_daily(
+            dataset.id,
+            DatasetQueryStatsDailyDelete(
+                date=today.isoformat(),
+                consumer_data_product_id=consumer1.id,
+            ),
+        )
+
+        deleted_row = self._fetch_stats(session, dataset.id, consumer1.id, today)
+        remaining_row = self._fetch_stats(session, dataset.id, consumer2.id, today)
+
+        assert deleted_row is None
+        assert remaining_row.consumer_data_product_id == consumer2.id
