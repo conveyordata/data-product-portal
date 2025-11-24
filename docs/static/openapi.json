@@ -993,6 +993,36 @@
               "format": "uuid",
               "title": "Id"
             }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "week",
+                "month",
+                "day"
+              ],
+              "type": "string",
+              "default": "week",
+              "title": "Granularity"
+            }
+          },
+          {
+            "name": "time_range",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "1m",
+                "90d",
+                "1y"
+              ],
+              "type": "string",
+              "default": "90d",
+              "title": "Time Range"
+            }
           }
         ],
         "responses": {
@@ -7445,6 +7475,36 @@
               "type": "string",
               "format": "uuid",
               "title": "Id"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "week",
+                "month",
+                "day"
+              ],
+              "type": "string",
+              "default": "week",
+              "title": "Granularity"
+            }
+          },
+          {
+            "name": "time_range",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "1m",
+                "90d",
+                "1y"
+              ],
+              "type": "string",
+              "default": "90d",
+              "title": "Time Range"
             }
           }
         ],
