@@ -1,6 +1,7 @@
+from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db_session
@@ -19,10 +20,12 @@ router = APIRouter(prefix="/{id}/query_stats", tags=["datasets"])
 @router.get("", response_model=DatasetQueryStatsDailyResponses)
 def get_query_stats(
     id: UUID,
+    granularity: Literal["week", "month", "day"] = Query(default="week"),
+    time_range: Literal["1m", "90d", "1y"] = Query(default="90d"),
     db: Session = Depends(get_db_session),
 ) -> DatasetQueryStatsDailyResponses:
     service = DatasetQueryStatsDailyService(db)
-    return service.get_query_stats_daily(dataset_id=id)
+    return service.get_query_stats_daily(dataset_id=id, granularity=granularity, time_range=time_range)
 
 
 @router.patch("")

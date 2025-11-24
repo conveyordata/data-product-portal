@@ -106,3 +106,43 @@ class TestDatasetQueryStatsDailyRouter:
         assert response.status_code == 200
         stats = session.query(DatasetQueryStatsDaily).all()
         assert stats == []
+
+    def test_get_query_stats_with_query_params(self, client, session):
+        dataset = DatasetFactory()
+        consumer = DataProductFactory()
+        base_date = date.today() - timedelta(days=7)
+        start_of_week = base_date - timedelta(days=base_date.weekday())
+        middle_of_week = start_of_week + timedelta(days=2)
+        old_date = date.today() - timedelta(days=150)
+
+        DatasetQueryStatsDailyFactory(
+            date=start_of_week,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=50,
+        )
+        DatasetQueryStatsDailyFactory(
+            date=middle_of_week,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=75,
+        )
+        DatasetQueryStatsDailyFactory(
+            date=old_date,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=125,
+        )
+        session.commit()
+
+        response = client.get(
+            f"{ENDPOINT}/{dataset.id}/query_stats",
+            params={"granularity": "week", "time_range": "90d"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        stats = data["dataset_query_stats_daily_responses"]
+        assert len(stats) == 1
+        assert stats[0]["date"] == start_of_week.isoformat()
+        assert stats[0]["query_count"] == 125

@@ -167,7 +167,9 @@ class TestDatasetQueryStatsDailyService:
 
         # Get stats for the dataset
         service = DatasetQueryStatsDailyService(session)
-        response = service.get_query_stats_daily(dataset.id)
+        response = service.get_query_stats_daily(
+            dataset.id, granularity="day", time_range="1y"
+        )
         stats = response.dataset_query_stats_daily_responses
 
         # Verify results
@@ -183,6 +185,70 @@ class TestDatasetQueryStatsDailyService:
         # Verify dates line up with expected history
         assert stats_by_consumer[consumer1.id].date == today
         assert stats_by_consumer[consumer2.id].date == yesterday
+
+    def test_get_query_stats_daily_week_granularity(self, session: Session):
+        dataset = DatasetFactory()
+        consumer = DataProductFactory()
+
+        base_date = date.today() - timedelta(days=7)
+        start_of_week = base_date - timedelta(days=base_date.weekday())
+        middle_of_week = start_of_week + timedelta(days=2)
+
+        DatasetQueryStatsDailyFactory(
+            date=start_of_week,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=120,
+        )
+        DatasetQueryStatsDailyFactory(
+            date=middle_of_week,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=180,
+        )
+        session.commit()
+
+        service = DatasetQueryStatsDailyService(session)
+        response = service.get_query_stats_daily(
+            dataset.id, granularity="week", time_range="1y"
+        )
+
+        stats = response.dataset_query_stats_daily_responses
+        assert len(stats) == 1
+        assert stats[0].date == start_of_week
+        assert stats[0].query_count == 300
+        assert stats[0].consumer_data_product_id == consumer.id
+
+    def test_get_query_stats_daily_time_range_filter(self, session: Session):
+        dataset = DatasetFactory()
+        consumer = DataProductFactory()
+
+        recent_date = date.today() - timedelta(days=10)
+        old_date = date.today() - timedelta(days=120)
+
+        DatasetQueryStatsDailyFactory(
+            date=recent_date,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=50,
+        )
+        DatasetQueryStatsDailyFactory(
+            date=old_date,
+            dataset_id=dataset.id,
+            consumer_data_product_id=consumer.id,
+            query_count=75,
+        )
+        session.commit()
+
+        service = DatasetQueryStatsDailyService(session)
+        response = service.get_query_stats_daily(
+            dataset.id, granularity="day", time_range="1m"
+        )
+
+        stats = response.dataset_query_stats_daily_responses
+        assert len(stats) == 1
+        assert stats[0].date == recent_date
+        assert stats[0].query_count == 50
 
     def test_delete_query_stats_daily_existing_row(
         self, session: Session, dataset_with_two_stats
