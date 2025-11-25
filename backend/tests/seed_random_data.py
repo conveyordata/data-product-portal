@@ -2,7 +2,7 @@ import random
 
 from sqlalchemy import select
 
-from app.platform_services.model import PlatformService
+from app.configuration.platforms.platform_services.model import PlatformService
 from tests import test_session
 from tests.factories.data_output import DataOutputFactory
 from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory

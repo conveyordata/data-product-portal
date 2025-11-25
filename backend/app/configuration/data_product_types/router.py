@@ -9,9 +9,11 @@ from app.configuration.data_product_types.schema_request import (
     DataProductTypeUpdate,
 )
 from app.configuration.data_product_types.schema_response import (
+    CreateDataProductTypeResponse,
     DataProductTypeGet,
     DataProductTypesGet,
     DataProductTypesGetItem,
+    UpdateDataProductTypeResponse,
 )
 from app.configuration.data_product_types.service import DataProductTypeService
 from app.core.authz import Action, Authorization
@@ -56,7 +58,7 @@ def get_data_product_type(
 )
 def create_data_product_type(
     data_product_type: DataProductTypeCreate, db: Session = Depends(get_db_session)
-) -> dict[str, UUID]:
+) -> CreateDataProductTypeResponse:
     return DataProductTypeService(db).create_data_product_type(data_product_type)
 
 
@@ -72,7 +74,7 @@ def update_data_product_type(
     id: UUID,
     data_product_type: DataProductTypeUpdate,
     db: Session = Depends(get_db_session),
-) -> dict[str, UUID]:
+) -> UpdateDataProductTypeResponse:
     return DataProductTypeService(db).update_data_product_type(id, data_product_type)
 
 

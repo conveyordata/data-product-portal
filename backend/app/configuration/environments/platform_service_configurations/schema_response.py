@@ -16,8 +16,8 @@ from app.configuration.environments.platform_service_configurations.schemas.snow
     SnowflakeConfig,
 )
 from app.configuration.environments.schema_response import Environment
+from app.configuration.platforms.platform_services.schema import PlatformService
 from app.configuration.platforms.schema_response import Platform
-from app.platform_services.schema import PlatformService
 from app.shared.schema import ORMModel
 
 ConfigType = (

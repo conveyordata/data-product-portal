@@ -10,8 +10,10 @@ from app.configuration.data_product_settings.schema_request import (
     DataProductSettingUpdate,
 )
 from app.configuration.data_product_settings.schema_response import (
+    CreateDataProductSettingResponse,
     DataProductSettingsGet,
     DataProductSettingsGetItem,
+    UpdateDataProductSettingResponse,
 )
 from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.authz import Action, Authorization
@@ -37,7 +39,7 @@ router = APIRouter()
 def create_data_product_setting(
     setting: DataProductSettingCreate,
     db: Session = Depends(get_db_session),
-) -> dict[str, UUID]:
+) -> CreateDataProductSettingResponse:
     return DataProductSettingService(db).create_data_product_setting(setting)
 
 
@@ -74,7 +76,7 @@ def update_data_product_setting(
     id: UUID,
     setting: DataProductSettingUpdate,
     db: Session = Depends(get_db_session),
-) -> dict[str, UUID]:
+) -> UpdateDataProductSettingResponse:
     return DataProductSettingService(db).update_data_product_setting(id, setting)
 
 

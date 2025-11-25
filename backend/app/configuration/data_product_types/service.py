@@ -16,8 +16,10 @@ from app.configuration.data_product_types.schema_request import (
     DataProductTypeUpdate,
 )
 from app.configuration.data_product_types.schema_response import (
+    CreateDataProductTypeResponse,
     DataProductTypeGet,
     DataProductTypesGetItem,
+    UpdateDataProductTypeResponse,
 )
 
 
@@ -53,17 +55,17 @@ class DataProductTypeService:
 
     def create_data_product_type(
         self, data_product_type: DataProductTypeCreate
-    ) -> dict[str, UUID]:
+    ) -> CreateDataProductTypeResponse:
         data_product_type = DataProductTypeModel(
             **data_product_type.parse_pydantic_schema()
         )
         self.db.add(data_product_type)
         self.db.commit()
-        return {"id": data_product_type.id}
+        return CreateDataProductTypeResponse(id=data_product_type.id)
 
     def update_data_product_type(
         self, id: UUID, data_product_type: DataProductTypeUpdate
-    ) -> dict[str, UUID]:
+    ) -> UpdateDataProductTypeResponse:
         current_data_product_type = self.db.get(DataProductTypeModel, id)
         updated_data_product_type = data_product_type.parse_pydantic_schema()
 
@@ -71,7 +73,7 @@ class DataProductTypeService:
             setattr(current_data_product_type, attr, value)
 
         self.db.commit()
-        return {"id": id}
+        return UpdateDataProductTypeResponse(id=id)
 
     def remove_data_product_type(self, id: UUID) -> None:
         data_product_type = self.db.get(

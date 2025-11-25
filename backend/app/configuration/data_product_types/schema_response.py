@@ -23,3 +23,11 @@ class DataProductTypesGetItem(BaseDataProductTypeGet):
 
 class DataProductTypesGet(ORMModel):
     data_product_types: Sequence[DataProductTypesGetItem]
+
+
+class UpdateDataProductTypeResponse(ORMModel):
+    id: UUID
+
+
+class CreateDataProductTypeResponse(ORMModel):
+    id: UUID

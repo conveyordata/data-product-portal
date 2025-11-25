@@ -6,9 +6,11 @@ from sqlalchemy.orm import Session
 
 from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
 from app.configuration.domains.schema_response import (
+    CreateDomainResponse,
     DomainGet,
     DomainsGet,
     DomainsGetItem,
+    UpdateDomainResponse,
 )
 from app.configuration.domains.service import DomainService
 from app.core.authz import Action, Authorization
@@ -41,7 +43,7 @@ def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> DomainGet:
 )
 def create_domain(
     domain: DomainCreate, db: Session = Depends(get_db_session)
-) -> dict[str, UUID]:
+) -> CreateDomainResponse:
     return DomainService(db).create_domain(domain)
 
 
@@ -55,7 +57,7 @@ def create_domain(
 )
 def update_domain(
     id: UUID, domain: DomainUpdate, db: Session = Depends(get_db_session)
-) -> dict[str, UUID]:
+) -> UpdateDomainResponse:
     return DomainService(db).update_domain(id, domain)
 
 
